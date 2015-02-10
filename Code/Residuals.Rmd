@@ -1,0 +1,254 @@
+---
+title: "Untitled"
+author: "Florian Hartig"
+date: "2 Feb 2015"
+output: html_document
+---
+
+Residuals analysis for GLMMs and other hierarchical models
+===
+
+```{r}
+#install.packages("runjags")
+library(lme4)
+library(rjags)
+library(runjags)
+library(R2jags)
+library(MCMCglmm)
+```
+
+
+Synopsis: the aim of this script is to compare different ways to do residual diagnostics for GLMMs and other hierarhical models
+
+
+# Background
+
+Imagine we have Poisson count data with a typical mixed effect structure and overdispersion, a pretty common situation in an ecological analysis
+
+```{r}
+createData <- function(n=500, numGroups = 10, sampleSize = 2000){
+  out = list()
+  for (i in 1:n){
+    environment1 = seq(-1,1,len = sampleSize)
+    group = rep(1:numGroups, each = sampleSize/numGroups)
+    groupRandom = rnorm(numGroups, sd = 1)
+    counts = rpois(sampleSize, exp(environment1 + groupRandom[group] + rnorm(sampleSize, sd = 0.5)))
+    out[[i]] <- data.frame(ID = 1:2000, counts, environment1, group)
+  }
+  return(out)
+}
+dataList <- createData()
+```
+
+A fit with 
+
+```{r}
+fit2 <- glmer(counts ~ environment1 + (1|group) + (1|ID) , family = "poisson", data = dataList[[1]])
+summary(fit2)
+plot(fit2, resid(.) ~ log(fitted(.)))
+plot(fit2, resid(., type = "deviance") ~ log(fitted(.)))
+
+
+```
+
+
+## Checking for bias in parameter estimates
+
+```{r}
+
+dataList <- createData()
+
+resultList <- matrix(NA,length(dataList), 4)
+models <- list()
+for (i in 1:length(dataList)){
+
+  fit <- glmer(counts ~ environment1 + (1|group) + (1|ID) , family = "poisson", data = dataList[[i]])
+  resultList[i,] = c( fixef(fit), as.data.frame(VarCorr(fit))[,5])
+}
+
+par(mfrow = c(2,2))
+hist(resultList[,1], breaks = 50)
+abline(v=0, col = "red")
+hist(resultList[,2]-1, breaks = 50)
+abline(v=0, col = "red")
+hist(resultList[,3]-0.5, breaks = 50)
+abline(v=0, col = "red")
+hist(resultList[,4]-1, breaks = 50)
+abline(v=0, col = "red")
+```
+
+
+```{r}
+simulatedResiduals <- function(fittedModel, response, n = 250, refit = F, plot = T, simulateLoop = F){
+  len = nobs(fittedModel)
+
+  ptm <- proc.time()
+  
+  # Either simulate from the MLE estimate, and compare the distribution of the model predictions
+  # to the observed data
+  if (refit == F){
+  
+    # To test whether simulate really does this correctly 
+    if (simulateLoop == T){
+      pred <- matrix(nrow = len, ncol = n )  
+      for (i in 1:n){
+        pred[,i] <- simulate(fittedModel, nsim = 1, use.u =F)[,1]
+      }
+    } else {
+      pred <- data.matrix(simulate(fittedModel, nsim = n, use.u =F))
+    }
+    
+    residuals <- numeric(len)
+    for (i in 1:len){
+      residuals[i] <- ecdf(pred[i,])(response[i])
+    }
+    
+  # Or new data based on the MLE estimate, fit a new model to this data, look at the 
+  # residuals, and check whether 
+  
+  } else {
+    observedResiduals <- residuals(fittedModel)
+    simulatedResiduals <- matrix(nrow = len, ncol = n )  
+    newSimulatedData <- data.matrix(simulate(fittedModel, nsim = n, use.u =F))
+    
+    newData <-model.frame(fittedModel)  
+    for (i in 1:n){
+      newData[,1] = newSimulatedData[,i]
+      simulatedResiduals[,i] <- residuals(update(fittedModel, data = newData ) )
+    }
+    residuals <- numeric(len)
+    for (i in 1:len){
+        residuals[i] <- ecdf(simulatedResiduals[i,])(observedResiduals[i])
+    }
+  }
+  
+  if (plot == T){
+    oldpar <- par(mfrow = c(1,2))
+    hist(residuals, breaks = 50)
+    ord <- order(fitted(fittedModel))
+    plot(log(fitted(fittedModel)[ord]), residuals[ord], pch = 3)
+    par(oldpar)
+  }
+  print((proc.time() - ptm))
+  return(residuals)
+}
+
+```
+
+
+
+## Simulated Residuals
+
+```{r}
+sim <- simulatedResiduals(fit2, counts)
+```
+
+## Quantiles of residuals agains residuals of refitted models 
+
+```{r, cache = T, eval=T}
+sim <- simulatedResiduals(fit2, counts, refit = T)
+```
+
+
+
+## Bayesian analysis 
+```{r}
+modelstring="
+  model {
+
+    # Observation Likelihood
+    for (i in 1:nobs) {
+      counts[i]~dpois(lambda[i])
+      lambda[i] <- exp(a + b * environment1[i] + Rgroup[group[i]] + Rover[ID[i]])
+    }
+
+      # Effect priors 
+      a ~ dnorm(0,0.01)
+      b ~ dnorm(0,0.01)
+
+
+    # Random effects 
+
+    for (i in 1:nobs) {
+      Rover[i]~dnorm(0,tauOver)
+    }
+    for (i in 1:ngroups) {
+      Rgroup[i]~dnorm(0,tauGroups)
+    }
+
+      # Variance priors 
+  
+      tauGroups~dgamma(0.001,0.001)
+      tauOver~dgamma(0.001,0.001)
+
+
+    # ##########################
+    # Simulations for Residuals
+
+    for (i in 1:nobs) {
+      Residual[i] <- countsSim[i] - counts[i]
+      countsSim[i]~dpois(lambdaSim[i])
+      lambdaSim[i] <- exp(a + b * environment1[i] + RgroupSim[group[i]] + RoverSim[ID[i]])
+    }
+
+    # Random effects 
+
+    for (i in 1:nobs) {
+      RoverSim[i]~dnorm(0,tauOver)
+    }
+
+    for (i in 1:ngroups) {
+      RgroupSim[i]~dnorm(0,tauGroups)
+    }
+
+    #monitor# a, b, tauGrouos, tauOver
+  }
+"
+
+data=as.list(CountDataPoissonOverdispersed)
+data = append(data, list(nobs=2000, ngroups = 10))
+
+
+model=jags(model.file = textConnection(modelstring), data=data, parameters.to.save = c("a", "b", "tauGroups", "tauOver", "Residual"))
+
+result <- autojags(model)
+
+residuals <- t(result$BUGSoutput$sims.list$Residual)
+
+plot(model)
+
+
+
+len = 2000
+
+quant <- numeric(len)
+    for (i in 1:len){
+        quant[i] <- ecdf(residuals[i,])(0)
+    }
+
+hist(quant, breaks = 50)
+
+
+
+
+
+
+```
+
+
+
+```{r, eval=F, echo=F}
+# Alternatives, don't know why it doesn't work with run.jags 
+update(model,n.iter=100)
+output=coda.samples(model=model,variable.names=c("a", "b"), n.iter=10000, thin=1)
+
+results <- run.jags(model=model, data=data, n.chains=3, method="rjags")
+plot(output)
+run.jags(model, n.chains = 2, method="interruptible")
+```
+
+
+
+
+
+  
