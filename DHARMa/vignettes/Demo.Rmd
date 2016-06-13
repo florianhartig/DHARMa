@@ -1,5 +1,5 @@
 ---
-title: "Demo"
+title: "DHARMa Demo"
 author: "Florian Hartig"
 output: rmarkdown::html_vignette
 vignette: >
@@ -7,8 +7,11 @@ vignette: >
   %\VignetteEngine{knitr::rmarkdown}
   \usepackage[utf8](inputenc)
 ---
-Residuals analysis for GLMMs and other hierarchical models
-===
+
+```{r global_options, include=FALSE}
+knitr::opts_chunk$set(fig.width=7, fig.height=4, warning=FALSE, message=FALSE)
+```
+
 
 ```{r}
 library(DHARMa)
@@ -16,14 +19,11 @@ library(lme4)
 ```
 
 
-Synopsis: the aim of this script is to compare different ways to do residual diagnostics for GLMMs and other hierarhical models
 
-# Background
-
-Imagine we have Poisson count data with a typical mixed effect structure and overdispersion, a pretty common situation in an ecological analysis
+## Example analysis for Poisson model
 
 ```{r}
-testData = createPoissonData()[[1]]
+testData = createPoissonData(sampleSize = 2000)[[1]]
 # see ?createPoissonData for paramter values
 ```
 
@@ -32,18 +32,49 @@ Standard analysis + standard residuals
 ```{r}
 fittedModel <- glmer(counts ~ environment1 + (1|group) + (1|ID) , family = "poisson", data = testData)
 summary(fittedModel)
-plot(fittedModel, resid(., type = "deviance") ~ log(fitted(.)))
-plot(fittedModel, resid(., type = "pearson") ~ log(fitted(.)))
-plot(fittedModel, resid(., type = "response") ~ log(fitted(.)))
+par(mfrow = c(1,3))
+plot(predict(fittedModel), resid(fittedModel, type = "deviance"), main = "Deviance" )
+plot(predict(fittedModel), resid(fittedModel, type = "pearson") , main = "Pearson")
+plot(predict(fittedModel), resid(fittedModel, type = "response") , main = "Pearson" )
 
 ```
 
-## Simulated Residuals
+Simulated Residuals
 
 ```{r}
-sim <- simulateResiduals(fittedModel)
-hist(sim$scaledResiduals)
+simulationOutput <- simulateResiduals(fittedModel = fittedModel)
+plotSimulatedResiduals(simulationOutput = simulationOutput)
 ```
+
+
+# Binomial model
+
+```{r}
+testData = createBinomialData(sampleSize = 2000)[[1]]
+# see ?createPoissonData for paramter values
+```
+
+Standard analysis + standard residuals
+
+```{r}
+fittedModel <- glmer(counts ~ environment1 + (1|group) , family = "binomial", data = testData)
+summary(fittedModel)
+par(mfrow = c(1,3))
+plot(predict(fittedModel), resid(fittedModel, type = "deviance"), main = "Deviance" )
+plot(predict(fittedModel), resid(fittedModel, type = "pearson") , main = "Pearson")
+plot(predict(fittedModel), resid(fittedModel, type = "response") , main = "Pearson" )
+
+```
+
+Simulated Residuals
+
+```{r}
+simulationOutput <- simulateResiduals(fittedModel = fittedModel)
+plotSimulatedResiduals(simulationOutput = simulationOutput)
+```
+
+
+
 
 
 

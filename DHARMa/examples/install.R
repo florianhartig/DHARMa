@@ -3,4 +3,5 @@ install_url("https://dl.dropboxusercontent.com/s/hlg8j0d85ftijem/DHARMa_0.0.0.90
 
 library(DHARMa)
 ?DHARMa
+vignette("Demo", package="DHARMa")
 

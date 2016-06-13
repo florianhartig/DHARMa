@@ -4,10 +4,16 @@
 \alias{simulateResiduals}
 \title{Creates scaled residuals by simulation}
 \usage{
-simulateResiduals(fittedModel, n = 250, refit = F)
+simulateResiduals(fittedModel, n = 250, refit = F, integer = NULL)
 }
 \arguments{
 \item{fittedModel}{fitted model, currently restricted to lme4 models}
+
+\item{n}{number of simulations to run. Set at least 250, better 1000}
+
+\item{refit}{should the model be refit to do a parametric bootstrap}
+
+\item{integer}{is this a model with an integer distribution. If not provided, the function will attept to find out by itself, may not work for all families}
 }
 \description{
 Creates scaled residuals by simulation
