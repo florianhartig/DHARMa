@@ -1,27 +1,36 @@
-#' creates Poisson data overdispersion and random intercept
-createPoissonData <- function(replicates=1, sampleSize = 2000, intercept = 0, slope = 1, numGroups = 10, randomEffectVariance = 1, overdispersion = 0.5){
+#' Function to simulate data
+#' @export
+createData <- function(replicates=1, sampleSize = 10, intercept = 0, fixedEffects = 1, numGroups = 10, randomEffectVariance = 1, overdispersion = 0.5, family = poisson(), scale = 1, cor = 0){
+  
+  nPredictors = length(fixedEffects)
+  
   out = list()
   for (i in 1:replicates){
-    environment1 = runif(sampleSize, -1,1)
+    
+    predictors = matrix(runif(nPredictors*sampleSize, min = -1), ncol = nPredictors)
+    
+    if (cor != 0){
+      predTemp <- runif(sampleSize, min = -1)
+      predictors  = (1-cor) * predictors + cor * matrix(rep(predTemp, nPredictors), ncol = nPredictors)
+    }
+    
+    colnames(predictors) = paste("Environment", 1:nPredictors, sep = "")
+    
     group = rep(1:numGroups, each = sampleSize/numGroups)
     groupRandom = rnorm(numGroups, sd = randomEffectVariance)
-    counts = rpois(sampleSize, exp(slope * environment1 + intercept + groupRandom[group] + rnorm(sampleSize, sd = overdispersion)))
-    out[[i]] <- data.frame(ID = 1:sampleSize, counts, environment1, group)
+    
+    
+    linearResponse = intercept + predictors %*% fixedEffects + groupRandom[group] + rnorm(sampleSize, sd = overdispersion)
+    linkResponse = family$linkinv(linearResponse)
+    
+    if (family$family == "gaussian") observedResponse = rnorm(n = sampleSize, mean = linkResponse, sd = scale)  
+    else if (family$family == "binomial") observedResponse = rbinom(n = sampleSize, 1, prob = linkResponse)
+    else if (family$family == "poisson") observedResponse = rpois(n = sampleSize, lambda = linkResponse)
+    else stop("wrong link argument supplied")
+    
+    out[[i]] <- data.frame(cbind(ID = 1:sampleSize, observedResponse, predictors, group))
   }
+  if(length(out) == 1) out = out[[1]]
   return(out)
 }
-
-
-
-#' creates Poisson data overdispersion and random intercept
-createBinomialData <- function(replicates=1, sampleSize = 2000, intercept = 0, slope = 1, numGroups = 10, randomEffectVariance = 1, overdispersion = 0.0){
-  out = list()
-  for (i in 1:replicates){
-    environment1 = runif(sampleSize, -1,1)
-    group = rep(1:numGroups, each = sampleSize/numGroups)
-    groupRandom = rnorm(numGroups, sd = randomEffectVariance)
-    counts = rbinom(sampleSize, 1, plogis(slope * environment1 + intercept + groupRandom[group] + rnorm(sampleSize, sd = overdispersion)))
-    out[[i]] <- data.frame(ID = 1:sampleSize, counts, environment1, group)
-  }
-  return(out)
-}
+#createData()
