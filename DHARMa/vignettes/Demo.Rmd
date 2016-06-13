@@ -1,5 +1,5 @@
 ---
-title: "DHARMa Demo"
+title: "DHARMa - Residual Diagnostics for HierArchical (Multi-level / Mixed) Regession Models"
 author: "Florian Hartig"
 output: rmarkdown::html_vignette
 vignette: >
@@ -9,28 +9,108 @@ vignette: >
 ---
 
 ```{r global_options, include=FALSE}
-knitr::opts_chunk$set(fig.width=7, fig.height=4, warning=FALSE, message=FALSE)
+knitr::opts_chunk$set(fig.width=7, fig.height=4, warning=FALSE, message=FALSE, cache = T)
 ```
 
+***Summary**: The DHARMa package creates easily interpretable, residuals for generalized linear mixed models that are standardized to values between 0 and 1. This is achieved by a simulation-based approach, similar to the Bayesian p-value or the parametric bootstrap: 1) simulate new data from the fitted model 2) calculate the cummulative empirical density function 3) residual is the value of the empirical density function at the value of the observed data.*  
+
+### Installing the package
+
+If you haven't installed the package yet, run
+
+```{r, eval = F}
+library(devtools)
+install_url("https://dl.dropboxusercontent.com/s/hlg8j0d85ftijem/DHARMa_0.0.0.9000.tar.gz", dependencies = T)
+
+```
+
+### Loading the package
 
 ```{r}
+set.seed(1)
 library(DHARMa)
+citation("DHARMa")
+```
+
+# Workflow in DHARMa
+
+```{r}
+# Some test data
+testData = createData(sampleSize = 2000, overdispersion = 2, family = poisson())
+
+# a fitted lme4 model
 library(lme4)
+fittedModel <- glmer(observedResponse ~ Environment1 + (1|group) , family = "poisson", data = testData)
+
+# The function simulateResiduals() in DHARMa creats standardized residuals
+simulationOutput <- simulateResiduals(fittedModel = fittedModel)
+
+# You can plot the residuals with the plotSimulatedResiduals() function
+plotSimulatedResiduals(simulationOutput = simulationOutput)
 ```
 
+The above exampel shows a misspecified model. The reason is that we created data with overdispersion, but the fitted model does not include overdispersion. For a correctly specified model, one would expect
 
+* a flat histogram of the scaled residuals
+* no pattern against the fitted value
 
-## Example analysis for Poisson model
+A bit later in this tutorial, we can see that this is indeed the case if we correct the model structure.
+
+You don't have to rely on the plots that are provided. It is *highly recommeded* to plot residuals against (where possible)
+
+* all predictors
+* space
+* time
+
+For that purpose, you can retrieve the residuals via 
+
+```{r, eval = F}
+simulationOutput$scaledResiduals
+```
+
+Note again that the residual values are scaled between 0 and 1. 
+
+If you plot the residuals against predictors, space or time, the resulting plots should not only show no systematic dependency of those residuals on the covariates, but they should also again be flat for each fixed situation. That means that if you have, for example, a categorical predictor: treatment / control, the distribution of residuals for each predictor alone should be flat as well. 
+
+# Example - residual analysis for a mixed Poisson model with overdispersion
+
+Create data with medium overdispersion
 
 ```{r}
-testData = createPoissonData(sampleSize = 2000)[[1]]
+testData = createData(sampleSize = 2000, overdispersion = 2, family = poisson())
 # see ?createPoissonData for paramter values
 ```
+
+### Fitting a model without overdispersion on overdispersed data
+
+
+```{r}
+library(lme4)
+fittedModel <- glmer(observedResponse ~ Environment1 + (1|group) , family = "poisson", data = testData)
+summary(fittedModel)
+par(mfrow = c(1,3))
+plot(predict(fittedModel), resid(fittedModel, type = "deviance"), main = "Deviance" )
+plot(predict(fittedModel), resid(fittedModel, type = "pearson") , main = "Pearson")
+plot(predict(fittedModel), resid(fittedModel, type = "response") , main = "Pearson" )
+
+```
+
+Simulated Residuals
+
+```{r}
+simulationOutput <- simulateResiduals(fittedModel = fittedModel)
+plotSimulatedResiduals(simulationOutput = simulationOutput)
+```
+
+The U-shaped distrituion in the histogram shows overdispersion
+
+
+### Fitting a model with overdispersion on the same data
 
 Standard analysis + standard residuals
 
 ```{r}
-fittedModel <- glmer(counts ~ environment1 + (1|group) + (1|ID) , family = "poisson", data = testData)
+fittedModel <- glmer(observedResponse ~ Environment1 + (1|group) + (1|ID) , family = "poisson", data = testData)
 summary(fittedModel)
 par(mfrow = c(1,3))
 plot(predict(fittedModel), resid(fittedModel, type = "deviance"), main = "Deviance" )
@@ -47,17 +127,17 @@ plotSimulatedResiduals(simulationOutput = simulationOutput)
 ```
 
 
-# Binomial model
+# Example - residual analysis for a mixed Binomial model
 
 ```{r}
-testData = createBinomialData(sampleSize = 2000)[[1]]
+testData = createData(sampleSize = 2000, overdispersion = 2, family = binomial())
 # see ?createPoissonData for paramter values
 ```
 
 Standard analysis + standard residuals
 
 ```{r}
-fittedModel <- glmer(counts ~ environment1 + (1|group) , family = "binomial", data = testData)
+fittedModel <- glmer(observedResponse ~ Environment1 + (1|group) , family = "binomial", data = testData)
 summary(fittedModel)
 par(mfrow = c(1,3))
 plot(predict(fittedModel), resid(fittedModel, type = "deviance"), main = "Deviance" )
@@ -72,10 +152,4 @@ Simulated Residuals
 simulationOutput <- simulateResiduals(fittedModel = fittedModel)
 plotSimulatedResiduals(simulationOutput = simulationOutput)
 ```
-
-
-
-
-
-
 

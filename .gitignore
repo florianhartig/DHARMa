@@ -3,3 +3,11 @@
 .RData
 
 DHARMa_0.0.0.9000.tar.gz
+
+
+*_cache/
+*_files/
+
+*.html
+
+DHARMa/vignettes/Demo.html
