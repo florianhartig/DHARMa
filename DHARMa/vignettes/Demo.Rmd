@@ -1,0 +1,50 @@
+---
+title: "Demo"
+author: "Florian Hartig"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{A demo of the package}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8](inputenc)
+---
+Residuals analysis for GLMMs and other hierarchical models
+===
+
+```{r}
+library(DHARMa)
+library(lme4)
+```
+
+
+Synopsis: the aim of this script is to compare different ways to do residual diagnostics for GLMMs and other hierarhical models
+
+# Background
+
+Imagine we have Poisson count data with a typical mixed effect structure and overdispersion, a pretty common situation in an ecological analysis
+
+```{r}
+testData = createPoissonData()[[1]]
+# see ?createPoissonData for paramter values
+```
+
+Standard analysis + standard residuals
+
+```{r}
+fittedModel <- glmer(counts ~ environment1 + (1|group) + (1|ID) , family = "poisson", data = testData)
+summary(fittedModel)
+plot(fittedModel, resid(., type = "deviance") ~ log(fitted(.)))
+plot(fittedModel, resid(., type = "pearson") ~ log(fitted(.)))
+plot(fittedModel, resid(., type = "response") ~ log(fitted(.)))
+
+```
+
+## Simulated Residuals
+
+```{r}
+sim <- simulateResiduals(fittedModel)
+hist(sim$scaledResiduals)
+```
+
+
+
+
