@@ -1,7 +1,7 @@
 #' Function to simulate data
 #' @export
 #' @param overdispersion if this is a numeric value, it will be used as the sd of a random normal variate that is added to the linear predictor. Alternatively, a random function can be provided that takes as input the linear predictor. 
-#' @example /inst/examples/createPrior.R
+#' @example /inst/examples/createDataHelp.R
 createData <- function(replicates=1, sampleSize = 10, intercept = 0, fixedEffects = 1, numGroups = 10, randomEffectVariance = 1, overdispersion = 0.5, family = poisson(), scale = 1, cor = 0, roundPoissonVariance = NULL, quadraticFixedEffects = NULL){
   
   nPredictors = length(fixedEffects)
@@ -39,7 +39,7 @@ createData <- function(replicates=1, sampleSize = 10, intercept = 0, fixedEffect
     else if (family$family == "binomial") observedResponse = rbinom(n = sampleSize, 1, prob = linkResponse)
     else if (family$family == "poisson") {
       if(is.null(roundPoissonVariance)) observedResponse = rpois(n = sampleSize, lambda = linkResponse)
-      else observedResponse = round(rnorm(n = length(linkResponse), mean = linkResponse, sd = sqrt(linkResponse) * roundPoissonVariance))
+      else observedResponse = round(rnorm(n = length(linkResponse), mean = linkResponse, sd = roundPoissonVariance))
     }
     
     else stop("wrong link argument supplied")

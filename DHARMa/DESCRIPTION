@@ -1,6 +1,7 @@
 Package: DHARMa
 Title: Residual Diagnostics for HierArchical (Multi-level / Mixed) Regession Models
-Version: 0.0.0.9000
+Version: 0.0.1.0
+Date: 16.6.2016
 Authors@R: c(person("Florian", "Hartig", email = "florian.hartig@biom.uni-freiburg.de", role = c("aut", "cre")))
 Author: Florian Hartig [aut, cre],
 Maintainer: Florian Hartig <florian.hartig@biom.uni-freiburg.d>
@@ -8,7 +9,9 @@ Description: The package creates easily interpretable, residuals for generalized
 Depends:
     R (>= 3.1.2)
 Imports:
-    gap
+    gap,
+    quantreg,
+    plyr
 Suggests:
     lme4
 License: What license is it under?

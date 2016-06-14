@@ -9,7 +9,7 @@ vignette: >
 ---
 
 ```{r global_options, include=FALSE}
-knitr::opts_chunk$set(fig.width=7, fig.height=4, warning=FALSE, message=FALSE, cache = T)
+knitr::opts_chunk$set(fig.width=8, fig.height=5, warning=FALSE, message=FALSE, cache = F)
 ```
 
 ***Summary**: The DHARMa package creates easily interpretable, residuals for generalized linear mixed models that are standardized to values between 0 and 1. This is achieved by a simulation-based approach, similar to the Bayesian p-value or the parametric bootstrap: 1) simulate new data from the fitted model 2) calculate the cummulative empirical density function 3) residual is the value of the empirical density function at the value of the observed data.*  
@@ -61,7 +61,7 @@ The above exampel shows a misspecified model. The reason is that we created data
 For comparison, also "standard residual plots" (deviance, pearso and raw) are shown
 
 ```{r}
-testData = createData(sampleSize = 500, intercept = 0, overdispersion = 0, family = poisson(), randomEffectVariance = 0)
+testData = createData(sampleSize = 250, intercept = 0, overdispersion = 0, family = poisson(), randomEffectVariance = 0)
 fittedModel <- glmer(observedResponse ~ Environment1 + (1|group) , family = "poisson", data = testData)
 
 plotConcentionalResiduals(fittedModel)
@@ -105,8 +105,10 @@ plotSimulatedResiduals(simulationOutput = simulationOutput)
 
 
 ```{r}
-testData = createData(sampleSize = 500, intercept=1, fixedEffects = 2, overdispersion = 0, family = poisson(), roundPoissonVariance = 0.6)
+testData = createData(sampleSize = 500, intercept=0, fixedEffects = 2, overdispersion = 0, family = poisson(), roundPoissonVariance = 0.001, randomEffectVariance = 0)
 fittedModel <- glmer(observedResponse ~ Environment1 + (1|group) , family = "poisson", data = testData)
+
+summary(fittedModel)
 
 plotConcentionalResiduals(fittedModel)
 
@@ -173,8 +175,8 @@ Difficult to see with the overall pattern, but it becomes clear if we plot again
 
 ```{r}
 par(mfrow = c(1,2))
-plot(testData$Environment1,  simulationOutput$scaledResiduals)
-plot(testData$Environment2,  simulationOutput$scaledResiduals)
+plotResiduals(testData$Environment1,  simulationOutput$scaledResiduals)
+plotResiduals(testData$Environment2,  simulationOutput$scaledResiduals)
 ```
 
 
