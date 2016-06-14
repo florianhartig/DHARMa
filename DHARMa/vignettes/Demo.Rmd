@@ -49,14 +49,102 @@ simulationOutput <- simulateResiduals(fittedModel = fittedModel)
 plotSimulatedResiduals(simulationOutput = simulationOutput)
 ```
 
+# Interpretation of the residual plots
+
 The above exampel shows a misspecified model. The reason is that we created data with overdispersion, but the fitted model does not include overdispersion. For a correctly specified model, one would expect
 
 * a flat histogram of the scaled residuals
 * no pattern against the fitted value
 
-A bit later in this tutorial, we can see that this is indeed the case if we correct the model structure.
+## Example of a correctly specified model 
 
-You don't have to rely on the plots that are provided. It is *highly recommeded* to plot residuals against (where possible)
+For comparison, also "standard residual plots" (deviance, pearso and raw) are shown
+
+```{r}
+testData = createData(sampleSize = 500, intercept = 0, overdispersion = 0, family = poisson(), randomEffectVariance = 0)
+fittedModel <- glmer(observedResponse ~ Environment1 + (1|group) , family = "poisson", data = testData)
+
+plotConcentionalResiduals(fittedModel)
+
+simulationOutput <- simulateResiduals(fittedModel = fittedModel)
+plotSimulatedResiduals(simulationOutput = simulationOutput)
+```
+
+## Diagnosing overdispersion or underdispersion problems 
+
+### Overdispersion
+
+This is how **overdispersion** looks like 
+
+```{r}
+testData = createData(sampleSize = 500, overdispersion = 2, family = poisson())
+fittedModel <- glmer(observedResponse ~ Environment1 + (1|group) , family = "poisson", data = testData)
+
+plotConcentionalResiduals(fittedModel)
+
+simulationOutput <- simulateResiduals(fittedModel = fittedModel)
+plotSimulatedResiduals(simulationOutput = simulationOutput)
+```
+
+### Overdispersion, corrected
+
+Now if we fit the overdispersed example with a model that includes overdispersion everything is fine again 
+
+```{r}
+testData = createData(sampleSize = 500, overdispersion = 2, family = poisson())
+fittedModel <- glmer(observedResponse ~ Environment1 + (1|group) + (1|ID) , family = "poisson", data = testData)
+
+plotConcentionalResiduals(fittedModel)
+
+simulationOutput <- simulateResiduals(fittedModel = fittedModel)
+plotSimulatedResiduals(simulationOutput = simulationOutput)
+```
+
+### Underdispersion
+
+
+
+```{r}
+testData = createData(sampleSize = 500, intercept=1, fixedEffects = 2, overdispersion = 0, family = poisson(), roundPoissonVariance = 0.6)
+fittedModel <- glmer(observedResponse ~ Environment1 + (1|group) , family = "poisson", data = testData)
+
+plotConcentionalResiduals(fittedModel)
+
+simulationOutput <- simulateResiduals(fittedModel = fittedModel)
+plotSimulatedResiduals(simulationOutput = simulationOutput)
+```
+
+
+## Diagnosing heteroscedasticity
+
+Also binomial or poisson models can show heteroscedasticity, meaning that the dispersion parameter changes with some other parameter. Here an example where we create such data 
+
+```{r}
+testData = createData(sampleSize = 500, intercept = 0, overdispersion = function(x){return(rnorm(length(x), sd = 2*abs(x)))}, family = poisson(), randomEffectVariance = 0)
+fittedModel <- glmer(observedResponse ~ Environment1 + (1|group), family = "poisson", data = testData)
+
+plotConcentionalResiduals(fittedModel)
+
+simulationOutput <- simulateResiduals(fittedModel = fittedModel)
+plotSimulatedResiduals(simulationOutput = simulationOutput)
+```
+
+Adding a simple overdispersion correct will not completely remove the problem. The qq plot looks better, but there is still a pattern in the residuals 
+
+```{r}
+testData = createData(sampleSize = 500, intercept = 0, overdispersion = function(x){return(rnorm(length(x), sd = 2*abs(x)))}, family = poisson(), randomEffectVariance = 0)
+fittedModel <- glmer(observedResponse ~ Environment1 + (1|group) + (1|ID), family = "poisson", data = testData)
+
+plotConcentionalResiduals(fittedModel)
+
+simulationOutput <- simulateResiduals(fittedModel = fittedModel)
+plotSimulatedResiduals(simulationOutput = simulationOutput)
+
+```
+
+## Diagnosing more complicated model misspecification such as missing predictors or quadratic effects 
+
+You don't have to rely on the overall qq and residual against predicted plots that are provided. To diagnose model misspecification (e.g. missing predictor), or spatial or temporal autorcorrelation it is *highly recommeded* to plot residuals against (where possible)
 
 * all predictors
 * space
@@ -68,88 +156,45 @@ For that purpose, you can retrieve the residuals via
 simulationOutput$scaledResiduals
 ```
 
-Note again that the residual values are scaled between 0 and 1. 
+Note again that the residual values are scaled between 0 and 1. If you plot the residuals against predictors, space or time, the resulting plots should not only show no systematic dependency of those residuals on the covariates, but they should also again be flat for each fixed situation. That means that if you have, for example, a categorical predictor: treatment / control, the distribution of residuals for each predictor alone should be flat as well. 
 
-If you plot the residuals against predictors, space or time, the resulting plots should not only show no systematic dependency of those residuals on the covariates, but they should also again be flat for each fixed situation. That means that if you have, for example, a categorical predictor: treatment / control, the distribution of residuals for each predictor alone should be flat as well. 
-
-# Example - residual analysis for a mixed Poisson model with overdispersion
-
-Create data with medium overdispersion
+Here an example with a missing quadratic effect in the model and 2 predictors
 
 ```{r}
-testData = createData(sampleSize = 2000, overdispersion = 2, family = poisson())
-# see ?createPoissonData for paramter values
-```
-
-### Fitting a model without overdispersion on overdispersed data
-
-
-```{r}
-library(lme4)
-fittedModel <- glmer(observedResponse ~ Environment1 + (1|group) , family = "poisson", data = testData)
-summary(fittedModel)
-par(mfrow = c(1,3))
-plot(predict(fittedModel), resid(fittedModel, type = "deviance"), main = "Deviance" )
-plot(predict(fittedModel), resid(fittedModel, type = "pearson") , main = "Pearson")
-plot(predict(fittedModel), resid(fittedModel, type = "response") , main = "Pearson" )
-
-```
-
-Simulated Residuals
-
-```{r}
+testData = createData(sampleSize = 500, intercept = 1, fixedEffects = c(1,2), overdispersion = 0, family = poisson(), quadraticFixedEffects = c(-3,0))
+fittedModel <- glmer(observedResponse ~ Environment1 + Environment2 + (1|group) , family = "poisson", data = testData)
 simulationOutput <- simulateResiduals(fittedModel = fittedModel)
+plotConcentionalResiduals(fittedModel)
 plotSimulatedResiduals(simulationOutput = simulationOutput)
+
 ```
 
-The U-shaped distrituion in the histogram shows overdispersion
-
-
-### Fitting a model with overdispersion on the same data
-
-Standard analysis + standard residuals
+Difficult to see with the overall pattern, but it becomes clear if we plot against the environment
 
 ```{r}
-fittedModel <- glmer(observedResponse ~ Environment1 + (1|group) + (1|ID) , family = "poisson", data = testData)
-summary(fittedModel)
-par(mfrow = c(1,3))
-plot(predict(fittedModel), resid(fittedModel, type = "deviance"), main = "Deviance" )
-plot(predict(fittedModel), resid(fittedModel, type = "pearson") , main = "Pearson")
-plot(predict(fittedModel), resid(fittedModel, type = "response") , main = "Pearson" )
-
-```
-
-Simulated Residuals
-
-```{r}
-simulationOutput <- simulateResiduals(fittedModel = fittedModel)
-plotSimulatedResiduals(simulationOutput = simulationOutput)
+par(mfrow = c(1,2))
+plot(testData$Environment1,  simulationOutput$scaledResiduals)
+plot(testData$Environment2,  simulationOutput$scaledResiduals)
 ```
 
 
-# Example - residual analysis for a mixed Binomial model
+# Further examples
+
+
+Works exactly as before
 
 ```{r}
 testData = createData(sampleSize = 2000, overdispersion = 2, family = binomial())
-# see ?createPoissonData for paramter values
-```
-
-Standard analysis + standard residuals
-
-```{r}
 fittedModel <- glmer(observedResponse ~ Environment1 + (1|group) , family = "binomial", data = testData)
 summary(fittedModel)
-par(mfrow = c(1,3))
-plot(predict(fittedModel), resid(fittedModel, type = "deviance"), main = "Deviance" )
-plot(predict(fittedModel), resid(fittedModel, type = "pearson") , main = "Pearson")
-plot(predict(fittedModel), resid(fittedModel, type = "response") , main = "Pearson" )
+plotConcentionalResiduals(fittedModel)
 
-```
-
-Simulated Residuals
-
-```{r}
 simulationOutput <- simulateResiduals(fittedModel = fittedModel)
 plotSimulatedResiduals(simulationOutput = simulationOutput)
+
 ```
+
+
+
+
 

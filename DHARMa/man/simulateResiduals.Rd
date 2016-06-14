@@ -18,4 +18,7 @@ simulateResiduals(fittedModel, n = 250, refit = F, integer = NULL)
 \description{
 Creates scaled residuals by simulation
 }
+\details{
+The integer option essentially adds a uniform noise from -0.5 to 0.5 on the simulated and observed response. Note that this works because the expected distribution of this is flat - you can see this via hist(ecdf(runif(10000))(runif(10000)))
+}
 

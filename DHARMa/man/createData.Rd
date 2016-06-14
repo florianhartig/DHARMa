@@ -6,7 +6,11 @@
 \usage{
 createData(replicates = 1, sampleSize = 10, intercept = 0,
   fixedEffects = 1, numGroups = 10, randomEffectVariance = 1,
-  overdispersion = 0.5, family = poisson(), scale = 1, cor = 0)
+  overdispersion = 0.5, family = poisson(), scale = 1, cor = 0,
+  roundPoissonVariance = NULL, quadraticFixedEffects = NULL)
+}
+\arguments{
+\item{overdispersion}{if this is a numeric value, it will be used as the sd of a random normal variate that is added to the linear predictor. Alternatively, a random function can be provided that takes as input the linear predictor.}
 }
 \description{
 Function to simulate data

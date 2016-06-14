@@ -8,6 +8,7 @@ simulateResiduals <- function(x, ...) UseMethod("simulateResiduals")
 #' @param n number of simulations to run. Set at least 250, better 1000
 #' @param refit should the model be refit to do a parametric bootstrap
 #' @param integer is this a model with an integer distribution. If not provided, the function will attept to find out by itself, may not work for all families
+#' @details The integer option essentially adds a uniform noise from -0.5 to 0.5 on the simulated and observed response. Note that this works because the expected distribution of this is flat - you can see this via hist(ecdf(runif(10000))(runif(10000))) 
 #' @export
 simulateResiduals <- function(fittedModel, n = 250, refit = F, integer = NULL){
 
@@ -19,35 +20,25 @@ simulateResiduals <- function(fittedModel, n = 250, refit = F, integer = NULL){
     else integer = F
   }
   
-  nObs = nobs(fittedModel)
-  out = list(
-    fittedModel = fittedModel,
-    nObs = nObs,
-    observedResponse = model.frame(fittedModel)[,1],
-    fittedPredictedResponse = predict(fittedModel, type = "response", re.form = ~0),
-    fittedFixedEffects = fixef(fittedModel), ## returns fixed effects 
-    fittedRandomEffects = ranef(fittedModel), ## returns random effects
-    
-    simulatedResponse = data.matrix(simulate(fittedModel, nsim = n, use.u =F)),   
-    scaledResiduals = rep(NA, nObs),
-    
-    # only for refit = T
-    refittedPredictedResponse = NULL,
-    refittedFixedEffects = NULL,
-    refittedRandomEffects = NULL
-  )
+  out = list()
   
-  if(integer == T){
-    out$simulatedResponseNoised = out$simulatedResponse + matrix(runif(nObs*n, -0.5, 0.5), ncol = n)
-    out$observedResponseNoised = out$observedResponse + runif(nObs, -0.5, 0.5)
-  }
+  out$fittedModel = fittedModel
+  out$nObs = nobs(fittedModel)
+  out$observedResponse = model.frame(fittedModel)[,1]
+  out$fittedPredictedResponse = predict(fittedModel, type = "response", re.form = ~0)
+  out$fittedFixedEffects = fixef(fittedModel) ## returns fixed effects 
+  out$fittedRandomEffects = ranef(fittedModel) ## returns random effects
+  out$fittedResiduals = residuals(fittedModel, type = "response")
+
+  out$simulatedResponse = data.matrix(simulate(fittedModel, nsim = n, use.u =F))  
+  out$scaledResiduals = rep(NA, out$nObs)
 
   if (refit == F){
  
     for (i in 1:out$nObs){
       
       if(integer == T){
-        out$scaledResiduals[i] <- ecdf(out$simulatedResponseNoised[i,])(out$observedResponseNoised[i])           
+        out$scaledResiduals[i] <- ecdf(out$simulatedResponse[i,] + runif(out$nObs, -0.5, 0.5))(out$observedResponse[i] + runif(1, -0.5, 0.5))           
       }else{
         out$scaledResiduals[i] <- ecdf(out$simulatedResponse[i,])(out$observedResponse[i])
       }
@@ -58,6 +49,7 @@ simulateResiduals <- function(fittedModel, n = 250, refit = F, integer = NULL){
     out$refittedPredictedResponse <- matrix(nrow = out$nObs, ncol = n )  
     out$refittedFixedEffects <- matrix(nrow = length(out$fittedFixedEffects), ncol = n )  
     #out$refittedRandomEffects <- matrix(nrow = length(out$fittedRandomEffects), ncol = n )  
+    out$refittedResiduals = matrix(nrow = out$nObs, ncol = n)   
     
     newData <-model.frame(fittedModel)  
     
@@ -66,8 +58,19 @@ simulateResiduals <- function(fittedModel, n = 250, refit = F, integer = NULL){
       refittedModel = update(fittedModel, data = newData )
       out$refittedPredictedResponse[,i] = predict(refittedModel, type = "response")
       out$refittedFixedEffects[,i]  = fixef(refittedModel)
+      out$refittedResiduals[,i] = residuals(refittedModel, type = "response")
       #out$refittedRandomEffects[,i]  = ranef(refittedModel)
     }
+    
+    for (i in 1:out$nObs){
+    
+      if(integer == T){
+        out$scaledResiduals[i] <- ecdf(out$refittedResiduals[i,] + runif(out$nObs, -0.5, 0.5))(fittedResiduals[i] + runif(1, -0.5, 0.5))           
+      }else{
+        out$scaledResiduals[i] <- ecdf(out$refittedResiduals[i,])(out$fittedResiduals[i])
+      }
+    }
+
   }
   out$time = proc.time() - ptm
   return(out)
