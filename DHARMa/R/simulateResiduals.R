@@ -14,9 +14,13 @@ simulateResiduals <- function(fittedModel, n = 250, refit = F, integer = NULL){
 
   ptm <- proc.time()  
   
+  if(!(class(fittedModel) %in% getPossibleModels())) warning("DHARMa: fittedModel not in class of supported models. No guarantee that this works!")
+  
+  
+  family = family(fittedModel)
+  
   if(is.null(integer)){
-    family = fittedModel@resp$family$family
-    if (family %in% c("binomial", "poisson", "quasibinomial", "quasipoisson")) integer = T
+    if (family$family %in% c("binomial", "poisson", "quasibinomial", "quasipoisson")) integer = T
     else integer = F
   }
   
@@ -26,8 +30,15 @@ simulateResiduals <- function(fittedModel, n = 250, refit = F, integer = NULL){
   out$nObs = nobs(fittedModel)
   out$observedResponse = model.frame(fittedModel)[,1]
   out$fittedPredictedResponse = predict(fittedModel, type = "response", re.form = ~0)
-  out$fittedFixedEffects = fixef(fittedModel) ## returns fixed effects 
-  out$fittedRandomEffects = ranef(fittedModel) ## returns random effects
+  
+  if("glm" %in% class(fittedModel)){
+    out$fittedFixedEffects = coef(fittedModel)
+  }
+  if("merMod" %in% class(fittedModel)){
+    out$fittedFixedEffects = fixef(fittedModel) ## returns fixed effects 
+    out$fittedRandomEffects = ranef(fittedModel) ## returns random effects    
+  }
+
   out$fittedResiduals = residuals(fittedModel, type = "response")
 
   out$simulatedResponse = data.matrix(simulate(fittedModel, nsim = n, use.u =F))  
@@ -75,3 +86,6 @@ simulateResiduals <- function(fittedModel, n = 250, refit = F, integer = NULL){
   out$time = proc.time() - ptm
   return(out)
 }
+
+getPossibleModels<-function()c("lm", "glm", "lmerMod", "glmerMod") 
+

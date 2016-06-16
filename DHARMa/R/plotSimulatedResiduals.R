@@ -70,7 +70,7 @@ plotResiduals <- function(pred, res){
 
 #plot(cumsum(sort(simulationOutput$scaledResiduals)))
 
-plotConcentionalResiduals <- function(fittedModel){
+plotConventionalResiduals <- function(fittedModel){
   par(mfrow = c(1,3), oma = c(0,1,2,1))
   plot(predict(fittedModel), resid(fittedModel, type = "deviance"), main = "Deviance" , ylab = "Residual", xlab = "predicted")
   plot(predict(fittedModel), resid(fittedModel, type = "pearson") , main = "Pearson", ylab = "Residual", xlab = "predicted")

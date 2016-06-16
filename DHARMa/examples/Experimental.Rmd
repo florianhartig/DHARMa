@@ -1,0 +1,41 @@
+---
+title: "Experimental"
+author: "Florian Hartig"
+date: "16 Jun 2016"
+output: html_document
+---
+
+
+```{r}
+library(DHARMa)
+```
+
+## GAM on binomial data - just to show that this also works
+
+```{r}
+testData = createData(sampleSize = 500, overdispersion = 2, family = binomial())
+
+
+
+library(mgcv)
+fittedModel <- gam(observedResponse ~ s(Environment1) + s(group,bs="re") , data = testData)
+summary(fittedModel)
+plotConventionalResiduals(fittedModel)
+
+simulationOutput <- simulateResiduals(fittedModel = fittedModel)
+plotSimulatedResiduals(simulationOutput = simulationOutput)
+testSimulatedResiduals(simulationOutput = simulationOutput)
+```
+
+## GAMM on binomial data - just to show that this also works
+
+```{r}
+library(mgcv)
+fittedModel <- gamm(observedResponse ~ s(Environment1), family = "binomial", random = list(group=~1) , data = testData)
+summary(fittedModel)
+plotConventionalResiduals(fittedModel)
+
+simulationOutput <- simulateResiduals(fittedModel = fittedModel)
+plotSimulatedResiduals(simulationOutput = simulationOutput)
+testSimulatedResiduals(simulationOutput = simulationOutput)
+```

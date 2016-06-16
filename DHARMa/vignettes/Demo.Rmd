@@ -1,5 +1,5 @@
 ---
-title: "DHARMa - Residual Diagnostics for HierArchical (Multi-level / Mixed) Regession Models"
+title: "DHARMa - Residual Diagnostics for HierArchical (Multi-level / Mixed) Regression Models"
 author: "Florian Hartig"
 output: rmarkdown::html_vignette
 vignette: >
@@ -36,7 +36,7 @@ citation("DHARMa")
 
 ```{r}
 # Some test data
-testData = createData(sampleSize = 2000, overdispersion = 2, family = poisson())
+testData = createData(sampleSize = 250, overdispersion = 2, family = poisson())
 
 # a fitted lme4 model
 library(lme4)
@@ -64,7 +64,7 @@ For comparison, also "standard residual plots" (deviance, pearso and raw) are sh
 testData = createData(sampleSize = 250, intercept = 0, overdispersion = 0, family = poisson(), randomEffectVariance = 0)
 fittedModel <- glmer(observedResponse ~ Environment1 + (1|group) , family = "poisson", data = testData)
 
-plotConcentionalResiduals(fittedModel)
+plotConventionalResiduals(fittedModel)
 
 simulationOutput <- simulateResiduals(fittedModel = fittedModel)
 plotSimulatedResiduals(simulationOutput = simulationOutput)
@@ -80,7 +80,7 @@ This is how **overdispersion** looks like
 testData = createData(sampleSize = 500, overdispersion = 2, family = poisson())
 fittedModel <- glmer(observedResponse ~ Environment1 + (1|group) , family = "poisson", data = testData)
 
-plotConcentionalResiduals(fittedModel)
+plotConventionalResiduals(fittedModel)
 
 simulationOutput <- simulateResiduals(fittedModel = fittedModel)
 plotSimulatedResiduals(simulationOutput = simulationOutput)
@@ -94,7 +94,7 @@ Now if we fit the overdispersed example with a model that includes overdispersio
 testData = createData(sampleSize = 500, overdispersion = 2, family = poisson())
 fittedModel <- glmer(observedResponse ~ Environment1 + (1|group) + (1|ID) , family = "poisson", data = testData)
 
-plotConcentionalResiduals(fittedModel)
+plotConventionalResiduals(fittedModel)
 
 simulationOutput <- simulateResiduals(fittedModel = fittedModel)
 plotSimulatedResiduals(simulationOutput = simulationOutput)
@@ -106,14 +106,17 @@ plotSimulatedResiduals(simulationOutput = simulationOutput)
 
 ```{r}
 testData = createData(sampleSize = 500, intercept=0, fixedEffects = 2, overdispersion = 0, family = poisson(), roundPoissonVariance = 0.001, randomEffectVariance = 0)
-fittedModel <- glmer(observedResponse ~ Environment1 + (1|group) , family = "poisson", data = testData)
+fittedModel <- glmer(observedResponse ~ Environment1 + s(...,bs="re")
+                       
+                       (1|group) , family = "poisson", data = testData)
 
 summary(fittedModel)
 
-plotConcentionalResiduals(fittedModel)
+plotConventionalResiduals(fittedModel)
 
 simulationOutput <- simulateResiduals(fittedModel = fittedModel)
 plotSimulatedResiduals(simulationOutput = simulationOutput)
+testSimulatedResiduals(simulationOutput = simulationOutput)
 ```
 
 
@@ -125,10 +128,11 @@ Also binomial or poisson models can show heteroscedasticity, meaning that the di
 testData = createData(sampleSize = 500, intercept = 0, overdispersion = function(x){return(rnorm(length(x), sd = 2*abs(x)))}, family = poisson(), randomEffectVariance = 0)
 fittedModel <- glmer(observedResponse ~ Environment1 + (1|group), family = "poisson", data = testData)
 
-plotConcentionalResiduals(fittedModel)
+plotConventionalResiduals(fittedModel)
 
 simulationOutput <- simulateResiduals(fittedModel = fittedModel)
 plotSimulatedResiduals(simulationOutput = simulationOutput)
+testSimulatedResiduals(simulationOutput = simulationOutput)
 ```
 
 Adding a simple overdispersion correct will not completely remove the problem. The qq plot looks better, but there is still a pattern in the residuals 
@@ -137,11 +141,11 @@ Adding a simple overdispersion correct will not completely remove the problem. T
 testData = createData(sampleSize = 500, intercept = 0, overdispersion = function(x){return(rnorm(length(x), sd = 2*abs(x)))}, family = poisson(), randomEffectVariance = 0)
 fittedModel <- glmer(observedResponse ~ Environment1 + (1|group) + (1|ID), family = "poisson", data = testData)
 
-plotConcentionalResiduals(fittedModel)
+plotConventionalResiduals(fittedModel)
 
 simulationOutput <- simulateResiduals(fittedModel = fittedModel)
 plotSimulatedResiduals(simulationOutput = simulationOutput)
-
+testSimulatedResiduals(simulationOutput = simulationOutput)
 ```
 
 ## Diagnosing more complicated model misspecification such as missing predictors or quadratic effects 
@@ -166,9 +170,9 @@ Here an example with a missing quadratic effect in the model and 2 predictors
 testData = createData(sampleSize = 500, intercept = 1, fixedEffects = c(1,2), overdispersion = 0, family = poisson(), quadraticFixedEffects = c(-3,0))
 fittedModel <- glmer(observedResponse ~ Environment1 + Environment2 + (1|group) , family = "poisson", data = testData)
 simulationOutput <- simulateResiduals(fittedModel = fittedModel)
-plotConcentionalResiduals(fittedModel)
+plotConventionalResiduals(fittedModel)
 plotSimulatedResiduals(simulationOutput = simulationOutput)
-
+testSimulatedResiduals(simulationOutput = simulationOutput)
 ```
 
 Difficult to see with the overall pattern, but it becomes clear if we plot against the environment
@@ -183,20 +187,55 @@ plotResiduals(testData$Environment2,  simulationOutput$scaledResiduals)
 # Further examples
 
 
-Works exactly as before
+## Binomial GLMM
+
+works exactly as before
 
 ```{r}
-testData = createData(sampleSize = 2000, overdispersion = 2, family = binomial())
+testData = createData(sampleSize = 500, overdispersion = 2, family = binomial())
 fittedModel <- glmer(observedResponse ~ Environment1 + (1|group) , family = "binomial", data = testData)
 summary(fittedModel)
-plotConcentionalResiduals(fittedModel)
+plotConventionalResiduals(fittedModel)
 
 simulationOutput <- simulateResiduals(fittedModel = fittedModel)
 plotSimulatedResiduals(simulationOutput = simulationOutput)
-
+testSimulatedResiduals(simulationOutput = simulationOutput)
 ```
 
+## Binomial GLM
 
+```{r}
+fittedModel <- glm(observedResponse ~ Environment1 , family = "binomial", data = testData)
+summary(fittedModel)
+plotConventionalResiduals(fittedModel)
 
+simulationOutput <- simulateResiduals(fittedModel = fittedModel)
+plotSimulatedResiduals(simulationOutput = simulationOutput)
+testSimulatedResiduals(simulationOutput = simulationOutput)
+```
+
+## LM on binomial data - just to show that this also works
+
+```{r}
+fittedModel <- lm(observedResponse ~ Environment1 , data = testData)
+summary(fittedModel)
+plotConventionalResiduals(fittedModel)
+
+simulationOutput <- simulateResiduals(fittedModel = fittedModel)
+plotSimulatedResiduals(simulationOutput = simulationOutput)
+testSimulatedResiduals(simulationOutput = simulationOutput)
+```
+
+## LMM on binomial data - just to show that this also works
+
+```{r}
+fittedModel <- lmer(observedResponse ~ Environment1 + (1|group) , data = testData)
+summary(fittedModel)
+plotConventionalResiduals(fittedModel)
+
+simulationOutput <- simulateResiduals(fittedModel = fittedModel)
+plotSimulatedResiduals(simulationOutput = simulationOutput)
+testSimulatedResiduals(simulationOutput = simulationOutput)
+```
 
 
