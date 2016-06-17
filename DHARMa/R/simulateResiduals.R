@@ -7,10 +7,10 @@ simulateResiduals <- function(x, ...) UseMethod("simulateResiduals")
 #' @param fittedModel fitted model, currently restricted to lme4 models
 #' @param n number of simulations to run. Set at least 250, better 1000
 #' @param refit should the model be refit to do a parametric bootstrap
-#' @param integer is this a model with an integer distribution. If not provided, the function will attept to find out by itself, may not work for all families
-#' @details The integer option essentially adds a uniform noise from -0.5 to 0.5 on the simulated and observed response. Note that this works because the expected distribution of this is flat - you can see this via hist(ecdf(runif(10000))(runif(10000))) 
+#' @param integerResponse is this a model with an integerResponse distribution. If not provided, the function will attept to find out by itself, may not work for all families
+#' @details The integerResponse option essentially adds a uniform noise from -0.5 to 0.5 on the simulated and observed response. Note that this works because the expected distribution of this is flat - you can see this via hist(ecdf(runif(10000))(runif(10000))) 
 #' @export
-simulateResiduals <- function(fittedModel, n = 250, refit = F, integer = NULL){
+simulateResiduals <- function(fittedModel, n = 250, refit = F, integerResponse = NULL){
 
   ptm <- proc.time()  
   
@@ -19,9 +19,9 @@ simulateResiduals <- function(fittedModel, n = 250, refit = F, integer = NULL){
   
   family = family(fittedModel)
   
-  if(is.null(integer)){
-    if (family$family %in% c("binomial", "poisson", "quasibinomial", "quasipoisson")) integer = T
-    else integer = F
+  if(is.null(integerResponse)){
+    if (family$family %in% c("binomial", "poisson", "quasibinomial", "quasipoisson")) integerResponse = T
+    else integerResponse = F
   }
   
   out = list()
@@ -34,9 +34,9 @@ simulateResiduals <- function(fittedModel, n = 250, refit = F, integer = NULL){
   if("glm" %in% class(fittedModel)){
     out$fittedFixedEffects = coef(fittedModel)
   }
-  if("merMod" %in% class(fittedModel)){
+  if(class(fittedModel) %in% c("glmerMod", "lmeMod")){
     out$fittedFixedEffects = fixef(fittedModel) ## returns fixed effects 
-    out$fittedRandomEffects = ranef(fittedModel) ## returns random effects    
+    out$fittedRandomEffects = ranef(fittedModel) ## returns random effects
   }
 
   out$fittedResiduals = residuals(fittedModel, type = "response")
@@ -48,8 +48,8 @@ simulateResiduals <- function(fittedModel, n = 250, refit = F, integer = NULL){
  
     for (i in 1:out$nObs){
       
-      if(integer == T){
-        out$scaledResiduals[i] <- ecdf(out$simulatedResponse[i,] + runif(out$nObs, -0.5, 0.5))(out$observedResponse[i] + runif(1, -0.5, 0.5))           
+      if(integerResponse == T){
+        out$scaledResiduals[i] <- ecdf(out$simulatedResponse[i,] + runif(n, -0.5, 0.5))(out$observedResponse[i] + runif(1, -0.5, 0.5))           
       }else{
         out$scaledResiduals[i] <- ecdf(out$simulatedResponse[i,])(out$observedResponse[i])
       }
@@ -75,8 +75,8 @@ simulateResiduals <- function(fittedModel, n = 250, refit = F, integer = NULL){
     
     for (i in 1:out$nObs){
     
-      if(integer == T){
-        out$scaledResiduals[i] <- ecdf(out$refittedResiduals[i,] + runif(out$nObs, -0.5, 0.5))(fittedResiduals[i] + runif(1, -0.5, 0.5))           
+      if(integerResponse == T){
+        out$scaledResiduals[i] <- ecdf(out$refittedResiduals[i,] + runif(n, -0.5, 0.5))(fittedResiduals[i] + runif(1, -0.5, 0.5))           
       }else{
         out$scaledResiduals[i] <- ecdf(out$refittedResiduals[i,])(out$fittedResiduals[i])
       }
