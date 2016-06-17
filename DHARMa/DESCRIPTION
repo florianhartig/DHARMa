@@ -13,7 +13,8 @@ Imports:
     quantreg,
     plyr
 Suggests:
-    lme4
+    lme4,
+    blmeco
 License: What license is it under?
 LazyData: true
 RoxygenNote: 5.0.1.9000

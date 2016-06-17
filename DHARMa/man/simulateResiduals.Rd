@@ -4,7 +4,7 @@
 \alias{simulateResiduals}
 \title{Creates scaled residuals by simulation}
 \usage{
-simulateResiduals(fittedModel, n = 250, refit = F, integer = NULL)
+simulateResiduals(fittedModel, n = 250, refit = F, integerResponse = NULL)
 }
 \arguments{
 \item{fittedModel}{fitted model, currently restricted to lme4 models}
@@ -13,12 +13,12 @@ simulateResiduals(fittedModel, n = 250, refit = F, integer = NULL)
 
 \item{refit}{should the model be refit to do a parametric bootstrap}
 
-\item{integer}{is this a model with an integer distribution. If not provided, the function will attept to find out by itself, may not work for all families}
+\item{integerResponse}{is this a model with an integerResponse distribution. If not provided, the function will attept to find out by itself, may not work for all families}
 }
 \description{
 Creates scaled residuals by simulation
 }
 \details{
-The integer option essentially adds a uniform noise from -0.5 to 0.5 on the simulated and observed response. Note that this works because the expected distribution of this is flat - you can see this via hist(ecdf(runif(10000))(runif(10000)))
+The integerResponse option essentially adds a uniform noise from -0.5 to 0.5 on the simulated and observed response. Note that this works because the expected distribution of this is flat - you can see this via hist(ecdf(runif(10000))(runif(10000)))
 }
 

@@ -1,0 +1,55 @@
+---
+title: "ErrorRatesOverdispersion"
+author: "Florian Hartig"
+date: "17 Jun 2016"
+output: html_document
+---
+
+```{r}
+
+getPvaluesDispersion <- function(overdispersion, n = 20, alpha = 0.05){
+  
+  out = matrix(nrow = n, ncol = 3)
+  
+  for (i in 1:nrow(out)){
+    
+    testData = createData(sampleSize = 250, fixedEffects = c(1,0.2,0.1,0.02), quadraticFixedEffects = c(0.1,-0.4,0.2,-0.1), overdispersion = overdispersion, family = poisson())
+    fittedModel <- glmer(observedResponse ~ Environment1 + I(Environment1^2) + Environment2 + I(Environment2^2) + Environment3 + I(Environment3^2) + Environment4 + I(Environment4^2) + (1|group) , family = "poisson", data = testData)
+  
+    
+    out[i,1] = blmeco::dispersion_glmer(fittedModel)
+    
+    out[i,2] = overdisp_fun(fittedModel)[4]
+  
+  
+   simulationOutput <- simulateResiduals(fittedModel = fittedModel)
+   x = testSimulatedResiduals(simulationOutput)
+   out[i,3] = x$pValueUnivariate$p.value
+  }
+
+  
+  sig <- function(x) mean(x < alpha)
+  
+  means = colMeans(out)
+  significant = apply(out, 2, sig)
+  
+  return(list(pValues = out, means = means, significant = significant))
+}
+
+dispValues = seq(0,2, len = 10)
+
+out = list()
+positiveDharma = numeric(length(dispValues))
+positiveWiki = numeric(length(dispValues))
+
+for(i in 1:length(dispValues)){
+  out[[i]] = getPvaluesDispersion(overdispersion = dispValues[i], n = 100)
+  positiveDharma[i] = out[[i]]$significant[2]
+  positiveWiki[i] = out[[i]]$significant[3]
+}
+
+plot(dispValues, positiveWiki, type = "b")
+lines(dispValues, positiveDharma, type = "b", col = "red")
+
+```
+
