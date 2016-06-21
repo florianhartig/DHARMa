@@ -1,8 +1,3 @@
-#' @export
-simulateResiduals <- function(x, ...) UseMethod("simulateResiduals")
-
-
-
 #' Creates scaled residuals by simulation
 #' @param fittedModel fitted model, currently restricted to lme4 models
 #' @param n number of simulations to run. Set at least 250, better 1000
@@ -14,7 +9,7 @@ simulateResiduals <- function(fittedModel, n = 250, refit = F, integerResponse =
 
   ptm <- proc.time()  
   
-  if(!(class(fittedModel) %in% getPossibleModels())) warning("DHARMa: fittedModel not in class of supported models. No guarantee that this works!")
+  if(!(class(fittedModel)[1] %in% getPossibleModels())) warning("DHARMa: fittedModel not in class of supported models. No guarantee that this works!")
   
   
   family = family(fittedModel)

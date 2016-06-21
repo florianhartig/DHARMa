@@ -1,5 +1,6 @@
 #' creates Poisson data overdispersion and random intercept
-plotSimulatedResiduals <- function(simulationOutput, quantreg = F){
+#' @export
+plotSimulatedResiduals <- function(simulationOutput, quantreg = T){
   
   
   pred = simulationOutput$fittedPredictedResponse
@@ -15,7 +16,7 @@ plotSimulatedResiduals <- function(simulationOutput, quantreg = F){
   #hist(simulationOutput$scaledResiduals, main = "Distribution of scaled residuals", breaks = 50, freq = F)
   #lines(density(simulationOutput$scaledResiduals, na.rm = T, from = 0, to = 1, kernel = "rectangular", bw = 0.01, cut = 0.01), col = "red")
   
-  plot(simulationOutput$fittedPredictedResponse, simulationOutput$scaledResiduals, xlab = "Predicted", ylab = "Residual", main = "Residual vs. predicted\n lines should match", cex.main = 1)
+  plot(simulationOutput$fittedPredictedResponse, simulationOutput$scaledResiduals, xlab = "Predicted", ylab = "Residual", main = "Residual vs. predicted\n lines should be straight on quartiles", cex.main = 1)
   
 
   
@@ -28,19 +29,45 @@ plotSimulatedResiduals <- function(simulationOutput, quantreg = F){
 
   }else{
     
-    require(quantreg)
-    dat <- plyr::arrange(dat,pred)
-    fit<-quantreg::rqss(resid~qss(pred,constraint="N"),tau=0.5,data = dat)
-    lines(unique(dat$pred)[-1],fit$coef[1] + fit$coef[-1], col = "red", lwd = 2)
-    abline(h = 0.5, col = "red", lwd = 2)
+    #library(gamlss)
     
-    fit<-quantreg::rqss(resid~qss(pred,constraint="N"),tau=0.25,data = dat)
-    lines(unique(dat$pred)[-1],fit$coef[1] + fit$coef[-1], col = "green", lwd = 2, lty =2)
-    abline(h = 0.25, col = "green", lwd = 2, lty =2)
+    # qrnn
     
-    fit<-quantreg::rqss(resid~qss(pred,constraint="N"),tau=0.75,data = dat)
-    lines(unique(dat$pred)[-1],fit$coef[1] + fit$coef[-1], col = "blue", lwd = 2, lty = 2)
-    abline(h = 0.75, col = "blue", lwd = 2, lty =2)   
+    # http://r.789695.n4.nabble.com/Quantile-GAM-td894280.html
+    
+    #require(quantreg)
+    #dat <- plyr::arrange(dat,pred)
+    #fit<-quantreg::rqss(resid~qss(pred,constraint="N"),tau=0.5,data = dat)
+    
+    probs = c(0.25, 0.50, 0.75)
+    
+    w <- p <- list()
+    for(i in seq_along(probs)){
+      w[[i]] <- qrnn::qrnn.fit(x = as.matrix(simulationOutput$fittedPredictedResponse), y = as.matrix(simulationOutput$scaledResiduals), n.hidden = 4, tau = probs[i], iter.max = 1000, n.trials = 1, penalty = 1)
+      p[[i]] <- qrnn::qrnn.predict(as.matrix(sort(simulationOutput$fittedPredictedResponse)), w[[i]])
+    }
+    
+
+    
+    #plot(simulationOutput$fittedPredictedResponse, simulationOutput$scaledResiduals, xlab = "Predicted", ylab = "Residual", main = "Residual vs. predicted\n lines should match", cex.main = 1)
+    
+    #lines(sort(simulationOutput$fittedPredictedResponse), as.vector(p[[1]]), col = "red")
+    
+    matlines(sort(simulationOutput$fittedPredictedResponse), matrix(unlist(p), nrow = length(simulationOutput$fittedPredictedResponse), ncol = length(p)), col = "red", lty = 1)
+    
+#     as.vector(p[[1]])
+#     
+#     
+#     lines(simulationOutput$fittedPredictedResponse,p[[1]], col = "red", lwd = 2)
+#     abline(h = 0.5, col = "red", lwd = 2)
+#     
+#     fit<-quantreg::rqss(resid~qss(pred,constraint="N"),tau=0.25,data = dat)
+#     lines(unique(dat$pred)[-1],fit$coef[1] + fit$coef[-1], col = "green", lwd = 2, lty =2)
+#     abline(h = 0.25, col = "green", lwd = 2, lty =2)
+#     
+#     fit<-quantreg::rqss(resid~qss(pred,constraint="N"),tau=0.75,data = dat)
+#     lines(unique(dat$pred)[-1],fit$coef[1] + fit$coef[-1], col = "blue", lwd = 2, lty = 2)
+#     abline(h = 0.75, col = "blue", lwd = 2, lty =2)   
   }
   
   
@@ -50,13 +77,30 @@ plotSimulatedResiduals <- function(simulationOutput, quantreg = F){
 }
 
 #' Plots a generic residual plot with spline 
-plotResiduals <- function(pred, res){
+plotResiduals <- function(pred, res, quantreg = T){
   
   plot(pred, res)
   
-  lines(smooth.spline(simulationOutput$fittedPredictedResponse, simulationOutput$scaledResiduals, df = 10), lty = 2, lwd = 2, col = "red")
+  if(quantreg == F){
+
+    lines(smooth.spline(pred, res, df = 10), lty = 2, lwd = 2, col = "red")
+    
+    abline(h = 0.5, col = "red", lwd = 2)
+    
+  }else{
+
+    probs = c(0.25, 0.50, 0.75)
+    
+    w <- p <- list()
+    for(i in seq_along(probs)){
+      w[[i]] <- qrnn::qrnn.fit(x = as.matrix(pred), y = as.matrix(res), n.hidden = 4, tau = probs[i], iter.max = 1000, n.trials = 1, penalty = 1)
+      p[[i]] <- qrnn::qrnn.predict(as.matrix(sort(pred)), w[[i]])
+    }
+    
+    matlines(sort(pred), matrix(unlist(p), nrow = length(pred), ncol = length(p)), col = "red", lty = 1)
+}
+
   
-  abline(h = 0.5, col = "red", lwd = 2)
   
 }
 

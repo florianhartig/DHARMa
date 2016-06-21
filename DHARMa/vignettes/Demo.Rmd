@@ -106,9 +106,7 @@ plotSimulatedResiduals(simulationOutput = simulationOutput)
 
 ```{r}
 testData = createData(sampleSize = 500, intercept=0, fixedEffects = 2, overdispersion = 0, family = poisson(), roundPoissonVariance = 0.001, randomEffectVariance = 0)
-fittedModel <- glmer(observedResponse ~ Environment1 + s(...,bs="re")
-                       
-                       (1|group) , family = "poisson", data = testData)
+fittedModel <- glmer(observedResponse ~ Environment1 + (1|group) , family = "poisson", data = testData)
 
 summary(fittedModel)
 
@@ -167,11 +165,11 @@ Note again that the residual values are scaled between 0 and 1. If you plot the 
 Here an example with a missing quadratic effect in the model and 2 predictors
 
 ```{r}
-testData = createData(sampleSize = 500, intercept = 1, fixedEffects = c(1,2), overdispersion = 0, family = poisson(), quadraticFixedEffects = c(-3,0))
+testData = createData(sampleSize = 200, intercept = 1, fixedEffects = c(1,2), overdispersion = 0, family = poisson(), quadraticFixedEffects = c(-3,0))
 fittedModel <- glmer(observedResponse ~ Environment1 + Environment2 + (1|group) , family = "poisson", data = testData)
 simulationOutput <- simulateResiduals(fittedModel = fittedModel)
 plotConventionalResiduals(fittedModel)
-plotSimulatedResiduals(simulationOutput = simulationOutput)
+plotSimulatedResiduals(simulationOutput = simulationOutput, quantreg = T)
 testSimulatedResiduals(simulationOutput = simulationOutput)
 ```
 

@@ -4,7 +4,7 @@
 \alias{plotSimulatedResiduals}
 \title{creates Poisson data overdispersion and random intercept}
 \usage{
-plotSimulatedResiduals(simulationOutput, quantreg = F)
+plotSimulatedResiduals(simulationOutput, quantreg = T)
 }
 \description{
 creates Poisson data overdispersion and random intercept

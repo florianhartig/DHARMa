@@ -4,7 +4,7 @@
 \alias{plotResiduals}
 \title{Plots a generic residual plot with spline}
 \usage{
-plotResiduals(pred, res)
+plotResiduals(pred, res, quantreg = T)
 }
 \description{
 Plots a generic residual plot with spline
