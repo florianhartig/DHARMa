@@ -1,6 +1,6 @@
 Package: DHARMa
 Title: Residual Diagnostics for HierArchical (Multi-level / Mixed) Regession Models
-Version: 0.0.1.0
+Version: 0.0.1.1
 Date: 16.6.2016
 Authors@R: c(person("Florian", "Hartig", email = "florian.hartig@biom.uni-freiburg.de", role = c("aut", "cre")))
 Author: Florian Hartig [aut, cre],
