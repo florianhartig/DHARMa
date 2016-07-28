@@ -1,5 +1,5 @@
 
-
+#' @export
 overdispersionTest <- function(model, type = 1){
   
   if(type == 1){
@@ -13,9 +13,6 @@ overdispersionTest <- function(model, type = 1){
   }
 }
 
-
-#' 
-#' 
 overdisp_fun <- function(model) {
   ## number of variance parameters in
   ##   an n-by-n variance-covariance matrix

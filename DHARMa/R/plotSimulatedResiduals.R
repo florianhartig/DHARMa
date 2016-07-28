@@ -77,6 +77,7 @@ plotSimulatedResiduals <- function(simulationOutput, quantreg = T){
 }
 
 #' Plots a generic residual plot with spline 
+#' @export
 plotResiduals <- function(pred, res, quantreg = T){
   
   plot(pred, res)
@@ -114,6 +115,7 @@ plotResiduals <- function(pred, res, quantreg = T){
 
 #plot(cumsum(sort(simulationOutput$scaledResiduals)))
 
+#' @export
 plotConventionalResiduals <- function(fittedModel){
   par(mfrow = c(1,3), oma = c(0,1,2,1))
   plot(predict(fittedModel), resid(fittedModel, type = "deviance"), main = "Deviance" , ylab = "Residual", xlab = "predicted")

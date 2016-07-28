@@ -7,13 +7,13 @@
 simulateResiduals(fittedModel, n = 250, refit = F, integerResponse = NULL)
 }
 \arguments{
-\item{fittedModel}{fitted model, currently restricted to lme4 models}
+\item{fittedModel}{fitted model object, currently restricted to lme4, lm, or glm models}
 
-\item{n}{number of simulations to run. Set at least 250, better 1000}
+\item{n}{integer number > 1, number of simulations to run. Set at least 250, better 1000}
 
-\item{refit}{should the model be refit to do a parametric bootstrap}
+\item{refit}{T or F - should the model be refit to do a parametric bootstrap}
 
-\item{integerResponse}{is this a model with an integerResponse distribution. If not provided, the function will attept to find out by itself, may not work for all families}
+\item{integerResponse}{T or F - is this a model with an integer response (such as Poisson or Binomial). If not provided, the function will attept to find out by itself, may not work for all families / distributions}
 }
 \description{
 Creates scaled residuals by simulation
