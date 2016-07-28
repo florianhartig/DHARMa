@@ -1,8 +1,8 @@
 #' Creates scaled residuals by simulation
-#' @param fittedModel fitted model, currently restricted to lme4 models
-#' @param n number of simulations to run. Set at least 250, better 1000
-#' @param refit should the model be refit to do a parametric bootstrap
-#' @param integerResponse is this a model with an integerResponse distribution. If not provided, the function will attept to find out by itself, may not work for all families
+#' @param fittedModel fitted model object, currently restricted to lme4, lm, or glm models
+#' @param n integer number > 1, number of simulations to run. Set at least 250, better 1000
+#' @param refit T or F - should the model be refit to do a parametric bootstrap
+#' @param integerResponse T or F - is this a model with an integer response (such as Poisson or Binomial). If not provided, the function will attept to find out by itself, may not work for all families / distributions
 #' @details The integerResponse option essentially adds a uniform noise from -0.5 to 0.5 on the simulated and observed response. Note that this works because the expected distribution of this is flat - you can see this via hist(ecdf(runif(10000))(runif(10000))) 
 #' @export
 simulateResiduals <- function(fittedModel, n = 250, refit = F, integerResponse = NULL){
@@ -29,6 +29,7 @@ simulateResiduals <- function(fittedModel, n = 250, refit = F, integerResponse =
   if("glm" %in% class(fittedModel)){
     out$fittedFixedEffects = coef(fittedModel)
   }
+  
   if(class(fittedModel) %in% c("glmerMod", "lmeMod")){
     out$fittedFixedEffects = fixef(fittedModel) ## returns fixed effects 
     out$fittedRandomEffects = ranef(fittedModel) ## returns random effects
@@ -36,7 +37,12 @@ simulateResiduals <- function(fittedModel, n = 250, refit = F, integerResponse =
 
   out$fittedResiduals = residuals(fittedModel, type = "response")
 
-  out$simulatedResponse = data.matrix(simulate(fittedModel, nsim = n, use.u =F))  
+  simulations = simulate(fittedModel, nsim = n, use.u =F)
+  
+  if(is.vector(simulations[[1]]))  out$simulatedResponse = data.matrix(simulations)  
+  else if (is.matrix(simulations[[1]])) out$simulatedResponse = as.matrix(simulations)[,seq(1, (2*n), by = 2)]
+  else stop("wrong class")
+
   out$scaledResiduals = rep(NA, out$nObs)
 
   if (refit == F){
