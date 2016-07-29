@@ -7,19 +7,22 @@ output: html_document
 
 ```{r}
 
-dispValues = seq(0,2, len = 10)
+library(DHARMa)
+library(lme4)
+
+dispValues = seq(0,1.5, len = 20)
 
 out = list()
 positiveDharma = numeric(length(dispValues))
 positiveWiki = numeric(length(dispValues))
 
 for(i in 1:length(dispValues)){
-  out[[i]] = simulatePvaluesDispersion(overdispersion = dispValues[i], n = 2)
+  out[[i]] = simulatePvaluesDispersion(overdispersion = dispValues[i], n = 10)
   positiveWiki[i] = out[[i]]$significant[2]
   positiveDharma[i] = out[[i]]$significant[3]
 }
 
-plot(dispValues, positiveWiki, type = "b")
+plot(dispValues, positiveWiki, type = "b", xlab = "Overdispersion strength", ylab = "Significant detections")
 lines(dispValues, positiveDharma, type = "b", col = "red")
 legend("bottomright", legend = c("Wiki", "DHARMa"), col = c("black", "red"), lty = c(1,1))
 
