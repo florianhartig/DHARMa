@@ -16,7 +16,7 @@ plotSimulatedResiduals <- function(simulationOutput, quantreg = T){
   #hist(simulationOutput$scaledResiduals, main = "Distribution of scaled residuals", breaks = 50, freq = F)
   #lines(density(simulationOutput$scaledResiduals, na.rm = T, from = 0, to = 1, kernel = "rectangular", bw = 0.01, cut = 0.01), col = "red")
   
-  plot(simulationOutput$fittedPredictedResponse, simulationOutput$scaledResiduals, xlab = "Predicted", ylab = "Residual", main = "Residual vs. predicted\n lines should be straight on quartiles", cex.main = 1)
+  plot(simulationOutput$fittedPredictedResponse, simulationOutput$scaledResiduals, xlab = "Predicted value", ylab = "Standardized residual", main = "Residual vs. predicted\n0.25, 0.5, 0.75 quantile lines\nshould be straight", cex.main = 1)
   
 
   
@@ -43,7 +43,7 @@ plotSimulatedResiduals <- function(simulationOutput, quantreg = T){
     
     w <- p <- list()
     for(i in seq_along(probs)){
-      w[[i]] <- qrnn::qrnn.fit(x = as.matrix(simulationOutput$fittedPredictedResponse), y = as.matrix(simulationOutput$scaledResiduals), n.hidden = 4, tau = probs[i], iter.max = 1000, n.trials = 1, penalty = 1)
+      capture.output(w[[i]] <- qrnn::qrnn.fit(x = as.matrix(simulationOutput$fittedPredictedResponse), y = as.matrix(simulationOutput$scaledResiduals), n.hidden = 4, tau = probs[i], iter.max = 1000, n.trials = 1, penalty = 1))
       p[[i]] <- qrnn::qrnn.predict(as.matrix(sort(simulationOutput$fittedPredictedResponse)), w[[i]])
     }
     
@@ -94,8 +94,8 @@ plotResiduals <- function(pred, res, quantreg = T){
     
     w <- p <- list()
     for(i in seq_along(probs)){
-      w[[i]] <- qrnn::qrnn.fit(x = as.matrix(pred), y = as.matrix(res), n.hidden = 4, tau = probs[i], iter.max = 1000, n.trials = 1, penalty = 1)
-      p[[i]] <- qrnn::qrnn.predict(as.matrix(sort(pred)), w[[i]])
+      capture.output(w[[i]] <- qrnn::qrnn.fit(x = as.matrix(pred), y = as.matrix(res), n.hidden = 4, tau = probs[i], iter.max = 1000, n.trials = 1, penalty = 1))
+p[[i]] <- qrnn::qrnn.predict(as.matrix(sort(pred)), w[[i]])
     }
     
     matlines(sort(pred), matrix(unlist(p), nrow = length(pred), ncol = length(p)), col = "red", lty = 1)
