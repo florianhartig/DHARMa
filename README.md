@@ -1,5 +1,4 @@
-# DHARMa
-Diagnostics for HierARchical Models
+# DHARMa - Residual Diagnostics for HierARchical Models
 
 
 To install the lates development release, run 
