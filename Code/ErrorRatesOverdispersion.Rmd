@@ -10,7 +10,7 @@ output: html_document
 library(DHARMa)
 library(lme4)
 
-dispValues = seq(0,1.5, len = 20)
+dispValues = seq(0,1.2, len = 10)
 
 out = list()
 positiveDharma = numeric(length(dispValues))
@@ -22,7 +22,7 @@ for(i in 1:length(dispValues)){
   positiveDharma[i] = out[[i]]$significant[3]
 }
 
-plot(dispValues, positiveWiki, type = "b", xlab = "Overdispersion strength", ylab = "Significant detections")
+plot(dispValues, positiveWiki, type = "b", xlab = "Overdispersion strength", ylab = "Proportion significant")
 lines(dispValues, positiveDharma, type = "b", col = "red")
 legend("bottomright", legend = c("Wiki", "DHARMa"), col = c("black", "red"), lty = c(1,1))
 
