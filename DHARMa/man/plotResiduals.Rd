@@ -2,11 +2,18 @@
 % Please edit documentation in R/plotSimulatedResiduals.R
 \name{plotResiduals}
 \alias{plotResiduals}
-\title{Plots a generic residual plot with spline}
+\title{Generic residual plot with either spline or quantile regression}
 \usage{
-plotResiduals(pred, res, quantreg = T)
+plotResiduals(pred, res, quantreg = T, ...)
+}
+\arguments{
+\item{pred}{predictor variable}
+
+\item{res}{result variable}
+
+\item{quantreg}{should a quantile regression be performed. If F, a smooth spline will be}
 }
 \description{
-Plots a generic residual plot with spline
+Generic residual plot with either spline or quantile regression
 }
 

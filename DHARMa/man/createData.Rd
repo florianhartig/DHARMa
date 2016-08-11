@@ -7,7 +7,8 @@
 createData(replicates = 1, sampleSize = 10, intercept = 0,
   fixedEffects = 1, numGroups = 10, randomEffectVariance = 1,
   overdispersion = 0.5, family = poisson(), scale = 1, cor = 0,
-  roundPoissonVariance = NULL, quadraticFixedEffects = NULL)
+  roundPoissonVariance = NULL, quadraticFixedEffects = NULL,
+  pZeroInflation = 0)
 }
 \arguments{
 \item{overdispersion}{if this is a numeric value, it will be used as the sd of a random normal variate that is added to the linear predictor. Alternatively, a random function can be provided that takes as input the linear predictor.}
@@ -16,8 +17,20 @@ createData(replicates = 1, sampleSize = 10, intercept = 0,
 Function to simulate data
 }
 \examples{
-testData = createData(sampleSize = 500, intercept = 1, fixedEffects = c(1), overdispersion = 0, family = poisson(), quadraticFixedEffects = c(-3))
+testData = createData(sampleSize = 500, intercept = 2, fixedEffects = c(1), overdispersion = 0, family = poisson(), quadraticFixedEffects = c(-3), randomEffectVariance = 0)
 
+par(mfrow = c(1,2))
 plot(testData$Environment1, testData$observedResponse)
+hist(testData$observedResponse)
+
+# with zero-inflation
+
+
+testData = createData(sampleSize = 500, intercept = 2, fixedEffects = c(1), overdispersion = 0, family = poisson(), quadraticFixedEffects = c(-3), randomEffectVariance = 0, pZeroInflation = 0.6)
+
+par(mfrow = c(1,2))
+plot(testData$Environment1, testData$observedResponse)
+hist(testData$observedResponse)
+
 }
 

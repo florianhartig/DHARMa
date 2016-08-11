@@ -10,11 +10,12 @@ Depends:
     R (>= 3.0.0)
 Imports:
     gap,
-    quantreg,
-    plyr
+    quantreg
 Suggests:
     lme4,
-    blmeco
+    blmeco,
+    aods3,
+    aer
 License: What license is it under?
 LazyData: true
 RoxygenNote: 5.0.1.9000
