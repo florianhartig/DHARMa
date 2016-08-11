@@ -20,9 +20,9 @@ testSimulatedResiduals <- function(simulationOutput){
 #' @export
 testUniformDistribution <- function(simulationOutput, print = T){
   
-  pValueUnivariate <- suppressWarnings(ks.test(residuals, 'punif'))
-  if(print == T) pValueUnivariate
-  return(pValueUnivariate)
+  out <- suppressWarnings(ks.test(simulationOutput, 'punif'))
+  if(print == T) out
+  return(out)
 }
 
 
