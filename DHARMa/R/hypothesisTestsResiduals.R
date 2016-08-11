@@ -20,3 +20,27 @@ testUnivariateDistribution <- function(residuals, print = T){
   if(print == T) pValueUnivariate
   return(pValueUnivariate)
 }
+
+
+
+#' Tests for zero-inflation in the residuals
+#' @details Tests against uniform distribution with KS test 
+#' @export
+testZeroInflation <- function(simulationOutput, print = T, plot = T){
+  
+  countZeros <- function(x) sum( x == 0)
+  
+  zerosObserved = countZeros(simulationOutput$observedResponse)
+  
+  zerosExpected = apply(simulationOutput$simulatedResponse, 2, countZeros)
+  
+
+  out = c(expected = mean(zerosExpected), sdExpected = sd(zerosExpected), observed = zerosObserved)   
+
+  if(print == T) out
+  if(plot == T) {
+    hist(zerosExpected, xlim = range(zerosExpected, zerosObserved ))
+    abline(v = zerosObserved, lwd= 2, col = "red")
+  }
+  return(out)
+}
