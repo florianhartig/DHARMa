@@ -17,7 +17,7 @@ set.seed(123)
 
 
 ```{r global_options, include=FALSE}
-knitr::opts_chunk$set(fig.width=8, fig.height=5, warning=FALSE, message=FALSE, cache = F)
+knitr::opts_chunk$set(fig.width=8, fig.height=5, warning=FALSE, message=FALSE, cache = T)
 ```
 
 ***Summary**: Diagnosing ge
@@ -46,14 +46,13 @@ plotConventionalResiduals(fittedModel)
 
 ```
 
-Just for completeness - the first model is the overdispersed model. Don't get too excited if you got it right. Likely, you were simply lucky. Misspecifications in GL(M)Ms cannot reliably be diagnosed with standard residual plots. 
+Just for completeness - the second model is the overdispersed model. Don't get too excited if you got it right. Likely, you were simply lucky. Misspecifications in GL(M)Ms cannot reliably be diagnosed with standard residual plots. 
 
 The reason is that in GL(M)Ms distribution shapes change with fitted values in all kind of ways. Simple reweightings as done in the Pearson residuals does not lead to visually homogenous residuals. Also deviance residuals don't solve that problem, because likelihood densities are equally non-homogenous, even in correctly specified models. As a result, standard residual plots, when interpreted in the same way as for linear models, seem to show all kind problems such as non-normality, heteroskedasticity and so on, even if the model is correctly specified, which regularly confuses statistical beginners. 
 
 The more serious problem, however, is that even experienced statistical analysis have currently few options to diagnose problems in the specification of GLMMs. I would hold that the current standard practice is to eyeball residual plots for major misspecifications, and the run a test for overdispersion, which asks if the overall variation in the observations is larger or smaller than expected under the fitted model. This approach, however, has a number of problems. For example, heteroskedasticity cannot be reliably be diagnosed. 
 
 A more reliable model 
-
 
 # Workflow in DHARMa
 
@@ -89,7 +88,6 @@ plotSimulatedResiduals(simulationOutput = simulationOutput)
 ```
 
 
-
 ## Hypothesis tests in DHARMa
 
 You can run a hypothesis test on the residuals, which runs a KS test on the uniformity of the simulated residuals
@@ -106,25 +104,36 @@ dispersionTest(fittedModel, type = 1)
 ```
 
 
+### Test for zero-inflation
 
-## Interpretation of the residual plots
+```{r}
+testZeroInflation(simulationOutput)
+```
 
-The above exampel shows a misspecified model. The reason is that we created data with overdispersion, but the fitted model does not include overdispersion. For a correctly specified model, one would expect
+
+### Test for temporal autocorrelation
+
+```{r}
+testTemporalAutocorrelation(simulationOutput, time = runif(length(simulationOutput$observedResponse )))
+```
+
+
+### Test for spatial autocorrelation
+
+```{r}
+testSpatialAutocorrelation(simulationOutput, x = runif(length(simulationOutput$observedResponse )), y =  runif(length(simulationOutput$observedResponse )))
+```
+
+
+# Interpretation of the residual plots
+
+So far, we have seen plots for a perfectly specified model. For a correctly specified model, one would expect
 
 * a flat histogram of the scaled residuals
 * no pattern against the fitted value
 
-### Perfect residuals
 
-As a comparison to the examle above, we show below the residual plots of a correctly specified model 
-
-```{r}
-simulationOutput <- simulateResiduals(fittedModel = fittedModel)
-plotSimulatedResiduals(simulationOutput = simulationOutput)
-```
-
-
-### Overdispersion / underdispersion / zero-inflation
+## Overdispersion / underdispersion / zero-inflation
 
 Over/underdispersion refers to the phenomenon that that residual variance is larger/smaller than expected under the fitted model. Over/underdispersion can appear for any distributional family with fixed variance, in particular for Poisson and binomial models. 
 
@@ -189,8 +198,7 @@ testZeroInflation(simulationOutput)
 ```
 
 
-
-### Heteroscedasticity
+## Heteroscedasticity
 
 
 Also binomial or poisson models can show heteroscedasticity, meaning that the dispersion parameter changes with some other parameter. Here an example where we create such data 
@@ -252,62 +260,9 @@ plotResiduals(testData$Environment1,  simulationOutput$scaledResiduals)
 plotResiduals(testData$Environment2,  simulationOutput$scaledResiduals)
 ```
 
+## Spatial and temporal autocorrelation
 
 
-
-# Further examples
-
-
-## Binomial GLMM
-
-works exactly as before
-
-```{r}
-testData = createData(sampleSize = 500, overdispersion = 2, family = binomial())
-fittedModel <- glmer(observedResponse ~ Environment1 + (1|group) , family = "binomial", data = testData)
-summary(fittedModel)
-# plotConventionalResiduals(fittedModel)
-
-simulationOutput <- simulateResiduals(fittedModel = fittedModel)
-plotSimulatedResiduals(simulationOutput = simulationOutput)
-testSimulatedResiduals(simulationOutput = simulationOutput)
-```
-
-## Binomial GLM
-
-```{r}
-fittedModel <- glm(observedResponse ~ Environment1 , family = "binomial", data = testData)
-summary(fittedModel)
-# plotConventionalResiduals(fittedModel)
-
-simulationOutput <- simulateResiduals(fittedModel = fittedModel)
-plotSimulatedResiduals(simulationOutput = simulationOutput)
-testSimulatedResiduals(simulationOutput = simulationOutput)
-```
-
-## LM on binomial data - just to show that this also works
-
-```{r}
-fittedModel <- lm(observedResponse ~ Environment1 , data = testData)
-summary(fittedModel)
-# plotConventionalResiduals(fittedModel)
-
-simulationOutput <- simulateResiduals(fittedModel = fittedModel)
-plotSimulatedResiduals(simulationOutput = simulationOutput)
-testSimulatedResiduals(simulationOutput = simulationOutput)
-```
-
-## LMM on binomial data - just to show that this also works
-
-```{r}
-fittedModel <- lmer(observedResponse ~ Environment1 + (1|group) , data = testData)
-summary(fittedModel)
-# plotConventionalResiduals(fittedModel)
-
-simulationOutput <- simulateResiduals(fittedModel = fittedModel)
-plotSimulatedResiduals(simulationOutput = simulationOutput)
-testSimulatedResiduals(simulationOutput = simulationOutput)
-```
 
 
 # Real examples

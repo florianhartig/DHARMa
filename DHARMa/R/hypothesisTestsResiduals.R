@@ -44,3 +44,44 @@ testZeroInflation <- function(simulationOutput, print = T, plot = T){
   }
   return(out)
 }
+
+
+#' Test for temporal autocorrelation
+#' @param simulationOutput the result of a residual simulation
+#' @param time the time, in the same order as the data points
+#' @note This function is provide as a base recommendation. 
+#' @details performs the Durbin-Watson Test and plots the residuals against time
+#' @export
+testTemporalAutocorrelation <- function(simulationOutput, time, print = T, plot = T){
+  
+ 
+  out = lmtest::dwtest(simulationOutput$scaledResiduals ~ time)
+  
+  if(print == T) out
+  if(plot == T) {
+    plot(simulationOutput$scaledResiduals ~ time)
+  }
+  return(out)
+}
+
+
+#' Convenience Function to test for spatial autocorrelation
+#' @param simulationOutput the result of a residual simulation
+#' @param x the x coordinate, in the same order as the data points
+#' @param y the x coordinate, in the same order as the data points
+#' @note This function is provide as a base recommendation. 
+#' @details performs the Durbin-Watson Test against euklidian distance and plots the residuals against time
+#' @export
+testSpatialAutocorrelation <- function(simulationOutput, x, y, print = T, plot = T){
+  
+  out = lmtest::dwtest(simulationOutput$scaledResiduals ~ I(sqrt(x^2 + y^2)))
+  
+  if(print == T) out
+  if(plot == T) {
+    
+    col = colorRamp(c("red", "white", "blue"))(simulationOutput$scaledResiduals)
+    
+    plot(x,y, col = rgb(col, max = 255) )
+  }
+  return(out)
+}
