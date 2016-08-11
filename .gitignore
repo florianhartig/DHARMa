@@ -21,3 +21,15 @@ DHARMa/vignettes/Demo.html
 *.gz
 
 DHARMa/vignettes/Demo.R
+
+*.pdf
+
+*.log
+
+*.bbl
+
+Publications/Package/RegressionDiagnostics-concordance.tex
+
+Publications/Package/DHARMa.docx
+
+Publications/Package/RegressionDiagnostics.tex

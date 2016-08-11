@@ -1,0 +1,199 @@
+\documentclass[a4paper]{article} %style file is in the same folder.
+
+\usepackage{color}
+\usepackage{xcolor}
+\usepackage{framed}
+\usepackage{listings}
+
+%\usepackage[applemac]{inputenc}
+%\usepackage[latin1]{inputenc}
+\usepackage[T1]{fontenc}
+
+\hyphenation{Bayesian-Tools}
+
+\usepackage{graphicx}
+\usepackage{natbib}
+
+\usepackage{multicol}              
+\usepackage{multirow}
+\usepackage{booktabs}
+%\usepackage{natbib} 
+
+\usepackage[innerrightmargin = 0.7cm, innerleftmargin = 0.3cm]{mdframed}
+\usepackage{mdwlist}
+
+\usepackage[]{hyperref}
+\definecolor{darkblue}{rgb}{0,0,.5}
+\hypersetup{colorlinks=true, breaklinks=true, linkcolor=darkblue, menucolor=darkblue, urlcolor=blue, citecolor=darkblue}
+
+\lstset{ % settings for listings needs to be be changed to R sytanx 
+language=R,
+breaklines = true,
+columns=fullflexible,
+breakautoindent = false,
+%basicstyle=\listingsfont, 
+basicstyle=\ttfamily \scriptsize,
+keywordstyle=\color{black},                          
+identifierstyle=\color{black},
+commentstyle=\color{gray},
+xleftmargin=3.4pt,
+xrightmargin=3.4pt,
+numbers=none,
+literate={*}{{\char42}}1
+         {-}{{\char45}}1
+         {\ }{{\copyablespace}}1
+}
+% http://www.monperrus.net/martin/copy-pastable-listings-in-pdf-from-latex
+\usepackage[space=true]{accsupp}
+% requires the latest version of package accsupp
+\newcommand{\copyablespace}{
+    \BeginAccSupp{method=hex,unicode,ActualText=00A0}
+\ %
+    \EndAccSupp{}
+}
+
+
+<<setup, cache=FALSE, include=FALSE>>=
+library(knitr)
+opts_knit$set(tidy = T, fig=TRUE, width = 10, warning = F, message = F, cache = T)
+render_listings()
+@
+
+\usepackage[toc,page]{appendix}
+
+\setcounter{secnumdepth}{1}
+\setcounter{tocdepth}{1}
+
+
+\title{An easy and widely-applicable method for residual diagnostics of generalized linear (mixed) models}
+\author{Florian Hartig}
+
+
+\begin{document}
+\maketitle
+
+\begin{abstract} I present a simulation-based approach to create easily interpretable scaled residual for a wide array of generalized linear and generalized linear mixed models, including mixed Poisson and logistic models. The resulting residuals allow a straightforwad diagnosis of potential regression problems, such as over- and underdispersion, heteroscedasticity, spatial and temporal autocorrelation or structural model errors, and can be interpreted as intuitive as standard residual diagnostics for the linear regression. As a result, residual analysis for mixed 
+
+
+The approach allows a far more detailed analysis of residual problems in genearlized linear (mixed) models as any other currently implemented method in the R environment. 
+
+\end{abstract}
+
+
+
+Problems in the distribution, problems in the fixed-effects, and problems in the random-effect structure. 
+
+
+\citep{Abad-Testingmisspecificationgeneralized-2010}
+
+
+
+Random effect structure \citep{Lin-Detectingmisspecificationrandom-2015}
+
+
+
+
+
+
+
+
+A common issue in ecological statistics is diagnosing problems in the residuals of used binary 
+
+
+Poisson regression for analyzing count data and logistic regression for analyzing presence absence or other binary data. The assumptions of these models imply that shape and variance of the residuals will change with the predicted value. 
+
+As a result, standard residual plots or other analysis are nearly impossible to interpret, and most analysts do not check residual assumption for these models, beyond crude test for overdispersion. 
+
+
+Various proposals 
+
+\citep{Pan-GoodnessFitMethods-2005}
+
+Very similar method \citep{Esarey-AssessingFitQuality-2012}
+
+
+
+The first option is what \citep{Gelman-Dataanalysisusing-2006} calls "fake-data simulation". Simulate from the expected model to get an idea what the residuals should look like
+
+
+
+<<echo = F, fig.height=4, fig.width=9, message=F>>=
+
+library(lme4)
+library(DHARMa)
+
+par(mfrow = c(1,3))
+
+testData = createData(sampleSize = 500, overdispersion = 0, family = gaussian())
+fittedModel <- lmer(observedResponse ~ Environment1 + (1|group), data = testData)
+plot(predict(fittedModel), resid(fittedModel, type = "response"), main = "Linear mixed model", xlab = "Predicted values", ylab = "Raw residuals") 
+
+testData = createData(sampleSize = 500, overdispersion = 0.5, family = poisson())
+fittedModel <- glmer(observedResponse ~ Environment1 + (1|group), data = testData, family = "poisson")
+plot(predict(fittedModel), resid(fittedModel, type = "response"), main = "GLMM, overdispersion, Poisson", xlab = "Predicted values", ylab = "Raw residuals") 
+
+
+testData = createData(sampleSize = 500, overdispersion = 1, family = binomial())
+fittedModel <- glmer(observedResponse ~ Environment1 + (1|group), data = testData, family = "binomial")
+plot(predict(fittedModel), resid(fittedModel, type = "response"), main = "GLMM, overdispersion, Binomial", xlab = "Predicted values", ylab = "Raw residuals") 
+@
+
+
+
+Simualate from the fitted model "predictive simulation" \citep{Gelman-Dataanalysisusing-2006}
+
+goes back to posterior predictive diagnostis \citep{Gelman-Posteriorpredictiveassessment-1996, Meng-PosteriorPredictivep-1994}, see also summary in \citep{Gelman-BayesianDataAnalysis-2003}. 
+
+
+Bayesian hierarchical checks \citep{Marshall-IdentifyingoutliersBayesian-2007}
+
+
+Working with discrete functions \citep{Gelman-DiagnosticChecksDiscrete-2000}
+
+Underdispersion \citep{Sellers-flexibleregressionmodel-2010}
+
+% notes about underdispersion http://opisthokonta.net/?p=1210
+
+
+
+Hilden-Minton (1995, PhD thesis UCLA), Verbeke and Lesaffre
+(1997, CSDA) or Pinheiro and Bates (2000, Springer): extension to
+define three types of residuals that accommodate the extra source of
+variability present in linear mixed models, namely:
+i) Marginal residuals, b = y − Xb = cM−1 bQy, predictors of marginal
+errors,  = y − E[y] = y − X = Zb + e
+ii) Conditional residuals, be = y − Xb − Zbb = bbQy, predictors of
+conditional errors e = y − E[y|b] = y − X − Zb
+iii) BLUP, Zbb, predictors of random effects, Zb = E[y|b] − E[y]
+
+
+
+
+<<echo = F, fig.height=5, fig.width=5, message=F>>=
+
+dispValues = seq(0,1.5, len = 20)
+
+out = list()
+positiveDharma = numeric(length(dispValues))
+positiveWiki = numeric(length(dispValues))
+
+for(i in 1:length(dispValues)){
+  out[[i]] = simulatePvaluesDispersion(overdispersion = dispValues[i], n = 100)
+  positiveWiki[i] = out[[i]]$significant[2]
+  positiveDharma[i] = out[[i]]$significant[3]
+}
+
+plot(dispValues, positiveWiki, type = "b")
+lines(dispValues, positiveDharma, type = "b", col = "red")
+legend("bottomright", legend = c("Wiki", "DHARMa"), col = c("black", "red"), lty = c(1,1))
+
+@
+
+
+
+
+
+\bibliographystyle{chicago}
+\bibliography{/Users/Florian/Home/Bibliography/Databases/flo}
+
+\end{document}
