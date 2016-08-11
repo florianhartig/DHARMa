@@ -65,14 +65,18 @@ render_listings()
 \setcounter{tocdepth}{1}
 
 
-\title{An easy and widely-applicable method for residual diagnostics of generalized linear (mixed) models}
+\title{DHARMA - An easy and widely-applicable method for residual diagnostics of generalized linear (mixed) models}
 \author{Florian Hartig}
 
 
 \begin{document}
 \maketitle
 
-\begin{abstract} I present a simulation-based approach to create easily interpretable scaled residual for a wide array of generalized linear and generalized linear mixed models, including mixed Poisson and logistic models. The resulting residuals allow a straightforwad diagnosis of potential regression problems, such as over- and underdispersion, heteroscedasticity, spatial and temporal autocorrelation or structural model errors, and can be interpreted as intuitive as standard residual diagnostics for the linear regression. As a result, residual analysis for mixed 
+\begin{abstract} A common problem in statistical practice is that standard residuals for generalized linear (mixed) models are hard to interpret, 
+
+
+
+I present a simulation-based approach to create easily interpretable scaled residual for a wide array of generalized linear and generalized linear mixed models, including mixed Poisson and logistic models. The resulting residuals allow a straightforwad diagnosis of potential regression problems, such as over- and underdispersion, heteroscedasticity, spatial and temporal autocorrelation or structural model errors, and can be interpreted as intuitive as standard residual diagnostics for the linear regression. As a result, residual analysis for mixed 
 
 
 The approach allows a far more detailed analysis of residual problems in genearlized linear (mixed) models as any other currently implemented method in the R environment. 
@@ -167,25 +171,29 @@ conditional errors e = y − E[y|b] = y − X − Zb
 iii) BLUP, Zbb, predictors of random effects, Zb = E[y|b] − E[y]
 
 
+\section{Tests and diagnostics}
 
+Although 
 
 <<echo = F, fig.height=5, fig.width=5, message=F>>=
 
-dispValues = seq(0,1.5, len = 20)
+dispValues = seq(0,1.2, len = 10)
 
 out = list()
+positiveBlmeco = numeric(length(dispValues))
 positiveDharma = numeric(length(dispValues))
 positiveWiki = numeric(length(dispValues))
 
 for(i in 1:length(dispValues)){
-  out[[i]] = simulatePvaluesDispersion(overdispersion = dispValues[i], n = 100)
+  out[[i]] = DHARMa:::simulatePvaluesDispersion(overdispersion = dispValues[i], n = 25)
   positiveWiki[i] = out[[i]]$significant[2]
   positiveDharma[i] = out[[i]]$significant[3]
 }
 
-plot(dispValues, positiveWiki, type = "b")
+plot(dispValues, positiveWiki, type = "b", xlab = "Overdispersion strength", ylab = "Proportion significant")
 lines(dispValues, positiveDharma, type = "b", col = "red")
-legend("bottomright", legend = c("Wiki", "DHARMa"), col = c("black", "red"), lty = c(1,1))
+lines(dispValues, positiveBlmeco, type = "b", col = "darkgreen")
+legend("bottomright", legend = c("Wiki", "DHARMa", "Blmeco "), col = c("black", "red", "darkgreen"), lty = c(1,1))
 
 @
 
