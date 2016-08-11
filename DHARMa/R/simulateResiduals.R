@@ -26,11 +26,11 @@ simulateResiduals <- function(fittedModel, n = 250, refit = F, integerResponse =
   out$observedResponse = model.frame(fittedModel)[,1]
   out$fittedPredictedResponse = predict(fittedModel, type = "response", re.form = ~0)
   
-  if("glm" %in% class(fittedModel)){
+  if("glm" %in% class(fittedModel)[1]){
     out$fittedFixedEffects = coef(fittedModel)
   }
   
-  if(class(fittedModel) %in% c("glmerMod", "lmeMod")){
+  if(class(fittedModel)[1] %in% c("glmerMod", "lmerMod")){
     out$fittedFixedEffects = fixef(fittedModel) ## returns fixed effects 
     out$fittedRandomEffects = ranef(fittedModel) ## returns random effects
   }
