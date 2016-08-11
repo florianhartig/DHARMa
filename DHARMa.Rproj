@@ -16,4 +16,5 @@ BuildType: Package
 PackageUseDevtools: Yes
 PackagePath: DHARMa
 PackageInstallArgs: --no-multiarch --with-keep.source
+PackageCheckArgs: --as-cran
 PackageRoxygenize: rd,collate,namespace
