@@ -2,7 +2,7 @@
 #' @export
 #' @param overdispersion if this is a numeric value, it will be used as the sd of a random normal variate that is added to the linear predictor. Alternatively, a random function can be provided that takes as input the linear predictor. 
 #' @example /inst/examples/createDataHelp.R
-createData <- function(replicates=1, sampleSize = 10, intercept = 0, fixedEffects = 1, numGroups = 10, randomEffectVariance = 1, overdispersion = 0.5, family = poisson(), scale = 1, cor = 0, roundPoissonVariance = NULL, quadraticFixedEffects = NULL){
+createData <- function(replicates=1, sampleSize = 10, intercept = 0, fixedEffects = 1, numGroups = 10, randomEffectVariance = 1, overdispersion = 0.5, family = poisson(), scale = 1, cor = 0, roundPoissonVariance = NULL, quadraticFixedEffects = NULL, pZeroInflation = 0){
   
   nPredictors = length(fixedEffects)
   
@@ -43,6 +43,13 @@ createData <- function(replicates=1, sampleSize = 10, intercept = 0, fixedEffect
     }
     
     else stop("wrong link argument supplied")
+    
+    if(pZeroInflation != 0){
+      artificialZeros = rbinom(n = length(observedResponse), size = 1, prob = 1-pZeroInflation)
+      observedResponse = observedResponse * artificialZeros
+    }
+    
+
     
     out[[i]] <- data.frame(cbind(ID = 1:sampleSize, observedResponse, predictors, group))
   }
