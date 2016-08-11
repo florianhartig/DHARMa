@@ -1,6 +1,7 @@
 #' creates Poisson data overdispersion and random intercept
-#' @param simulationOutput a result from simulatedResiduals
+#' @param simulationOutput an object with simualted residuals created by \code{\link{simulateResiduals}}
 #' @param quantreg whether to perform a quantile regression on 0.25, 0.5, 0.75
+#' @seealso \code{\link{plotResiduals}}
 #' @export
 plotSimulatedResiduals <- function(simulationOutput, quantreg = T){
 
@@ -14,13 +15,15 @@ plotSimulatedResiduals <- function(simulationOutput, quantreg = T){
 }
 
 
-
 #' Generic residual plot with either spline or quantile regression
 #' @param pred predictor variable
-#' @param res result variable
+#' @param residual residual variable
 #' @param quantreg should a quantile regression be performed. If F, a smooth spline will be 
+#' @seealso \code{\link{plotSimulatedResiduals}}
 #' @export
-plotResiduals <- function(pred, res, quantreg = T, ...){
+plotResiduals <- function(pred, residual, quantreg = T, ...){
+  
+  res = residual 
   
   plot(pred, res, ...)
   

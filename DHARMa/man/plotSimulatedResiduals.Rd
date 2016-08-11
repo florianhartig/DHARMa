@@ -7,11 +7,14 @@
 plotSimulatedResiduals(simulationOutput, quantreg = T)
 }
 \arguments{
-\item{simulationOutput}{a result from simulatedResiduals}
+\item{simulationOutput}{an object with simualted residuals created by \code{\link{simulateResiduals}}}
 
 \item{quantreg}{whether to perform a quantile regression on 0.25, 0.5, 0.75}
 }
 \description{
 creates Poisson data overdispersion and random intercept
+}
+\seealso{
+\code{\link{plotResiduals}}
 }
 

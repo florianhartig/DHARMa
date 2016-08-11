@@ -1,20 +1,24 @@
-#' Performs automatic tests of the simulated residuals
-#' @param simulationOutput a simulation output
+#' Wrapper for the various test functions
+#' @param simulationOutput an object with simulated residuals created by \code{\link{simulateResiduals}}
+#' @details Currently, this function calls only the \code{\link{testUniformDistribution}} function. All other tests (see below) have to be called by hand. 
 #' @export
+#' @note for special problems, in particular overdispersion, a \code{\link{parametricDispersionTest}} will likely be more powerful 
+#' @seealso \code{\link{testUniformDistribution}}, \code{\link{testZeroInflation}}, \code{\link{testTemporalAutocorrelation}}, \code{\link{testSpatialAutocorrelation}}
 testSimulatedResiduals <- function(simulationOutput){
  
-  pValueUnivariate <- testUnivariateDistribution(simulationOutput$scaledResiduals)
-  
-  out = list(pValueUnivariate = pValueUnivariate)
+  out <- testUniformDistribution(simulationOutput$scaledResiduals)
   
   return(out)
 }
 #plotConcentionalResiduals(fittedModel)
 
 #' Tests residuals against a uniform distribution
-#' @details Tests against uniform distribution with KS test 
+#' @param simulationOutput an object with simulated residuals created by \code{\link{simulateResiduals}}
+#' @param print whether to print output
+#' @details Tests residuals against a uniform distribution with the KS test 
+#' @seealso \code{\link{testSimulatedResiduals}}, \code{\link{testZeroInflation}}, \code{\link{testTemporalAutocorrelation}}, \code{\link{testSpatialAutocorrelation}}
 #' @export
-testUnivariateDistribution <- function(residuals, print = T){
+testUniformDistribution <- function(simulationOutput, print = T){
   
   pValueUnivariate <- suppressWarnings(ks.test(residuals, 'punif'))
   if(print == T) pValueUnivariate
@@ -24,7 +28,11 @@ testUnivariateDistribution <- function(residuals, print = T){
 
 
 #' Tests for zero-inflation in the residuals
-#' @details Tests against uniform distribution with KS test 
+#' @param simulationOutput an object with simulated residuals created by \code{\link{simulateResiduals}}
+#' @param print whether to print output
+#' @param plot whether to plot output
+#' @details shows the expected distribution of zeros against the observed
+#' @seealso \code{\link{testUniformDistribution}}, \code{\link{testSimulatedResiduals}}, \code{\link{testTemporalAutocorrelation}}, \code{\link{testSpatialAutocorrelation}}
 #' @export
 testZeroInflation <- function(simulationOutput, print = T, plot = T){
   
@@ -47,10 +55,13 @@ testZeroInflation <- function(simulationOutput, print = T, plot = T){
 
 
 #' Test for temporal autocorrelation
-#' @param simulationOutput the result of a residual simulation
+#' @param simulationOutput an object with simulated residuals created by \code{\link{simulateResiduals}}
 #' @param time the time, in the same order as the data points
+#' @param print whether to print output
+#' @param plot whether to plot output
 #' @note This function is provide as a base recommendation. 
 #' @details performs the Durbin-Watson Test and plots the residuals against time
+#' @seealso \code{\link{testUniformDistribution}}, \code{\link{testZeroInflation}}, \code{\link{testSimulatedResiduals}}, \code{\link{testSpatialAutocorrelation}}
 #' @export
 testTemporalAutocorrelation <- function(simulationOutput, time, print = T, plot = T){
   
@@ -66,11 +77,12 @@ testTemporalAutocorrelation <- function(simulationOutput, time, print = T, plot 
 
 
 #' Convenience Function to test for spatial autocorrelation
-#' @param simulationOutput the result of a residual simulation
+#' @param simulationOutput an object with simulated residuals created by \code{\link{simulateResiduals}}
 #' @param x the x coordinate, in the same order as the data points
 #' @param y the x coordinate, in the same order as the data points
 #' @note This function is provide as a base recommendation. 
 #' @details performs the Durbin-Watson Test against euklidian distance and plots the residuals against time
+#' @seealso \code{\link{testUniformDistribution}}, \code{\link{testZeroInflation}}, \code{\link{testTemporalAutocorrelation}}, \code{\link{testSimulatedResiduals}}
 #' @export
 testSpatialAutocorrelation <- function(simulationOutput, x, y, print = T, plot = T){
   

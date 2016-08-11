@@ -1,6 +1,5 @@
-#' simulates null
+#' Simulated p-values for internal testing
 #' @return list of various named objects. Within each, order is dispersion_glmer, overdisp_fun, DHARMa
-#' @export
 simulatePvaluesDispersion <- function(overdispersion, n = 20, alpha = 0.05){
   
   out = matrix(nrow = n, ncol = 3)

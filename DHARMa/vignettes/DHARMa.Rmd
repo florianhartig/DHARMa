@@ -1,6 +1,6 @@
 ---
 title: "DHARMa - Residual Diagnostics for HierArchical (Multi-level / Mixed) Regression Models"
-author: "Florian Hartig"
+author: "Florian Hartig, University of Freiburg, [website](https://florianhartig.wordpress.com/)"
 output: 
   rmarkdown::html_vignette:
     toc: true
@@ -17,23 +17,20 @@ set.seed(123)
 
 
 ```{r global_options, include=FALSE}
-knitr::opts_chunk$set(fig.width=8, fig.height=5, warning=FALSE, message=FALSE, cache = T)
+knitr::opts_chunk$set(fig.width=7, fig.height=4.5, warning=FALSE, message=FALSE, cache = T)
 ```
 
-***Summary**: Diagnosing ge
-
-
-The DHARMa package creates readily interpretable residuals for generalized linear (mixed) models that are standardized to values between 0 and 1. This is achieved by a simulation-based approach, similar to the Bayesian p-value or the parametric bootstrap: 1) simulate new data from the fitted model 2) from this simulated data, calculate the cummulative density function  3) residual is the value of the empirical density function at the value of the observed data.*  
+***Summary: The DHARMa package creates readily interpretable residuals for generalized linear (mixed) models that are standardized to values between 0 and 1. This is achieved by a simulation-based approach, similar to the Bayesian p-value or the parametric bootstrap: 1) simulate new data from the fitted model 2) from this simulated data, calculate the cummulative density function  3) residual is the value of the empirical density function at the value of the observed data.*  **
 
 # Motivation 
 
-Residual interpretation for generalized linear mixed models is often problematic. As an example, here two Poisson models, one with serious overdispersion, and one that fits the data perfectly. I show three standard residuals diagnostics each. Can you say which is the overdispersed model?
+Residual interpretation for generalized linear mixed models is often problematic. As an example, here two Poisson models, one that is lacking a quadratic effect, and one that fits the data perfectly. I show three standard residuals diagnostics each. Can you say which is the misspecified model?
 
 
-```{r, echo = F}
+```{r, echo = F, fig.width=8, fig.height=3.5}
 library(lme4)
 
-overdispersedData = createData(sampleSize = 250, overdispersion = 2, family = poisson())
+overdispersedData = createData(sampleSize = 250, overdispersion = 0, quadraticFixedEffects = -2, family = poisson())
 fittedModelOverdispersed <- glmer(observedResponse ~ Environment1 + (1|group) , family = "poisson", data = overdispersedData)
 
 plotConventionalResiduals(fittedModelOverdispersed)
@@ -46,13 +43,13 @@ plotConventionalResiduals(fittedModel)
 
 ```
 
-Just for completeness - the second model is the overdispersed model. Don't get too excited if you got it right. Likely, you were simply lucky. Misspecifications in GL(M)Ms cannot reliably be diagnosed with standard residual plots. 
+Just for completeness - it was the first one. Don't get too excited if you got it right, though. Either you were simply lucky, or you noted that the first model seems a bit overdispersed. Even so, could you have said what the problem is? Would you have added a quadratic effect, instead of adding an overdispersion correction? The point that I want to make is that misspecifications in GL(M)Ms cannot reliably be diagnosed with standard residual plots. 
 
 The reason is that in GL(M)Ms distribution shapes change with fitted values in all kind of ways. Simple reweightings as done in the Pearson residuals does not lead to visually homogenous residuals. Also deviance residuals don't solve that problem, because likelihood densities are equally non-homogenous, even in correctly specified models. As a result, standard residual plots, when interpreted in the same way as for linear models, seem to show all kind problems such as non-normality, heteroskedasticity and so on, even if the model is correctly specified, which regularly confuses statistical beginners. 
 
 The more serious problem, however, is that even experienced statistical analysis have currently few options to diagnose problems in the specification of GLMMs. I would hold that the current standard practice is to eyeball residual plots for major misspecifications, and the run a test for overdispersion, which asks if the overall variation in the observations is larger or smaller than expected under the fitted model. This approach, however, has a number of problems. For example, heteroskedasticity cannot be reliably be diagnosed. 
 
-A more reliable model 
+DHARMa aims at solvind this problem by creating readily interpretable residuals for generalized linear (mixed) models that are standardized to values between 0 and 1. This is achieved by a simulation-based approach, similar to the Bayesian p-value or the parametric bootstrap.
 
 # Workflow in DHARMa
 
@@ -81,14 +78,45 @@ The scaled residuals are calculated with the simulateResiduals() functions. You 
 simulationOutput <- simulateResiduals(fittedModel = fittedModel, n = 250, refit = F, integerResponse = NULL)
 ```
 
-You can plot the residuals with the plotSimulatedResiduals() function
+What the function does is to create 250 new datasets from the fitted model, calculating the distribution of expected values for each observed value, and then returning the quantile value that would correspond to the observed value.
+
+For example, a simulated residual of 0.5 means that half of the simulated values are higher, and half of them lower than the observed value. A value of 0.99 would mean that nearly all simulated values are lower than the observed value. The minium/maxium values for the residuals are 0 and 1. 
+
+The calculated residuals are stored in the 
+
+```{r, eval = F}
+simulationOutput$scaledResiduals
+```
+
+The key idea for the interpretation of the residuals is that, if the model is correctly specified, then the observed data will basically look identical to be simulated data, and hence all residual values are equally likely. Hence, regardless of what the exact model structure is (Poisson, binomial, ...), for a correctly specified model we would expect 
+
+* a uniform (flat) distribution of the overall residuals 
+
+* uniformity in y direction if we plot against any predictor. 
+
+We can get a visual impression of these properties with the plotSimulatedResiduals() function
 
 ```{r}
 plotSimulatedResiduals(simulationOutput = simulationOutput)
 ```
 
+which provides a qq-plot to detect overall deviations from normality, and a plot of the residuals against the predicted value. 
+
+To provide a visual aid in detecting deviations from uniformity in y-direction, the plot of the residuals against the predited values also performs an (optional) quantile regression, which provides 0.25, 0.5 and 0.75 quantile lines across the plots. These lines should be straight, horizontal, and at y-values of 0.25, 0.5 and 0.75. 
+
+If you want to plot the residuals against other predictors (highly recommend), you can use the function
+
+```{r, eval = F}
+plotResiduals(YOURPREDICTOR, simulationOutput$scaledResiduals)
+```
+
+which does the same quantile plot as the main plotting function. 
 
 ## Hypothesis tests in DHARMa
+
+The DHARMa package provides a number of additional tests, which, however, should be viewed more as informal diagnostics than formal hypothesis tests. Likely, power and type-I error rates are rather low. If available, specialized parametric tests should be preferred. Nevertheless, the tests can be useful as confirmation of the visual analysis. 
+
+### Omnibus test for deviations from overall uniformity 
 
 You can run a hypothesis test on the residuals, which runs a KS test on the uniformity of the simulated residuals
 
@@ -98,42 +126,44 @@ testSimulatedResiduals(simulationOutput = simulationOutput)
 
 Note, however, that simulations show that this test is less powerfull than parametric tests on the likelihood that are currently run by many people. On the other hand, the parametric tests
 
-
 ```{r}
 dispersionTest(fittedModel, type = 1)
 ```
 
-
 ### Test for zero-inflation
 
-```{r}
+There is a special test for zero-inflation, which compares the distribution of expected zeros in the data against the observed zeros
+
+```{r, fig.width=4, fig.height=4.5}
 testZeroInflation(simulationOutput)
 ```
 
 
 ### Test for temporal autocorrelation
 
-```{r}
+The temporal autocorrelation test plots and test the temporal autocorrelation of the data 
+
+```{r, fig.width=4, fig.height=4.5}
 testTemporalAutocorrelation(simulationOutput, time = runif(length(simulationOutput$observedResponse )))
 ```
 
 
 ### Test for spatial autocorrelation
 
-```{r}
+The spatial autocorrelation test plots and test the spatial autocorrelation of the data 
+
+```{r, fig.width=4, fig.height=4.5}
 testSpatialAutocorrelation(simulationOutput, x = runif(length(simulationOutput$observedResponse )), y =  runif(length(simulationOutput$observedResponse )))
 ```
 
 
-# Interpretation of the residual plots
+# Diagnosing problems in the residuals 
 
-So far, we have seen plots for a perfectly specified model. For a correctly specified model, one would expect
-
-* a flat histogram of the scaled residuals
-* no pattern against the fitted value
-
+So far, all the plots / tests were run for a correctly specified model. In this section, we discuss how model misspecification will show up in the scaled residuals.
 
 ## Overdispersion / underdispersion / zero-inflation
+
+The most common concern for GLMMs is overdispersion, underdispersion and zero-inflation.
 
 Over/underdispersion refers to the phenomenon that that residual variance is larger/smaller than expected under the fitted model. Over/underdispersion can appear for any distributional family with fixed variance, in particular for Poisson and binomial models. 
 
@@ -158,6 +188,8 @@ simulationOutput <- simulateResiduals(fittedModel = fittedModel)
 plotSimulatedResiduals(simulationOutput = simulationOutput)
 ```
 
+Note that we get more residuals around 0 and 1, which means that residuals are in the tail of distribution that would be expected under the fitted model. 
+
 #### An example of underdispersion
 
 And this is underdispersion 
@@ -175,15 +207,23 @@ plotSimulatedResiduals(simulationOutput = simulationOutput)
 testSimulatedResiduals(simulationOutput = simulationOutput)
 ```
 
+Here, we get too many residuals around 0.5, which means that we are not getting as many residuals as we would expect in the tail of the distribution that is epected with the fitted model. 
+
 #### An example of zero-inflation
 
-```{r}
+For pedagogical reasons, I plot this data against the environmental predictor
 
+```{r}
 testData = createData(sampleSize = 500, intercept = 2, fixedEffects = c(1), overdispersion = 0, family = poisson(), quadraticFixedEffects = c(-3), randomEffectVariance = 0, pZeroInflation = 0.6)
 
 par(mfrow = c(1,2))
 plot(testData$Environment1, testData$observedResponse, xlab = "Envrionmental Predictor", ylab = "Response")
 hist(testData$observedResponse, xlab = "Response", main = "")
+```
+
+We see a hump-shaped dependence of the environment, but with too many zeros. In the residuals, this looks pretty much like overdispersion
+
+```{r}
 
 fittedModel <- glmer(observedResponse ~ Environment1 + I(Environment1^2) + (1|group) , family = "poisson", data = testData)
 
@@ -191,17 +231,19 @@ simulationOutput <- simulateResiduals(fittedModel = fittedModel)
 plotSimulatedResiduals(simulationOutput = simulationOutput)
 ```
 
-There is a special function to visualize / test zero-inflation
+The reason is that the model will usually try to find a compromise between the zeros, and the other values, which will lead to excecss variation in the resiudals. The overdispersion can be better detected with this specialized plot / test
 
-```{r}
+```{r, fig.width=4, fig.height=4.5}
 testZeroInflation(simulationOutput)
 ```
 
+which shows the expected distribution of the number of zeros against the observed number of zeros. 
 
 ## Heteroscedasticity
 
+So far, most of the things that we have tested could also have been detected with paramtric tests. Here, we come to the first issue that is difficult to detect with current tests, and that is usually neglected. 
 
-Also binomial or poisson models can show heteroscedasticity, meaning that the dispersion parameter changes with some other parameter. Here an example where we create such data 
+Heteroscedasticity means that there is a systematic dependency of the dispersion / variance on another variable in the model. It is not sufficiently appreciated that also binomial or poisson models can show heteroscedasticity. Basically, it means that the level of over/underdispersion depends on another parameter. Here an example where we create such data 
 
 ```{r}
 testData = createData(sampleSize = 500, intercept = 0, overdispersion = function(x){return(rnorm(length(x), sd = 2*abs(x)))}, family = poisson(), randomEffectVariance = 0)
@@ -212,7 +254,7 @@ plotSimulatedResiduals(simulationOutput = simulationOutput)
 testSimulatedResiduals(simulationOutput = simulationOutput)
 ```
 
-Adding a simple overdispersion correct will not completely remove the problem. The qq plot looks better, but there is still a pattern in the residuals 
+Adding a simple overdispersion correction will try to find a compromise between the different levels of dispersion in the model. The qq plot looks better now, but there is still a pattern in the residuals 
 
 ```{r}
 testData = createData(sampleSize = 500, intercept = 0, overdispersion = function(x){return(rnorm(length(x), sd = 2*abs(x)))}, family = poisson(), randomEffectVariance = 0)
@@ -225,15 +267,11 @@ plotSimulatedResiduals(simulationOutput = simulationOutput)
 testSimulatedResiduals(simulationOutput = simulationOutput)
 ```
 
-## Diagnosing more complicated model misspecification such as missing predictors or quadratic effects 
+To remove this patter, you would need to make the dispersion parameter dependent on a predictor (e.g. in JAGS), or apply a transformation. 
 
-You don't have to rely on the overall qq and residual against predicted plots that are provided. To diagnose model misspecification (e.g. missing predictor), or spatial or temporal autorcorrelation it is *highly recommeded* to plot residuals against (where possible)
+## Missing predictors or quadratic effects 
 
-* all predictors
-* space
-* time
-
-For that purpose, you can retrieve the residuals via 
+A second test that is typically run for LMs, but not for GL(M)Ms is to plot residuals against the predictors in the model (or potentially predictors that were not in the model) to detect possible misspecifcations. Doing this is *highly recommeded*. For that purpose, you can retrieve the residuals via 
 
 ```{r, eval = F}
 simulationOutput$scaledResiduals
@@ -262,14 +300,18 @@ plotResiduals(testData$Environment2,  simulationOutput$scaledResiduals)
 
 ## Spatial and temporal autocorrelation
 
+A special case of the plotting residuals against predictors is the plot against time and space, which should always be performed if those variables are present in the model. This can be done by hand, but is suppored by the previously introduced tests 
 
+```{r, fig.width=4, fig.height=4, eval = F}
+testTemporalAutocorrelation(simulationOutput, time = runif(length(simulationOutput$observedResponse )))
+testSpatialAutocorrelation(simulationOutput, x = runif(length(simulationOutput$observedResponse )), y =  runif(length(simulationOutput$observedResponse )))
+```
 
-
-# Real examples
+# Real-world examples
 
 ## Budworm example
 
-Example from Jochen Fründ, 
+This example comes from Jochen Fründ. Measured are the number of parasitized adults against the density
 
 ```{r, echo = F}
 data = structure(list(N_parasitized = c(226, 689, 481, 960, 1177, 266, 
@@ -296,7 +338,12 @@ data = structure(list(N_parasitized = c(226, 689, 481, 960, 1177, 266,
 ), class = "data.frame")
 ```
 
-Fitting the model with a regular Poisson model
+
+```{r, fig.width=4, fig.height=4.5}
+plot(data$N_parasitized / (data$N_adult + data$N_parasitized ) ~ log10(data$density.attack + 1), xlab = "Density", ylap = "Proportion infected" )
+```
+
+Fitting the data with a regular Poisson model
 
 ```{r}
 mod1 <- glm(cbind(N_parasitized, N_adult) ~ log10(density.attack+1), data = data, family=binomial)
@@ -311,7 +358,6 @@ testSimulatedResiduals(simulationOutput = simulationOutput)
 ```
 
 
-
 ```{r}
 mod2 <- glmer(cbind(N_parasitized, N_adult) ~ log10(density.attack+1) + (1|ID), data = data, family=binomial)
 simulationOutput <- simulateResiduals(fittedModel = mod2)
@@ -319,19 +365,7 @@ plotSimulatedResiduals(simulationOutput = simulationOutput)
 
 ```
 
-Overdispersion looks better, but seems like a quadratic effect is missing
-
-```{r}
-mod3 <- glmer(cbind(N_parasitized, N_adult) ~ log10(density.attack+1) + I(log10(density.attack+1)^2) + (1|ID) + (1|Plot), data = data, family=binomial)
-simulationOutput <- simulateResiduals(fittedModel = mod3)
-plotSimulatedResiduals(simulationOutput = simulationOutput)
-```
-
-Final model 
-
-```{r}
-summary(mod3)
-```
+Overdispersion looks better, but you can see that the residuals still detect an issue with the steep inclrease in the beginning that one an see in the raw data. One would probably need to apply another transformation or a nonlinear function to completely fit this away.
 
 
 

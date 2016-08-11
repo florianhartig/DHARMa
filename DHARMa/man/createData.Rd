@@ -2,19 +2,42 @@
 % Please edit documentation in R/createData.R
 \name{createData}
 \alias{createData}
-\title{Function to simulate data}
+\title{Function to simulate test data}
 \usage{
 createData(replicates = 1, sampleSize = 10, intercept = 0,
-  fixedEffects = 1, numGroups = 10, randomEffectVariance = 1,
-  overdispersion = 0.5, family = poisson(), scale = 1, cor = 0,
-  roundPoissonVariance = NULL, quadraticFixedEffects = NULL,
-  pZeroInflation = 0)
+  fixedEffects = 1, quadraticFixedEffects = NULL, numGroups = 10,
+  randomEffectVariance = 1, overdispersion = 0.5, family = poisson(),
+  scale = 1, cor = 0, roundPoissonVariance = NULL, pZeroInflation = 0)
 }
 \arguments{
+\item{replicates}{number of datasets to create}
+
+\item{sampleSize}{sample size of the dataset}
+
+\item{intercept}{intercept}
+
+\item{fixedEffects}{vector of fixed effects (linear)}
+
+\item{quadraticFixedEffects}{vector of quadratic fixed effects}
+
+\item{numGroups}{number of groups for the random effect}
+
+\item{randomEffectVariance}{variance of the random effect (intercept)}
+
 \item{overdispersion}{if this is a numeric value, it will be used as the sd of a random normal variate that is added to the linear predictor. Alternatively, a random function can be provided that takes as input the linear predictor.}
+
+\item{family}{family}
+
+\item{scale}{scale if the distribution has a scale (e.g. sd for the Gaussian)}
+
+\item{cor}{correlation between predictors}
+
+\item{roundPoissonVariance}{if set, this creates a uniform noise on the possion response. The aim of this is to create heteroscedasticity}
+
+\item{pZeroInflation}{probability to set any data point to zero}
 }
 \description{
-Function to simulate data
+Function to simulate test data
 }
 \examples{
 testData = createData(sampleSize = 500, intercept = 2, fixedEffects = c(1), overdispersion = 0, family = poisson(), quadraticFixedEffects = c(-3), randomEffectVariance = 0)

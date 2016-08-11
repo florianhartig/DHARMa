@@ -4,16 +4,19 @@
 \alias{plotResiduals}
 \title{Generic residual plot with either spline or quantile regression}
 \usage{
-plotResiduals(pred, res, quantreg = T, ...)
+plotResiduals(pred, residual, quantreg = T, ...)
 }
 \arguments{
 \item{pred}{predictor variable}
 
-\item{res}{result variable}
+\item{residual}{residual variable}
 
 \item{quantreg}{should a quantile regression be performed. If F, a smooth spline will be}
 }
 \description{
 Generic residual plot with either spline or quantile regression
+}
+\seealso{
+\code{\link{plotSimulatedResiduals}}
 }
 
