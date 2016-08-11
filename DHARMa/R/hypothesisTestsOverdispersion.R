@@ -1,16 +1,25 @@
 
+#' A wrapper for a number of parametric overdispersion tests
+#' @param model a fitted model
+#' @param type the test type. See details. 
+#' @details This function is a wrapper for a number of parametric overdispersion tests. I am not actively developing these tests for the DHARMa package. The main purpose of providing these functions here is benchmarking agains the simulation-based tests in DHARMa. That being said, feel 
+#' 
+#' Type 1 is from Harrison et al. 2014 (Using observation-level random effects to model overdispersion in count data in ecology and evolution), but also include the function to test for overdispersion with Boostraping. 
+#' 
+#' Type 2 is the function dispersion_glmer in the blmeco package. From the help there: "This function has been posted on the R-helplist. It seems to have been written or motivated by D. Bates. Here is the URL, where we downloaded the function: https://stat.ethz.ch/pipermail/r-sig-mixed-models/2011q1/015392.html"
 #' @export
-overdispersionTest <- function(model, type = 1){
+dispersionTest <- function(model, type = 1){
   
   if(type == 1){
     out = overdisp_fun(model)
   }
   if(type == 2){
-    out = dispersion_glmer(model)
+    out = blmeco::dispersion_glmer(model)
   }
   if(type == 3){
     1
   }
+  return(out)
 }
 
 overdisp_fun <- function(model) {
@@ -29,10 +38,6 @@ overdisp_fun <- function(model) {
 }
 
 #
-
-
-
-# Harrison et al. 2014 (Using observation-level random effects to model overdispersion in count data in ecology and evolution), but also include the function to test for overdispersion with Boostraping. 
 
 
 #Function to calculate a point estimate of overdispersion from a mixed model object
