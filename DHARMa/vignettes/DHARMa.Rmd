@@ -1,13 +1,15 @@
 ---
 title: "DHARMa - Residual Diagnostics for HierArchical (Multi-level / Mixed) Regression Models"
 author: "Florian Hartig, University of Freiburg, [website](https://florianhartig.wordpress.com/)"
+date: "`r Sys.Date()`"
 output: 
   rmarkdown::html_vignette:
     toc: true
 vignette: >
   %\VignetteIndexEntry{Vignette for the DHARMa package}
   %\VignetteEngine{knitr::rmarkdown}
-  \usepackage[utf8](inputenc)
+  %\VignetteEncoding{UTF-8}
+  \usepackage[utf8]{inputenc}
 ---
 
 ```{r, echo = F}

@@ -1,16 +1,22 @@
 Package: DHARMa
-Title: Residual Diagnostics for HierArchical (Multi-level / Mixed) Regression Models
-Version: 0.0.2.1
+Title: Residual Diagnostics for HierArchical (Multi-level / Mixed) Regression
+    Models
+Version: 0.0.2.2
 Date: 12.8.2016
 Authors@R: c(person("Florian", "Hartig", email = "florian.hartig@biologie.uni-regensburg.de", role = c("aut", "cre")))
 Author: Florian Hartig [aut, cre],
 Maintainer: Florian Hartig <florian.hartig@biologie.uni-regensburg.de>
-Description: The package creates easily interpretable, residuals for generalized linear mixed models that are standardized to values between 0 and 1. This is achieved by a simulation-based approach, similar to the Bayesian p-value or the parametric bootstrap: 1) simulate new data from the fitted model 2) calculate the cummulative empirical density function 3) residual is the value of the empirical density function at the value of the observed data.  
+Description: The package creates easily interpretable, residuals for generalized
+    linear mixed models that are standardized to values between 0 and 1. This is
+    achieved by a simulation-based approach, similar to the Bayesian p-value or the
+    parametric bootstrap: 1) simulate new data from the fitted model 2) calculate
+    the cummulative empirical density function 3) residual is the value of the
+    empirical density function at the value of the observed data.
 Depends:
     R (>= 3.0.0)
 Imports:
     gap,
-    quantreg
+    qrnn
 Suggests:
     lme4,
     blmeco,
@@ -19,6 +25,7 @@ Suggests:
     knitr
 License: GPL (>= 3)
 URL: https://github.com/florianhartig/DHARMa
+BugReports: https://github.com/florianhartig/DHARMa/issues
 LazyData: true
-RoxygenNote: 5.0.1.9000
+RoxygenNote: 5.0.1
 VignetteBuilder: knitr
