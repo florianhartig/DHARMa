@@ -1,6 +1,6 @@
 #' Simulated p-values for internal testing
 #' @return list of various named objects. Within each, order is dispersion_glmer, overdisp_fun, DHARMa
-simulatePvaluesDispersion <- function(overdispersion, n = 20, alpha = 0.05){
+simulatePvaluesDispersion <- function(overdispersion = 0, n = 20, alpha = 0.05){
   
   out = matrix(nrow = n, ncol = 3)
   
@@ -16,8 +16,8 @@ simulatePvaluesDispersion <- function(overdispersion, n = 20, alpha = 0.05){
     
     
     simulationOutput <- simulateResiduals(fittedModel = fittedModel)
-    x = testSimulatedResiduals(simulationOutput)
-    out[i,3] = x$pValueUnivariate$p.value
+    x = testUniformDistribution(simulationOutput)
+    out[i,3] = x$p.value
   }
   
   

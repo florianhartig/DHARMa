@@ -4,7 +4,7 @@
 \alias{simulatePvaluesDispersion}
 \title{Simulated p-values for internal testing}
 \usage{
-simulatePvaluesDispersion(overdispersion, n = 20, alpha = 0.05)
+simulatePvaluesDispersion(overdispersion = 0, n = 20, alpha = 0.05)
 }
 \value{
 list of various named objects. Within each, order is dispersion_glmer, overdisp_fun, DHARMa

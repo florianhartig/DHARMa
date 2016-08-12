@@ -6,7 +6,7 @@
 #' @seealso \code{\link{testUniformDistribution}}, \code{\link{testZeroInflation}}, \code{\link{testTemporalAutocorrelation}}, \code{\link{testSpatialAutocorrelation}}
 testSimulatedResiduals <- function(simulationOutput){
  
-  out <- testUniformDistribution(simulationOutput$scaledResiduals)
+  out$pValueUnivariate <- testUniformDistribution(simulationOutput)
   
   return(out)
 }
@@ -20,7 +20,7 @@ testSimulatedResiduals <- function(simulationOutput){
 #' @export
 testUniformDistribution <- function(simulationOutput, print = T){
   
-  out <- suppressWarnings(ks.test(simulationOutput, 'punif'))
+  out <- suppressWarnings(ks.test(simulationOutput$scaledResiduals, 'punif'))
   if(print == T) out
   return(out)
 }

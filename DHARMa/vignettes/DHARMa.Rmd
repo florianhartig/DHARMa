@@ -17,7 +17,7 @@ set.seed(123)
 
 
 ```{r global_options, include=FALSE}
-knitr::opts_chunk$set(fig.width=7, fig.height=4.5, warning=FALSE, message=FALSE, cache = T)
+knitr::opts_chunk$set(fig.width=7, fig.height=4.5, warning=FALSE, message=FALSE, cache = F)
 ```
 
 ***Summary: The DHARMa package creates readily interpretable residuals for generalized linear (mixed) models that are standardized to values between 0 and 1. This is achieved by a simulation-based approach, similar to the Bayesian p-value or the parametric bootstrap: 1) simulate new data from the fitted model 2) from this simulated data, calculate the cummulative density function  3) residual is the value of the empirical density function at the value of the observed data.*  **
@@ -121,13 +121,13 @@ The DHARMa package provides a number of additional tests, which, however, should
 You can run a hypothesis test on the residuals, which runs a KS test on the uniformity of the simulated residuals
 
 ```{r}
-testSimulatedResiduals(simulationOutput = simulationOutput)
+testUniformDistribution(simulationOutput = simulationOutput)
 ```
 
 Note, however, that simulations show that this test is less powerfull than parametric tests on the likelihood that are currently run by many people. On the other hand, the parametric tests
 
 ```{r}
-dispersionTest(fittedModel, type = 1)
+parametricDispersionTest(fittedModel, type = 1)
 ```
 
 ### Test for zero-inflation
@@ -204,7 +204,7 @@ summary(fittedModel)
 
 simulationOutput <- simulateResiduals(fittedModel = fittedModel)
 plotSimulatedResiduals(simulationOutput = simulationOutput)
-testSimulatedResiduals(simulationOutput = simulationOutput)
+testUniformDistribution(simulationOutput = simulationOutput)
 ```
 
 Here, we get too many residuals around 0.5, which means that we are not getting as many residuals as we would expect in the tail of the distribution that is epected with the fitted model. 
@@ -251,7 +251,7 @@ fittedModel <- glmer(observedResponse ~ Environment1 + (1|group), family = "pois
 
 simulationOutput <- simulateResiduals(fittedModel = fittedModel)
 plotSimulatedResiduals(simulationOutput = simulationOutput)
-testSimulatedResiduals(simulationOutput = simulationOutput)
+testUniformDistribution(simulationOutput = simulationOutput)
 ```
 
 Adding a simple overdispersion correction will try to find a compromise between the different levels of dispersion in the model. The qq plot looks better now, but there is still a pattern in the residuals 
@@ -264,7 +264,7 @@ fittedModel <- glmer(observedResponse ~ Environment1 + (1|group) + (1|ID), famil
 
 simulationOutput <- simulateResiduals(fittedModel = fittedModel)
 plotSimulatedResiduals(simulationOutput = simulationOutput)
-testSimulatedResiduals(simulationOutput = simulationOutput)
+testUniformDistribution(simulationOutput = simulationOutput)
 ```
 
 To remove this patter, you would need to make the dispersion parameter dependent on a predictor (e.g. in JAGS), or apply a transformation. 
@@ -287,7 +287,7 @@ fittedModel <- glmer(observedResponse ~ Environment1 + Environment2 + (1|group) 
 simulationOutput <- simulateResiduals(fittedModel = fittedModel)
 # plotConventionalResiduals(fittedModel)
 plotSimulatedResiduals(simulationOutput = simulationOutput, quantreg = T)
-testSimulatedResiduals(simulationOutput = simulationOutput)
+testUniformDistribution(simulationOutput = simulationOutput)
 ```
 
 Difficult to see with the overall pattern, but it becomes clear if we plot against the environment
@@ -354,7 +354,7 @@ plotSimulatedResiduals(simulationOutput = simulationOutput)
 The residuals look clearly overdispersed. We can confirm that with a 
 
 ```{r}
-testSimulatedResiduals(simulationOutput = simulationOutput)
+testUniformDistribution(simulationOutput = simulationOutput)
 ```
 
 
