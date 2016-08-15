@@ -12,7 +12,7 @@ simulateResiduals <- function(fittedModel, n = 250, refit = F, integerResponse =
 
   ptm <- proc.time()  
   
-  if(!(class(fittedModel)[1] %in% getPossibleModels())) warning("DHARMa: fittedModel not in class of supported models. Absolutely no guarantee that this will work!")
+  if(!(class(fittedModel)[1] %in% DHARMa:::getPossibleModels())) warning("DHARMa: fittedModel not in class of supported models. Absolutely no guarantee that this will work!")
   
   family = family(fittedModel)
   
@@ -38,13 +38,13 @@ simulateResiduals <- function(fittedModel, n = 250, refit = F, integerResponse =
   }
 
   out$fittedResiduals = residuals(fittedModel, type = "response")
-
+  
   simulations = simulate(fittedModel, nsim = n, use.u =F)
   
   if(is.vector(simulations[[1]]))  out$simulatedResponse = data.matrix(simulations)  
   else if (is.matrix(simulations[[1]])) out$simulatedResponse = as.matrix(simulations)[,seq(1, (2*n), by = 2)]
   else stop("wrong class")
-
+  
   out$scaledResiduals = rep(NA, out$nObs)
 
   if (refit == F){
@@ -59,6 +59,8 @@ simulateResiduals <- function(fittedModel, n = 250, refit = F, integerResponse =
     }
     
   } else {
+    
+    # Adding new outputs
     
     out$refittedPredictedResponse <- matrix(nrow = out$nObs, ncol = n )  
     out$refittedFixedEffects <- matrix(nrow = length(out$fittedFixedEffects), ncol = n )  
@@ -79,7 +81,7 @@ simulateResiduals <- function(fittedModel, n = 250, refit = F, integerResponse =
     for (i in 1:out$nObs){
     
       if(integerResponse == T){
-        out$scaledResiduals[i] <- ecdf(out$refittedResiduals[i,] + runif(n, -0.5, 0.5))(fittedResiduals[i] + runif(1, -0.5, 0.5))           
+        out$scaledResiduals[i] <- ecdf(out$refittedResiduals[i,] + runif(n, -0.5, 0.5))(out$fittedResiduals[i] + runif(1, -0.5, 0.5))           
       }else{
         out$scaledResiduals[i] <- ecdf(out$refittedResiduals[i,])(out$fittedResiduals[i])
       }
