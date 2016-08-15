@@ -4,7 +4,8 @@
 \alias{simulateResiduals}
 \title{Creates scaled residuals by simulation}
 \usage{
-simulateResiduals(fittedModel, n = 250, refit = F, integerResponse = NULL)
+simulateResiduals(fittedModel, n = 250, refit = F, integerResponse = NULL,
+  plot = F)
 }
 \arguments{
 \item{fittedModel}{fitted model object, currently restricted to lme4, lm, or glm models}
@@ -14,12 +15,21 @@ simulateResiduals(fittedModel, n = 250, refit = F, integerResponse = NULL)
 \item{refit}{(experimental) if T, the model will be refit with a parametric bootstrap}
 
 \item{integerResponse}{if T, noise will be added at to the residuals to maintain a uniform expectations for integer responses (such as Poisson or Binomial). Usually, the model will automatically detect the appropriate setting, so there is no need to adjust this setting.}
+
+\item{plot}{if T, \code{\link{plotSimulatedResiduals}} will be directly run after the simulations have terminated}
 }
 \description{
 Creates scaled residuals by simulation
 }
 \details{
 The integerResponse option essentially adds a uniform noise from -0.5 to 0.5 on the simulated and observed response. Note that this works because the expected distribution of this is flat - you can see this via hist(ecdf(runif(10000))(runif(10000)))
+}
+\examples{
+testData = createData(sampleSize = nData, overdispersion = 0.5, family = poisson())
+fittedModel <- glmer(observedResponse ~ Environment1 + (1|group), family = "poisson", data = testData)
+
+simulationOutput <- simulateResiduals(fittedModel = fittedModel)
+plotSimulatedResiduals(simulationOutput = simulationOutput)
 }
 \seealso{
 \code{\link{testSimulatedResiduals}}, \code{\link{plotSimulatedResiduals}}
