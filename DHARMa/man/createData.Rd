@@ -6,7 +6,7 @@
 \usage{
 createData(replicates = 1, sampleSize = 10, intercept = 0,
   fixedEffects = 1, quadraticFixedEffects = NULL, numGroups = 10,
-  randomEffectVariance = 1, overdispersion = 0.5, family = poisson(),
+  randomEffectVariance = 1, overdispersion = 0, family = poisson(),
   scale = 1, cor = 0, roundPoissonVariance = NULL, pZeroInflation = 0,
   bionomialTrials = 1)
 }
@@ -63,9 +63,10 @@ hist(testData$observedResponse)
 
 # binomial with multiple trials
 
-testData = createData(sampleSize = 500, intercept = 2, fixedEffects = c(1), 
+testData = createData(sampleSize = 40, intercept = 2, fixedEffects = c(1), 
                       overdispersion = 0, family = binomial(), quadraticFixedEffects = c(-3), 
-                      randomEffectVariance = 0, pZeroInflation = 0.6)
+                      randomEffectVariance = 0, bionomialTrials = 20)
 
+plot(observedResponse1 / observedResponse0 ~ Environment1, data = testData, ylab = "Proportion 1")
 }
 
