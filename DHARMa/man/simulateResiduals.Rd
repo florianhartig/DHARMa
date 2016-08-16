@@ -10,7 +10,7 @@ simulateResiduals(fittedModel, n = 250, refit = F, integerResponse = NULL,
 \arguments{
 \item{fittedModel}{fitted model object, currently restricted to lme4, lm, or glm models}
 
-\item{n}{integer number > 1, number of simulations to run. Set at least 250, better 1000}
+\item{n}{integer number > 1, number of simulations to run. If possible, set to at least 250, better 1000. See also details}
 
 \item{refit}{(experimental) if T, the model will be refit with a parametric bootstrap}
 
@@ -22,11 +22,13 @@ simulateResiduals(fittedModel, n = 250, refit = F, integerResponse = NULL,
 Creates scaled residuals by simulation
 }
 \details{
-The integerResponse option essentially adds a uniform noise from -0.5 to 0.5 on the simulated and observed response. Note that this works because the expected distribution of this is flat - you can see this via hist(ecdf(runif(10000))(runif(10000)))
+The integerResponse option essentially adds a uniform noise from -0.5 to 0.5 on the simulated and observed response. Note that this works because the expected distribution of this is flat - you can see this via hist(ecdf(runif(10000))(runif(10000))) 
+So far, my simulations didn't show major problems with a small n (even down to the order of 10), but just to be on the safe side, I would recommend to use a high value (e.g. 1000)
 }
 \examples{
 testData = createData(sampleSize = 50, overdispersion = 0.5, family = poisson())
-fittedModel <- glmer(observedResponse ~ Environment1 + (1|group), family = "poisson", data = testData)
+fittedModel <- glmer(observedResponse ~ Environment1 + (1|group), 
+                     family = "poisson", data = testData)
 
 simulationOutput <- simulateResiduals(fittedModel = fittedModel)
 plotSimulatedResiduals(simulationOutput = simulationOutput)
@@ -35,7 +37,8 @@ plotSimulatedResiduals(simulationOutput = simulationOutput)
 simulationOutput <- simulateResiduals(fittedModel = fittedModel, plot = T)
 
 # create simulations with refitting
-simulationOutput <- simulateResiduals(fittedModel = fittedModel, n = 10, refit = T, plot = T)
+simulationOutput <- simulateResiduals(fittedModel = fittedModel, 
+                                      n = 10, refit = T, plot = T)
 }
 \seealso{
 \code{\link{testSimulatedResiduals}}, \code{\link{plotSimulatedResiduals}}

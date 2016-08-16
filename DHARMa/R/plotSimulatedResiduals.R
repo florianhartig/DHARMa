@@ -2,6 +2,8 @@
 #' @param simulationOutput an object with simualted residuals created by \code{\link{simulateResiduals}}
 #' @param quantreg whether to perform a quantile regression on 0.25, 0.5, 0.75
 #' @seealso \code{\link{plotResiduals}}
+#' @import graphics
+#' @import utils
 #' @export
 plotSimulatedResiduals <- function(simulationOutput, quantreg = T){
 
@@ -19,6 +21,7 @@ plotSimulatedResiduals <- function(simulationOutput, quantreg = T){
 #' @param pred predictor variable
 #' @param residual residual variable
 #' @param quantreg should a quantile regression be performed. If F, a smooth spline will be 
+#' @param ... additional arguments to plot
 #' @seealso \code{\link{plotSimulatedResiduals}}
 #' @export
 plotResiduals <- function(pred, residual, quantreg = T, ...){

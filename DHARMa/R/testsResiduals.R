@@ -80,9 +80,12 @@ testTemporalAutocorrelation <- function(simulationOutput, time, print = T, plot 
 #' @param simulationOutput an object with simulated residuals created by \code{\link{simulateResiduals}}
 #' @param x the x coordinate, in the same order as the data points
 #' @param y the x coordinate, in the same order as the data points
+#' @param print whether to print output
+#' @param plot whether to plot output
 #' @note This function is provide as a base recommendation. 
 #' @details performs the Durbin-Watson Test against euklidian distance and plots the residuals against time
 #' @seealso \code{\link{testUniformDistribution}}, \code{\link{testZeroInflation}}, \code{\link{testTemporalAutocorrelation}}, \code{\link{testSimulatedResiduals}}
+#' @import grDevices
 #' @export
 testSpatialAutocorrelation <- function(simulationOutput, x, y, print = T, plot = T){
   

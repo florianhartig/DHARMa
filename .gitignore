@@ -35,3 +35,7 @@ Publications/Package/DHARMa.docx
 Publications/Package/RegressionDiagnostics.tex
 
 DHARMa.Rcheck/
+
+Publications/Package/cache/
+*.sty
+

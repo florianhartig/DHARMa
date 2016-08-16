@@ -1,7 +1,8 @@
+#' Residual Diagnostics for HierArchical (Multi-level / Mixed) Regression Models
 #' @title DHARMa
 #' @name DHARMa
 #' @docType package
-#' @details A Diagnostics for HierArchical Regession Models - see index / vignette for details
-#' 
-#' Run vignette("Demo", package="DHARMa") to see the vignette
+#' @details See index / vignette for details
+#' @examples 
+#' vignette("Demo", package="DHARMa")
 NULL

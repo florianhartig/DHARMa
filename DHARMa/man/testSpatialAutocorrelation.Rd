@@ -12,6 +12,10 @@ testSpatialAutocorrelation(simulationOutput, x, y, print = T, plot = T)
 \item{x}{the x coordinate, in the same order as the data points}
 
 \item{y}{the x coordinate, in the same order as the data points}
+
+\item{print}{whether to print output}
+
+\item{plot}{whether to plot output}
 }
 \description{
 Convenience Function to test for spatial autocorrelation

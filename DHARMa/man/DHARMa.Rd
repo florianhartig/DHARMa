@@ -5,9 +5,13 @@
 \alias{DHARMa}
 \alias{DHARMa-package}
 \title{DHARMa}
+\description{
+Residual Diagnostics for HierArchical (Multi-level / Mixed) Regression Models
+}
 \details{
-A Diagnostics for HierArchical Regession Models - see index / vignette for details
-
-Run vignette("Demo", package="DHARMa") to see the vignette
+See index / vignette for details
+}
+\examples{
+vignette("Demo", package="DHARMa")
 }
 

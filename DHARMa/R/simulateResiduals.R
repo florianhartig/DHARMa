@@ -1,18 +1,20 @@
 #' Creates scaled residuals by simulation
 #' @param fittedModel fitted model object, currently restricted to lme4, lm, or glm models
-#' @param n integer number > 1, number of simulations to run. Set at least 250, better 1000
+#' @param n integer number > 1, number of simulations to run. If possible, set to at least 250, better 1000. See also details
 #' @param refit (experimental) if T, the model will be refit with a parametric bootstrap
 #' @param integerResponse if T, noise will be added at to the residuals to maintain a uniform expectations for integer responses (such as Poisson or Binomial). Usually, the model will automatically detect the appropriate setting, so there is no need to adjust this setting.
 #' @param plot if T, \code{\link{plotSimulatedResiduals}} will be directly run after the simulations have terminated
 #' @details The integerResponse option essentially adds a uniform noise from -0.5 to 0.5 on the simulated and observed response. Note that this works because the expected distribution of this is flat - you can see this via hist(ecdf(runif(10000))(runif(10000))) 
+#' So far, my simulations didn't show major problems with a small n (even down to the order of 10), but just to be on the safe side, I would recommend to use a high value (e.g. 1000)
 #' @seealso \code{\link{testSimulatedResiduals}}, \code{\link{plotSimulatedResiduals}}
 #' @example inst/examples/simulateResidualsHelp.R
+#' @import stats
 #' @export
 simulateResiduals <- function(fittedModel, n = 250, refit = F, integerResponse = NULL, plot = F){
 
   ptm <- proc.time()  
   
-  if(!(class(fittedModel)[1] %in% DHARMa:::getPossibleModels())) warning("DHARMa: fittedModel not in class of supported models. Absolutely no guarantee that this will work!")
+  if(!(class(fittedModel)[1] %in% getPossibleModels())) warning("DHARMa: fittedModel not in class of supported models. Absolutely no guarantee that this will work!")
   
   family = family(fittedModel)
   
