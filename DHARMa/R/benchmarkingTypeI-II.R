@@ -2,8 +2,9 @@
 #' @param overdispersion amount of overdispersion
 #' @param n replicates
 #' @param alpha significance level
+#' @export 
 #' @return list of various named objects. Within each, order is dispersion_glmer, overdisp_fun, DHARMa
-simulatePvaluesDispersion <- function(overdispersion = 0, n = 20, alpha = 0.05){
+benchmarkTypeI_II <- function(overdispersion = 0, n = 20, alpha = 0.05){
   
   out = matrix(nrow = n, ncol = 3)
   

@@ -1,0 +1,69 @@
+---
+title: "UniformityTest"
+author: "Florian Hartig"
+date: "`r Sys.Date()`"
+output: 
+  html_document:
+      toc: true
+---
+
+```{r global_options, include=FALSE}
+knitr::opts_chunk$set(fig.width=10, fig.height=10, warning=FALSE, message=FALSE, cache = T)
+```
+
+```{r, echo = F}
+library(DHARMa)
+library(lme4)
+set.seed(123)
+```
+
+This script runs a number of simulations to show that the scaled residuals produced by DHARMa will really be distributed uniformly under H0 that the fitted model is also the data-generating model. 
+
+
+# Poisson models 
+
+## No overdispersion
+
+### 1-parameter model
+
+```{r}
+
+dataModelCreator <- function(){
+  data = createData(sampleSize = 100, overdispersion = 0, family = poisson())
+  model <- glmer(observedResponse ~ Environment1 + (1|group) , data = data, family = "poisson")  
+  return(list(data=data, model = model))
+}
+
+benchmarkUniformity(dataModelCreator = dataModelCreator)
+
+```
+
+### 3-parameter model
+
+
+```{r}
+
+dataModelCreator <- function(){
+  data = createData(sampleSize = 100, fixedEffects = c(1,-1, 0), overdispersion = 0, family = poisson())
+  model <- glmer(observedResponse ~ Environment1 + Environment2 + Environment3 + (1|group) , data = data, family = "poisson")  
+  return(list(data=data, model = model))
+}
+
+benchmarkUniformity(dataModelCreator = dataModelCreator)
+
+```
+
+## Strong overdispersion
+
+```{r}
+
+dataModelCreator <- function(){
+  data = createData(sampleSize = 100, overdispersion = 2, family = poisson())
+  model <- glmer(observedResponse ~ Environment1 + (1|group) + (1|ID), data = data, family = "poisson")  
+  return(list(data=data, model = model))
+}
+
+benchmarkUniformity(dataModelCreator = dataModelCreator)
+
+```
+
