@@ -16,3 +16,10 @@ par(mfrow = c(1,2))
 plot(testData$Environment1, testData$observedResponse)
 hist(testData$observedResponse)
 
+# binomial with multiple trials
+
+testData = createData(sampleSize = 40, intercept = 2, fixedEffects = c(1), 
+                      overdispersion = 0, family = binomial(), quadraticFixedEffects = c(-3), 
+                      randomEffectVariance = 0, bionomialTrials = 20)
+
+plot(observedResponse1 / observedResponse0 ~ Environment1, data = testData, ylab = "Proportion 1")

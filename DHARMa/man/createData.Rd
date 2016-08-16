@@ -7,7 +7,8 @@
 createData(replicates = 1, sampleSize = 10, intercept = 0,
   fixedEffects = 1, quadraticFixedEffects = NULL, numGroups = 10,
   randomEffectVariance = 1, overdispersion = 0.5, family = poisson(),
-  scale = 1, cor = 0, roundPoissonVariance = NULL, pZeroInflation = 0)
+  scale = 1, cor = 0, roundPoissonVariance = NULL, pZeroInflation = 0,
+  bionomialTrials = 1)
 }
 \arguments{
 \item{replicates}{number of datasets to create}
@@ -35,6 +36,8 @@ createData(replicates = 1, sampleSize = 10, intercept = 0,
 \item{roundPoissonVariance}{if set, this creates a uniform noise on the possion response. The aim of this is to create heteroscedasticity}
 
 \item{pZeroInflation}{probability to set any data point to zero}
+
+\item{binomialTrials}{Number of trials for the binomial. Only active if family == binomial}
 }
 \description{
 Function to simulate test data
@@ -57,6 +60,12 @@ testData = createData(sampleSize = 500, intercept = 2, fixedEffects = c(1),
 par(mfrow = c(1,2))
 plot(testData$Environment1, testData$observedResponse)
 hist(testData$observedResponse)
+
+# binomial with multiple trials
+
+testData = createData(sampleSize = 500, intercept = 2, fixedEffects = c(1), 
+                      overdispersion = 0, family = binomial(), quadraticFixedEffects = c(-3), 
+                      randomEffectVariance = 0, pZeroInflation = 0.6)
 
 }
 

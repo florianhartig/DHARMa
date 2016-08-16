@@ -13,13 +13,18 @@
 #' @param cor correlation between predictors
 #' @param roundPoissonVariance if set, this creates a uniform noise on the possion response. The aim of this is to create heteroscedasticity
 #' @param pZeroInflation probability to set any data point to zero
+#' @param binomialTrials Number of trials for the binomial. Only active if family == binomial
 #' @example /inst/examples/createDataHelp.R
-createData <- function(replicates=1, sampleSize = 10, intercept = 0, fixedEffects = 1, quadraticFixedEffects = NULL, numGroups = 10, randomEffectVariance = 1, overdispersion = 0.5, family = poisson(), scale = 1, cor = 0, roundPoissonVariance = NULL,  pZeroInflation = 0){
+createData <- function(replicates=1, sampleSize = 10, intercept = 0, fixedEffects = 1, quadraticFixedEffects = NULL, numGroups = 10, randomEffectVariance = 1, overdispersion = 0.5, family = poisson(), scale = 1, cor = 0, roundPoissonVariance = NULL,  pZeroInflation = 0, bionomialTrials = 1){
   
   nPredictors = length(fixedEffects)
   
   out = list()
+  
   for (i in 1:replicates){
+
+    ########################################################################    
+    # Create predictors
     
     predictors = matrix(runif(nPredictors*sampleSize, min = -1), ncol = nPredictors)
     
@@ -30,11 +35,14 @@ createData <- function(replicates=1, sampleSize = 10, intercept = 0, fixedEffect
     
     colnames(predictors) = paste("Environment", 1:nPredictors, sep = "")
     
-
+    ########################################################################
+    # Create random effects
     
     group = rep(1:numGroups, each = sampleSize/numGroups)
     groupRandom = rnorm(numGroups, sd = randomEffectVariance)
     
+    ########################################################################
+    # Creation of linear prediction
     
     linearResponse = intercept + predictors %*% fixedEffects + groupRandom[group] 
     
@@ -42,19 +50,31 @@ createData <- function(replicates=1, sampleSize = 10, intercept = 0, fixedEffect
       linearResponse = linearResponse + predictors^2 %*% quadraticFixedEffects
     }
     
+    ########################################################################
+    # Overdispersion on linear predictor
+    
+    
     if(is.numeric(overdispersion)) linearResponse = linearResponse + rnorm(sampleSize, sd = overdispersion)
     if(is.function(overdispersion)) linearResponse = linearResponse + overdispersion(linearResponse)
+    
+    ########################################################################
+    # Link and distribution
     
     linkResponse = family$linkinv(linearResponse)
     
     if (family$family == "gaussian") observedResponse = rnorm(n = sampleSize, mean = linkResponse, sd = scale)  
-    else if (family$family == "binomial") observedResponse = rbinom(n = sampleSize, 1, prob = linkResponse)
+    else if (family$family == "binomial"){
+      observedResponse = rbinom(n = sampleSize, bionomialTrials, prob = linkResponse)
+      if (bionomialTrials > 1) observedResponse = cbind(observedResponse1 = observedResponse, observedResponse0 = bionomialTrials - observedResponse)
+    }
     else if (family$family == "poisson") {
       if(is.null(roundPoissonVariance)) observedResponse = rpois(n = sampleSize, lambda = linkResponse)
       else observedResponse = round(rnorm(n = length(linkResponse), mean = linkResponse, sd = roundPoissonVariance))
     }
-    
     else stop("wrong link argument supplied")
+  
+    ########################################################################
+    # Zero-inflation
     
     if(pZeroInflation != 0){
       artificialZeros = rbinom(n = length(observedResponse), size = 1, prob = 1-pZeroInflation)
@@ -62,7 +82,6 @@ createData <- function(replicates=1, sampleSize = 10, intercept = 0, fixedEffect
     }
     
 
-    
     out[[i]] <- data.frame(cbind(ID = 1:sampleSize, observedResponse, predictors, group))
   }
   if(length(out) == 1) out = out[[1]]
