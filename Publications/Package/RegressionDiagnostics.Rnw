@@ -65,24 +65,81 @@ render_listings()
 \setcounter{tocdepth}{1}
 
 
-\title{DHARMA - An easy and widely-applicable method for residual diagnostics of generalized linear (mixed) models}
+\title{DHARMa - an R package to create simulation-based standardized for residual diagnostics of generalized linear (mixed) models}
 \author{Florian Hartig}
 
 
 \begin{document}
 \maketitle
 
-\begin{abstract} A common problem in statistical practice is that standard residuals for generalized linear (mixed) models are hard to interpret, 
+\begin{abstract} 
 
+1. Generalized linear (mixed) models are widely used in ecology and evolution, but apart from overdispersion, their residuals are rarely checked due to 
 
+2. A possible solution to this problem is to create scaled residuals based on simulations from the fitted model. The general idea is to simulate new data based on the fitted model, and calculate the quantile at which the observed data is with respect to the observed values
 
-I present a simulation-based approach to create easily interpretable scaled residual for a wide array of generalized linear and generalized linear mixed models, including mixed Poisson and logistic models. The resulting residuals allow a straightforwad diagnosis of potential regression problems, such as over- and underdispersion, heteroscedasticity, spatial and temporal autocorrelation or structural model errors, and can be interpreted as intuitive as standard residual diagnostics for the linear regression. As a result, residual analysis for mixed 
+3. DHARMa implements such a simulation-based scheme and creates easily interpretable scaled residual for a wide array of generalized linear and generalized linear mixed models, including mixed Poisson and logistic models. The resulting residuals allow a straightforwad diagnosis of potential regression problems, such as over- and underdispersion, heteroscedasticity, spatial and temporal autocorrelation or structural model errors, and can be interpreted as intuitive as standard residual diagnostics for the linear regression. 
 
+4. The approach allows a far more detailed analysis of residual problems in genearlized linear (mixed) models as any other currently implemented method in the R environment. 
 
-The approach allows a far more detailed analysis of residual problems in genearlized linear (mixed) models as any other currently implemented method in the R environment. 
 
 \end{abstract}
 
+
+\section{Introduction}
+
+In recent years, generalized linear mixed models (GLMMs) have become a standard tool ecology and evolution \citep{Bolker-Generalizedlinearmixed-2009}. Despite the immense popularity of these methods, fundamental questions remain regarding the inference
+
+In recent years, 
+
+
+
+Simulation-based approaches are maybe better known for another problem i
+
+Paragraph uncertainty via parametric bootstrap 
+Parametric bootstrap \citep{Booth-BootstrapMethodsGeneralized-1995}
+
+Connection to Bayesian posterior \citep{Efron-Bayesianinferenceparametric-2012}
+
+
+Another idea that is close to Bayesian is the creation of residuals. 
+
+
+
+
+A common issue in ecological statistics is diagnosing problems in the residuals of used binary 
+
+Poisson regression for analyzing count data and logistic regression for analyzing presence absence or other binary data. The assumptions of these models imply that shape and variance of the residuals will change with the predicted value. 
+
+As a result, standard residual plots or other analysis are nearly impossible to interpret, and most analysts do not check residual assumption for these models, beyond crude test for overdispersion. 
+
+
+\begin{figure}[htb]
+\begin{center}
+<<echo = F, fig.height=4, fig.width=9, message=F>>=
+
+library(lme4)
+library(DHARMa)
+
+par(mfrow = c(1,3))
+
+testData = createData(sampleSize = 500, overdispersion = 0, family = gaussian())
+fittedModel <- lmer(observedResponse ~ Environment1 + (1|group), data = testData)
+plot(predict(fittedModel), resid(fittedModel, type = "deviance"), main = "Linear mixed model", xlab = "Predicted values", ylab = "Raw residuals") 
+
+testData = createData(sampleSize = 500, overdispersion = 0.5, family = poisson())
+fittedModel <- glmer(observedResponse ~ Environment1 + (1|group), data = testData, family = "poisson")
+plot(predict(fittedModel), resid(fittedModel, type = "deviance"), main = "GLMM, overdispersion, Poisson", xlab = "Predicted values", ylab = "Raw residuals") 
+
+
+testData = createData(sampleSize = 500, overdispersion = 1, family = binomial())
+fittedModel <- glmer(observedResponse ~ Environment1 + (1|group), data = testData, family = "binomial")
+plot(predict(fittedModel), resid(fittedModel, type = "deviance"), main = "GLMM, overdispersion, Binomial", xlab = "Predicted values", ylab = "Raw residuals") 
+@
+\caption{Data }
+\label{fig: standard residuals}
+\end{center}
+\end{figure}
 
 
 Problems in the distribution, problems in the fixed-effects, and problems in the random-effect structure. 
@@ -96,17 +153,12 @@ Random effect structure \citep{Lin-Detectingmisspecificationrandom-2015}
 
 
 
+We think the time the idea was written down is in \citet{Rosenblatt-Remarksmultivariatetransformation-1952}, although he does mention in the paper that Curtiss and Savage had come up with similar ideas. 
 
 
 
 
 
-A common issue in ecological statistics is diagnosing problems in the residuals of used binary 
-
-
-Poisson regression for analyzing count data and logistic regression for analyzing presence absence or other binary data. The assumptions of these models imply that shape and variance of the residuals will change with the predicted value. 
-
-As a result, standard residual plots or other analysis are nearly impossible to interpret, and most analysts do not check residual assumption for these models, beyond crude test for overdispersion. 
 
 
 Various proposals 
@@ -120,27 +172,23 @@ Very similar method \citep{Esarey-AssessingFitQuality-2012}
 The first option is what \citep{Gelman-Dataanalysisusing-2006} calls "fake-data simulation". Simulate from the expected model to get an idea what the residuals should look like
 
 
-
-<<echo = F, fig.height=4, fig.width=9, message=F>>=
-
-library(lme4)
-library(DHARMa)
-
-par(mfrow = c(1,3))
-
-testData = createData(sampleSize = 500, overdispersion = 0, family = gaussian())
-fittedModel <- lmer(observedResponse ~ Environment1 + (1|group), data = testData)
-plot(predict(fittedModel), resid(fittedModel, type = "response"), main = "Linear mixed model", xlab = "Predicted values", ylab = "Raw residuals") 
-
-testData = createData(sampleSize = 500, overdispersion = 0.5, family = poisson())
-fittedModel <- glmer(observedResponse ~ Environment1 + (1|group), data = testData, family = "poisson")
-plot(predict(fittedModel), resid(fittedModel, type = "response"), main = "GLMM, overdispersion, Poisson", xlab = "Predicted values", ylab = "Raw residuals") 
+\citep{Kalliovirta-Misspecificationtestsbased-2012}
 
 
-testData = createData(sampleSize = 500, overdispersion = 1, family = binomial())
-fittedModel <- glmer(observedResponse ~ Environment1 + (1|group), data = testData, family = "binomial")
-plot(predict(fittedModel), resid(fittedModel, type = "response"), main = "GLMM, overdispersion, Binomial", xlab = "Predicted values", ylab = "Raw residuals") 
-@
+As noted in \citep{Bates-Fittinglinearmixed-2014}, there was a similar attempt via the merBoot \citep{Sanchez-Espigares-Rimplementationbootstrap-2009}
+
+
+
+Fixing discrete case 
+
+\citep{Brockwell-Universalresidualsmultivariate-2007}
+
+
+% for testing uniformity of the (multivariate) distribution, see also Justel-multivariateKolmogorovSmirnov-1997
+
+mention merTools
+
+
 
 
 
@@ -160,22 +208,54 @@ Underdispersion \citep{Sellers-flexibleregressionmodel-2010}
 
 
 
-Hilden-Minton (1995, PhD thesis UCLA), Verbeke and Lesaffre
-(1997, CSDA) or Pinheiro and Bates (2000, Springer): extension to
-define three types of residuals that accommodate the extra source of
-variability present in linear mixed models, namely:
-i) Marginal residuals, b = y − Xb = cM−1 bQy, predictors of marginal
-errors,  = y − E[y] = y − X = Zb + e
-ii) Conditional residuals, be = y − Xb − Zbb = bbQy, predictors of
-conditional errors e = y − E[y|b] = y − X − Zb
-iii) BLUP, Zbb, predictors of random effects, Zb = E[y|b] − E[y]
+\section{Features of the scaled residuals}
 
+DHARMa - Residual Diagnostics for HierArchical (Multi-level / Mixed) Regression Models
+
+\subsection{Calculation of scaled residuals}
+
+
+\begin{figure}[htb]
+\begin{center}
+<<Uniformity, echo = F,  fig.height=5, fig.width=5, message=F, cache=T>>=
+nSim = 100
+nData = 200
+
+
+out = matrix(NA, nrow = nSim, ncol = nData)
+predicted =  matrix(NA, nrow = nSim, ncol = nData)
+outRefit = matrix(NA, nrow = nSim, ncol = nData)
+
+for (i in 1:nSim){
+  testData = createData(sampleSize = nData, overdispersion = 0, family = poisson())
+  fittedModel <- glmer(observedResponse ~ Environment1 + (1|group) + (1|ID), data = testData, family = "poisson")
+  simResults = simulateResiduals(fittedModel = fittedModel, refit = F, n=250)
+  out[i,] = simResults$scaledResiduals
+  predicted[i,] =  simResults$fittedPredictedResponse
+  #outRefit[i,] = simulateResiduals(fittedModel = fittedModel, n = 10, refit = T)$scaledResiduals
+}
+
+par(mfrow = c(4,4))
+
+hist(out, breaks = 50, col = "red", main = paste("mean of", nSim, "simulations"))
+
+for (i in 1:15) hist(out[i,], breaks = 50, freq = F, main = i)
+
+# plotResiduals(as.vector(predicted), as.vector(out))
+
+@
+\caption{Data }
+\label{fig: uniformity}
+\end{center}
+\end{figure}
+
+I suspect, however, that deviations can occur once the 
 
 \section{Tests and diagnostics}
 
 Although 
 
-<<echo = F, fig.height=5, fig.width=5, message=F>>=
+<<PowerAnalysis, echo = F, fig.height=5, fig.width=5, message=F, cache=T>>=
 
 dispValues = seq(0,1.2, len = 10)
 
@@ -185,7 +265,7 @@ positiveDharma = numeric(length(dispValues))
 positiveWiki = numeric(length(dispValues))
 
 for(i in 1:length(dispValues)){
-  out[[i]] = DHARMa:::simulatePvaluesDispersion(overdispersion = dispValues[i], n = 25)
+  out[[i]] = benchmarkTypeI_II(overdispersion = dispValues[i], n = 25)
   positiveWiki[i] = out[[i]]$significant[2]
   positiveDharma[i] = out[[i]]$significant[3]
 }
@@ -194,9 +274,20 @@ plot(dispValues, positiveWiki, type = "b", xlab = "Overdispersion strength", yla
 lines(dispValues, positiveDharma, type = "b", col = "red")
 lines(dispValues, positiveBlmeco, type = "b", col = "darkgreen")
 legend("bottomright", legend = c("Wiki", "DHARMa", "Blmeco "), col = c("black", "red", "darkgreen"), lty = c(1,1))
-
 @
+\caption{Data from \citet{Student-probableerrormean-1908}}
+\label{fig: power analysis}
+\end{center}
+\end{figure}
 
+
+\section{Possible extensions}
+
+Although we concentrated here on generalized linear mixed models. 
+
+
+
+\section{Acknowledgements}
 
 
 
