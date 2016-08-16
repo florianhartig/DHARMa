@@ -1,6 +1,6 @@
 Package: DHARMa
 Title: Residual Diagnostics for HierArchical (Multi-level / Mixed) Regression Models
-Version: 0.0.2.2
+Version: 0.0.2.3
 Date: 12.8.2016
 Authors@R: c(person("Florian", "Hartig", email = "florian.hartig@biologie.uni-regensburg.de", role = c("aut", "cre")))
 Description: The package creates easily interpretable residuals for generalized
