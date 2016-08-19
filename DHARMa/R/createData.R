@@ -15,11 +15,15 @@
 #' @param pZeroInflation probability to set any data point to zero
 #' @param binomialTrials Number of trials for the binomial. Only active if family == binomial
 #' @example /inst/examples/createDataHelp.R
-createData <- function(replicates=1, sampleSize = 10, intercept = 0, fixedEffects = 1, quadraticFixedEffects = NULL, numGroups = 10, randomEffectVariance = 1, overdispersion = 0, family = poisson(), scale = 1, cor = 0, roundPoissonVariance = NULL,  pZeroInflation = 0, bionomialTrials = 1){
+createData <- function(replicates=1, sampleSize = 10, intercept = 0, fixedEffects = 1, quadraticFixedEffects = NULL, numGroups = 10, randomEffectVariance = 1, overdispersion = 0, family = poisson(), scale = 1, cor = 0, roundPoissonVariance = NULL,  pZeroInflation = 0, bionomialTrials = 1, temporalAutocorrelation = 0, spatialAutocorrelation =0){
   
   nPredictors = length(fixedEffects)
   
   out = list()
+  
+  time = 1:sampleSize
+  x = runif(sampleSize)
+  y = runif(sampleSize)
   
   for (i in 1:replicates){
 
@@ -57,6 +61,25 @@ createData <- function(replicates=1, sampleSize = 10, intercept = 0, fixedEffect
     if(is.numeric(overdispersion)) linearResponse = linearResponse + rnorm(sampleSize, sd = overdispersion)
     if(is.function(overdispersion)) linearResponse = linearResponse + overdispersion(linearResponse)
     
+    
+    ########################################################################    
+    # Autocorrelation 
+    
+    if(!(temporalAutocorrelation == 0)) linearResponse = linearResponse + temporalAutocorrelation *as.vector(arima.sim(n = sampleSize, list(ar = c(0.8897, -0.4858), ma = c(-0.2279, 0.2488))))
+    
+    if(!(spatialAutocorrelation == 0)) {
+      distMat <- as.matrix(dist(cbind(x, y))) 
+      
+      invDistMat <- 1/distMat * 5000
+      diag(invDistMat) <- 0
+      invDistMat = sfsmisc::posdefify(invDistMat)
+      
+      spatialError <- MASS::mvrnorm(n=1, mu=rep(0,sampleSize), Sigma=invDistMat)
+      
+      linearResponse = linearResponse + spatialError
+    }
+    
+    
     ########################################################################
     # Link and distribution
     
@@ -82,7 +105,9 @@ createData <- function(replicates=1, sampleSize = 10, intercept = 0, fixedEffect
     }
     
 
-    out[[i]] <- data.frame(cbind(ID = 1:sampleSize, observedResponse, predictors, group))
+    # add spatialError?
+    
+    out[[i]] <- data.frame(cbind(ID = 1:sampleSize, observedResponse, predictors, group, time, x, y))
   }
   if(length(out) == 1) out = out[[1]]
   return(out)

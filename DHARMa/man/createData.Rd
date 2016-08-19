@@ -8,7 +8,8 @@ createData(replicates = 1, sampleSize = 10, intercept = 0,
   fixedEffects = 1, quadraticFixedEffects = NULL, numGroups = 10,
   randomEffectVariance = 1, overdispersion = 0, family = poisson(),
   scale = 1, cor = 0, roundPoissonVariance = NULL, pZeroInflation = 0,
-  bionomialTrials = 1)
+  bionomialTrials = 1, temporalAutocorrelation = 0,
+  spatialAutocorrelation = 0)
 }
 \arguments{
 \item{replicates}{number of datasets to create}
@@ -68,5 +69,13 @@ testData = createData(sampleSize = 40, intercept = 2, fixedEffects = c(1),
                       randomEffectVariance = 0, bionomialTrials = 20)
 
 plot(observedResponse1 / observedResponse0 ~ Environment1, data = testData, ylab = "Proportion 1")
+
+
+# spatial / temporal correlation
+
+testData = createData(sampleSize = 100, family = poisson(), spatialAutocorrelation = 3000, temporalAutocorrelation = 3)
+
+plot(log(observedResponse) ~ time, data = testData)
+plot(log(observedResponse) ~ x, data = testData)
 }
 
