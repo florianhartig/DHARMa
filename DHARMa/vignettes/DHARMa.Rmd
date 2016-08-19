@@ -77,12 +77,18 @@ citation("DHARMa")
 The scaled residuals are calculated with the simulateResiduals() functions. You have to specify the number of simulations. The default number of simulations to run is 250, but for very stable results you may want to increase this number. 
 
 ```{r}
-simulationOutput <- simulateResiduals(fittedModel = fittedModel, n = 250, refit = F, integerResponse = NULL)
+simulationOutput <- simulateResiduals(fittedModel = fittedModel, n = 250)
 ```
 
-What the function does is to create 250 new datasets from the fitted model, calculating the distribution of expected values for each observed value, and then returning the quantile value that would correspond to the observed value.
+What the function does is to create 250 new datasets by simulating from the fitted model, calculating the distribution of expected values for each observed value, and then returning the quantile value that would correspond to the observed value. 
 
 For example, a simulated residual of 0.5 means that half of the simulated values are higher, and half of them lower than the observed value. A value of 0.99 would mean that nearly all simulated values are lower than the observed value. The minium/maxium values for the residuals are 0 and 1. 
+
+There are a few important technical details regarding how the simulations are performed, in particular regarding the treatments of random effects and integer responses. I would therefore strongly recommend to read the help 
+
+```{r, eval = F}
+?simulateResiduals
+```
 
 The calculated residuals are stored in the 
 
@@ -90,7 +96,7 @@ The calculated residuals are stored in the
 simulationOutput$scaledResiduals
 ```
 
-The key idea for the interpretation of the residuals is that, if the model is correctly specified, then the observed data will basically look identical to be simulated data, and hence all residual values are equally likely. Hence, regardless of what the exact model structure is (Poisson, binomial, ...), for a correctly specified model we would expect 
+The key idea for the interpretation of the residuals is that, if the model is correctly specified, then the observed data can be thought of as a draw from the fitted model. If that is the case, the observed data will fall on all possible values of the simulated data, and hence, regardless of what the exact model structure is (Poisson, binomial, ...), for a correctly specified model we would expect 
 
 * a uniform (flat) distribution of the overall residuals 
 
@@ -114,6 +120,20 @@ plotResiduals(YOURPREDICTOR, simulationOutput$scaledResiduals)
 
 which does the same quantile plot as the main plotting function. 
 
+
+### Simulation options
+
+
+refit = F, integerResponse = NULL
+
+
+```{r}
+simulationOutput <- simulateResiduals(fittedModel = fittedModel, n = 250, use.u = F)
+plotSimulatedResiduals(simulationOutput = simulationOutput)
+```
+
+
+
 ## Hypothesis tests in DHARMa
 
 The DHARMa package provides a number of additional tests, which, however, should be viewed more as informal diagnostics than formal hypothesis tests. Likely, power and type-I error rates are rather low. If available, specialized parametric tests should be preferred. Nevertheless, the tests can be useful as confirmation of the visual analysis. 
@@ -126,7 +146,7 @@ You can run a hypothesis test on the residuals, which runs a KS test on the unif
 testUniformDistribution(simulationOutput = simulationOutput)
 ```
 
-Note, however, that simulations show that this test is less powerfull than parametric tests on the likelihood that are currently run by many people. On the other hand, the parametric tests
+Simulations show that this test is considerably less powerfull for specific problems (overdispersion, etc.) than specific (in particular parametric tests). On the other hand, the parametric tests
 
 ```{r}
 parametricDispersionTest(fittedModel, type = 1)
@@ -143,21 +163,23 @@ testZeroInflation(simulationOutput)
 
 ### Test for temporal autocorrelation
 
-The temporal autocorrelation test plots and test the temporal autocorrelation of the data 
+The temporal autocorrelation test performs the Durbin-Watson test from the package lmtest on the uniform residuals to test for temporal autocorrelation in the residuals, and additionally plots the residuals against time. 
 
 ```{r, fig.width=4, fig.height=4.5}
 testTemporalAutocorrelation(simulationOutput, time = runif(length(simulationOutput$observedResponse )))
 ```
 
+Note the caveats mentioned about the dest in the help.
 
 ### Test for spatial autocorrelation
 
-The spatial autocorrelation test plots and test the spatial autocorrelation of the data 
+The spatial autocorrelation test performs the Moran.I test from the package ape and plots plots the residuals against space.
 
 ```{r, fig.width=4, fig.height=4.5}
 testSpatialAutocorrelation(simulationOutput, x = runif(length(simulationOutput$observedResponse )), y =  runif(length(simulationOutput$observedResponse )))
 ```
 
+The usual caveats for Moran.I apply, in particular that it may miss non-local and heterogeneous (non-stationary) spatial autocorrelation. The former should be detectable in the spatial plot. 
 
 # Diagnosing problems in the residuals 
 
