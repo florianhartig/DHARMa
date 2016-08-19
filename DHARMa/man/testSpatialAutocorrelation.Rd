@@ -4,7 +4,8 @@
 \alias{testSpatialAutocorrelation}
 \title{Convenience Function to test for spatial autocorrelation}
 \usage{
-testSpatialAutocorrelation(simulationOutput, x, y, print = T, plot = T)
+testSpatialAutocorrelation(simulationOutput, x = NULL, y = NULL,
+  print = T, plot = T)
 }
 \arguments{
 \item{simulationOutput}{an object with simulated residuals created by \code{\link{simulateResiduals}}}
@@ -24,7 +25,7 @@ Convenience Function to test for spatial autocorrelation
 performs the Durbin-Watson Test against euklidian distance and plots the residuals against time
 }
 \note{
-This function is provide as a base recommendation.
+It is possible to not specify x and y. In this case, random x and y values are created. The sense of this option is to test the rate of false positives under the current residual structure (random x/y corresponds to H0: no spatial autocorrelation). This may be useful because it may be that the test doesn't have noninal error rates due to some problem in the residual structure that is different from spatial autocorrelation
 }
 \seealso{
 \code{\link{testUniformDistribution}}, \code{\link{testZeroInflation}}, \code{\link{testTemporalAutocorrelation}}, \code{\link{testSimulatedResiduals}}
