@@ -1,3 +1,5 @@
+library(lme4)
+
 testData = createData(sampleSize = 50, overdispersion = 0.5, family = poisson())
 fittedModel <- glmer(observedResponse ~ Environment1 + (1|group), 
                      family = "poisson", data = testData)

@@ -4,7 +4,7 @@
 \alias{benchmarkTypeI_II}
 \title{Simulated p-values for internal testing}
 \usage{
-benchmarkTypeI_II(overdispersion = 0, n = 20, alpha = 0.05)
+benchmarkTypeI_II(overdispersion = 0, n = 20, alpha = 0.05, ...)
 }
 \arguments{
 \item{overdispersion}{amount of overdispersion}

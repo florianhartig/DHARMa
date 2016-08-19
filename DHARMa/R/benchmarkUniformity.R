@@ -2,11 +2,16 @@
 #' @param dataCreator a function that returns a list with two elements, data and model. See help for details
 #' @param nsim number of simulations
 #' @param plot should a plot be created
+#' @param ... parameters to pass on to \code{\link{simulateResiduals}}
 #' @export
 #' @example inst/examples/benchmarkUniformityHelp.R
-benchmarkUniformity <- function(dataModelCreator,  nSim = 100, plot = T){
+benchmarkUniformity <- function(dataModelCreator,  nSim = 100, plot = T, refit = F, ...){
   
   nData = nrow(dataModelCreator()$data)  
+  
+  out = list()
+  
+  out$residuals
   
   out = matrix(NA, nrow = nSim, ncol = nData)
   predicted =  matrix(NA, nrow = nSim, ncol = nData)
@@ -17,7 +22,7 @@ benchmarkUniformity <- function(dataModelCreator,  nSim = 100, plot = T){
     
     testData = temp$data
     fittedModel <- temp$model
-    simResults = simulateResiduals(fittedModel = fittedModel, refit = F, n=250)
+    simResults = simulateResiduals(fittedModel = fittedModel, refit = F, n=250, ...)
     out[i,] = simResults$scaledResiduals
     predicted[i,] =  simResults$fittedPredictedResponse
     #outRefit[i,] = simulateResiduals(fittedModel = fittedModel, n = 10, refit = T)$scaledResiduals

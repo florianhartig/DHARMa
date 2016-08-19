@@ -4,10 +4,13 @@
 \alias{benchmarkUniformity}
 \title{Runs simulation to confirm uniformity of residuals under H0}
 \usage{
-benchmarkUniformity(dataModelCreator, nSim = 100, plot = T)
+benchmarkUniformity(dataModelCreator, nSim = 100, plot = T, refit = F,
+  ...)
 }
 \arguments{
 \item{plot}{should a plot be created}
+
+\item{...}{parameters to pass on to \code{\link{simulateResiduals}}}
 
 \item{dataCreator}{a function that returns a list with two elements, data and model. See help for details}
 
@@ -21,10 +24,11 @@ library(lme4)
 
 dataModelCreator <- function(){
   data = createData(sampleSize = 100, overdispersion = 0, family = poisson())
-  model <- glmer(observedResponse ~ Environment1 + (1|group) + (1|ID), data = data, family = "poisson")  
+  model <- glmer(observedResponse ~ Environment1 + (1|group) + 
+    (1|ID), data = data, family = "poisson")  
   return(list(data=data, model = model))
 }
 
-benchmarkUniformity(dataModelCreator = dataModelCreator)
+benchmarkUniformity(dataModelCreator = dataModelCreator, nSim = 5)
 }
 

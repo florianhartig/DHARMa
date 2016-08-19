@@ -4,7 +4,7 @@
 #' @param alpha significance level
 #' @export 
 #' @return list of various named objects. Within each, order is dispersion_glmer, overdisp_fun, DHARMa
-benchmarkTypeI_II <- function(overdispersion = 0, n = 20, alpha = 0.05){
+benchmarkTypeI_II <- function(overdispersion = 0, n = 20, alpha = 0.05, ...){
   
   out = matrix(nrow = n, ncol = 3)
   
@@ -19,7 +19,7 @@ benchmarkTypeI_II <- function(overdispersion = 0, n = 20, alpha = 0.05){
     out[i,2] = overdisp_fun(fittedModel)[4]
     
     
-    simulationOutput <- simulateResiduals(fittedModel = fittedModel)
+    simulationOutput <- simulateResiduals(fittedModel = fittedModel, ...)
     x = testUniformDistribution(simulationOutput)
     out[i,3] = x$p.value
   }
