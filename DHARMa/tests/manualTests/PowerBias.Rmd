@@ -1,0 +1,243 @@
+---
+title: "Power and bias / uniformity tests"
+author: "Florian Hartig"
+date: "`r Sys.Date()`"
+output: 
+  html_document:
+      toc: true
+---
+
+```{r global_options, include=FALSE}
+knitr::opts_chunk$set(fig.width=10, fig.height=10, warning=FALSE, message=FALSE, cache = T)
+```
+
+
+```{r}
+library(DHARMa)
+library(lme4)
+set.seed(123)
+```
+
+
+# Test of Power / Type I error rates 
+
+## Overdispersion
+
+
+```{r}
+
+dispValues = seq(0,1.2, len = 10)
+
+out = list()
+positiveBlmeco = numeric(length(dispValues))
+positiveDharma = numeric(length(dispValues))
+positiveWiki = numeric(length(dispValues))
+
+for(i in 1:length(dispValues)){
+  out[[i]] = benchmarkTypeI_II(overdispersion = dispValues[i], n = 25, use.u = T)
+  positiveWiki[i] = out[[i]]$significant[2]
+  positiveDharma[i] = out[[i]]$significant[3]
+}
+
+plot(dispValues, positiveWiki, type = "b", xlab = "Overdispersion strength", ylab = "Proportion significant")
+lines(dispValues, positiveDharma, type = "b", col = "red")
+lines(dispValues, positiveBlmeco, type = "b", col = "darkgreen")
+legend("bottomright", legend = c("Wiki", "DHARMa", "Blmeco "), col = c("black", "red", "darkgreen"), lty = c(1,1))
+
+```
+
+
+
+
+
+## Temporal autocorrelation
+
+
+### Example 
+
+```{r}
+
+testData = createData(sampleSize = 200, overdispersion = 0, randomEffectVariance = 0, family = poisson())
+
+# An ARIMA simulation
+
+
+plot(testData$observedResponse)
+
+fittedModel <- lm(observedResponse ~ Environment1, data = testData )
+simulationOutput <- simulateResiduals(fittedModel = fittedModel)
+
+# normal residuals and tests
+
+plotSimulatedResiduals(simulationOutput = simulationOutput)
+testUniformDistribution(simulationOutput = simulationOutput)
+
+# temporal autocorrelation, with contrast against H0 with the same residual structure
+
+testTemporalAutocorrelation(simulationOutput = simulationOutput, time = 1:200)
+testTemporalAutocorrelation(simulationOutput = simulationOutput, time = runif(200))
+
+```
+
+### Power analysis 
+
+
+```{r}
+
+getPTemporal <- function(spatialStrength=3, n=25){
+  
+  pValues = rep(NA, n)
+  pValuesH0 = rep(NA, n)
+  
+  for (i in 1:n){
+    
+      testData = createData(sampleSize = 200, overdispersion = 0, randomEffectVariance = 0, family = gaussian())
+
+# An ARIMA simulation
+    testData$observedResponse = testData$observedResponse + spatialStrength *as.vector(arima.sim(n = 200, list(ar = c(0.8897, -0.4858), ma = c(-0.2279, 0.2488))))
+    
+  }
+  
+  fittedModel <- lm(observedResponse ~ Environment1, data = testData )
+  simulationOutput <- simulateResiduals(fittedModel = fittedModel)
+  
+
+  pValues[i] <- testTemporalAutocorrelation(simulationOutput = simulationOutput, time = 1:200, plot = F, print = F)$p.value
+  
+  pValuesH0[i] <- testTemporalAutocorrelation(simulationOutput = simulationOutput, time = runif(200), plot = F, print = F)$p.value
+}
+
+
+getPTemporal
+
+
+```
+
+
+
+
+## Spatial autocorrelation
+
+### Example 
+
+
+```{r}
+
+
+testData = createData(sampleSize = 200, overdispersion = 0, randomEffectVariance = 0, family = gaussian())
+
+x = runif(200)
+y = runif(200)
+
+distMat <- as.matrix(dist(cbind(x, y))) 
+
+invDistMat <- 1/distMat * 5000
+diag(invDistMat) <- 0
+invDistMat = sfsmisc::posdefify(invDistMat)
+
+spatialError <- MASS::mvrnorm(n=1, mu=rep(0,200), Sigma=invDistMat)
+plot(x,y, cex = spatialError)
+
+testData$observedResponse = testData$observedResponse + spatialError
+
+
+
+fittedModel <- lm(observedResponse ~ Environment1, data = testData )
+simulationOutput <- simulateResiduals(fittedModel = fittedModel)
+
+# normal residuals and tests
+
+plotSimulatedResiduals(simulationOutput = simulationOutput)
+testUniformDistribution(simulationOutput = simulationOutput)
+
+# spatial autocorrelation test, with contrast against H0 with the same residual structure
+
+testSpatialAutocorrelation(simulationOutput = simulationOutput, x = x, y= y)
+
+testSpatialAutocorrelation(simulationOutput = simulationOutput, x = runif(200, -1,1), y= runif(200, -1,1))
+
+```
+
+Spatial autocorrelation test 
+
+
+```{r}
+testData = createData(sampleSize = 100, family = poisson(), spatialAutocorrelation = 3000, temporalAutocorrelation = 3)
+
+fittedModel <- glmer(observedResponse ~ Environment1 + (1|group), data = testData, family = poisson() )
+simulationOutput <- simulateResiduals(fittedModel = fittedModel)
+
+testSpatialAutocorrelation(simulationOutput = simulationOutput, x = testData$x, y= testData$y)
+
+
+
+testData = createData(sampleSize = 100, family = poisson())
+
+fittedModel <- glmer(observedResponse ~ Environment1 + (1|group), data = testData, family = poisson() )
+simulationOutput <- simulateResiduals(fittedModel = fittedModel)
+
+testSpatialAutocorrelation(simulationOutput = simulationOutput, x = testData$x, y= testData$y)
+testSpatialAutocorrelation(simulationOutput = simulationOutput, )
+
+
+```
+
+
+
+
+
+
+
+
+# Uniformity tests 
+
+This script runs a number of simulations to show that the scaled residuals produced by DHARMa will really be distributed uniformly under H0 that the fitted model is also the data-generating model. 
+
+## Poisson, no overdispersion
+
+### 1-parameter model
+
+```{r}
+
+dataModelCreator <- function(){
+  data = createData(sampleSize = 100, overdispersion = 0, family = poisson())
+  model <- glmer(observedResponse ~ Environment1 + (1|group) , data = data, family = "poisson")  
+  return(list(data=data, model = model))
+}
+
+benchmarkUniformity(dataModelCreator = dataModelCreator, use.u = F)
+
+benchmarkUniformity(dataModelCreator = dataModelCreator, use.u = T)
+
+```
+
+### 3-parameter model
+
+
+```{r}
+
+dataModelCreator <- function(){
+  data = createData(sampleSize = 100, fixedEffects = c(1,-1, 0), overdispersion = 0, family = poisson())
+  model <- glmer(observedResponse ~ Environment1 + Environment2 + Environment3 + (1|group) , data = data, family = "poisson")  
+  return(list(data=data, model = model))
+}
+
+benchmarkUniformity(dataModelCreator = dataModelCreator)
+
+```
+
+## Poisson, strong overdispersion
+
+```{r}
+
+dataModelCreator <- function(){
+  data = createData(sampleSize = 100, overdispersion = 2, family = poisson())
+  model <- glmer(observedResponse ~ Environment1 + (1|group) + (1|ID), data = data, family = "poisson")  
+  return(list(data=data, model = model))
+}
+
+benchmarkUniformity(dataModelCreator = dataModelCreator)
+
+```
+
+
