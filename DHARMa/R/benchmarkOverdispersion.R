@@ -4,7 +4,7 @@
 #' @param alpha significance level
 #' @export 
 #' @return list of various named objects. Within each, order is dispersion_glmer, overdisp_fun, DHARMa
-benchmarkOverdispersion <- function(dispersionValues = 0, n = 10, alpha = 0.05, plot = T, ...){
+benchmarkOverdispersion <- function(dispersionValues = 0, n = 10, alpha = 0.05, plot = T, parallel = F, ...){
   
     library(lme4)
   
@@ -18,26 +18,49 @@ benchmarkOverdispersion <- function(dispersionValues = 0, n = 10, alpha = 0.05, 
   
       out = matrix(nrow = n, ncol = 3)
       
-      for (i in 1:n){
-        
+      
+      getP <- function(){
         testData = createData(sampleSize = 250, fixedEffects = c(1,0.2,0.1,0.02), quadraticFixedEffects = c(0.1,-0.4,0.2,-0.1), overdispersion = dispersionValues[j], family = poisson())
         
         fittedModel <- glmer(observedResponse ~ Environment1 + I(Environment1^2) + Environment2 + I(Environment2^2) + Environment3 + I(Environment3^2) + Environment4 + I(Environment4^2) + (1|group) , family = "poisson", data = testData)
-    
+        
         
         simulationOutput <- simulateResiduals(fittedModel = fittedModel, ...)
-        x = testUniformDistribution(simulationOutput)
-        out[i,1] = x$p.value    
+        out = rep(NA,3)
+        x = testUniformity(simulationOutput)
+        out[1] = x$p.value    
         
-        out[i,2] = testOverdispersionParametric(model = fittedModel)$p.value
+        out[2] = testOverdispersionParametric(model = fittedModel)$p.value
         
-        simulationOutput <- simulateResiduals(fittedModel = simulationOutput$fittedModel, refit = T, ...)
+        simulationOutput <- simulateResiduals(fittedModel = simulationOutput$fittedModel, refit = T, n = 100, ...)
         x = testOverdispersion(simulationOutput, plot = F, print = F)
-        out[i,3] = x$p.value    
-    
+        out[3] = x$p.value
+        return(out)
       }
       
-      
+        
+      if (parallel == F){
+        out = replicate(2, getP(), simplify = "array")
+        out = t(out)
+      }else{
+        library(foreach)
+        if (parallel == T | parallel == "auto"){
+          cores <- parallel::detectCores() - 1
+          message("parallel, set cores automatically to ", cores)
+        } else if (is.numeric(parallel)){
+          cores <- parallel
+          message("parallel, set number of cores by hand to ", cores)
+        } else stop("wrong argument to parallel")
+        
+        cl <- parallel::makeCluster(cores)
+        doParallel::registerDoParallel(cl)
+        
+        out <- foreach::foreach(i=1:n, .packages=c("lme4", "DHARMa") , .combine = rbind) %dopar% getP()
+        
+        parallel::stopCluster(cl = cl)
+        
+      }
+    
       sig <- function(x) mean(x < alpha)
       
       means = colMeans(out)

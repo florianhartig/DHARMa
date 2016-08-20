@@ -28,9 +28,9 @@ set.seed(123)
 
 rm(list = ls(all = T))
 
-dispersionValues = seq(0,1.2, len = 3)
+dispersionValues = seq(0,1.2, len = 2)
 
-out = benchmarkOverdispersion(dispersionValues, n = 5)
+out = benchmarkOverdispersion(dispersionValues, n = 2, parallel = F)
 
 
 ```
