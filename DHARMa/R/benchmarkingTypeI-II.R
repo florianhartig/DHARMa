@@ -4,13 +4,15 @@
 #' @param alpha significance level
 #' @export 
 #' @return list of various named objects. Within each, order is dispersion_glmer, overdisp_fun, DHARMa
-benchmarkTypeI_II <- function(dispersionValues = 0, n = 10, alpha = 0.05, ...){
+benchmarkOverdispersion <- function(dispersionValues = 0, n = 10, alpha = 0.05, ...){
+  
+    library(lme4)
   
     values = list()
 
-    positiveDharmaOmnibus= numeric(length(dispValues))
-    positiveParametric= numeric(length(dispValues))
-    positiveDharmaNonparametric = numeric(length(dispValues))
+    positiveDharmaOmnibus= numeric(length(dispersionValues))
+    positiveParametric= numeric(length(dispersionValues))
+    positiveDharmaNonparametric = numeric(length(dispersionValues))
     
     for(j in 1:length(dispersionValues)){
   
@@ -29,7 +31,7 @@ benchmarkTypeI_II <- function(dispersionValues = 0, n = 10, alpha = 0.05, ...){
         
         out[i,2] = testOverdispersionParametric(model = fittedModel)$p.value
         
-        simulationOutput <- simulateResiduals(fittedModel = fittedModel, refit = T, ...)
+        simulationOutput <- simulateResiduals(fittedModel = simulationOutput$fittedModel, refit = T, ...)
         x = testOverdispersion(simulationOutput, plot = F, print = F)
         out[i,3] = x$p.value    
     

@@ -52,7 +52,7 @@ testOverdispersionParametric <- function(model){
   
   pval <- pchisq(Pearson.chisq, df=rdf, lower.tail=FALSE)
   
-  out = list (statistic=c(dispersion=prat, pearSS = Pearson.chisq, rdf=rdf), method = "Chisq test for overdispersion in GLMMs", alternative = "true dispersion greater 1", data.name = fittedModel@call$family, p.value = pval)
+  out = list (statistic=c(dispersion=prat, pearSS = Pearson.chisq, rdf=rdf), method = "Chisq test for overdispersion in GLMMs", alternative = "true dispersion greater 1", data.name = model@call$family, p.value = pval)
   class(out) = "htest"
   return(out)
 }

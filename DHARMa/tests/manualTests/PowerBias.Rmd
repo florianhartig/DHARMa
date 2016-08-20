@@ -26,9 +26,11 @@ set.seed(123)
 
 ```{r}
 
-dispValues = seq(0,1.2, len = 3)
+rm(list = ls(all = T))
 
-out = benchmarkTypeI_II(dispValues, n = 5)
+dispersionValues = seq(0,1.2, len = 3)
+
+out = benchmarkOverdispersion(dispersionValues, n = 5)
 
 plot(dispValues, out$positiveDharmaOmnibus, type = "b", xlab = "Overdispersion strength", ylab = "Proportion significant")
 lines(dispValues, out$positiveParametric, type = "b", col = "red")
