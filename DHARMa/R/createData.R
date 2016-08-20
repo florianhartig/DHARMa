@@ -76,7 +76,7 @@ createData <- function(replicates=1, sampleSize = 10, intercept = 0, fixedEffect
       
       spatialError <- MASS::mvrnorm(n=1, mu=rep(0,sampleSize), Sigma=invDistMat)
       
-      linearResponse = linearResponse + spatialError
+      linearResponse = linearResponse + spatialAutocorrelation * spatialError
     }
     
     
@@ -84,7 +84,7 @@ createData <- function(replicates=1, sampleSize = 10, intercept = 0, fixedEffect
     # Link and distribution
     
     linkResponse = family$linkinv(linearResponse)
-    
+
     if (family$family == "gaussian") observedResponse = rnorm(n = sampleSize, mean = linkResponse, sd = scale)  
     else if (family$family == "binomial"){
       observedResponse = rbinom(n = sampleSize, bionomialTrials, prob = linkResponse)
