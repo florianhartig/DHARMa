@@ -151,30 +151,16 @@ Spatial autocorrelation test
 
 
 ```{r}
-testData = createData(sampleSize = 100, family = poisson(), spatialAutocorrelation = 3000, temporalAutocorrelation = 3)
+testData = createData(sampleSize = 100, family = poisson(), spatialAutocorrelation = 5)
 
 fittedModel <- glmer(observedResponse ~ Environment1 + (1|group), data = testData, family = poisson() )
+
 simulationOutput <- simulateResiduals(fittedModel = fittedModel)
 
 testSpatialAutocorrelation(simulationOutput = simulationOutput, x = testData$x, y= testData$y)
-
-
-
-testData = createData(sampleSize = 100, family = poisson())
-
-fittedModel <- glmer(observedResponse ~ Environment1 + (1|group), data = testData, family = poisson() )
-simulationOutput <- simulateResiduals(fittedModel = fittedModel)
-
-testSpatialAutocorrelation(simulationOutput = simulationOutput, x = testData$x, y= testData$y)
-testSpatialAutocorrelation(simulationOutput = simulationOutput, )
-
+testSpatialAutocorrelation(simulationOutput = simulationOutput, x = "random", y= "random")
 
 ```
-
-
-
-
-
 
 
 

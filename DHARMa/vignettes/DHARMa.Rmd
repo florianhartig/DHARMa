@@ -22,7 +22,7 @@ set.seed(123)
 knitr::opts_chunk$set(fig.width=7, fig.height=4.5, warning=FALSE, message=FALSE, cache = F)
 ```
 
-***Summary: The DHARMa package creates readily interpretable residuals for generalized linear (mixed) models that are standardized to values between 0 and 1. This is achieved by a simulation-based approach, similar to the Bayesian p-value or the parametric bootstrap: 1) simulate new data from the fitted model 2) from this simulated data, calculate the cummulative density function  3) residual is the value of the empirical density function at the value of the observed data.*  **
+***Summary: The DHARMa package creates readily interpretable residuals for generalized linear (mixed) models that are standardized to values between 0 and 1. This is achieved by a simulation-based approach, similar to the Bayesian p-value or the parametric bootstrap: 1) simulate new data from the fitted model 2) from this simulated data, calculate the cummulative density function  3) residual is the value of the empirical density function at the value of the observed data.***
 
 # Motivation 
 
@@ -123,12 +123,24 @@ which does the same quantile plot as the main plotting function.
 
 ### Simulation options
 
+There are a number of options for the simulations that are explained in more detail in the help. 
 
-refit = F, integerResponse = NULL
+Apart from the number of simulations, there are two important options in the simulateResiduals function
+
+**refit = T/F**
+
+* if refit = F (default), new data is simulated from the fitted model, and residuals are calculated by comparing the observed data to the new data
+
+* if refit = T, a parametric bootstrap is performed, meaning that the model is refit on the new data, and residuals are created by comparing observed residuals against refitted residuals 
+
+The second option is much slower, and only important for running tests that rely on comparing observed to simulated residuals, e.g. the testOverdispersion function (see below) 
+
+** "..." ** 
+
 
 
 ```{r}
-simulationOutput <- simulateResiduals(fittedModel = fittedModel, n = 250, use.u = F)
+simulationOutput <- simulateResiduals(fittedModel = fittedModel, n = 250, use.u = T)
 plotSimulatedResiduals(simulationOutput = simulationOutput)
 ```
 
@@ -136,20 +148,36 @@ plotSimulatedResiduals(simulationOutput = simulationOutput)
 
 ## Hypothesis tests in DHARMa
 
-The DHARMa package provides a number of additional tests, which, however, should be viewed more as informal diagnostics than formal hypothesis tests. Likely, power and type-I error rates are rather low. If available, specialized parametric tests should be preferred. Nevertheless, the tests can be useful as confirmation of the visual analysis. 
+```{r, echo = F}
+simulationOutput <- simulateResiduals(fittedModel = fittedModel, n = 250)
+```
+
+The DHARMa package provides a number of hypothesis tests that can be run on the simulated residuals to help diagnose typical problems. 
 
 ### Omnibus test for deviations from overall uniformity 
 
-You can run a hypothesis test on the residuals, which runs a KS test on the uniformity of the simulated residuals
+The first obvious option is to simply test the overall uniformity of the simulated residuals. For that purppse, the testUniformity function runs a KS test on the uniformity of the simulated residuals
 
 ```{r}
-testUniformDistribution(simulationOutput = simulationOutput)
+testUniformity(simulationOutput = simulationOutput)
 ```
 
-Simulations show that this test is considerably less powerfull for specific problems (overdispersion, etc.) than specific (in particular parametric tests). On the other hand, the parametric tests
+
+### Testing overdispersion
+
+Although overdispersion should show up in the above test, simulations show that this test is considerably less powerfull than more targeted tests. 
+
+
+
+```{r, echo = F}
+simulationOutput2 <- simulateResiduals(fittedModel = fittedModel, n = 250, refit = T)
+testOverdispersion(simulationOutput2)
+```
+
+Simulations show that this diagnostic has similar power than the parametric overdispersion tests
 
 ```{r}
-parametricDispersionTest(fittedModel, type = 1)
+testOverdispersionParametric(fittedModel)
 ```
 
 ### Test for zero-inflation
@@ -228,7 +256,7 @@ summary(fittedModel)
 
 simulationOutput <- simulateResiduals(fittedModel = fittedModel)
 plotSimulatedResiduals(simulationOutput = simulationOutput)
-testUniformDistribution(simulationOutput = simulationOutput)
+testUniformity(simulationOutput = simulationOutput)
 ```
 
 Here, we get too many residuals around 0.5, which means that we are not getting as many residuals as we would expect in the tail of the distribution that is epected with the fitted model. 
@@ -275,7 +303,7 @@ fittedModel <- glmer(observedResponse ~ Environment1 + (1|group), family = "pois
 
 simulationOutput <- simulateResiduals(fittedModel = fittedModel)
 plotSimulatedResiduals(simulationOutput = simulationOutput)
-testUniformDistribution(simulationOutput = simulationOutput)
+testUniformity(simulationOutput = simulationOutput)
 ```
 
 Adding a simple overdispersion correction will try to find a compromise between the different levels of dispersion in the model. The qq plot looks better now, but there is still a pattern in the residuals 
@@ -288,7 +316,7 @@ fittedModel <- glmer(observedResponse ~ Environment1 + (1|group) + (1|ID), famil
 
 simulationOutput <- simulateResiduals(fittedModel = fittedModel)
 plotSimulatedResiduals(simulationOutput = simulationOutput)
-testUniformDistribution(simulationOutput = simulationOutput)
+testUniformity(simulationOutput = simulationOutput)
 ```
 
 To remove this patter, you would need to make the dispersion parameter dependent on a predictor (e.g. in JAGS), or apply a transformation. 
@@ -311,7 +339,7 @@ fittedModel <- glmer(observedResponse ~ Environment1 + Environment2 + (1|group) 
 simulationOutput <- simulateResiduals(fittedModel = fittedModel)
 # plotConventionalResiduals(fittedModel)
 plotSimulatedResiduals(simulationOutput = simulationOutput, quantreg = T)
-testUniformDistribution(simulationOutput = simulationOutput)
+testUniformity(simulationOutput = simulationOutput)
 ```
 
 Difficult to see with the overall pattern, but it becomes clear if we plot against the environment
@@ -322,14 +350,35 @@ plotResiduals(testData$Environment1,  simulationOutput$scaledResiduals)
 plotResiduals(testData$Environment2,  simulationOutput$scaledResiduals)
 ```
 
-## Spatial and temporal autocorrelation
+## Temporal autocorrelation
 
 A special case of the plotting residuals against predictors is the plot against time and space, which should always be performed if those variables are present in the model. This can be done by hand, but is suppored by the previously introduced tests 
 
-```{r, fig.width=4, fig.height=4, eval = F}
-testTemporalAutocorrelation(simulationOutput, time = runif(length(simulationOutput$observedResponse )))
-testSpatialAutocorrelation(simulationOutput, x = runif(length(simulationOutput$observedResponse )), y =  runif(length(simulationOutput$observedResponse )))
+```{r}
+testData = createData(sampleSize = 100, family = poisson(), temporalAutocorrelation = 5)
+
+fittedModel <- glmer(observedResponse ~ Environment1 + (1|group), data = testData, family = poisson() )
+
+simulationOutput <- simulateResiduals(fittedModel = fittedModel)
+
+testTemporalAutocorrelation(simulationOutput = simulationOutput, time = testData$time)
+testTemporalAutocorrelation(simulationOutput = simulationOutput, time = "random")
 ```
+
+## Spatial autocorrelation
+
+```{r}
+testData = createData(sampleSize = 100, family = poisson(), spatialAutocorrelation = 5)
+
+fittedModel <- glmer(observedResponse ~ Environment1 + (1|group), data = testData, family = poisson() )
+
+simulationOutput <- simulateResiduals(fittedModel = fittedModel)
+
+testSpatialAutocorrelation(simulationOutput = simulationOutput, x = testData$x, y= testData$y)
+testSpatialAutocorrelation(simulationOutput = simulationOutput, x = "random", y= "random")
+```
+
+
 
 # Real-world examples
 
@@ -378,7 +427,7 @@ plotSimulatedResiduals(simulationOutput = simulationOutput)
 The residuals look clearly overdispersed. We can confirm that with a 
 
 ```{r}
-testUniformDistribution(simulationOutput = simulationOutput)
+testUniformity(simulationOutput = simulationOutput)
 ```
 
 
