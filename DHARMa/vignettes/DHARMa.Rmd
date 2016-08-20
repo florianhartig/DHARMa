@@ -1,6 +1,6 @@
 ---
 title: "DHARMa - Residual Diagnostics for HierArchical (Multi-level / Mixed) Regression Models"
-author: "Florian Hartig, University of Freiburg, [website](https://florianhartig.wordpress.com/)"
+author: "Florian Hartig, University of Freiburg/Regensburg, [website](https://florianhartig.wordpress.com/)"
 date: "`r Sys.Date()`"
 output: 
   rmarkdown::html_vignette:
@@ -57,12 +57,19 @@ DHARMa aims at solvind this problem by creating readily interpretable residuals 
 
 ## Installing, loading and citing the package
 
-If you haven't installed the package yet, run
+If you haven't installed the package yet, either run
 
 ```{r, eval = F}
+install.packages("DHARMa")
+```
+
+Or follow the instructions on [https://github.com/florianhartig/DHARMa](https://github.com/florianhartig/DHARMa) to install a development version. Usually, snapshots of the latest development version will be available at
+
+```{r}
 library(devtools)
 install_url("https://dl.dropboxusercontent.com/s/xlvjf0vpslukl29/DHARMa.tar.gz", dependencies = T)
 ```
+
 
 loading and citation
 
@@ -119,7 +126,6 @@ plotResiduals(YOURPREDICTOR, simulationOutput$scaledResiduals)
 ```
 
 which does the same quantile plot as the main plotting function. 
-
 
 ### Simulation options
 
