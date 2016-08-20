@@ -26,24 +26,14 @@ set.seed(123)
 
 ```{r}
 
-dispValues = seq(0,1.2, len = 10)
+dispValues = seq(0,1.2, len = 3)
 
-out = list()
-positiveBlmeco = numeric(length(dispValues))
-positiveDharma = numeric(length(dispValues))
-positiveWiki = numeric(length(dispValues))
+out = benchmarkTypeI_II(dispValues, n = 5)
 
-for(i in 1:length(dispValues)){
-  out[[i]] = benchmarkTypeI_II(overdispersion = dispValues[i], n = 25, use.u = T)
-  positiveWiki[i] = out[[i]]$significant[2]
-  positiveDharma[i] = out[[i]]$significant[3]
-}
-
-plot(dispValues, positiveWiki, type = "b", xlab = "Overdispersion strength", ylab = "Proportion significant")
-lines(dispValues, positiveDharma, type = "b", col = "red")
-lines(dispValues, positiveBlmeco, type = "b", col = "darkgreen")
-legend("bottomright", legend = c("Wiki", "DHARMa", "Blmeco "), col = c("black", "red", "darkgreen"), lty = c(1,1))
-
+plot(dispValues, out$positiveDharmaOmnibus, type = "b", xlab = "Overdispersion strength", ylab = "Proportion significant")
+lines(dispValues, out$positiveParametric, type = "b", col = "red")
+lines(dispValues, out$positiveDharmaNonparametric, type = "b", col = "darkgreen")
+legend("bottomright", legend = c("DHARMa Omnibus", "Parametric", "DHARMa nonparametric"), col = c("black", "red", "darkgreen"), lty = c(1,1))
 ```
 
 

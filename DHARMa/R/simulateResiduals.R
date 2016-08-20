@@ -77,6 +77,7 @@ simulateResiduals <- function(fittedModel, n = 250, refit = F, integerResponse =
     out$refittedFixedEffects <- matrix(nrow = length(out$fittedFixedEffects), ncol = n )  
     #out$refittedRandomEffects <- matrix(nrow = length(out$fittedRandomEffects), ncol = n )  
     out$refittedResiduals = matrix(nrow = out$nObs, ncol = n)   
+    out$refittedPearsonResiduals = matrix(nrow = out$nObs, ncol = n)   
     
     newData <-model.frame(fittedModel)  
     
@@ -86,6 +87,7 @@ simulateResiduals <- function(fittedModel, n = 250, refit = F, integerResponse =
       out$refittedPredictedResponse[,i] = predict(refittedModel, type = "response")
       out$refittedFixedEffects[,i]  = fixef(refittedModel)
       out$refittedResiduals[,i] = residuals(refittedModel, type = "response")
+      out$refittedPearsonResiduals[,i] = residuals(refittedModel, type = "pearson")
       #out$refittedRandomEffects[,i]  = ranef(refittedModel)
     }
     

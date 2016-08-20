@@ -4,14 +4,14 @@
 \alias{benchmarkTypeI_II}
 \title{Simulated p-values for internal testing}
 \usage{
-benchmarkTypeI_II(overdispersion = 0, n = 20, alpha = 0.05, ...)
+benchmarkTypeI_II(dispersionValues = 0, n = 10, alpha = 0.05, ...)
 }
 \arguments{
-\item{overdispersion}{amount of overdispersion}
-
 \item{n}{replicates}
 
 \item{alpha}{significance level}
+
+\item{overdispersion}{amount of overdispersion}
 }
 \value{
 list of various named objects. Within each, order is dispersion_glmer, overdisp_fun, DHARMa
