@@ -12,7 +12,7 @@ simulateResiduals(fittedModel, n = 250, refit = F, integerResponse = NULL,
 
 \item{n}{integer number > 1, number of simulations to run. If possible, set to at least 250, better 1000. See also details}
 
-\item{refit}{(experimental) if T, the model will be refit with a parametric bootstrap}
+\item{refit}{if F, new data will be simulated and scaled residuals will be created by comparing observed data with new data. If T, the model will be refit on the simulated data (parametric bootstrap), and scaled residuals will be created by comparing observed with refitted residuals.}
 
 \item{integerResponse}{if T, noise will be added at to the residuals to maintain a uniform expectations for integer responses (such as Poisson or Binomial). Usually, the model will automatically detect the appropriate setting, so there is no need to adjust this setting.}
 
@@ -34,6 +34,14 @@ For controlling how many levels should be re-simulated, the simulateResidual fun
 The simulated residuals should be flat against all options. The most thorough testing procedure would therefore be to test all possible options. If testing only one option, I would recommend to re-simulate all levels, because this esentially tests the whole model structure together. This is the default setting in the package. A potential drawback is that re-simulating the lower-level random effects creates more variability, which may reduce power for detecing problems in the upper-level stochatic processes. 
 
 A further complication is the treatment of inter responses. Imaging we have observed a 0, and we predict 30% zeros - what is the quantile that we should display for the residual? To deal with this problem and maintain a unifor response, the option integerResponse adds a uniform noise from -0.5 to 0.5 on the simulated and observed response. Note that this works because the expected distribution of this is flat - you can see this via hist(ecdf(runif(10000))(runif(10000))) 
+
+A third issue is how residuals are calculated. simulateResiduals has two options that are controlled by the refit parameter:
+
+1. if refit = F (default), new data is simulated from the fitted model, and residuals are calculated by comparing the observed data to the new data
+
+2. if refit = T, a parametric bootstrap is performed, meaning that the model is refit on the new data, and residuals are created by comparing observed residuals against refitted residuals 
+
+The second option is much slower, and only important for running tests that rely on comparing observed to simulated residuals, e.g. the  \code{\link{testOverdispersion}} function
 
 About the choice of n: my simulations didn't show major problems with a small n (even down to the order of 10), but just to be on the safe side, I would recommend to use a high value (e.g. 1000)
 }

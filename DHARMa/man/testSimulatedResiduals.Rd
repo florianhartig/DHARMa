@@ -13,12 +13,12 @@ testSimulatedResiduals(simulationOutput)
 Wrapper for the various test functions
 }
 \details{
-Currently, this function calls only the \code{\link{testUniformDistribution}} function. All other tests (see below) have to be called by hand.
+Currently, this function calls only the \code{\link{testUniformity}} function. All other tests (see below) have to be called by hand.
 }
 \note{
 for special problems, in particular overdispersion, a \code{\link{parametricDispersionTest}} will likely be more powerful
 }
 \seealso{
-\code{\link{testUniformDistribution}}, \code{\link{testZeroInflation}}, \code{\link{testTemporalAutocorrelation}}, \code{\link{testSpatialAutocorrelation}}
+\code{\link{testUniformity}}, \code{\link{testZeroInflation}}, \code{\link{testTemporalAutocorrelation}}, \code{\link{testSpatialAutocorrelation}}, \code{\link{testOverdispersion}}
 }
 

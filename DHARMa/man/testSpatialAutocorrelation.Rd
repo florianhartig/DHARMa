@@ -4,15 +4,14 @@
 \alias{testSpatialAutocorrelation}
 \title{Convenience Function to test for spatial autocorrelation}
 \usage{
-testSpatialAutocorrelation(simulationOutput, x = NULL, y = NULL,
-  print = T, plot = T)
+testSpatialAutocorrelation(simulationOutput, x, y, print = T, plot = T)
 }
 \arguments{
 \item{simulationOutput}{an object with simulated residuals created by \code{\link{simulateResiduals}}}
 
-\item{x}{the x coordinate, in the same order as the data points}
+\item{x}{the x coordinate, in the same order as the data points. If set to "random", random values will be created}
 
-\item{y}{the x coordinate, in the same order as the data points}
+\item{y}{the x coordinate, in the same order as the data points. If set to "random", random values will be created}
 
 \item{print}{whether to print output}
 
@@ -28,6 +27,6 @@ performs the Durbin-Watson Test against euklidian distance and plots the residua
 It is possible to not specify x and y. In this case, random x and y values are created. The sense of this option is to test the rate of false positives under the current residual structure (random x/y corresponds to H0: no spatial autocorrelation). This may be useful because it may be that the test doesn't have noninal error rates due to some problem in the residual structure that is different from spatial autocorrelation
 }
 \seealso{
-\code{\link{testUniformDistribution}}, \code{\link{testZeroInflation}}, \code{\link{testTemporalAutocorrelation}}, \code{\link{testSimulatedResiduals}}
+\code{\link{testUniformity}}, \code{\link{testZeroInflation}}, \code{\link{testTemporalAutocorrelation}}, \code{\link{testSimulatedResiduals}}, \code{\link{testOverdispersion}}
 }
 

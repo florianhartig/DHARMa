@@ -42,27 +42,22 @@ benchmarkOverdispersion <- function(dispersionValues = 0, n = 10, alpha = 0.05, 
       
       means = colMeans(out)
       significant = apply(out, 2, sig)
-      values[[i]] = list(pValues = out, means = means)
+      values[[j]] = list(pValues = out, means = means)
       
-      positiveDharmaOmnibus[i] = significant[1]
-      positiveParametric[i] = significant[2]
-      positiveDharmaNonparametric[i] = significant[3]
+      positiveDharmaOmnibus[j] = significant[1]
+      positiveParametric[j] = significant[2]
+      positiveDharmaNonparametric[j] = significant[3]
     }
-    
-    if(plot == T){
-      plot(dispersionValues, out$positiveDharmaOmnibus, type = "b", xlab = "Overdispersion strength", ylab = "Proportion significant")
-      lines(dispersionValues, out$positiveParametric, type = "b", col = "red")
-      lines(dispersionValues, out$positiveDharmaNonparametric, type = "b", col = "darkgreen")
-      legend("bottomright", legend = c("DHARMa Omnibus", "Parametric", "DHARMa nonparametric"), col = c("black", "red", "darkgreen"), lty = c(1,1))
-      
-    }
-    
     
   out = list(values = values, positiveDharmaOmnibus= positiveDharmaOmnibus, positiveParametric = positiveParametric , positiveDharmaNonparametric = positiveDharmaNonparametric )
+  
+  if(plot == T){
+    plot(dispersionValues, out$positiveDharmaOmnibus, type = "b", xlab = "Overdispersion strength", ylab = "Proportion significant")
+    lines(dispersionValues, out$positiveParametric, type = "b", col = "red")
+    lines(dispersionValues, out$positiveDharmaNonparametric, type = "b", col = "darkgreen")
+    legend("bottomright", legend = c("DHARMa Omnibus", "Parametric", "DHARMa nonparametric"), col = c("black", "red", "darkgreen"), lty = c(1,1))
     
+  }
     
   return(out)
-    
-  
-  
 }

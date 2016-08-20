@@ -4,13 +4,12 @@
 \alias{testTemporalAutocorrelation}
 \title{Test for temporal autocorrelation}
 \usage{
-testTemporalAutocorrelation(simulationOutput, time = NULL, print = T,
-  plot = T)
+testTemporalAutocorrelation(simulationOutput, time, print = T, plot = T)
 }
 \arguments{
 \item{simulationOutput}{an object with simulated residuals created by \code{\link{simulateResiduals}}}
 
-\item{time}{the time, in the same order as the data points}
+\item{time}{the time, in the same order as the data points. If set to "random", random values will be created}
 
 \item{print}{whether to print output}
 
@@ -26,6 +25,6 @@ The function performs a Durbin-Watson test on the uniformly scaled residuals, an
 It is possible to not specify x and y. In this case, random x and y values are created. The sense of this option is to test the rate of false positives under the current residual structure (random x/y corresponds to H0: no spatial autocorrelation). This may be useful because it may be that the test doesn't have noninal error rates due to some problem in the residual structure that is different from spatial autocorrelation
 }
 \seealso{
-\code{\link{testUniformDistribution}}, \code{\link{testZeroInflation}}, \code{\link{testSimulatedResiduals}}, \code{\link{testSpatialAutocorrelation}}
+\code{\link{testUniformity}}, \code{\link{testZeroInflation}}, \code{\link{testSimulatedResiduals}}, \code{\link{testSpatialAutocorrelation}}, \code{\link{testOverdispersion}}
 }
 
