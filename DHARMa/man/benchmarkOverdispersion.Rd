@@ -4,7 +4,8 @@
 \alias{benchmarkOverdispersion}
 \title{Simulated p-values for internal testing}
 \usage{
-benchmarkOverdispersion(dispersionValues = 0, n = 10, alpha = 0.05, ...)
+benchmarkOverdispersion(dispersionValues = 0, n = 10, alpha = 0.05,
+  plot = T, ...)
 }
 \arguments{
 \item{n}{replicates}

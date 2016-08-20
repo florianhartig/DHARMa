@@ -32,10 +32,7 @@ dispersionValues = seq(0,1.2, len = 3)
 
 out = benchmarkOverdispersion(dispersionValues, n = 5)
 
-plot(dispValues, out$positiveDharmaOmnibus, type = "b", xlab = "Overdispersion strength", ylab = "Proportion significant")
-lines(dispValues, out$positiveParametric, type = "b", col = "red")
-lines(dispValues, out$positiveDharmaNonparametric, type = "b", col = "darkgreen")
-legend("bottomright", legend = c("DHARMa Omnibus", "Parametric", "DHARMa nonparametric"), col = c("black", "red", "darkgreen"), lty = c(1,1))
+
 ```
 
 

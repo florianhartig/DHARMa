@@ -4,7 +4,7 @@
 #' @param alpha significance level
 #' @export 
 #' @return list of various named objects. Within each, order is dispersion_glmer, overdisp_fun, DHARMa
-benchmarkOverdispersion <- function(dispersionValues = 0, n = 10, alpha = 0.05, ...){
+benchmarkOverdispersion <- function(dispersionValues = 0, n = 10, alpha = 0.05, plot = T, ...){
   
     library(lme4)
   
@@ -47,7 +47,16 @@ benchmarkOverdispersion <- function(dispersionValues = 0, n = 10, alpha = 0.05, 
       positiveDharmaOmnibus[i] = significant[1]
       positiveParametric[i] = significant[2]
       positiveDharmaNonparametric[i] = significant[3]
-   }
+    }
+    
+    if(plot == T){
+      plot(dispersionValues, out$positiveDharmaOmnibus, type = "b", xlab = "Overdispersion strength", ylab = "Proportion significant")
+      lines(dispersionValues, out$positiveParametric, type = "b", col = "red")
+      lines(dispersionValues, out$positiveDharmaNonparametric, type = "b", col = "darkgreen")
+      legend("bottomright", legend = c("DHARMa Omnibus", "Parametric", "DHARMa nonparametric"), col = c("black", "red", "darkgreen"), lty = c(1,1))
+      
+    }
+    
     
   out = list(values = values, positiveDharmaOmnibus= positiveDharmaOmnibus, positiveParametric = positiveParametric , positiveDharmaNonparametric = positiveDharmaNonparametric )
     

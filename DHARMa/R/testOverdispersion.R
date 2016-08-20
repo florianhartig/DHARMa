@@ -23,7 +23,7 @@ testOverdispersion <- function(simulationOutput, alternative = "overdispersion",
   out$method = "Overdispersion test via comparison to simulation under H0"
   out$alternative = alternative
   out$p.value = p
-  out$data.name = fittedModel@call$family
+  out$data.name = simulationOutput$fittedModel@call$family
   
   class(out) = "htest"
 
