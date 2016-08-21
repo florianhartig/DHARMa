@@ -27,7 +27,7 @@ set.seed(123)
 ```{r}
 rm(list = ls(all = T))
 dispersionValues = seq(0,1.2, len = 20)
-out = benchmarkOverdispersion(dispersionValues, n = 100, parallel = 20)
+out = benchmarkOverdispersion(dispersionValues, n = 200, parallel = 20)
 ```
 
 
@@ -61,7 +61,7 @@ getPTemporal <- function(strength=3, n=25, alpha = 0.05){
 
 strength = seq(0,20,length = 20)
 
-out = sapply(strength, getPTemporal, n = 100)
+out = sapply(strength, getPTemporal, n = 500)
 
 plot(strength, out[1,], type = "b", ylim = c(0,1))
 lines(strength, out[2,], type = "b", col = "red")
@@ -99,9 +99,9 @@ getPSpatial <- function(strength=3, n=25, alpha = 0.05){
   return(c(sig = sig, sigH0 = sigH0))
 }
 
-strength = seq(0,20,length = 4)
+strength = seq(0,20,length = 20)
 
-out = sapply(strength, getPTemporal, n = 10)
+out = sapply(strength, getPTemporal, n = 200)
 
 plot(strength, out[1,], type = "b", ylim = c(0,1))
 lines(strength, out[2,], type = "b", col = "red")
