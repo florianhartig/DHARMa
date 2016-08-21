@@ -65,8 +65,19 @@ createData <- function(replicates=1, sampleSize = 10, intercept = 0, fixedEffect
     ########################################################################    
     # Autocorrelation 
     
-    if(!(temporalAutocorrelation == 0)) linearResponse = linearResponse + temporalAutocorrelation *as.vector(arima.sim(n = sampleSize, list(ar = c(0.8897, -0.4858), ma = c(-0.2279, 0.2488))))
+    if(!(temporalAutocorrelation == 0)){
+      distMat <- as.matrix(dist(time)) 
+      
+      invDistMat <- 1/distMat * 5000
+      diag(invDistMat) <- 0
+      invDistMat = sfsmisc::posdefify(invDistMat)
+      
+      temporalError <- MASS::mvrnorm(n=1, mu=rep(0,sampleSize), Sigma=invDistMat)
+      
+      linearResponse = linearResponse + temporalAutocorrelation * temporalError
+    } 
     
+
     if(!(spatialAutocorrelation == 0)) {
       distMat <- as.matrix(dist(cbind(x, y))) 
       
