@@ -25,140 +25,87 @@ set.seed(123)
 
 
 ```{r}
-
 rm(list = ls(all = T))
-
-dispersionValues = seq(0,1.2, len = 2)
-
-out = benchmarkOverdispersion(dispersionValues, n = 2, parallel = F)
-
-
+dispersionValues = seq(0,1.2, len = 20)
+out = benchmarkOverdispersion(dispersionValues, n = 100, parallel = 20)
 ```
-
-
-
 
 
 ## Temporal autocorrelation
 
 
-### Example 
-
-```{r}
-
-testData = createData(sampleSize = 200, overdispersion = 0, randomEffectVariance = 0, family = poisson())
-
-# An ARIMA simulation
-
-
-plot(testData$observedResponse)
-
-fittedModel <- lm(observedResponse ~ Environment1, data = testData )
-simulationOutput <- simulateResiduals(fittedModel = fittedModel)
-
-# normal residuals and tests
-
-plotSimulatedResiduals(simulationOutput = simulationOutput)
-testUniformDistribution(simulationOutput = simulationOutput)
-
-# temporal autocorrelation, with contrast against H0 with the same residual structure
-
-testTemporalAutocorrelation(simulationOutput = simulationOutput, time = 1:200)
-testTemporalAutocorrelation(simulationOutput = simulationOutput, time = runif(200))
-
-```
-
 ### Power analysis 
 
 
-```{r}
+```{r temporalPower}
 
-getPTemporal <- function(spatialStrength=3, n=25){
+getPTemporal <- function(strength=3, n=25, alpha = 0.05){
   
   pValues = rep(NA, n)
   pValuesH0 = rep(NA, n)
   
   for (i in 1:n){
     
-      testData = createData(sampleSize = 200, overdispersion = 0, randomEffectVariance = 0, family = gaussian())
-
-# An ARIMA simulation
-    testData$observedResponse = testData$observedResponse + spatialStrength *as.vector(arima.sim(n = 200, list(ar = c(0.8897, -0.4858), ma = c(-0.2279, 0.2488))))
-    
+      testData = createData(sampleSize = 100, overdispersion = 0, randomEffectVariance = 0, family = gaussian(), temporalAutocorrelation = strength)
+      
+      fittedModel <- lm(observedResponse ~ Environment1, data = testData )
+      simulationOutput <- simulateResiduals(fittedModel = fittedModel)
+      pValues[i] <- testTemporalAutocorrelation(simulationOutput = simulationOutput, time = testData$time, plot = F, print = F)$p.value
+      pValuesH0[i] <- testTemporalAutocorrelation(simulationOutput = simulationOutput, time = "random", plot = F, print = F)$p.value
   }
+  sig = sum(pValues<alpha) / n
+  sigH0 = sum(pValuesH0<alpha) / n
   
-  fittedModel <- lm(observedResponse ~ Environment1, data = testData )
-  simulationOutput <- simulateResiduals(fittedModel = fittedModel)
-  
-
-  pValues[i] <- testTemporalAutocorrelation(simulationOutput = simulationOutput, time = 1:200, plot = F, print = F)$p.value
-  
-  pValuesH0[i] <- testTemporalAutocorrelation(simulationOutput = simulationOutput, time = runif(200), plot = F, print = F)$p.value
+  return(c(sig = sig, sigH0 = sigH0))
 }
 
+strength = seq(0,20,length = 20)
 
-getPTemporal
+out = sapply(strength, getPTemporal, n = 100)
 
+plot(strength, out[1,], type = "b", ylim = c(0,1))
+lines(strength, out[2,], type = "b", col = "red")
+legend("topleft", legend = c("Test", "H0"), lty = c(1,1), col = c(1,2))
 
 ```
+
+
 
 
 
 
 ## Spatial autocorrelation
 
-### Example 
 
+```{r spatialPower}
 
-```{r}
+getPSpatial <- function(strength=3, n=25, alpha = 0.05){
+  
+  pValues = rep(NA, n)
+  pValuesH0 = rep(NA, n)
+  
+  for (i in 1:n){
+    
+      testData = createData(sampleSize = 100, overdispersion = 0, randomEffectVariance = 0, family = gaussian(), spatialAutocorrelation = strength)
+      
+      fittedModel <- lm(observedResponse ~ Environment1, data = testData )
+      simulationOutput <- simulateResiduals(fittedModel = fittedModel)
+      pValues[i] <- testSpatialAutocorrelation(simulationOutput = simulationOutput, x = testData$x, y = testData$y, plot = F, print = F)$p.value
+      pValuesH0[i] <- testSpatialAutocorrelation(simulationOutput = simulationOutput, x = "random",  y = testData$y, plot = F, print = F)$p.value
+  }
+  sig = sum(pValues<alpha) / n
+  sigH0 = sum(pValuesH0<alpha) / n
+  
+  return(c(sig = sig, sigH0 = sigH0))
+}
 
+strength = seq(0,20,length = 4)
 
-testData = createData(sampleSize = 200, overdispersion = 0, randomEffectVariance = 0, family = gaussian())
+out = sapply(strength, getPTemporal, n = 10)
 
-x = runif(200)
-y = runif(200)
-
-distMat <- as.matrix(dist(cbind(x, y))) 
-
-invDistMat <- 1/distMat * 5000
-diag(invDistMat) <- 0
-invDistMat = sfsmisc::posdefify(invDistMat)
-
-spatialError <- MASS::mvrnorm(n=1, mu=rep(0,200), Sigma=invDistMat)
-plot(x,y, cex = spatialError)
-
-testData$observedResponse = testData$observedResponse + spatialError
-
-
-
-fittedModel <- lm(observedResponse ~ Environment1, data = testData )
-simulationOutput <- simulateResiduals(fittedModel = fittedModel)
-
-# normal residuals and tests
-
-plotSimulatedResiduals(simulationOutput = simulationOutput)
-testUniformDistribution(simulationOutput = simulationOutput)
-
-# spatial autocorrelation test, with contrast against H0 with the same residual structure
-
-testSpatialAutocorrelation(simulationOutput = simulationOutput, x = x, y= y)
-
-testSpatialAutocorrelation(simulationOutput = simulationOutput, x = runif(200, -1,1), y= runif(200, -1,1))
-
-```
-
-Spatial autocorrelation test 
-
-
-```{r}
-testData = createData(sampleSize = 100, family = poisson(), spatialAutocorrelation = 5)
-
-fittedModel <- glmer(observedResponse ~ Environment1 + (1|group), data = testData, family = poisson() )
-
-simulationOutput <- simulateResiduals(fittedModel = fittedModel)
-
-testSpatialAutocorrelation(simulationOutput = simulationOutput, x = testData$x, y= testData$y)
-testSpatialAutocorrelation(simulationOutput = simulationOutput, x = "random", y= "random")
+plot(strength, out[1,], type = "b", ylim = c(0,1))
+lines(strength, out[2,], type = "b", col = "red")
+legend("topleft", legend = c("Test", "H0"), lty = c(1,1), col = c(1,2))
 
 ```
 

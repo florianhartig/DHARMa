@@ -32,7 +32,7 @@ benchmarkOverdispersion <- function(dispersionValues = 0, n = 10, alpha = 0.05, 
         
         out[2] = testOverdispersionParametric(model = fittedModel)$p.value
         
-        simulationOutput <- simulateResiduals(fittedModel = simulationOutput$fittedModel, refit = T, n = 100, ...)
+        simulationOutput <- simulateResiduals(fittedModel = simulationOutput$fittedModel, refit = T, ...)
         x = testOverdispersion(simulationOutput, plot = F, print = F)
         out[3] = x$p.value
         return(out)
