@@ -2,7 +2,7 @@
 % Please edit documentation in R/benchmarkOverdispersion.R
 \name{benchmarkOverdispersion}
 \alias{benchmarkOverdispersion}
-\title{Simulated p-values for internal testing}
+\title{Overdispersion benchmarks}
 \usage{
 benchmarkOverdispersion(dispersionValues = 0, n = 10, alpha = 0.05,
   plot = T, parallel = F, ...)
@@ -12,12 +12,24 @@ benchmarkOverdispersion(dispersionValues = 0, n = 10, alpha = 0.05,
 
 \item{alpha}{significance level}
 
+\item{plot}{whether to do a plot}
+
+\item{parallel}{whether to use parallel computations. Possible values are F, T (parallel cores set to number of cores in the computer -1), or an integer number for the number of cores that should be used}
+
+\item{...}{parameters to pass on to \code{\link{simulateResiduals}}}
+
 \item{overdispersion}{amount of overdispersion}
 }
-\value{
-list of various named objects. Within each, order is dispersion_glmer, overdisp_fun, DHARMa
-}
 \description{
-Simulated p-values for internal testing
+This function runs Power / Type I error simulations for overdispersion tests in DHARMa
+}
+\details{
+This function runs Type I error / power comparisons for overdispersion tests in DHARMA. Compared are a) the omnibus test \code{\link{testUniformity}} b) the parameteric dispersion test \code{\link{testOverdispersionParametric}}, and the nonparametric dispersion test \code{\link{testOverdispersion}}.
+}
+\note{
+The benchmark function in DHARMa are intended for development purposes, and for users that want to test / confirm the properties of functions in DHARMa. If you are running an applied data analysis, they are probably of little use.
+}
+\seealso{
+\code{\link{benchmarkUniformity}}
 }
 

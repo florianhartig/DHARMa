@@ -2,24 +2,24 @@
 % Please edit documentation in R/testsResiduals.R
 \name{testZeroInflation}
 \alias{testZeroInflation}
-\title{Tests for zero-inflation in the residuals}
+\title{Tests for zero-inflation}
 \usage{
-testZeroInflation(simulationOutput, print = T, plot = T)
+testZeroInflation(simulationOutput, plot = T, alternative = "more")
 }
 \arguments{
 \item{simulationOutput}{an object with simulated residuals created by \code{\link{simulateResiduals}}}
 
-\item{print}{whether to print output}
-
 \item{plot}{whether to plot output}
+
+\item{alternative}{whether to test for 'more', 'less', or 'both' more or less zeros in the observed data}
 }
 \description{
-Tests for zero-inflation in the residuals
+This function compares the observed number of zeros with the zeros expected from simulations.
 }
 \details{
 shows the expected distribution of zeros against the observed
 }
 \seealso{
-\code{\link{testUniformity}}, \code{\link{testSimulatedResiduals}}, \code{\link{testTemporalAutocorrelation}}, \code{\link{testSpatialAutocorrelation}}, \code{\link{testOverdispersion}}
+\code{\link{testUniformity}}, \code{\link{testSimulatedResiduals}}, \code{\link{testTemporalAutocorrelation}}, \code{\link{testSpatialAutocorrelation}}, \code{\link{testOverdispersion}}, \code{\link{testOverdispersionParametric}}
 }
 

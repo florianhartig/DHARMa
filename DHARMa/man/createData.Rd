@@ -2,7 +2,7 @@
 % Please edit documentation in R/createData.R
 \name{createData}
 \alias{createData}
-\title{Function to simulate test data}
+\title{Simulate test data}
 \usage{
 createData(replicates = 1, sampleSize = 10, intercept = 0,
   fixedEffects = 1, quadraticFixedEffects = NULL, numGroups = 10,
@@ -41,7 +41,7 @@ createData(replicates = 1, sampleSize = 10, intercept = 0,
 \item{binomialTrials}{Number of trials for the binomial. Only active if family == binomial}
 }
 \description{
-Function to simulate test data
+This function creates synthetic dataset with various problems such as overdispersion, zero-inflation, etc.
 }
 \examples{
 testData = createData(sampleSize = 500, intercept = 2, fixedEffects = c(1), 

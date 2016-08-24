@@ -1,9 +1,17 @@
-#' Simulated p-values for internal testing
+#' Overdispersion benchmarks
+#' 
+#' This function runs Power / Type I error simulations for overdispersion tests in DHARMa
+#' 
 #' @param overdispersion amount of overdispersion
 #' @param n replicates
 #' @param alpha significance level
+#' @param plot whether to do a plot
+#' @param parallel whether to use parallel computations. Possible values are F, T (parallel cores set to number of cores in the computer -1), or an integer number for the number of cores that should be used
+#' @param ... parameters to pass on to \code{\link{simulateResiduals}}
+#' @details This function runs Type I error / power comparisons for overdispersion tests in DHARMA. Compared are a) the omnibus test \code{\link{testUniformity}} b) the parameteric dispersion test \code{\link{testOverdispersionParametric}}, and the nonparametric dispersion test \code{\link{testOverdispersion}}.
+#' @seealso \code{\link{benchmarkUniformity}}
+#' @note The benchmark function in DHARMa are intended for development purposes, and for users that want to test / confirm the properties of functions in DHARMa. If you are running an applied data analysis, they are probably of little use. 
 #' @export 
-#' @return list of various named objects. Within each, order is dispersion_glmer, overdisp_fun, DHARMa
 benchmarkOverdispersion <- function(dispersionValues = 0, n = 10, alpha = 0.05, plot = T, parallel = F, ...){
   
     library(lme4)

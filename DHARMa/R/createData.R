@@ -1,5 +1,5 @@
-#' Function to simulate test data
-#' @export
+#' Simulate test data
+#' @description This function creates synthetic dataset with various problems such as overdispersion, zero-inflation, etc.
 #' @param replicates number of datasets to create
 #' @param sampleSize sample size of the dataset
 #' @param intercept intercept
@@ -14,6 +14,7 @@
 #' @param roundPoissonVariance if set, this creates a uniform noise on the possion response. The aim of this is to create heteroscedasticity
 #' @param pZeroInflation probability to set any data point to zero
 #' @param binomialTrials Number of trials for the binomial. Only active if family == binomial
+#' @export
 #' @example /inst/examples/createDataHelp.R
 createData <- function(replicates=1, sampleSize = 10, intercept = 0, fixedEffects = 1, quadraticFixedEffects = NULL, numGroups = 10, randomEffectVariance = 1, overdispersion = 0, family = poisson(), scale = 1, cor = 0, roundPoissonVariance = NULL,  pZeroInflation = 0, bionomialTrials = 1, temporalAutocorrelation = 0, spatialAutocorrelation =0){
   

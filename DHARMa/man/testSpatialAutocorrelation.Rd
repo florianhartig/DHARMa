@@ -2,9 +2,9 @@
 % Please edit documentation in R/testsResiduals.R
 \name{testSpatialAutocorrelation}
 \alias{testSpatialAutocorrelation}
-\title{Convenience Function to test for spatial autocorrelation}
+\title{Test for spatial autocorrelation}
 \usage{
-testSpatialAutocorrelation(simulationOutput, x, y, print = T, plot = T)
+testSpatialAutocorrelation(simulationOutput, x, y, plot = T)
 }
 \arguments{
 \item{simulationOutput}{an object with simulated residuals created by \code{\link{simulateResiduals}}}
@@ -13,12 +13,10 @@ testSpatialAutocorrelation(simulationOutput, x, y, print = T, plot = T)
 
 \item{y}{the x coordinate, in the same order as the data points. If set to "random", random values will be created}
 
-\item{print}{whether to print output}
-
 \item{plot}{whether to plot output}
 }
 \description{
-Convenience Function to test for spatial autocorrelation
+This function performs a standard test for spatial autocorrelation on the simulated residuals
 }
 \details{
 performs the Durbin-Watson Test against euklidian distance and plots the residuals against time
@@ -27,6 +25,6 @@ performs the Durbin-Watson Test against euklidian distance and plots the residua
 It is possible to not specify x and y. In this case, random x and y values are created. The sense of this option is to test the rate of false positives under the current residual structure (random x/y corresponds to H0: no spatial autocorrelation). This may be useful because it may be that the test doesn't have noninal error rates due to some problem in the residual structure that is different from spatial autocorrelation
 }
 \seealso{
-\code{\link{testUniformity}}, \code{\link{testZeroInflation}}, \code{\link{testTemporalAutocorrelation}}, \code{\link{testSimulatedResiduals}}, \code{\link{testOverdispersion}}
+\code{\link{testUniformity}}, \code{\link{testZeroInflation}}, \code{\link{testTemporalAutocorrelation}}, \code{\link{testSimulatedResiduals}}, \code{\link{testOverdispersion}}, \code{\link{testOverdispersionParametric}}
 }
 

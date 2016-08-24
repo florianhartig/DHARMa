@@ -1,6 +1,6 @@
 ---
 title: "DHARMa - Residual Diagnostics for HierArchical (Multi-level / Mixed) Regression Models"
-author: "Florian Hartig, University of Freiburg/Regensburg, [website](https://florianhartig.wordpress.com/)"
+author: "Florian Hartig, University of Regensburg, [website](https://florianhartig.wordpress.com/)"
 date: "`r Sys.Date()`"
 output: 
   rmarkdown::html_vignette:
@@ -19,7 +19,7 @@ set.seed(123)
 
 
 ```{r global_options, include=FALSE}
-knitr::opts_chunk$set(fig.width=7, fig.height=4.5, warning=FALSE, message=FALSE, cache = F)
+knitr::opts_chunk$set(fig.width=7, fig.height=4.5, warning=FALSE, message=FALSE, cache = T)
 ```
 
 ***Summary: The DHARMa package creates readily interpretable residuals for generalized linear (mixed) models that are standardized to values between 0 and 1. This is achieved by a simulation-based approach, similar to the Bayesian p-value or the parametric bootstrap: 1) simulate new data from the fitted model 2) from this simulated data, calculate the cummulative density function  3) residual is the value of the empirical density function at the value of the observed data.***
@@ -65,7 +65,7 @@ install.packages("DHARMa")
 
 Or follow the instructions on [https://github.com/florianhartig/DHARMa](https://github.com/florianhartig/DHARMa) to install a development version. Usually, snapshots of the latest development version will be available at
 
-```{r}
+```{r, eval = F}
 library(devtools)
 install_url("https://dl.dropboxusercontent.com/s/xlvjf0vpslukl29/DHARMa.tar.gz", dependencies = T)
 ```
@@ -79,7 +79,7 @@ library(DHARMa)
 citation("DHARMa")
 ```
 
-## Calculating and plotting scaled residuals 
+## Calculating scaled residuals 
 
 The scaled residuals are calculated with the simulateResiduals() functions. You have to specify the number of simulations. The default number of simulations to run is 250, but for very stable results you may want to increase this number. 
 
@@ -109,6 +109,8 @@ The key idea for the interpretation of the residuals is that, if the model is co
 
 * uniformity in y direction if we plot against any predictor. 
 
+## Plotting the scaled residuals
+
 We can get a visual impression of these properties with the plotSimulatedResiduals() function
 
 ```{r}
@@ -127,13 +129,35 @@ plotResiduals(YOURPREDICTOR, simulationOutput$scaledResiduals)
 
 which does the same quantile plot as the main plotting function. 
 
-### Simulation options
+
+## Formal goodness-of-fit tests on the scaled residuals
+
+To support the visual inspection, the DHARMa package provides a numer of specialized goodness-of-fit tests on the simulated residuals. For example, the function 
+
+```{r}
+testUniformity(simulationOutput = simulationOutput)
+```
+
+runs a KS test to test for overall uniformity of the residuals.
+
+* testOverdispersion()
+* testZeroinflation()
+* testTemporalAutocorrelation()
+* testSpatialAutocorrelation()
+
+See the help of the functions for a more detailed description of what they do
+
+## Simulation options
 
 There are a number of options for the simulations that are explained in more detail in the help. 
 
 Apart from the number of simulations, there are two important options in the simulateResiduals function
 
-**refit = T/F**
+#### Refit
+
+```{r, eval= F}
+simulationOutput <- simulateResiduals(fittedModel = fittedModel, refit = T)
+```
 
 * if refit = F (default), new data is simulated from the fitted model, and residuals are calculated by comparing the observed data to the new data
 
@@ -141,91 +165,27 @@ Apart from the number of simulations, there are two important options in the sim
 
 The second option is much slower, and only important for running tests that rely on comparing observed to simulated residuals, e.g. the testOverdispersion function (see below) 
 
-** "..." ** 
+#### Random effect simulations
 
+```{r, eval= F}
+simulationOutput <- simulateResiduals(fittedModel = fittedModel, n = 250, ...)
+```
 
+The function has also 
 
-```{r}
+```{r, eval= F}
 simulationOutput <- simulateResiduals(fittedModel = fittedModel, n = 250, use.u = T)
-plotSimulatedResiduals(simulationOutput = simulationOutput)
 ```
 
-
-
-## Hypothesis tests in DHARMa
-
-```{r, echo = F}
-simulationOutput <- simulateResiduals(fittedModel = fittedModel, n = 250)
-```
-
-The DHARMa package provides a number of hypothesis tests that can be run on the simulated residuals to help diagnose typical problems. 
-
-### Omnibus test for deviations from overall uniformity 
-
-The first obvious option is to simply test the overall uniformity of the simulated residuals. For that purppse, the testUniformity function runs a KS test on the uniformity of the simulated residuals
-
-```{r}
-testUniformity(simulationOutput = simulationOutput)
-```
-
-
-### Testing overdispersion
-
-Although overdispersion should show up in the above test, simulations show that this test is considerably less powerfull than more targeted tests. 
-
-
-
-```{r, echo = F}
-simulationOutput2 <- simulateResiduals(fittedModel = fittedModel, n = 250, refit = T)
-testOverdispersion(simulationOutput2)
-```
-
-Simulations show that this diagnostic has similar power than the parametric overdispersion tests
-
-```{r}
-testOverdispersionParametric(fittedModel)
-```
-
-### Test for zero-inflation
-
-There is a special test for zero-inflation, which compares the distribution of expected zeros in the data against the observed zeros
-
-```{r, fig.width=4, fig.height=4.5}
-testZeroInflation(simulationOutput)
-```
-
-
-### Test for temporal autocorrelation
-
-The temporal autocorrelation test performs the Durbin-Watson test from the package lmtest on the uniform residuals to test for temporal autocorrelation in the residuals, and additionally plots the residuals against time. 
-
-```{r, fig.width=4, fig.height=4.5}
-testTemporalAutocorrelation(simulationOutput, time = runif(length(simulationOutput$observedResponse )))
-```
-
-Note the caveats mentioned about the dest in the help.
-
-### Test for spatial autocorrelation
-
-The spatial autocorrelation test performs the Moran.I test from the package ape and plots plots the residuals against space.
-
-```{r, fig.width=4, fig.height=4.5}
-testSpatialAutocorrelation(simulationOutput, x = runif(length(simulationOutput$observedResponse )), y =  runif(length(simulationOutput$observedResponse )))
-```
-
-The usual caveats for Moran.I apply, in particular that it may miss non-local and heterogeneous (non-stationary) spatial autocorrelation. The former should be detectable in the spatial plot. 
-
-# Diagnosing problems in the residuals 
+# Visual diagnostics and tests of common misspecification problems 
 
 So far, all the plots / tests were run for a correctly specified model. In this section, we discuss how model misspecification will show up in the scaled residuals.
 
-## Overdispersion / underdispersion / zero-inflation
+## Overdispersion / underdispersion
 
 The most common concern for GLMMs is overdispersion, underdispersion and zero-inflation.
 
 Over/underdispersion refers to the phenomenon that that residual variance is larger/smaller than expected under the fitted model. Over/underdispersion can appear for any distributional family with fixed variance, in particular for Poisson and binomial models. 
-
-A common special case of overdispersion is zero-inflation, which is the situation when more zeros appear in the observation than expected under the fitted model. Zero-inflation requires special correction steps. 
 
 A few general rules of thumb
 
@@ -267,6 +227,32 @@ testUniformity(simulationOutput = simulationOutput)
 
 Here, we get too many residuals around 0.5, which means that we are not getting as many residuals as we would expect in the tail of the distribution that is epected with the fitted model. 
 
+which shows the expected distribution of the number of zeros against the observed number of zeros. 
+
+
+#### Testing for over/underdispersion
+
+Although overdispersion should show up in the above test, simulations show that this test is considerably less powerfull than more targeted tests. 
+
+```{r overDispersionTest, echo = F}
+simulationOutput2 <- simulateResiduals(fittedModel = fittedModel, n = 250, refit = T)
+testOverdispersion(simulationOutput2)
+```
+
+Simulations show that this diagnostic has similar power than the parametric overdispersion tests
+
+```{r}
+testOverdispersionParametric(fittedModel)
+```
+
+![Comparison of power from simulation studies](Overdispersion.png)
+
+
+## Zero-inflation
+
+A common special case of overdispersion is zero-inflation, which is the situation when more zeros appear in the observation than expected under the fitted model. Zero-inflation requires special correction steps. 
+
+
 #### An example of zero-inflation
 
 For pedagogical reasons, I plot this data against the environmental predictor
@@ -279,7 +265,11 @@ plot(testData$Environment1, testData$observedResponse, xlab = "Envrionmental Pre
 hist(testData$observedResponse, xlab = "Response", main = "")
 ```
 
-We see a hump-shaped dependence of the environment, but with too many zeros. In the residuals, this looks pretty much like overdispersion
+We see a hump-shaped dependence of the environment, but with too many zeros. 
+
+#### Zero-inflation in the scaled residuals
+
+In the normal residual, plots, zero-inflation will look pretty much like overdispersion
 
 ```{r}
 
@@ -289,13 +279,19 @@ simulationOutput <- simulateResiduals(fittedModel = fittedModel)
 plotSimulatedResiduals(simulationOutput = simulationOutput)
 ```
 
-The reason is that the model will usually try to find a compromise between the zeros, and the other values, which will lead to excecss variation in the resiudals. The overdispersion can be better detected with this specialized plot / test
+The reason is that the model will usually try to find a compromise between the zeros, and the other values, which will lead to excecss variation in the resiudals. 
+
+#### Test for zero-inflation
+
+DHARMa has a special test for zero-inflation, which compares the distribution of expected zeros in the data against the observed zeros
 
 ```{r, fig.width=4, fig.height=4.5}
+
 testZeroInflation(simulationOutput)
 ```
 
-which shows the expected distribution of the number of zeros against the observed number of zeros. 
+It is likely better to detect zero-inflation, but note that also overdispersion will lead to excess zeros. A reliable differentiation between overdispersion and zero-inflation will only be possible when directly comparing it, e.g. through comparing parameter estimates of a model that inlcudes both options, or throught model selection. 
+
 
 ## Heteroscedasticity
 
@@ -366,10 +362,18 @@ testData = createData(sampleSize = 100, family = poisson(), temporalAutocorrelat
 fittedModel <- glmer(observedResponse ~ Environment1 + (1|group), data = testData, family = poisson() )
 
 simulationOutput <- simulateResiduals(fittedModel = fittedModel)
+```
 
+#### Test and plot for temporal autocorrelation
+
+The temporal autocorrelation test performs the Durbin-Watson test from the package lmtest on the uniform residuals to test for temporal autocorrelation in the residuals, and additionally plots the residuals against time. An additional test against randomized time (H0) is performed, to show that the test is not oversensitive. 
+
+```{r, fig.width=4, fig.height=4.5}
 testTemporalAutocorrelation(simulationOutput = simulationOutput, time = testData$time)
 testTemporalAutocorrelation(simulationOutput = simulationOutput, time = "random")
 ```
+
+Note the caveats mentioned about the dest in the help.
 
 ## Spatial autocorrelation
 
@@ -380,15 +384,23 @@ fittedModel <- glmer(observedResponse ~ Environment1 + (1|group), data = testDat
 
 simulationOutput <- simulateResiduals(fittedModel = fittedModel)
 
+```
+
+#### Test and plot for spatial autocorrelation
+
+The spatial autocorrelation test performs the Moran.I test from the package ape and plots plots the residuals against space. An additional test against randomized space (H0) is performed, to show that the test is not oversensitive. 
+
+```{r, fig.width=4, fig.height=4.5}
 testSpatialAutocorrelation(simulationOutput = simulationOutput, x = testData$x, y= testData$y)
 testSpatialAutocorrelation(simulationOutput = simulationOutput, x = "random", y= "random")
 ```
 
+The usual caveats for Moran.I apply, in particular that it may miss non-local and heterogeneous (non-stationary) spatial autocorrelation. The former should be detectable in the spatial plot. 
 
 
 # Real-world examples
 
-## Budworm example
+## Budworm (n/k Poisson) example
 
 This example comes from Jochen Fründ. Measured are the number of parasitized adults against the density
 
@@ -448,11 +460,12 @@ Overdispersion looks better, but you can see that the residuals still detect an 
 
 
 
-## Poisson example 
+## Beetlecount / Poisson example 
 
 
+#### Dataset
 
-## Dataset
+
 
 ```{r, echo=F, cache = T}
 altitude = rep(seq(0,1,len = 50), each = 20)
@@ -478,14 +491,14 @@ beetles <- rpois(1000, exp( 0  + 12*altitude - 12*altitude^2 - 0.2 * moisture + 
 data = data.frame(dataID, beetles, altitude, moisture, deadwood, plot, year, spatialCoordinate)
 ```
 
-Measured beetle counts over 20 years on 50 different plots across an altitudinal gradient
+This example is a synthetic dataset of measured beetle counts over 50 plots across an altitudinal gradient that are yearly sampled over 20 years. The following plot shows the observed number of beetles (log10) vs. altitude. Additional variables in the data are soil moisture and the amount of deadwood on the plots. 
 
 ```{r}
 par(mfrow = c(1,3))
 plot(log10(beetles) ~ altitude + I(altitude) + moisture, data = data, main = "Beetle counts", xlab = "Altitude")
 ```
 
-What is the effect of altitude on the abundance of the beetle? I guess it would be standard to start with a linear and quadratic term, but just to show the use of the residual analysis, let's start with a linear term only: 
+Our question is: what is the effect of altitude on the abundance of the beetle? Let's start with a linear and quadratic term for altitude, linear effect of soil moisture, and random intercepts on plot and year
 
 ```{r}
 mod <- glmer(beetles ~ altitude + I(altitude^2) + moisture + (1|plot) + (1|year), data = data, family=poisson, control = glmerControl(optCtrl = list(maxfun = 10000)))
@@ -494,12 +507,13 @@ plotSimulatedResiduals(simulationOutput = simulationOutput)
 summary(mod)
 ```
 
-Problem 
+We see that we have a problem when we plot residuals against deadwood
 
 ```{r}
 plotResiduals(data$deadwood, simulationOutput$scaledResiduals)
 ```
 
+so let's add this term as well
 
 ```{r}
 mod <- glmer(beetles ~ altitude + I(altitude^2) + moisture + deadwood + (1|plot) + (1|year) , data = data, family=poisson, control = glmerControl(optCtrl = list(maxfun = 10000)))
@@ -508,6 +522,7 @@ plotSimulatedResiduals(simulationOutput = simulationOutput)
 summary(mod)
 ```
 
+still, there is obviously overdispersion in the data, so we'll add an individual level random effect to account for overdispersion
 
 ```{r}
 mod <- glmer(beetles ~ altitude + I(altitude^2) + moisture + deadwood + (1|plot) + (1|year) + (1|dataID) , data = data, family=poisson, control = glmerControl(optCtrl = list(maxfun = 10000)))
@@ -515,14 +530,17 @@ simulationOutput <- simulateResiduals(fittedModel = mod)
 plotSimulatedResiduals(simulationOutput = simulationOutput)
 ```
 
-
-We see that things are still not fine, the data looks overdispersed. The reason is that there is in fact no standard overdispersion, but zero-inflation in the data. We can look at the excess zeros via
+The data still looks overdispersed. The reason is that there is in fact no standard overdispersion, but zero-inflation in the data. We can look at the excess zeros via
 
 ```{r}
 testZeroInflation(simulationOutput)
 ```
 
-which shows that we have too many zeros, but to be honest, this 
+which shows that we have too many zeros. We need a GLMM with zero-inflation. The easiest option is to do this in a Bayesian framework, e.g. in JAGS as in [this example](https://github.com/florianhartig/LearningBayes/blob/master/CommentedCode/04-StandardModels/GLMM/Beetles.md)
+
+To be honest however, if I wouldn't it would be hard to tell that zero-inflation is the problem here. The reason is that, if you have zero-inflation, the model will be drawn towards the zeros, which also creates an excess of residuals that are too large. Hence, it is hard to distinguish zero-inflation from the case where we have a case where the individual-level random effect is not successfull at removing the overdispersion, i.e. because the functional form of the added noise is incorrect. The best way to test this is probably to run model selections (e.g. simulated LRTs) between a number of alternative models, e.g. a zero-inflated GLMM vs a number of different overdispersed GLMMs. 
 
 
-https://github.com/florianhartig/LearningBayes/blob/master/CommentedCode/04-StandardModels/GLMM/Beetles.md
+
+
+

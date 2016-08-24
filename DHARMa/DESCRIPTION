@@ -3,12 +3,14 @@ Title: Residual Diagnostics for HierArchical (Multi-level / Mixed) Regression Mo
 Version: 0.0.3.1
 Date: 12.8.2016
 Authors@R: c(person("Florian", "Hartig", email = "florian.hartig@biologie.uni-regensburg.de", role = c("aut", "cre")))
-Description: The DHARMa package creates easily interpretable residuals for generalized
-    linear mixed models that are standardized to values between 0 and 1. This is
-    achieved by a simulation-based approach, similar to the Bayesian p-value or the
-    parametric bootstrap: 1) simulate new data from the fitted model 2) calculate
-    the cummulative empirical density function 3) residual is the value of the
-    empirical density function at the value of the observed data.
+Description: The DHARMa package uses a simulation-based approach to create
+    readily interpretable scaled residuals from fitted generalized linear mixed
+    models. Currently supported are lme4, glm (except quasi-distributions) and lm model 
+    classes. The resulting residuals are standardized to values between 0 and 1 and 
+    can be interpreted as intuitively as residuals from a linear regression. The package 
+    also provides a number of plot and test functions for typical model mispecification
+    problem, such as over/underdispersion, zero-inflation, and spatial and temporal
+    autocorrelation.
 Depends:
     R (>= 3.0.0)
 Imports:

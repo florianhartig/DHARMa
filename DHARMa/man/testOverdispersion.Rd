@@ -2,23 +2,25 @@
 % Please edit documentation in R/testsResiduals.R
 \name{testOverdispersion}
 \alias{testOverdispersion}
-\title{Simulated overdipersion test}
+\title{Test for over/underdispersion}
 \usage{
 testOverdispersion(simulationOutput, alternative = "overdispersion",
-  print = F, plot = F)
+  plot = F)
 }
 \arguments{
-\item{alternative}{whether to test for overdispersion, underdispersion, or both}
+\item{simulationOutput}{an object with simulated residuals created by \code{\link{simulateResiduals}}}
 
-\item{model}{a fitted model object. See details for possible models}
+\item{alternative}{whether to test for "overdispersion", "underdispersion", or "both"}
+
+\item{plot}{whether to plot output}
 }
 \description{
-Simulated overdipersion test
+This function performs a simulation-based test for over/underdispersion
 }
 \details{
-This test compares the approximate deviance (via squared pearson residuals) with the same quantity from a number of simulated models.
+This test compares the approximate deviance (via squared pearson residuals) with the same quantity from a number of simulated models. It is MUCH slower than the parametric alternative \code{\link{testOverdispersionParametric}}, but potentially more exact in situations where one would expect problems with the chi2 test employed in the parametric test
 }
 \seealso{
-\code{\link{testSimulatedResiduals}}, \code{\link{testSimulatedResiduals}}, \code{\link{testZeroInflation}}, \code{\link{testTemporalAutocorrelation}}, \code{\link{testSpatialAutocorrelation}}
+\code{\link{testSimulatedResiduals}}, \code{\link{testSimulatedResiduals}}, \code{\link{testZeroInflation}}, \code{\link{testTemporalAutocorrelation}}, \code{\link{testSpatialAutocorrelation}}, \code{\link{testOverdispersionParametric}}
 }
 

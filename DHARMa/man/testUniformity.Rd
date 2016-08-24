@@ -2,7 +2,7 @@
 % Please edit documentation in R/testsResiduals.R
 \name{testUniformity}
 \alias{testUniformity}
-\title{Tests residuals against a uniform distribution}
+\title{Test for overall uniformity}
 \usage{
 testUniformity(simulationOutput, print = T)
 }
@@ -12,12 +12,12 @@ testUniformity(simulationOutput, print = T)
 \item{print}{whether to print output}
 }
 \description{
-Tests residuals against a uniform distribution
+This function tests the overall uniformity of the residuals
 }
 \details{
 Tests residuals against a uniform distribution with the KS test
 }
 \seealso{
-\code{\link{testSimulatedResiduals}}, \code{\link{testZeroInflation}}, \code{\link{testTemporalAutocorrelation}}, \code{\link{testSpatialAutocorrelation}}, \code{\link{testOverdispersion}}
+\code{\link{testSimulatedResiduals}}, \code{\link{testZeroInflation}}, \code{\link{testTemporalAutocorrelation}}, \code{\link{testSpatialAutocorrelation}}, \code{\link{testOverdispersion}}, \code{\link{testOverdispersionParametric}}
 }
 

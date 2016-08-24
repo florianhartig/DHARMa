@@ -1,6 +1,15 @@
-#' creates Poisson data overdispersion and random intercept
+#' DHARMa standard residual plots
+#' 
+#' This function creates standard plots for the simulated residuals
 #' @param simulationOutput an object with simualted residuals created by \code{\link{simulateResiduals}}
-#' @param quantreg whether to perform a quantile regression on 0.25, 0.5, 0.75
+#' @param quantreg whether to perform a quantile regression on 0.25, 0.5, 0.75. If F, a spline will be created instead
+#' @details The function creates two plots. To the left, a qq-uniform plot to detect deviations from overall uniformity of the residuals, and to the right a plot of residuals against predicted values. For a correctly specified model we would expect 
+#' 
+#' a) a uniform (flat) distribution of the overall residuals, evidenced by a straight line in the qq-plot
+#' 
+#' b) uniformity in y direction if we plot against any predictor, including the predicted value.
+#' 
+#' To provide a visual aid in detecting deviations from uniformity in y-direction, the plot of the residuals against the predited values also performs an (optional) quantile regression, which provides 0.25, 0.5 and 0.75 quantile lines across the plots. These lines should be straight, horizontal, and at y-values of 0.25, 0.5 and 0.75.
 #' @seealso \code{\link{plotResiduals}}
 #' @import graphics
 #' @import utils
@@ -11,7 +20,7 @@ plotSimulatedResiduals <- function(simulationOutput, quantreg = T){
   
   gap::qqunif(simulationOutput$scaledResiduals,pch=2,bty="n", logscale = F, col = "black", cex = 0.6, main = "QQ plot residuals", cex.main = 1)
 
-  plotResiduals(simulationOutput$fittedPredictedResponse, simulationOutput$scaledResiduals, xlab = "Predicted value", ylab = "Standardized residual", main = "Residual vs. predicted\n0.25, 0.5, 0.75 quantile lines\nshould be straight", cex.main = 1)
+  plotResiduals(simulationOutput$fittedPredictedResponse, simulationOutput$scaledResiduals, xlab = "Predicted value", ylab = "Standardized residual", main = "Residual vs. predicted\n0.25, 0.5, 0.75 quantile lines\nshould be straight", cex.main = 1, quantreg = quantreg)
   
   mtext("DHARMa scaled residual plots", outer = T)
   
@@ -20,10 +29,14 @@ plotSimulatedResiduals <- function(simulationOutput, quantreg = T){
 
 
 #' Generic residual plot with either spline or quantile regression
+#' 
+#' The function creates a generic residual plot with either spline or quantile regression
+#' 
 #' @param pred predictor variable
 #' @param residual residual variable
-#' @param quantreg should a quantile regression be performed. If F, a smooth spline will be 
+#' @param quantreg should a quantile regression be performed. If F, a smooth spline will be plotted
 #' @param ... additional arguments to plot
+#' @details For a correctly specified model, we would expect uniformity in y direction when plotting against any predictor.
 #' @seealso \code{\link{plotSimulatedResiduals}}
 #' @export
 plotResiduals <- function(pred, residual, quantreg = T, ...){
@@ -60,7 +73,10 @@ p[[i]] <- qrnn::qrnn.predict(as.matrix(sort(pred)), w[[i]])
 #plotConcentionalResiduals(fittedModel)
 
 
+#' Conventional residual plot
+#' 
 #' Convenience function to draw conventional residual plots
+#' 
 #' @param fittedModel a fitted model object
 #' @export
 plotConventionalResiduals <- function(fittedModel){

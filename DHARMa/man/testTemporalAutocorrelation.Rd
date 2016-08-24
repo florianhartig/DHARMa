@@ -4,19 +4,17 @@
 \alias{testTemporalAutocorrelation}
 \title{Test for temporal autocorrelation}
 \usage{
-testTemporalAutocorrelation(simulationOutput, time, print = T, plot = T)
+testTemporalAutocorrelation(simulationOutput, time, plot = T)
 }
 \arguments{
 \item{simulationOutput}{an object with simulated residuals created by \code{\link{simulateResiduals}}}
 
 \item{time}{the time, in the same order as the data points. If set to "random", random values will be created}
 
-\item{print}{whether to print output}
-
 \item{plot}{whether to plot output}
 }
 \description{
-Test for temporal autocorrelation
+This function performs a standard test for temporal autocorrelation on the simulated residuals
 }
 \details{
 The function performs a Durbin-Watson test on the uniformly scaled residuals, and plots the residuals against time. The DB test was originally be designed for normal residuals. In simulations, I didn't see a problem with this setting though. The alternative is to transform the uniform residuals to normal residuals and perform the DB test on those.
@@ -25,6 +23,6 @@ The function performs a Durbin-Watson test on the uniformly scaled residuals, an
 It is possible to not specify x and y. In this case, random x and y values are created. The sense of this option is to test the rate of false positives under the current residual structure (random x/y corresponds to H0: no spatial autocorrelation). This may be useful because it may be that the test doesn't have noninal error rates due to some problem in the residual structure that is different from spatial autocorrelation
 }
 \seealso{
-\code{\link{testUniformity}}, \code{\link{testZeroInflation}}, \code{\link{testSimulatedResiduals}}, \code{\link{testSpatialAutocorrelation}}, \code{\link{testOverdispersion}}
+\code{\link{testUniformity}}, \code{\link{testZeroInflation}}, \code{\link{testSimulatedResiduals}}, \code{\link{testSpatialAutocorrelation}}, \code{\link{testOverdispersion}}, \code{\link{testOverdispersionParametric}}
 }
 

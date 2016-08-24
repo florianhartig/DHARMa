@@ -2,7 +2,7 @@
 % Please edit documentation in R/testsResiduals.R
 \name{testSimulatedResiduals}
 \alias{testSimulatedResiduals}
-\title{Wrapper for the various test functions}
+\title{Residual tests}
 \usage{
 testSimulatedResiduals(simulationOutput)
 }
@@ -10,15 +10,12 @@ testSimulatedResiduals(simulationOutput)
 \item{simulationOutput}{an object with simulated residuals created by \code{\link{simulateResiduals}}}
 }
 \description{
-Wrapper for the various test functions
+This is intended as a wrapper for the various test functions. Currently, this function calls only the \code{\link{testUniformity}} function. Other tests (see below) have to be called by hand
 }
 \details{
 Currently, this function calls only the \code{\link{testUniformity}} function. All other tests (see below) have to be called by hand.
 }
-\note{
-for special problems, in particular overdispersion, a \code{\link{parametricDispersionTest}} will likely be more powerful
-}
 \seealso{
-\code{\link{testUniformity}}, \code{\link{testZeroInflation}}, \code{\link{testTemporalAutocorrelation}}, \code{\link{testSpatialAutocorrelation}}, \code{\link{testOverdispersion}}
+\code{\link{testUniformity}}, \code{\link{testZeroInflation}}, \code{\link{testTemporalAutocorrelation}}, \code{\link{testSpatialAutocorrelation}}, \code{\link{testOverdispersion}}, \code{\link{testOverdispersionParametric}}
 }
 

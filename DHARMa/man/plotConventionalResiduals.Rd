@@ -2,7 +2,7 @@
 % Please edit documentation in R/plotResiduals.R
 \name{plotConventionalResiduals}
 \alias{plotConventionalResiduals}
-\title{Convenience function to draw conventional residual plots}
+\title{Conventional residual plot}
 \usage{
 plotConventionalResiduals(fittedModel)
 }

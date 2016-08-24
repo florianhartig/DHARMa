@@ -11,12 +11,15 @@ plotResiduals(pred, residual, quantreg = T, ...)
 
 \item{residual}{residual variable}
 
-\item{quantreg}{should a quantile regression be performed. If F, a smooth spline will be}
+\item{quantreg}{should a quantile regression be performed. If F, a smooth spline will be plotted}
 
 \item{...}{additional arguments to plot}
 }
 \description{
-Generic residual plot with either spline or quantile regression
+The function creates a generic residual plot with either spline or quantile regression
+}
+\details{
+For a correctly specified model, we would expect uniformity in y direction when plotting against any predictor.
 }
 \seealso{
 \code{\link{plotSimulatedResiduals}}

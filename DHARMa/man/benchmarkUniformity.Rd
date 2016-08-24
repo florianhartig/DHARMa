@@ -2,10 +2,9 @@
 % Please edit documentation in R/benchmarkUniformity.R
 \name{benchmarkUniformity}
 \alias{benchmarkUniformity}
-\title{Runs simulation to confirm uniformity of residuals under H0}
+\title{Uniformity benchmarks}
 \usage{
-benchmarkUniformity(dataModelCreator, nSim = 100, plot = T, refit = F,
-  ...)
+benchmarkUniformity(dataModelCreator, nSim = 100, plot = T, ...)
 }
 \arguments{
 \item{plot}{should a plot be created}
@@ -17,7 +16,13 @@ benchmarkUniformity(dataModelCreator, nSim = 100, plot = T, refit = F,
 \item{nsim}{number of simulations}
 }
 \description{
-Runs simulation to confirm uniformity of residuals under H0
+This function runs simulation to confirm uniformity of residuals under H0
+}
+\details{
+This function runs repeated simulations to test of residuals are really uniform if the data-creating process and the model that is used to fit the data are identical
+}
+\note{
+The benchmark function in DHARMa are intended for development purposes, and for users that want to test / confirm the properties of functions in DHARMa. If you are running an applied data analysis, they are probably of little use.
 }
 \examples{
 library(lme4)
@@ -30,5 +35,8 @@ dataModelCreator <- function(){
 }
 
 benchmarkUniformity(dataModelCreator = dataModelCreator, nSim = 5)
+}
+\seealso{
+\code{\link{benchmarkOverdispersion}}
 }
 

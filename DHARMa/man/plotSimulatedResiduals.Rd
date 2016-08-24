@@ -2,17 +2,26 @@
 % Please edit documentation in R/plotResiduals.R
 \name{plotSimulatedResiduals}
 \alias{plotSimulatedResiduals}
-\title{creates Poisson data overdispersion and random intercept}
+\title{DHARMa standard residual plots}
 \usage{
 plotSimulatedResiduals(simulationOutput, quantreg = T)
 }
 \arguments{
 \item{simulationOutput}{an object with simualted residuals created by \code{\link{simulateResiduals}}}
 
-\item{quantreg}{whether to perform a quantile regression on 0.25, 0.5, 0.75}
+\item{quantreg}{whether to perform a quantile regression on 0.25, 0.5, 0.75. If F, a spline will be created instead}
 }
 \description{
-creates Poisson data overdispersion and random intercept
+This function creates standard plots for the simulated residuals
+}
+\details{
+The function creates two plots. To the left, a qq-uniform plot to detect deviations from overall uniformity of the residuals, and to the right a plot of residuals against predicted values. For a correctly specified model we would expect 
+
+a) a uniform (flat) distribution of the overall residuals, evidenced by a straight line in the qq-plot
+
+b) uniformity in y direction if we plot against any predictor, including the predicted value.
+
+To provide a visual aid in detecting deviations from uniformity in y-direction, the plot of the residuals against the predited values also performs an (optional) quantile regression, which provides 0.25, 0.5 and 0.75 quantile lines across the plots. These lines should be straight, horizontal, and at y-values of 0.25, 0.5 and 0.75.
 }
 \seealso{
 \code{\link{plotResiduals}}

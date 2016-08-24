@@ -1,11 +1,17 @@
-#' Runs simulation to confirm uniformity of residuals under H0
+#' Uniformity benchmarks
+#' 
+#' This function runs simulation to confirm uniformity of residuals under H0
+#' 
 #' @param dataCreator a function that returns a list with two elements, data and model. See help for details
 #' @param nsim number of simulations
 #' @param plot should a plot be created
 #' @param ... parameters to pass on to \code{\link{simulateResiduals}}
+#' @details This function runs repeated simulations to test of residuals are really uniform if the data-creating process and the model that is used to fit the data are identical
+#' @note The benchmark function in DHARMa are intended for development purposes, and for users that want to test / confirm the properties of functions in DHARMa. If you are running an applied data analysis, they are probably of little use. 
 #' @export
+#' @seealso \code{\link{benchmarkOverdispersion}}
 #' @example inst/examples/benchmarkUniformityHelp.R
-benchmarkUniformity <- function(dataModelCreator,  nSim = 100, plot = T, refit = F, ...){
+benchmarkUniformity <- function(dataModelCreator,  nSim = 100, plot = T, ...){
   
   nData = nrow(dataModelCreator()$data)  
   
@@ -22,10 +28,9 @@ benchmarkUniformity <- function(dataModelCreator,  nSim = 100, plot = T, refit =
     
     testData = temp$data
     fittedModel <- temp$model
-    simResults = simulateResiduals(fittedModel = fittedModel, refit = F, n=250, ...)
+    simResults = simulateResiduals(fittedModel = fittedModel, n=250, ...)
     out[i,] = simResults$scaledResiduals
     predicted[i,] =  simResults$fittedPredictedResponse
-    #outRefit[i,] = simulateResiduals(fittedModel = fittedModel, n = 10, refit = T)$scaledResiduals
   }
   
   if(plot == T){
