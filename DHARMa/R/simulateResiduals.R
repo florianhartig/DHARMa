@@ -51,9 +51,12 @@ simulateResiduals <- function(fittedModel, n = 250, refit = F, integerResponse =
   out$nSim = n
   out$refit = refit
   out$observedResponse = model.frame(fittedModel)[,1]
-  out$fittedPredictedResponse = predict(fittedModel, type = "response", re.form = ~0)
   
-  if("glm" %in% class(fittedModel)[1]){
+  ## following block re-used below, create function for this 
+  
+  out$fittedPredictedResponse = predict(fittedModel, type = "response", re.form = ~0) # sensible to have re-form set to ~0?
+  
+  if(class(fittedModel)[1] %in% c("glm", "lm") ){
     out$fittedFixedEffects = coef(fittedModel)
   }
   
@@ -64,11 +67,13 @@ simulateResiduals <- function(fittedModel, n = 250, refit = F, integerResponse =
 
   out$fittedResiduals = residuals(fittedModel, type = "response")
   
-  simulations = simulate(fittedModel, nsim = n, use.u =F)
+  simulations = simulate(fittedModel, nsim = n, ...)
   
-  if(is.vector(simulations[[1]]))  out$simulatedResponse = data.matrix(simulations)  
-  else if (is.matrix(simulations[[1]])) out$simulatedResponse = as.matrix(simulations)[,seq(1, (2*n), by = 2)]
-  else stop("wrong class")
+  if(is.vector(simulations[[1]])){
+    out$simulatedResponse = data.matrix(simulations) 
+  } else if (is.matrix(simulations[[1]])){
+    out$simulatedResponse = as.matrix(simulations)[,seq(1, (2*n), by = 2)]
+  } else stop("wrong class")
   
   out$scaledResiduals = rep(NA, out$nObs)
 
@@ -85,6 +90,9 @@ simulateResiduals <- function(fittedModel, n = 250, refit = F, integerResponse =
     
   } else {
     
+    # make sure that we use here the same random effect options as for simulate
+    out$fittedPredictedResponse = predict(fittedModel, type = "response", ... ) # sensible to have re-form set to ~0?
+    
     # Adding new outputs
     
     out$refittedPredictedResponse <- matrix(nrow = out$nObs, ncol = n )  
@@ -96,10 +104,29 @@ simulateResiduals <- function(fittedModel, n = 250, refit = F, integerResponse =
     newData <-model.frame(fittedModel)  
     
     for (i in 1:n){
-      newData[,1] = out$simulatedResponse[,i]
-      refittedModel = update(fittedModel, data = newData )
+      
+      simObserved = simulations[[i]]
+      
+      if(is.vector(simObserved)){
+        newData[,1] = simObserved
+      } else {
+        # Hack to make the binomial n/k case work
+        newData[[1]] = NULL
+        newData = cbind(simObserved, newData)
+      }
+      
+      refittedModel = update(fittedModel, data = newData)
       out$refittedPredictedResponse[,i] = predict(refittedModel, type = "response")
-      out$refittedFixedEffects[,i]  = fixef(refittedModel)
+      
+      if(class(fittedModel)[1] %in% c("glm", "lm") ){
+        out$refittedFixedEffects[,i]  = coef(refittedModel)
+      }
+      
+      if(class(fittedModel)[1] %in% c("glmerMod", "lmerMod")){
+        out$refittedFixedEffects[,i]  = fixef(refittedModel)
+        #out$fittedRandomEffects = ranef(fittedModel) ## returns random effects
+      }
+      
       out$refittedResiduals[,i] = residuals(refittedModel, type = "response")
       out$refittedPearsonResiduals[,i] = residuals(refittedModel, type = "pearson")
       #out$refittedRandomEffects[,i]  = ranef(refittedModel)
@@ -126,4 +153,7 @@ simulateResiduals <- function(fittedModel, n = 250, refit = F, integerResponse =
 }
 
 getPossibleModels<-function()c("lm", "glm", "lmerMod", "glmerMod") 
+
+
+
 
