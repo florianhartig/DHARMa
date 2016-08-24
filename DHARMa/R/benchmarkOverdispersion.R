@@ -3,7 +3,7 @@
 #' This function runs Power / Type I error simulations for overdispersion tests in DHARMa
 #' 
 #' @param overdispersion amount of overdispersion
-#' @param n replicates
+#' @param nRep replicates
 #' @param alpha significance level
 #' @param plot whether to do a plot
 #' @param parallel whether to use parallel computations. Possible values are F, T (parallel cores set to number of cores in the computer -1), or an integer number for the number of cores that should be used
@@ -12,7 +12,7 @@
 #' @seealso \code{\link{benchmarkUniformity}}
 #' @note The benchmark function in DHARMa are intended for development purposes, and for users that want to test / confirm the properties of functions in DHARMa. If you are running an applied data analysis, they are probably of little use. 
 #' @export 
-benchmarkOverdispersion <- function(dispersionValues = 0, n = 10, alpha = 0.05, plot = T, parallel = F, ...){
+benchmarkOverdispersion <- function(dispersionValues = 0, nRep = 10, alpha = 0.05, plot = T, parallel = F, ...){
   
     library(lme4)
   
@@ -23,12 +23,9 @@ benchmarkOverdispersion <- function(dispersionValues = 0, n = 10, alpha = 0.05, 
     positiveDharmaNonparametric = numeric(length(dispersionValues))
     
     for(j in 1:length(dispersionValues)){
-  
-      out = matrix(nrow = n, ncol = 3)
       
-      
-      getP <- function(){
-        testData = createData(sampleSize = 250, fixedEffects = c(1,0.2,0.1,0.02), quadraticFixedEffects = c(0.1,-0.4,0.2,-0.1), overdispersion = dispersionValues[j], family = poisson())
+      getP <- function(...){
+        testData = createData(sampleSize = 250, fixedEffects = c(1,0.2,0.1,0.02), quadraticFixedEffects = c(0.1,-0.4,0.2,-0.1), overdispersion = dispersionValues[j], family = poisson(), ...)
         
         fittedModel <- glmer(observedResponse ~ Environment1 + I(Environment1^2) + Environment2 + I(Environment2^2) + Environment3 + I(Environment3^2) + Environment4 + I(Environment4^2) + (1|group) , family = "poisson", data = testData)
         
@@ -41,14 +38,14 @@ benchmarkOverdispersion <- function(dispersionValues = 0, n = 10, alpha = 0.05, 
         out[2] = testOverdispersionParametric(model = fittedModel)$p.value
         
         simulationOutput <- simulateResiduals(fittedModel = simulationOutput$fittedModel, refit = T, ...)
-        x = testOverdispersion(simulationOutput, plot = F, print = F)
+        x = testOverdispersion(simulationOutput, plot = F)
         out[3] = x$p.value
         return(out)
       }
       
         
       if (parallel == F){
-        out = replicate(2, getP(), simplify = "array")
+        out = replicate(nRep, getP(), simplify = "array", ...)
         out = t(out)
       }else{
         library(foreach)
@@ -63,7 +60,7 @@ benchmarkOverdispersion <- function(dispersionValues = 0, n = 10, alpha = 0.05, 
         cl <- parallel::makeCluster(cores)
         doParallel::registerDoParallel(cl)
         
-        out <- foreach::foreach(i=1:n, .packages=c("lme4", "DHARMa") , .combine = rbind) %dopar% getP()
+        out <- foreach::foreach(i=1:nRep, .packages=c("lme4", "DHARMa") , .combine = rbind) %dopar% getP(...)
         
         parallel::stopCluster(cl = cl)
         

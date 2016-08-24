@@ -24,10 +24,10 @@ set.seed(123)
 ## Overdispersion
 
 
-```{r}
+```{r powerTest, message = F, warning=F, result = "hide"}
 rm(list = ls(all = T))
-dispersionValues = seq(0,1.2, len = 20)
-out = benchmarkOverdispersion(dispersionValues, n = 200, parallel = 20)
+dispersionValues = seq(0,1.2, len = 2)
+out = benchmarkOverdispersion(dispersionValues, nRep = 5, parallel = 5)
 ```
 
 
@@ -50,8 +50,8 @@ getPTemporal <- function(strength=3, n=25, alpha = 0.05){
       
       fittedModel <- lm(observedResponse ~ Environment1, data = testData )
       simulationOutput <- simulateResiduals(fittedModel = fittedModel)
-      pValues[i] <- testTemporalAutocorrelation(simulationOutput = simulationOutput, time = testData$time, plot = F, print = F)$p.value
-      pValuesH0[i] <- testTemporalAutocorrelation(simulationOutput = simulationOutput, time = "random", plot = F, print = F)$p.value
+      pValues[i] <- testTemporalAutocorrelation(simulationOutput = simulationOutput, time = testData$time, plot = F)$p.value
+      pValuesH0[i] <- testTemporalAutocorrelation(simulationOutput = simulationOutput, time = "random", plot = F)$p.value
   }
   sig = sum(pValues<alpha) / n
   sigH0 = sum(pValuesH0<alpha) / n
@@ -90,8 +90,8 @@ getPSpatial <- function(strength=3, n=25, alpha = 0.05){
       
       fittedModel <- lm(observedResponse ~ Environment1, data = testData )
       simulationOutput <- simulateResiduals(fittedModel = fittedModel)
-      pValues[i] <- testSpatialAutocorrelation(simulationOutput = simulationOutput, x = testData$x, y = testData$y, plot = F, print = F)$p.value
-      pValuesH0[i] <- testSpatialAutocorrelation(simulationOutput = simulationOutput, x = "random",  y = testData$y, plot = F, print = F)$p.value
+      pValues[i] <- testSpatialAutocorrelation(simulationOutput = simulationOutput, x = testData$x, y = testData$y, plot = F)$p.value
+      pValuesH0[i] <- testSpatialAutocorrelation(simulationOutput = simulationOutput, x = "random",  y = testData$y, plot = F)$p.value
   }
   sig = sum(pValues<alpha) / n
   sigH0 = sum(pValuesH0<alpha) / n

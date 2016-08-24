@@ -17,14 +17,12 @@ testSimulatedResiduals <- function(simulationOutput){
 #' This function tests the overall uniformity of the residuals
 #' 
 #' @param simulationOutput an object with simulated residuals created by \code{\link{simulateResiduals}}
-#' @param print whether to print output
 #' @details Tests residuals against a uniform distribution with the KS test 
 #' @seealso \code{\link{testSimulatedResiduals}}, \code{\link{testZeroInflation}}, \code{\link{testTemporalAutocorrelation}}, \code{\link{testSpatialAutocorrelation}}, \code{\link{testOverdispersion}}, \code{\link{testOverdispersionParametric}}
 #' @export
-testUniformity<- function(simulationOutput, print = T){
+testUniformity<- function(simulationOutput){
   
   out <- suppressWarnings(ks.test(simulationOutput$scaledResiduals, 'punif'))
-  if(print == T) out
   return(out)
 }
 
