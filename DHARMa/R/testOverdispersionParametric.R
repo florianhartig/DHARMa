@@ -22,6 +22,10 @@
 #' @export
 testOverdispersionParametric <- function(model){
   
+  if(class(model)[1] %in% c("lm", "glm")){
+    return("Parametric overdispersion test not implemented for this model type")
+  }
+  
   ## number of variance parameters in
   ##   an n-by-n variance-covariance matrix
   vpars <- function(m) {
