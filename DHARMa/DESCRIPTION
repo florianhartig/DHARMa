@@ -23,11 +23,13 @@ Imports:
     lmtest,
     ape,
     sfsmisc,
-    MASS
+    MASS,
+    doParallel,
+    foreach
 Suggests:
-    lme4,
     aods3,
     knitr,
+    lme4,
     testthat
 License: GPL (>= 3)
 URL: https://github.com/florianhartig/DHARMa

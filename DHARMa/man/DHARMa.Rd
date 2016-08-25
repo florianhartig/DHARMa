@@ -15,6 +15,6 @@ See index / vignette for details
 vignette("Demo", package="DHARMa")
 }
 \seealso{
-\code{\link{simulatedResiduals}}
+\code{\link{simulateResiduals}}
 }
 

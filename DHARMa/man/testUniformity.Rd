@@ -4,12 +4,10 @@
 \alias{testUniformity}
 \title{Test for overall uniformity}
 \usage{
-testUniformity(simulationOutput, print = T)
+testUniformity(simulationOutput)
 }
 \arguments{
 \item{simulationOutput}{an object with simulated residuals created by \code{\link{simulateResiduals}}}
-
-\item{print}{whether to print output}
 }
 \description{
 This function tests the overall uniformity of the residuals

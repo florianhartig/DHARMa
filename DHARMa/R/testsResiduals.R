@@ -39,7 +39,7 @@ testUniformity<- function(simulationOutput){
 #' @export
 testOverdispersion <- function(simulationOutput, alternative = "overdispersion", plot = F){
   
-  if(is.null(simulationOutput$refittedPearsonResiduals)) stop("Overdispersion test requires a simulation object with refit = T")
+  if(simulationOutput$refit == F) stop("Overdispersion test requires simulated residuals with refit = T")
   
   observed = sum(residuals(simulationOutput$fittedModel, type = "pearson")^2)
   

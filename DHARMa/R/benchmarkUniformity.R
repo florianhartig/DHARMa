@@ -2,8 +2,8 @@
 #' 
 #' This function runs simulation to confirm uniformity of residuals under H0
 #' 
-#' @param dataCreator a function that returns a list with two elements, data and model. See help for details
-#' @param nsim number of simulations
+#' @param dataModelCreator a function that returns a list with two elements, data and model. See help for details
+#' @param nSim number of simulations
 #' @param plot should a plot be created
 #' @param ... parameters to pass on to \code{\link{simulateResiduals}}
 #' @details This function runs repeated simulations to test of residuals are really uniform if the data-creating process and the model that is used to fit the data are identical
@@ -14,11 +14,7 @@
 benchmarkUniformity <- function(dataModelCreator,  nSim = 100, plot = T, ...){
   
   nData = nrow(dataModelCreator()$data)  
-  
-  out = list()
-  
-  out$residuals
-  
+
   out = matrix(NA, nrow = nSim, ncol = nData)
   predicted =  matrix(NA, nrow = nSim, ncol = nData)
   outRefit = matrix(NA, nrow = nSim, ncol = nData)
@@ -36,9 +32,12 @@ benchmarkUniformity <- function(dataModelCreator,  nSim = 100, plot = T, ...){
   if(plot == T){
     oldpar <- par(mfrow = c(5,5))
     hist(out, breaks = 50, col = "red", main = paste("mean of", nSim, "simulations"))
-    for (i in 1:24) hist(out[i,], breaks = 50, freq = F, main = i)
+    for (i in 1:min(nSim, 24)) hist(out[i,], breaks = 50, freq = F, main = i)
     par(oldpar)    
   }
+  
+  return(list(residuals = out, predictedResponse = predicted))
+  
 }
 
 

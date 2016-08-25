@@ -2,7 +2,7 @@
 #' 
 #' This function runs Power / Type I error simulations for overdispersion tests in DHARMa
 #' 
-#' @param overdispersion amount of overdispersion
+#' @param dispersionValues amount of overdispersion
 #' @param nRep replicates
 #' @param alpha significance level
 #' @param plot whether to do a plot
@@ -12,9 +12,8 @@
 #' @seealso \code{\link{benchmarkUniformity}}
 #' @note The benchmark function in DHARMa are intended for development purposes, and for users that want to test / confirm the properties of functions in DHARMa. If you are running an applied data analysis, they are probably of little use. 
 #' @export 
+#' @importFrom foreach "%dopar%"
 benchmarkOverdispersion <- function(dispersionValues = 0, nRep = 10, alpha = 0.05, plot = T, parallel = F, ...){
-  
-    library(lme4)
   
     values = list()
 
@@ -27,7 +26,7 @@ benchmarkOverdispersion <- function(dispersionValues = 0, nRep = 10, alpha = 0.0
       getP <- function(...){
         testData = createData(sampleSize = 250, fixedEffects = c(1,0.2,0.1,0.02), quadraticFixedEffects = c(0.1,-0.4,0.2,-0.1), overdispersion = dispersionValues[j], family = poisson(), ...)
         
-        fittedModel <- glmer(observedResponse ~ Environment1 + I(Environment1^2) + Environment2 + I(Environment2^2) + Environment3 + I(Environment3^2) + Environment4 + I(Environment4^2) + (1|group) , family = "poisson", data = testData)
+        fittedModel <- lme4::glmer(observedResponse ~ Environment1 + I(Environment1^2) + Environment2 + I(Environment2^2) + Environment3 + I(Environment3^2) + Environment4 + I(Environment4^2) + (1|group) , family = "poisson", data = testData)
         
         
         simulationOutput <- simulateResiduals(fittedModel = fittedModel, ...)
@@ -48,7 +47,6 @@ benchmarkOverdispersion <- function(dispersionValues = 0, nRep = 10, alpha = 0.0
         out = replicate(nRep, getP(), simplify = "array", ...)
         out = t(out)
       }else{
-        library(foreach)
         if (parallel == T | parallel == "auto"){
           cores <- parallel::detectCores() - 1
           message("parallel, set cores automatically to ", cores)
@@ -60,7 +58,7 @@ benchmarkOverdispersion <- function(dispersionValues = 0, nRep = 10, alpha = 0.0
         cl <- parallel::makeCluster(cores)
         doParallel::registerDoParallel(cl)
         
-        out <- foreach::foreach(i=1:nRep, .packages=c("lme4", "DHARMa") , .combine = rbind) %dopar% getP(...)
+        out <- foreach::foreach(i=1:nRep, .packages=c("lme4", "DHARMa") , .combine = rbind) %dopar% getP(...) 
         
         parallel::stopCluster(cl = cl)
         

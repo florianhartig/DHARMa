@@ -8,7 +8,7 @@ createData(replicates = 1, sampleSize = 10, intercept = 0,
   fixedEffects = 1, quadraticFixedEffects = NULL, numGroups = 10,
   randomEffectVariance = 1, overdispersion = 0, family = poisson(),
   scale = 1, cor = 0, roundPoissonVariance = NULL, pZeroInflation = 0,
-  bionomialTrials = 1, temporalAutocorrelation = 0,
+  binomialTrials = 1, temporalAutocorrelation = 0,
   spatialAutocorrelation = 0)
 }
 \arguments{
@@ -39,6 +39,10 @@ createData(replicates = 1, sampleSize = 10, intercept = 0,
 \item{pZeroInflation}{probability to set any data point to zero}
 
 \item{binomialTrials}{Number of trials for the binomial. Only active if family == binomial}
+
+\item{temporalAutocorrelation}{strength of temporalAutocorrelation}
+
+\item{spatialAutocorrelation}{strength of spatial Autocorrelation}
 }
 \description{
 This function creates synthetic dataset with various problems such as overdispersion, zero-inflation, etc.
@@ -66,14 +70,15 @@ hist(testData$observedResponse)
 
 testData = createData(sampleSize = 40, intercept = 2, fixedEffects = c(1), 
                       overdispersion = 0, family = binomial(), quadraticFixedEffects = c(-3), 
-                      randomEffectVariance = 0, bionomialTrials = 20)
+                      randomEffectVariance = 0, binomialTrials = 20)
 
 plot(observedResponse1 / observedResponse0 ~ Environment1, data = testData, ylab = "Proportion 1")
 
 
 # spatial / temporal correlation
 
-testData = createData(sampleSize = 100, family = poisson(), spatialAutocorrelation = 3000, temporalAutocorrelation = 3)
+testData = createData(sampleSize = 100, family = poisson(), spatialAutocorrelation = 3, 
+                      temporalAutocorrelation = 3)
 
 plot(log(observedResponse) ~ time, data = testData)
 plot(log(observedResponse) ~ x, data = testData)

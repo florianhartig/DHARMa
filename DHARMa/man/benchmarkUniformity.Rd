@@ -7,13 +7,13 @@
 benchmarkUniformity(dataModelCreator, nSim = 100, plot = T, ...)
 }
 \arguments{
+\item{dataModelCreator}{a function that returns a list with two elements, data and model. See help for details}
+
+\item{nSim}{number of simulations}
+
 \item{plot}{should a plot be created}
 
 \item{...}{parameters to pass on to \code{\link{simulateResiduals}}}
-
-\item{dataCreator}{a function that returns a list with two elements, data and model. See help for details}
-
-\item{nsim}{number of simulations}
 }
 \description{
 This function runs simulation to confirm uniformity of residuals under H0

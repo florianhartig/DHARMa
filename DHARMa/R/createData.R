@@ -14,9 +14,11 @@
 #' @param roundPoissonVariance if set, this creates a uniform noise on the possion response. The aim of this is to create heteroscedasticity
 #' @param pZeroInflation probability to set any data point to zero
 #' @param binomialTrials Number of trials for the binomial. Only active if family == binomial
+#' @param temporalAutocorrelation strength of temporalAutocorrelation
+#' @param spatialAutocorrelation strength of spatial Autocorrelation
 #' @export
 #' @example /inst/examples/createDataHelp.R
-createData <- function(replicates=1, sampleSize = 10, intercept = 0, fixedEffects = 1, quadraticFixedEffects = NULL, numGroups = 10, randomEffectVariance = 1, overdispersion = 0, family = poisson(), scale = 1, cor = 0, roundPoissonVariance = NULL,  pZeroInflation = 0, bionomialTrials = 1, temporalAutocorrelation = 0, spatialAutocorrelation =0){
+createData <- function(replicates=1, sampleSize = 10, intercept = 0, fixedEffects = 1, quadraticFixedEffects = NULL, numGroups = 10, randomEffectVariance = 1, overdispersion = 0, family = poisson(), scale = 1, cor = 0, roundPoissonVariance = NULL,  pZeroInflation = 0, binomialTrials = 1, temporalAutocorrelation = 0, spatialAutocorrelation =0){
   
   nPredictors = length(fixedEffects)
   
@@ -99,8 +101,8 @@ createData <- function(replicates=1, sampleSize = 10, intercept = 0, fixedEffect
 
     if (family$family == "gaussian") observedResponse = rnorm(n = sampleSize, mean = linkResponse, sd = scale)  
     else if (family$family == "binomial"){
-      observedResponse = rbinom(n = sampleSize, bionomialTrials, prob = linkResponse)
-      if (bionomialTrials > 1) observedResponse = cbind(observedResponse1 = observedResponse, observedResponse0 = bionomialTrials - observedResponse)
+      observedResponse = rbinom(n = sampleSize, binomialTrials, prob = linkResponse)
+      if (binomialTrials > 1) observedResponse = cbind(observedResponse1 = observedResponse, observedResponse0 = binomialTrials - observedResponse)
     }
     else if (family$family == "poisson") {
       if(is.null(roundPoissonVariance)) observedResponse = rpois(n = sampleSize, lambda = linkResponse)

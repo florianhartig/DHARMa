@@ -20,14 +20,15 @@ hist(testData$observedResponse)
 
 testData = createData(sampleSize = 40, intercept = 2, fixedEffects = c(1), 
                       overdispersion = 0, family = binomial(), quadraticFixedEffects = c(-3), 
-                      randomEffectVariance = 0, bionomialTrials = 20)
+                      randomEffectVariance = 0, binomialTrials = 20)
 
 plot(observedResponse1 / observedResponse0 ~ Environment1, data = testData, ylab = "Proportion 1")
 
 
 # spatial / temporal correlation
 
-testData = createData(sampleSize = 100, family = poisson(), spatialAutocorrelation = 3000, temporalAutocorrelation = 3)
+testData = createData(sampleSize = 100, family = poisson(), spatialAutocorrelation = 3, 
+                      temporalAutocorrelation = 3)
 
 plot(log(observedResponse) ~ time, data = testData)
 plot(log(observedResponse) ~ x, data = testData)

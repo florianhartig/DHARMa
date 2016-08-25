@@ -4,11 +4,13 @@
 \alias{benchmarkOverdispersion}
 \title{Overdispersion benchmarks}
 \usage{
-benchmarkOverdispersion(dispersionValues = 0, n = 10, alpha = 0.05,
+benchmarkOverdispersion(dispersionValues = 0, nRep = 10, alpha = 0.05,
   plot = T, parallel = F, ...)
 }
 \arguments{
-\item{n}{replicates}
+\item{dispersionValues}{amount of overdispersion}
+
+\item{nRep}{replicates}
 
 \item{alpha}{significance level}
 
@@ -17,8 +19,6 @@ benchmarkOverdispersion(dispersionValues = 0, n = 10, alpha = 0.05,
 \item{parallel}{whether to use parallel computations. Possible values are F, T (parallel cores set to number of cores in the computer -1), or an integer number for the number of cores that should be used}
 
 \item{...}{parameters to pass on to \code{\link{simulateResiduals}}}
-
-\item{overdispersion}{amount of overdispersion}
 }
 \description{
 This function runs Power / Type I error simulations for overdispersion tests in DHARMa

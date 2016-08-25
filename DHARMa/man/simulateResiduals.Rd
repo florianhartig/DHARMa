@@ -45,24 +45,26 @@ If the model is correctly specified, the simulated residuals should be flat rega
 
 The second option is much slower, and only important for running tests that rely on comparing observed to simulated residuals, e.g. the  \code{\link{testOverdispersion}} function
 
-#' \strong{How many simulations}: about the choice of n: my simulations didn't show major problems with a small n (even down to the order of 10), but just to be on the safe side, I would recommend to use a high value (e.g. 1000)
+#' \strong{How many simulations}: about the choice of n: my simulations didn't show major problems with a small n (if you get down to the order of a few 10, you will start seeing discretization artifacts from the empirical cummulative density estimates though). The default of 250 seems safe to me. If you want to be on the safe side, choose a high value (e.g. 1000) for producing your definite results.
 }
 \examples{
 library(lme4)
 
-testData = createData(sampleSize = 50, overdispersion = 0.5, family = poisson())
+testData = createData(sampleSize = 200, overdispersion = 0.5, family = poisson())
 fittedModel <- glmer(observedResponse ~ Environment1 + (1|group), 
-                     family = "poisson", data = testData)
+                     family = "poisson", data = testData,
+                     control=glmerControl(optCtrl=list(maxfun=20000) ))
 
 simulationOutput <- simulateResiduals(fittedModel = fittedModel)
 plotSimulatedResiduals(simulationOutput = simulationOutput)
 
 # plot directly
-simulationOutput <- simulateResiduals(fittedModel = fittedModel, plot = T)
+simulationOutput <- simulateResiduals(fittedModel = fittedModel, plot = TRUE)
 
 # create simulations with refitting
+
 simulationOutput <- simulateResiduals(fittedModel = fittedModel, 
-                                      n = 10, refit = T, plot = T)
+                                      n = 100, refit = TRUE, plot = TRUE)
 }
 \seealso{
 \code{\link{testSimulatedResiduals}}, \code{\link{plotSimulatedResiduals}}
