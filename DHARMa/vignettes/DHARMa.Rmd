@@ -1,6 +1,6 @@
 ---
 title: "DHARMa - Residual Diagnostics for HierArchical (Multi-level / Mixed) Regression Models"
-author: "Florian Hartig, University of Regensburg, [website](https://florianhartig.wordpress.com/)"
+author: "Florian Hartig, University of Freiburg / Regensburg, [website](https://florianhartig.wordpress.com/)"
 date: "`r Sys.Date()`"
 output: 
   rmarkdown::html_vignette:
@@ -20,7 +20,7 @@ set.seed(123)
 
 
 ```{r global_options, include=FALSE}
-knitr::opts_chunk$set(fig.width=7, fig.height=4.5, warning=FALSE, message=FALSE, cache = T)
+knitr::opts_chunk$set(fig.width=7, fig.height=4.5, fig.align='center', warning=FALSE, message=FALSE, cache = T)
 ```
 
 # Motivation 
@@ -304,7 +304,7 @@ The reason is that the model will usually try to find a compromise between the z
 
 DHARMa has a special test for zero-inflation, which compares the distribution of expected zeros in the data against the observed zeros
 
-```{r, fig.width=4, fig.height=4.5}
+```{r, fig.width=4, fig.height=4}
 
 testZeroInflation(simulationOutput)
 ```
@@ -387,7 +387,7 @@ simulationOutput <- simulateResiduals(fittedModel = fittedModel)
 
 The temporal autocorrelation test performs the Durbin-Watson test from the package lmtest on the uniform residuals to test for temporal autocorrelation in the residuals, and additionally plots the residuals against time. An additional test against randomized time (H0) is performed, to show that the test is not oversensitive. 
 
-```{r, fig.width=4, fig.height=4.5}
+```{r, fig.width=4, fig.height=4}
 testTemporalAutocorrelation(simulationOutput = simulationOutput, time = testData$time)
 testTemporalAutocorrelation(simulationOutput = simulationOutput, time = "random")
 ```
@@ -409,7 +409,7 @@ simulationOutput <- simulateResiduals(fittedModel = fittedModel)
 
 The spatial autocorrelation test performs the Moran.I test from the package ape and plots plots the residuals against space. An additional test against randomized space (H0) is performed, to show that the test is not oversensitive. 
 
-```{r, fig.width=4, fig.height=4.5}
+```{r, fig.width=4, fig.height=4}
 testSpatialAutocorrelation(simulationOutput = simulationOutput, x = testData$x, y= testData$y)
 testSpatialAutocorrelation(simulationOutput = simulationOutput, x = "random", y= "random")
 ```
@@ -456,7 +456,7 @@ data$logDensity = log10(data$density.attack+1)
 ```
 
 
-```{r, fig.width=4, fig.height=4.5}
+```{r, fig.width=4, fig.height=4}
 plot(N_parasitized / (N_adult + N_parasitized ) ~ logDensity, xlab = "Density", ylab = "Proportion infected", data = data)
 ```
 
@@ -543,7 +543,7 @@ summary(mod)
 
 We see that we have a problem when we plot residuals against deadwood
 
-```{r}
+```{r, fig.width=4, fig.height=4}
 plotResiduals(data$deadwood, simulationOutput$scaledResiduals)
 ```
 
@@ -566,7 +566,7 @@ plotSimulatedResiduals(simulationOutput = simulationOutput)
 
 The data still looks overdispersed. The reason is that there is in fact no standard overdispersion, but zero-inflation in the data. We can look at the excess zeros via
 
-```{r}
+```{r, fig.width=4, fig.height=4}
 testZeroInflation(simulationOutput)
 ```
 
