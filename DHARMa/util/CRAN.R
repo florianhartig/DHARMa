@@ -1,6 +1,9 @@
 
 
+devtools::revdep()
 
-res <- devtools::revdep_check("DHARMa")
+revdep_maintainers
+
+res <- devtools::revdep_check()
 devtools::revdep_check_summary(res)
 devtools::revdep_check_save_logs(res)

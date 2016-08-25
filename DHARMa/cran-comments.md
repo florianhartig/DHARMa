@@ -1,7 +1,7 @@
 
 # Version 0.1.0
 
-## Test environments
+## Tested under
 
 * local MAC OS 10.10.5, R 3.3.1
 * local Windows 2012 Server, R 3.3.0
@@ -20,7 +20,7 @@ R CMD check succeeded
 
 #### win-builder
 
-Only notes were:
+Notes:
 
 Possibly mis-spelled words in DESCRIPTION:
   DHARMa (7:18)
@@ -35,6 +35,4 @@ The Title field should be in title case, current version then in title case:
 'Residual Diagnostics for HierArchical (Multi-level / Mixed) Regression Models'
 'Residual Diagnostics for HierArchical (Multi-Level / Mixed) Regression Models'
 
---> To me this looked fine 
-
-
+--> This seems fine to me. AFAIKS, the spelling is as intendend, and the title is in title case
