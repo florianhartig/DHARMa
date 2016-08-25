@@ -62,13 +62,16 @@ getPTemporal <- function(strength=3, n=25, alpha = 0.05){
 strength = seq(0,20,length = 20)
 
 out = sapply(strength, getPTemporal, n = 500)
+```
 
+
+
+```{r}
 plot(strength, out[1,], type = "b", ylim = c(0,1))
 lines(strength, out[2,], type = "b", col = "red")
 legend("topleft", legend = c("Test", "H0"), lty = c(1,1), col = c(1,2))
 
 ```
-
 
 
 
@@ -102,11 +105,14 @@ getPSpatial <- function(strength=3, n=25, alpha = 0.05){
 strength = seq(0,20,length = 20)
 
 out = sapply(strength, getPTemporal, n = 200)
+```
 
+
+
+```{r}
 plot(strength, out[1,], type = "b", ylim = c(0,1))
 lines(strength, out[2,], type = "b", col = "red")
 legend("topleft", legend = c("Test", "H0"), lty = c(1,1), col = c(1,2))
-
 ```
 
 
