@@ -24,7 +24,7 @@ plot.DHARMa <- function(x, ...){
 #' @param ... optional arguments to pass on to \code{\link{plotSimulatedResiduals}}
 #' @export
 print.DHARMa <- function(x, ...){
-  print(paste("Class DHARMa with simulated residuals based on", simulationOutput$nSim, "simulations with refit =", x$refit))
+  print(paste("Class DHARMa with simulated residuals based on", x$nSim, "simulations with refit =", x$refit))
   print("see ?DHARMa::simulateResiduals for help")
   print("-----------------------------")
   print(x$scaledResiduals)

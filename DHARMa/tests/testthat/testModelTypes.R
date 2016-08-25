@@ -5,6 +5,9 @@ library(lme4)
 runEverything = function(fittedModel, testData){
   simulationOutput <- simulateResiduals(fittedModel = fittedModel)
   
+  print(simulationOutput)
+  plot(simulationOutput, quantreg = F)
+  
   plotSimulatedResiduals(simulationOutput = simulationOutput)
   plotResiduals(pred = testData$Environment1, simulationOutput$scaledResiduals, quantreg = F)
 
@@ -12,8 +15,13 @@ runEverything = function(fittedModel, testData){
   testZeroInflation(simulationOutput = simulationOutput)
   testTemporalAutocorrelation(simulationOutput = simulationOutput, time = runif(length(simulationOutput$scaledResiduals )))
   testSpatialAutocorrelation(simulationOutput = simulationOutput, x = runif(length(simulationOutput$scaledResiduals )), y =  runif(length(simulationOutput$scaledResiduals )))
+
   
-  simulationOutput2 <- simulateResiduals(fittedModel = fittedModel, refit = T, n = 25)
+  simulationOutput2 <- simulateResiduals(fittedModel = fittedModel, refit = T, n = 10) # n=10 is very low, set higher for serious tests
+  
+  print(simulationOutput2)
+  plot(simulationOutput2, quantreg = F)
+  
   testOverdispersion(simulationOutput2)
   testOverdispersionParametric(fittedModel)
   
@@ -23,7 +31,7 @@ runEverything = function(fittedModel, testData){
 test_that("lm gaussian works", 
           {
             skip_on_cran()
-            testData = createData(sampleSize = 200, overdispersion = 0, randomEffectVariance = 0, family = gaussian())
+            testData = createData(sampleSize = 100, overdispersion = 0, randomEffectVariance = 0, family = gaussian())
             fittedModel <- lm(observedResponse ~ Environment1 , data = testData)
             runEverything(fittedModel, testData)
           }
@@ -43,7 +51,7 @@ test_that("glm gaussian works",
 test_that("lmer gaussian works", 
           {
             skip_on_cran()
-            testData = createData(sampleSize = 200, overdispersion = 0, randomEffectVariance = 0, family = gaussian())
+            testData = createData(sampleSize = 100, overdispersion = 0, randomEffectVariance = 1, family = gaussian())
             fittedModel <- lmer(observedResponse ~ Environment1 + (1|group) , data = testData)
             runEverything(fittedModel, testData)
           }

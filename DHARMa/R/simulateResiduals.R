@@ -62,8 +62,8 @@ simulateResiduals <- function(fittedModel, n = 250, refit = F, integerResponse =
   }
   
   if(class(fittedModel)[1] %in% c("glmerMod", "lmerMod")){
-    out$fittedFixedEffects = fixef(fittedModel) ## returns fixed effects 
-    out$fittedRandomEffects = ranef(fittedModel) ## returns random effects
+    out$fittedFixedEffects = lme4::fixef(fittedModel) ## returns fixed effects 
+    out$fittedRandomEffects = lme4::ranef(fittedModel) ## returns random effects
   }
 
   out$fittedResiduals = residuals(fittedModel, type = "response")
@@ -124,7 +124,7 @@ simulateResiduals <- function(fittedModel, n = 250, refit = F, integerResponse =
       }
       
       if(class(fittedModel)[1] %in% c("glmerMod", "lmerMod")){
-        out$refittedFixedEffects[,i]  = fixef(refittedModel)
+        out$refittedFixedEffects[,i]  = lme4::fixef(refittedModel)
         #out$fittedRandomEffects = ranef(fittedModel) ## returns random effects
       }
       

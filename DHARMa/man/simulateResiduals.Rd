@@ -61,10 +61,10 @@ plotSimulatedResiduals(simulationOutput = simulationOutput)
 # plot directly
 simulationOutput <- simulateResiduals(fittedModel = fittedModel, plot = TRUE)
 
-# create simulations with refitting
+# create simulations with refitting, n=10 is too low, set higher when using this
 
 simulationOutput <- simulateResiduals(fittedModel = fittedModel, 
-                                      n = 100, refit = TRUE, plot = TRUE)
+                                      n = 10, refit = TRUE, plot = TRUE)
 }
 \seealso{
 \code{\link{testSimulatedResiduals}}, \code{\link{plotSimulatedResiduals}}

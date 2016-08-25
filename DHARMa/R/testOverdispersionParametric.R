@@ -31,7 +31,7 @@ testOverdispersionParametric <- function(model){
   vpars <- function(m) {
     nrow(m)*(nrow(m)+1)/2
   }
-  model.df <- sum(sapply(VarCorr(model),vpars))+length(fixef(model))
+  model.df <- sum(sapply(lme4::VarCorr(model),vpars))+length(lme4::fixef(model))
   rdf <- nrow(model.frame(model))-model.df
   
   # Residual df
