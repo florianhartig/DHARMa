@@ -20,7 +20,7 @@ set.seed(123)
 
 
 ```{r global_options, include=FALSE}
-knitr::opts_chunk$set(fig.width=7, fig.height=4.5, fig.align='center', warning=FALSE, message=FALSE, cache = T)
+knitr::opts_chunk$set(fig.width=7, fig.height=4.5, fig.align='center', warning=FALSE, message=FALSE, cache = F)
 ```
 
 # Motivation 

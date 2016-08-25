@@ -1,14 +1,14 @@
 Package: DHARMa
 Title: Residual Diagnostics for HierArchical (Multi-level / Mixed) Regression Models
 Version: 0.1.0
-Date: 12.8.2016
+Date: 25.08.2016
 Authors@R: c(person("Florian", "Hartig", email = "florian.hartig@biologie.uni-regensburg.de", role = c("aut", "cre")))
 Description: The DHARMa package uses a simulation-based approach to create
     readily interpretable scaled residuals from fitted generalized linear mixed
-    models. Currently supported are lme4, glm (except quasi-distributions) and lm model 
+    models. Currently supported are 'lme4', 'glm' (except quasi-distributions) and 'lm' model 
     classes. The resulting residuals are standardized to values between 0 and 1 and 
     can be interpreted as intuitively as residuals from a linear regression. The package 
-    also provides a number of plot and test functions for typical model mispecification
+    also provides a number of plot and test functions for typical model misspecification
     problem, such as over/underdispersion, zero-inflation, and spatial and temporal
     autocorrelation.
 Depends:
@@ -25,13 +25,12 @@ Imports:
     sfsmisc,
     MASS,
     doParallel,
-    foreach
+    foreach,
+    lme4
 Suggests:
     aods3,
     knitr,
     testthat
-Enhances:
-    lme4
 License: GPL (>= 3)
 URL: https://github.com/florianhartig/DHARMa
 BugReports: https://github.com/florianhartig/DHARMa/issues

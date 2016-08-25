@@ -1,24 +1,40 @@
+
+# Version 0.1.0
+
 ## Test environments
-* local OS X install, R 3.1.2
-* ubuntu 12.04 (on travis-ci), R 3.1.2
-* win-builder (devel and release)
+
+* local MAC OS 10.10.5, R 3.3.1
+* local Windows 2012 Server, R 3.3.0
+* http://win-builder.r-project.org/
+ * R-release: R-release, currently R-3.3.1 
+ * R-devel: R-devel, to be R-3.4.0
 
 ## R CMD check results
-There were no ERRORs or WARNINGs. 
 
-There was 1 NOTE:
+#### local
 
-* checking dependencies in R code ... NOTE
-  Namespace in Imports field not imported from: 'R6'
+R CMD check results
+0 errors | 0 warnings | 0 notes
 
-  R6 is a build-time dependency.
+R CMD check succeeded
 
-## Downstream dependencies
-I have also run R CMD check on downstream dependencies of httr 
-(https://github.com/wch/checkresults/blob/master/httr/r-release). 
-All packages that I could install passed except:
+#### win-builder
 
-* Ecoengine: this appears to be a failure related to config on 
-  that machine. I couldn't reproduce it locally, and it doesn't 
-  seem to be related to changes in httr (the same problem exists 
-  with httr 0.4).
+Only notes were:
+
+Possibly mis-spelled words in DESCRIPTION:
+  DHARMa (7:18)
+  HierArchical (2:33)
+  Multi (2:47)
+  autocorrelation (14:5)
+  interpretable (8:13)
+  misspecification (12:73)
+  underdispersion (13:27)
+
+The Title field should be in title case, current version then in title case:
+'Residual Diagnostics for HierArchical (Multi-level / Mixed) Regression Models'
+'Residual Diagnostics for HierArchical (Multi-Level / Mixed) Regression Models'
+
+--> To me this looked fine 
+
+
