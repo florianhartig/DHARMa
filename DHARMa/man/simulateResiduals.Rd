@@ -56,15 +56,15 @@ fittedModel <- glmer(observedResponse ~ Environment1 + (1|group),
                      control=glmerControl(optCtrl=list(maxfun=20000) ))
 
 simulationOutput <- simulateResiduals(fittedModel = fittedModel)
-plotSimulatedResiduals(simulationOutput = simulationOutput)
 
-# plot directly
-simulationOutput <- simulateResiduals(fittedModel = fittedModel, plot = TRUE)
+# plot residuals, quantreg = T is better but costs more time
+plotSimulatedResiduals(simulationOutput = simulationOutput, quantreg = FALSE)
 
-# create simulations with refitting, n=10 is too low, set higher when using this
-
+# create simulations with refitting, n=5 is very low, set higher when using this
 simulationOutput <- simulateResiduals(fittedModel = fittedModel, 
-                                      n = 10, refit = TRUE, plot = TRUE)
+                                      n = 10, refit = TRUE)
+plotSimulatedResiduals(simulationOutput = simulationOutput, quantreg = FALSE)
+
 }
 \seealso{
 \code{\link{testSimulatedResiduals}}, \code{\link{plotSimulatedResiduals}}
