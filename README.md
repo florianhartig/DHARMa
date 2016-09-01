@@ -4,6 +4,7 @@ The DHARMa package creates readily interpretable residuals for generalized linea
 
 * In the DHARMa vignette (see below)
 * A blog post [here](https://theoreticalecology.wordpress.com/2016/08/28/dharma-an-r-package-for-residual-diagnostics-of-glmms/)
+* A poster for the 2016 GFÖ conference [here](https://florianhartig.files.wordpress.com/2016/09/dharma.pdf)
 
 ## Getting DHARMa
 
