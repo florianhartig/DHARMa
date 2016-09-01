@@ -22,7 +22,9 @@ library(DHARMa)
 vignette("DHARMa", package="DHARMa")
 ```
 
-To get an overview about its functionality. If you want to install a newer (development) version from this repository, run
+To get an overview about its functionality. 
+
+If you want to install a newer (development) version from this repository, run
 
 ```{r}
 devtools::install_github(repo = "DHARMa", username = "florianhartig", subdir = "DHARMa", dependencies = T)
