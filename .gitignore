@@ -39,3 +39,5 @@ DHARMa.Rcheck/
 Publications/Package/cache/
 *.sty
 
+
+.DS_Store

@@ -81,9 +81,9 @@ p[[i]] <- qrnn::qrnn.predict(as.matrix(sort(pred)), w[[i]])
 #' @export
 plotConventionalResiduals <- function(fittedModel){
   par(mfrow = c(1,3), oma = c(0,1,2,1))
-  plot(predict(fittedModel), resid(fittedModel, type = "deviance"), main = "Deviance" , ylab = "Residual", xlab = "predicted")
-  plot(predict(fittedModel), resid(fittedModel, type = "pearson") , main = "Pearson", ylab = "Residual", xlab = "predicted")
-  plot(predict(fittedModel), resid(fittedModel, type = "response") , main = "Raw residuals" , ylab = "Residual", xlab = "predicted")  
+  plot(predict(fittedModel), resid(fittedModel, type = "deviance"), main = "Deviance" , ylab = "Residual", xlab = "Predicted")
+  plot(predict(fittedModel), resid(fittedModel, type = "pearson") , main = "Pearson", ylab = "Residual", xlab = "Predicted")
+  plot(predict(fittedModel), resid(fittedModel, type = "response") , main = "Raw residuals" , ylab = "Residual", xlab = "Predicted")  
   mtext("Conventional residual plots", outer = T)
 }
 

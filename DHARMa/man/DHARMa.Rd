@@ -12,7 +12,7 @@ The DHARMa package uses a simulation-based approach to create readily interpreta
 See index / vignette for details
 }
 \examples{
-vignette("Demo", package="DHARMa")
+vignette("DHARMa", package="DHARMa")
 }
 \seealso{
 \code{\link{simulateResiduals}}

@@ -5,7 +5,7 @@
 #' @details See index / vignette for details
 #' @seealso \code{\link{simulateResiduals}}
 #' @examples 
-#' vignette("Demo", package="DHARMa")
+#' vignette("DHARMa", package="DHARMa")
 NULL
 
 
