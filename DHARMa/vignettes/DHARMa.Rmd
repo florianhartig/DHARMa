@@ -63,9 +63,9 @@ DHARMa aims at solvind this problem by creating readily interpretable residuals 
 
 3. residual is the value of the empirical density function at the value of the observed data. 
 
-The key idea for this definition is that, if the model is correctly specified, then the observed data can be thought of as a draw from the fitted model. Hence, for a correctly specified model, all values of the cummulative distribution will appear with equal probability. What that means is that we expect the distribution of the residuals definen in 3) to be flat, regardless what the exact model structure is (Poisson, binomial, ...).
+The key idea for this definition is that, if the model is correctly specified, then the observed data can be thought of as a draw from the fitted model. Hence, for a correctly specified model, all values of the cumulative distribution will appear with equal probability. What that means is that we expect the distribution of the residuals to be flat, regardless of whether we have a Poisson, binomial or another model structure.
 
-A more exact statistical justification for the appoach will be provided in an accompanying paper, but if you must provide a reference I would suggest citing 
+A more exact statistical justification for the apporach will be provided in an accompanying paper, but if you must provide a reference I would suggest citing 
 
 * Dunn, K. P., and Smyth, G. K. (1996). Randomized quantile residuals. Journal of Computational and Graphical Statistics 5, 1-10. 
 
@@ -103,7 +103,9 @@ The scaled (quantile) residuals are calculated with the simulateResiduals() func
 simulationOutput <- simulateResiduals(fittedModel = fittedModel, n = 250)
 ```
 
-The function creates 250 new datasets by simulating from the fitted model, calcualtes the cummulative distribution of simulated values for each observed value, and returns the quantile value that corresponds to the observed value. 
+The function creates 250 new datasets by simulating from the fitted model, calcualtes the cummulative distribution of simulated values for each observed value, and returns the quantile value that corresponds to the observed value. This is visualized in the following figure 
+
+![Calculations of residuals](../util/figures/ECDFmotivation.png)
 
 For example, a simulated residual of 0.5 means that half of the simulated data are higher, and half of them lower than the observed value. A value of 0.99 would mean that nearly all simulated data are lower than the observed value. The minium/maxium values for the residuals are 0 and 1. 
 
@@ -264,7 +266,7 @@ Simulations show that this diagnostic has similar power than the parametric over
 testOverdispersionParametric(fittedModel)
 ```
 
-![Comparison of power from simulation studies](Overdispersion.png)
+![Comparison of power from simulation studies](../util/figures/Overdispersion.png)
 
 
 ## Zero-inflation
@@ -424,9 +426,9 @@ You think your random effect estimates look weird? Run the model with the refit 
 
 # Real-world examples
 
-## Budworm (n/k Poisson) example
+## Budworm example (count-proportion n/k binomial)
 
-This example comes from Jochen Fründ. Measured are the number of parasitized adults against the population density
+This example comes from Jochen Fründ. Measured are the number of parasitized observations, with population density as a covariate
 
 ```{r, echo = F}
 data = structure(list(N_parasitized = c(226, 689, 481, 960, 1177, 266, 
