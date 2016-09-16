@@ -5,7 +5,7 @@ Date: 2016-08-25
 Authors@R: c(person("Florian", "Hartig", email = "florian.hartig@biologie.uni-regensburg.de", role = c("aut", "cre")))
 Description: The 'DHARMa' package uses a simulation-based approach to create
     readily interpretable scaled (quantile) residuals from fitted generalized linear mixed
-    models. Currently supported are 'lme4', 'glm' (except quasi-distributions) and 'lm' model 
+    models. Currently supported are 'merMod' classes from 'lme4', 'glm' (except quasi-distributions) and 'lm' model 
     classes. The resulting residuals are standardized to values between 0 and 1 and 
     can be interpreted as intuitively as residuals from a linear regression. The package 
     also provides a number of plot and test functions for typical model misspecification
