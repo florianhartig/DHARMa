@@ -29,3 +29,21 @@ print.DHARMa <- function(x, ...){
   print("-----------------------------")
   print(x$scaledResiduals)
 } 
+
+
+#' Convert simulated residuals to a DHARMa object
+#' 
+#' @param scaledResiduals scaled residuals from a simulation, e.g. Bayesian p-values
+#' @param fittedPredictedResponse fitted predicted response. Optional, but will be neccessary for some plots. If scaled residuals are Bayesian p-values, using the median posterior prediction as fittedPredictedResponse is recommended. 
+#' @details The use of this function is to convert simulated residuals (e.g. from a point estimate, or Bayesian p-values) to a DHARMa object, to make use of the plotting / test functions in DHARMa 
+#' @export
+createDHARMa <- function(scaledResiduals, observedResponse = NULL, fittedPredictedResponse = NULL){
+  out = list()
+  out$scaledResiduals = scaledResiduals
+  out$nObs = length(scaledResiduals)
+  out$observedResponse = observedResponse
+  out$fittedPredictedResponse = fittedPredictedResponse
+  class(out) = "DHARMa"
+  return(out)
+}
+
