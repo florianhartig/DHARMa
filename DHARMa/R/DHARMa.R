@@ -34,14 +34,32 @@ print.DHARMa <- function(x, ...){
 #' Convert simulated residuals to a DHARMa object
 #' 
 #' @param scaledResiduals scaled residuals from a simulation, e.g. Bayesian p-values
+#' @param simulatedResponse matrix with rows being observations and colums being simulations 
 #' @param fittedPredictedResponse fitted predicted response. Optional, but will be neccessary for some plots. If scaled residuals are Bayesian p-values, using the median posterior prediction as fittedPredictedResponse is recommended. 
 #' @details The use of this function is to convert simulated residuals (e.g. from a point estimate, or Bayesian p-values) to a DHARMa object, to make use of the plotting / test functions in DHARMa 
+#' @note either scaled residuals or (simulatedResponse AND observed response) have to be provided 
 #' @export
-createDHARMa <- function(scaledResiduals, observedResponse = NULL, fittedPredictedResponse = NULL){
+createDHARMa <- function(scaledResiduals = NULL, simulatedResponse = NULL, observedResponse = NULL, fittedPredictedResponse = NULL, integerResponse = F){
   out = list()
+
+  if(is.null(scaledResiduals)) {
+    if(!is.matrix(simulatedResponse) & !is.null(observedResponse)) stop("either scaled residuals or simulations and observations have to be provided")
+    
+    out$nObs = length(observedResponse)
+    scaledResiduals = rep(NA, out$nObs)
+    
+    for (i in 1:out$nObs){
+      
+      if(integerResponse == T){
+        scaledResiduals[i] <- ecdf(simulatedResponse[i,] + runif(n, -0.5, 0.5))(observedResponse[i] + runif(1, -0.5, 0.5))           
+      }else{
+        scaledResiduals[i] <- ecdf(simulatedResponse[i,])(observedResponse[i])
+      }
+    }
+  }
+  out$observedResponse = observedResponse
   out$scaledResiduals = scaledResiduals
   out$nObs = length(scaledResiduals)
-  out$observedResponse = observedResponse
   out$fittedPredictedResponse = fittedPredictedResponse
   class(out) = "DHARMa"
   return(out)
