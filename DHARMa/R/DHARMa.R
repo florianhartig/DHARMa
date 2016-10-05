@@ -24,20 +24,22 @@ plot.DHARMa <- function(x, ...){
 #' @param ... optional arguments to pass on to \code{\link{plotSimulatedResiduals}}
 #' @export
 print.DHARMa <- function(x, ...){
-  print(paste("Class DHARMa with simulated residuals based on", x$nSim, "simulations with refit =", x$refit))
-  print("see ?DHARMa::simulateResiduals for help")
-  print("-----------------------------")
-  print(x$scaledResiduals)
+  cat(paste("Object of Class DHARMa with simulated residuals based on", x$nSim, "simulations with refit =", x$refit , ". See ?DHARMa::simulateResiduals for help."), "\n", "\n")
+  if (length(x$scaledResiduals) < 20) cat("Scaled residual values:", x$scaledResiduals)
+  else {
+    cat("Scaled residual values:", x$scaledResiduals[1:20], "...")
+  } 
 } 
 
 
 #' Convert simulated residuals to a DHARMa object
 #' 
-#' @param scaledResiduals scaled residuals from a simulation, e.g. Bayesian p-values
-#' @param simulatedResponse matrix with rows being observations and colums being simulations 
+#' @param scaledResiduals optional scaled residuals from a simulation, e.g. Bayesian p-values. If those are not provided, simulated and true observations have to be provided. 
+#' @param simulatedResponse matrix of observations simulated from the fitted model - row index for observations and colum index for simulations 
+#' @param observedResponse true observations
 #' @param fittedPredictedResponse fitted predicted response. Optional, but will be neccessary for some plots. If scaled residuals are Bayesian p-values, using the median posterior prediction as fittedPredictedResponse is recommended. 
 #' @details The use of this function is to convert simulated residuals (e.g. from a point estimate, or Bayesian p-values) to a DHARMa object, to make use of the plotting / test functions in DHARMa 
-#' @note either scaled residuals or (simulatedResponse AND observed response) have to be provided 
+#' @note Either scaled residuals or (simulatedResponse AND observed response) have to be provided 
 #' @export
 createDHARMa <- function(scaledResiduals = NULL, simulatedResponse = NULL, observedResponse = NULL, fittedPredictedResponse = NULL, integerResponse = F){
   out = list()
@@ -60,6 +62,7 @@ createDHARMa <- function(scaledResiduals = NULL, simulatedResponse = NULL, obser
   out$observedResponse = observedResponse
   out$scaledResiduals = scaledResiduals
   out$nObs = length(scaledResiduals)
+  if(is.null(fittedPredictedResponse)) fittedPredictedResponse = rep(1, out$nObs) # makes sure that DHARM plots that rely on this vector won't crash
   out$fittedPredictedResponse = fittedPredictedResponse
   class(out) = "DHARMa"
   return(out)

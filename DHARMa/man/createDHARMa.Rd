@@ -9,9 +9,11 @@ createDHARMa(scaledResiduals = NULL, simulatedResponse = NULL,
   integerResponse = F)
 }
 \arguments{
-\item{scaledResiduals}{scaled residuals from a simulation, e.g. Bayesian p-values}
+\item{scaledResiduals}{optional scaled residuals from a simulation, e.g. Bayesian p-values. If those are not provided, simulated and true observations have to be provided.}
 
-\item{simulatedResponse}{matrix with rows being observations and colums being simulations}
+\item{simulatedResponse}{matrix of observations simulated from the fitted model - row index for observations and colum index for simulations}
+
+\item{observedResponse}{true observations}
 
 \item{fittedPredictedResponse}{fitted predicted response. Optional, but will be neccessary for some plots. If scaled residuals are Bayesian p-values, using the median posterior prediction as fittedPredictedResponse is recommended.}
 }
@@ -22,6 +24,6 @@ Convert simulated residuals to a DHARMa object
 The use of this function is to convert simulated residuals (e.g. from a point estimate, or Bayesian p-values) to a DHARMa object, to make use of the plotting / test functions in DHARMa
 }
 \note{
-either scaled residuals or (simulatedResponse AND observed response) have to be provided
+Either scaled residuals or (simulatedResponse AND observed response) have to be provided
 }
 
