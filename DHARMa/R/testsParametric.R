@@ -22,7 +22,7 @@
 #' @export
 testOverdispersionParametric <- function(model){
   
-  if(class(model)[1] %in% c("lm", "glm")){
+  if(! class(model)[1] %in% c("lmer", "glmer")){
     return("Parametric overdispersion test not implemented for this model type")
   }
   
@@ -76,4 +76,8 @@ od.point2<-function(modelglmer){
   n <- length(resid(modelglmer))
   return(sqrt(sum(c(resid(modelglmer), modelglmer@u)^2)/n))
 }
+
+
+
+
 
