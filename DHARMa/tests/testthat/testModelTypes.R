@@ -1,15 +1,17 @@
 context("Tests DHARMa functions on all implemented model types")
 
+library(MASS)
 library(lme4)
 
-runEverything = function(fittedModel, testData){
+
+runEverything = function(fittedModel, testData, DHARMaData = T){
   simulationOutput <- simulateResiduals(fittedModel = fittedModel)
   
   print(simulationOutput)
   plot(simulationOutput, quantreg = F)
   
   plotSimulatedResiduals(simulationOutput = simulationOutput)
-  plotResiduals(pred = testData$Environment1, simulationOutput$scaledResiduals, quantreg = F)
+  if(DHARMaData == T) plotResiduals(pred = testData$Environment1, simulationOutput$scaledResiduals, quantreg = F)
 
   testUniformity(simulationOutput = simulationOutput)
   testZeroInflation(simulationOutput = simulationOutput)
@@ -118,6 +120,42 @@ test_that("glmer poisson works",
             testData = createData(sampleSize = 200, overdispersion = 0.5, randomEffectVariance = 1, family = poisson(), roundPoissonVariance = 0.1, pZeroInflation = 0.1)
             fittedModel <- glmer(observedResponse ~ Environment1 + (1|group) + (1|ID), family = "poisson", data = testData, control=glmerControl(optCtrl=list(maxfun=20000) ))
             runEverything(fittedModel, testData)
+          }
+)
+
+
+# Negative binomial models 
+
+
+test_that("glmer.nb works", 
+          {
+            skip_on_cran()
+            
+            
+            set.seed(101)
+            dd <- expand.grid(f1 = factor(1:3),
+                              f2 = LETTERS[1:2], g=1:9, rep=1:15,
+                              KEEP.OUT.ATTRS=FALSE)
+            summary(mu <- 5*(-4 + with(dd, as.integer(f1) + 4*as.numeric(f2))))
+            dd$y <- rnbinom(nrow(dd), mu = mu, size = 0.5)
+            str(dd)
+            
+            testData = dd
+            
+            fittedModel <- glmer.nb(y ~ f1*f2 + (1|g), data=testData, verbose=TRUE)
+
+            runEverything(fittedModel, testData, DHARMaData = F)
+          }
+)
+
+
+
+test_that("glmer.nb works", 
+          {
+            skip_on_cran()
+            testData = quine
+            fittedModel <- glm.nb(Days ~ Sex/(Age + Eth*Lrn), data = testData)
+            runEverything(fittedModel, testData, DHARMaData = F)
           }
 )
 
