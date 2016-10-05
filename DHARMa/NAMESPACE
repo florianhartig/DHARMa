@@ -3,6 +3,7 @@
 S3method(plot,DHARMa)
 S3method(print,DHARMa)
 export(benchmarkOverdispersion)
+export(benchmarkP)
 export(benchmarkUniformity)
 export(createDHARMa)
 export(createData)
