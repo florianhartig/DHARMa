@@ -41,7 +41,8 @@ simulateResiduals <- function(fittedModel, n = 250, refit = F, integerResponse =
   family = family(fittedModel)
   
   if(is.null(integerResponse)){
-    if (family$family %in% c("binomial", "poisson", "quasibinomial", "quasipoisson")) integerResponse = T
+    if (family$family %in% c("binomial", "poisson", "quasibinomial", "quasipoisson", "Negative Binom") | 
+        startsWith(family$family, "Negative Binomial")) integerResponse = T
     else integerResponse = F
   }
   
@@ -52,6 +53,7 @@ simulateResiduals <- function(fittedModel, n = 250, refit = F, integerResponse =
   out$nSim = n
   out$refit = refit
   out$observedResponse = model.frame(fittedModel)[,1]
+  out$integerResponse = integerResponse
   
   ## following block re-used below, create function for this 
   

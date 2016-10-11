@@ -150,7 +150,7 @@ test_that("glmer.nb works",
 
 
 
-test_that("glmer.nb works", 
+test_that("glm.nb works", 
           {
             skip_on_cran()
             testData = quine
