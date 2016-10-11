@@ -14,7 +14,7 @@ DHARMa is on CRAN. So, to install the latest major release, just run
 install.packages("DHARMa")
 ```
 
-Once the package is installed, run
+To get an overview about its functionality once the package is installed, run
 
 ```{r}
 library(DHARMa)
@@ -22,18 +22,15 @@ library(DHARMa)
 vignette("DHARMa", package="DHARMa")
 ```
 
-To get an overview about its functionality. 
-
-If you want to install a newer (development) version from this repository, run
+If you want to install the current (development) version from this repository, run
 
 ```{r}
 devtools::install_github(repo = "DHARMa", username = "florianhartig", subdir = "DHARMa", dependencies = T)
 ```
 
-To install a specific release, decide for the version number that you want to install in [https://github.com/florianhartig/DHARMa/releases](https://github.com/florianhartig/DHARMa/releases) and run 
+To install a specific (older) release, decide for the version number that you want to install in [https://github.com/florianhartig/DHARMa/releases](https://github.com/florianhartig/DHARMa/releases) (version numbering corresponds to CRAN, but there may be smaller releases that were not pushed to CRAN) and run 
 
 ```{r}
 devtools::install_github(repo = "DHARMa", username = "florianhartig", subdir = "DHARMa", ref = "v0.0.2.1")
 ```
-
 with the appropriate version number. 
