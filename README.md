@@ -8,6 +8,8 @@ The DHARMa package creates readily interpretable residuals for generalized linea
 
 ## Getting DHARMa
 
+### From CRAN 
+
 DHARMa is on CRAN. So, to install the latest major release, just run 
 
 ```{r}
@@ -22,11 +24,15 @@ library(DHARMa)
 vignette("DHARMa", package="DHARMa")
 ```
 
+### Development release 
+
 If you want to install the current (development) version from this repository, run
 
 ```{r}
 devtools::install_github(repo = "DHARMa", username = "florianhartig", subdir = "DHARMa", dependencies = T)
 ```
+
+### Older releases
 
 To install a specific (older) release, decide for the version number that you want to install in [https://github.com/florianhartig/DHARMa/releases](https://github.com/florianhartig/DHARMa/releases) (version numbering corresponds to CRAN, but there may be smaller releases that were not pushed to CRAN) and run 
 
