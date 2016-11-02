@@ -10,7 +10,7 @@ The DHARMa package creates readily interpretable residuals for generalized linea
 
 ### From CRAN 
 
-DHARMa is on CRAN. So, to install the latest major release, just run 
+DHARMa is on [CRAN](https://cran.r-project.org/web/packages/DHARMa/index.html). So, to install the latest major release, just run 
 
 ```{r}
 install.packages("DHARMa")
