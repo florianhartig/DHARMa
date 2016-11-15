@@ -10,6 +10,43 @@ output: html_document
 library(DHARMa)
 ```
 
+
+
+```{r}
+library(lme4)
+?glmer.nb
+
+set.seed(101)
+dd <- expand.grid(f1 = factor(1:3),
+                  f2 = LETTERS[1:2], g=1:9, rep=1:15,
+          KEEP.OUT.ATTRS=FALSE)
+summary(mu <- 5*(-4 + with(dd, as.integer(f1) + 4*as.numeric(f2))))
+dd$y <- rnbinom(nrow(dd), mu = mu, size = 0.5)
+str(dd)
+require("MASS")## and use its glm.nb() - as indeed we have zero random effect:
+## Not run: 
+m.glm <- glm.nb(y ~ f1*f2, data=dd, trace=TRUE)
+
+class(m.glm)
+
+simulate(m.glm)
+
+out <- simulateResiduals(m.glm)
+plot(out)
+
+ "negbin" 
+ 
+ m.nb <- glmer.nb(y ~ f1*f2 + (1|g), data=dd, verbose=F)
+ out <- simulateResiduals(m.nb)
+ plot(out)
+  
+  class(m.nb)
+
+```
+
+
+
+
 ## GAM on binomial data - just to show that this also works
 
 ```{r}
@@ -19,12 +56,22 @@ testData = createData(sampleSize = 500, overdispersion = 2, family = binomial())
 
 library(mgcv)
 fittedModel <- gam(observedResponse ~ s(Environment1) + s(group,bs="re") , data = testData)
+
+simulate(fittedModel)
+
+fittedModel <- bam(observedResponse ~ s(Environment1) + s(group,bs="re") , data = testData)
+
+simulate(fittedModel)
+
 summary(fittedModel)
 plotConventionalResiduals(fittedModel)
 
 simulationOutput <- simulateResiduals(fittedModel = fittedModel)
 plotSimulatedResiduals(simulationOutput = simulationOutput)
 testSimulatedResiduals(simulationOutput = simulationOutput)
+
+
+
 ```
 
 ## GAMM on binomial data - just to show that this also works
@@ -32,6 +79,9 @@ testSimulatedResiduals(simulationOutput = simulationOutput)
 ```{r}
 library(mgcv)
 fittedModel <- gamm(observedResponse ~ s(Environment1), family = "binomial", random = list(group=~1) , data = testData)
+
+simulate(fittedModel)
+
 summary(fittedModel)
 plotConventionalResiduals(fittedModel)
 
@@ -39,3 +89,68 @@ simulationOutput <- simulateResiduals(fittedModel = fittedModel)
 plotSimulatedResiduals(simulationOutput = simulationOutput)
 testSimulatedResiduals(simulationOutput = simulationOutput)
 ```
+
+## GAMM4
+
+```{r}
+
+library(gamm4)
+
+###################################
+## A simple additive mixed model...
+###################################
+library(gamm4)
+
+set.seed(0) 
+dat <- gamSim(1,n=400,scale=2) ## simulate 4 term additive truth
+## Now add 20 level random effect `fac'...
+dat$fac <- fac <- as.factor(sample(1:20,400,replace=TRUE))
+dat$y <- dat$y + model.matrix(~fac-1)%*%rnorm(20)*.5
+
+br <- gamm4(y~s(x0)+x1+s(x2),data=dat,random=~(1|fac))
+plot(br$gam,pages=1)
+
+simulate(br$mer)
+
+```
+
+
+
+```{r}
+
+library(nlme)
+
+fm1 <- lme(distance ~ age, data = Orthodont) # random is ~ age
+summary(fm1)
+simulate(fm1)
+
+fm1 <- nlme(height ~ SSasymp(age, Asym, R0, lrc),
+            data = Loblolly,
+            fixed = Asym + R0 + lrc ~ 1,
+            random = Asym ~ 1,
+            start = c(Asym = 103, R0 = -8.5, lrc = -3.3))
+
+simulate(fm1)
+
+```
+
+
+```{r}
+## nonlinear mixed models --- 3-part formulas ---
+## 1. basic nonlinear fit. Use stats::SSlogis for its
+## implementation of the 3-parameter logistic curve.
+## "SS" stands for "self-starting logistic", but the
+## "self-starting" part is not currently used by nlmer ... 'start' is
+## necessary
+startvec <- c(Asym = 200, xmid = 725, scal = 350)
+(nm1 <- nlmer(circumference ~ SSlogis(age, Asym, xmid, scal) ~ Asym|Tree,
+             Orange, start = startvec))
+
+simulate(nm1)
+
+
+```
+
+
+
+
