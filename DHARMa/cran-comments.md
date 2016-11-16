@@ -1,4 +1,32 @@
 
+# Version 0.1.1
+
+## Submission 1
+
+This is a minor update of the DHARMa package, fixing a few small isues and including the negative binomial glm and glmms in the family of supported models.
+
+### Tested under
+
+* local MAC OS 10.10.5, R 3.3.1
+* http://win-builder.r-project.org/
+ * R-release: R-3.3.1 
+ * R-devel: 2016-11-14 r71659
+
+### R CMD check results
+
+#### local
+
+R CMD check results
+0 errors | 0 warnings | 0 notes
+
+R CMD check succeeded
+
+#### win-builder
+
+only some spelling problems that seem fine to me. 
+
+
+
 # Version 0.1.0
 
 

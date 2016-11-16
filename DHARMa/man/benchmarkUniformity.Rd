@@ -34,7 +34,7 @@ dataModelCreator <- function(){
   return(list(data=data, model = model))
 }
 
-benchmarkUniformity(dataModelCreator = dataModelCreator, nSim = 5)
+\dontrun{benchmarkUniformity(dataModelCreator = dataModelCreator, nSim = 4)}
 }
 \seealso{
 \code{\link{benchmarkOverdispersion}}
