@@ -85,7 +85,7 @@ simulateResiduals <- function(fittedModel, n = 250, refit = F, integerResponse =
     for (i in 1:out$nObs){
       
       if(integerResponse == T){
-        out$scaledResiduals[i] <- ecdf(out$simulatedResponse[i,] + runif(n, -0.5, 0.5))(out$observedResponse[i] + runif(1, -0.5, 0.5))           
+        out$scaledResiduals[i] <- ecdf(out$simulatedResponse[i,] + runif(out$nSim, -0.5, 0.5))(out$observedResponse[i] + runif(1, -0.5, 0.5))           
       }else{
         out$scaledResiduals[i] <- ecdf(out$simulatedResponse[i,])(out$observedResponse[i])
       }
@@ -138,7 +138,7 @@ simulateResiduals <- function(fittedModel, n = 250, refit = F, integerResponse =
     for (i in 1:out$nObs){
     
       if(integerResponse == T){
-        out$scaledResiduals[i] <- ecdf(out$refittedResiduals[i,] + runif(n, -0.5, 0.5))(out$fittedResiduals[i] + runif(1, -0.5, 0.5))           
+        out$scaledResiduals[i] <- ecdf(out$refittedResiduals[i,] + runif(out$nSim, -0.5, 0.5))(out$fittedResiduals[i] + runif(1, -0.5, 0.5))           
       }else{
         out$scaledResiduals[i] <- ecdf(out$refittedResiduals[i,])(out$fittedResiduals[i])
       }

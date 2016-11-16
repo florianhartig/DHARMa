@@ -48,12 +48,14 @@ createDHARMa <- function(scaledResiduals = NULL, simulatedResponse = NULL, obser
     if(!is.matrix(simulatedResponse) & !is.null(observedResponse)) stop("either scaled residuals or simulations and observations have to be provided")
     
     out$nObs = length(observedResponse)
+    out$nSim = ncol(simulatedResponse)
+      
     scaledResiduals = rep(NA, out$nObs)
     
     for (i in 1:out$nObs){
       
       if(integerResponse == T){
-        scaledResiduals[i] <- ecdf(simulatedResponse[i,] + runif(n, -0.5, 0.5))(observedResponse[i] + runif(1, -0.5, 0.5))           
+        scaledResiduals[i] <- ecdf(simulatedResponse[i,] + runif(out$nSim, -0.5, 0.5))(observedResponse[i] + runif(1, -0.5, 0.5))           
       }else{
         scaledResiduals[i] <- ecdf(simulatedResponse[i,])(observedResponse[i])
       }
