@@ -63,11 +63,11 @@ DHARMa aims at solving these problems by creating readily interpretable residual
 
 3. The residual is defined as the value of the empirical density function at the value of the observed data. 
 
-This steps are visualized in the following figure 
+These steps are visualized in the following figure 
 
-```{r, out.width = "400px", echo = F}
-knitr::include_graphics("../util/figures/ECDFmotivation.png")
-```
+
+<img src="ECDFmotivation.png" width="400">
+
 
 The key idea for this definition is that, if the model is correctly specified, then the observed data should look like as if was created by the assumptions of the fitted model. Hence, for a correctly specified model, all values of the cumulative distribution should appear with equal probability. What that means is that we expect the distribution of the residuals to be flat, regardless of the model structure (Poisson, binomial, random effects and so on).
 
@@ -87,12 +87,7 @@ If you haven't installed the package yet, either run
 install.packages("DHARMa")
 ```
 
-Or follow the instructions on [https://github.com/florianhartig/DHARMa](https://github.com/florianhartig/DHARMa) to install a development version. Usually, snapshots of the latest development version will be available at
-
-```{r, eval = F}
-library(devtools)
-install_url("https://dl.dropboxusercontent.com/s/xlvjf0vpslukl29/DHARMa.tar.gz", dependencies = T)
-```
+Or follow the instructions on [https://github.com/florianhartig/DHARMa](https://github.com/florianhartig/DHARMa) to install a development version. 
 
 Loading and citation
 
@@ -275,7 +270,7 @@ testOverdispersionParametric(fittedModel)
 while having all advantages of a parametric tests, i.e. it is should be still reliable for situations where distributional assumptions are violated
 
 
-![Comparison of power from simulation studies](../util/figures/Overdispersion.png)
+![Comparison of power from simulation studies](Overdispersion.png)
 
 ## Zero-inflation
 
