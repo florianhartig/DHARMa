@@ -16,6 +16,8 @@ createDHARMa(scaledResiduals = NULL, simulatedResponse = NULL,
 \item{observedResponse}{true observations}
 
 \item{fittedPredictedResponse}{fitted predicted response. Optional, but will be neccessary for some plots. If scaled residuals are Bayesian p-values, using the median posterior prediction as fittedPredictedResponse is recommended.}
+
+\item{integerResponse}{if T, noise will be added at to the residuals to maintain a uniform expectations for integer responses (such as Poisson or Binomial). Unlike in \code{\link{simulateResiduals}}, the nature of the data is not automatically detected, so this MUST be set by the user appropriately}
 }
 \description{
 Convert simulated residuals to a DHARMa object

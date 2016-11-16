@@ -12,7 +12,7 @@
 #' @note The benchmark function in DHARMa are intended for development purposes, and for users that want to test / confirm the properties of functions in DHARMa. If you are running an applied data analysis, they are probably of little use. 
 #' @export 
 #' @importFrom foreach "%dopar%"
-benchmarkP <- function(controlValues = 0, getP, nRep = 10, alpha = 0.05, plot = T, parallel = F, ...){
+benchmarkP <- function(controlValues = 0, getP, nRep = 10, alpha = 0.05, plot = T, parallel = F){
   
   values = list()
   
@@ -21,7 +21,7 @@ benchmarkP <- function(controlValues = 0, getP, nRep = 10, alpha = 0.05, plot = 
   for(j in 1:length(controlValues)){
     
     if (parallel == F){
-      out = replicate(nRep, getP(controlValues[j]), simplify = "array", ...)
+      out = replicate(nRep, getP(controlValues[j]), simplify = "array")
       out = t(out)
     }else{
       if (parallel == T | parallel == "auto"){

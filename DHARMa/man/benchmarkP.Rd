@@ -5,7 +5,7 @@
 \title{General Type I/II benchmarks}
 \usage{
 benchmarkP(controlValues = 0, getP, nRep = 10, alpha = 0.05, plot = T,
-  parallel = F, ...)
+  parallel = F)
 }
 \arguments{
 \item{controlValues}{a vector with a control parameter (e.g. to vary the strength of a problem the test should be specific to)}
