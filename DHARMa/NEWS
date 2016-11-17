@@ -1,2 +1,14 @@
-For news / changelog, see https://github.com/florianhartig/DHARMa/releases
+NOTE: for more news about the package, see https://github.com/florianhartig/DHARMa/releases
+
+
+DHARMa 0.1.1
+
+- including now the negative binomial models from MASS and lme4, as well as the possibility to create synthetic data from the negative binomial family
+
+- includes a createDHARMa function that allows using the plot functions of DHARMa also with externally created simualtions, for example for Bayesian predictive simulations
+
+DHARMA 0.1
+
+- initial release, with support for lm, glm, lme4 
+
 

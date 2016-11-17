@@ -3,7 +3,11 @@
 
 ## Submission 1
 
-This is a minor update of the DHARMa package, fixing a few small isues and including the negative binomial glm and glmms in the family of supported models.
+This is a minor update of the DHARMa package
+
+- including now the negative binomial models from MASS and lme4, as well as the possibility to create synthetic data from the negative binomial family
+
+- includes a createDHARMa function that allows using the plot functions of DHARMa also with externally created simulations, for example for Bayesian predictive simulations
 
 ### Tested under
 
