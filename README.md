@@ -31,7 +31,7 @@ If you want to install the current (development) version from this repository, r
 ```{r}
 devtools::install_github(repo = "DHARMa", username = "florianhartig", subdir = "DHARMa", dependencies = T)
 ```
-Below the status of the automatic Travis CI tests on the master branch
+Below the status of the automatic Travis CI tests on the master branch (if this doesn load see [here](https://travis-ci.org/florianhartig/DHARMa))
 
 [![Build Status](https://travis-ci.org/florianhartig/DHARMa.svg?branch=master)](https://travis-ci.org/florianhartig/DHARMa)
 
