@@ -1,4 +1,18 @@
 
+# Version 0.1.2
+
+## Submission 1
+
+This is a bugfix release that fixes an issue with backwards compatibility introduced in the 0.1.1 release of DHARMa. 0.1.1 used the 'startsWith' function that is only available in R base since 3.3.0. Apologies for this oversight. I replaced all occurences of 'startsWith' with 'grepl', which should restore the compatibility with older R versions.
+
+This release was tested without apparent problems under
+
+* local MAC OS 10.10.5, R 3.3.1
+* http://win-builder.r-project.org/
+ * R-release: R-3.3.1 
+ * R-devel: 2016-11-14 r71659
+* Linux (Travis CI)
+
 # Version 0.1.1
 
 ## Submission 1

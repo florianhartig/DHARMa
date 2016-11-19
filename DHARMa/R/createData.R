@@ -109,7 +109,7 @@ createData <- function(replicates=1, sampleSize = 10, intercept = 0, fixedEffect
       if(is.null(roundPoissonVariance)) observedResponse = rpois(n = sampleSize, lambda = linkResponse)
       else observedResponse = round(rnorm(n = length(linkResponse), mean = linkResponse, sd = roundPoissonVariance))
     }
-    else if (startsWith(family$family, "Negative Binomial")) {
+    else if (grepl("Negative Binomial",family$family)) {
       theta = as.numeric(gsub("[\\(\\)]", "", regmatches(family$family, gregexpr("\\(.*?\\)", family$family))[[1]]))
       observedResponse = MASS::rnegbin(linkResponse, theta = theta)
     }

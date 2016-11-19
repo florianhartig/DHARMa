@@ -60,6 +60,16 @@ test_that("lmer gaussian works",
 )
 
 
+# test_that("lmer gaussian with weights works",
+#           {
+#             skip_on_cran()
+#             testData = createData(sampleSize = 100, overdispersion = 0, randomEffectVariance = 1, family = gaussian())
+#             fittedModel <- lmer(observedResponse ~ Environment1 + (1|group) , weights = runif(100, 0.9,1.1), data = testData)
+#             runEverything(fittedModel, testData)
+#           }
+# )
+
+
 test_that("glm binomial 1/0 works",
           {
             skip_on_cran()
@@ -122,6 +132,18 @@ test_that("glmer poisson works",
             runEverything(fittedModel, testData)
           }
 )
+
+
+# test_that("glmer poisson with weights works",
+#           {
+#             skip_on_cran()
+#             testData = createData(sampleSize = 200, overdispersion = 0.5, randomEffectVariance = 1, family = poisson(), roundPoissonVariance = 0.1, pZeroInflation = 0.1)
+#             fittedModel <- glmer(observedResponse ~ Environment1 + (1|group) + (1|ID), family = "poisson", weights = runif(200, 0.9,1.1),  data = testData, control=glmerControl(optCtrl=list(maxfun=20000) ))
+#             runEverything(fittedModel, testData)
+#           }
+# )
+
+
 
 
 # Negative binomial models
