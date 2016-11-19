@@ -1,0 +1,8 @@
+before_install:
+ - cd DHARMa
+
+language: r
+r:
+  - oldrel
+  - release
+  - devel
