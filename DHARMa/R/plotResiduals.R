@@ -37,25 +37,28 @@ plotSimulatedResiduals <- function(simulationOutput, quantreg = T){
 #' @param quantreg should a quantile regression be performed. If F, a smooth spline will be plotted
 #' @param ... additional arguments to plot
 #' @details For a correctly specified model, we would expect uniformity in y direction when plotting against any predictor.
+#' @name if predictor is a factor, a boxplot will be plotted instead of a scatter plot.
 #' @seealso \code{\link{plotSimulatedResiduals}}
 #' @export
 plotResiduals <- function(pred, residual, quantreg = T, ...){
   
   res = residual 
   
-  plot(pred, res, ...)
+  plot(res ~ pred, ...)
   
-  if(quantreg == F){
-    lines(smooth.spline(pred, res, df = 10), lty = 2, lwd = 2, col = "red")
-    abline(h = 0.5, col = "red", lwd = 2)
-  }else{
-    probs = c(0.25, 0.50, 0.75)
-    w <- p <- list()
-    for(i in seq_along(probs)){
-      capture.output(w[[i]] <- qrnn::qrnn.fit(x = as.matrix(pred), y = as.matrix(res), n.hidden = 4, tau = probs[i], iter.max = 1000, n.trials = 1, penalty = 1))
-p[[i]] <- qrnn::qrnn.predict(as.matrix(sort(pred)), w[[i]])
+  if(is.numeric(pred)){
+    if(quantreg == F){
+      lines(smooth.spline(pred, res, df = 10), lty = 2, lwd = 2, col = "red")
+      abline(h = 0.5, col = "red", lwd = 2)
+    }else{
+      probs = c(0.25, 0.50, 0.75)
+      w <- p <- list()
+      for(i in seq_along(probs)){
+        capture.output(w[[i]] <- qrnn::qrnn.fit(x = as.matrix(pred), y = as.matrix(res), n.hidden = 4, tau = probs[i], iter.max = 1000, n.trials = 1, penalty = 1))
+  p[[i]] <- qrnn::qrnn.predict(as.matrix(sort(pred)), w[[i]])
+      }
+      matlines(sort(pred), matrix(unlist(p), nrow = length(pred), ncol = length(p)), col = "red", lty = 1)
     }
-    matlines(sort(pred), matrix(unlist(p), nrow = length(pred), ncol = length(p)), col = "red", lty = 1)
   }
 }
 
