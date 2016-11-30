@@ -19,7 +19,7 @@ testSpatialAutocorrelation(simulationOutput, x, y, plot = T)
 This function performs a standard test for spatial autocorrelation on the simulated residuals
 }
 \details{
-performs the Durbin-Watson Test against euklidian distance and plots the residuals against time
+performs Moran.I from the package ape to test against euklidian distance and plots the residuals against space
 }
 \note{
 It is possible to not specify x and y. In this case, random x and y values are created. The sense of this option is to test the rate of false positives under the current residual structure (random x/y corresponds to H0: no spatial autocorrelation). This may be useful because it may be that the test doesn't have noninal error rates due to some problem in the residual structure that is different from spatial autocorrelation
