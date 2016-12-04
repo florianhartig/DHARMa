@@ -10,7 +10,7 @@ vignette: >
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
   \usepackage[utf8]{inputenc}
-abstract: "The DHARMa package uses a simulation-based approach to create readily interpretable scaled residuals from fitted generalized linear mixed models. Currently supported are all 'merMod' classes from 'lme4' ('lmerMod', 'glmerMod'), 'glm' (including 'negbin' from 'MASS', but excluding quasi-distributions) and 'lm' model classes. Alternatively, externally created simulations, e.g. posterior predictive simulations from Bayesian software such as 'JAGS', 'STAN', or 'BUGS' can be processed as well. The resulting residuals are standardized to values between 0 and 1 and can be interpreted as intuitively as residuals from a linear regression. The package also provides a number of plot and test functions for typical model mispecification problem, such as over/underdispersion, zero-inflation, and spatial and temporal autocorrelation.\n \n \n"
+abstract: "The DHARMa package uses a simulation-based approach to create readily interpretable scaled residuals from fitted generalized linear mixed models. Currently supported are all 'merMod' classes from 'lme4' ('lmerMod', 'glmerMod'), 'glm' (including 'negbin' from 'MASS', but excluding quasi-distributions) and 'lm' model classes. Alternatively, externally created simulations, e.g. posterior predictive simulations from Bayesian software such as 'JAGS', 'STAN', or 'BUGS' can be processed as well. The resulting residuals are standardized to values between 0 and 1 and can be interpreted as intuitively as residuals from a linear regression. The package also provides a number of plot and test functions for typical model mispecification problem, such as over/underdispersion, zero-inflation, and spatial / temporal autocorrelation.\n \n \n"
 ---
 
 ```{r, echo = F}
@@ -47,7 +47,7 @@ Just for completeness - it was the first one. But don't get too excited if you g
 
 The reason why GL(M)Ms residuals are harder to interpret is that the expected distribution of the data changes with the fitted values. Reweighting with the expected variance, as done in Pearson residuals, or using deviance residuals, helps a bit, but does not lead to visually homogenous residuals even if the model is correctly specified. As a result, standard residual plots, when interpreted in the same way as for linear models, seem to show all kind problems such as non-normality, heteroskedasticity and so on, even if the model is correctly specified. Questions on the R mailing lists and forums show that practitioners are regularly confused about whether such patterns in GL(M)Ms show a problem or not. 
 
-But even experienced statistical analysists currently have few options to diagnose specification problems in GLMMs. In my experience, the current standard practice is to eyeball the residual plots for major misspecifications, potentially have a look at the random effect distribution, and the run a test for overdispersion, which is usually positive for count data, after which the model is modified towards an overdispersed / zero-inflated distribution. This approach, however, has a number of problems. Just a few examples:
+But even experienced statistical analysts currently have few options to diagnose specification problems in GLMMs. In my experience, the current standard practice is to eyeball the residual plots for major misspecifications, potentially have a look at the random effect distribution, and the run a test for overdispersion, which is usually positive for count data, after which the model is modified towards an overdispersed / zero-inflated distribution. This approach, however, has a number of problems. Just a few examples:
 
 * Overdispersion often comes from missing or misspecified predictors. Standard residual plots make it difficult to test for residual patterns against the predictors 
 
@@ -98,13 +98,13 @@ citation("DHARMa")
 
 ## Calculating scaled residuals 
 
-The scaled (quantile) residuals are calculated with the simulateResiduals() functions. The default number of simulations to run is 250, which proved to be a reasonable compromise between computation time and precision, but if high precision is desired, n should be raised to 1000 at least. 
+The scaled (quantile) residuals are calculated with the simulateResiduals() function. The default number of simulations to run is 250, which proved to be a reasonable compromise between computation time and precision, but if high precision is desired, n should be raised to 1000 at least. 
 
 ```{r}
 simulationOutput <- simulateResiduals(fittedModel = fittedModel, n = 250)
 ```
 
-The function call thus creates new synthetic datasets by simulating from the fitted model, calculates the cummulative distribution of simulated values for each observed value, and returns the quantile value that corresponds to the observed value. 
+What the function does is a) creating n new synthetic datasets by simulating from the fitted model, b) calculates the cummulative distribution of simulated values for each observed value, and c) returning the quantile value that corresponds to the observed value. 
 
 For example, a simulated residual of 0.5 means that half of the simulated data are higher than the observed value, and half of them lower. A value of 0.99 would mean that nearly all simulated data are lower than the observed value. The minium/maxium values for the residuals are 0 and 1. 
 
@@ -120,6 +120,15 @@ As discussed above, for a correctly specified model we would expect
 
 * uniformity in y direction if we plot against any predictor. 
 
+Note: the expected uniform distribution is the only differences to the linear regression that one has to keep in mind when interpreting DHARMa residuals. If you cannot get used to this and you must have residuals that behave exactly like a linear regression, you can access a normal transformation of the residuals via  
+
+```{r, eval = F}
+simulationOutput$scaledResidualsNormal
+```
+
+These normal residuals will behave exactly like the residuals of a linear regression. However, for reasons of a) numeric stability with low number of simulations and b) my conviction that it is much easier to visually detect deviations from uniformity than normality, I would STRONGLY advice against using this transformation. 
+
+
 ## Plotting the scaled residuals
 
 We can get a visual impression of these properties with the plotSimulatedResiduals() function
@@ -128,7 +137,7 @@ We can get a visual impression of these properties with the plotSimulatedResidua
 plotSimulatedResiduals(simulationOutput = simulationOutput)
 ```
 
-which creates a qq-plot to detect overall deviations from normality, and a plot of the residuals against the predicted value. 
+which creates a qq-plot to detect overall deviations from the expected distribution, and a plot of the residuals against the predicted value. 
 
 To provide a visual aid in detecting deviations from uniformity in y-direction, the plot of the residuals against the predited values also performs an (optional) quantile regression, which provides 0.25, 0.5 and 0.75 quantile lines across the plots. These lines should be straight, horizontal, and at y-values of 0.25, 0.5 and 0.75. Note, however, that some deviations from this are to be expected by chance, even for a perfect model, especially if the sample size is small.  
 
@@ -202,6 +211,19 @@ The simulateResiduals function should automatically detect if the function is in
 # Visual diagnostics and tests of common misspecification problems 
 
 So far, all the plots / tests that were shown were from a correctly specified model. In this section, we discuss how model misspecification will show up in the scaled residuals.
+
+### Using external simulations
+
+As mentioned earlier, the quantile residuals defined in DHARMa are the frequentist equivalent of the so-called "Bayesian p-values", i.e. residuals created from posterior predictive simulations in a Bayesian analysis.
+
+To make the plots and tests in DHARMa also available for Bayesian analysis, DHARMa provides the option to convert externally created posterior predictive simulations into a DHARMa object
+
+
+```{r, eval = F}
+res = createDHARMa(scaledResiduals = posteriorPredictiveSimulations, simulatedResponse = medianPosteriorPredictions, observedResponse = observations, integerResponse = ?)
+```
+
+What is provided as simulatedResponse is up to the user, but median posterior predictions seem most sensible. Note: as DHARMa doesn't know the fitted model, it is important in this function to specify the integerResponse option by hand (see simulateResiduals for details). After the conversion, all DHARMa plots can be used, however, note that Bayesian p-values != DHARMA residuals, because in the Bayesian analysis, parameters are varied as well. 
 
 ## Overdispersion / underdispersion
 

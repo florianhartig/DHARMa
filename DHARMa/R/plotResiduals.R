@@ -9,7 +9,10 @@
 #' 
 #' b) uniformity in y direction if we plot against any predictor, including the predicted value.
 #' 
-#' To provide a visual aid in detecting deviations from uniformity in y-direction, the plot of the residuals against the predited values also performs an (optional) quantile regression, which provides 0.25, 0.5 and 0.75 quantile lines across the plots. These lines should be straight, horizontal, and at y-values of 0.25, 0.5 and 0.75.
+#' To provide a visual aid in detecting deviations from uniformity in y-direction, the plot of the residuals against the predited values also performs an (optional) quantile regression, which provides 0.25, 0.5 and 0.75 quantile lines across the plots. These lines should be straight, horizontal, and at y-values of 0.25, 0.5 and 0.75. Note, however, that some deviations from this are to be expected by chance, even for a perfect model, especially if the sample size is small.
+#' 
+#' The quantile regression can take some time to calculate, especially for larger datasets. For that reason, quantreg = F can be set to produce a smooth spline instead. 
+#' 
 #' @seealso \code{\link{plotResiduals}}
 #' @import graphics
 #' @import utils
@@ -37,6 +40,13 @@ plotSimulatedResiduals <- function(simulationOutput, quantreg = T){
 #' @param quantreg should a quantile regression be performed. If F, a smooth spline will be plotted
 #' @param ... additional arguments to plot
 #' @details For a correctly specified model, we would expect uniformity in y direction when plotting against any predictor.
+#' 
+#' To provide a visual aid in detecting deviations from uniformity in y-direction, the plot of the residuals against the predited values also performs an (optional) quantile regression, which provides 0.25, 0.5 and 0.75 quantile lines across the plots. These lines should be straight, horizontal, and at y-values of 0.25, 0.5 and 0.75. Note, however, that some deviations from this are to be expected by chance, even for a perfect model, especially if the sample size is small.
+#' 
+#' The quantile regression can take some time to calculate, especially for larger datasets. For that reason, quantreg = F can be set to produce a smooth spline instead. 
+#' 
+#' If the predictor is a factor (categorial), a boxplot will be created - with a uniform distrituion, the box should go from 0.25 to 0.75, with the median line at 0.5. Again, chance deviations from this will increases when the sample size is smaller
+#'   
 #' @name if predictor is a factor, a boxplot will be plotted instead of a scatter plot.
 #' @seealso \code{\link{plotSimulatedResiduals}}
 #' @export
