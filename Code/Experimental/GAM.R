@@ -7,8 +7,11 @@ simulate(fm1)
 
 # This works, but unclear what it does 
 
+getResponse(fm1)
 x = simulateResiduals(fm1)
 plot(x)
+
+model.frame(fm1)
 
 
 library(mgcv)

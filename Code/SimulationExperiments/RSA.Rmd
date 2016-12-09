@@ -1,0 +1,42 @@
+---
+title: "SpatialErrorOnGLMs"
+author: "Florian Hartig"
+date: "6 Dec 2016"
+output: html_document
+---
+
+
+Idea: for testing RSA in GLMs or similar, it is common to perform autocorrelation tests (Moran's I or similar) on raw or transformed (deviance) residuals. One would expect that this could create a problem due to the assymetry of these residuals for small / large counts for the binomial, and small counts for the Poisson. This document tests if such problems occcur. 
+
+
+```{r}
+library(ape)
+library(RandomFields)
+library(fields)
+
+```
+
+
+
+
+
+```{r}
+ape::Moran.I()
+```
+
+
+
+
+
+
+
+
+```{r}
+model <- RMexp()
+x <- seq(0, 10, length.out = 10)
+z <- RFsimulate(model, x, x, n=1)
+image.plot(matrix(z@data$variable1, nrow = length(x)))
+
+data = cbind(coordinates(z), z@data$variable1)
+```
+
