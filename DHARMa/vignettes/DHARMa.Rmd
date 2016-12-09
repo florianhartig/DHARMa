@@ -10,7 +10,7 @@ vignette: >
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
   \usepackage[utf8]{inputenc}
-abstract: "The DHARMa package uses a simulation-based approach to create readily interpretable scaled residuals from fitted generalized linear mixed models. Currently supported are all 'merMod' classes from 'lme4' ('lmerMod', 'glmerMod'), 'glm' (including 'negbin' from 'MASS', but excluding quasi-distributions) and 'lm' model classes. Alternatively, externally created simulations, e.g. posterior predictive simulations from Bayesian software such as 'JAGS', 'STAN', or 'BUGS' can be processed as well. The resulting residuals are standardized to values between 0 and 1 and can be interpreted as intuitively as residuals from a linear regression. The package also provides a number of plot and test functions for typical model mispecification problem, such as over/underdispersion, zero-inflation, and spatial / temporal autocorrelation.\n \n \n"
+abstract: "The DHARMa package uses a simulation-based approach to create readily interpretable scaled residuals from fitted generalized linear mixed models. Currently supported are generalized linear mixed models from 'lme4' (classes 'lmerMod', 'glmerMod'), generalized additive models ('gam' from 'mgcv'), 'glm' (including 'negbin' from 'MASS', but excluding quasi-distributions) and 'lm' model classes. Alternatively, externally created simulations, e.g. posterior predictive simulations from Bayesian software such as 'JAGS', 'STAN', or 'BUGS' can be processed as well. The resulting residuals are standardized to values between 0 and 1 and can be interpreted as intuitively as residuals from a linear regression. The package also provides a number of plot and test functions for typical model misspecification problems, such as over/underdispersion, zero-inflation, and spatial / temporal autocorrelation.\n \n \n"
 ---
 
 ```{r, echo = F}
@@ -43,23 +43,23 @@ plotConventionalResiduals(fittedModel)
 
 ```
 
-Just for completeness - it was the first one. But don't get too excited if you got it right. Either you were lucky, or you noted that the first model seems a bit overdispersed (range of the Pearson residuals). But even when noting that, would you have added a quadratic effect, instead of adding an overdispersion correction? The point that I want to make is that misspecifications in GL(M)Ms cannot reliably be diagnosed with standard residual plots, and GLMMs are not often as thoroghly checked as LMs. 
+Just for completeness - it was the first one. But don't get too excited if you got it right. Either you were lucky, or you noted that the first model seems a bit overdispersed (range of the Pearson residuals). But even when noting that, would you have added a quadratic effect, instead of adding an overdispersion correction? The point that I want to make is that misspecifications in GL(M)Ms cannot reliably be diagnosed with standard residual plots, and GLMMs are not often as thoroughly checked as LMs. 
 
-The reason why GL(M)Ms residuals are harder to interpret is that the expected distribution of the data changes with the fitted values. Reweighting with the expected variance, as done in Pearson residuals, or using deviance residuals, helps a bit, but does not lead to visually homogenous residuals even if the model is correctly specified. As a result, standard residual plots, when interpreted in the same way as for linear models, seem to show all kind problems such as non-normality, heteroskedasticity and so on, even if the model is correctly specified. Questions on the R mailing lists and forums show that practitioners are regularly confused about whether such patterns in GL(M)Ms show a problem or not. 
+The reason why GL(M)Ms residuals are harder to interpret is that the expected distribution of the data changes with the fitted values. Reweighting with the expected variance, as done in Pearson residuals, or using deviance residuals, helps a bit, but does not lead to visually homogenous residuals even if the model is correctly specified. As a result, standard residual plots, when interpreted in the same way as for linear models, seem to show all kind of problems, such as non-normality, heteroscedasticity, even if the model is correctly specified. Questions on the R mailing lists and forums show that practitioners are regularly confused about whether such patterns in GL(M)Ms show a problem or not. 
 
-But even experienced statistical analysts currently have few options to diagnose specification problems in GLMMs. In my experience, the current standard practice is to eyeball the residual plots for major misspecifications, potentially have a look at the random effect distribution, and the run a test for overdispersion, which is usually positive for count data, after which the model is modified towards an overdispersed / zero-inflated distribution. This approach, however, has a number of problems. Just a few examples:
+But even experienced statistical analysts currently have few options to diagnose specification problems in GLMMs. In my experience, the current standard practice is to eyeball the residual plots for major misspecifications, potentially have a look at the random effect distribution, and then run a test for overdispersion, which is usually positive for count data, after which the model is modified towards an overdispersed / zero-inflated distribution. This approach, however, has a number of problems. Just a few examples:
 
 * Overdispersion often comes from missing or misspecified predictors. Standard residual plots make it difficult to test for residual patterns against the predictors 
 
 * Not all overdispersion is the same. For count data, the negative binomial creates a different distribution than individual-level random effects in the Poisson. Differences between distributional assumptions are not detectable by overdispersion tests, once overdispersion is corrected (because the tests only looks for to total dispersion), and nearly impossible to see visually from standard residuals. 
 
-* Dispersion frequenly varies with predictor variables (heteroskedasticity). This can have a significant effect on the inference. While it is standard to tests for heteroskedasticity in linear regressions, heteroskedasticity is currently hardly ever tested in GLMMs, although it is likely as frequent and infuential. 
+* Dispersion frequently varies with predictor variables (heteroscedasticity). This can have a significant effect on the inference. While it is standard to tests for heteroscedasticity in linear regressions, heteroscedasticity is currently hardly ever tested in GLMMs, although it is likely as frequent and influential. 
 
-DHARMa aims at solving these problems by creating readily interpretable residuals for generalized linear (mixed) models that are standardized to values between 0 and 1, and that can be interpreted as intuitively as residuals for the linear model. This is achieved by a simulation-based approach, similar to the Bayesian p-value or the parametric bootstrap, that tranforms the residuals to a standardized scale. The basic steps are:
+DHARMa aims at solving these problems by creating readily interpretable residuals for generalized linear (mixed) models that are standardized to values between 0 and 1, and that can be interpreted as intuitively as residuals for the linear model. This is achieved by a simulation-based approach, similar to the Bayesian p-value or the parametric bootstrap, that transforms the residuals to a standardized scale. The basic steps are:
 
 1. Simulate new data from the fitted model for the predictor variable combination of each observation.
 
-2. For each observation, calculate the empirical cummulative density function, which describes the expected spread for an observation at the respective point in predictor space, conditional on the fitted model.
+2. For each observation, calculate the empirical cumulative density function, which describes the expected spread for an observation at the respective point in predictor space, conditional on the fitted model.
 
 3. The residual is defined as the value of the empirical density function at the value of the observed data. 
 
@@ -69,9 +69,9 @@ These steps are visualized in the following figure
 <img src="ECDFmotivation.png" width="400">
 
 
-The key idea for this definition is that, if the model is correctly specified, then the observed data should look like as if was created by the assumptions of the fitted model. Hence, for a correctly specified model, all values of the cumulative distribution should appear with equal probability. What that means is that we expect the distribution of the residuals to be flat, regardless of the model structure (Poisson, binomial, random effects and so on).
+The key idea for this definition is that, if the model is correctly specified, then the observed data should look like as if it was created by the assumptions of the fitted model. Hence, for a correctly specified model, all values of the cumulative distribution should appear with equal probability. What that means is that we expect the distribution of the residuals to be flat, regardless of the model structure (Poisson, binomial, random effects and so on).
 
-I currently prepare a more exact statistical justification for the apporach in an accompanying paper, but if you must provide a reference in the meantime I would suggest citing 
+I currently prepare a more exact statistical justification for the approach in an accompanying paper, but if you must provide a reference in the meantime I would suggest citing 
 
 * Dunn, K. P., and Smyth, G. K. (1996). Randomized quantile residuals. Journal of Computational and Graphical Statistics 5, 1-10. 
 
@@ -104,9 +104,9 @@ The scaled (quantile) residuals are calculated with the simulateResiduals() func
 simulationOutput <- simulateResiduals(fittedModel = fittedModel, n = 250)
 ```
 
-What the function does is a) creating n new synthetic datasets by simulating from the fitted model, b) calculates the cummulative distribution of simulated values for each observed value, and c) returning the quantile value that corresponds to the observed value. 
+What the function does is a) creating n new synthetic datasets by simulating from the fitted model, b) calculates the cumulative distribution of simulated values for each observed value, and c) returning the quantile value that corresponds to the observed value. 
 
-For example, a simulated residual of 0.5 means that half of the simulated data are higher than the observed value, and half of them lower. A value of 0.99 would mean that nearly all simulated data are lower than the observed value. The minium/maxium values for the residuals are 0 and 1. 
+For example, a simulated residual of 0.5 means that half of the simulated data are higher than the observed value, and half of them lower. A value of 0.99 would mean that nearly all simulated data are lower than the observed value. The minimum/maximum values for the residuals are 0 and 1. 
 
 The calculated residuals are stored in 
 
@@ -139,7 +139,7 @@ plotSimulatedResiduals(simulationOutput = simulationOutput)
 
 which creates a qq-plot to detect overall deviations from the expected distribution, and a plot of the residuals against the predicted value. 
 
-To provide a visual aid in detecting deviations from uniformity in y-direction, the plot of the residuals against the predited values also performs an (optional) quantile regression, which provides 0.25, 0.5 and 0.75 quantile lines across the plots. These lines should be straight, horizontal, and at y-values of 0.25, 0.5 and 0.75. Note, however, that some deviations from this are to be expected by chance, even for a perfect model, especially if the sample size is small.  
+To provide a visual aid in detecting deviations from uniformity in y-direction, the plot of the residuals against the predicted values also performs an (optional) quantile regression, which provides 0.25, 0.5 and 0.75 quantile lines across the plots. These lines should be straight, horizontal, and at y-values of 0.25, 0.5 and 0.75. Note, however, that some deviations from this are to be expected by chance, even for a perfect model, especially if the sample size is small.  
 
 If you want to plot the residuals against other predictors (highly recommend), you can use the function
 
@@ -151,7 +151,7 @@ which does the same quantile plot as the main plotting function.
 
 ## Formal goodness-of-fit tests on the scaled residuals
 
-To support the visual inspection of the residuals, the DHARMa package provides a numer of specialized goodness-of-fit tests on the simulated residuals. For example, the function 
+To support the visual inspection of the residuals, the DHARMa package provides a number of specialized goodness-of-fit tests on the simulated residuals. For example, the function 
 
 ```{r}
 testUniformity(simulationOutput = simulationOutput)
@@ -186,7 +186,7 @@ simulationOutput <- simulateResiduals(fittedModel = fittedModel, refit = T)
 
 * if refit = T, a parametric bootstrap is performed, meaning that the model is refit on the new data, and residuals are created by comparing observed residuals against refitted residuals 
 
-The second option is much much slower, and only important for running tests that rely on comparing observed to simulated residuals, e.g. the testOverdispersion function (see below).
+The second option is much much slower, and only important for running tests that rely on comparing observed to simulated residuals, e.g. the testOverdispersion function (see below), or if one expects that the tested model is biased and one wants to calculate the expected residuals conditional on this bias (this could make sense in particular for shrinkage estimators that include a purposeful bias, such as random effects or the splines in GAMs).
 
 #### Random effect simulations
 
@@ -199,14 +199,16 @@ For controlling how many levels should be re-simulated, the simulateResidual fun
 simulationOutput <- simulateResiduals(fittedModel = fittedModel, n = 250, use.u = T)
 ```
 
-If the model is correctly specified, the simulated residuals should be flat regardles how many hierarchical levels we re-simulate. The most thorough procedure would therefore be to test all possible options. If testing only one option, I would recommend to re-simulate all levels, because this esentially tests the model structure as a whole. This is the default setting in the DHARMa package. A potential drawback is that re-simulating the lower-level random effects creates more variability, which may reduce power for detecing problems in the upper-level stochatic processes.
+If the model is correctly specified, the simulated residuals should be flat regardless how many hierarchical levels we re-simulate. The most thorough procedure would therefore be to test all possible options. If testing only one option, I would recommend to re-simulate all levels, because this essentially tests the model structure as a whole. This is the default setting in the DHARMa package. A potential drawback is that re-simulating the lower-level random effects creates more variability, which may reduce power for detecting problems in the upper-level stochastic processes.
 
 
 #### Integer treatment
 
-A third option is the treatment of integer responses. The background here is that, for integer-value variables, some additional resampling is neccessary to make sure that the residual distribution becomes flat (essentially, we have to smooten away the integer nature of the data). 
+A third option is the treatment of integer responses. The background here is that, for integer-value variables, some additional resampling is necessary to make sure that the residual distribution becomes flat (essentially, we have to smoothen away the integer nature of the data). The idea is explained in 
 
-The simulateResiduals function should automatically detect if the function is integer valued. The parameter should therefore usually not be changed. 
+* Dunn, K. P., and Smyth, G. K. (1996). Randomized quantile residuals. Journal of Computational and Graphical Statistics 5, 1-10. 
+
+The simulateResiduals function will automatically check if the family is integer valued. The parameter should therefore usually not be changed. 
 
 # Visual diagnostics and tests of common misspecification problems 
 
@@ -229,14 +231,14 @@ What is provided as simulatedResponse is up to the user, but median posterior pr
 
 The most common concern for GLMMs is overdispersion, underdispersion and zero-inflation.
 
-Over/underdispersion refers to the phenomenon that that residual variance is larger/smaller than expected under the fitted model. Over/underdispersion can appear for any distributional family with fixed variance, in particular for Poisson and binomial models. 
+Over/underdispersion refers to the phenomenon that residual variance is larger/smaller than expected under the fitted model. Over/underdispersion can appear for any distributional family with fixed variance, in particular for Poisson and binomial models. 
 
 A few general rules of thumb
 
 * You can detect overdispersion / zero-inflation only AFTER fitting the model
 * Overdispersion is more common than underdispersion
 * If overdispersion is present, confidence intervals tend to be too narrow, and p-values to small. The opposite is true for underdispersion
-* A common reason for overdispersion is a misspecified models. When overdispersion is detected, one should therefore first search for problems in the model specification (e.g. by plotting residuals against predictors with DHARMa), and only if this doesn't lead to success, overdispersion corrections such as individual-level random effects or changes in the distribution should be applied
+* A common reason for overdispersion is a misspecified model. When overdispersion is detected, one should therefore first search for problems in the model specification (e.g. by plotting residuals against predictors with DHARMa), and only if this doesn't lead to success, overdispersion corrections such as individual-level random effects or changes in the distribution should be applied
 
 #### An example of overdispersion
 
@@ -274,9 +276,9 @@ Here, we get too many residuals around 0.5, which means that we are not getting 
 
 #### Testing for over/underdispersion
 
-Although, as discussed above, over/underdispersion will show up in the residuals, and it's possible to detect it with the testUniformity function, simulations show that this test is considerably less powerfull than more targeted tests. 
+Although, as discussed above, over/underdispersion will show up in the residuals, and it's possible to detect it with the testUniformity function, simulations show that this test is considerably less powerful than more targeted tests. 
 
-DHARMa therefore contains a specific nonparametric overdispersion test that compares the dispersion of simulated residuals to the observed residuals. Note that, in this case, refit = T is neccessary. 
+DHARMa therefore contains a specific nonparametric overdispersion test that compares the dispersion of simulated residuals to the observed residuals. Note that, in this case, refit = T is necessary. 
 
 ```{r overDispersionTest, echo = T}
 simulationOutput2 <- simulateResiduals(fittedModel = fittedModel, n = 250, refit = T)
@@ -289,7 +291,7 @@ Power simulations (2nd figure below) show that this diagnostic has similar power
 testOverdispersionParametric(fittedModel)
 ```
 
-while having all advantages of a parametric tests, i.e. it is should be still reliable for situations where distributional assumptions are violated
+while having all advantages of a non-parametric test, i.e. it should be still reliable for situations where distributional assumptions are violated
 
 
 ![Comparison of power from simulation studies](Overdispersion.png)
@@ -301,7 +303,7 @@ A common special case of overdispersion is zero-inflation, which is the situatio
 
 #### An example of zero-inflation
 
-Here an example of a zero-inflated count dataset, plotted against the environmental predictor
+Here an example of a typical zero-inflated count dataset, plotted against the environmental predictor
 
 ```{r}
 testData = createData(sampleSize = 500, intercept = 2, fixedEffects = c(1), overdispersion = 0, family = poisson(), quadraticFixedEffects = c(-3), randomEffectVariance = 0, pZeroInflation = 0.6)
@@ -325,25 +327,25 @@ simulationOutput <- simulateResiduals(fittedModel = fittedModel)
 plotSimulatedResiduals(simulationOutput = simulationOutput)
 ```
 
-The reason is that the model will usually try to find a compromise between the zeros, and the other values, which will lead to excecss variance in the resiudals. 
+The reason is that the model will usually try to find a compromise between the zeros, and the other values, which will lead to excess variance in the residuals. 
 
 #### Test for zero-inflation
 
-DHARMa therefore has a special test for zero-inflation, which compares the distribution of expected zeros in the data against the observed zeros
+DHARMa has a special test for zero-inflation, which compares the distribution of expected zeros in the data against the observed zeros
 
 ```{r, fig.width=4, fig.height=4}
 
 testZeroInflation(simulationOutput)
 ```
 
-This test is likely better suited for detecting zero-inflation, but note that also overdispersion will lead to excess zeros, so only seing too many zeros is not a reliable diagnostics for zero-inflation. A reliable differentiation between overdispersion and zero-inflation will only be possible when directly comparing it, e.g. through comparing parameter estimates of a model that inlcudes both options, or throught model selection. 
+This test is likely better suited for detecting zero-inflation than the standard plot, but note that also overdispersion will lead to excess zeros, so only seeing too many zeros is not a reliable diagnostics for moving towards a zero-inflated model. A reliable differentiation between overdispersion and zero-inflation will usually only be possible when directly comparing alternative models, e.g. through residual comparison / model selection of a model with / without zero-inflation, or by simply fitting a model with zero-inflation and looking at the parameter estimate for the zero-inflation. 
 
 
 ## Heteroscedasticity
 
 So far, most of the things that we have tested could also have been detected with parametric tests. Here, we come to the first issue that is difficult to detect with current tests, and that is usually neglected. 
 
-Heteroscedasticity means that there is a systematic dependency of the dispersion / variance on another variable in the model. It is not sufficiently appreciated that also binomial or poisson models can show heteroscedasticity. Basically, it means that the level of over/underdispersion depends on another parameter. Here an example where we create such data 
+Heteroscedasticity means that there is a systematic dependency of the dispersion / variance on another variable in the model. It is not sufficiently appreciated that also binomial or Poisson models can show heteroscedasticity. Basically, it means that the level of over/underdispersion depends on another parameter. Here an example where we create such data 
 
 ```{r}
 testData = createData(sampleSize = 500, intercept = 0, overdispersion = function(x){return(rnorm(length(x), sd = 2*abs(x)))}, family = poisson(), randomEffectVariance = 0)
@@ -371,7 +373,7 @@ To remove this pattern, you would need to make the dispersion parameter dependen
 
 ## Missing predictors or quadratic effects 
 
-A second test that is typically run for LMs, but not for GL(M)Ms is to plot residuals against the predictors in the model (or potentially predictors that were not in the model) to detect possible misspecifcations. Doing this is *highly recommeded*. For that purpose, you can retrieve the residuals via 
+A second test that is typically run for LMs, but not for GL(M)Ms is to plot residuals against the predictors in the model (or potentially predictors that were not in the model) to detect possible misspecifications. Doing this is *highly recommended*. For that purpose, you can retrieve the residuals via 
 
 ```{r, eval = F}
 simulationOutput$scaledResiduals
@@ -414,7 +416,7 @@ simulationOutput <- simulateResiduals(fittedModel = fittedModel)
 
 The function testTemporalAutocorrelation performs a Durbin-Watson test from the package lmtest on the uniform residuals to test for temporal autocorrelation in the residuals, and additionally plots the residuals against time. 
 
-The function also has an option to perform the test against randomized time (H0) - the sense of this is to be able to run simulations for testing if the test has correct error rates in the respective situation, i.e. is not oversensitive (too high sensitivity has sometimes be reported for Durbin-Watson). 
+The function also has an option to perform the test against randomized time (H0) - the sense of this is to be able to run simulations for testing if the test has correct error rates in the respective situation, i.e. is not oversensitive (too high sensitivity has sometimes been reported for Durbin-Watson). 
 
 ```{r, fig.width=4, fig.height=4}
 testTemporalAutocorrelation(simulationOutput = simulationOutput, time = testData$time)
@@ -457,7 +459,7 @@ You think your random effect estimates look weird? Run the model with the refit 
 
 ## Budworm example (count-proportion n/k binomial)
 
-This example comes from Jochen Fründ. Measured are the number of parasitized observations, with population density as a covariate
+This example comes from [Jochen Fründ](https://jochenfruend.wordpress.com/). Measured are the number of parasitized observations, with population density as a covariate
 
 ```{r, echo = F}
 data = structure(list(N_parasitized = c(226, 689, 481, 960, 1177, 266, 
@@ -505,7 +507,7 @@ The residuals look clearly overdispersed. We can confirm that with the omnibus t
 testUniformity(simulationOutput = simulationOutput)
 ```
 
-Or with the more powerful oversdispersion test 
+Or with the more powerful overdispersion test 
 
 ```{r}
 simulationOutput2 <- simulateResiduals(fittedModel = mod1, refit = T) # remember for this test we need the refit option
@@ -603,7 +605,8 @@ testZeroInflation(simulationOutput)
 
 which shows that we have too many zeros. We need a GLMM with zero-inflation. The easiest option is to do this in a Bayesian framework, e.g. in JAGS as in [this example](https://github.com/florianhartig/LearningBayes/blob/master/CommentedCode/04-StandardModels/GLMM/Beetles.md)
 
-To be honest however, if I wouldn't it would be hard to tell that zero-inflation is the problem here. The reason is that, if you have zero-inflation, the model will be drawn towards the zeros, which also creates an excess of residuals that are too large. Hence, it is hard to distinguish zero-inflation from the case where we have a case where the individual-level random effect is not successfull at removing the overdispersion, i.e. because the functional form of the added noise is incorrect. The best way to test this is probably to run model selections (e.g. simulated LRTs) between a number of alternative models, e.g. a zero-inflated GLMM vs a number of different overdispersed GLMMs. 
+To be honest however, if I wouldn't it would be hard to tell that zero-inflation is the problem here. The reason is that, if you have zero-inflation, the model will be drawn towards the zeros, which also creates an excess of residuals that are too large. Hence, it is hard to distinguish zero-inflation from the case where we have a case where the individual-level random effect is not successful at removing the overdispersion, i.e. because the functional form of the added noise is incorrect. The best way to test this is probably to run model selections (e.g. simulated LRTs) between a number of alternative models, e.g. a zero-inflated GLMM vs. a number of different overdispersed GLMMs. 
+
 
 
 

@@ -1,6 +1,20 @@
 NOTE: for more news about the package, see https://github.com/florianhartig/DHARMa/releases
 
 
+DHARMa 0.2.0 (in preparation)
+
+Major changes
+
+- includes support for model class 'lme' from package 'nlme', however, without the option to re-simulate random effects, and 'gam' from 'mgcv'
+
+- Technical note: compatibility with nlme is created by implementing / overwriting missing generic functions such as family() or model.frame(), so that the existing simulateResiduals function could be used more or less unchanged. For the moment, this seems to be the strategy to include further model classes. 
+
+Minor changes
+
+- plotResiduals includes support for factors 
+
+- updates to the help 
+
 DHARMa 0.1.2
 
 - This bugfix release fixes an issue with backwards compatibility introduced in the 0.1.1 release, which used the 'startsWith' function that is only available in R base since 3.3.0. In 0.1.2, all occurences of 'startsWith' were replaced with 'grepl', which restores the compatibility with older R versions.
