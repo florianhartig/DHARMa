@@ -4,7 +4,7 @@ before_install:
 
 language: r
 r:
-  - oldrel
+  - 3.1
   - release
   - devel
   
