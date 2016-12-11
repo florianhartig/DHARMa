@@ -8,6 +8,8 @@
 }
 \arguments{
 \item{object}{fitted model}
+
+\item{...}{arguments to be passed on to stats::fitted}
 }
 \description{
 This function overwrites the standard fitted function for GAM
