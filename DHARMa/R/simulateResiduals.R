@@ -1,7 +1,7 @@
 #' Create simulated residuals
 #' 
 #' The function creates scaled residuals by simulating from the fitted model
-#' @param fittedModel fitted model object, currently restricted to lme4, lm, or glm models
+#' @param fittedModel fitted model object. Supproted are generalized linear mixed models from 'lme4' (classes 'lmerMod', 'glmerMod'), generalized additive models ('gam' from 'mgcv', excluding extended families from 'mgcv'), 'glm' (including 'negbin' from 'MASS', but excluding quasi-distributions) and 'lm' model classes. 
 #' @param n integer number > 1, number of simulations to run. If possible, set to at least 250, better 1000. See also details
 #' @param refit if F, new data will be simulated and scaled residuals will be created by comparing observed data with new data. If T, the model will be refit on the simulated data (parametric bootstrap), and scaled residuals will be created by comparing observed with refitted residuals.
 #' @param integerResponse if T, noise will be added at to the residuals to maintain a uniform expectations for integer responses (such as Poisson or Binomial). Usually, the model will automatically detect the appropriate setting, so there is no need to adjust this setting.
@@ -33,10 +33,16 @@
 #' @import stats
 #' @export
 simulateResiduals <- function(fittedModel, n = 250, refit = F, integerResponse = NULL, plot = F, ...){
-
-  ptm <- proc.time()  
+  
+  # assertions
+  
+  if (n < 2) stop("error in DHARMa::simulateResiduals - n > 1 is required to calculate scaled residusl")
   
   if(!(class(fittedModel)[1] %in% getPossibleModels())) warning("DHARMa: fittedModel not in class of supported models. Absolutely no guarantee that this will work!")
+  
+  if (class(fittedModel)[1] == "gam" ) if (class(fittedModel$family)[1] == "extended.family") stop("It seems you are trying to fit a model from mgcv that was fit with an extended.family. Simulation functions for these families are not yet implemented in DHARMa. See issue https://github.com/florianhartig/DHARMa/issues/11 for updates about this")
+  
+  ptm <- proc.time() 
   
   family = family(fittedModel)
   
@@ -51,14 +57,14 @@ simulateResiduals <- function(fittedModel, n = 250, refit = F, integerResponse =
   out$nObs = nobs(fittedModel)
   out$nSim = n
   out$refit = refit
-  out$observedResponse = model.frame(fittedModel)[,1]
+  out$observedResponse = model.frame(fittedModel)[,1]  
   out$integerResponse = integerResponse
   
   ## following block re-used below, create function for this 
   
   out$fittedPredictedResponse = predict(fittedModel, type = "response", re.form = ~0) # sensible to have re-form set to ~0?
   
-  if(class(fittedModel)[1] %in% c("glm", "lm") ){
+  if(class(fittedModel)[1] %in% c("glm", "lm", "gam") ){
     out$fittedFixedEffects = coef(fittedModel)
   }
   
@@ -74,6 +80,8 @@ simulateResiduals <- function(fittedModel, n = 250, refit = F, integerResponse =
   if(is.vector(simulations[[1]])){
     out$simulatedResponse = data.matrix(simulations) 
   } else if (is.matrix(simulations[[1]])){
+    
+    if(class(fittedModel)[1] == "gam") simulations = convertGam(simulations) # hack to make gam work
     out$simulatedResponse = as.matrix(simulations)[,seq(1, (2*n), by = 2)]
   } else stop("wrong class")
   
@@ -154,7 +162,21 @@ simulateResiduals <- function(fittedModel, n = 250, refit = F, integerResponse =
   return(out)
 }
 
-getPossibleModels<-function()c("lm", "glm", "negbin", "lmerMod", "glmerMod") 
+getPossibleModels<-function()c("lm", "glm", "negbin", "lmerMod", "glmerMod", "gam") 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

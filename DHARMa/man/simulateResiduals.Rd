@@ -8,7 +8,7 @@ simulateResiduals(fittedModel, n = 250, refit = F, integerResponse = NULL,
   plot = F, ...)
 }
 \arguments{
-\item{fittedModel}{fitted model object, currently restricted to lme4, lm, or glm models}
+\item{fittedModel}{fitted model object. Supproted are generalized linear mixed models from 'lme4' (classes 'lmerMod', 'glmerMod'), generalized additive models ('gam' from 'mgcv', excluding extended families from 'mgcv'), 'glm' (including 'negbin' from 'MASS', but excluding quasi-distributions) and 'lm' model classes.}
 
 \item{n}{integer number > 1, number of simulations to run. If possible, set to at least 250, better 1000. See also details}
 
