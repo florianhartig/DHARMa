@@ -15,7 +15,7 @@ Description: The 'DHARMa' package uses a simulation-based approach to create
     plot and test functions for typical model misspecification problems, such as 
     over/underdispersion, zero-inflation, and residual spatial and temporal autocorrelation.
 Depends:
-    R (>= 3.0.0)
+    R (>= 3.0.2)
 Imports:
     stats,
     graphics,
