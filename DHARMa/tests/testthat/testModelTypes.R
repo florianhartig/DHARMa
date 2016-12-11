@@ -1,7 +1,9 @@
 context("Tests DHARMa functions on all implemented model types")
 
+library(DHARMa)
 library(MASS)
 library(lme4)
+library(mgcv)
 
 
 runEverything = function(fittedModel, testData, DHARMaData = T){
@@ -49,6 +51,15 @@ test_that("glm gaussian works",
           }
 )
 
+test_that("gam gaussian works",
+          {
+            skip_on_cran()
+            testData = createData(sampleSize = 200, overdispersion = 0, randomEffectVariance = 0, family = gaussian())
+            fittedModel <- gam(observedResponse ~ s(Environment1) , data = testData)
+            runEverything(fittedModel, testData)
+          }
+)
+
 
 test_that("lmer gaussian works",
           {
@@ -79,6 +90,15 @@ test_that("glm binomial 1/0 works",
           }
 )
 
+test_that("gam binomial 1/0 works",
+          {
+            skip_on_cran()
+            testData = createData(sampleSize = 200, overdispersion = 0, randomEffectVariance = 0, family = binomial())
+            fittedModel <- gam(observedResponse ~ s(Environment1) ,family = "binomial", data = testData)
+            runEverything(fittedModel, testData)
+          }
+)
+
 
 test_that("glm binomial n/k works",
           {
@@ -88,6 +108,17 @@ test_that("glm binomial n/k works",
             runEverything(fittedModel, testData)
           }
 )
+
+
+test_that("gam binomial n/k works",
+          {
+            skip_on_cran()
+            testData = createData(sampleSize = 200, overdispersion = 0, randomEffectVariance = 0, family = binomial(), binomialTrials = 20)
+            fittedModel <- gam(cbind(observedResponse1,observedResponse0) ~ s(Environment1) ,family = "binomial", data = testData)
+            runEverything(fittedModel, testData)
+          }
+)
+
 
 
 
@@ -118,6 +149,16 @@ test_that("glm poisson works",
             skip_on_cran()
             testData = createData(sampleSize = 200, overdispersion = 0.5, randomEffectVariance = 1, family = poisson(), roundPoissonVariance = 0.1, pZeroInflation = 0.1)
             fittedModel <- glm(observedResponse ~ Environment1 , family = "poisson", data = testData)
+            runEverything(fittedModel, testData)
+          }
+)
+
+
+test_that("gam poisson works",
+          {
+            skip_on_cran()
+            testData = createData(sampleSize = 200, overdispersion = 0.5, randomEffectVariance = 1, family = poisson(), roundPoissonVariance = 0.1, pZeroInflation = 0.1)
+            fittedModel <- gam(observedResponse ~ Environment1 , family = "poisson", data = testData)
             runEverything(fittedModel, testData)
           }
 )
@@ -171,6 +212,16 @@ test_that("glm.nb from MASS works",
             testData = createData(sampleSize = 200, randomEffectVariance = 1, family = negative.binomial(theta = 1.2, link = "log"))
 
             fittedModel <- glm.nb(observedResponse ~ Environment1,  data = testData)
+            runEverything(fittedModel, testData)
+          }
+)
+
+
+test_that("gam poisson works",
+          {
+            skip_on_cran()
+            testData = createData(sampleSize = 200, overdispersion = 0.5, randomEffectVariance = 1, family = poisson(), roundPoissonVariance = 0.1, pZeroInflation = 0.1)
+            fittedModel <- gam(observedResponse ~ Environment1 , family = "nb", data = testData)
             runEverything(fittedModel, testData)
           }
 )
