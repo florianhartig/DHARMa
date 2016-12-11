@@ -3,6 +3,7 @@
 #' 
 #' This function overwrites the standard fitted function for GAM
 #' @note See explanation at 
+#' @param x fitted model
 #' @export
 fitted.gam <- function(x){
   class(x) = "glm"
