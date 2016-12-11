@@ -1,57 +1,6 @@
+# simulate.lm code from R core for test purposes 
 
-### generic Wrappers ###
-
-#' @export
-getResponse <- function (x, ...) {
-  UseMethod("getResponse", x)
-}
-
-getResponse <- function(fittedModel){
-  model.frame(fittedModel)[,1]  
-}
-
-predictGeneric <- function(fittedModel, ...){
-  predictedResponse = predict(fm1, response = T)
-}
-
-x = gaussian()
-
-
-#' Generic functions to simulate from a fitted model
-#' 
-#' A generic method to create simulations from model classes that don't provide a simulate function.
-#' @param fittedModel fitted model object
-#' @param n integer number > 1, number of simulations to run.
-simulateGeneric <- function(predictions, family, nsim = n){
-  
-  nObs = length(predictions)
-}
-
-
-### PACKAGE nlme ####
-
-## Class lme
-
-# this adds a family function for lme models 
-family.lme <- function(fittedModel){
-  return(gaussian())
-}
-
-simulate.lme <- function(fittedModel){
-
-}
-
-
-
-
-#' @method getResponse lme 
-#' @export
-getResponse.lme <-function(fittedModel){
-  name =  as.character(fittedModel$terms[[2]])
-  response = fm1$data[[name]]
-  return(response)
-}
-
+fittedModelGAM
 
 
 ## The lm method includes objects of class "glm"
@@ -104,4 +53,73 @@ simulate.lm <- function(object, nsim = 1, seed = NULL, ...)
   if (!is.null(nm)) row.names(val) <- nm
   attr(val, "seed") <- RNGstate
   val
+}
+
+
+
+
+# GLM
+
+function (object, nsim) 
+{
+  ftd <- fitted(object)
+  n <- length(ftd)
+  ntot <- n * nsim
+  wts <- object$prior.weights
+  if (any(wts%%1 != 0)) 
+    stop("cannot simulate from non-integer prior.weights")
+  if (!is.null(m <- object$model)) {
+    y <- model.response(m)
+    if (is.factor(y)) {
+      yy <- factor(1 + rbinom(ntot, size = 1, prob = ftd), 
+                   labels = levels(y))
+      split(yy, rep(seq_len(nsim), each = n))
+    }
+    else if (is.matrix(y) && ncol(y) == 2) {
+      yy <- vector("list", nsim)
+      for (i in seq_len(nsim)) {
+        Y <- rbinom(n, size = wts, prob = ftd)
+        YY <- cbind(Y, wts - Y)
+        colnames(YY) <- colnames(y)
+        yy[[i]] <- YY
+      }
+      yy
+    }
+    else rbinom(ntot, size = wts, prob = ftd)/wts
+  }
+  else rbinom(ntot, size = wts, prob = ftd)/wts
+}
+
+
+
+# GAM
+
+function (object, nsim) 
+{
+  ftd <- fitted(object)
+  n <- length(ftd)
+  ntot <- n * nsim
+  wts <- object$prior.weights
+  if (any(wts%%1 != 0)) 
+    stop("cannot simulate from non-integer prior.weights")
+  if (!is.null(m <- object$model)) {
+    y <- model.response(m)
+    if (is.factor(y)) {
+      yy <- factor(1 + rbinom(ntot, size = 1, prob = ftd), 
+                   labels = levels(y))
+      split(yy, rep(seq_len(nsim), each = n))
+    }
+    else if (is.matrix(y) && ncol(y) == 2) {
+      yy <- vector("list", nsim)
+      for (i in seq_len(nsim)) {
+        Y <- rbinom(n, size = wts, prob = ftd)
+        YY <- cbind(Y, wts - Y)
+        colnames(YY) <- colnames(y)
+        yy[[i]] <- YY
+      }
+      yy
+    }
+    else rbinom(ntot, size = wts, prob = ftd)/wts
+  }
+  else rbinom(ntot, size = wts, prob = ftd)/wts
 }
