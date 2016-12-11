@@ -217,13 +217,3 @@ test_that("glm.nb from MASS works",
 )
 
 
-test_that("gam poisson works",
-          {
-            skip_on_cran()
-            testData = createData(sampleSize = 200, overdispersion = 0.5, randomEffectVariance = 1, family = poisson(), roundPoissonVariance = 0.1, pZeroInflation = 0.1)
-            fittedModel <- gam(observedResponse ~ Environment1 , family = "nb", data = testData)
-            runEverything(fittedModel, testData)
-          }
-)
-
-

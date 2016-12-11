@@ -80,8 +80,6 @@ simulateResiduals <- function(fittedModel, n = 250, refit = F, integerResponse =
   if(is.vector(simulations[[1]])){
     out$simulatedResponse = data.matrix(simulations) 
   } else if (is.matrix(simulations[[1]])){
-    
-    if(class(fittedModel)[1] == "gam") simulations = convertGam(simulations) # hack to make gam work
     out$simulatedResponse = as.matrix(simulations)[,seq(1, (2*n), by = 2)]
   } else stop("wrong class")
   
