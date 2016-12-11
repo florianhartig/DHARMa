@@ -1,13 +1,10 @@
 NOTE: for more news about the package, see https://github.com/florianhartig/DHARMa/releases
 
-
-DHARMa 0.2.0 (in preparation)
+DHARMa 0.1.3 
 
 Major changes
 
-- includes support for model class 'lme' from package 'nlme', however, without the option to re-simulate random effects, and 'gam' from 'mgcv'
-
-- Technical note: compatibility with nlme is created by implementing / overwriting missing generic functions such as family() or model.frame(), so that the existing simulateResiduals function could be used more or less unchanged. For the moment, this seems to be the strategy to include further model classes. 
+- includes support for model class 'gam' from package 'mgcv'. Required overwriting the 'fitted' function for gam, see 
 
 Minor changes
 

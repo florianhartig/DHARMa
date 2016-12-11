@@ -6,6 +6,9 @@
 \usage{
 \method{fitted}{gam}(x)
 }
+\arguments{
+\item{x}{fitted model}
+}
 \description{
 This function overwrites the standard fitted function for GAM
 }
