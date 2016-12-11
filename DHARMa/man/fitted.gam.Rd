@@ -4,10 +4,10 @@
 \alias{fitted.gam}
 \title{This function overwrites the standard fitted function for GAM}
 \usage{
-\method{fitted}{gam}(x)
+\method{fitted}{gam}(object, ...)
 }
 \arguments{
-\item{x}{fitted model}
+\item{object}{fitted model}
 }
 \description{
 This function overwrites the standard fitted function for GAM
