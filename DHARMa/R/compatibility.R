@@ -4,6 +4,7 @@
 #' This function overwrites the standard fitted function for GAM
 #' @note See explanation at 
 #' @param object fitted model
+#' @param ... arguments to be passed on to stats::fitted
 #' @export
 fitted.gam <- function(object, ...){
   class(object) = "glm"

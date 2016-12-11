@@ -1,4 +1,25 @@
 
+# Version 0.1.3
+
+## Submission 1
+
+This is a minor update. Important changes
+
+- includes support for model class 'gam' from package 'mgcv'. Required overwriting the 'fitted' function for gam, see https://github.com/florianhartig/DHARMa/issues/12
+
+- plotResiduals includes support for factors 
+
+- updates to the help 
+
+This release was tested without apparent problems under
+
+* local MAC OS 10.10.5, R 3.3.1
+* http://win-builder.r-project.org/
+ * R-release: R-3.3.1 
+ * R-devel: 2016-11-14 r71659
+* Linux (Travis CI)
+ * oldrel / release / devel
+
 # Version 0.1.2
 
 ## Submission 1
