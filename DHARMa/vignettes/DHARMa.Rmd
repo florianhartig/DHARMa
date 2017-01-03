@@ -77,6 +77,10 @@ I currently prepare a more exact statistical justification for the approach in a
 
 * Gelman, A. & Hill, J. Data analysis using regression and multilevel/hierarchical models Cambridge University Press, 2006
 
+p.s.: DHARMa stands for “Diagnostics for HierArchical Regression Models” – which, strictly speaking, would make DHARM. But in German, Darm means intestines; plus, the meaning of DHARMa in Hinduism makes the current abbreviation so much more suitable for a package that tests whether your model is in harmony with your data:
+
+> From Wikipedia, 28/08/16: In Hinduism, dharma signifies behaviours that are considered to be in accord with rta, the order that makes life and universe possible, and includes duties, rights, laws, conduct, virtues and ‘‘right way of living’’.
+
 # Workflow in DHARMa
 
 ## Installing, loading and citing the package
@@ -208,13 +212,9 @@ A third option is the treatment of integer responses. The background here is tha
 
 * Dunn, K. P., and Smyth, G. K. (1996). Randomized quantile residuals. Journal of Computational and Graphical Statistics 5, 1-10. 
 
-The simulateResiduals function will automatically check if the family is integer valued. The parameter should therefore usually not be changed. 
+The simulateResiduals function will automatically check if the family is integer valued. The parameter should therefore usually not be changed.
 
-# Visual diagnostics and tests of common misspecification problems 
-
-So far, all the plots / tests that were shown were from a correctly specified model. In this section, we discuss how model misspecification will show up in the scaled residuals.
-
-### Using external simulations
+## Using external simulations (e.g. from Bayesian software)
 
 As mentioned earlier, the quantile residuals defined in DHARMa are the frequentist equivalent of the so-called "Bayesian p-values", i.e. residuals created from posterior predictive simulations in a Bayesian analysis.
 
@@ -226,6 +226,11 @@ res = createDHARMa(scaledResiduals = posteriorPredictiveSimulations, simulatedRe
 ```
 
 What is provided as simulatedResponse is up to the user, but median posterior predictions seem most sensible. Note: as DHARMa doesn't know the fitted model, it is important in this function to specify the integerResponse option by hand (see simulateResiduals for details). After the conversion, all DHARMa plots can be used, however, note that Bayesian p-values != DHARMA residuals, because in the Bayesian analysis, parameters are varied as well. 
+
+
+# Visual diagnostics and tests of common misspecification problems 
+
+In all plots / tests that were shown so far, the model was correctly specified, resulting in "perfect" residual plots. In this section, we discuss how to recognize and interpret model misspecifications in the scaled residuals.
 
 ## Overdispersion / underdispersion
 
@@ -456,6 +461,8 @@ A big advantage of the simulations is that you can test any problem that you thi
 You think your random effect estimates look weird? Run the model with the refit = T option and see how typical random effect estimates look for your problem.
 
 # Real-world examples
+
+**Note:** More real-world examples on the DHARMa GitHub repository [here](https://github.com/florianhartig/DHARMa/tree/master/Code/Examples) 
 
 ## Budworm example (count-proportion n/k binomial)
 
