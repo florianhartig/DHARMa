@@ -2,7 +2,10 @@
 Florian Hartig  
 25 Nov 2016  
 
-**Summary:** This document demonstrates that deviance residuals for GLMs are not normal, unless the distribution (in this case Poisson) is itself in a range that is approximately normal.
+# Poisson GLM
+
+## Data creation
+
 
 Creating data for Poisson with large intercept (data1, i.e. nearly normal distribution), and Poisson with small intercept (data 2, strongly skewed)
 
@@ -21,7 +24,23 @@ fittedModel2 <- glm(observedResponse ~ Environment1 , family = "poisson", data =
 res2 = residuals(fittedModel2, type = "deviance")
 ```
 
-Test for normality
+
+## Visual comparison via Pearson residual plots and normal qq Plots
+
+
+```r
+par(mfrow = c(2,2))
+plot(fitted(fittedModel), residuals(fittedModel, type = "pearson"), main = "Model 1, mean counts large")
+plot(fitted(fittedModel2), residuals(fittedModel2, type = "pearson"), main = "Model 2, mean counts small")
+qqnorm(res )
+qqnorm(res2)
+```
+
+![](DevianceResiduals_files/figure-html/unnamed-chunk-2-1.png)<!-- -->
+
+
+
+## Test for normality
 
 
 ```r
@@ -49,16 +68,8 @@ shapiro.test(res2)
 ```
 
 
-Visual comparison via Normal qq Plots
+## DHARMa residuals
 
-
-```r
-par(mfrow = c(1,2))
-qqnorm(res, main = "QQnorm Data1")
-qqnorm(res2, main = "QQnorm  Data2")
-```
-
-![](DevianceResiduals_files/figure-html/unnamed-chunk-3-1.png)<!-- -->
 
 DHARMa corrects this problem (showing here only model 2 because 1 is no problem anyway)
 
