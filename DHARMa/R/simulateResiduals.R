@@ -74,14 +74,16 @@ simulateResiduals <- function(fittedModel, n = 250, refit = F, integerResponse =
   out$fittedResiduals = residuals(fittedModel, type = "response")
   
   simulations = simulate(fittedModel, nsim = n, ...)
-  
+ 
   if(is.vector(simulations[[1]])){
     out$simulatedResponse = data.matrix(simulations)
   } else if (is.matrix(simulations[[1]])){
     out$simulatedResponse = as.matrix(simulations)[,seq(1, (2*n), by = 2)]
   } else if(is.factor(simulations[[1]])){
+    if(nlevels(simulations[[1]]) != 2) warning("The fitted model has a factorial response with number of levels not equal to 2 - there is currently no sensible application in DHARMa that would lead to this situation. Likely, you are trying something that doesn't work.")
     out$simulatedResponse = data.matrix(simulations) - 1
-  } else stop("DHARMa error - simulations resulted in unsupported class - if this happens for a supported model please repor at https://github.com/florianhartig/DHARMa/issues")
+    out$observedResponse = as.numeric(out$observedResponse) - 1
+  } else stop("DHARMa error - simulations resulted in unsupported class - if this happens for a supported model please report an error at https://github.com/florianhartig/DHARMa/issues")
   
   out$scaledResiduals = rep(NA, out$nObs)
 
@@ -117,6 +119,9 @@ simulateResiduals <- function(fittedModel, n = 250, refit = F, integerResponse =
       
       if(is.vector(simObserved)){
         newData[,1] = simObserved
+      } else if (is.factor(simObserved)){
+        # Hack to make the factor binomial case work
+        newData[,1] = as.numeric(simObserved) - 1
       } else {
         # Hack to make the binomial n/k case work
         newData[[1]] = NULL

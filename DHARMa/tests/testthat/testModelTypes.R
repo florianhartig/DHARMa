@@ -81,10 +81,19 @@ test_that("lmer gaussian works",
 # )
 
 
-test_that("glm binomial 1/0 works",
+test_that("glm binomial y/n (factor) works",
           {
             skip_on_cran()
             testData = createData(sampleSize = 200, fixedEffects = c(1,0), overdispersion = 0, randomEffectVariance = 0, family = binomial(), factorResponse = T)
+            fittedModel <- glm(observedResponse ~ Environment1 + Environment2 , family = "binomial", data = testData)
+            runEverything(fittedModel, testData)
+          }
+)
+
+test_that("glm binomial 1/0 works",
+          {
+            skip_on_cran()
+            testData = createData(sampleSize = 200, fixedEffects = c(1,0), overdispersion = 0, randomEffectVariance = 0, family = binomial())
             fittedModel <- glm(observedResponse ~ Environment1 + Environment2 , family = "binomial", data = testData)
             runEverything(fittedModel, testData)
           }
