@@ -206,13 +206,13 @@ simulationOutput <- simulateResiduals(fittedModel = fittedModel, n = 250, use.u 
 If the model is correctly specified, the simulated residuals should be flat regardless how many hierarchical levels we re-simulate. The most thorough procedure would therefore be to test all possible options. If testing only one option, I would recommend to re-simulate all levels, because this essentially tests the model structure as a whole. This is the default setting in the DHARMa package. A potential drawback is that re-simulating the lower-level random effects creates more variability, which may reduce power for detecting problems in the upper-level stochastic processes.
 
 
-#### Integer treatment
+#### Integer treatment / randomization
 
-A third option is the treatment of integer responses. The background here is that, for integer-value variables, some additional resampling is necessary to make sure that the residual distribution becomes flat (essentially, we have to smoothen away the integer nature of the data). The idea is explained in 
+A third option is the treatment of integer responses. The background of this option is that for integer-valued variables, some additional steps are neccessary to make sure that the residual distribution becomes flat (essentially, we have to smoothen away the integer nature of the data). The idea is explained in 
 
 * Dunn, K. P., and Smyth, G. K. (1996). Randomized quantile residuals. Journal of Computational and Graphical Statistics 5, 1-10. 
 
-The simulateResiduals function will automatically check if the family is integer valued. The parameter should therefore usually not be changed.
+The simulateResiduals function will automatically check if the family is integer valued, and apply randomization if that is the case. I see no reason why one would not want to randomize for an integer-valued function, so the parameter should usually not be changed.
 
 ## Using external simulations (e.g. from Bayesian software)
 

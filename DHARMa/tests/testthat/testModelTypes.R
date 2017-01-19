@@ -35,8 +35,8 @@ runEverything = function(fittedModel, testData, DHARMaData = T){
 test_that("lm gaussian works",
           {
             skip_on_cran()
-            testData = createData(sampleSize = 100, overdispersion = 0, randomEffectVariance = 0, family = gaussian())
-            fittedModel <- lm(observedResponse ~ Environment1 , data = testData)
+            testData = createData(sampleSize = 100, fixedEffects = c(1,0), overdispersion = 0, randomEffectVariance = 0, family = gaussian())
+            fittedModel <- lm(observedResponse ~ Environment1 + Environment2 , data = testData)
             runEverything(fittedModel, testData)
           }
 )
@@ -84,8 +84,8 @@ test_that("lmer gaussian works",
 test_that("glm binomial 1/0 works",
           {
             skip_on_cran()
-            testData = createData(sampleSize = 200, overdispersion = 0, randomEffectVariance = 0, family = binomial())
-            fittedModel <- glm(observedResponse ~ Environment1 , family = "binomial", data = testData)
+            testData = createData(sampleSize = 200, fixedEffects = c(1,0), overdispersion = 0, randomEffectVariance = 0, family = binomial(), factorResponse = T)
+            fittedModel <- glm(observedResponse ~ Environment1 + Environment2 , family = "binomial", data = testData)
             runEverything(fittedModel, testData)
           }
 )

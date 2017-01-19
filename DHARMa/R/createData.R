@@ -2,9 +2,9 @@
 #' @description This function creates synthetic dataset with various problems such as overdispersion, zero-inflation, etc.
 #' @param replicates number of datasets to create
 #' @param sampleSize sample size of the dataset
-#' @param intercept intercept
-#' @param fixedEffects vector of fixed effects (linear)
-#' @param quadraticFixedEffects vector of quadratic fixed effects
+#' @param intercept intercept (linear scale)
+#' @param fixedEffects vector of fixed effects (linear scale)
+#' @param quadraticFixedEffects vector of quadratic fixed effects (linear scale)
 #' @param numGroups number of groups for the random effect
 #' @param randomEffectVariance variance of the random effect (intercept)
 #' @param overdispersion if this is a numeric value, it will be used as the sd of a random normal variate that is added to the linear predictor. Alternatively, a random function can be provided that takes as input the linear predictor.
@@ -18,7 +18,7 @@
 #' @param spatialAutocorrelation strength of spatial Autocorrelation
 #' @export
 #' @example /inst/examples/createDataHelp.R
-createData <- function(replicates=1, sampleSize = 10, intercept = 0, fixedEffects = 1, quadraticFixedEffects = NULL, numGroups = 10, randomEffectVariance = 1, overdispersion = 0, family = poisson(), scale = 1, cor = 0, roundPoissonVariance = NULL,  pZeroInflation = 0, binomialTrials = 1, temporalAutocorrelation = 0, spatialAutocorrelation =0){
+createData <- function(replicates=1, sampleSize = 10, intercept = 0, fixedEffects = 1, quadraticFixedEffects = NULL, numGroups = 10, randomEffectVariance = 1, overdispersion = 0, family = poisson(), scale = 1, cor = 0, roundPoissonVariance = NULL,  pZeroInflation = 0, binomialTrials = 1, temporalAutocorrelation = 0, spatialAutocorrelation =0, factorResponse = F){
 
   nPredictors = length(fixedEffects)
 
@@ -123,10 +123,12 @@ createData <- function(replicates=1, sampleSize = 10, intercept = 0, fixedEffect
       observedResponse = observedResponse * artificialZeros
     }
 
+    
+    if(factorResponse) observedResponse = factor(observedResponse)
 
     # add spatialError?
 
-    out[[i]] <- data.frame(cbind(ID = 1:sampleSize, observedResponse, predictors, group, time, x, y))
+    out[[i]] <- data.frame(ID = 1:sampleSize, observedResponse, predictors, group, time, x, y)
   }
   if(length(out) == 1) out = out[[1]]
   return(out)

@@ -9,18 +9,18 @@ createData(replicates = 1, sampleSize = 10, intercept = 0,
   randomEffectVariance = 1, overdispersion = 0, family = poisson(),
   scale = 1, cor = 0, roundPoissonVariance = NULL, pZeroInflation = 0,
   binomialTrials = 1, temporalAutocorrelation = 0,
-  spatialAutocorrelation = 0)
+  spatialAutocorrelation = 0, factorResponse = F)
 }
 \arguments{
 \item{replicates}{number of datasets to create}
 
 \item{sampleSize}{sample size of the dataset}
 
-\item{intercept}{intercept}
+\item{intercept}{intercept (linear scale)}
 
-\item{fixedEffects}{vector of fixed effects (linear)}
+\item{fixedEffects}{vector of fixed effects (linear scale)}
 
-\item{quadraticFixedEffects}{vector of quadratic fixed effects}
+\item{quadraticFixedEffects}{vector of quadratic fixed effects (linear scale)}
 
 \item{numGroups}{number of groups for the random effect}
 

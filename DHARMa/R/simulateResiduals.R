@@ -36,11 +36,9 @@ simulateResiduals <- function(fittedModel, n = 250, refit = F, integerResponse =
   
   # assertions
   
-  if (n < 2) stop("error in DHARMa::simulateResiduals - n > 1 is required to calculate scaled residusl")
+  if (n < 2) stop("error in DHARMa::simulateResiduals: n > 1 is required to calculate scaled residuals")
   
-  if(!(class(fittedModel)[1] %in% getPossibleModels())) warning("DHARMa: fittedModel not in class of supported models. Absolutely no guarantee that this will work!")
-  
-  if (class(fittedModel)[1] == "gam" ) if (class(fittedModel$family)[1] == "extended.family") stop("It seems you are trying to fit a model from mgcv that was fit with an extended.family. Simulation functions for these families are not yet implemented in DHARMa. See issue https://github.com/florianhartig/DHARMa/issues/11 for updates about this")
+  checkModel(fittedModel)
   
   ptm <- proc.time() 
   
@@ -78,10 +76,12 @@ simulateResiduals <- function(fittedModel, n = 250, refit = F, integerResponse =
   simulations = simulate(fittedModel, nsim = n, ...)
   
   if(is.vector(simulations[[1]])){
-    out$simulatedResponse = data.matrix(simulations) 
+    out$simulatedResponse = data.matrix(simulations)
   } else if (is.matrix(simulations[[1]])){
     out$simulatedResponse = as.matrix(simulations)[,seq(1, (2*n), by = 2)]
-  } else stop("wrong class")
+  } else if(is.factor(simulations[[1]])){
+    out$simulatedResponse = data.matrix(simulations) - 1
+  } else stop("DHARMa error - simulations resulted in unsupported class - if this happens for a supported model please repor at https://github.com/florianhartig/DHARMa/issues")
   
   out$scaledResiduals = rep(NA, out$nObs)
 
@@ -162,6 +162,12 @@ simulateResiduals <- function(fittedModel, n = 250, refit = F, integerResponse =
 
 getPossibleModels<-function()c("lm", "glm", "negbin", "lmerMod", "glmerMod", "gam") 
 
+
+checkModel <- function(fittedModel){
+  if(!(class(fittedModel)[1] %in% getPossibleModels())) warning("DHARMa: fittedModel not in class of supported models. Absolutely no guarantee that this will work!")
+  
+  if (class(fittedModel)[1] == "gam" ) if (class(fittedModel$family)[1] == "extended.family") stop("It seems you are trying to fit a model from mgcv that was fit with an extended.family. Simulation functions for these families are not yet implemented in DHARMa. See issue https://github.com/florianhartig/DHARMa/issues/11 for updates about this")
+}
 
 
 
