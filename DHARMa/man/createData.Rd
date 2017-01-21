@@ -43,6 +43,8 @@ createData(replicates = 1, sampleSize = 10, intercept = 0,
 \item{temporalAutocorrelation}{strength of temporalAutocorrelation}
 
 \item{spatialAutocorrelation}{strength of spatial Autocorrelation}
+
+\item{factorResponse}{should the response be transformed to a factor (inteded to be used for 0/1 data)}
 }
 \description{
 This function creates synthetic dataset with various problems such as overdispersion, zero-inflation, etc.

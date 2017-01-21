@@ -53,7 +53,7 @@ testOverdispersion <- function(simulationOutput, alternative = "overdispersion",
   
   out = list()
   out$statistic = c(dispersion = observed / mean(ss))
-  out$method = "Overdispersion test via comparison to simulation under H0"
+  out$method = "DHARMa nonparametric overdispersion test via comparison to simulation under H0 = fitted model"
   out$alternative = alternative
   out$p.value = p
   out$data.name = deparse(substitute(simulationOutput))
@@ -96,7 +96,7 @@ testZeroInflation <- function(simulationOutput,  plot = T, alternative = "more")
   
   out = list()
   out$statistic = c(ratioObsExp = zerosObserved / mean(zerosExpected))
-  out$method = "Zero-inflation test via comparison to expected zeros with simulation under H0"
+  out$method = "DHARMa zero-inflation test via comparison to expected zeros with simulation under H0 = fitted model"
   out$alternative = alternative
   out$p.value = p
   out$data.name = deparse(substitute(simulationOutput))
@@ -163,7 +163,7 @@ testSpatialAutocorrelation <- function(simulationOutput, x , y , plot = T){
   
   out = list()
   out$statistic = c(observed = MI$observed, expected = MI$expected, sd = MI$sd)
-  out$method = "Moran's I"
+  out$method = "DHARMa Moran's I test for spatial autocorrelation"
   out$alternative = "Spatial autocorrelation"
   out$p.value = MI$p.value
   out$data.name = deparse(substitute(simulationOutput))
