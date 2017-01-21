@@ -18,3 +18,9 @@ library(DHARMa)
 vignette("DHARMa", package="DHARMa")
 ```
 
+# Acknowledgements
+
+Thanks to comments / suggestions from
+
+Jochen Fründ
+Tomer J. Czaczkes
