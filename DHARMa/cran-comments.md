@@ -1,4 +1,9 @@
 
+
+* Travis CI, under standard settings for
+ * oldrel / release / devel
+ * See https://travis-ci.org/florianhartig/BayesianTools
+
 # Version 0.1.3
 
 ## Submission 1
