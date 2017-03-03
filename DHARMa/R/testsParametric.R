@@ -22,7 +22,7 @@
 #' @export
 testOverdispersionParametric <- function(model){
   
-  if(! class(model)[1] %in% c("lmer", "glmer")){
+  if(! class(model)[1] %in% c("glmerMod")){
     return("Parametric overdispersion test not implemented for this model type")
   }
   
