@@ -31,4 +31,3 @@ If the predictor is a factor (categorial), a boxplot will be created - with a un
 \seealso{
 \code{\link{plotSimulatedResiduals}}
 }
-

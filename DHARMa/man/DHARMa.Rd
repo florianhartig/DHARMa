@@ -17,4 +17,3 @@ vignette("DHARMa", package="DHARMa")
 \seealso{
 \code{\link{simulateResiduals}}
 }
-

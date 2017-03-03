@@ -27,4 +27,3 @@ It is possible to not specify x and y. In this case, random x and y values are c
 \seealso{
 \code{\link{testUniformity}}, \code{\link{testZeroInflation}}, \code{\link{testTemporalAutocorrelation}}, \code{\link{testSimulatedResiduals}}, \code{\link{testOverdispersion}}, \code{\link{testOverdispersionParametric}}
 }
-

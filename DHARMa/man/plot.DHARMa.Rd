@@ -14,4 +14,3 @@
 \description{
 Plot simulated residuals
 }
-

@@ -23,4 +23,3 @@ This test compares the approximate deviance (via squared pearson residuals) with
 \seealso{
 \code{\link{testSimulatedResiduals}}, \code{\link{testSimulatedResiduals}}, \code{\link{testZeroInflation}}, \code{\link{testTemporalAutocorrelation}}, \code{\link{testSpatialAutocorrelation}}, \code{\link{testOverdispersionParametric}}
 }
-

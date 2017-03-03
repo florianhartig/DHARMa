@@ -28,4 +28,3 @@ The use of this function is to convert simulated residuals (e.g. from a point es
 \note{
 Either scaled residuals or (simulatedResponse AND observed response) have to be provided
 }
-

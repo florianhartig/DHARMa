@@ -29,4 +29,3 @@ The benchmark function in DHARMa are intended for development purposes, and for 
 \seealso{
 \code{\link{benchmarkUniformity}}
 }
-

@@ -18,4 +18,3 @@ Currently, this function calls only the \code{\link{testUniformity}} function. A
 \seealso{
 \code{\link{testUniformity}}, \code{\link{testZeroInflation}}, \code{\link{testTemporalAutocorrelation}}, \code{\link{testSpatialAutocorrelation}}, \code{\link{testOverdispersion}}, \code{\link{testOverdispersionParametric}}
 }
-

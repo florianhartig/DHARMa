@@ -85,4 +85,3 @@ testData = createData(sampleSize = 100, family = poisson(), spatialAutocorrelati
 plot(log(observedResponse) ~ time, data = testData)
 plot(log(observedResponse) ~ x, data = testData)
 }
-

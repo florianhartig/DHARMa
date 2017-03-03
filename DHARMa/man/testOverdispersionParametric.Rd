@@ -31,4 +31,3 @@ The implementation here follows the suggestion in http://glmm.wikidot.com/faq, w
 \seealso{
 \code{\link{testSimulatedResiduals}}, \code{\link{testSimulatedResiduals}}, \code{\link{testZeroInflation}}, \code{\link{testTemporalAutocorrelation}}, \code{\link{testSpatialAutocorrelation}}
 }
-

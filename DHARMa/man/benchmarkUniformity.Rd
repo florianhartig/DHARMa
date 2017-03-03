@@ -39,4 +39,3 @@ dataModelCreator <- function(){
 \seealso{
 \code{\link{benchmarkOverdispersion}}
 }
-

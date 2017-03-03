@@ -17,4 +17,3 @@ This function overwrites the standard fitted function for GAM
 \note{
 See explanation at
 }
-

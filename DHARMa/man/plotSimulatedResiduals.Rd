@@ -28,4 +28,3 @@ The quantile regression can take some time to calculate, especially for larger d
 \seealso{
 \code{\link{plotResiduals}}
 }
-

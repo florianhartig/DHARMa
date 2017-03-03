@@ -14,4 +14,3 @@
 \description{
 Print simulated residuals
 }
-

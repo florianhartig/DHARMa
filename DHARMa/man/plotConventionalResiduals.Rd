@@ -12,4 +12,3 @@ plotConventionalResiduals(fittedModel)
 \description{
 Convenience function to draw conventional residual plots
 }
-

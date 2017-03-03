@@ -18,4 +18,3 @@ Tests residuals against a uniform distribution with the KS test
 \seealso{
 \code{\link{testSimulatedResiduals}}, \code{\link{testZeroInflation}}, \code{\link{testTemporalAutocorrelation}}, \code{\link{testSpatialAutocorrelation}}, \code{\link{testOverdispersion}}, \code{\link{testOverdispersionParametric}}
 }
-
