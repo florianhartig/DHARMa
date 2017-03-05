@@ -10,7 +10,7 @@ testOverdispersion(simulationOutput, alternative = "overdispersion",
 \arguments{
 \item{simulationOutput}{an object with simulated residuals created by \code{\link{simulateResiduals}}}
 
-\item{alternative}{whether to test for "overdispersion", "underdispersion", or "both"}
+\item{alternative}{whether to test for "overdispersion", "underdispersion", or "both" (both reduces power)}
 
 \item{plot}{whether to plot output}
 }
@@ -18,7 +18,11 @@ testOverdispersion(simulationOutput, alternative = "overdispersion",
 This function performs a simulation-based test for over/underdispersion
 }
 \details{
-This test compares the approximate deviance (via squared pearson residuals) with the same quantity from a number of simulated models. It is MUCH slower than the parametric alternative \code{\link{testOverdispersionParametric}}, but potentially more exact in situations where one would expect problems with the chi2 test employed in the parametric test
+The function implements two tests, depending on whether it is applied on a simulation with refit = F, or refit = T. 
+
+If refit = F (default, and recommended), the function tests if the IQR of the scaled residuals deviate from the null hypothesis of a uniform distribution. 
+
+If refit = T, the function compares the approximate deviance (via squared pearson residuals) with the same quantity from the models refit with simulated models. It is MUCH slower than the option above and the parametric alternative \code{\link{testOverdispersionParametric}}. At the moment it's only implemented for testing purposes.
 }
 \seealso{
 \code{\link{testSimulatedResiduals}}, \code{\link{testSimulatedResiduals}}, \code{\link{testZeroInflation}}, \code{\link{testTemporalAutocorrelation}}, \code{\link{testSpatialAutocorrelation}}, \code{\link{testOverdispersionParametric}}

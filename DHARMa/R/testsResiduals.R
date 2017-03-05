@@ -33,17 +33,34 @@ testUniformity<- function(simulationOutput){
 #' 
 #' @param simulationOutput an object with simulated residuals created by \code{\link{simulateResiduals}}
 #' @param plot whether to plot output
-#' @param alternative whether to test for "overdispersion", "underdispersion", or "both"
-#' @details This test compares the approximate deviance (via squared pearson residuals) with the same quantity from a number of simulated models. It is MUCH slower than the parametric alternative \code{\link{testOverdispersionParametric}}, but potentially more exact in situations where one would expect problems with the chi2 test employed in the parametric test
+#' @param alternative whether to test for "overdispersion", "underdispersion", or "both" (both reduces power)
+#' @details The function implements two tests, depending on whether it is applied on a simulation with refit = F, or refit = T. 
+#' 
+#' If refit = F (not recommended), the function tests if the IQR of the scaled residuals deviate from the null hypothesis of a uniform distribution. Simulations show that this option is not properly calibrated and much less powerful than the parametric alternative \code{\link{testOverdispersionParametric}} and even the simple \code{\link{testUniformity}}, and therefore it's use is not recommended. 
+#' 
+#' If refit = T, the function compares the approximate deviance (via squared pearson residuals) with the same quantity from the models refit with simulated models. It is much slower the parametric alternative \code{\link{testOverdispersionParametric}}, but simulations show that it is at least as powerful as the latter, and more powerful than any other non-parametric test in DHARMa. It might be preferable in (rare) cases where the parametric assuptions are violated. 
+#' 
 #' @seealso \code{\link{testSimulatedResiduals}}, \code{\link{testSimulatedResiduals}}, \code{\link{testZeroInflation}}, \code{\link{testTemporalAutocorrelation}}, \code{\link{testSpatialAutocorrelation}}, \code{\link{testOverdispersionParametric}}
 #' @export
 testOverdispersion <- function(simulationOutput, alternative = "overdispersion", plot = F){
   
-  if(simulationOutput$refit == F) stop("Overdispersion test requires simulated residuals with refit = T")
+  out = list()
   
-  observed = sum(residuals(simulationOutput$fittedModel, type = "pearson")^2)
+  if(simulationOutput$refit == F){
+    warning("This call performs a non-parametric test for overdispersion in the scaled residuals. Simulations show that this test is less powerful for detecting overdispersion than the default uniform test on the sclaed residuals, and a lot less powerful than the test on re-simulated residuals. It is only implemented for testing / development purposes, but there is no real usecase for this test.")
+    observed = IQR(simulationOutput$scaledResiduals)
+    sims = matrix(runif(simulationOutput$nObs * 1000), nrow = 1000)
+    ss = apply(sims, 1, IQR)
+    out$statistic = c(dispersion = observed / mean(ss))
+    out$method = "DHARMa nonparametric overdispersion test via IQR of scaled residuals against IQR expected under uniform"
+  } else {
+    observed = sum(residuals(simulationOutput$fittedModel, type = "pearson")^2)
+    ss = apply(simulationOutput$refittedPearsonResiduals^2 , 2, sum)
+    out$statistic = c(dispersion = observed / mean(ss))
+    out$method = "DHARMa nonparametric overdispersion test via comparison to simulation under H0 = fitted model"
+  }
   
-  ss = apply(simulationOutput$refittedPearsonResiduals^2 , 2, sum)
+  #stop("Overdispersion test requires simulated residuals with refit = T") 
   
   p = ecdf(ss)(observed)
   
@@ -51,9 +68,6 @@ testOverdispersion <- function(simulationOutput, alternative = "overdispersion",
   if(alternative == "underdispersion") p = p  
   if(alternative == "both") p = min(p, 1-p) * 2     
   
-  out = list()
-  out$statistic = c(dispersion = observed / mean(ss))
-  out$method = "DHARMa nonparametric overdispersion test via comparison to simulation under H0 = fitted model"
   out$alternative = alternative
   out$p.value = p
   out$data.name = deparse(substitute(simulationOutput))

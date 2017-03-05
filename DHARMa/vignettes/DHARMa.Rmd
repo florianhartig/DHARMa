@@ -297,23 +297,35 @@ Here, we get too many residuals around 0.5, which means that we are not getting 
 
 Although, as discussed above, over/underdispersion will show up in the residuals, and it's possible to detect it with the testUniformity function, simulations show that this test is considerably less powerful than more targeted tests. 
 
-DHARMa therefore contains a specific nonparametric overdispersion test that compares the dispersion of simulated residuals to the observed residuals. Note that, in this case, refit = T is necessary. 
+DHARMa therefore contains several specific overdispersion test that compares the dispersion of simulated residuals to the observed residuals. Those are
+
+1. A parametric overdispersion test
+2. A non-parametric test on the simulated residuals
+3. A non-parametric overdispersion test on the re-fitted residuals. 
+
+Technically, you can call these tests as follows: 
+
+
 
 ```{r overDispersionTest, echo = T}
-simulationOutput2 <- simulateResiduals(fittedModel = fittedModel, n = 250, refit = T)
+# Option 1
+testOverdispersionParametric(fittedModel)
+
+# Option 2
+testOverdispersion(simulationOutput)
+
+# Option 3
+simulationOutput2 <- simulateResiduals(fittedModel = fittedModel, refit = 2)
 testOverdispersion(simulationOutput2)
 ```
 
-Power simulations (2nd figure below) show that this diagnostic has similar power than the standard parametric overdispersion test for GLMMs, which is implemented in 
+Power simulations (figure below) show that option 2 is generally not preferable. It is worse than even the uniform test. I only kept it in the package for testing and future improvements. 
 
-```{r}
-testOverdispersionParametric(fittedModel)
-```
-
-while having all advantages of a non-parametric test, i.e. it should be still reliable for situations where distributional assumptions are violated
-
+Option 1 and 3 are substantially more powerful than the standard uniform test. The parametric alternative (option 1) has the advantage that it's fast, while option 3 might have slightly higher power and all other advantages of a non-parametric test, i.e. it should be still reliable for situations where distributional assumptions are violated
 
 ![Comparison of power from simulation studies](Overdispersion.png)
+
+*A word of warning* that applies also to all other tests that follow: significance in hypothesis tests depends on at least 2 ingredients: strenght of the signal, and number of data points. Hence, the p-value alone is not a good indicator of the extent to which your residuals deviate from assumptions. Specifically, if you have a lot of data points, residual diagnostics will nearly inevitably become significant, because having a perfectly fitting model is very unlikely. That, however, doesn't neccessarily mean that you need to change your model. The p-values confirm that there is a deviation from your null hypothesis. It is, however, in your discretion to decide whether this deviation is worth worrying about. If you see a dispersion parameter of 1.01, I would not worry, even if it is significant. A significant value of 5, however, is clearly a reason to move to a model that accounts for overdispersion. 
 
 ## Zero-inflation
 
