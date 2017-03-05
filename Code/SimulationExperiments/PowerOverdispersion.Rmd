@@ -1,0 +1,282 @@
+---
+title: "Overdispersion tests"
+author: "Florian Hartig"
+date: "`r Sys.Date()`"
+output: 
+  html_document: 
+    keep_md: yes
+    toc: true
+abstract: "This documents tests the overdispersion diagnostics of DHARMa \n \n \n"
+---
+
+
+
+
+```{r global_options, include=FALSE}
+knitr::opts_chunk$set(fig.width=7, fig.height=4.5, fig.align='center', warning=FALSE, message=FALSE, cache = F)
+```
+
+```{r, echo = F}
+library(DHARMa)
+library(lme4)
+library(foreach)
+set.seed(123)
+```
+
+```{r}
+dispValues = seq(0,1.2, len = 7)
+replicates = 50
+```
+
+# Poisson test
+
+## General idea / options
+
+### No overdispersion
+
+```{r}
+testData = createData(sampleSize = 200, overdispersion = 0, family = poisson())
+
+fittedModel <- glmer(observedResponse ~ Environment1 + (1|group) , family = "poisson", data = testData)
+
+sim = simulateResiduals(fittedModel)
+plot(sim)
+
+# Parametric test
+testOverdispersionParametric(fittedModel)
+
+# Omnibus test
+testOverdispersionParametric(fittedModel)
+
+# Non-parametric test
+
+sim = simulateResiduals(fittedModel,refit = T)
+plot(sim)
+testOverdispersion(sim,  plot = T)
+```
+
+### Overdispersion
+
+
+```{r}
+testData = createData(sampleSize = 200, overdispersion = 1, family = poisson())
+
+fittedModel <- glmer(observedResponse ~ Environment1 + (1|group) , family = "poisson", data = testData)
+
+sim = simulateResiduals(fittedModel)
+plot(sim)
+
+# Parametric test
+testOverdispersionParametric(fittedModel)
+
+# Omnibus test
+testOverdispersionParametric(fittedModel)
+
+# Non-parametric test
+
+sim = simulateResiduals(fittedModel,refit = T)
+plot(sim)
+testOverdispersion(sim,  plot = T)
+```
+
+### Overdispersion corrected
+
+```{r}
+testData = createData(sampleSize = 200, overdispersion = 1, family = poisson())
+
+fittedModel <- glmer(observedResponse ~ Environment1 + (1|group) + (1|ID) , family = "poisson", data = testData)
+
+sim = simulateResiduals(fittedModel)
+plot(sim)
+
+# Parametric test
+testOverdispersionParametric(fittedModel)
+
+# Omnibus test
+testOverdispersionParametric(fittedModel)
+
+# Non-parametric test
+
+sim = simulateResiduals(fittedModel,refit = T)
+plot(sim)
+testOverdispersion(sim,  plot = T)
+```
+
+
+## Power analysis
+
+```{r, echo = F}
+valuesU = valuesP  = valuesNP = valuesNPR = matrix(ncol = replicates,nrow = length(dispValues))
+
+for(i in 1:length(dispValues)){
+  for (j in 1:replicates){
+    
+    testData = createData(sampleSize = 200, overdispersion = dispValues[i], family = poisson())
+    fittedModel <- glmer(observedResponse ~ Environment1 + (1|group) , family = "poisson", data = testData)
+    sim = simulateResiduals(fittedModel)
+    
+    valuesU[i,j] = DHARMa::testUniformity(sim)$p.value
+    valuesP[i,j] = DHARMa::testOverdispersionParametric(fittedModel)$p.value
+    valuesNP[i,j] = DHARMa::testOverdispersion(sim)$p.value
+    
+    sim = simulateResiduals(fittedModel, refit = T, n = 50)
+    valuesNPR[i,j] = DHARMa::testOverdispersion(sim)$p.value
+  }
+}
+
+proportionsU = apply(valuesU < 0.05, 1, mean)
+proportionsP = apply(valuesP < 0.05, 1, mean)
+proportionsNP = apply(valuesNP < 0.05, 1, mean)
+proportionsNPR = apply(valuesNPR < 0.05, 1, mean)
+
+plot(dispValues, proportionsU, type = "b", xlab = "Overdispersion strength", ylab = "Proportion significant", ylim = c(0,1))
+lines(dispValues, proportionsP, type = "b", col = "red")
+lines(dispValues, proportionsNP, type = "b", col = "darkgreen")
+lines(dispValues, proportionsNPR, type = "b", col = "purple")
+legend("bottomright", legend = c("Uniform", "Parametric", "DHARMa nonparametric", "DHARMa nonparametric Resim"), col = c("black", "red", "darkgreen", "purple"), lty = c(1,1))
+
+```
+
+
+
+
+# Binomial k/n test
+
+
+## 1/0 case
+
+Just to show that overdispersion does not show up in 1/0 data
+
+
+
+```{r}
+testData = createData(sampleSize = 200, overdispersion = 1, family = binomial())
+
+fittedModel <- glmer(observedResponse ~ Environment1 + (1|group) , family = "binomial", data = testData)
+
+sim = simulateResiduals(fittedModel)
+plot(sim)
+
+# Parametric test
+testOverdispersionParametric(fittedModel)
+
+# Omnibus test
+testOverdispersionParametric(fittedModel)
+
+# Non-parametric test
+
+sim = simulateResiduals(fittedModel,refit = T)
+plot(sim)
+testOverdispersion(sim,  plot = T)
+```
+
+
+## n/k case
+
+### No overdispersion
+
+```{r}
+testData = createData(sampleSize = 200, overdispersion = 0, family = binomial(), binomialTrials = 20)
+
+fittedModel <- glmer(cbind(observedResponse1,observedResponse0) ~ Environment1 + (1|group) , family = "binomial", data = testData)
+
+sim = simulateResiduals(fittedModel)
+plot(sim)
+
+# Parametric test
+testOverdispersionParametric(fittedModel)
+
+# Omnibus test
+testOverdispersionParametric(fittedModel)
+
+# Non-parametric test
+
+sim = simulateResiduals(fittedModel,refit = T)
+plot(sim)
+testOverdispersion(sim,  plot = T)
+```
+
+### Overdispersion
+
+
+```{r}
+testData = createData(sampleSize = 200, overdispersion = 1, family = binomial(), binomialTrials = 20)
+
+fittedModel <- glmer(cbind(observedResponse1,observedResponse0) ~ Environment1 + (1|group) , family = "binomial", data = testData)
+
+sim = simulateResiduals(fittedModel)
+plot(sim)
+
+# Parametric test
+testOverdispersionParametric(fittedModel)
+
+# Omnibus test
+testOverdispersionParametric(fittedModel)
+
+# Non-parametric test
+
+sim = simulateResiduals(fittedModel,refit = T)
+plot(sim)
+testOverdispersion(sim,  plot = T)
+```
+
+### Overdispersion corrected
+
+```{r}
+
+testData = createData(sampleSize = 200, overdispersion = 0.2, family = binomial(), binomialTrials = 20)
+
+fittedModel <- glmer(cbind(observedResponse1,observedResponse0) ~ Environment1 + (1|group) + (1|ID) , family = "binomial", data = testData)
+
+sim = simulateResiduals(fittedModel)
+plot(sim)
+
+# Parametric test
+testOverdispersionParametric(fittedModel)
+
+# Omnibus test
+testOverdispersionParametric(fittedModel)
+
+# Non-parametric test
+
+sim = simulateResiduals(fittedModel,refit = T)
+plot(sim)
+testOverdispersion(sim,  plot = T)
+```
+
+
+## Power analysis
+
+```{r, echo = F}
+valuesU = valuesP  = valuesNP = valuesNPR = matrix(ncol = replicates,nrow = length(dispValues))
+
+for(i in 1:length(dispValues)){
+  for (j in 1:replicates){
+    
+    testData = createData(sampleSize = 200, overdispersion = dispValues[i], family = binomial(), binomialTrials = 20)
+    fittedModel <- glmer(cbind(observedResponse1,observedResponse0) ~ Environment1 + (1|group) , family = "binomial", data = testData)
+    sim = simulateResiduals(fittedModel)
+    
+    valuesU[i,j] = DHARMa::testUniformity(sim)$p.value
+    valuesP[i,j] = DHARMa::testOverdispersionParametric(fittedModel)$p.value
+    valuesNP[i,j] = DHARMa::testOverdispersion(sim)$p.value
+    
+    sim = simulateResiduals(fittedModel, refit = T, n = 50)
+    valuesNPR[i,j] = DHARMa::testOverdispersion(sim)$p.value
+  }
+}
+
+proportionsU = apply(valuesU < 0.05, 1, mean)
+proportionsP = apply(valuesP < 0.05, 1, mean)
+proportionsNP = apply(valuesNP < 0.05, 1, mean)
+proportionsNPR = apply(valuesNPR < 0.05, 1, mean)
+
+plot(dispValues, proportionsU, type = "b", xlab = "Overdispersion strength", ylab = "Proportion significant", ylim = c(0,1))
+lines(dispValues, proportionsP, type = "b", col = "red")
+lines(dispValues, proportionsNP, type = "b", col = "darkgreen")
+lines(dispValues, proportionsNPR, type = "b", col = "purple")
+legend("bottomright", legend = c("Uniform", "Parametric", "DHARMa nonparametric", "DHARMa nonparametric Resim"), col = c("black", "red", "darkgreen", "purple"), lty = c(1,1))
+
+```
+
+
