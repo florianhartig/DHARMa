@@ -19,6 +19,9 @@ runEverything = function(fittedModel, testData, DHARMaData = T){
   testZeroInflation(simulationOutput = simulationOutput)
   testTemporalAutocorrelation(simulationOutput = simulationOutput, time = runif(length(simulationOutput$scaledResiduals )))
   testSpatialAutocorrelation(simulationOutput = simulationOutput, x = runif(length(simulationOutput$scaledResiduals )), y =  runif(length(simulationOutput$scaledResiduals )))
+  
+  testOverdispersion(simulationOutput)
+  testOverdispersion(simulationOutput, alternative = "both", plot = T)
 
 
   simulationOutput2 <- simulateResiduals(fittedModel = fittedModel, refit = T, n = 10) # n=10 is very low, set higher for serious tests
@@ -27,6 +30,7 @@ runEverything = function(fittedModel, testData, DHARMaData = T){
   plot(simulationOutput2, quantreg = F)
 
   testOverdispersion(simulationOutput2)
+  testOverdispersion(simulationOutput2, alternative = "both", plot = T)
   testOverdispersionParametric(fittedModel)
 
 }

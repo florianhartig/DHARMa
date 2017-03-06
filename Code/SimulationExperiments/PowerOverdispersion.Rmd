@@ -13,7 +13,7 @@ abstract: "This documents tests the overdispersion diagnostics of DHARMa \n \n \
 
 
 ```{r global_options, include=FALSE}
-knitr::opts_chunk$set(fig.width=7, fig.height=4.5, fig.align='center', warning=FALSE, message=FALSE, cache = F)
+knitr::opts_chunk$set(fig.width=7, fig.height=4.5, fig.align='center', warning=FALSE, message=FALSE, cache = T)
 ```
 
 ```{r, echo = F}
@@ -24,8 +24,8 @@ set.seed(123)
 ```
 
 ```{r}
-dispValues = seq(0,1.2, len = 7)
-replicates = 50
+dispValues = seq(0,1.2, len = 10)
+replicates = 100
 ```
 
 # Poisson test
@@ -129,11 +129,11 @@ proportionsP = apply(valuesP < 0.05, 1, mean)
 proportionsNP = apply(valuesNP < 0.05, 1, mean)
 proportionsNPR = apply(valuesNPR < 0.05, 1, mean)
 
-plot(dispValues, proportionsU, type = "b", xlab = "Overdispersion strength", ylab = "Proportion significant", ylim = c(0,1))
+plot(dispValues, proportionsU, type = "b", xlab = "Overdispersion strength", ylab = "Proportion significant", ylim = c(0,1), main = "Poisson")
 lines(dispValues, proportionsP, type = "b", col = "red")
 lines(dispValues, proportionsNP, type = "b", col = "darkgreen")
 lines(dispValues, proportionsNPR, type = "b", col = "purple")
-legend("bottomright", legend = c("Uniform", "Parametric", "DHARMa nonparametric", "DHARMa nonparametric Resim"), col = c("black", "red", "darkgreen", "purple"), lty = c(1,1))
+legend("bottomright", legend = c("DHARMa omnibus uniform", "DHARMa parametric", "DHARMa nonparametric refit = F", "DHARMa nonparametric refit = T"), lty = c(1,1))
 
 ```
 
@@ -271,11 +271,11 @@ proportionsP = apply(valuesP < 0.05, 1, mean)
 proportionsNP = apply(valuesNP < 0.05, 1, mean)
 proportionsNPR = apply(valuesNPR < 0.05, 1, mean)
 
-plot(dispValues, proportionsU, type = "b", xlab = "Overdispersion strength", ylab = "Proportion significant", ylim = c(0,1))
+plot(dispValues, proportionsU, type = "b", xlab = "Overdispersion strength", ylab = "Proportion significant", ylim = c(0,1), main = "Binomial (20 trials)")
 lines(dispValues, proportionsP, type = "b", col = "red")
 lines(dispValues, proportionsNP, type = "b", col = "darkgreen")
 lines(dispValues, proportionsNPR, type = "b", col = "purple")
-legend("bottomright", legend = c("Uniform", "Parametric", "DHARMa nonparametric", "DHARMa nonparametric Resim"), col = c("black", "red", "darkgreen", "purple"), lty = c(1,1))
+legend("bottomright", legend = c("DHARMa omnibus uniform", "DHARMa parametric", "DHARMa nonparametric refit = F", "DHARMa nonparametric refit = T"), col = c("black", "red", "darkgreen", "purple"), lty = c(1,1))
 
 ```
 
