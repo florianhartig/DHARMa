@@ -20,9 +20,9 @@ This function performs a simulation-based test for over/underdispersion
 \details{
 The function implements two tests, depending on whether it is applied on a simulation with refit = F, or refit = T. 
 
-If refit = F (default, and recommended), the function tests if the IQR of the scaled residuals deviate from the null hypothesis of a uniform distribution. 
+If refit = F (not recommended), the function tests if the IQR of the scaled residuals deviate from the null hypothesis of a uniform distribution. Simulations show that this option is not properly calibrated and much less powerful than the parametric alternative \code{\link{testOverdispersionParametric}} and even the simple \code{\link{testUniformity}}, and therefore it's use is not recommended. 
 
-If refit = T, the function compares the approximate deviance (via squared pearson residuals) with the same quantity from the models refit with simulated models. It is MUCH slower than the option above and the parametric alternative \code{\link{testOverdispersionParametric}}. At the moment it's only implemented for testing purposes.
+If refit = T, the function compares the approximate deviance (via squared pearson residuals) with the same quantity from the models refit with simulated models. It is much slower the parametric alternative \code{\link{testOverdispersionParametric}}, but simulations show that it is at least as powerful as the latter, and more powerful than any other non-parametric test in DHARMa. It might be preferable in (rare) cases where the parametric assuptions are violated.
 }
 \seealso{
 \code{\link{testSimulatedResiduals}}, \code{\link{testSimulatedResiduals}}, \code{\link{testZeroInflation}}, \code{\link{testTemporalAutocorrelation}}, \code{\link{testSpatialAutocorrelation}}, \code{\link{testOverdispersionParametric}}

@@ -2,7 +2,7 @@
 % Please edit documentation in R/testsParametric.R
 \name{testOverdispersionParametric}
 \alias{testOverdispersionParametric}
-\title{Parametric overdipersion test}
+\title{Parametric overdispersion test}
 \usage{
 testOverdispersionParametric(model)
 }

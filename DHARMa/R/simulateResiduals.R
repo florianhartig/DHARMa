@@ -1,7 +1,7 @@
 #' Create simulated residuals
 #' 
 #' The function creates scaled residuals by simulating from the fitted model
-#' @param fittedModel fitted model object. Supproted are generalized linear mixed models from 'lme4' (classes 'lmerMod', 'glmerMod'), generalized additive models ('gam' from 'mgcv', excluding extended families from 'mgcv'), 'glm' (including 'negbin' from 'MASS', but excluding quasi-distributions) and 'lm' model classes. 
+#' @param fittedModel fitted model object. Supported are generalized linear mixed models from 'lme4' (classes 'lmerMod', 'glmerMod'), generalized additive models ('gam' from 'mgcv', excluding extended families from 'mgcv'), 'glm' (including 'negbin' from 'MASS', but excluding quasi-distributions) and 'lm' model classes. 
 #' @param n integer number > 1, number of simulations to run. If possible, set to at least 250, better 1000. See also details
 #' @param refit if F, new data will be simulated and scaled residuals will be created by comparing observed data with new data. If T, the model will be refit on the simulated data (parametric bootstrap), and scaled residuals will be created by comparing observed with refitted residuals.
 #' @param integerResponse if T, noise will be added at to the residuals to maintain a uniform expectations for integer responses (such as Poisson or Binomial). Usually, the model will automatically detect the appropriate setting, so there is no need to adjust this setting.
@@ -57,6 +57,8 @@ simulateResiduals <- function(fittedModel, n = 250, refit = F, integerResponse =
   out$refit = refit
   out$observedResponse = model.frame(fittedModel)[,1]  
   out$integerResponse = integerResponse
+  
+  out$problems = list()
   
   ## following block re-used below, create function for this 
   
@@ -128,6 +130,12 @@ simulateResiduals <- function(fittedModel, n = 250, refit = F, integerResponse =
         newData = cbind(simObserved, newData)
       }
       
+      #tryCatch()
+      try({
+        
+        # for testing
+        if (i==3) stop("x")
+        
       refittedModel = update(fittedModel, data = newData)
       out$refittedPredictedResponse[,i] = predict(refittedModel, type = "response")
       
@@ -143,8 +151,22 @@ simulateResiduals <- function(fittedModel, n = 250, refit = F, integerResponse =
       out$refittedResiduals[,i] = residuals(refittedModel, type = "response")
       out$refittedPearsonResiduals[,i] = residuals(refittedModel, type = "pearson")
       #out$refittedRandomEffects[,i]  = ranef(refittedModel)
+      })
     }
+
+    if(anyNA(out$refittedResiduals)) warning("DHARMa::simulateResiduals warning: on refit = T, at least one of the refitted models produced an error. Inspect the refitted model values. Results may not be reliable.")
     
+    ## check for convergece problems
+    
+    dup = sum(duplicated(out$refittedFixedEffects, MARGIN = 2))
+    if (dup > 0){
+      if (dup < n/3){
+        warning(paste("There were", dup, "of", n ,"duplicate parameter estimates in the refitted models. This may hint towards a problem with optimizer convergence in the fitted models. Results may not be reliable. The suggested action is to not use the refitting procedure, and diagnose with tools available for the normal (not refitted) simulated residuals. If you absolutely require the refitting procedure, try changing tolerance / iterations in the optimizer settings."))
+      } else warning(paste("There were", dup, "of", n ,"duplicate parameter estimates in the refitted models. This may hint towards a problem with optimizer convergence in the fitted models. Results are likely not reliable. The suggested action is to not use the refitting procedure, and diagnose with tools available for the normal (not refitted) simulated residuals. If you absolutely require the refitting procedure, try changing tolerance / iterations in the optimizer settings."))
+      out$problems[[length(out$problems)+ 1]] = "error in refit"
+    } 
+    
+
     for (i in 1:out$nObs){
     
       if(integerResponse == T){
