@@ -13,6 +13,8 @@
 #' @example inst/examples/benchmarkUniformityHelp.R
 benchmarkUniformity <- function(dataModelCreator,  nSim = 100, plot = T, ...){
   
+  if(class(dataModelCreator)[1] %in% getPossibleModels()) dataModelCreator = generateGenerator(dataModelCreator)
+    
   nData = nrow(dataModelCreator()$data)  
 
   out = matrix(NA, nrow = nSim, ncol = nData)
@@ -24,15 +26,15 @@ benchmarkUniformity <- function(dataModelCreator,  nSim = 100, plot = T, ...){
     
     testData = temp$data
     fittedModel <- temp$model
-    simResults = simulateResiduals(fittedModel = fittedModel, n=250, ...)
+    simResults = simulateResiduals(fittedModel = fittedModel, ...)
     out[i,] = simResults$scaledResiduals
     predicted[i,] =  simResults$fittedPredictedResponse
   }
   
   if(plot == T){
-    oldpar <- par(mfrow = c(5,5))
+    oldpar <- par(mfrow = c(4,4))
     hist(out, breaks = 50, col = "red", main = paste("mean of", nSim, "simulations"))
-    for (i in 1:min(nSim, 24)) hist(out[i,], breaks = 50, freq = F, main = i)
+    for (i in 1:min(nSim, 15)) hist(out[i,], breaks = 50, freq = F, main = i)
     par(oldpar)    
   }
   
@@ -40,7 +42,30 @@ benchmarkUniformity <- function(dataModelCreator,  nSim = 100, plot = T, ...){
   
 }
 
+generateGenerator <- function(mod){
+  
+  out <- function(){
+    
+    simulations = simulate(mod, nsim = 1)
 
+    newData <-model.frame(mod)  
+    
+    if(is.vector(simulations[[1]])){
+      newData[,1] = simulations[[1]]
+    } else {
+      # Hack to make the binomial n/k case work
+      newData[[1]] = NULL
+      newData = cbind(simulations[[1]], newData)
+    }
+    
+    refittedModel = update(mod, data = newData)
+    
+    list(data = newData, model = refittedModel)
+    
+  }
+
+  
+}
 
 
 
