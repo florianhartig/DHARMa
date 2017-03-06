@@ -118,7 +118,7 @@ testZeroInflation <- function(simulationOutput,  plot = T, alternative = "more")
   class(out) = "htest"
 
   if(plot == T) {
-    hist(zerosExpected, xlim = range(zerosExpected, zerosObserved ))
+    hist(zerosExpected, xlim = range(zerosExpected, zerosObserved, na.rm=T ))
     abline(v = zerosObserved, lwd= 2, col = "red")
   }
   return(out)
