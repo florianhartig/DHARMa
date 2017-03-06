@@ -1,8 +1,15 @@
+# Version 0.1.4
 
+## Submission 1
 
-* Travis CI, under standard settings for
+This is a minor update. See NEWS for changes. 
+
+This release was tested without apparent problems under
+
+* local MAC OS 10.10.5, R 3.3.1
+* http://win-builder.r-project.org/, current settings
+* Linux (Travis CI)
  * oldrel / release / devel
- * See https://travis-ci.org/florianhartig/BayesianTools
 
 # Version 0.1.3
 

@@ -1,5 +1,17 @@
 NOTE: for more news about the package, see https://github.com/florianhartig/DHARMa/releases
 
+DHARMa 0.1.4 
+
+Major changes
+
+- new experimental non-parametric dispersion test on simulated residuals. Extended simulations to compare dispersion tests
+
+Minor changes
+
+- supports for binomial with response coded as factor
+- error catching for refit procedure https://github.com/florianhartig/DHARMa/issues/18
+- warnings in case the refit procedure fails or produces identical parameter values https://github.com/florianhartig/DHARMa/issues/20
+
 DHARMa 0.1.3 
 
 Major changes
