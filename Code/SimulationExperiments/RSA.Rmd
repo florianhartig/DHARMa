@@ -10,33 +10,47 @@ Idea: for testing RSA in GLMs or similar, it is common to perform autocorrelatio
 
 
 ```{r}
+library(DHARMa)
 library(ape)
-library(RandomFields)
-library(fields)
-
+library(lme4)
 ```
-
-
 
 
 
 ```{r}
-ape::Moran.I()
+
+nsim = 1000
+
+pval = data.frame(uncorrected = rep(NA, nsim), corrected = rep(NA, nsim))
+
+for(i in 1:nsim){
+  
+  testData = createData(sampleSize = 200, intercept = 0, overdispersion = 0, randomEffectVariance = 0, family = poisson(), roundPoissonVariance = 0, pZeroInflation = 0)
+  
+  fittedModel <- glmer(observedResponse ~ Environment1 + (1|group) , family = "poisson", data = testData)
+
+  # Moran's I on standard residuals
+  
+  distMat <- as.matrix(dist(cbind(testData$x, testData$y)))
+  invDistMat <- 1/distMat
+  diag(invDistMat) <- 0
+  
+  MI = ape::Moran.I(residuals(fittedModel), weight = invDistMat)
+  
+  simres = simulateResiduals(fittedModel)
+  
+  DMI = testSpatialAutocorrelation(simres, x = testData$x, y = testData$y, plot = F)
+  
+  DMI$p.value
+  
+  pval[i,] = c(MI$p.value , DMI$p.value)
+
+}
+
+par(mfrow = c(1,2))
+hist(pval[,1], breaks = 20, col = c("red", rep("gray", 19)), freq = F )
+hist(pval[,2], breaks = 20, col = c("red", rep("gray", 19)), freq = F )
+
 ```
 
-
-
-
-
-
-
-
-```{r}
-model <- RMexp()
-x <- seq(0, 10, length.out = 10)
-z <- RFsimulate(model, x, x, n=1)
-image.plot(matrix(z@data$variable1, nrow = length(x)))
-
-data = cbind(coordinates(z), z@data$variable1)
-```
 

@@ -1,0 +1,33 @@
+---
+title: "Uniformity"
+author: "Florian Hartig"
+date: "5 Jan 2017"
+output: html_document
+---
+
+
+
+```{r}
+library(DHARMa)
+library(lme4)
+```
+
+
+
+
+
+```{r}
+generator <- function(){
+   testData = createData(sampleSize = 50, randomEffectVariance = 0, family = poisson())
+  
+  fittedModel <- glm(observedResponse ~ Environment1 , family = "poisson", data = testData)
+  list(data = testData, model = fittedModel)
+}
+res = benchmarkUniformity(fittedModel, nSim = 100)
+
+x = generateGenerator(fittedModel)
+
+x()
+
+```
+
