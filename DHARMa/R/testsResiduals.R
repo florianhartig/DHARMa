@@ -36,9 +36,9 @@ testUniformity<- function(simulationOutput){
 #' @param alternative whether to test for "overdispersion", "underdispersion", or "both" (both reduces power)
 #' @details The function implements two tests, depending on whether it is applied on a simulation with refit = F, or refit = T. 
 #' 
-#' If refit = F (not recommended), the function tests if the IQR of the scaled residuals deviate from the null hypothesis of a uniform distribution. Simulations show that this option is not properly calibrated and much less powerful than the parametric alternative \code{\link{testOverdispersionParametric}} and even the simple \code{\link{testUniformity}}, and therefore it's use is not recommended. 
+#' If refit = F (not recommended), the function tests if the IQR of the scaled residuals deviate from the null hypothesis of a uniform distribution. Simulations show that this option is not properly calibrated and much less powerful than the parametric alternative \code{\link{testOverdispersionParametric}} and even the simple \code{\link{testUniformity}}, and therefore it's use is not recommended. A warning will be returned if the function is called. 
 #' 
-#' If refit = T, the function compares the approximate deviance (via squared pearson residuals) with the same quantity from the models refit with simulated models. It is much slower the parametric alternative \code{\link{testOverdispersionParametric}}, but simulations show that it is at least as powerful as the latter, and more powerful than any other non-parametric test in DHARMa. It might be preferable in (rare) cases where the parametric assuptions are violated. 
+#' If refit = T, the function compares the approximate deviance (via squared pearson residuals) with the same quantity from the models refitted with simulated data. It is much slower than the parametric alternative \code{\link{testOverdispersionParametric}}, but simulations show that it is slightly more powerful than the latter, and more powerful than any other non-parametric test in DHARMa, and it doesn't make any parametric assumptions. However, given the computational cost, I would suggest that most users will be satisfied with the parametric overdispersion test. 
 #' 
 #' @seealso \code{\link{testSimulatedResiduals}}, \code{\link{testSimulatedResiduals}}, \code{\link{testZeroInflation}}, \code{\link{testTemporalAutocorrelation}}, \code{\link{testSpatialAutocorrelation}}, \code{\link{testOverdispersionParametric}}
 #' @export
@@ -75,7 +75,7 @@ testOverdispersion <- function(simulationOutput, alternative = "overdispersion",
   class(out) = "htest"
 
   if(plot == T) {
-    hist(ss, xlim = range(ss, observed ))
+    hist(ss, xlim = range(ss, observed, na.rm = T))
     abline(v = observed, lwd= 2, col = "red")
   }
   return(out)

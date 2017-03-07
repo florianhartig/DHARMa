@@ -88,7 +88,7 @@ render_listings()
 
 \section{Introduction}
 
-In recent years, generalized linear mixed models (GLMMs) have become a standard tool ecology and evolution \citep{Bolker-Generalizedlinearmixed-2009}. Despite the immense popularity of these methods, fundamental questions remain regarding the inference
+In recent years, generalized linear mixed models (GLMMs) have become a standard tool ecology and evolution \citep{Bolker-Generalizedlinearmixed-2009}. Despite the immense popularity of the appraoch, fundamental questions remain regarding the inference
 
 In recent years, 
 
@@ -293,6 +293,6 @@ Although we concentrated here on generalized linear mixed models.
 
 
 \bibliographystyle{chicago}
-\bibliography{/Users/Florian/Home/Bibliography/Databases/flo}
+\bibliography{/Users/Florian/Home/Bibliography/Databases/flo3 }
 
 \end{document}
