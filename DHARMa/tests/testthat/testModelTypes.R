@@ -7,6 +7,10 @@ library(mgcv)
 
 
 runEverything = function(fittedModel, testData, DHARMaData = T){
+  
+  cat("\n\n============= NEW MODEL ====================\n\n")
+  
+  
   simulationOutput <- simulateResiduals(fittedModel = fittedModel)
 
   print(simulationOutput)

@@ -134,12 +134,13 @@ simulateResiduals <- function(fittedModel, n = 250, refit = F, integerResponse =
       try({
         
         # for testing
-        if (i==3) stop("x")
+        # if (i==3) stop("x")
+        # Note: also set silet = T for production
         
       refittedModel = update(fittedModel, data = newData)
       out$refittedPredictedResponse[,i] = predict(refittedModel, type = "response")
       
-      if(class(fittedModel)[1] %in% c("glm", "lm") ){
+      if(class(fittedModel)[1] %in% c("glm", "lm", "gam") ){
         out$refittedFixedEffects[,i]  = coef(refittedModel)
       }
       
@@ -151,7 +152,7 @@ simulateResiduals <- function(fittedModel, n = 250, refit = F, integerResponse =
       out$refittedResiduals[,i] = residuals(refittedModel, type = "response")
       out$refittedPearsonResiduals[,i] = residuals(refittedModel, type = "pearson")
       #out$refittedRandomEffects[,i]  = ranef(refittedModel)
-      })
+      }, silent = T)
     }
 
     if(anyNA(out$refittedResiduals)) warning("DHARMa::simulateResiduals warning: on refit = T, at least one of the refitted models produced an error. Inspect the refitted model values. Results may not be reliable.")

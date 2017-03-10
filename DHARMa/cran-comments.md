@@ -2,6 +2,19 @@
 
 ## Submission 1
 
+A bugxif of version 0.1.4 - there was a a bug in simulateResiduals, with refit = T
+
+This release was tested without apparent problems under
+
+* local MAC OS 10.10.5, R 3.3.1
+* http://win-builder.r-project.org/, current settings
+* Linux (Travis CI)
+ * oldrel / release / devel
+ 
+# Version 0.1.4
+
+## Submission 1
+
 This is a minor update. See NEWS for changes. 
 
 This release was tested without apparent problems under

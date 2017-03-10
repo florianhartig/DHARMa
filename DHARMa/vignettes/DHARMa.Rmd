@@ -314,13 +314,13 @@ testOverdispersionParametric(fittedModel)
 testOverdispersion(simulationOutput)
 
 # Option 3
-simulationOutput2 <- simulateResiduals(fittedModel = fittedModel, refit = 2)
+simulationOutput2 <- simulateResiduals(fittedModel = fittedModel, refit = T, n = 20)
 testOverdispersion(simulationOutput2)
 ```
 
 Power simulations (figure below, see extended simulations [here](https://github.com/florianhartig/DHARMa/blob/master/Code/SimulationExperiments/PowerOverdispersion.md)) show that option 2 is generally not preferable. I only kept it in the package for testing and future improvements. 
 
-![Comparison of power from simulation studies](Overdispersion.png)
+![Comparison of power from simulation studies](overdispersion.png)
 
 Option 1 and 3 are substantially more powerful than the standard uniform test. The parametric alternative (option 1) has the advantage that it is fast, while option 3 might have slightly higher power and all other advantages of a non-parametric test, i.e. it should be still reliable for situations where distributional assumptions are violated. For normal use, I recommend using the parametric test. 
 
