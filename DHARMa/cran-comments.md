@@ -2,7 +2,7 @@
 
 ## Submission 1
 
-A bugxif of version 0.1.4 - there was a a bug in simulateResiduals, with refit = T
+This release fixes a bug in version 0.1.4 that occurred when running simulateResiduals with refit = T. Apologies for any inconvenience. 
 
 This release was tested without apparent problems under
 

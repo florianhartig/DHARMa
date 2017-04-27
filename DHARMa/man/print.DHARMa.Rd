@@ -4,7 +4,7 @@
 \alias{print.DHARMa}
 \title{Print simulated residuals}
 \usage{
-\method{print}{DHARMa}(x, ...)
+print.DHARMa(x, ...)
 }
 \arguments{
 \item{x}{an object with simulated residuals created by \code{\link{simulateResiduals}}}

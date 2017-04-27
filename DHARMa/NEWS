@@ -1,5 +1,17 @@
 NOTE: for more news about the package, see https://github.com/florianhartig/DHARMa/releases
 
+DHARMa 0.1.6
+
+Minor changes
+
+- changed syntax in tests for sptial / temporal autocorrlation - null provides now random. Also, custom distance matrices can be provided to testSpatialAutocorrelation
+
+DHARMa 0.1.5
+
+Minor changes
+
+- fixes a bug in version 0.1.4 that occurred when running simulateResiduals with refit = T. Apologies for any inconvenience. 
+
 DHARMa 0.1.4 
 
 Major changes

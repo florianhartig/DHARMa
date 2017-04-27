@@ -40,3 +40,7 @@ Publications/Package/cache/
 
 
 .DS_Store
+
+*.aux
+
+*.blg

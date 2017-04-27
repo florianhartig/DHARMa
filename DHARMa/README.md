@@ -20,8 +20,4 @@ vignette("DHARMa", package="DHARMa")
 
 # Acknowledgements
 
-Thanks to comments / suggestions from
-
-Jochen Fründ
-Tomer J. Czaczkes
-Luis Cayuela Delgado
+A question by Catalina Gutiérrez Chacón provided me with the motivation write the first version of DHARMa. Thanks to Jochen Fründ, Tomer J. Czaczkes and Luis Cayuela Delgado for useful suggestions to improve the software. 

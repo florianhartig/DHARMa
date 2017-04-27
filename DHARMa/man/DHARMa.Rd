@@ -10,6 +10,8 @@ The DHARMa package uses a simulation-based approach to create readily interpreta
 }
 \details{
 See index / vignette for details
+
+A question by Catalina Gutiérrez Chacón provided me with the motivation write the first version of DHARMa. Thanks to Jochen Fründ, Tomer J. Czaczkes and Luis Cayuela Delgado for useful suggestions to improve the software.
 }
 \examples{
 vignette("DHARMa", package="DHARMa")
