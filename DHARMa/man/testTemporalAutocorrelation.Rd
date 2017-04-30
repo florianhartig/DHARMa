@@ -4,7 +4,7 @@
 \alias{testTemporalAutocorrelation}
 \title{Test for temporal autocorrelation}
 \usage{
-testTemporalAutocorrelation(simulationOutput, time, plot = T)
+testTemporalAutocorrelation(simulationOutput, time = NULL, plot = T)
 }
 \arguments{
 \item{simulationOutput}{an object with simulated residuals created by \code{\link{simulateResiduals}}}
