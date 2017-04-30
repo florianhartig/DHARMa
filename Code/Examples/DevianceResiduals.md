@@ -25,19 +25,20 @@ res2 = residuals(fittedModel2, type = "deviance")
 ```
 
 
-## Visual comparison via Pearson residual plots and normal qq Plots
+## Visual comparison via residual plots and normal qq Plots
 
 
 ```r
 par(mfrow = c(2,2))
-plot(fitted(fittedModel), residuals(fittedModel, type = "pearson"), main = "Model 1, mean counts large")
-plot(fitted(fittedModel2), residuals(fittedModel2, type = "pearson"), main = "Model 2, mean counts small")
+plot(fitted(fittedModel), res2, main = "Model 1, mean counts large")
+plot(fitted(fittedModel2), res2, main = "Model 2, mean counts small")
 qqnorm(res )
 qqnorm(res2)
 ```
 
 ![](DevianceResiduals_files/figure-html/unnamed-chunk-2-1.png)<!-- -->
 
+For large counts, QQ is approximately normally distribtion, which is expected as the Poisson approaches normality for large means. For small counts, there is a notable deviation from normality. 
 
 
 ## Test for normality
