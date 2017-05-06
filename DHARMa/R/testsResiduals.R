@@ -47,7 +47,7 @@ testOverdispersion <- function(simulationOutput, alternative = "overdispersion",
   out = list()
   
   if(simulationOutput$refit == F){
-    warning("You have called the non-parametric test for overdispersion based on the scaled residuals. Simulations show that this test is less powerful for detecting overdispersion than the default uniform test on the sclaed residuals, and a lot less powerful than a parametric overdispersion test, or the non-parametric test on re-simulated residuals. The test you called is only implemented for testing / development purposes, there is no scenario where it would be preferred. See vignette for details.")
+    warning("You have called the non-parametric test for overdispersion based on the scaled residuals. Simulations show that this test is less powerful for detecting overdispersion than the default uniform test on the scaled residuals, and a lot less powerful than a parametric overdispersion test, or the non-parametric test on re-simulated residuals. The test you called is only implemented for testing / development purposes, there is no scenario where it would be preferred. See vignette for details.")
     observed = IQR(simulationOutput$scaledResiduals)
     sims = matrix(runif(simulationOutput$nObs * 1000), nrow = 1000)
     ss = apply(sims, 1, IQR)
