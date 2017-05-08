@@ -167,10 +167,11 @@ testTemporalAutocorrelation <- function(simulationOutput, time = NULL , plot = T
 #' 
 #' @seealso \code{\link{testUniformity}}, \code{\link{testZeroInflation}}, \code{\link{testTemporalAutocorrelation}}, \code{\link{testSimulatedResiduals}}, \code{\link{testOverdispersion}}, \code{\link{testOverdispersionParametric}}
 #' @import grDevices
+#' @example inst/examples/testSpatialAutocorrelation.R
 #' @export
 testSpatialAutocorrelation <- function(simulationOutput, x = NULL, y  = NULL, distMat = NULL, plot = T){
   
-  if( !is.null(x) & !is.null(distMat) ) 
+  if( !is.null(x) & !is.null(distMat) ) warning("coordinates and distMat provided, coordinates will only be used for plotting")
   # if not provided, fill x and y with random numbers (Null model)
   if(is.null(x)) x = runif(simulationOutput$nObs, -1,1) 
   if(is.null(y)) y = runif(simulationOutput$nObs, -1,1)

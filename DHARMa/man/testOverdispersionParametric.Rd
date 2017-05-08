@@ -10,7 +10,7 @@ testOverdispersionParametric(model)
 \item{model}{a fitted model object. See details for possible models}
 }
 \description{
-This function implements a parametric dispersion test based on comparing the residual devialce to the residual degrees of freedom that is commonly used, with the purpose of benchmarking against the nonparametric tests of DHARMA
+This function implements a parametric dispersion test based on comparing the residual deviance to the residual degrees of freedom that is commonly used, with the purpose of benchmarking against the nonparametric tests of DHARMA
 }
 \details{
 The general idea of such as test is to copy GLM wisdom that we can define a dispersion parameter as residual deviance / residual degrees of freedom. For a model with correct dispersion, this parameter

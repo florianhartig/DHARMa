@@ -29,6 +29,21 @@ If distMat is not provided, the function will calculate the euclidian distances 
 
    It is possible to not specify x and y. In this case, random x and y values are created. The sense of this option is to test the rate of false positives under the current residual structure (random x/y corresponds to H0: no spatial autocorrelation). This may be useful because it may be that the test doesn't have noninal error rates due to some problem in the residual structure that is different from spatial autocorrelation
 }
+\examples{
+testData = createData(sampleSize = 40, family = gaussian())
+fittedModel <- lm(observedResponse ~ Environment1, data = testData)
+res = simulateResiduals(fittedModel)
+
+# Standard use
+testSpatialAutocorrelation(res, x =  testData$x, y = testData$y)
+
+# If x and y is not provided, random values will be created
+testSpatialAutocorrelation(res)
+
+# Alternatively, one can provide a distance matrix
+dM = as.matrix(dist(cbind(testData$x, testData$y)))
+testSpatialAutocorrelation(res, distMat = dM)
+}
 \seealso{
 \code{\link{testUniformity}}, \code{\link{testZeroInflation}}, \code{\link{testTemporalAutocorrelation}}, \code{\link{testSimulatedResiduals}}, \code{\link{testOverdispersion}}, \code{\link{testOverdispersionParametric}}
 }
