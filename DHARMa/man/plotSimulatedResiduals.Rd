@@ -4,12 +4,12 @@
 \alias{plotSimulatedResiduals}
 \title{DHARMa standard residual plots}
 \usage{
-plotSimulatedResiduals(simulationOutput, quantreg = T)
+plotSimulatedResiduals(simulationOutput, quantreg = NULL)
 }
 \arguments{
 \item{simulationOutput}{an object with simualted residuals created by \code{\link{simulateResiduals}}}
 
-\item{quantreg}{whether to perform a quantile regression on 0.25, 0.5, 0.75. If F, a spline will be created instead}
+\item{quantreg}{whether to perform a quantile regression on 0.25, 0.5, 0.75 on the residuals. If F, a spline will be created instead. Default NULL chooses T for nObs < 2000, and F otherwise.}
 }
 \description{
 This function creates standard plots for the simulated residuals

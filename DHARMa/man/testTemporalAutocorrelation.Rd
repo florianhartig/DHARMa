@@ -30,7 +30,7 @@ res = simulateResiduals(fittedModel)
 # Standard use
 testTemporalAutocorrelation(res, time =  testData$time)
 
-# If x and y is not provided, random values will be created
+# If no time is provided, random values will be created
 testTemporalAutocorrelation(res)
 
 }

@@ -5,14 +5,14 @@
 \alias{plotResiduals}
 \title{Generic residual plot with either spline or quantile regression}
 \usage{
-plotResiduals(pred, residual, quantreg = T, ...)
+plotResiduals(pred, residual, quantreg = NULL, ...)
 }
 \arguments{
 \item{pred}{predictor variable}
 
 \item{residual}{residual variable}
 
-\item{quantreg}{should a quantile regression be performed. If F, a smooth spline will be plotted}
+\item{quantreg}{whether to perform a quantile regression on 0.25, 0.5, 0.75 on the residuals. If F, a spline will be created instead. Default NULL chooses T for nObs < 2000, and F otherwise.}
 
 \item{...}{additional arguments to plot}
 }

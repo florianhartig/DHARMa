@@ -2,7 +2,7 @@
 #' 
 #' This function creates standard plots for the simulated residuals
 #' @param simulationOutput an object with simualted residuals created by \code{\link{simulateResiduals}}
-#' @param quantreg whether to perform a quantile regression on 0.25, 0.5, 0.75. If F, a spline will be created instead
+#' @param quantreg whether to perform a quantile regression on 0.25, 0.5, 0.75 on the residuals. If F, a spline will be created instead. Default NULL chooses T for nObs < 2000, and F otherwise. 
 #' @details The function creates two plots. To the left, a qq-uniform plot to detect deviations from overall uniformity of the residuals, and to the right a plot of residuals against predicted values. For a correctly specified model we would expect 
 #' 
 #' a) a uniform (flat) distribution of the overall residuals, evidenced by a straight line in the qq-plot
@@ -17,7 +17,7 @@
 #' @import graphics
 #' @import utils
 #' @export
-plotSimulatedResiduals <- function(simulationOutput, quantreg = T){
+plotSimulatedResiduals <- function(simulationOutput, quantreg = NULL){
 
   oldpar <- par(mfrow = c(1,2), oma = c(0,1,2,1))
   
@@ -37,7 +37,7 @@ plotSimulatedResiduals <- function(simulationOutput, quantreg = T){
 #' 
 #' @param pred predictor variable
 #' @param residual residual variable
-#' @param quantreg should a quantile regression be performed. If F, a smooth spline will be plotted
+#' @param quantreg whether to perform a quantile regression on 0.25, 0.5, 0.75 on the residuals. If F, a spline will be created instead. Default NULL chooses T for nObs < 2000, and F otherwise. 
 #' @param ... additional arguments to plot
 #' @details For a correctly specified model, we would expect uniformity in y direction when plotting against any predictor.
 #' 
@@ -50,9 +50,11 @@ plotSimulatedResiduals <- function(simulationOutput, quantreg = T){
 #' @name if predictor is a factor, a boxplot will be plotted instead of a scatter plot.
 #' @seealso \code{\link{plotSimulatedResiduals}}
 #' @export
-plotResiduals <- function(pred, residual, quantreg = T, ...){
+plotResiduals <- function(pred, residual, quantreg = NULL, ...){
   
   res = residual 
+  
+  if(is.null(quantreg)) if (length(res) > 2000) quantreg = FALSE else quantreg = TRUE
   
   plot(res ~ pred, ...)
   
