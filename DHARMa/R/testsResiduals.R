@@ -135,6 +135,7 @@ testZeroInflation <- function(simulationOutput,  plot = T, alternative = "more")
 #' @note It is possible to not specify x and y. In this case, random x and y values are created. The sense of this option is to test the rate of false positives under the current residual structure (random x/y corresponds to H0: no spatial autocorrelation). This may be useful because it may be that the test doesn't have noninal error rates due to some problem in the residual structure that is different from spatial autocorrelation
 #' @details The function performs a Durbin-Watson test on the uniformly scaled residuals, and plots the residuals against time. The DB test was originally be designed for normal residuals. In simulations, I didn't see a problem with this setting though. The alternative is to transform the uniform residuals to normal residuals and perform the DB test on those.
 #' @seealso \code{\link{testUniformity}}, \code{\link{testZeroInflation}}, \code{\link{testSimulatedResiduals}}, \code{\link{testSpatialAutocorrelation}}, \code{\link{testOverdispersion}}, \code{\link{testOverdispersionParametric}}
+#' @example inst/examples/testTemporalAutocorrelationHelp.R
 #' @export
 testTemporalAutocorrelation <- function(simulationOutput, time = NULL , plot = T){
   
@@ -167,7 +168,7 @@ testTemporalAutocorrelation <- function(simulationOutput, time = NULL , plot = T
 #' 
 #' @seealso \code{\link{testUniformity}}, \code{\link{testZeroInflation}}, \code{\link{testTemporalAutocorrelation}}, \code{\link{testSimulatedResiduals}}, \code{\link{testOverdispersion}}, \code{\link{testOverdispersionParametric}}
 #' @import grDevices
-#' @example inst/examples/testSpatialAutocorrelation.R
+#' @example inst/examples/testSpatialAutocorrelationHelp.R
 #' @export
 testSpatialAutocorrelation <- function(simulationOutput, x = NULL, y  = NULL, distMat = NULL, plot = T){
   

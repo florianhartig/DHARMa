@@ -449,7 +449,7 @@ The function also has an option to perform the test against randomized time (H0)
 
 ```{r, fig.width=4, fig.height=4}
 testTemporalAutocorrelation(simulationOutput = simulationOutput, time = testData$time)
-testTemporalAutocorrelation(simulationOutput = simulationOutput, time = "random")
+testTemporalAutocorrelation(simulationOutput = simulationOutput)
 ```
 
 Note general caveats mentioned about the DW test in the help of testTemporalAutocorrelation(). In general, as for spatial autocorrelation, it is difficult to specify one test, because temporal and spatial autocorrelation can appear in many flavors, short-scale and long scale, homogenous or not, and so on. The pre-defined functions in DHARMa are a starting point, but they are not something you should rely on blindly. 
@@ -475,7 +475,7 @@ An additional test against randomized space (H0) can be performed, for the same 
 
 ```{r, fig.width=4, fig.height=4}
 testSpatialAutocorrelation(simulationOutput = simulationOutput, x = testData$x, y= testData$y)
-testSpatialAutocorrelation(simulationOutput = simulationOutput, x = "random", y= "random")
+testSpatialAutocorrelation(simulationOutput = simulationOutput)
 ```
 
 The usual caveats for Moran.I apply, in particular that it may miss non-local and heterogeneous (non-stationary) spatial autocorrelation. The former should be better detectable visually in the spatial plot, or via regressions on the pattern. 
