@@ -1,0 +1,205 @@
+---
+title: "Beetles example"
+author: "Florian Hartig"
+date: "`r Sys.Date()`"
+output: 
+  html_document: 
+    toc: yes
+abstract: "This example demonstrates how to create and read in simulated residuals from a Bayesian analysis in DHARMa"
+
+---
+
+
+# Create data
+
+This first part creates a dataset with beetles counts across an altitudinal gradient (several plots each observed several years), with a random intercept on year and zero-inflation. 
+
+```{r}
+altitude = rep(seq(0,1,len = 50), each = 20)
+dataID = 1:1000
+spatialCoordinate = rep(seq(0,30, len = 50), each = 20)
+
+# random effects + zeroinflation
+plot = rep(1:50, each = 20)
+year = rep(1:20, times = 50)
+
+yearRandom = rnorm(20, 0, 1)
+plotRandom = rnorm(50, 0, 1)
+overdispersion = rnorm(1000, sd = 0.5)
+zeroinflation = rbinom(1000,1,0.6)
+
+beetles <- rpois(1000, exp( 0  + 12*altitude - 12*altitude^2 
+                            #  + overdispersion   + plotRandom[plot]
+                            + yearRandom[year]) * zeroinflation )
+
+data = data.frame(dataID, beetles, altitude, plot, year, spatialCoordinate)
+
+plot(year, altitude, cex = beetles/50, pch =2, main = "Beetle counts across altitudinal gradient\n triangle is proportional to counts")
+```
+
+# Analysis and residual analysis with JAGS
+
+Prepare analysis
+
+```{r}
+library(R2jags)
+modelData=as.list(data)
+modelData = append(data, list(nobs=1000, nplots = 50, nyears = 20))
+head(data)
+
+```
+
+## Fit GLM only 
+
+```{r}
+
+modelstring="
+model {
+
+# Likelihood
+for (i in 1:nobs) {
+lambda[i] <- exp(intercept + alt * altitude[i] + alt2 * altitude[i] * altitude[i]) 
+beetles[i]~dpois(lambda[i]) 
+}
+
+# Fixed effect priors 
+intercept ~ dnorm(0,0.0001)
+alt ~ dnorm(0,0.0001)
+alt2 ~ dnorm(0,0.0001)
+
+# Posterior predictive simulations 
+
+for (i in 1:nobs) {
+beetlesPred[i]~dpois(lambda[i])
+}
+Prediction <- sum(beetlesPred)
+}
+"
+
+model=jags(model.file = textConnection(modelstring), data=modelData, n.iter=10000,  parameters.to.save = c("intercept", "alt", "alt2", "beetlesPred", "lambda"), DIC = F)
+
+library(DHARMa)
+simulations = model$BUGSoutput$sims.list$beetlesPred
+pred = apply(model$BUGSoutput$sims.list$lambda, 2, median)
+dim(simulations)
+sim = createDHARMa(simulatedResponse = t(simulations), observedResponse = data$beetles, fittedPredictedResponse = pred, integerResponse = T)
+plotSimulatedResiduals(sim)
+
+```
+
+
+We clearly see overdispersion in the plots.
+
+
+# GLMM with random intercept on year, observation-level RE for overdispersion, and zero-inflation
+
+The following code fits a GLMM with random intercept on year, observation-level RE for overdispersion, and zero-inflation.
+
+Note that we then created two types of posterior predictive simulations 
+
+* Conditional posterior predictive simulations, meaning that we take the final fitted values for lampda (which includes destimates of REs and ZI), and only simulate the final Poisson distribution
+
+* Unconditional simulations, which means that we created data from the fitted model, simulating also the REs and the ZI terms newly
+
+Below, I demonstrate both. If we want to create fully uncoditional simulations, we can either copy the entire model structure (as done in this example), or (small trick), we just make a copy of the data, merge it with the existing data, and set the response to NA - this way Jags will see sample the empty notes according to the same structure that is used to fit the data. 
+
+Of course, with more complicated models, one can also do a part of the structure conditional, and another part unconditional. For example, here, we could have made the observation-level RE unconditional (as this is essentially a part of the distribution), but kept the REs on year and the zero-inflation conditional. 
+
+```{r}
+
+modelstring="
+model {
+
+# Likelihood
+for (i in 1:nobs) {
+lambda[i] <- exp(intercept + alt * altitude[i] + alt2 * altitude[i] * altitude[i] + Ryear[year[i]] + RID[i] ) * Zero[i] + 0.00000001 
+
+beetles[i]~dpois(lambda[i]) 
+}
+
+# Fixed effect priors 
+intercept ~ dnorm(0,0.0001)
+alt ~ dnorm(0,0.0001)
+alt2 ~ dnorm(0,0.0001)
+
+# Random effects 
+
+for (i in 1:nyears) {
+Ryear[i]~dnorm(0,sigmaYear)
+}
+
+for (i in 1:nobs) {
+RID[i]~dnorm(0,sigmaID)
+}
+
+# Variance priors 
+sigmaYear~dgamma(1,2)
+sigmaID~dgamma(0.001,0.001)
+
+# Zeroinflation
+
+for (i in 1:nobs) {
+Zero[i]~dbern(zeroMu + altZero * altitude[i])
+}
+zeroMu ~ dunif(0,1)
+altZero ~ dnorm(0,0.0001)
+
+# Posterior predictive simulations, conditional on fitted REs  
+
+for (i in 1:nobs) {
+  beetlesPredCond[i]~dpois(lambda[i])
+}
+PredictionCond <- sum(beetlesPredCond)
+
+# Posterior predictive simulations, re-simulating REs  
+
+for (i in 1:nobs) {
+  lambdaPred[i] <- exp(intercept + alt * altitude[i] + alt2 * altitude[i] * altitude[i] + RyearPred[year[i]] + RIDPred[i] ) * ZeroPred[i] + 0.00000001 
+  beetlesPred[i]~dpois(lambdaPred[i]) 
+}
+
+for (i in 1:nyears) {
+  RyearPred[i]~dnorm(0,sigmaYear)
+}
+
+for (i in 1:nobs) {
+  RIDPred[i]~dnorm(0,sigmaID)
+}
+
+for (i in 1:nobs) {
+  ZeroPred[i]~dbern(zeroMu + altZero * altitude[i])
+}
+
+Prediction <- sum(beetlesPred)
+
+}
+"
+
+model=jags(model.file = textConnection(modelstring), data=modelData, n.iter=10000,  parameters.to.save = c("intercept", "alt", "alt2", "beetlesPred", "beetlesPredCond", "Ryear", "sigmaYear", "lambda", "altZero", "zeroMu"), DIC = F)
+
+plot(model)
+
+```
+
+
+```{r}
+library(DHARMa)
+
+# Conditional
+
+simulations = model$BUGSoutput$sims.list$beetlesPredCond
+pred = apply(model$BUGSoutput$sims.list$lambda, 2, median)
+dim(simulations)
+sim = createDHARMa(simulatedResponse = t(simulations), observedResponse = data$beetles, fittedPredictedResponse = pred, integerResponse = T)
+plotSimulatedResiduals(sim)
+
+# Unconditional
+
+simulations = model$BUGSoutput$sims.list$beetlesPred
+pred = apply(model$BUGSoutput$sims.list$lambda, 2, median)
+dim(simulations)
+# Here I change fittedPredictedResponse because it doesn't make sense to plot the unconditional residuals against the conditional predictions
+sim = createDHARMa(simulatedResponse = t(simulations), observedResponse = data$beetles, fittedPredictedResponse = apply(simulations, 2, mean), integerResponse = T)
+plotSimulatedResiduals(sim)
+```
+
