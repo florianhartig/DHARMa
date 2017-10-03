@@ -19,8 +19,7 @@ library(DHARMa)
 ?DHARMa
 vignette("DHARMa", package="DHARMa")
 ```
-
-to cite the package, run 
+The vignette can also be read online [here](https://cran.r-project.org/web/packages/DHARMa/vignettes/DHARMa.html). To cite the package, run 
 
 ```{r}
 citation("DHARMa")
