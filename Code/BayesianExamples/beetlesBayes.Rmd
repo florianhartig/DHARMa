@@ -58,8 +58,8 @@ model {
 
 # Likelihood
 for (i in 1:nobs) {
-lambda[i] <- exp(intercept + alt * altitude[i] + alt2 * altitude[i] * altitude[i]) 
-beetles[i]~dpois(lambda[i]) 
+  lambda[i] <- exp(intercept + alt * altitude[i] + alt2 * altitude[i] * altitude[i]) 
+  beetles[i]~dpois(lambda[i]) 
 }
 
 # Fixed effect priors 
@@ -70,7 +70,7 @@ alt2 ~ dnorm(0,0.0001)
 # Posterior predictive simulations 
 
 for (i in 1:nobs) {
-beetlesPred[i]~dpois(lambda[i])
+  beetlesPred[i]~dpois(lambda[i])
 }
 Prediction <- sum(beetlesPred)
 }
