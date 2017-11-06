@@ -23,7 +23,7 @@ plotSimulatedResiduals <- function(simulationOutput, quantreg = NULL){
   
   gap::qqunif(simulationOutput$scaledResiduals,pch=2,bty="n", logscale = F, col = "black", cex = 0.6, main = "QQ plot residuals", cex.main = 1)
 
-  plotResiduals(simulationOutput$fittedPredictedResponse, simulationOutput$scaledResiduals, xlab = "Predicted value", ylab = "Standardized residual", main = "Residual vs. predicted\n quantile lines should be\n horizontal lines at 0.25, 0.5, 0.75", cex.main = 1, quantreg = quantreg)
+  plotResiduals(simulationOutput$fittedPredictedResponse, simulationOutput$scaledResiduals, xlab = "Predicted value", ylab = "Standardized residual", main = "Residual vs. predicted\n quantile lines should be\n horizontal at 0.25, 0.5, 0.75", cex.main = 1, quantreg = quantreg)
   
   mtext("DHARMa scaled residual plots", outer = T)
   
@@ -56,7 +56,7 @@ plotResiduals <- function(pred, residual, quantreg = NULL, ...){
   
   if(is.null(quantreg)) if (length(res) > 2000) quantreg = FALSE else quantreg = TRUE
   
-  plot(res ~ pred, ...)
+  plot(res ~ pred, ylim = c(0,1), ...)
   
   if(is.numeric(pred)){
     if(quantreg == F){
