@@ -57,8 +57,8 @@ simulateResiduals <- function(fittedModel, n = 250, refit = F, integerResponse =
   out$refit = refit
   out$observedResponse = model.frame(fittedModel)[,1]  
   out$integerResponse = integerResponse
-  
   out$problems = list()
+  out$scaledResiduals = rep(NA, out$nObs)
   
   ## following block re-used below, create function for this 
   
@@ -86,15 +86,14 @@ simulateResiduals <- function(fittedModel, n = 250, refit = F, integerResponse =
     out$simulatedResponse = data.matrix(simulations) - 1
     out$observedResponse = as.numeric(out$observedResponse) - 1
   } else stop("DHARMa error - simulations resulted in unsupported class - if this happens for a supported model please report an error at https://github.com/florianhartig/DHARMa/issues")
-  
-  out$scaledResiduals = rep(NA, out$nObs)
 
   if (refit == F){
  
     for (i in 1:out$nObs){
       
       if(integerResponse == T){
-        out$scaledResiduals[i] <- ecdf(out$simulatedResponse[i,] + runif(out$nSim, -0.5, 0.5))(out$observedResponse[i] + runif(1, -0.5, 0.5))           
+        #out$scaledResiduals[i] <- ecdf(out$simulatedResponse[i,] + runif(out$nSim, -0.5, 0.5))(out$observedResponse[i] + runif(1, -0.5, 0.5))
+        out$scaledResiduals[i] <- sum((out$simulatedResponse[i,] + runif(out$nSim, -0.5, 0.5)) < (out$observedResponse[i] + runif(out$nSim, -0.5, 0.5))) / out$nSim  
       }else{
         out$scaledResiduals[i] <- ecdf(out$simulatedResponse[i,])(out$observedResponse[i])
       }
@@ -171,7 +170,8 @@ simulateResiduals <- function(fittedModel, n = 250, refit = F, integerResponse =
     for (i in 1:out$nObs){
     
       if(integerResponse == T){
-        out$scaledResiduals[i] <- ecdf(out$refittedResiduals[i,] + runif(out$nSim, -0.5, 0.5))(out$fittedResiduals[i] + runif(1, -0.5, 0.5))           
+        #out$scaledResiduals[i] <- ecdf(out$refittedResiduals[i,] + runif(out$nSim, -0.5, 0.5))(out$fittedResiduals[i] + runif(1, -0.5, 0.5))    
+        out$scaledResiduals[i] <- sum((out$refittedResiduals[i,] + runif(out$nSim, -0.5, 0.5)) < (out$fittedResiduals[i] + runif(out$nSim, -0.5, 0.5))) / out$nSim
       }else{
         out$scaledResiduals[i] <- ecdf(out$refittedResiduals[i,])(out$fittedResiduals[i])
       }
