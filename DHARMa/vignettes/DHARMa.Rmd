@@ -1,6 +1,6 @@
 ---
-title: "DHARMa - Residual Diagnostics for HierArchical (Multi-level / Mixed) Regression Models"
-author: "Florian Hartig, University of Freiburg / Regensburg, [website](https://florianhartig.wordpress.com/)"
+title: "DHARMa: residual diagnostics for hierarchical (multi-level/mixed) regression models"
+author: "Florian Hartig, Theoretical Ecology, University of Regensburg [website](http://www.uni-regensburg.de/biologie-vorklinische-medizin/theoretische-oekologie/mitarbeiter/hartig/)"
 date: "`r Sys.Date()`"
 output: 
   rmarkdown::html_vignette:
@@ -50,23 +50,24 @@ But even experienced statistical analysts currently have few options to diagnose
 
 * Overdispersion often comes from missing or misspecified predictors. Standard residual plots make it difficult to test for residual patterns against the predictors to check for candidates.
 
-* Not all overdispersion is the same. For count data, the negative binomial creates a different distribution than observation-level random effects in the Poisson. Differences between distributional assumptions are not detectable by overdispersion tests, once overdispersion is corrected (because the tests only looks at total dispersion), and nearly impossible to see visually from standard residual plots. 
+* Not all overdispersion is the same. For count data, the negative binomial creates a different distribution than adding observation-level random effects to the Poisson. Once overdispersion is corrected, such violations of distributional assumptions are not detectable with standard overdispersion tests (because the tests only looks at total dispersion), and nearly impossible to see visually from standard residual plots. 
 
 * Dispersion frequently varies with predictors (heteroscedasticity). This can have a significant effect on the inference. While it is standard to tests for heteroscedasticity in linear regressions, heteroscedasticity is currently hardly ever tested for in GLMMs, although it is likely as frequent and influential. 
 
+* Moreover, if residuals are checked, they are usually checked conditional on the fitted random effect estimates. Thus, standard checks only check the final level of the random structure in a GLMM. One can perform extra checks on the random effects, but it is somewhat unsatisfactory that there is no check on the entire model structure. 
+
 DHARMa aims at solving these problems by creating readily interpretable residuals for generalized linear (mixed) models that are standardized to values between 0 and 1, and that can be interpreted as intuitively as residuals for the linear model. This is achieved by a simulation-based approach, similar to the Bayesian p-value or the parametric bootstrap, that transforms the residuals to a standardized scale. The basic steps are:
 
-1. Simulate new data from the fitted model for the predictor variable combination of each observation.
+1. Simulate new data from the fitted model for each observation.
 
-2. For each observation, calculate the empirical cumulative density function for the simulated data, which describes the expected spread for an observation at the respective point in predictor space, conditional on the fitted model.
+2. For each observation, calculate the empirical cumulative density function for the simulated observations, which describes the possible values (and their probability) at the predictor combination of the observed value, assuming the fitted model is correct.
 
-3. The residual is defined as the value of the empirical density function at the value of the observed data. 
+3. The residual is then defined as the value of the empirical density function at the value of the observed data, so a residual of 0 means that all simulated values are larger than the observed value, and a residual of 0.5 means half of the simulated values are larger than the observed value. 
 
 These steps are visualized in the following figure 
 
 
 <img src="ECDFmotivation.png" width="400">
-
 
 The key idea for this definition is that, if the model is correctly specified, then the observed data should look like as if it was created from the fitted model. Hence, for a correctly specified model, all values of the cumulative distribution should appear with equal probability. That means we expect the distribution of the residuals to be flat, regardless of the model structure (Poisson, binomial, random effects and so on).
 
@@ -189,16 +190,21 @@ simulationOutput <- simulateResiduals(fittedModel = fittedModel, refit = T)
 
 * if refit = F (default), new data is simulated from the fitted model, and residuals are calculated by comparing the observed data to the new data
 
-* if refit = T, a parametric bootstrap is performed, meaning that the model is refit on the new data, and residuals are created by comparing observed residuals against refitted residuals 
+* if refit = T, a parametric bootstrap is performed, meaning that the model is refit to the new data, and residuals are created by comparing observed residuals against refitted residuals 
 
-The second option is much much slower, and therefore not recommended. It is only important for running tests that rely on comparing observed to simulated residuals, e.g. the testOverdispersion function (see below), or if one expects that the tested model is biased and one wants to calculate the expected residuals conditional on this bias (this could make sense in particular for shrinkage estimators that include a purposeful bias, such as random effects or the splines in GAMs). Note also that refit = T can sometimes run into numerical problems, if the fitted model does not converge on the newly simulated data. 
+The second option is much much slower, and also seemed to have lower power in some tests I ran. It is therefore not recommended for standard residual diagnostics! I only recommend using it in two situations
+
+1. For running tests that rely on comparing observed to simulated residuals, e.g. the testOverdispersion function (see below), 
+
+2. Or, and this was my original motivation for introducing this option, if one expects that the tested model is biased. A bias could, for example, arise in small data situations, or when estimating models with shrinkage estimators that include a purposeful bias, such as ridge/lasso, random effects or the splines in GAMs. My idea was then that simulated data would not fit to the observations, but that residuals for model fits on simulated data would have the same patterns/bias than model fits on the observed data. 
+
+Note also that refit = T can sometimes run into numerical problems, if the fitted model does not converge on the newly simulated data. 
 
 #### Random effect simulations
 
-The second option is the treatment of the stochastic hierarchy. In a hierarchical model, several layers of stochasticity are placed on top of each other. Specifically, in a GLMM, we have a lower level stochastic process (random effect), whose result enters into a higher level (e.g. Poisson distribution). For other hierarchical models such as state-space models, similar considerations apply, but the hierarchy can be more complex. When simulating, we have to decide if we want to re-simulate all stochastic levels, or only a subset of those. For example, in a GLMM, it is common to only simulate the last stochastic level (e.g. Poisson) conditional on the fitted random effects, meaning that the random effects are set on the fitted values.
+The second option is the treatment of the stochastic hierarchy. In a hierarchical model, several layers of stochasticity are placed on top of each other. Specifically, in a GLMM, we have a lower level stochastic process (random effect), whose result enters into a higher level (e.g. Poisson distribution). For other hierarchical models, such as state-space models, similar considerations apply, but the hierarchy can be more complex. When simulating, we have to decide if we want to re-simulate all stochastic levels, or only a subset of those. For example, in a GLMM, it is common to only simulate the last stochastic level (e.g. Poisson) conditional on the fitted random effects, meaning that the random effects are set on the fitted values.
 
 For controlling how many levels should be re-simulated, the simulateResidual function allows to pass on parameters to the simulate function of the fitted model object. Please refer to the help of the different simulate functions (e.g. ?simulate.merMod) for details. For merMod (lme4) model objects, the relevant parameters are "use.u", and "re.form", as, e.g., in 
-
 
 ```{r, eval= F}
 simulationOutput <- simulateResiduals(fittedModel = fittedModel, n = 250, use.u = T)
@@ -225,7 +231,9 @@ To make the plots and tests in DHARMa also available for Bayesian analysis, DHAR
 res = createDHARMa(scaledResiduals = posteriorPredictiveSimulations, simulatedResponse = medianPosteriorPredictions, observedResponse = observations, integerResponse = ?)
 ```
 
-What is provided as simulatedResponse is up to the user, but median posterior predictions seem most sensible to me. Note: as DHARMa doesn't know the fitted model, it is important in this function to specify the integerResponse option by hand (see simulateResiduals for details). After the conversion, all DHARMa plots can be used, however, note that Bayesian p-values != DHARMA residuals, because in the Bayesian analysis, parameters are varied as well. 
+What is provided as simulatedResponse is up to the user, but median posterior predictions seem most sensible to me. After the conversion, all DHARMa plots can be used, however, note that Bayesian p-values != DHARMA residuals, because in the Bayesian analysis, parameters are varied as well. 
+
+**Important**: as DHARMa doesn't know the distribution fitted model, it is vital to specify the integerResponse option by hand (see above / ?simulateResiduals for details). 
 
 ## Reproducibility notes
 
