@@ -1,27 +1,20 @@
----
-title: "Beetles GLMM example with DHARMa residual checks"
-author: "Florian Hartig"
-date: "`r Sys.Date()`"
-output: 
-  html_document: 
-    keep_md: yes
-    toc: yes
-abstract: "This example demonstrates how to perform Bayesian residual checks by creating and reading in simulated residuals from a Bayesian analysis with JAGS in DHARMa"
----
+# Beetles GLMM example with DHARMa residual checks
+Florian Hartig  
+`r Sys.Date()`  
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE, cache = T, warnings = F, message = F, fig.width = 5, fig.height = 5)
-```
+
 
 # Create data
 
-```{r}
+
+```r
 set.seed(123)
 ```
 
 This first part creates a dataset with beetles counts across an altitudinal gradient (several plots each observed several years), with a random intercept on year and zero-inflation. 
 
-```{r}
+
+```r
 altitude = rep(seq(0,1,len = 50), each = 20)
 dataID = 1:1000
 spatialCoordinate = rep(seq(0,30, len = 50), each = 20)
@@ -44,24 +37,36 @@ data = data.frame(dataID, beetles, altitude, plot, year, spatialCoordinate)
 plot(year, altitude, cex = beetles/50, pch =2, main = "Beetle counts across altitudinal gradient\n triangle is proportional to counts")
 ```
 
+![](beetlesBayes_files/figure-html/unnamed-chunk-2-1.png)<!-- -->
+
 # Analysis and residual analysis with JAGS
 
 Prepare analysis
 
-```{r}
+
+```r
 library(R2jags)
 modelData=as.list(data)
 modelData = append(data, list(nobs=1000, nplots = 50, nyears = 20))
 head(data)
+```
 
+```
+##   dataID beetles altitude plot year spatialCoordinate
+## 1      1       0        0    1    1                 0
+## 2      2       2        0    1    2                 0
+## 3      3       4        0    1    3                 0
+## 4      4       0        0    1    4                 0
+## 5      5       0        0    1    5                 0
+## 6      6       4        0    1    6                 0
 ```
 
 ## Fitting a basic GLM 
 
 Note that I create here the simulated residuals via a new block at the end of the code. An alternative, more traditional, but less versatile coding option is to provide the data 2 times, but set the response the second time to NA, which will cause JAGS to simulate the empty notes. 
 
-```{r, results='hide'}
 
+```r
 modelstring="
 model {
 
@@ -86,20 +91,58 @@ Prediction <- sum(beetlesPred)
 "
 
 model=jags(model.file = textConnection(modelstring), data=modelData, n.iter=10000,  parameters.to.save = c("intercept", "alt", "alt2", "beetlesPred", "lambda"), DIC = F)
+```
 
+```
+## Warning in jags.model(model.file, data = data, inits = init.values,
+## n.chains = n.chains, : Unused variable "dataID" in data
+```
+
+```
+## Warning in jags.model(model.file, data = data, inits = init.values,
+## n.chains = n.chains, : Unused variable "plot" in data
+```
+
+```
+## Warning in jags.model(model.file, data = data, inits = init.values,
+## n.chains = n.chains, : Unused variable "year" in data
+```
+
+```
+## Warning in jags.model(model.file, data = data, inits = init.values,
+## n.chains = n.chains, : Unused variable "spatialCoordinate" in data
+```
+
+```
+## Warning in jags.model(model.file, data = data, inits = init.values,
+## n.chains = n.chains, : Unused variable "nplots" in data
+```
+
+```
+## Warning in jags.model(model.file, data = data, inits = init.values,
+## n.chains = n.chains, : Unused variable "nyears" in data
 ```
 
 Calculating Residuals
 
-```{r}
+
+```r
 library(DHARMa)
 simulations = model$BUGSoutput$sims.list$beetlesPred
 pred = apply(model$BUGSoutput$sims.list$lambda, 2, median)
 dim(simulations)
-sim = createDHARMa(simulatedResponse = t(simulations), observedResponse = data$beetles, fittedPredictedResponse = pred, integerResponse = T)
-plotSimulatedResiduals(sim)
+```
 
 ```
+## [1] 3000 1000
+```
+
+```r
+sim = createDHARMa(simulatedResponse = t(simulations), observedResponse = data$beetles, fittedPredictedResponse = pred, integerResponse = T)
+plotSimulatedResiduals(sim)
+```
+
+![](beetlesBayes_files/figure-html/unnamed-chunk-5-1.png)<!-- -->
 
 
 We clearly see overdispersion in the plots (if you don't see it, read the DHARMa vignette for more explanations).
@@ -119,8 +162,8 @@ Below, I demonstrate both. If we want to create fully uncoditional simulations, 
 
 Of course, with more complicated models, one can also do a part of the structure conditional, and another part unconditional. For example, here, we could have made the observation-level RE unconditional (as this is essentially a part of the distribution), but kept the REs on year and the zero-inflation conditional. 
 
-```{r, results = "hide"}
 
+```r
 modelstring="
 model {
 
@@ -190,13 +233,37 @@ Prediction <- sum(beetlesPred)
 "
 
 model=jags(model.file = textConnection(modelstring), data=modelData, n.iter=10000,  parameters.to.save = c("intercept", "alt", "alt2", "beetlesPred", "beetlesPredCond", "Ryear", "sigmaYear", "lambda", "altZero", "zeroMu"), DIC = F)
-
-plot(model)
-
 ```
 
+```
+## Warning in jags.model(model.file, data = data, inits = init.values,
+## n.chains = n.chains, : Unused variable "dataID" in data
+```
 
-```{r}
+```
+## Warning in jags.model(model.file, data = data, inits = init.values,
+## n.chains = n.chains, : Unused variable "plot" in data
+```
+
+```
+## Warning in jags.model(model.file, data = data, inits = init.values,
+## n.chains = n.chains, : Unused variable "spatialCoordinate" in data
+```
+
+```
+## Warning in jags.model(model.file, data = data, inits = init.values,
+## n.chains = n.chains, : Unused variable "nplots" in data
+```
+
+```r
+plot(model)
+```
+
+![](beetlesBayes_files/figure-html/unnamed-chunk-6-1.png)<!-- -->
+
+
+
+```r
 library(DHARMa)
 
 # Conditional
@@ -204,20 +271,39 @@ library(DHARMa)
 simulations = model$BUGSoutput$sims.list$beetlesPredCond
 pred = apply(model$BUGSoutput$sims.list$lambda, 2, median)
 dim(simulations)
+```
+
+```
+## [1] 3000 1000
+```
+
+```r
 sim = createDHARMa(simulatedResponse = t(simulations), observedResponse = data$beetles, fittedPredictedResponse = pred, integerResponse = T)
 plotSimulatedResiduals(sim)
 ```
+
+![](beetlesBayes_files/figure-html/unnamed-chunk-7-1.png)<!-- -->
 
 Now the plots for the unconditional - note that there is now a bit of underdispersion, although we have the correct model.
 
 I think the reason is the following. The quantile residuals should be assymptotically flat (i.e. for a sharp posterior on the true values), but they don't neccessarily have these properties for wide posteriors that may additionally still show prior influences. I'm sorry that I can't give a more general explanation of this at the moment, I also think this topic is generally not well researched. I doubt, what I would do is to create a new dataset based on the MAP and refit it, to see if the observed residual pattern is expected for the model structure, together with the priors. 
 
-```{r}
+
+```r
 simulations = model$BUGSoutput$sims.list$beetlesPred
 pred = apply(model$BUGSoutput$sims.list$lambda, 2, median)
 dim(simulations)
+```
+
+```
+## [1] 3000 1000
+```
+
+```r
 # Here I change fittedPredictedResponse because it doesn't make sense to plot the unconditional residuals against the conditional predictions
 sim = createDHARMa(simulatedResponse = t(simulations), observedResponse = data$beetles, fittedPredictedResponse = log(apply(simulations, 2, mean) + 1), integerResponse = T)
 plotSimulatedResiduals(sim)
 ```
+
+![](beetlesBayes_files/figure-html/unnamed-chunk-8-1.png)<!-- -->
 
