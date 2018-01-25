@@ -4,6 +4,7 @@ Florian Hartig
 
 
 
+
 # Create data
 
 
@@ -150,9 +151,9 @@ We clearly see overdispersion in the plots (if you don't see it, read the DHARMa
 
 ## GLMM with random intercept on year, observation-level RE for overdispersion, and zero-inflation
 
-The following code fits a GLMM with random intercept on year, observation-level RE for overdispersion, and zero-inflation.
+The following code fits a GLMM with random intercept on year, observation-level RE for overdispersion, and zero-inflation. Note that this is the true, data-generating model. 
 
-Note that we then created two types of posterior predictive simulations 
+We  will create two types of posterior predictive simulations 
 
 * Conditional posterior predictive simulations, meaning that we take the final fitted values for lampda (which includes destimates of REs and ZI), and only simulate the final Poisson distribution
 
@@ -284,9 +285,7 @@ plotSimulatedResiduals(sim)
 
 ![](beetlesBayes_files/figure-html/unnamed-chunk-7-1.png)<!-- -->
 
-Now the plots for the unconditional - note that there is now a bit of underdispersion, although we have the correct model.
-
-I think the reason is the following. The quantile residuals should be assymptotically flat (i.e. for a sharp posterior on the true values), but they don't neccessarily have these properties for wide posteriors that may additionally still show prior influences. I'm sorry that I can't give a more general explanation of this at the moment, I also think this topic is generally not well researched. I doubt, what I would do is to create a new dataset based on the MAP and refit it, to see if the observed residual pattern is expected for the model structure, together with the priors. 
+Now the plots for the unconditional - note that quantile residuals should be assymptotically flat (i.e. for a sharp posterior on the true values), but they don't neccessarily have these properties for wide posteriors that may additionally still show prior influences. This problem will be more likely to show up for unconditional plots. I doubt, what I would do is to create a new dataset based on the MAP and refit it, to see if the observed residual pattern is expected for the model structure, together with the priors. 
 
 
 ```r
