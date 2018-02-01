@@ -53,3 +53,16 @@ benchmarkP <- function(controlValues = 0, getP, nRep = 10, alpha = 0.05, plot = 
   
   return(positive)
 }
+
+
+#' Plot distribution of p-values
+#' @param x vector of p values
+#' @param plot should the values be plottet
+#' @param ... additional arguments to hist
+#' @author Florian Hartig
+testPDistribution <- function(x, plot = T, title = "p value", ...){
+  out = suppressWarnings(ks.test(x, 'punif'))
+  hist(x, xlim = c(0,1), breaks = 20, freq = F, main = "p distribution \n expected is flat at 1")
+  abline(h=1, col = "red")
+  return(out)
+}
