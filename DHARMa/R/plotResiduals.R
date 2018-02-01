@@ -21,13 +21,30 @@ plotSimulatedResiduals <- function(simulationOutput, quantreg = NULL){
 
   oldpar <- par(mfrow = c(1,2), oma = c(0,1,2,1))
   
-  gap::qqunif(simulationOutput$scaledResiduals,pch=2,bty="n", logscale = F, col = "black", cex = 0.6, main = "QQ plot residuals", cex.main = 1)
+  plotQQunif(simulationOutput)
 
   plotResiduals(simulationOutput$fittedPredictedResponse, simulationOutput$scaledResiduals, xlab = "Predicted value", ylab = "Standardized residual", main = "Residual vs. predicted\n quantile lines should be\n horizontal at 0.25, 0.5, 0.75", cex.main = 1, quantreg = quantreg)
   
   mtext("DHARMa scaled residual plots", outer = T)
   
   par(oldpar)
+}
+
+
+#' Quantile-quantile plot for a uniform distribution
+#' 
+#' The function produces a generic quantile-quantile plot for a uniform distribution
+#' 
+#' @param sample a vector with residuals to be tested
+#' 
+#' @details the function calls qqunif from the R package gap
+#' 
+plotQQunif <- function(simulationOutput, testUniformity = T){
+  gap::qqunif(simulationOutput$scaledResiduals,pch=2,bty="n", logscale = F, col = "black", cex = 0.6, main = "QQ plot residuals", cex.main = 1)
+  if(testUniformity == TRUE){
+    temp = testUniformity(simulationOutput)
+    legend("topleft", c(paste("p-value KS test: ", round(temp$p.value, digits = 5)), paste("Deviation ", ifelse(temp$p.value < 0.05, "significant", "n.s."))), text.col = ifelse(temp$p.value < 0.05, "red", "black" ), bty="n")     
+  }
 }
 
 
@@ -60,14 +77,18 @@ plotResiduals <- function(pred, residual, quantreg = NULL, ...){
   
   if(is.numeric(pred)){
     if(quantreg == F){
-      lines(smooth.spline(pred, res, df = 10), lty = 2, lwd = 2, col = "red")
-      abline(h = 0.5, col = "red", lwd = 2)
+      try({
+        lines(smooth.spline(pred, res, df = 10), lty = 2, lwd = 2, col = "red")
+        abline(h = 0.5, col = "red", lwd = 2)
+      }, silent = T)
     }else{
       probs = c(0.25, 0.50, 0.75)
       w <- p <- list()
       for(i in seq_along(probs)){
-        capture.output(w[[i]] <- qrnn::qrnn.fit(x = as.matrix(pred), y = as.matrix(res), n.hidden = 4, tau = probs[i], iter.max = 1000, n.trials = 1, penalty = 1))
-  p[[i]] <- qrnn::qrnn.predict(as.matrix(sort(pred)), w[[i]])
+        try({
+          capture.output(w[[i]] <- qrnn::qrnn.fit(x = as.matrix(pred), y = as.matrix(res), n.hidden = 4, tau = probs[i], iter.max = 1000, n.trials = 1, penalty = 1))
+          p[[i]] <- qrnn::qrnn.predict(as.matrix(sort(pred)), w[[i]])
+        }, silent = T)
       }
       matlines(sort(pred), matrix(unlist(p), nrow = length(pred), ncol = length(p)), col = "red", lty = 1)
     }
