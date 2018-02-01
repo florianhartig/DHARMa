@@ -144,7 +144,8 @@ testTemporalAutocorrelation <- function(simulationOutput, time = NULL , plot = T
   out = lmtest::dwtest(simulationOutput$scaledResiduals ~ 1, order.by = time)
   
   if(plot == T) {
-    plot(simulationOutput$scaledResiduals ~ time)
+    col = colorRamp(c("red", "white", "blue"))(simulationOutput$scaledResiduals)
+    plot(simulationOutput$scaledResiduals ~ time, col = rgb(col, maxColorValue = 255))
   }
   return(out)
 }
