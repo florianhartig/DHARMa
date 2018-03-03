@@ -8,7 +8,7 @@ testSpatialAutocorrelation(simulationOutput, x = NULL, y = NULL,
   distMat = NULL, plot = T)
 }
 \arguments{
-\item{simulationOutput}{an object with simulated residuals created by \code{\link{simulateResiduals}}}
+\item{simulationOutput}{a DHARMa object with simulated residuals created with \code{\link{simulateResiduals}}}
 
 \item{x}{the x coordinate, in the same order as the data points. If not provided, random values will be created}
 

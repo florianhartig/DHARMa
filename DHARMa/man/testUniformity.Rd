@@ -7,13 +7,13 @@
 testUniformity(simulationOutput)
 }
 \arguments{
-\item{simulationOutput}{an object with simulated residuals created by \code{\link{simulateResiduals}}}
+\item{simulationOutput}{a DHARMa object with simulated residuals created with \code{\link{simulateResiduals}}}
 }
 \description{
-This function tests the overall uniformity of the residuals
+This function tests the overall uniformity of the simulated residuals in a DHARMa object
 }
 \details{
-Tests residuals against a uniform distribution with the KS test
+The function applies a KS test for uniformity on the simulated residuals
 }
 \seealso{
 \code{\link{testSimulatedResiduals}}, \code{\link{testZeroInflation}}, \code{\link{testTemporalAutocorrelation}}, \code{\link{testSpatialAutocorrelation}}, \code{\link{testOverdispersion}}, \code{\link{testOverdispersionParametric}}

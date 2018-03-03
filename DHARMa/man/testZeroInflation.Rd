@@ -7,7 +7,7 @@
 testZeroInflation(simulationOutput, plot = T, alternative = "more")
 }
 \arguments{
-\item{simulationOutput}{an object with simulated residuals created by \code{\link{simulateResiduals}}}
+\item{simulationOutput}{a DHARMa object with simulated residuals created with \code{\link{simulateResiduals}}}
 
 \item{plot}{whether to plot output}
 

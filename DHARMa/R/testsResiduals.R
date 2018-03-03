@@ -2,7 +2,7 @@
 #' 
 #' This is intended as a wrapper for the various test functions. Currently, this function calls only the \code{\link{testUniformity}} function. Other tests (see below) have to be called by hand
 #' 
-#' @param simulationOutput an object with simulated residuals created by \code{\link{simulateResiduals}}
+#' @param simulationOutput a DHARMa object with simulated residuals created with \code{\link{simulateResiduals}}
 #' @details Currently, this function calls only the \code{\link{testUniformity}} function. All other tests (see below) have to be called by hand. 
 #' @export
 #' @seealso \code{\link{testUniformity}}, \code{\link{testZeroInflation}}, \code{\link{testTemporalAutocorrelation}}, \code{\link{testSpatialAutocorrelation}}, \code{\link{testOverdispersion}}, \code{\link{testOverdispersionParametric}}
@@ -14,14 +14,13 @@ testSimulatedResiduals <- function(simulationOutput){
 
 #' Test for overall uniformity 
 #' 
-#' This function tests the overall uniformity of the residuals
+#' This function tests the overall uniformity of the simulated residuals in a DHARMa object
 #' 
-#' @param simulationOutput an object with simulated residuals created by \code{\link{simulateResiduals}}
-#' @details Tests residuals against a uniform distribution with the KS test 
+#' @param simulationOutput a DHARMa object with simulated residuals created with \code{\link{simulateResiduals}}
+#' @details The function applies a KS test for uniformity on the simulated residuals
 #' @seealso \code{\link{testSimulatedResiduals}}, \code{\link{testZeroInflation}}, \code{\link{testTemporalAutocorrelation}}, \code{\link{testSpatialAutocorrelation}}, \code{\link{testOverdispersion}}, \code{\link{testOverdispersionParametric}}
 #' @export
 testUniformity<- function(simulationOutput){
-  
   out <- suppressWarnings(ks.test(simulationOutput$scaledResiduals, 'punif'))
   return(out)
 }
@@ -31,7 +30,7 @@ testUniformity<- function(simulationOutput){
 #' 
 #' This function performs a simulation-based test for over/underdispersion 
 #' 
-#' @param simulationOutput an object with simulated residuals created by \code{\link{simulateResiduals}}
+#' @param simulationOutput a DHARMa object with simulated residuals created with \code{\link{simulateResiduals}}
 #' @param plot whether to plot output
 #' @param alternative whether to test for "overdispersion", "underdispersion", or "both" (both reduces power)
 #' @details The function implements two tests, depending on whether it is applied on a simulation with refit = F, or refit = T. 
@@ -87,7 +86,7 @@ testOverdispersion <- function(simulationOutput, alternative = "overdispersion",
 #' 
 #' This function compares the observed number of zeros with the zeros expected from simulations. 
 #' 
-#' @param simulationOutput an object with simulated residuals created by \code{\link{simulateResiduals}}
+#' @param simulationOutput a DHARMa object with simulated residuals created with \code{\link{simulateResiduals}}
 #' @param plot whether to plot output
 #' @param alternative whether to test for 'more', 'less', or 'both' more or less zeros in the observed data
 #' @details shows the expected distribution of zeros against the observed
@@ -155,7 +154,7 @@ testTemporalAutocorrelation <- function(simulationOutput, time = NULL , plot = T
 #' 
 #' This function performs a standard test for spatial autocorrelation on the simulated residuals
 #' 
-#' @param simulationOutput an object with simulated residuals created by \code{\link{simulateResiduals}}
+#' @param simulationOutput a DHARMa object with simulated residuals created with \code{\link{simulateResiduals}}
 #' @param x the x coordinate, in the same order as the data points. If not provided, random values will be created
 #' @param y the x coordinate, in the same order as the data points. If not provided, random values will be created
 #' @param distMat optional distance matrix. If not provided, a distance matrix will be calculated based on x and y. See details for explanation

@@ -7,7 +7,7 @@
 testSimulatedResiduals(simulationOutput)
 }
 \arguments{
-\item{simulationOutput}{an object with simulated residuals created by \code{\link{simulateResiduals}}}
+\item{simulationOutput}{a DHARMa object with simulated residuals created with \code{\link{simulateResiduals}}}
 }
 \description{
 This is intended as a wrapper for the various test functions. Currently, this function calls only the \code{\link{testUniformity}} function. Other tests (see below) have to be called by hand

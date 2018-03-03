@@ -8,7 +8,7 @@ testOverdispersion(simulationOutput, alternative = "overdispersion",
   plot = F)
 }
 \arguments{
-\item{simulationOutput}{an object with simulated residuals created by \code{\link{simulateResiduals}}}
+\item{simulationOutput}{a DHARMa object with simulated residuals created with \code{\link{simulateResiduals}}}
 
 \item{alternative}{whether to test for "overdispersion", "underdispersion", or "both" (both reduces power)}
 
