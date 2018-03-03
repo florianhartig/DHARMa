@@ -4,12 +4,10 @@
 \alias{print.DHARMa}
 \title{Print simulated residuals}
 \usage{
-\method{print}{DHARMa}(x, ...)
+\method{print}{DHARMa}(simulationOutput)
 }
 \arguments{
-\item{x}{an object with simulated residuals created by \code{\link{simulateResiduals}}}
-
-\item{...}{optional arguments to pass on to \code{\link{plotSimulatedResiduals}}}
+\item{simulationOutput}{an object with simulated residuals created by \code{\link{simulateResiduals}}}
 }
 \description{
 Print simulated residuals

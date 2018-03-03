@@ -4,27 +4,59 @@
 \alias{plotSimulatedResiduals}
 \title{DHARMa standard residual plots}
 \usage{
-plotSimulatedResiduals(simulationOutput, quantreg = NULL)
+plotSimulatedResiduals(simulationOutput, ...)
 }
 \arguments{
 \item{simulationOutput}{an object with simualted residuals created by \code{\link{simulateResiduals}}}
 
-\item{quantreg}{whether to perform a quantile regression on 0.25, 0.5, 0.75 on the residuals. If F, a spline will be created instead. Default NULL chooses T for nObs < 2000, and F otherwise.}
+\item{...}{further options for \code{\link{plotResiduals}}. Consider in particular parameters quantreg, rank and asFactor. xlab, ylab and main cannot be changed when using plotSimulatedResiduals, but can be changed when using plotResiduals.}
 }
 \description{
 This function creates standard plots for the simulated residuals
 }
 \details{
-The function creates two plots. To the left, a qq-uniform plot to detect deviations from overall uniformity of the residuals, and to the right a plot of residuals against predicted values. For a correctly specified model we would expect 
+The function creates two plots. To the left, a qq-uniform plot to detect deviations from overall uniformity of the residuals (calling \code{\link{plotQQunif}}), and to the right, a plot of residuals against predicted values (calling \code{\link{plotResiduals}}). For a correctly specified model, we would expect 
 
-a) a uniform (flat) distribution of the overall residuals, evidenced by a straight line in the qq-plot
+a) a straight 1-1 line in the uniform qq-plot -> evidence for an overal uniform (flat) distribution of the residuals
 
-b) uniformity in y direction if we plot against any predictor, including the predicted value.
+b) uniformity of residuals in the vertical direction in the res against predictor plot
 
-To provide a visual aid in detecting deviations from uniformity in y-direction, the plot of the residuals against the predited values also performs an (optional) quantile regression, which provides 0.25, 0.5 and 0.75 quantile lines across the plots. These lines should be straight, horizontal, and at y-values of 0.25, 0.5 and 0.75. Note, however, that some deviations from this are to be expected by chance, even for a perfect model, especially if the sample size is small.
+Deviations of this can be interpreted as for a liner regression. See the vignette for detailed examples. 
 
-The quantile regression can take some time to calculate, especially for larger datasets. For that reason, quantreg = F can be set to produce a smooth spline instead.
+To provide a visual aid in detecting deviations from uniformity in y-direction, the plot of the residuals against the predited values also performs an (optional) quantile regression, which provides 0.25, 0.5 and 0.75 quantile lines across the plots. These lines should be straight, horizontal, and at y-values of 0.25, 0.5 and 0.75. Note, however, that some deviations from this are to be expected by chance, even for a perfect model, especially if the sample size is small. See further comments on this plot, and options, in \code{\link{plotResiduals}}
+
+The quantile regression can take some time to calculate, especially for larger datasets. For that reason, quantreg = F can be set to produce a smooth spline instead. This is default for n > 2000.
+}
+\examples{
+testData = createData(sampleSize = 200, family = poisson(), 
+                      randomEffectVariance = 0, numGroups = 5)
+fittedModel <- glm(observedResponse ~ Environment1, 
+                   family = "poisson", data = testData)
+simulationOutput <- simulateResiduals(fittedModel = fittedModel)
+
+######### main plotting function #############
+
+plot(simulationOutput = simulationOutput)
+
+#############  qq plot  ######################
+
+plotQQunif(simulationOutput = simulationOutput)
+
+#############  residual plots  ###############
+
+# a single residual vs. predicte plot, various options
+plotResiduals(simulationOutput, rank = T)
+plotResiduals(simulationOutput, quantreg = F)
+
+# residual vs predictors
+plotResiduals(pred = testData$Environment1, residuals = simulationOutput$scaledResiduals, quantreg = F)
+plotResiduals(pred = testData$time, residuals = simulationOutput$scaledResiduals, quantreg = T)
+
+# factor vs. non factor
+plotResiduals(pred = testData$group, residuals = simulationOutput$scaledResiduals, quantreg = F, asFactor = F)
+plotResiduals(pred = testData$group, residuals = simulationOutput$scaledResiduals, quantreg = F, asFactor = T)
+
 }
 \seealso{
-\code{\link{plotResiduals}}
+\code{\link{plotResiduals}}, \code{\link{plotQQunif}}
 }
