@@ -104,10 +104,5 @@ Either scaled residuals or (simulatedResponse AND observed response) have to be 
   library(DHARMa)
   x = createDHARMa(t(posteriorPredictiveSims))
   plot(x)
-  
-  
-  
-  
-  
 }
 }

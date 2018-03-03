@@ -73,9 +73,4 @@
   library(DHARMa)
   x = createDHARMa(t(posteriorPredictiveSims))
   plot(x)
-  
-  
-  
-  
-  
 }
