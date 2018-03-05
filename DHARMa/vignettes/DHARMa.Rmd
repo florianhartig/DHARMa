@@ -220,6 +220,30 @@ A third option is the treatment of integer responses. The background of this opt
 
 The simulateResiduals function will automatically check if the family is integer valued, and apply randomization if that is the case. I see no reason why one would not want to randomize for an integer-valued function, so the parameter should usually not be changed.
 
+#### Random seed and random state
+
+DHARMa essentially performs a simulation experiment on the fitted model, to find out if the residuals fit to observation. A simulation means that random numbers are drawn, which meanst that results will be slightly different every time you do this.
+
+In principle this is no problem - each outcome is as likely as the other. However, there the somewhat unitutive behavior that, if you run a residual check several times, the result will always look different and will be sometimes more and sometimes less significant. See this example:
+
+```{r}
+simulationOutput <- simulateResiduals(fittedModel = fittedModel, seed = NA)
+testUniformity(simulationOutput)
+simulationOutput <- simulateResiduals(fittedModel = fittedModel, seed = NA)
+testUniformity(simulationOutput)
+```
+
+This can not only be confusing to a user, but it also bears the danger that one runs the plot several times and stops when it looks particularly nice. 
+
+By default, DHARMa fixes therefore the random seed to the same value every time a simulation is run. This means that you will get exactly the same residual plot each time. If you want to avoid this behavior, for example for simulation experiments on DHARMa, use the setting "seed = NA" as above. 
+
+Whether or not you fix the seed, the setting for the random seed and the random state are stored in 
+
+```{r}
+simulationOutput$randomState
+```
+
+
 ## Using external simulations (e.g. from Bayesian software)
 
 As mentioned earlier, the quantile residuals defined in DHARMa are the frequentist equivalent of the so-called "Bayesian p-values", i.e. residuals created from posterior predictive simulations in a Bayesian analysis.

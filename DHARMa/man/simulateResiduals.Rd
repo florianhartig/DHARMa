@@ -5,7 +5,7 @@
 \title{Create simulated residuals}
 \usage{
 simulateResiduals(fittedModel, n = 250, refit = F, integerResponse = NULL,
-  plot = F, ...)
+  plot = F, seed = 123, ...)
 }
 \arguments{
 \item{fittedModel}{fitted model object. Supported are generalized linear mixed models from 'lme4' (classes 'lmerMod', 'glmerMod'), generalized additive models ('gam' from 'mgcv', excluding extended families from 'mgcv'), 'glm' (including 'negbin' from 'MASS', but excluding quasi-distributions) and 'lm' model classes.}
@@ -17,6 +17,8 @@ simulateResiduals(fittedModel, n = 250, refit = F, integerResponse = NULL,
 \item{integerResponse}{if T, noise will be added at to the residuals to maintain a uniform expectations for integer responses (such as Poisson or Binomial). Usually, the model will automatically detect the appropriate setting, so there is no need to adjust this setting.}
 
 \item{plot}{if T, \code{\link{plotSimulatedResiduals}} will be directly run after the simulations have terminated}
+
+\item{seed}{the random seed. The default setting, recommended for any type of data analysis, is to reset the random number generator each time the function is run, meaning that you will always get the same result when running the same code. Setting seed = NA avoids the reset. This is only recommended for simulation experiments. See vignette for details.}
 
 \item{...}{parameters to pass to the simulate function of the model object. An important use of this is to specify whether simulations should be conditional on the current random effect estimates. See details.}
 }

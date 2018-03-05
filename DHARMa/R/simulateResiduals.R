@@ -7,6 +7,7 @@
 #' @param integerResponse if T, noise will be added at to the residuals to maintain a uniform expectations for integer responses (such as Poisson or Binomial). Usually, the model will automatically detect the appropriate setting, so there is no need to adjust this setting.
 #' @param plot if T, \code{\link{plotSimulatedResiduals}} will be directly run after the simulations have terminated
 #' @param ... parameters to pass to the simulate function of the model object. An important use of this is to specify whether simulations should be conditional on the current random effect estimates. See details.
+#' @param seed the random seed. The default setting, recommended for any type of data analysis, is to reset the random number generator each time the function is run, meaning that you will always get the same result when running the same code. Setting seed = NA avoids the reset. This is only recommended for simulation experiments. See vignette for details.
 #' @return A list with various objects. The most important are scaledResiduals, which contain the scaled residuals, and scaledResidualsNormal, which are the the scaled residuals transformed to a normal distribution
 #' @details There are a number of important considerations when simulating from a more complex (hierarchical) model. 
 #' 
@@ -32,10 +33,11 @@
 #' @example inst/examples/simulateResidualsHelp.R
 #' @import stats
 #' @export
-simulateResiduals <- function(fittedModel, n = 250, refit = F, integerResponse = NULL, plot = F, ...){
+simulateResiduals <- function(fittedModel, n = 250, refit = F, integerResponse = NULL, plot = F, seed = 123, ...){
+
+  randomState <- getRandomState(seed)
   
   # assertions
-  
   if (n < 2) stop("error in DHARMa::simulateResiduals: n > 1 is required to calculate scaled residuals")
   
   checkModel(fittedModel)
@@ -186,6 +188,7 @@ simulateResiduals <- function(fittedModel, n = 250, refit = F, integerResponse =
   if(plot == T) plotSimulatedResiduals(out)
   
   out$time = proc.time() - ptm
+  out$randomState = randomState
   class(out) = "DHARMa"
   return(out)
 }
