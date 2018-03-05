@@ -1,46 +1,24 @@
 .Rproj.user
 .Rhistory
 .RData
-
-DHARMa_0.0.0.9000.tar.gz
-
-
+.DS_Store
 *_cache/
-
 *.html
-
-DHARMa/vignettes/Demo.html
-
-DHARMa_0.0.0.9000.tgz
-
-DHARMa/Rplots.pdf
-
-DHARMa/vignettes/Demo.html
-
 *.gz
+*.pdf
+*.log
+*.bbl
+*.aux
+*.blg
+*.sty
 
 DHARMa/vignettes/Demo.R
-
-*.pdf
-
-*.log
-
-*.bbl
+DHARMa/vignettes/Demo.html
 
 Publications/Package/RegressionDiagnostics-concordance.tex
-
 Publications/Package/DHARMa.docx
-
 Publications/Package/RegressionDiagnostics.tex
+Publications/Package/cache/
 
 DHARMa.Rcheck/
 
-Publications/Package/cache/
-*.sty
-
-
-.DS_Store
-
-*.aux
-
-*.blg
