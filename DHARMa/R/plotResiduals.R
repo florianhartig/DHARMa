@@ -75,6 +75,7 @@ plotQQunif <- function(simulationOutput, testUniformity = T){
 #' The quantile regression can take some time to calculate, especially for larger datasets. For that reason, quantreg = F can be set to produce a smooth spline instead. 
 #' 
 #' @note if pred is a factor, a boxplot will be plotted instead of a scatter plot. The distribution for each factor level should be uniformly distributed, so the box should go from 0.25 to 0.75, with the median line at 0.5. Again, chance deviations from this will increases when the sample size is smaller. You can run null simulations to test if the deviations you see exceed what you would expect from random variation. If you want to create box plots for categorical predictors (e.g. because you only have a small number of unique numberic predictor values), you can convert your predictor with as.factor(pred)
+#' 
 #' @seealso \code{\link{plotSimulatedResiduals}}, \code{\link{plotQQunif}}
 #' @example inst/examples/plotsHelp.R
 #' @export
@@ -89,12 +90,22 @@ plotResiduals <- function(pred, residuals = NULL, quantreg = NULL, rank = F, asF
     if (is.null(residuals)) stop("DHARMa::plotResiduals - residual can only be NULL if pred is of class DHARMa")
     res = residuals
   }
-  
+
+  # CHECK FOR LENGTH AND NA PROBLEM
+  if(length(pred) != length(res)) {
+    if(any(is.na(pred))){
+      stop("DHARMa::plotResiduals - residuals and predictor do not have the same length. The issue is likely that you have NAs in your predictor that were removed during the model fit. Remove the NA values from your predictor.")      
+    } else {
+      stop("DHARMa::plotResiduals - residuals and predictor do not have the same length. ")        
+    }
+  }
+
   if (asFactor) pred = as.factor(pred)
   
   if(! is.factor(pred)){
     nuniq = length(unique(pred))
     ndata = length(pred)
+    if(nuniq < 10 & ndata / nuniq > 10) message("DHARMa::plotResiduals - data seems to be clustered, consider setting asFactor = T")
     if(nuniq < 10 & ndata / nuniq > 10) message("DHARMa::plotResiduals - data seems to be clustered, consider setting asFactor = T")
     # this rank tranforms the predictor
     if (rank == T) pred = rank(pred, ties.method = "average")
