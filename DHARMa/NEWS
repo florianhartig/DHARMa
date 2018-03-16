@@ -2,9 +2,19 @@ NOTE: for more news about the package, see https://github.com/florianhartig/DHAR
 
 DHARMa 0.1.6
 
+New features
+
+- option to apply rank tranformation of x values in plotResiduals, see https://github.com/florianhartig/DHARMa/issues/44
+- random seed is fixed, random state is recorded
+
 Minor changes
 
 - changed syntax in tests for sptial / temporal autocorrlation - null provides now random. Also, custom distance matrices can be provided to testSpatialAutocorrelation
+- slight changes to plot layout
+
+Bugfixes
+
+- error catching for crashes in plot function https://github.com/florianhartig/DHARMa/issues/42
 
 DHARMa 0.1.5
 

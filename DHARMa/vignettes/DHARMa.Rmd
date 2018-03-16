@@ -224,7 +224,9 @@ The simulateResiduals function will automatically check if the family is integer
 
 DHARMa essentially performs a simulation experiment on the fitted model, to find out if the residuals fit to observation. A simulation means that random numbers are drawn, which meanst that results will be slightly different every time you do this.
 
-In principle this is no problem - each outcome is as likely as the other. However, there the somewhat unitutive behavior that, if you run a residual check several times, the result will always look different and will be sometimes more and sometimes less significant. See this example:
+This can not only be confusing to a user, but it also bears the danger that a user would run the simulation several times and take the result that looks better. Do not do this if you want to interpret your p-values properly - this is essentially multiple testing!
+
+By default, DHARMa therefore fixes the random seed to the same value every time a simulation is run. This means that you will get exactly the same residual plot each time. If you want to avoid this behavior, for example for simulation experiments on DHARMa, use the setting "seed = NA" as above. 
 
 ```{r}
 simulationOutput <- simulateResiduals(fittedModel = fittedModel, seed = NA)
@@ -232,17 +234,14 @@ testUniformity(simulationOutput)
 simulationOutput <- simulateResiduals(fittedModel = fittedModel, seed = NA)
 testUniformity(simulationOutput)
 ```
-
-This can not only be confusing to a user, but it also bears the danger that one runs the plot several times and stops when it looks particularly nice. 
-
-By default, DHARMa fixes therefore the random seed to the same value every time a simulation is run. This means that you will get exactly the same residual plot each time. If you want to avoid this behavior, for example for simulation experiments on DHARMa, use the setting "seed = NA" as above. 
 
 Whether or not you fix the seed, the setting for the random seed and the random state are stored in 
 
-```{r}
+```{r, eval = F}
 simulationOutput$randomState
 ```
 
+If you do not use a seed, the random state will still recorded. If you want to reproduce simualtions for such a run, set the variable .Random.seed by hand, and simulate with seed = NA. 
 
 ## Using external simulations (e.g. from Bayesian software)
 
