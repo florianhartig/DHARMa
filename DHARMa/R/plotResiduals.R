@@ -28,7 +28,7 @@ plotSimulatedResiduals <- function(simulationOutput, ...){
   
   plotQQunif(simulationOutput)
 
-  plotResiduals(pred = simulationOutput, residuals = NULL, xlab = "Predicted value", ylab = "Standardized residual", main = "Residual vs. predicted\n quantile lines should be\n horizontal at 0.25, 0.5, 0.75", ...)
+  plotResiduals(pred = simulationOutput, residuals = NULL, xlab = "Predicted value", ylab = "Standardized residual", main = "Residual vs. predicted\n lines should match", ...)
   
   mtext("DHARMa scaled residual plots", outer = T)
   
@@ -54,7 +54,7 @@ plotQQunif <- function(simulationOutput, testUniformity = T){
   gap::qqunif(simulationOutput$scaledResiduals,pch=2,bty="n", logscale = F, col = "black", cex = 0.6, main = "QQ plot residuals", cex.main = 1)
   if(testUniformity == TRUE){
     temp = testUniformity(simulationOutput)
-    legend("topleft", c(paste("p-value KS test: ", round(temp$p.value, digits = 5)), paste("Deviation ", ifelse(temp$p.value < 0.05, "significant", "n.s."))), text.col = ifelse(temp$p.value < 0.05, "red", "black" ), bty="n")     
+    legend("topleft", c(paste("KS test: p=", round(temp$p.value, digits = 5)), paste("Deviation ", ifelse(temp$p.value < 0.05, "significant", "n.s."))), text.col = ifelse(temp$p.value < 0.05, "red", "black" ), bty="n")     
   }
 }
 
@@ -67,6 +67,7 @@ plotQQunif <- function(simulationOutput, testUniformity = T){
 #' @param residuals residuals values. Leave empty if pred is a DHARMa object
 #' @param quantreg whether to perform a quantile regression on 0.25, 0.5, 0.75 on the residuals. If F, a spline will be created instead. Default NULL chooses T for nObs < 2000, and F otherwise. 
 #' @param rank if T, the values of pred will be transformed to rank. This is useful if the distribution of pred is very skewed
+#' @param asFactor should the predictor variable converted into a factor
 #' @param ... additional arguments to plot
 #' @details For a correctly specified model, we would expect uniformity in y direction when plotting against any predictor.
 #' 
@@ -79,7 +80,7 @@ plotQQunif <- function(simulationOutput, testUniformity = T){
 #' @seealso \code{\link{plotSimulatedResiduals}}, \code{\link{plotQQunif}}
 #' @example inst/examples/plotsHelp.R
 #' @export
-plotResiduals <- function(pred, residuals = NULL, quantreg = NULL, rank = F, asFactor = F, ...){
+plotResiduals <- function(pred, residuals = NULL, quantreg = NULL, rank = FALSE, asFactor = FALSE, ...){
   
   # conversions from DHARMa 
   if(class(pred) == "DHARMa"){
@@ -105,8 +106,8 @@ plotResiduals <- function(pred, residuals = NULL, quantreg = NULL, rank = F, asF
   if(! is.factor(pred)){
     nuniq = length(unique(pred))
     ndata = length(pred)
-    if(nuniq < 10 & ndata / nuniq > 10) message("DHARMa::plotResiduals - data seems to be clustered, consider setting asFactor = T")
-    if(nuniq < 10 & ndata / nuniq > 10) message("DHARMa::plotResiduals - data seems to be clustered, consider setting asFactor = T")
+    if(nuniq < 10 & ndata / nuniq > 10) message("DHARMa::plotResiduals - low number of unique predictor values, consider setting asFactor = T")
+    if(nuniq < 10 & ndata / nuniq > 10) message("DHARMa::plotResiduals - low number of unique predictor values, consider setting asFactor = T")
     # this rank tranforms the predictor
     if (rank == T) pred = rank(pred, ties.method = "average")
     pred = pred / max(pred)    

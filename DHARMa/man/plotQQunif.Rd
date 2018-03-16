@@ -26,7 +26,8 @@ simulationOutput <- simulateResiduals(fittedModel = fittedModel)
 
 ######### main plotting function #############
 
-plot(simulationOutput = simulationOutput)
+plot(simulationOutput)
+# idential to plotSimulatedResiduals
 
 #############  qq plot  ######################
 
@@ -34,17 +35,20 @@ plotQQunif(simulationOutput = simulationOutput)
 
 #############  residual plots  ###############
 
-# a single residual vs. predicte plot, various options
-plotResiduals(simulationOutput, rank = T)
-plotResiduals(simulationOutput, quantreg = F)
+# rank transformation, using a simulationOutput
+plotResiduals(simulationOutput, rank = TRUE)
 
-# residual vs predictors
-plotResiduals(pred = testData$Environment1, residuals = simulationOutput$scaledResiduals, quantreg = F)
-plotResiduals(pred = testData$time, residuals = simulationOutput$scaledResiduals, quantreg = T)
+# residual vs predictors, using explicit values for pred, residual 
+plotResiduals(pred = testData$Environment1, 
+              residuals = simulationOutput$scaledResiduals, quantreg = FALSE)
 
-# factor vs. non factor
-plotResiduals(pred = testData$group, residuals = simulationOutput$scaledResiduals, quantreg = F, asFactor = F)
-plotResiduals(pred = testData$group, residuals = simulationOutput$scaledResiduals, quantreg = F, asFactor = T)
+# if pred is a factor, or asFactor = T, will produce a boxplot
+plotResiduals(pred = testData$group, residuals = simulationOutput$scaledResiduals, 
+              quantreg = FALSE, asFactor = TRUE)
+
+# All these options can also be provided to the main plotting function
+
+plot(simulationOutput, quantreg = FALSE, rank = TRUE)
 
 }
 \seealso{

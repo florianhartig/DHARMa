@@ -11,23 +11,24 @@ NULL
 
 #' Plot simulated residuals
 #' 
-#' @param simulationOutput an object with simulated residuals created by \code{\link{simulateResiduals}}
+#' @param x an object with simulated residuals created by \code{\link{simulateResiduals}}
 #' @param ... optional arguments to pass on to \code{\link{plotSimulatedResiduals}}
 #' @details The function calls \code{\link{plotSimulatedResiduals}} - see details there
 #' @export
-plot.DHARMa <- function(simulationOutput, ...){
-  plotSimulatedResiduals(simulationOutput, ...)
+plot.DHARMa <- function(x, ...){
+  plotSimulatedResiduals(simulationOutput = x, ...)
 }
 
 #' Print simulated residuals
 #' 
-#' @param simulationOutput an object with simulated residuals created by \code{\link{simulateResiduals}}
+#' @param x an object with simulated residuals created by \code{\link{simulateResiduals}}
+#' @param ... optional arguments for compatibility with genetic, no function implemented
 #' @export
-print.DHARMa <- function(simulationOutput){
-  cat(paste("Object of Class DHARMa with simulated residuals based on", simulationOutput$nSim, "simulations with refit =", simulationOutput$refit , ". See ?DHARMa::simulateResiduals for help."), "\n", "\n")
-  if (length(simulationOutput$scaledResiduals) < 20) cat("Scaled residual values:", simulationOutput$scaledResiduals)
+print.DHARMa <- function(x, ...){
+  cat(paste("Object of Class DHARMa with simulated residuals based on", x$nSim, "simulations with refit =", x$refit , ". See ?DHARMa::simulateResiduals for help."), "\n", "\n")
+  if (length(x$scaledResiduals) < 20) cat("Scaled residual values:", x$scaledResiduals)
   else {
-    cat("Scaled residual values:", simulationOutput$scaledResiduals[1:20], "...")
+    cat("Scaled residual values:", x$scaledResiduals[1:20], "...")
   } 
 } 
 

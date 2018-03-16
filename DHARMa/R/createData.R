@@ -129,7 +129,7 @@ createData <- function(replicates=1, sampleSize = 10, intercept = 0, fixedEffect
 
     # add spatialError?
 
-    out[[i]] <- data.frame(ID = 1:sampleSize, observedResponse, predictors, group, time, x, y)
+    out[[i]] <- data.frame(ID = 1:sampleSize, observedResponse, predictors, group = as.factor(group), time, x, y)
   }
   if(length(out) == 1) out = out[[1]]
   return(out)

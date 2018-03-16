@@ -4,12 +4,15 @@
 \alias{testPDistribution}
 \title{Plot distribution of p-values}
 \usage{
-testPDistribution(x, plot = T, title = "p value", ...)
+testPDistribution(x, plot = T,
+  main = "p distribution \\n expected is flat at 1", ...)
 }
 \arguments{
 \item{x}{vector of p values}
 
 \item{plot}{should the values be plottet}
+
+\item{main}{title for the plot}
 
 \item{...}{additional arguments to hist}
 }

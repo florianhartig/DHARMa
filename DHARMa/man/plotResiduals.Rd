@@ -4,8 +4,8 @@
 \alias{plotResiduals}
 \title{Generic residual plot with either spline or quantile regression}
 \usage{
-plotResiduals(pred, residuals = NULL, quantreg = NULL, rank = F,
-  asFactor = F, ...)
+plotResiduals(pred, residuals = NULL, quantreg = NULL, rank = FALSE,
+  asFactor = FALSE, ...)
 }
 \arguments{
 \item{pred}{either the predictor variable against which the residuals should be plotted, or a DHARMa object}
@@ -15,6 +15,8 @@ plotResiduals(pred, residuals = NULL, quantreg = NULL, rank = F,
 \item{quantreg}{whether to perform a quantile regression on 0.25, 0.5, 0.75 on the residuals. If F, a spline will be created instead. Default NULL chooses T for nObs < 2000, and F otherwise.}
 
 \item{rank}{if T, the values of pred will be transformed to rank. This is useful if the distribution of pred is very skewed}
+
+\item{asFactor}{should the predictor variable converted into a factor}
 
 \item{...}{additional arguments to plot}
 }
@@ -40,7 +42,8 @@ simulationOutput <- simulateResiduals(fittedModel = fittedModel)
 
 ######### main plotting function #############
 
-plot(simulationOutput = simulationOutput)
+plot(simulationOutput)
+# idential to plotSimulatedResiduals
 
 #############  qq plot  ######################
 
@@ -48,17 +51,20 @@ plotQQunif(simulationOutput = simulationOutput)
 
 #############  residual plots  ###############
 
-# a single residual vs. predicte plot, various options
-plotResiduals(simulationOutput, rank = T)
-plotResiduals(simulationOutput, quantreg = F)
+# rank transformation, using a simulationOutput
+plotResiduals(simulationOutput, rank = TRUE)
 
-# residual vs predictors
-plotResiduals(pred = testData$Environment1, residuals = simulationOutput$scaledResiduals, quantreg = F)
-plotResiduals(pred = testData$time, residuals = simulationOutput$scaledResiduals, quantreg = T)
+# residual vs predictors, using explicit values for pred, residual 
+plotResiduals(pred = testData$Environment1, 
+              residuals = simulationOutput$scaledResiduals, quantreg = FALSE)
 
-# factor vs. non factor
-plotResiduals(pred = testData$group, residuals = simulationOutput$scaledResiduals, quantreg = F, asFactor = F)
-plotResiduals(pred = testData$group, residuals = simulationOutput$scaledResiduals, quantreg = F, asFactor = T)
+# if pred is a factor, or asFactor = T, will produce a boxplot
+plotResiduals(pred = testData$group, residuals = simulationOutput$scaledResiduals, 
+              quantreg = FALSE, asFactor = TRUE)
+
+# All these options can also be provided to the main plotting function
+
+plot(simulationOutput, quantreg = FALSE, rank = TRUE)
 
 }
 \seealso{
