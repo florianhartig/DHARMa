@@ -19,10 +19,11 @@ runEverything = function(fittedModel, testData, DHARMaData = T){
   plotSimulatedResiduals(simulationOutput = simulationOutput)
   if(DHARMaData == T) plotResiduals(pred = testData$Environment1, simulationOutput$scaledResiduals, quantreg = F)
 
+  testOverdispersion(simulationOutput)
   testUniformity(simulationOutput = simulationOutput)
   testZeroInflation(simulationOutput = simulationOutput)
-  testTemporalAutocorrelation(simulationOutput = simulationOutput, time = runif(length(simulationOutput$scaledResiduals )))
-  testSpatialAutocorrelation(simulationOutput = simulationOutput, x = runif(length(simulationOutput$scaledResiduals )), y =  runif(length(simulationOutput$scaledResiduals )))
+  testTemporalAutocorrelation(simulationOutput = simulationOutput, time = testData$time)
+  testSpatialAutocorrelation(simulationOutput = simulationOutput, x = testData$x, y = testData$y)
   
   # currently not testing the following because of warning
   #testOverdispersion(simulationOutput)
@@ -136,8 +137,6 @@ test_that("gam binomial n/k works",
             runEverything(fittedModel, testData)
           }
 )
-
-
 
 
 test_that("glmer binomial 1/0 works",

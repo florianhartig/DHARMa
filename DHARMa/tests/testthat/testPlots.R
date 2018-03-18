@@ -20,6 +20,30 @@ doPlots <- function(simulationOutput){
   plotResiduals(pred = simulationOutput$fittedPredictedResponse, residuals = simulationOutput$scaledResiduals)
 }
 
+doTests <- function(simulationOutput, testData){
+  testUniformity(simulationOutput = simulationOutput)
+  testZeroInflation(simulationOutput = simulationOutput)
+  testTemporalAutocorrelation(simulationOutput = simulationOutput, time = testData$time)
+  testTemporalAutocorrelation(simulationOutput = simulationOutput)
+  
+  testSpatialAutocorrelation(simulationOutput = simulationOutput, x = testData$x, y = testData$y)
+}
+
+# currently not testing the following because of warning
+#testOverdispersion(simulationOutput)
+#testOverdispersion(simulationOutput, alternative = "both", plot = T)
+
+
+# simulationOutput2 <- simulateResiduals(fittedModel = fittedModel, refit = T, n = 10) # n=10 is very low, set higher for serious tests
+# 
+# print(simulationOutput2)
+# plot(simulationOutput2, quantreg = F)
+# 
+# testOverdispersion(simulationOutput2)
+# testOverdispersion(simulationOutput2, alternative = "both", plot = T)
+# testOverdispersionParametric(fittedModel)
+
+
 
 test_that("Plots work",
           {
