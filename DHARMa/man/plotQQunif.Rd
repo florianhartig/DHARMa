@@ -36,7 +36,7 @@ plotQQunif(simulationOutput = simulationOutput)
 #############  residual plots  ###############
 
 # rank transformation, using a simulationOutput
-plotResiduals(simulationOutput, rank = TRUE)
+plotResiduals(simulationOutput, rank = TRUE, quantreg = FALSE)
 
 # residual vs predictors, using explicit values for pred, residual 
 plotResiduals(pred = testData$Environment1, 

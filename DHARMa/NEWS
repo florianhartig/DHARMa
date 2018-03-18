@@ -5,6 +5,7 @@ DHARMa 0.1.6
 New features
 
 - option to apply rank tranformation of x values in plotResiduals, see https://github.com/florianhartig/DHARMa/issues/44
+- option to convert predictor to factor
 - random seed is fixed, random state is recorded
 
 Minor changes
@@ -15,6 +16,7 @@ Minor changes
 Bugfixes
 
 - error catching for crashes in plot function https://github.com/florianhartig/DHARMa/issues/42
+- bugfix for glmer.nb parametricOverdispersinTest https://github.com/florianhartig/DHARMa/issues/47
 
 DHARMa 0.1.5
 
