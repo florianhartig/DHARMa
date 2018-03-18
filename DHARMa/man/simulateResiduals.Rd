@@ -4,8 +4,8 @@
 \alias{simulateResiduals}
 \title{Create simulated residuals}
 \usage{
-simulateResiduals(fittedModel, n = 250, refit = F, integerResponse = NULL,
-  plot = F, seed = 123, ...)
+simulateResiduals(fittedModel, n = 250, replicates = 1, refit = F,
+  integerResponse = NULL, plot = F, seed = 123, ...)
 }
 \arguments{
 \item{fittedModel}{fitted model object. Supported are generalized linear mixed models from 'lme4' (classes 'lmerMod', 'glmerMod'), generalized additive models ('gam' from 'mgcv', excluding extended families from 'mgcv'), 'glm' (including 'negbin' from 'MASS', but excluding quasi-distributions) and 'lm' model classes.}

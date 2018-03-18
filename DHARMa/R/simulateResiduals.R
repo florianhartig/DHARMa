@@ -33,7 +33,7 @@
 #' @example inst/examples/simulateResidualsHelp.R
 #' @import stats
 #' @export
-simulateResiduals <- function(fittedModel, n = 250, refit = F, integerResponse = NULL, plot = F, seed = 123, ...){
+simulateResiduals <- function(fittedModel, n = 250, replicates = 1, refit = F, integerResponse = NULL, plot = F, seed = 123, ...){
 
   randomState <- getRandomState(seed)
   
@@ -56,11 +56,12 @@ simulateResiduals <- function(fittedModel, n = 250, refit = F, integerResponse =
   out$fittedModel = fittedModel
   out$nObs = nobs(fittedModel)
   out$nSim = n
+  out$replicates = replicates
   out$refit = refit
   out$observedResponse = model.frame(fittedModel)[,1]  
   out$integerResponse = integerResponse
   out$problems = list()
-  out$scaledResiduals = rep(NA, out$nObs)
+  out$scaledResiduals = rep(NA, out$nObs*replicates)
   
   ## following block re-used below, create function for this 
   
@@ -89,99 +90,107 @@ simulateResiduals <- function(fittedModel, n = 250, refit = F, integerResponse =
     out$observedResponse = as.numeric(out$observedResponse) - 1
   } else stop("DHARMa error - simulations resulted in unsupported class - if this happens for a supported model please report an error at https://github.com/florianhartig/DHARMa/issues")
 
-  if (refit == F){
- 
-    for (i in 1:out$nObs){
+  for (j in 1:replicates){
+    
+    ####### refit = F #################
+    if (refit == F){
       
-      if(integerResponse == T){
-        out$scaledResiduals[i] <- ecdf(out$simulatedResponse[i,] + runif(out$nSim, -0.5, 0.5))(out$observedResponse[i] + runif(1, -0.5, 0.5))
-        #This option doesn't work!
-        #out$scaledResiduals[i] <- sum((out$simulatedResponse[i,] + runif(out$nSim, -0.5, 0.5)) < (out$observedResponse[i] + runif(out$nSim, -0.5, 0.5))) / out$nSim  
-      }else{
-        out$scaledResiduals[i] <- ecdf(out$simulatedResponse[i,])(out$observedResponse[i])
-      }
-    }
-    
-  } else {
-    
-    # make sure that we use here the same random effect options as for simulate
-    out$fittedPredictedResponse = predict(fittedModel, type = "response", ... ) # sensible to have re-form set to ~0?
-    
-    # Adding new outputs
-    
-    out$refittedPredictedResponse <- matrix(nrow = out$nObs, ncol = n )  
-    out$refittedFixedEffects <- matrix(nrow = length(out$fittedFixedEffects), ncol = n )  
-    #out$refittedRandomEffects <- matrix(nrow = length(out$fittedRandomEffects), ncol = n )  
-    out$refittedResiduals = matrix(nrow = out$nObs, ncol = n)   
-    out$refittedPearsonResiduals = matrix(nrow = out$nObs, ncol = n)   
-    
-    newData <-model.frame(fittedModel)  
-    
-    for (i in 1:n){
-      
-      simObserved = simulations[[i]]
-      
-      if(is.vector(simObserved)){
-        newData[,1] = simObserved
-      } else if (is.factor(simObserved)){
-        # Hack to make the factor binomial case work
-        newData[,1] = as.numeric(simObserved) - 1
-      } else {
-        # Hack to make the binomial n/k case work
-        newData[[1]] = NULL
-        newData = cbind(simObserved, newData)
-      }
-      
-      #tryCatch()
-      try({
+      for (i in 1:out$nObs){
         
-        # for testing
-        # if (i==3) stop("x")
-        # Note: also set silet = T for production
+        if(integerResponse == T){
+          out$scaledResiduals[i + (j-1)*out$nObs] <- ecdf(out$simulatedResponse[i,] + runif(out$nSim, -0.5, 0.5))(out$observedResponse[i] + runif(1, -0.5, 0.5))
+          #This option doesn't work!
+          #out$scaledResiduals[i] <- sum((out$simulatedResponse[i,] + runif(out$nSim, -0.5, 0.5)) < (out$observedResponse[i] + runif(out$nSim, -0.5, 0.5))) / out$nSim  
+        }else{
+          out$scaledResiduals[i + (j-1)*out$nObs] <- ecdf(out$simulatedResponse[i,])(out$observedResponse[i])
+        }
+      }
+  
+    ####### refit = T #################    
+    } else {
+      
+      # make sure that we use here the same random effect options as for simulate
+      out$fittedPredictedResponse = predict(fittedModel, type = "response", ... ) # sensible to have re-form set to ~0?
+      
+      # Adding new outputs
+      
+      out$refittedPredictedResponse <- matrix(nrow = out$nObs, ncol = n )  
+      out$refittedFixedEffects <- matrix(nrow = length(out$fittedFixedEffects), ncol = n )  
+      #out$refittedRandomEffects <- matrix(nrow = length(out$fittedRandomEffects), ncol = n )  
+      out$refittedResiduals = matrix(nrow = out$nObs, ncol = n)   
+      out$refittedPearsonResiduals = matrix(nrow = out$nObs, ncol = n)   
+      
+      newData <-model.frame(fittedModel)  
+      
+      for (i in 1:n){
         
-      refittedModel = update(fittedModel, data = newData)
-      out$refittedPredictedResponse[,i] = predict(refittedModel, type = "response")
-      
-      if(class(fittedModel)[1] %in% c("glm", "lm", "gam") ){
-        out$refittedFixedEffects[,i]  = coef(refittedModel)
+        simObserved = simulations[[i]]
+        
+        if(is.vector(simObserved)){
+          newData[,1] = simObserved
+        } else if (is.factor(simObserved)){
+          # Hack to make the factor binomial case work
+          newData[,1] = as.numeric(simObserved) - 1
+        } else {
+          # Hack to make the binomial n/k case work
+          newData[[1]] = NULL
+          newData = cbind(simObserved, newData)
+        }
+        
+        #tryCatch()
+        try({
+          
+          # for testing
+          # if (i==3) stop("x")
+          # Note: also set silet = T for production
+          
+          refittedModel = update(fittedModel, data = newData)
+          out$refittedPredictedResponse[,i] = predict(refittedModel, type = "response")
+          
+          if(class(fittedModel)[1] %in% c("glm", "lm", "gam") ){
+            out$refittedFixedEffects[,i]  = coef(refittedModel)
+          }
+          
+          if(class(fittedModel)[1] %in% c("glmerMod", "lmerMod")){
+            out$refittedFixedEffects[,i]  = lme4::fixef(refittedModel)
+            #out$fittedRandomEffects = ranef(fittedModel) ## returns random effects
+          }
+          
+          out$refittedResiduals[,i] = residuals(refittedModel, type = "response")
+          out$refittedPearsonResiduals[,i] = residuals(refittedModel, type = "pearson")
+          #out$refittedRandomEffects[,i]  = ranef(refittedModel)
+        }, silent = T)
       }
       
-      if(class(fittedModel)[1] %in% c("glmerMod", "lmerMod")){
-        out$refittedFixedEffects[,i]  = lme4::fixef(refittedModel)
-        #out$fittedRandomEffects = ranef(fittedModel) ## returns random effects
+      if(anyNA(out$refittedResiduals)) warning("DHARMa::simulateResiduals warning: on refit = T, at least one of the refitted models produced an error. Inspect the refitted model values. Results may not be reliable.")
+      
+      ## check for convergece problems
+      
+      dup = sum(duplicated(out$refittedFixedEffects, MARGIN = 2))
+      if (dup > 0){
+        if (dup < n/3){
+          warning(paste("There were", dup, "of", n ,"duplicate parameter estimates in the refitted models. This may hint towards a problem with optimizer convergence in the fitted models. Results may not be reliable. The suggested action is to not use the refitting procedure, and diagnose with tools available for the normal (not refitted) simulated residuals. If you absolutely require the refitting procedure, try changing tolerance / iterations in the optimizer settings."))
+        } else warning(paste("There were", dup, "of", n ,"duplicate parameter estimates in the refitted models. This may hint towards a problem with optimizer convergence in the fitted models. Results are likely not reliable. The suggested action is to not use the refitting procedure, and diagnose with tools available for the normal (not refitted) simulated residuals. If you absolutely require the refitting procedure, try changing tolerance / iterations in the optimizer settings."))
+        out$problems[[length(out$problems)+ 1]] = "error in refit"
+      } 
+      
+      
+      for (i in 1:out$nObs){
+        
+        if(integerResponse == T){
+          out$scaledResiduals[i + (j-1)*out$nObs] <- ecdf(out$refittedResiduals[i,] + runif(out$nSim, -0.5, 0.5))(out$fittedResiduals[i] + runif(1, -0.5, 0.5)) 
+          #This option doesn't work!
+          #out$scaledResiduals[i] <- sum((out$refittedResiduals[i,] + runif(out$nSim, -0.5, 0.5)) < (out$fittedResiduals[i] + runif(out$nSim, -0.5, 0.5))) / out$nSim
+        }else{
+          out$scaledResiduals[i + (j-1)*out$nObs] <- ecdf(out$refittedResiduals[i,])(out$fittedResiduals[i])
+        }
       }
       
-      out$refittedResiduals[,i] = residuals(refittedModel, type = "response")
-      out$refittedPearsonResiduals[,i] = residuals(refittedModel, type = "pearson")
-      #out$refittedRandomEffects[,i]  = ranef(refittedModel)
-      }, silent = T)
     }
-
-    if(anyNA(out$refittedResiduals)) warning("DHARMa::simulateResiduals warning: on refit = T, at least one of the refitted models produced an error. Inspect the refitted model values. Results may not be reliable.")
-    
-    ## check for convergece problems
-    
-    dup = sum(duplicated(out$refittedFixedEffects, MARGIN = 2))
-    if (dup > 0){
-      if (dup < n/3){
-        warning(paste("There were", dup, "of", n ,"duplicate parameter estimates in the refitted models. This may hint towards a problem with optimizer convergence in the fitted models. Results may not be reliable. The suggested action is to not use the refitting procedure, and diagnose with tools available for the normal (not refitted) simulated residuals. If you absolutely require the refitting procedure, try changing tolerance / iterations in the optimizer settings."))
-      } else warning(paste("There were", dup, "of", n ,"duplicate parameter estimates in the refitted models. This may hint towards a problem with optimizer convergence in the fitted models. Results are likely not reliable. The suggested action is to not use the refitting procedure, and diagnose with tools available for the normal (not refitted) simulated residuals. If you absolutely require the refitting procedure, try changing tolerance / iterations in the optimizer settings."))
-      out$problems[[length(out$problems)+ 1]] = "error in refit"
-    } 
-    
-
-    for (i in 1:out$nObs){
-    
-      if(integerResponse == T){
-        out$scaledResiduals[i] <- ecdf(out$refittedResiduals[i,] + runif(out$nSim, -0.5, 0.5))(out$fittedResiduals[i] + runif(1, -0.5, 0.5)) 
-        #This option doesn't work!
-        #out$scaledResiduals[i] <- sum((out$refittedResiduals[i,] + runif(out$nSim, -0.5, 0.5)) < (out$fittedResiduals[i] + runif(out$nSim, -0.5, 0.5))) / out$nSim
-      }else{
-        out$scaledResiduals[i] <- ecdf(out$refittedResiduals[i,])(out$fittedResiduals[i])
-      }
-    }
-
+    ####### End simu #################  
   }
+  ####### End replicates #################  
+  
   
   out$scaledResidualsNormal = qnorm(out$scaledResiduals + 0.00 )
 

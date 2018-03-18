@@ -1,0 +1,46 @@
+---
+title: "Binomial"
+author: "Florian Hartig"
+date: "3/17/2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(DHARMa)
+```
+
+
+```{r}
+testData = createData(sampleSize = 20, intercept = 0, overdispersion = 5, family = binomial())
+
+fit = glm(observedResponse ~ Environment1,  data = testData, family = binomial)
+simulationOutput = simulateResiduals(fit)
+plot(simulationOutput)
+
+```
+
+```{r}
+testData = createData(sampleSize = 20, intercept = 0, overdispersion = 5, family = binomial())
+fit = glm(observedResponse ~ Environment1,  data = testData, family = binomial)
+
+x = rep(predict(fit), 10)
+y = NULL
+for(i in 1:10) y = c(y, simulationOutput = simulateResiduals(fit, seed = NA)$scaledResiduals)
+
+plotResiduals(x, y)
+```
+
+
+
+```{r}
+testData = createData(sampleSize = 20, intercept = 0, overdispersion = 5, family = binomial())
+
+fit = glm(observedResponse ~ Environment1,  data = testData, family = binomial)
+simulationOutput = simulateResiduals(fit, replicates = 100, seed = NA)
+test(simulationOutput)
+
+```

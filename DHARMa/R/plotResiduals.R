@@ -86,7 +86,7 @@ plotResiduals <- function(pred, residuals = NULL, quantreg = NULL, rank = FALSE,
   if(class(pred) == "DHARMa"){
     if (! is.null(residuals)) stop("DHARMa::plotResiduals - can't provide both a DHARMa object to pred and additional residuals")
     res = pred$scaledResiduals
-    pred = pred$fittedPredictedResponse
+    pred = rep(pred$fittedPredictedResponse, pred$replicates)
   } else {
     if (is.null(residuals)) stop("DHARMa::plotResiduals - residual can only be NULL if pred is of class DHARMa")
     res = residuals
