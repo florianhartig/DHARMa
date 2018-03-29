@@ -1,0 +1,210 @@
+---
+title: "glmmTMB"
+author: "Florian Hartig"
+date: "3/27/2018"
+output: 
+  html_document: 
+    keep_md: yes
+    toc: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Testing general package behavior
+
+```{r}
+library(DHARMa)
+library(glmmTMB)
+
+m1 <- glmmTMB(count~ mined + (1|site), 
+               zi=~mined, 
+               family=poisson, data=Salamanders)
+summary(m1)
+class(m1)
+predict(m1)
+fixef(m1)
+ranef(m1)
+simulate(m1)
+```
+
+# Problems 
+
+## Binomial
+
+This crashes my R (memory allocation issue) on the current CRAN version (27.3.18). Development version on GitHub fixes the problem  
+
+```{r, eval = F}
+library(glmmTMB)
+data(cbpp, package="lme4")
+system.info()
+m <- glmmTMB(cbind(incidence, size-incidence) ~ period + (1 | herd), data=cbpp, family=binomial)
+summary(m)
+predict(m)
+```
+
+
+## with ~reform in pred / simulate
+
+Currently, all predictions and simulations are conditional on REs, problematic for some of the residual tests
+
+```{r}
+m1 <- glmmTMB(count~ mined + (1|site), family=poisson, data=Salamanders)
+summary(m1)
+
+#pred = predict(m1, re.form = 0)
+pred = predict(m1)
+
+hist(pred, breaks = 20)
+
+x = fixef(m1)
+x$cond[1] + x$cond[2]*as.numeric(Salamanders$mined)
+
+res = simulateResiduals(m1)
+plot(res)
+```
+
+
+# Test cases 
+
+## Test 1 - simple poisson
+
+```{r}
+m <- glmmTMB(count~ mined, family=poisson, data=Salamanders)
+summary(m)
+
+res = simulateResiduals(m)
+plot(res)
+
+### creating new data based on the fitted models. Residuals should now be perfect
+
+Salamanders$count2 = simulate(m)$sim_1
+
+m <- glmmTMB(count2~ mined, family=poisson, data=Salamanders)
+
+res = simulateResiduals(m)
+plot(res, asFactor = T)
+```
+
+
+## Test 2 - poisson + RE
+
+```{r}
+m <- glmmTMB(count~ mined + (1|site), family=poisson, data=Salamanders)
+summary(m)
+
+res = simulateResiduals(m)
+plot(res)
+
+### creating new data based on the fitted models. Residuals should now be perfect
+
+Salamanders$count2 = simulate(m)$sim_1
+
+m <- glmmTMB(count2~ mined + (1|site), family=poisson, data=Salamanders)
+
+res = simulateResiduals(m)
+plot(res)
+```
+
+Fit is still fine, but note the pattern in the residual vs. predicted, which is caused by the reform problem (REs are included in the predictions)
+
+If we calculate unconditional REs by hand, pattern disappears
+
+```{r}
+x = fixef(m)
+pred = x$cond[1] + x$cond[2]*as.numeric(Salamanders$mined)
+plotResiduals(pred, res$scaledResiduals, asFactor = T)
+```
+
+
+## Test 3 - Zero-inflated negative binomial model
+
+no RE to test ZI only
+
+```{r}
+m <- glmmTMB(count~1 , zi=~1, family=nbinom1, Salamanders)
+summary(m)
+
+res = simulateResiduals(m)
+plot(res, asFactor = T)
+
+### creating new data based on the fitted models. Residuals should now be perfect
+
+Salamanders$count2 = simulate(m)$sim_1
+m <- glmmTMB(count2~1 , zi=~1, family=nbinom1, Salamanders)
+summary(m)
+
+res = simulateResiduals(m)
+plot(res, asFactor = T)
+```
+
+This doesn't work at all
+
+Reasons seems to be that fit-refit is not stable, i.e. producing new data based on the fitted model, and refitting doesn't produce the same parameter estimates ... repeate the following loop
+
+
+```{r}
+Salamanders$count2 = simulate(m)$sim_1
+m <- glmmTMB(count2~1 , zi=~1, family=nbinom1, Salamanders)
+summary(m)
+
+res = simulateResiduals(m)
+plot(res, asFactor = T)
+```
+
+
+## Test 4 - Binomial model
+
+binomial require a few adjustments, because the simulate function in glmmTMB doesn't behave like glm / glmer, which returns lists of for the n/k case, and a vector instead
+
+standard binomial with DHARMa test data
+
+```{r}
+testData = createData(sampleSize = 100, fixedEffects = 2, family = binomial(), randomEffectVariance = 0)
+
+m <- glmmTMB(observedResponse ~ Environment1 , data=testData, family=binomial)
+res = simulateResiduals(m)
+plot(res)
+```
+
+with a missing predictor
+
+```{r}
+testData = createData(sampleSize = 100, fixedEffects = 2, family = binomial(), randomEffectVariance = 0)
+
+m <- glmmTMB(observedResponse ~ 1 , data=testData, family=binomial)
+res = simulateResiduals(m)
+plot(res)
+plotResiduals(testData$Environment1, res$scaledResiduals)
+```
+
+n/k example from the help
+
+```{r}
+data(cbpp, package="lme4")
+
+newDat = cbpp
+newDat$response = cbind(newDat$incidence, newDat$size-newDat$incidence)
+m <- glmmTMB(response ~ period , data=newDat, family=binomial)
+m
+
+res = simulateResiduals(m)
+plot(res)
+
+### creating new data based on the fitted models. Residuals should now be perfect
+
+# R problem - sometimes newDat$newResponse is updated, and sometimes not ... I have no idea why
+
+newDat$newResponse = as.matrix(simulate(m))
+newDat$newResponse
+m2 <- glmmTMB(newResponse ~ period , data=newDat, family=binomial)
+m2
+
+res = simulateResiduals(m2)
+plot(res)
+```
+
+
+
+

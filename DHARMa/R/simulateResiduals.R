@@ -35,59 +35,94 @@
 #' @export
 simulateResiduals <- function(fittedModel, n = 250, refit = F, integerResponse = NULL, plot = F, seed = 123, ...){
 
-  randomState <- getRandomState(seed)
+  ####################################
+  # general assertions and startup calculations
   
-  # assertions
   if (n < 2) stop("error in DHARMa::simulateResiduals: n > 1 is required to calculate scaled residuals")
-  
-  checkModel(fittedModel)
-  
+  DHARMa:::checkModel(fittedModel)  
+  randomState <- DHARMa:::getRandomState(seed)
   ptm <- proc.time() 
-  
-  family = family(fittedModel)
-  
-  if(is.null(integerResponse)){
-    if (family$family %in% c("binomial", "poisson", "quasibinomial", "quasipoisson", "Negative Binom") | grepl("Negative Binomial",family$family) ) integerResponse = T
-    else integerResponse = F
-  }
+
+  ####################################
+  # extract model info
   
   out = list()
   
+  family = family(fittedModel)
+  if(is.null(integerResponse)){
+    if (family$family %in% c("binomial", "poisson", "quasibinomial", "quasipoisson", "Negative Binom", "nbinom2", "nbinom1", "genpois", "compois", "truncated_poisson", "truncated_nbinom2", "truncated_nbinom1", "betabinomial") | grepl("Negative Binomial",family$family) ) integerResponse = T
+    else integerResponse = F
+  }
+  
   out$fittedModel = fittedModel
+  out$modelClass = class(fittedModel)[1]
+  
   out$nObs = nobs(fittedModel)
   out$nSim = n
   out$refit = refit
-  out$observedResponse = model.frame(fittedModel)[,1]  
+  out$observedResponse = model.frame(fittedModel)[,1] 
+  
+  # TODO - check if that works 
+  nKcase = is.matrix(out$observedResponse)
+  if(nKcase){
+    if(family != "binomial") securityAssertionWarning("nKcase")
+    if(! (ncol(out$observedResponse)==2)) securityAssertionWarning("nKcase")
+    out$observedResponse = out$observedResponse[,1]
+  }
+
+
   out$integerResponse = integerResponse
   out$problems = list()
   out$scaledResiduals = rep(NA, out$nObs)
+
   
   ## following block re-used below, create function for this 
+
+  ##### calculating predictions #####
+  # re-form should be set to ~0 to avoid spurious residual patterns, see https://github.com/florianhartig/DHARMa/issues/43
+    
+  if(out$modelClass %in% c("glmmTMB")){
+    warning("Due to limitations in the current implementation of glmmTMB, model predictions are calculated conditional on the fitted random effects. This can sometimes create assymetries when plotting residual vs. predicted, see https://github.com/florianhartig/DHARMa/issues/43. If you see assymetries similar to what is shown in this issue, but residuals otherwise look fine, you should probably calculate a model prediction by hand with fixed effects only, and do the plot for those.")
+    out$fittedPredictedResponse = predict(fittedModel, type = "response") 
+  }else{
+    out$fittedPredictedResponse = predict(fittedModel, type = "response", re.form = ~0) 
+  }
   
-  out$fittedPredictedResponse = predict(fittedModel, type = "response", re.form = ~0) # sensible to have re-form set to ~0?
-  
-  if(class(fittedModel)[1] %in% c("glm", "lm", "gam") ){
+  if(out$modelClass %in% c("glm", "lm", "gam") ){
     out$fittedFixedEffects = coef(fittedModel)
   }
   
-  if(class(fittedModel)[1] %in% c("glmerMod", "lmerMod")){
+  if(out$modelClass %in% c("glmerMod", "lmerMod", "glmer", "glmmTMB")){
     out$fittedFixedEffects = lme4::fixef(fittedModel) ## returns fixed effects 
     out$fittedRandomEffects = lme4::ranef(fittedModel) ## returns random effects
   }
 
   out$fittedResiduals = residuals(fittedModel, type = "response")
   
+  ######## SIMULATIONS ##################
+  
   simulations = simulate(fittedModel, nsim = n, ...)
- 
-  if(is.vector(simulations[[1]])){
-    out$simulatedResponse = data.matrix(simulations)
-  } else if (is.matrix(simulations[[1]])){
-    out$simulatedResponse = as.matrix(simulations)[,seq(1, (2*n), by = 2)]
-  } else if(is.factor(simulations[[1]])){
-    if(nlevels(simulations[[1]]) != 2) warning("The fitted model has a factorial response with number of levels not equal to 2 - there is currently no sensible application in DHARMa that would lead to this situation. Likely, you are trying something that doesn't work.")
-    out$simulatedResponse = data.matrix(simulations) - 1
-    out$observedResponse = as.numeric(out$observedResponse) - 1
-  } else stop("DHARMa error - simulations resulted in unsupported class - if this happens for a supported model please report an error at https://github.com/florianhartig/DHARMa/issues")
+  
+  if(out$modelClass == "glmmTMB"){
+    if(ncol(simulations) == 2*n){
+      out$simulatedResponse = simulations[,seq(1, (2*n), by = 2)]
+    }else{
+      
+    }
+  }else{
+    if(is.vector(simulations[[1]])){
+      out$simulatedResponse = data.matrix(simulations)
+    } else if (is.matrix(simulations[[1]])){ 
+      # this is for the k/n binomial case
+      out$simulatedResponse = as.matrix(simulations)[,seq(1, (2*n), by = 2)]
+    } else if(is.factor(simulations[[1]])){
+      if(nlevels(simulations[[1]]) != 2) warning("The fitted model has a factorial response with number of levels not equal to 2 - there is currently no sensible application in DHARMa that would lead to this situation. Likely, you are trying something that doesn't work.")
+      out$simulatedResponse = data.matrix(simulations) - 1
+      out$observedResponse = as.numeric(out$observedResponse) - 1
+    } else stop("DHARMa error - simulations resulted in unsupported class - if this happens for a supported model please report an error at https://github.com/florianhartig/DHARMa/issues")
+  }
+  
+  ######## QUANTILE RESIDUAL CALCULATIONS ################## 
 
   if (refit == F){
  
@@ -193,8 +228,7 @@ simulateResiduals <- function(fittedModel, n = 250, refit = F, integerResponse =
   return(out)
 }
 
-getPossibleModels<-function()c("lm", "glm", "negbin", "lmerMod", "glmerMod", "gam") 
-
+getPossibleModels<-function()c("lm", "glm", "negbin", "lmerMod", "glmerMod", "gam", "glmmTMB") 
 
 checkModel <- function(fittedModel){
   if(!(class(fittedModel)[1] %in% getPossibleModels())) warning("DHARMa: fittedModel not in class of supported models. Absolutely no guarantee that this will work!")
