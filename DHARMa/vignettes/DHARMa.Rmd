@@ -243,21 +243,6 @@ simulationOutput$randomState
 
 If you do not use a seed, the random state will still recorded. If you want to reproduce simualtions for such a run, set the variable .Random.seed by hand, and simulate with seed = NA. 
 
-## Using external simulations (e.g. from Bayesian software)
-
-As mentioned earlier, the quantile residuals defined in DHARMa are the frequentist equivalent of the so-called "Bayesian p-values", i.e. residuals created from posterior predictive simulations in a Bayesian analysis.
-
-To make the plots and tests in DHARMa also available for Bayesian analysis, DHARMa provides the option to convert externally created posterior predictive simulations into a DHARMa object
-
-
-```{r, eval = F}
-res = createDHARMa(scaledResiduals = posteriorPredictiveSimulations, simulatedResponse = medianPosteriorPredictions, observedResponse = observations, integerResponse = ?)
-```
-
-What is provided as simulatedResponse is up to the user, but median posterior predictions seem most sensible to me. After the conversion, all DHARMa plots can be used, however, note that Bayesian p-values != DHARMA residuals, because in the Bayesian analysis, parameters are varied as well. 
-
-**Important**: as DHARMa doesn't know the distribution fitted model, it is vital to specify the integerResponse option by hand (see above / ?simulateResiduals for details). 
-
 ## Reproducibility notes
 
 If you running a stochastic algorithms such as the code in DHARMa, you should always set or record your random seed to make your final results reproducible (otherwise, results will change slightly every time you run the code). Do this via
@@ -517,6 +502,30 @@ A big advantage of the simulations is that you can test any problem that you thi
 
 You think your random effect estimates look weird? Run the model with the refit = T option and see how typical random effect estimates look for your problem.
 
+# Supported packages 
+
+## lm and glm
+
+## lme4
+
+## glmmTMB
+
+## Unsupported packages
+
+## Importing external simulations (e.g. from Bayesian software or unsupported packages)
+
+As mentioned earlier, the quantile residuals defined in DHARMa are the frequentist equivalent of the so-called "Bayesian p-values", i.e. residuals created from posterior predictive simulations in a Bayesian analysis.
+
+To make the plots and tests in DHARMa also available for Bayesian analysis, DHARMa provides the option to convert externally created posterior predictive simulations into a DHARMa object
+
+
+```{r, eval = F}
+res = createDHARMa(scaledResiduals = posteriorPredictiveSimulations, simulatedResponse = medianPosteriorPredictions, observedResponse = observations, integerResponse = ?)
+```
+
+What is provided as simulatedResponse is up to the user, but median posterior predictions seem most sensible to me. After the conversion, all DHARMa plots can be used, however, note that Bayesian p-values != DHARMA residuals, because in the Bayesian analysis, parameters are varied as well. 
+
+**Important**: as DHARMa doesn't know the distribution fitted model, it is vital to specify the integerResponse option by hand (see above / ?simulateResiduals for details). 
 
 # Real-world examples
 
