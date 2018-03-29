@@ -1,0 +1,27 @@
+---
+title: "Binomial"
+author: "Florian Hartig"
+date: "3/28/2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+
+```{r}
+testData = createData(sampleSize = 500, overdispersion = 0, fixedEffects = 2, family = binomial(), randomEffectVariance = 0)
+fittedModel <- glm(observedResponse ~ 1, family = "binomial", data = testData)
+
+simulationOutput <- simulateResiduals(fittedModel = fittedModel)
+
+plotResiduals(testData$Environment1, simulationOutput$scaledResiduals)
+
+plotSimulatedResiduals(simulationOutput = simulationOutput, quantreg = FALSE)
+```
+
+
+
+
