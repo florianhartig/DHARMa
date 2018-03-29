@@ -4,16 +4,14 @@
 \alias{createData}
 \title{Simulate test data}
 \usage{
-createData(replicates = 1, sampleSize = 10, intercept = 0,
-  fixedEffects = 1, quadraticFixedEffects = NULL, numGroups = 10,
-  randomEffectVariance = 1, overdispersion = 0, family = poisson(),
-  scale = 1, cor = 0, roundPoissonVariance = NULL, pZeroInflation = 0,
-  binomialTrials = 1, temporalAutocorrelation = 0,
-  spatialAutocorrelation = 0, factorResponse = F)
+createData(sampleSize = 10, intercept = 0, fixedEffects = 1,
+  quadraticFixedEffects = NULL, numGroups = 10, randomEffectVariance = 1,
+  overdispersion = 0, family = poisson(), scale = 1, cor = 0,
+  roundPoissonVariance = NULL, pZeroInflation = 0, binomialTrials = 1,
+  temporalAutocorrelation = 0, spatialAutocorrelation = 0,
+  factorResponse = F, replicates = 1)
 }
 \arguments{
-\item{replicates}{number of datasets to create}
-
 \item{sampleSize}{sample size of the dataset}
 
 \item{intercept}{intercept (linear scale)}
@@ -45,6 +43,8 @@ createData(replicates = 1, sampleSize = 10, intercept = 0,
 \item{spatialAutocorrelation}{strength of spatial Autocorrelation}
 
 \item{factorResponse}{should the response be transformed to a factor (inteded to be used for 0/1 data)}
+
+\item{replicates}{number of datasets to create}
 }
 \description{
 This function creates synthetic dataset with various problems such as overdispersion, zero-inflation, etc.
