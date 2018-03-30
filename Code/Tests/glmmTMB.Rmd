@@ -1,5 +1,5 @@
 ---
-title: "glmmTMB"
+title: "Tests / Examples using glmmTMB with DHARMa"
 author: "Florian Hartig"
 date: "3/27/2018"
 output: 
@@ -9,73 +9,60 @@ output:
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE, cache = T)
 ```
-
-# Testing general package behavior
 
 ```{r}
 library(DHARMa)
 library(glmmTMB)
-
-m1 <- glmmTMB(count~ mined + (1|site), 
-               zi=~mined, 
-               family=poisson, data=Salamanders)
-summary(m1)
-class(m1)
-predict(m1)
-fixef(m1)
-ranef(m1)
-simulate(m1)
 ```
 
-# Problems 
+# Testing general package behavior / general problems
 
-## Binomial
+## Problems with binomial
 
-This crashes my R (memory allocation issue) on the current CRAN version (27.3.18). Development version on GitHub fixes the problem  
+This crashes my R (memory allocation issue) on the current CRAN version (27.3.18). Installing the development version on GitHub fixes the problem. sessionInfo() at the end of the document
 
 ```{r, eval = F}
 library(glmmTMB)
 data(cbpp, package="lme4")
-system.info()
 m <- glmmTMB(cbind(incidence, size-incidence) ~ period + (1 | herd), data=cbpp, family=binomial)
 summary(m)
 predict(m)
 ```
 
+## Residual problems
+
+* residual function doesn't work with factor response (bug)
+* pearson residuals don't work with zi terms (not implemented)
 
 ## with ~reform in pred / simulate
 
-Currently, all predictions and simulations are conditional on REs, problematic for some of the residual tests
+Currently, glmmTMB doesn't support the reform argument. Also, 
+
+* predict() is conditional on all random effects, corresponding to lme4 re.form = NULL
+* simulate() is unconditional, i.e. all random effects will be resimulated, corresponding to lme4 re.form = 0
+
+all predictions and simulations are conditional on REs, problematic for some of the residual tests, see https://github.com/florianhartig/DHARMa/issues/43
 
 ```{r}
 m1 <- glmmTMB(count~ mined + (1|site), family=poisson, data=Salamanders)
-summary(m1)
 
 #pred = predict(m1, re.form = 0)
 pred = predict(m1)
-
-hist(pred, breaks = 20)
-
-x = fixef(m1)
-x$cond[1] + x$cond[2]*as.numeric(Salamanders$mined)
-
-res = simulateResiduals(m1)
-plot(res)
 ```
 
 
-# Test cases 
+# DHARMa with glmmTMB example cases 
 
-## Test 1 - simple poisson
+## Test 1 - Simple poisson model
 
 ```{r}
 m <- glmmTMB(count~ mined, family=poisson, data=Salamanders)
 summary(m)
 
 res = simulateResiduals(m)
-plot(res)
+plot(res, asFactor = T)
 
 ### creating new data based on the fitted models. Residuals should now be perfect
 
@@ -88,23 +75,23 @@ plot(res, asFactor = T)
 ```
 
 
-## Test 2 - poisson + RE
+## Test 2 - Poisson + RE
 
 ```{r}
 m <- glmmTMB(count~ mined + (1|site), family=poisson, data=Salamanders)
 summary(m)
 
 res = simulateResiduals(m)
-plot(res)
+plot(res, rank = T)
 
-### creating new data based on the fitted models. Residuals should now be perfect
+### creating new data based on the fitted models. Residuals should now be perfect, except for the reform pattern
 
 Salamanders$count2 = simulate(m)$sim_1
 
 m <- glmmTMB(count2~ mined + (1|site), family=poisson, data=Salamanders)
 
 res = simulateResiduals(m)
-plot(res)
+plot(res, rank = T)
 ```
 
 Fit is still fine, but note the pattern in the residual vs. predicted, which is caused by the reform problem (REs are included in the predictions)
@@ -118,45 +105,10 @@ plotResiduals(pred, res$scaledResiduals, asFactor = T)
 ```
 
 
-## Test 3 - Zero-inflated negative binomial model
 
-no RE to test ZI only
+## Test 3 - Binomial models
 
-```{r}
-m <- glmmTMB(count~1 , zi=~1, family=nbinom1, Salamanders)
-summary(m)
-
-res = simulateResiduals(m)
-plot(res, asFactor = T)
-
-### creating new data based on the fitted models. Residuals should now be perfect
-
-Salamanders$count2 = simulate(m)$sim_1
-m <- glmmTMB(count2~1 , zi=~1, family=nbinom1, Salamanders)
-summary(m)
-
-res = simulateResiduals(m)
-plot(res, asFactor = T)
-```
-
-This doesn't work at all
-
-Reasons seems to be that fit-refit is not stable, i.e. producing new data based on the fitted model, and refitting doesn't produce the same parameter estimates ... repeate the following loop
-
-
-```{r}
-Salamanders$count2 = simulate(m)$sim_1
-m <- glmmTMB(count2~1 , zi=~1, family=nbinom1, Salamanders)
-summary(m)
-
-res = simulateResiduals(m)
-plot(res, asFactor = T)
-```
-
-
-## Test 4 - Binomial model
-
-binomial require a few adjustments, because the simulate function in glmmTMB doesn't behave like glm / glmer, which returns lists of for the n/k case, and a vector instead
+Binomial required a few adjustments, because the simulate function in glmmTMB doesn't behave like glm / glmer, which returns lists of for the n/k case, and a vector instead
 
 standard binomial with DHARMa test data
 
@@ -190,7 +142,7 @@ m <- glmmTMB(response ~ period , data=newDat, family=binomial)
 m
 
 res = simulateResiduals(m)
-plot(res)
+plot(res, rank = T)
 
 ### creating new data based on the fitted models. Residuals should now be perfect
 
@@ -202,9 +154,56 @@ m2 <- glmmTMB(newResponse ~ period , data=newDat, family=binomial)
 m2
 
 res = simulateResiduals(m2)
-plot(res)
+plot(res, rank = T)
 ```
 
 
+## Test 4 - Zero-inflated negative binomial models
+
+no RE to test ZI intercept only
+
+```{r}
+m <- glmmTMB(count~1 , zi=~1, family=nbinom1, Salamanders)
+summary(m)
+
+res = simulateResiduals(m)
+plot(res, asFactor = T)
+
+### creating new data based on the fitted models. Residuals should now be perfect
+
+Salamanders$count2 = simulate(m)$sim_1
+m <- glmmTMB(count2~1 , zi=~1, family=nbinom1, Salamanders)
+summary(m)
+
+res = simulateResiduals(m)
+plot(res, asFactor = T)
+```
+
+Example from the help
+
+```{r}
+m <- glmmTMB(count~spp + mined + (1|site), zi=~spp + mined, family=nbinom2, Salamanders)
+summary(m)
+
+res = simulateResiduals(m)
+plot(res, rank = T)
+
+### creating new data based on the fitted models. Residuals should now be perfect
+
+Salamanders$count2 = simulate(m)$sim_1
+m <- glmmTMB(count~spp + mined + (1|site), zi=~spp + mined, family=nbinom2, Salamanders)
+summary(m)
+
+res = simulateResiduals(m)
+plot(res, rank = T)
+```
+
+There is still a slight correlation in both cases - I assume that this is again a problem of https://github.com/florianhartig/DHARMa/issues/43
+
+# Reproducibility info 
+
+```{r}
+sessionInfo()
+```
 
 

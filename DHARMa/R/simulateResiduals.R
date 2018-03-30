@@ -35,16 +35,14 @@
 #' @export
 simulateResiduals <- function(fittedModel, n = 250, refit = F, integerResponse = NULL, plot = F, seed = 123, ...){
 
-  ####################################
-  # general assertions and startup calculations
+  ######## general assertions and startup calculations ##########
   
   if (n < 2) stop("error in DHARMa::simulateResiduals: n > 1 is required to calculate scaled residuals")
   DHARMa:::checkModel(fittedModel)  
   randomState <- DHARMa:::getRandomState(seed)
   ptm <- proc.time() 
 
-  ####################################
-  # extract model info
+  ####### extract model info ############
   
   out = list()
   
@@ -65,20 +63,19 @@ simulateResiduals <- function(fittedModel, n = 250, refit = F, integerResponse =
   # TODO - check if that works 
   nKcase = is.matrix(out$observedResponse)
   if(nKcase){
-    if(family != "binomial") securityAssertionWarning("nKcase")
-    if(! (ncol(out$observedResponse)==2)) securityAssertionWarning("nKcase")
+    if(family$family != "binomial") securityAssertion("nKcase")
+    if(! (ncol(out$observedResponse)==2)) securityAssertion("nKcase")
     out$observedResponse = out$observedResponse[,1]
   }
-
 
   out$integerResponse = integerResponse
   out$problems = list()
   out$scaledResiduals = rep(NA, out$nObs)
 
-  
   ## following block re-used below, create function for this 
 
   ##### calculating predictions #####
+  
   # re-form should be set to ~0 to avoid spurious residual patterns, see https://github.com/florianhartig/DHARMa/issues/43
     
   if(out$modelClass %in% c("glmmTMB")){
@@ -88,18 +85,10 @@ simulateResiduals <- function(fittedModel, n = 250, refit = F, integerResponse =
     out$fittedPredictedResponse = predict(fittedModel, type = "response", re.form = ~0) 
   }
   
-  if(out$modelClass %in% c("glm", "lm", "gam") ){
-    out$fittedFixedEffects = coef(fittedModel)
-  }
-  
-  if(out$modelClass %in% c("glmerMod", "lmerMod", "glmer", "glmmTMB")){
-    out$fittedFixedEffects = lme4::fixef(fittedModel) ## returns fixed effects 
-    out$fittedRandomEffects = lme4::ranef(fittedModel) ## returns random effects
-  }
-
+  out$fittedFixedEffects = DHARMa:::getFixedEffects(fittedModel)
   out$fittedResiduals = residuals(fittedModel, type = "response")
   
-  ######## SIMULATIONS ##################
+  ######## simulations ##################
   
   simulations = simulate(fittedModel, nsim = n, ...)
   
@@ -107,8 +96,10 @@ simulateResiduals <- function(fittedModel, n = 250, refit = F, integerResponse =
     if(ncol(simulations) == 2*n){
       out$simulatedResponse = simulations[,seq(1, (2*n), by = 2)]
     }else{
-      
+      out$simulatedResponse = simulations
     }
+    # observation is factor - unlike lme4 and older, glmmTMB simulates nevertheless as numeric
+    if(is.factor(out$observedResponse)) out$observedResponse = as.numeric(out$observedResponse) - 1
   }else{
     if(is.vector(simulations[[1]])){
       out$simulatedResponse = data.matrix(simulations)
@@ -119,10 +110,12 @@ simulateResiduals <- function(fittedModel, n = 250, refit = F, integerResponse =
       if(nlevels(simulations[[1]]) != 2) warning("The fitted model has a factorial response with number of levels not equal to 2 - there is currently no sensible application in DHARMa that would lead to this situation. Likely, you are trying something that doesn't work.")
       out$simulatedResponse = data.matrix(simulations) - 1
       out$observedResponse = as.numeric(out$observedResponse) - 1
-    } else stop("DHARMa error - simulations resulted in unsupported class - if this happens for a supported model please report an error at https://github.com/florianhartig/DHARMa/issues")
+    } else securityAssertion("Simulation results produced unsupported data structure", stop = T)
   }
+    
+  if(any(dim(out$simulatedResponse) != c(out$nObs, out$nSim) )) securityAssertion("Simulation results have wrong dimension", stop = T)
   
-  ######## QUANTILE RESIDUAL CALCULATIONS ################## 
+  ######## refit = F ################## 
 
   if (refit == F){
  
@@ -136,14 +129,13 @@ simulateResiduals <- function(fittedModel, n = 250, refit = F, integerResponse =
         out$scaledResiduals[i] <- ecdf(out$simulatedResponse[i,])(out$observedResponse[i])
       }
     }
+  
+  ######## refit = T ################## 
     
   } else {
-    
-    # make sure that we use here the same random effect options as for simulate
-    out$fittedPredictedResponse = predict(fittedModel, type = "response", ... ) # sensible to have re-form set to ~0?
-    
+
     # Adding new outputs
-    
+
     out$refittedPredictedResponse <- matrix(nrow = out$nObs, ncol = n )  
     out$refittedFixedEffects <- matrix(nrow = length(out$fittedFixedEffects), ncol = n )  
     #out$refittedRandomEffects <- matrix(nrow = length(out$fittedRandomEffects), ncol = n )  
@@ -154,17 +146,28 @@ simulateResiduals <- function(fittedModel, n = 250, refit = F, integerResponse =
     
     for (i in 1:n){
       
-      simObserved = simulations[[i]]
-      
-      if(is.vector(simObserved)){
-        newData[,1] = simObserved
-      } else if (is.factor(simObserved)){
-        # Hack to make the factor binomial case work
-        newData[,1] = as.numeric(simObserved) - 1
-      } else {
-        # Hack to make the binomial n/k case work
-        newData[[1]] = NULL
-        newData = cbind(simObserved, newData)
+      if(out$modelClass == "glmmTMB"){
+        if(ncol(simulations) == 2*n & nKcase){
+          newData[[1]] = simulations[,(1+(2*(i-1))):(2+(2*(i-1)))]
+        }else if (ncol(simulations) == 2*n){
+          newData[[1]] = simulations[[1 + (2*(i-1))]] 
+        }else{
+          newData[[1]] = simulations[[i]] 
+        }
+      }else{
+    
+        simObserved = simulations[[i]]
+        
+        if(is.vector(simObserved)){
+          newData[,1] = simObserved
+        } else if (is.factor(simObserved)){
+          # Hack to make the factor binomial case work
+          newData[,1] = as.numeric(simObserved) - 1
+        } else {
+          # Hack to make the binomial n/k case work
+          newData[[1]] = NULL
+          newData = cbind(simObserved, newData)
+        }        
       }
       
       #tryCatch()
@@ -176,21 +179,15 @@ simulateResiduals <- function(fittedModel, n = 250, refit = F, integerResponse =
         
       refittedModel = update(fittedModel, data = newData)
       out$refittedPredictedResponse[,i] = predict(refittedModel, type = "response")
-      
-      if(class(fittedModel)[1] %in% c("glm", "lm", "gam") ){
-        out$refittedFixedEffects[,i]  = coef(refittedModel)
-      }
-      
-      if(class(fittedModel)[1] %in% c("glmerMod", "lmerMod")){
-        out$refittedFixedEffects[,i]  = lme4::fixef(refittedModel)
-        #out$fittedRandomEffects = ranef(fittedModel) ## returns random effects
-      }
-      
+      out$refittedFixedEffects[,i] = DHARMa:::getFixedEffects(refittedModel)
       out$refittedResiduals[,i] = residuals(refittedModel, type = "response")
-      out$refittedPearsonResiduals[,i] = residuals(refittedModel, type = "pearson")
+      # try statement for glmmTMB
+      if(!simulationOutput$modelClass == "glmmTMB") out$refittedPearsonResiduals[,i] = residuals(refittedModel, type = "pearson")
       #out$refittedRandomEffects[,i]  = ranef(refittedModel)
       }, silent = T)
     }
+    
+    ######### residual checks ###########
 
     if(anyNA(out$refittedResiduals)) warning("DHARMa::simulateResiduals warning: on refit = T, at least one of the refitted models produced an error. Inspect the refitted model values. Results may not be reliable.")
     
@@ -200,10 +197,13 @@ simulateResiduals <- function(fittedModel, n = 250, refit = F, integerResponse =
     if (dup > 0){
       if (dup < n/3){
         warning(paste("There were", dup, "of", n ,"duplicate parameter estimates in the refitted models. This may hint towards a problem with optimizer convergence in the fitted models. Results may not be reliable. The suggested action is to not use the refitting procedure, and diagnose with tools available for the normal (not refitted) simulated residuals. If you absolutely require the refitting procedure, try changing tolerance / iterations in the optimizer settings."))
-      } else warning(paste("There were", dup, "of", n ,"duplicate parameter estimates in the refitted models. This may hint towards a problem with optimizer convergence in the fitted models. Results are likely not reliable. The suggested action is to not use the refitting procedure, and diagnose with tools available for the normal (not refitted) simulated residuals. If you absolutely require the refitting procedure, try changing tolerance / iterations in the optimizer settings."))
-      out$problems[[length(out$problems)+ 1]] = "error in refit"
+      } else {
+        warning(paste("There were", dup, "of", n ,"duplicate parameter estimates in the refitted models. This may hint towards a problem with optimizer convergence in the fitted models. Results are likely not reliable. The suggested action is to not use the refitting procedure, and diagnose with tools available for the normal (not refitted) simulated residuals. If you absolutely require the refitting procedure, try changing tolerance / iterations in the optimizer settings."))
+        out$problems[[length(out$problems)+ 1]] = "error in refit" 
+      }
     } 
     
+    ######### residual calculations ###########
 
     for (i in 1:out$nObs){
     
@@ -217,6 +217,8 @@ simulateResiduals <- function(fittedModel, n = 250, refit = F, integerResponse =
     }
 
   }
+  
+  ########### Wrapup ############
   
   out$scaledResidualsNormal = qnorm(out$scaledResiduals + 0.00 )
 
@@ -237,7 +239,22 @@ checkModel <- function(fittedModel){
 }
 
 
-
+getFixedEffects <- function(fittedModel){
+  
+  if(class(fittedModel)[1] %in% c("glm", "lm", "gam") ){
+    out  = coef(fittedModel)
+  }
+  
+  if(class(fittedModel)[1] %in% c("glmerMod", "lmerMod")){
+    out = lme4::fixef(fittedModel)
+  }
+  
+  if(class(fittedModel)[1] %in% c("glmmTMB")){
+    out = fixef(fittedModel)
+    out = out$cond
+  }
+  return(out)
+}
 
 
 

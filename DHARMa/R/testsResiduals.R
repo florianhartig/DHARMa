@@ -53,6 +53,10 @@ testOverdispersion <- function(simulationOutput, alternative = "overdispersion",
     out$statistic = c(dispersion = observed / mean(ss))
     out$method = "DHARMa nonparametric overdispersion test via IQR of scaled residuals against IQR expected under uniform"
   } else {
+    if(simulationOutput$modelClass == "glmmTMB"){
+      message("testOverdispersion with refit = T not implemented for glmmTMB, abort")
+      return(NULL)
+    }
     observed = sum(residuals(simulationOutput$fittedModel, type = "pearson")^2)
     ss = apply(simulationOutput$refittedPearsonResiduals^2 , 2, sum)
     out$statistic = c(dispersion = observed / mean(ss))
