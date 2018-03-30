@@ -1,5 +1,16 @@
 NOTE: for more news about the package, see https://github.com/florianhartig/DHARMa/releases
 
+DHARMa 0.1.7
+
+New features
+
+- support for glmmTMB
+
+Minor changes
+
+Bugfixes
+
+
 DHARMa 0.1.6
 
 New features
