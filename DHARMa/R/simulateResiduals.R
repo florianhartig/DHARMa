@@ -79,7 +79,6 @@ simulateResiduals <- function(fittedModel, n = 250, refit = F, integerResponse =
   # re-form should be set to ~0 to avoid spurious residual patterns, see https://github.com/florianhartig/DHARMa/issues/43
     
   if(out$modelClass %in% c("glmmTMB")){
-    warning("Due to limitations in the current implementation of glmmTMB, model predictions are calculated conditional on the fitted random effects. This can sometimes create assymetries when plotting residual vs. predicted, see https://github.com/florianhartig/DHARMa/issues/43. If you see assymetries similar to what is shown in this issue, but residuals otherwise look fine, you should probably calculate a model prediction by hand with fixed effects only, and do the plot for those.")
     out$fittedPredictedResponse = predict(fittedModel, type = "response") 
   }else{
     out$fittedPredictedResponse = predict(fittedModel, type = "response", re.form = ~0) 
@@ -240,23 +239,21 @@ checkModel <- function(fittedModel){
   if(!(class(fittedModel)[1] %in% getPossibleModels())) warning("DHARMa: fittedModel not in class of supported models. Absolutely no guarantee that this will work!")
   
   if (class(fittedModel)[1] == "gam" ) if (class(fittedModel$family)[1] == "extended.family") stop("It seems you are trying to fit a model from mgcv that was fit with an extended.family. Simulation functions for these families are not yet implemented in DHARMa. See issue https://github.com/florianhartig/DHARMa/issues/11 for updates about this")
+  
+  if (class(fittedModel)[1] == "glmmTMB" ) warning("Note that there are a few limitations for using glmmTMB with DHARMa. Please consult https://github.com/florianhartig/DHARMa/issues/16 for details.")
 }
 
 
 getFixedEffects <- function(fittedModel){
   
-  if(class(fittedModel)[1] %in% c("glm", "lm", "gam") ){
+  if(class(fittedModel)[1] %in% c("glm", "lm", "gam", "negbin") ){
     out  = coef(fittedModel)
-  }
-  
-  if(class(fittedModel)[1] %in% c("glmerMod", "lmerMod")){
+  } else if(class(fittedModel)[1] %in% c("glmerMod", "lmerMod")){
     out = lme4::fixef(fittedModel)
-  }
-  
-  if(class(fittedModel)[1] %in% c("glmmTMB")){
+  } else if(class(fittedModel)[1] %in% c("glmmTMB")){
     out = fixef(fittedModel)
     out = out$cond
-  }
+  } else stop()
   return(out)
 }
 
