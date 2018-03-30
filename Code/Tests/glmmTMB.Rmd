@@ -31,10 +31,40 @@ summary(m)
 predict(m)
 ```
 
+## n/k update problem 
+
+update doesn't work for n/k data
+
+```{r}
+library(DHARMa)
+library(glmmTMB)
+
+testData = createData(sampleSize = 200, family = binomial(), binomialTrials = 20)
+
+fittedModel <- glmmTMB(cbind(observedResponse1,observedResponse0) ~ Environment1 + (1|group) , family = "binomial", data = testData)
+temp = model.frame(fittedModel)
+update(fittedModel, temp)
+```
+
+
 ## Residual problems
 
 * residual function doesn't work with factor response (bug)
+
+```{r, eval = F}
+library(DHARMa)
+library(glmmTMB)
+
+testData = createData(sampleSize = 200, family = binomial(), factorResponse = T)
+fittedModel <- glmmTMB(observedResponse ~ Environment1 + (1|group) , family = "binomial", data = testData)
+residuals(fittedModel)
+
+```
+
+
 * pearson residuals don't work with zi terms (not implemented)
+
+
 
 ## with ~reform in pred / simulate
 

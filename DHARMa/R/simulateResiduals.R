@@ -148,7 +148,12 @@ simulateResiduals <- function(fittedModel, n = 250, refit = F, integerResponse =
       
       if(out$modelClass == "glmmTMB"){
         if(ncol(simulations) == 2*n & nKcase){
+          #tmp = colnames(newData[[1]])
+          #a = simulations[,(1+(2*(i-1))):(2+(2*(i-1)))]
+          #newData[[1]][,1] = a[,1]
+          #newData[[1]][,2] = a[,2]
           newData[[1]] = simulations[,(1+(2*(i-1))):(2+(2*(i-1)))]
+          #colnames(newData[[1]]) = tmp
         }else if (ncol(simulations) == 2*n){
           newData[[1]] = simulations[[1 + (2*(i-1))]] 
         }else{
@@ -176,13 +181,12 @@ simulateResiduals <- function(fittedModel, n = 250, refit = F, integerResponse =
         # for testing
         # if (i==3) stop("x")
         # Note: also set silet = T for production
-        
       refittedModel = update(fittedModel, data = newData)
       out$refittedPredictedResponse[,i] = predict(refittedModel, type = "response")
       out$refittedFixedEffects[,i] = DHARMa:::getFixedEffects(refittedModel)
       out$refittedResiduals[,i] = residuals(refittedModel, type = "response")
       # try statement for glmmTMB
-      if(!simulationOutput$modelClass == "glmmTMB") out$refittedPearsonResiduals[,i] = residuals(refittedModel, type = "pearson")
+      if(!out$modelClass == "glmmTMB") out$refittedPearsonResiduals[,i] = residuals(refittedModel, type = "pearson")
       #out$refittedRandomEffects[,i]  = ranef(refittedModel)
       }, silent = T)
     }
