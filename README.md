@@ -35,7 +35,7 @@ citation("DHARMa")
 If you want to install the current (development) version from this repository, run
 
 ```{r}
-devtools::install_github(repo = "DHARMa", username = "florianhartig", subdir = "DHARMa", dependencies = T, build_vignettes = T)
+devtools::install_github(repo = "florianhartig/DHARMa", subdir = "DHARMa", dependencies = T, build_vignettes = T)
 ```
 Below the status of the automatic Travis CI tests on the master branch (if this doesn load see [here](https://travis-ci.org/florianhartig/DHARMa))
 
@@ -46,6 +46,6 @@ Below the status of the automatic Travis CI tests on the master branch (if this 
 To install a specific (older) release, decide for the version number that you want to install in [https://github.com/florianhartig/DHARMa/releases](https://github.com/florianhartig/DHARMa/releases) (version numbering corresponds to CRAN, but there may be smaller releases that were not pushed to CRAN) and run 
 
 ```{r}
-devtools::install_github(repo = "DHARMa", username = "florianhartig", subdir = "DHARMa", ref = "v0.0.2.1", dependencies = T, build_vignettes = T)
+devtools::install_github(repo = "florianhartig/DHARMa", subdir = "DHARMa", ref = "v0.0.2.1", dependencies = T, build_vignettes = T)
 ```
 with the appropriate version number. 
