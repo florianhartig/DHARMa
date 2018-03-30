@@ -506,11 +506,62 @@ You think your random effect estimates look weird? Run the model with the refit 
 
 ## lm and glm
 
+lm and glm are fully supported as specified in the help
+
 ## lme4
+
+lme 4 is fully supported as specified in the help
 
 ## glmmTMB
 
+Current limitations of glmmTMB
+
+* residual function doesn't work with factor response (glmmTMB bug)
+* refit doesn't work with n/k data, because update doesnt' work   
+* pearson residuals don't work with zi terms (not implemented), which limits some of the overdispersion tests
+* Currently, glmmTMB doesn't support the reform argument. 
+  * predict() is conditional on all random effects, corresponding to lme4 re.form = NULL
+  * simulate() is unconditional, i.e. all random effects will be resimulated, corresponding to lme4 re.form = 0
+  * That means that all predictions and simulations are conditional on REs, which can sometimes create a positive correlation between res and predicted , see https://github.com/florianhartig/DHARMa/issues/43
+  
+
+```{r}
+library(glmmTMB)
+testData = createData(sampleSize = 100, fixedEffects = 2, family = binomial(), randomEffectVariance = 0)
+
+m <- glmmTMB(observedResponse ~ Environment1 , data=testData, family=binomial)
+res = simulateResiduals(m)
+plot(res)
+```
+
+
 ## Unsupported packages
+
+See my general comments about [adding new R packages to DHARMa](https://github.com/florianhartig/DHARMa/wiki/Adding-new-R-packages-to-DHARMA)
+
+As noted there, if you want to use DHARMa for a specific case, you could write a custom simulate function for the specific model you are working with. This will usually involve using the predict function and adding the random distribution, plus potentially drawing new data for the random effects or other hierarchical levels.
+
+As an example, for an poisson glm, a simulate function could be programmed as in the following example, which also shows how the results are read into DHARMa and plotted (see also following section)
+
+```{r, eval = T}
+testData = createData(sampleSize = 200, overdispersion = 0.5, family = poisson())
+fittedModel <- glm(observedResponse ~ Environment1, family = "poisson", data = testData)
+
+simulatePoissonGLM <- function(fittedModel, n){
+  pred = predict(fittedModel, type = "response")
+  nObs = length(pred)
+  sim = matrix(nrow = nObs, ncol = n)
+  for(i in 1:n) sim[,i] = rpois(nObs, pred)
+  return(sim)
+}
+
+sim = simulatePoissonGLM(fittedModel, 100)
+
+DHARMaRes = createDHARMa(simulatedResponse = sim, observedResponse = testData$observedResponse, 
+             fittedPredictedResponse = predict(fittedModel))
+plot(DHARMaRes, quantreg = F)
+```
+
 
 ## Importing external simulations (e.g. from Bayesian software or unsupported packages)
 
