@@ -185,7 +185,7 @@ simulateResiduals <- function(fittedModel, n = 250, refit = F, integerResponse =
   
   out$scaledResidualsNormal = qnorm(out$scaledResiduals + 0.00 )
 
-  if(plot == T) plotSimulatedResiduals(out)
+  if(plot == T) plot(out)
   
   out$time = proc.time() - ptm
   out$randomState = randomState

@@ -9,15 +9,41 @@
 NULL
 
 
-#' Plot simulated residuals
+#' DHARMa standard residual plots
 #' 
-#' @param x an object with simulated residuals created by \code{\link{simulateResiduals}}
-#' @param ... optional arguments to pass on to \code{\link{plotSimulatedResiduals}}
-#' @details The function calls \code{\link{plotSimulatedResiduals}} - see details there
+#' This function creates standard plots for the simulated residuals
+#' @param simulationOutput an object with simualted residuals created by \code{\link{simulateResiduals}}
+#' @param ... further options for \code{\link{plotResiduals}}. Consider in particular parameters quantreg, rank and asFactor. xlab, ylab and main cannot be changed when using plotSimulatedResiduals, but can be changed when using plotResiduals.
+#' @details The function creates two plots. To the left, a qq-uniform plot to detect deviations from overall uniformity of the residuals (calling \code{\link{plotQQunif}}), and to the right, a plot of residuals against predicted values (calling \code{\link{plotResiduals}}). For a correctly specified model, we would expect 
+#' 
+#' a) a straight 1-1 line in the uniform qq-plot -> evidence for an overal uniform (flat) distribution of the residuals
+#' 
+#' b) uniformity of residuals in the vertical direction in the res against predictor plot
+#' 
+#' Deviations of this can be interpreted as for a liner regression. See the vignette for detailed examples. 
+#' 
+#' To provide a visual aid in detecting deviations from uniformity in y-direction, the plot of the residuals against the predited values also performs an (optional) quantile regression, which provides 0.25, 0.5 and 0.75 quantile lines across the plots. These lines should be straight, horizontal, and at y-values of 0.25, 0.5 and 0.75. Note, however, that some deviations from this are to be expected by chance, even for a perfect model, especially if the sample size is small. See further comments on this plot, and options, in \code{\link{plotResiduals}}
+#' 
+#' The quantile regression can take some time to calculate, especially for larger datasets. For that reason, quantreg = F can be set to produce a smooth spline instead. This is default for n > 2000. 
+#' 
+#' @seealso \code{\link{plotResiduals}}, \code{\link{plotQQunif}}
+#' @example inst/examples/plotsHelp.R
+#' @import graphics
+#' @import utils
 #' @export
 plot.DHARMa <- function(x, ...){
-  plotSimulatedResiduals(simulationOutput = x, ...)
+
+  oldpar <- par(mfrow = c(1,2), oma = c(0,1,2,1))
+  
+  plotQQunif(simulationOutput)
+  
+  plotResiduals(pred = simulationOutput, residuals = NULL, xlab = "Predicted value", ylab = "Standardized residual", main = "Residual vs. predicted\n lines should match", ...)
+  
+  mtext("DHARMa scaled residual plots", outer = T)
+  
+  par(oldpar)
 }
+
 
 #' Print simulated residuals
 #' 
