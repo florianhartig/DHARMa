@@ -6,12 +6,6 @@ doPlots <- function(simulationOutput){
   plot(simulationOutput, quantreg = T, rank = T)
   plot(simulationOutput, quantreg = F, rank = T)
   
-  plotSimulatedResiduals(simulationOutput = simulationOutput, quantreg = T, rank = F)
-  plotSimulatedResiduals(simulationOutput = simulationOutput, quantreg = F, rank = F)
-  
-  plotSimulatedResiduals(simulationOutput = simulationOutput, quantreg = T, rank = T)
-  plotSimulatedResiduals(simulationOutput = simulationOutput, quantreg = F, rank = T)
-  
   # qq plot
   plotQQunif(simulationOutput = simulationOutput)
   
