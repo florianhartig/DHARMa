@@ -13,6 +13,7 @@ NULL
 #' 
 #' This function creates standard plots for the simulated residuals
 #' @param simulationOutput an object with simualted residuals created by \code{\link{simulateResiduals}}
+#' @param rank if T (default), the values of pred will be rank transformed. This will usually make patterns easier to spot visually, especially if the distribution of the predictor is skewed. 
 #' @param ... further options for \code{\link{plotResiduals}}. Consider in particular parameters quantreg, rank and asFactor. xlab, ylab and main cannot be changed when using plotSimulatedResiduals, but can be changed when using plotResiduals.
 #' @details The function creates two plots. To the left, a qq-uniform plot to detect deviations from overall uniformity of the residuals (calling \code{\link{plotQQunif}}), and to the right, a plot of residuals against predicted values (calling \code{\link{plotResiduals}}). For a correctly specified model, we would expect 
 #' 
@@ -31,7 +32,7 @@ NULL
 #' @import graphics
 #' @import utils
 #' @export
-plot.DHARMa <- function(x, ...){
+plot.DHARMa <- function(x, rank = TRUE, ...){
 
   oldpar <- par(mfrow = c(1,2), oma = c(0,1,2,1))
   
