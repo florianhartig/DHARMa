@@ -37,7 +37,7 @@ plot.DHARMa <- function(x, ...){
   
   plotQQunif(simulationOutput)
   
-  plotResiduals(pred = simulationOutput, residuals = NULL, xlab = "Predicted value", ylab = "Standardized residual", main = "Residual vs. predicted\n lines should match", ...)
+  plotResiduals(pred = simulationOutput, residuals = NULL, xlab = "Predicted value (rank transformed)", ylab = "Standardized residual", main = "Residual vs. predicted\n lines should match", rank = T, ...)
   
   mtext("DHARMa scaled residual plots", outer = T)
   
