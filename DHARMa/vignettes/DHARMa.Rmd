@@ -388,7 +388,7 @@ This test is likely better suited for detecting zero-inflation than the standard
 A good option is the R package glmmTMB, which is also supported by DHARMa. We can use this to fit
 
 ```{r}
-
+library(glmmTMB)
 fittedModel <- glmmTMB(observedResponse ~ Environment1 + I(Environment1^2) + (1|group), ziformula = ~1 , family = "poisson", data = testData)
 summary(fittedModel)
 
