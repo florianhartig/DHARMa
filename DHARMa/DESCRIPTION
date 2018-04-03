@@ -33,6 +33,7 @@ Imports:
     mgcv
 Suggests:
     knitr,
+    rmarkdown,
     testthat
 License: GPL (>= 3)
 URL: http://florianhartig.github.io/DHARMa/
