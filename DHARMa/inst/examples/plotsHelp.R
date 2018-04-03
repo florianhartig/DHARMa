@@ -10,7 +10,6 @@ simulationOutput <- simulateResiduals(fittedModel = fittedModel)
 # informative, but slower
 
 plot(simulationOutput, quantreg = FALSE)
-# idential to plotSimulatedResiduals
 
 #############  qq plot  ######################
 

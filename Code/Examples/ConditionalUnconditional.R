@@ -10,13 +10,13 @@ fittedModel <- glmer(observedResponse ~ Environment1 + (1|group), family = "pois
 # res ~ pred, with conditional and unconditional predictions
 simulationOutput <- simulateResiduals(fittedModel = fittedModel)
 par(mfrow = c(2,2))
-plotResiduals(simulationOutput$fittedPredictedResponse, simulationOutput$scaledResiduals , main = "Unconditional Residuals\n Unconditional Predictions\n DHARMa standard")
-plotResiduals(predict(fittedModel), simulationOutput$scaledResiduals, main = "Unconditional Residuals\n Conditional Predictions\n")
+
+plotResiduals(simulationOutput$fittedPredictedResponse, simulationOutput$scaledResiduals , main = "Unconditional Residuals\n Unconditional Predictions\n DHARMa standard", rank = T)
+plotResiduals(predict(fittedModel), simulationOutput$scaledResiduals, main = "Unconditional Residuals\n Conditional Predictions\n", rank = T)
 
 simulationOutput <- simulateResiduals(fittedModel = fittedModel, re.form = NULL)
-plotResiduals(simulationOutput$fittedPredictedResponse, simulationOutput$scaledResiduals , main = "Conditional Residuals\n Unconditional Predictions\n")
-plotResiduals(predict(fittedModel), simulationOutput$scaledResiduals, main = "Conditional Residuals\n Conditional Predictions\n")
-
+plotResiduals(simulationOutput$fittedPredictedResponse, simulationOutput$scaledResiduals , main = "Conditional Residuals\n Unconditional Predictions\n", rank = T)
+plotResiduals(predict(fittedModel), simulationOutput$scaledResiduals, main = "Conditional Residuals\n Conditional Predictions\n", rank = T)
 
 
 # creating test data according to standard poisson GLMM assumptions

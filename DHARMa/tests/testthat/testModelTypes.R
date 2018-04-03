@@ -17,6 +17,12 @@ runEverything = function(fittedModel, testData, DHARMaData = T){
 
   DHARMa:::checkOutput(simulationOutput)
 
+  print(simulationOutput)
+  plot(simulationOutput, quantreg = F)
+
+  plot(simulationOutput = simulationOutput)
+  if(DHARMaData == T) plotResiduals(pred = testData$Environment1, simulationOutput$scaledResiduals, quantreg = F)
+
   testOverdispersion(simulationOutput)
   testUniformity(simulationOutput = simulationOutput)
   testZeroInflation(simulationOutput = simulationOutput)
