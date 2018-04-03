@@ -7,7 +7,7 @@ output:
     toc: true
 vignette: >
   %\VignetteIndexEntry{Vignette for the DHARMa package}
-  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEngine{knitr::knitr}
   %\VignetteEncoding{UTF-8}
 abstract: "The 'DHARMa' package uses a simulation-based approach to create readily interpretable scaled (quantile) residuals for fitted generalized linear mixed models. Currently supported are generalized linear mixed models from 'lme4' (classes 'lmerMod', 'glmerMod') and 'glmmTMB', generalized additive models ('gam' from 'mgcv'), 'glm' (including 'negbin' from 'MASS', but excluding quasi-distributions) and 'lm' model classes. Alternatively, externally created simulations, e.g. posterior predictive simulations from Bayesian software such as 'JAGS', 'STAN', or 'BUGS' can be processed as well. The resulting residuals are standardized to values between 0 and 1 and can be interpreted as intuitively as residuals from a linear regression. The package also provides a number of plot and test functions for typical model misspecification problems, such as over/underdispersion, zero-inflation, and residual spatial and temporal autocorrelation.\n \n \n"
 ---
@@ -135,10 +135,10 @@ These normal residuals will behave exactly like the residuals of a linear regres
 
 ## Plotting the scaled residuals
 
-We can get a visual impression of these properties with the plot() function
+We can get a visual impression of these properties with the plot.DHARMa() function
 
 ```{r}
-plot(simulationOutput = simulationOutput)
+plot(simulationOutput)
 ```
 
 which creates a qq-plot to detect overall deviations from the expected distribution, and a plot of the residuals against the predicted value. 
@@ -285,7 +285,7 @@ testData = createData(sampleSize = 500, overdispersion = 2, family = poisson())
 fittedModel <- glmer(observedResponse ~ Environment1 + (1|group) , family = "poisson", data = testData)
 
 simulationOutput <- simulateResiduals(fittedModel = fittedModel)
-plot(simulationOutput = simulationOutput)
+plot(simulationOutput)
 ```
 
 Note that we get more residuals around 0 and 1, which means that more residuals are in the tail of distribution than would be expected under the fitted model. 
@@ -303,7 +303,7 @@ summary(fittedModel)
 # plotConventionalResiduals(fittedModel)
 
 simulationOutput <- simulateResiduals(fittedModel = fittedModel)
-plot(simulationOutput = simulationOutput)
+plot(simulationOutput)
 testUniformity(simulationOutput = simulationOutput)
 ```
 
@@ -369,7 +369,7 @@ In the normal residual, plots, zero-inflation will look pretty much like overdis
 fittedModel <- glmer(observedResponse ~ Environment1 + I(Environment1^2) + (1|group) , family = "poisson", data = testData)
 
 simulationOutput <- simulateResiduals(fittedModel = fittedModel)
-plot(simulationOutput = simulationOutput)
+plot(simulationOutput)
 ```
 
 The reason is that the model will usually try to find a compromise between the zeros, and the other values, which will lead to excess variance in the residuals. 
@@ -397,7 +397,7 @@ testData = createData(sampleSize = 500, intercept = 0, overdispersion = function
 fittedModel <- glmer(observedResponse ~ Environment1 + (1|group), family = "poisson", data = testData)
 
 simulationOutput <- simulateResiduals(fittedModel = fittedModel)
-plot(simulationOutput = simulationOutput)
+plot(simulationOutput)
 testUniformity(simulationOutput = simulationOutput)
 ```
 
@@ -410,7 +410,7 @@ fittedModel <- glmer(observedResponse ~ Environment1 + (1|group) + (1|ID), famil
 # plotConventionalResiduals(fittedModel)
 
 simulationOutput <- simulateResiduals(fittedModel = fittedModel)
-plot(simulationOutput = simulationOutput)
+plot(simulationOutput)
 testUniformity(simulationOutput = simulationOutput)
 ```
 
@@ -433,7 +433,7 @@ testData = createData(sampleSize = 200, intercept = 1, fixedEffects = c(1,2), ov
 fittedModel <- glmer(observedResponse ~ Environment1 + Environment2 + (1|group) , family = "poisson", data = testData)
 simulationOutput <- simulateResiduals(fittedModel = fittedModel)
 # plotConventionalResiduals(fittedModel)
-plot(simulationOutput = simulationOutput, quantreg = T)
+plot(simulationOutput, quantreg = T)
 testUniformity(simulationOutput = simulationOutput)
 ```
 
@@ -623,7 +623,7 @@ Let's fit the data with a regular binomial n/k glm
 ```{r}
 mod1 <- glm(cbind(N_parasitized, N_adult) ~ logDensity, data = data, family=binomial)
 simulationOutput <- simulateResiduals(fittedModel = mod1)
-plot(simulationOutput = simulationOutput)
+plot(simulationOutput)
 ```
 
 The residuals look clearly overdispersed. We can confirm that with the omnibus test
@@ -643,7 +643,7 @@ OK, so let's add overdispersion through an individual-level random effect
 ```{r}
 mod2 <- glmer(cbind(N_parasitized, N_adult) ~ logDensity + (1|ID), data = data, family=binomial)
 simulationOutput <- simulateResiduals(fittedModel = mod2)
-plot(simulationOutput = simulationOutput)
+plot(simulationOutput)
 
 ```
 
@@ -694,7 +694,7 @@ Our question is: what is the effect of altitude on the abundance of the beetle? 
 ```{r}
 mod <- glmer(beetles ~ altitude + I(altitude^2) + moisture + (1|plot) + (1|year), data = data, family=poisson, control = glmerControl(optCtrl = list(maxfun = 10000)))
 simulationOutput <- simulateResiduals(fittedModel = mod)
-plot(simulationOutput = simulationOutput)
+plot(simulationOutput)
 summary(mod)
 ```
 
@@ -709,7 +709,7 @@ so let's add this term as well
 ```{r}
 mod <- glmer(beetles ~ altitude + I(altitude^2) + moisture + deadwood + (1|plot) + (1|year) , data = data, family=poisson, control = glmerControl(optCtrl = list(maxfun = 10000)))
 simulationOutput <- simulateResiduals(fittedModel = mod)
-plot(simulationOutput = simulationOutput)
+plot(simulationOutput)
 summary(mod)
 ```
 
@@ -718,7 +718,7 @@ still, there is obviously overdispersion in the data, so we'll add an individual
 ```{r}
 mod <- glmer(beetles ~ altitude + I(altitude^2) + moisture + deadwood + (1|plot) + (1|year) + (1|dataID) , data = data, family=poisson, control = glmerControl(optCtrl = list(maxfun = 10000)))
 simulationOutput <- simulateResiduals(fittedModel = mod)
-plot(simulationOutput = simulationOutput)
+plot(simulationOutput)
 ```
 
 The data still looks overdispersed. The reason is that there is in fact no standard overdispersion, but zero-inflation in the data. We can look at the excess zeros via
