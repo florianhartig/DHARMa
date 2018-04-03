@@ -141,52 +141,26 @@ simulateResiduals <- function(fittedModel, n = 250, refit = F, integerResponse =
     out$refittedResiduals = matrix(nrow = out$nObs, ncol = n)   
     out$refittedPearsonResiduals = matrix(nrow = out$nObs, ncol = n)   
     
-    newData <-model.frame(fittedModel)  
-    
     for (i in 1:n){
-      
-      if(out$modelClass == "glmmTMB"){
-        if(ncol(simulations) == 2*n & nKcase){
-          #tmp = colnames(newData[[1]])
-          #a = simulations[,(1+(2*(i-1))):(2+(2*(i-1)))]
-          #newData[[1]][,1] = a[,1]
-          #newData[[1]][,2] = a[,2]
-          newData[[1]] = simulations[,(1+(2*(i-1))):(2+(2*(i-1)))]
-          #colnames(newData[[1]]) = tmp
-        }else if (ncol(simulations) == 2*n){
-          newData[[1]] = simulations[[1 + (2*(i-1))]] 
-        }else{
-          newData[[1]] = simulations[[i]] 
-        }
-      }else{
-    
-        simObserved = simulations[[i]]
-        
-        if(is.vector(simObserved)){
-          newData[,1] = simObserved
-        } else if (is.factor(simObserved)){
-          # Hack to make the factor binomial case work
-          newData[,1] = as.numeric(simObserved) - 1
-        } else {
-          # Hack to make the binomial n/k case work
-          newData[[1]] = NULL
-          newData = cbind(simObserved, newData)
-        }        
-      }
-      
       #tryCatch()
+      
+      if (out$modelClass == "glmmTMB" & ncol(simulations) == 2*n) simObserved = simulations[,(1+(2*(i-1))):(2+(2*(i-1)))]
+      else simObserved = simulations[[i]]
+      
       try({
         
         # for testing
         # if (i==3) stop("x")
         # Note: also set silet = T for production
-      refittedModel = update(fittedModel, data = newData)
-      out$refittedPredictedResponse[,i] = predict(refittedModel, type = "response")
-      out$refittedFixedEffects[,i] = DHARMa:::getFixedEffects(refittedModel)
-      out$refittedResiduals[,i] = residuals(refittedModel, type = "response")
-      # try statement for glmmTMB
-      if(!out$modelClass == "glmmTMB") out$refittedPearsonResiduals[,i] = residuals(refittedModel, type = "pearson")
-      #out$refittedRandomEffects[,i]  = ranef(refittedModel)
+    
+        refittedModel = refit(fittedModel, simObserved)
+        
+        out$refittedPredictedResponse[,i] = predict(refittedModel, type = "response")
+        out$refittedFixedEffects[,i] = DHARMa:::getFixedEffects(refittedModel)
+        out$refittedResiduals[,i] = residuals(refittedModel, type = "response")
+        # try statement for glmmTMB
+        if(!out$modelClass == "glmmTMB") out$refittedPearsonResiduals[,i] = residuals(refittedModel, type = "pearson")
+        #out$refittedRandomEffects[,i]  = ranef(refittedModel)
       }, silent = T)
     }
     
@@ -257,13 +231,49 @@ getFixedEffects <- function(fittedModel){
   return(out)
 }
 
+#' @export
+refit.lm <- function(object, newresp, ...){
+  
+  newData <-model.frame(object)  
+
+  if(is.vector(newresp)){
+    newData[,1] = newresp
+  } else if (is.factor(newresp)){
+    # Hack to make the factor binomial case work
+    newData[,1] = as.numeric(newresp) - 1
+  } else {
+    # Hack to make the binomial n/k case work
+    newData[[1]] = NULL
+    newData = cbind(newresp, newData)
+  }     
+  
+  refittedModel = update(object, data = newData)
+  return(refittedModel)
+}
 
 
+#' @export
+refit.glmmTMB <- function(object, newresp, ...){
+  
+  newData <-model.frame(object)  
+  
+  matrixResp = is.matrix(newData[[1]])
 
+  if(matrixResp & !is.null(ncol(newresp))){
+    # Hack to make the factor binomial case work
+    tmp = colnames(newData[[1]])
+    newData[[1]] = NULL
+    newData = cbind(newresp, newData)
+    colnames(newData)[1:2] = tmp
+  } else if(!is.null(ncol(newresp))){
+    newData[[1]] = newresp[,1]
+  } else {
+    newData[[1]] = newresp 
+  }
 
-
-
-
+  refittedModel = update(object, data = newData)
+  return(refittedModel)
+}
 
 
 
