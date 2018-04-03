@@ -1,7 +1,7 @@
 #' @title DHARMa - Residual Diagnostics for HierArchical (Multi-level / Mixed) Regression Models
 #' @name DHARMa
 #' @docType package
-#' @description The 'DHARMa' package uses a simulation-based approach to create readily interpretable scaled (quantile) residuals for fitted generalized linear mixed models. Currently supported are generalized linear mixed models from 'lme4' (classes 'lmerMod', 'glmerMod') and 'glmmTMB', generalized additive models ('gam' from 'mgcv'), 'glm' (including 'negbin' from 'MASS', but excluding quasi-distributions) and 'lm' model classes. Alternatively, externally created simulations, e.g. posterior predictive simulations from Bayesian software such as 'JAGS', 'STAN', or 'BUGS' can be processed as well. The resulting residuals are standardized to values between 0 and 1 and can be interpreted as intuitively as residuals from a linear regression. The package also provides a number of plot and test functions for typical model misspecification problems, such as over/underdispersion, zero-inflation, and residual spatial and temporal autocorrelation.
+#' @description The DHARMa package uses a simulation-based approach to create readily interpretable scaled residuals from fitted generalized linear mixed models. Currently supported are generalized linear mixed models from 'lme4' (classes 'lmerMod', 'glmerMod'), generalized additive models ('gam' from 'mgcv'), 'glm' (including 'negbin' from 'MASS', but excluding quasi-distributions) and 'lm' model classes. Alternatively, externally created simulations, e.g. posterior predictive simulations from Bayesian software such as 'JAGS', 'STAN', or 'BUGS' can be processed as well. The resulting residuals are standardized to values between 0 and 1 and can be interpreted as intuitively as residuals from a linear regression. The package also provides a number of plot and test functions for typical model misspecification problems, such as over/underdispersion, zero-inflation, and spatial / temporal autocorrelation.
 #' @details See index / vignette for details
 #' @seealso \code{\link{simulateResiduals}}
 #' @examples 
@@ -12,7 +12,8 @@ NULL
 #' DHARMa standard residual plots
 #' 
 #' This function creates standard plots for the simulated residuals
-#' @param simulationOutput an object with simualted residuals created by \code{\link{simulateResiduals}}
+#' @param x an object with simualted residuals created by \code{\link{simulateResiduals}}
+#' @param rank if T (default), the values of pred will be rank transformed. This will usually make patterns easier to spot visually, especially if the distribution of the predictor is skewed. 
 #' @param ... further options for \code{\link{plotResiduals}}. Consider in particular parameters quantreg, rank and asFactor. xlab, ylab and main cannot be changed when using plotSimulatedResiduals, but can be changed when using plotResiduals.
 #' @details The function creates two plots. To the left, a qq-uniform plot to detect deviations from overall uniformity of the residuals (calling \code{\link{plotQQunif}}), and to the right, a plot of residuals against predicted values (calling \code{\link{plotResiduals}}). For a correctly specified model, we would expect 
 #' 
@@ -31,13 +32,13 @@ NULL
 #' @import graphics
 #' @import utils
 #' @export
-plot.DHARMa <- function(x, ...){
+plot.DHARMa <- function(x, rank = TRUE, ...){
 
   oldpar <- par(mfrow = c(1,2), oma = c(0,1,2,1))
   
-  plotQQunif(simulationOutput)
+  plotQQunif(x)
   
-  plotResiduals(pred = simulationOutput, residuals = NULL, xlab = "Predicted value (rank transformed)", ylab = "Standardized residual", main = "Residual vs. predicted\n lines should match", rank = T, ...)
+  plotResiduals(pred = x, residuals = NULL, xlab = "Predicted value (rank transformed)", ylab = "Standardized residual", main = "Residual vs. predicted\n lines should match", rank = T, ...)
   
   mtext("DHARMa scaled residual plots", outer = T)
   

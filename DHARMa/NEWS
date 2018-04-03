@@ -2,6 +2,7 @@ NOTE: for more news about the package, see https://github.com/florianhartig/DHAR
 
 DHARMa 0.1.7
 
+
 New features
 
 - support for glmmTMB
@@ -11,6 +12,7 @@ Minor changes
 - changed plot function names
 
 Bugfixes
+
 
 DHARMa 0.1.6
 
