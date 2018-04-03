@@ -44,7 +44,7 @@ plotQQunif <- function(simulationOutput, testUniformity = T){
 #' @param pred either the predictor variable against which the residuals should be plotted, or a DHARMa object
 #' @param residuals residuals values. Leave empty if pred is a DHARMa object
 #' @param quantreg whether to perform a quantile regression on 0.25, 0.5, 0.75 on the residuals. If F, a spline will be created instead. Default NULL chooses T for nObs < 2000, and F otherwise. 
-#' @param rank if T, the values of pred will be transformed to rank. This is useful if the distribution of pred is very skewed
+#' @param rank if T, the values of pred will be rank transformed. This will usually make patterns easier to spot visually, especially if the distribution of the predictor is skewed. 
 #' @param asFactor should the predictor variable converted into a factor
 #' @param ... additional arguments to plot
 #' @details For a correctly specified model, we would expect uniformity in y direction when plotting against any predictor.

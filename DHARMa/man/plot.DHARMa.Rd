@@ -4,12 +4,14 @@
 \alias{plot.DHARMa}
 \title{DHARMa standard residual plots}
 \usage{
-\method{plot}{DHARMa}(x, ...)
+\method{plot}{DHARMa}(x, rank = TRUE, ...)
 }
 \arguments{
-\item{...}{further options for \code{\link{plotResiduals}}. Consider in particular parameters quantreg, rank and asFactor. xlab, ylab and main cannot be changed when using plotSimulatedResiduals, but can be changed when using plotResiduals.}
+\item{x}{an object with simualted residuals created by \code{\link{simulateResiduals}}}
 
-\item{simulationOutput}{an object with simualted residuals created by \code{\link{simulateResiduals}}}
+\item{rank}{if T (default), the values of pred will be rank transformed. This will usually make patterns easier to spot visually, especially if the distribution of the predictor is skewed.}
+
+\item{...}{further options for \code{\link{plotResiduals}}. Consider in particular parameters quantreg, rank and asFactor. xlab, ylab and main cannot be changed when using plotSimulatedResiduals, but can be changed when using plotResiduals.}
 }
 \description{
 This function creates standard plots for the simulated residuals

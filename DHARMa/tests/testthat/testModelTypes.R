@@ -16,7 +16,7 @@ runEverything = function(fittedModel, testData, DHARMaData = T){
   print(simulationOutput)
   plot(simulationOutput, quantreg = F)
 
-  plot(simulationOutput = simulationOutput)
+  plot(simulationOutput)
   if(DHARMaData == T) plotResiduals(pred = testData$Environment1, simulationOutput$scaledResiduals, quantreg = F)
 
   testOverdispersion(simulationOutput)
