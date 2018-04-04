@@ -6,6 +6,18 @@ library(lme4)
 library(mgcv)
 library(glmmTMB)
 
+checkOutput <- function(simulationOutput){
+  
+  print(simulationOutput)
+  
+  if(any(simulationOutput$scaledResiduals < 0)) stop()
+  if(any(simulationOutput$scaledResiduals > 1)) stop()
+  if(any(is.na(simulationOutput$scaledResiduals))) stop()
+  
+  if(length(simulationOutput$scaledResiduals) != length(simulationOutput$observedResponse)) stop()
+  if(length(simulationOutput$fittedPredictedResponse) != length(simulationOutput$observedResponse)) stop()
+  
+}
 
 runEverything = function(fittedModel, testData, DHARMaData = T){
   
@@ -18,7 +30,7 @@ runEverything = function(fittedModel, testData, DHARMaData = T){
   
   simulationOutput <- simulateResiduals(fittedModel = fittedModel, n = 100)
   
-  DHARMa:::checkOutput(simulationOutput)
+  checkOutput(simulationOutput)
   
   testOverdispersion(simulationOutput)
   testUniformity(simulationOutput = simulationOutput)
@@ -32,7 +44,7 @@ runEverything = function(fittedModel, testData, DHARMaData = T){
   
   simulationOutput2 <- simulateResiduals(fittedModel = fittedModel, refit = T, n = 5) # n=10 is very low, set higher for serious tests
   
-  DHARMa:::checkOutput(simulationOutput2)
+  checkOutput(simulationOutput2)
   
   plot(simulationOutput2, quantreg = F)
   
@@ -121,7 +133,7 @@ test_that("binomial y/n (factor) works",
             fittedModel <- glmer(observedResponse ~ Environment1 + (1|group) , family = "binomial", data = testData)
             runEverything(fittedModel, testData)
             
-            # fittedModel <- glmmTMB(observedResponse ~ Environment1 + (1|group) , family = "binomial", data = testData)
+            fittedModel <- glmmTMB(observedResponse ~ Environment1 + (1|group) , family = "binomial", data = testData)
             # runEverything(fittedModel, testData)
           }
 )

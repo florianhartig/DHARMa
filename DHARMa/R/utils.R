@@ -5,15 +5,3 @@ securityAssertion <- function(context = "Not provided", stop = F){
 }
 
 
-checkOutput <- function(simulationOutput){
-  
-  print(simulationOutput)
-  
-  if(any(simulationOutput$scaledResiduals < 0)) stop()
-  if(any(simulationOutput$scaledResiduals > 1)) stop()
-  if(any(is.na(simulationOutput$scaledResiduals))) stop()
-  
-  if(length(simulationOutput$scaledResiduals) != length(simulationOutput$observedResponse)) stop()
-  if(length(simulationOutput$fittedPredictedResponse) != length(simulationOutput$observedResponse)) stop()
-  
-}
