@@ -16,13 +16,14 @@ sudo: false
 # This only works if sudo = false.
 cache: packages
 
+r_github_packages:
+  - glmmTMB/glmmTMB/glmmTMB
+
 r:
   - oldrel
   - release
   - devel
   
-cache: packages
-
 # Install nlopt package to help nloptr install.
 addons:
   apt:
