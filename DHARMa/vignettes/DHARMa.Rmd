@@ -9,7 +9,7 @@ vignette: >
   %\VignetteIndexEntry{Vignette for the DHARMa package}
   %\VignetteEngine{knitr::knitr}
   %\VignetteEncoding{UTF-8}
-abstract: "The DHARMa package uses a simulation-based approach to create readily interpretable scaled residuals from fitted generalized linear mixed models. Currently supported are generalized linear mixed models from 'lme4' (classes 'lmerMod', 'glmerMod'), generalized additive models ('gam' from 'mgcv'), 'glm' (including 'negbin' from 'MASS', but excluding quasi-distributions) and 'lm' model classes. Alternatively, externally created simulations, e.g. posterior predictive simulations from Bayesian software such as 'JAGS', 'STAN', or 'BUGS' can be processed as well. The resulting residuals are standardized to values between 0 and 1 and can be interpreted as intuitively as residuals from a linear regression. The package also provides a number of plot and test functions for typical model misspecification problems, such as over/underdispersion, zero-inflation, and spatial / temporal autocorrelation.\n \n \n"
+abstract: "The 'DHARMa' package uses a simulation-based approach to create readily interpretable scaled (quantile) residuals for fitted generalized linear mixed models. Currently supported are generalized linear mixed models from 'lme4' (classes 'lmerMod', 'glmerMod') and 'glmmTMB', generalized additive models ('gam' from 'mgcv'), 'glm' (including 'negbin' from 'MASS', but excluding quasi-distributions) and 'lm' model classes. Alternatively, externally created simulations, e.g. posterior predictive simulations from Bayesian software such as 'JAGS', 'STAN', or 'BUGS' can be processed as well. The resulting residuals are standardized to values between 0 and 1 and can be interpreted as intuitively as residuals from a linear regression. The package also provides a number of plot and test functions for typical model misspecification problems, such as over/underdispersion, zero-inflation, and residual spatial and temporal autocorrelation.\n \n \n"
 ---
 
 ```{r, echo = F}
@@ -243,21 +243,6 @@ simulationOutput$randomState
 
 If you do not use a seed, the random state will still recorded. If you want to reproduce simualtions for such a run, set the variable .Random.seed by hand, and simulate with seed = NA. 
 
-## Using external simulations (e.g. from Bayesian software)
-
-As mentioned earlier, the quantile residuals defined in DHARMa are the frequentist equivalent of the so-called "Bayesian p-values", i.e. residuals created from posterior predictive simulations in a Bayesian analysis.
-
-To make the plots and tests in DHARMa also available for Bayesian analysis, DHARMa provides the option to convert externally created posterior predictive simulations into a DHARMa object
-
-
-```{r, eval = F}
-res = createDHARMa(scaledResiduals = posteriorPredictiveSimulations, simulatedResponse = medianPosteriorPredictions, observedResponse = observations, integerResponse = ?)
-```
-
-What is provided as simulatedResponse is up to the user, but median posterior predictions seem most sensible to me. After the conversion, all DHARMa plots can be used, however, note that Bayesian p-values != DHARMA residuals, because in the Bayesian analysis, parameters are varied as well. 
-
-**Important**: as DHARMa doesn't know the distribution fitted model, it is vital to specify the integerResponse option by hand (see above / ?simulateResiduals for details). 
-
 ## Reproducibility notes
 
 If you running a stochastic algorithms such as the code in DHARMa, you should always set or record your random seed to make your final results reproducible (otherwise, results will change slightly every time you run the code). Do this via
@@ -377,7 +362,7 @@ We see a hump-shaped dependence of the environment, but with too many zeros.
 
 #### Zero-inflation in the scaled residuals
 
-In the normal residual, plots, zero-inflation will look pretty much like overdispersion
+In the normal DHARMa residual, plots, zero-inflation will look pretty much like overdispersion
 
 ```{r}
 
@@ -399,6 +384,18 @@ testZeroInflation(simulationOutput)
 ```
 
 This test is likely better suited for detecting zero-inflation than the standard plot, but note that also overdispersion will lead to excess zeros, so only seeing too many zeros is not a reliable diagnostics for moving towards a zero-inflated model. A reliable differentiation between overdispersion and zero-inflation will usually only be possible when directly comparing alternative models, e.g. through residual comparison / model selection of a model with / without zero-inflation, or by simply fitting a model with zero-inflation and looking at the parameter estimate for the zero-inflation. 
+
+A good option is the R package glmmTMB, which is also supported by DHARMa. We can use this to fit
+
+```{r}
+library(glmmTMB)
+fittedModel <- glmmTMB(observedResponse ~ Environment1 + I(Environment1^2) + (1|group), ziformula = ~1 , family = "poisson", data = testData)
+summary(fittedModel)
+
+simulationOutput <- simulateResiduals(fittedModel = fittedModel)
+plot(simulationOutput)
+```
+
 
 
 ## Heteroscedasticity
@@ -517,6 +514,81 @@ A big advantage of the simulations is that you can test any problem that you thi
 
 You think your random effect estimates look weird? Run the model with the refit = T option and see how typical random effect estimates look for your problem.
 
+# Supported packages 
+
+## lm and glm
+
+lm and glm are fully supported as specified in the help
+
+## lme4
+
+lme 4 is fully supported as specified in the help
+
+## glmmTMB
+
+Current limitations of glmmTMB
+
+* residual function doesn't work with factor response (glmmTMB bug)
+* refit doesn't work with n/k data, because update doesnt' work   
+* pearson residuals don't work with zi terms (not implemented), which limits some of the overdispersion tests
+* Currently, glmmTMB doesn't support the reform argument. 
+  * predict() is conditional on all random effects, corresponding to lme4 re.form = NULL
+  * simulate() is unconditional, i.e. all random effects will be resimulated, corresponding to lme4 re.form = 0
+  * That means that all predictions and simulations are conditional on REs, which can sometimes create a positive correlation between res and predicted , see https://github.com/florianhartig/DHARMa/issues/43
+  
+
+```{r}
+library(glmmTMB)
+testData = createData(sampleSize = 100, fixedEffects = 2, family = binomial(), randomEffectVariance = 0)
+
+m <- glmmTMB(observedResponse ~ Environment1 , data=testData, family=binomial)
+res = simulateResiduals(m)
+plot(res)
+```
+
+
+## Unsupported packages
+
+See my general comments about [adding new R packages to DHARMa](https://github.com/florianhartig/DHARMa/wiki/Adding-new-R-packages-to-DHARMA)
+
+As noted there, if you want to use DHARMa for a specific case, you could write a custom simulate function for the specific model you are working with. This will usually involve using the predict function and adding the random distribution, plus potentially drawing new data for the random effects or other hierarchical levels.
+
+As an example, for an poisson glm, a simulate function could be programmed as in the following example, which also shows how the results are read into DHARMa and plotted (see also following section)
+
+```{r, eval = T}
+testData = createData(sampleSize = 200, overdispersion = 0.5, family = poisson())
+fittedModel <- glm(observedResponse ~ Environment1, family = "poisson", data = testData)
+
+simulatePoissonGLM <- function(fittedModel, n){
+  pred = predict(fittedModel, type = "response")
+  nObs = length(pred)
+  sim = matrix(nrow = nObs, ncol = n)
+  for(i in 1:n) sim[,i] = rpois(nObs, pred)
+  return(sim)
+}
+
+sim = simulatePoissonGLM(fittedModel, 100)
+
+DHARMaRes = createDHARMa(simulatedResponse = sim, observedResponse = testData$observedResponse, 
+             fittedPredictedResponse = predict(fittedModel))
+plot(DHARMaRes, quantreg = F)
+```
+
+
+## Importing external simulations (e.g. from Bayesian software or unsupported packages)
+
+As mentioned earlier, the quantile residuals defined in DHARMa are the frequentist equivalent of the so-called "Bayesian p-values", i.e. residuals created from posterior predictive simulations in a Bayesian analysis.
+
+To make the plots and tests in DHARMa also available for Bayesian analysis, DHARMa provides the option to convert externally created posterior predictive simulations into a DHARMa object
+
+
+```{r, eval = F}
+res = createDHARMa(scaledResiduals = posteriorPredictiveSimulations, simulatedResponse = medianPosteriorPredictions, observedResponse = observations, integerResponse = ?)
+```
+
+What is provided as simulatedResponse is up to the user, but median posterior predictions seem most sensible to me. After the conversion, all DHARMa plots can be used, however, note that Bayesian p-values != DHARMA residuals, because in the Bayesian analysis, parameters are varied as well. 
+
+**Important**: as DHARMa doesn't know the distribution fitted model, it is vital to specify the integerResponse option by hand (see above / ?simulateResiduals for details). 
 
 # Real-world examples
 
