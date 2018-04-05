@@ -38,8 +38,8 @@ simulateResiduals <- function(fittedModel, n = 250, refit = F, integerResponse =
   ######## general assertions and startup calculations ##########
   
   if (n < 2) stop("error in DHARMa::simulateResiduals: n > 1 is required to calculate scaled residuals")
-  DHARMa:::checkModel(fittedModel)  
-  randomState <- DHARMa:::getRandomState(seed)
+  checkModel(fittedModel)  
+  randomState <-getRandomState(seed)
   ptm <- proc.time() 
 
   ####### extract model info ############
@@ -84,7 +84,7 @@ simulateResiduals <- function(fittedModel, n = 250, refit = F, integerResponse =
     out$fittedPredictedResponse = predict(fittedModel, type = "response", re.form = ~0) 
   }
   
-  out$fittedFixedEffects = DHARMa:::getFixedEffects(fittedModel)
+  out$fittedFixedEffects = getFixedEffects(fittedModel)
   out$fittedResiduals = residuals(fittedModel, type = "response")
   
   ######## simulations ##################
@@ -156,7 +156,7 @@ simulateResiduals <- function(fittedModel, n = 250, refit = F, integerResponse =
         refittedModel = refit(fittedModel, simObserved)
         
         out$refittedPredictedResponse[,i] = predict(refittedModel, type = "response")
-        out$refittedFixedEffects[,i] = DHARMa:::getFixedEffects(refittedModel)
+        out$refittedFixedEffects[,i] = getFixedEffects(refittedModel)
         out$refittedResiduals[,i] = residuals(refittedModel, type = "response")
         # try statement for glmmTMB
         if(!out$modelClass == "glmmTMB") out$refittedPearsonResiduals[,i] = residuals(refittedModel, type = "pearson")
@@ -225,12 +225,23 @@ getFixedEffects <- function(fittedModel){
   } else if(class(fittedModel)[1] %in% c("glmerMod", "lmerMod")){
     out = lme4::fixef(fittedModel)
   } else if(class(fittedModel)[1] %in% c("glmmTMB")){
-    out = fixef(fittedModel)
+    out = glmmTMB::fixef(fittedModel)
     out = out$cond
   } else stop()
   return(out)
 }
 
+
+#' @importFrom lme4 refit
+NULL
+
+
+#' Refit a Model with a Different Response
+#' 
+#' @param object a fitted model
+#' @param newresp a new response
+#' @param ... further arguments, no effect implemented for this S3 class
+#' @example inst/examples/helpRefit.R
 #' @export
 refit.lm <- function(object, newresp, ...){
   
@@ -251,7 +262,12 @@ refit.lm <- function(object, newresp, ...){
   return(refittedModel)
 }
 
-
+#' Refit a Model with a Different Response
+#' 
+#' @param object a fitted model
+#' @param newresp a new response
+#' @param ... further arguments, no effect implemented for this S3 class
+#' @example inst/examples/helpRefit.R
 #' @export
 refit.glmmTMB <- function(object, newresp, ...){
   
@@ -273,6 +289,13 @@ refit.glmmTMB <- function(object, newresp, ...){
 
   refittedModel = update(object, data = newData)
   return(refittedModel)
+}
+
+
+securityAssertion <- function(context = "Not provided", stop = F){
+  generalMessage = "Message from DHARMa package: a security assertion was not met. This means that during the execution of a DHARMa function, some unexpected conditions ocurred. Even if you didn't get an error, your results may not be reliable. Please check with the help if you use the functions as intended. If you think that the error is not on your side, I would be grateful if you could report the problem at https://github.com/florianhartig/DHARMa/issues \n\n Context:"
+  if (stop == F) warning(paste(generalMessage, context))  
+  else stop(paste(generalMessage, context))  
 }
 
 
