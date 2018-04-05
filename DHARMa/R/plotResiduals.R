@@ -1,6 +1,6 @@
 #' DHARMa standard residual plots
 #' 
-#' DEPRECATED, use plot.DHARMa
+#' DEPRECATED, use plot() instead
 #' 
 #' @param simulationOutput an object with simualted residuals created by \code{\link{simulateResiduals}}
 #' @param ... further options for \code{\link{plotResiduals}}. Consider in particular parameters quantreg, rank and asFactor. xlab, ylab and main cannot be changed when using plotSimulatedResiduals, but can be changed when using plotResiduals.
@@ -9,7 +9,7 @@
 #' @seealso \code{\link{plotResiduals}}, \code{\link{plotQQunif}}
 #' @export
 plotSimulatedResiduals <- function(simulationOutput, ...){
-  message("plotSimulatedResiduals is deprecated, switch your code to using plot.DHARMa")
+  message("plotSimulatedResiduals is deprecated, switch your code to using the normal plot command")
   plot(simulationOutput, ...)
 }
 

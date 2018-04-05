@@ -35,6 +35,7 @@ citation("DHARMa")
 If you want to install the current (development) version from this repository, run
 
 ```{r}
+devtools::install_github("glmmTMB/glmmTMB/glmmTMB") # for full glmmTMB support
 devtools::install_github(repo = "florianhartig/DHARMa", subdir = "DHARMa", 
 dependencies = T, build_vignettes = T)
 ```
