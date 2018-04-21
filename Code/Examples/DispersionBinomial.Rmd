@@ -9,7 +9,7 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-
+This example shows a misspecified binomial model
 
 ```{r}
 testData = createData(sampleSize = 500, overdispersion = 0, fixedEffects = 2, family = binomial(), randomEffectVariance = 0)

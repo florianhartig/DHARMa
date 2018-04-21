@@ -514,6 +514,39 @@ A big advantage of the simulations is that you can test any problem that you thi
 
 You think your random effect estimates look weird? Run the model with the refit = T option and see how typical random effect estimates look for your problem.
 
+# Special cases and 
+
+## Binomial 0/1 data
+
+There are a lot of rumors about that can and cannot be checked with binomial 0/1 data. Let's consider a clearly misspecified binomial model
+
+```{r}
+testData = createData(sampleSize = 500, overdispersion = 0, fixedEffects = 5, family = binomial(), randomEffectVariance = 0)
+fittedModel <- glm(observedResponse ~ 1, family = "binomial", data = testData)
+
+simulationOutput <- simulateResiduals(fittedModel = fittedModel)
+```
+
+A rumor that is true is that, unlike in k/n or count data, such a misspecification will not produce overdispersion. 
+```{r}
+plot(simulationOutput, asFactor = T)
+```
+However, you can clearly see the misfit if you plot 
+
+```{r}
+plotResiduals(testData$Environment1, simulationOutput$scaledResiduals, quantreg = T)
+```
+
+Moreover, if you would perform the DHARMa procedure per group, you should also be able to see overdispersion. Unfortunately, however, this option is not yet implemented in DHARMa.
+
+
+## Negative binomial
+
+
+
+
+
+
 # Supported packages 
 
 ## lm and glm
