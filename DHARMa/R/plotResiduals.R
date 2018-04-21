@@ -9,7 +9,7 @@
 #' @seealso \code{\link{plotResiduals}}, \code{\link{plotQQunif}}
 #' @export
 plotSimulatedResiduals <- function(simulationOutput, ...){
-  message("plotSimulatedResiduals is deprecated, switch your code to using the normal plot command")
+  message("plotSimulatedResiduals is deprecated, switch your code to using the plot function")
   plot(simulationOutput, ...)
 }
 
