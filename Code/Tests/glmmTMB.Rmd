@@ -1,0 +1,239 @@
+---
+title: "Tests / Examples using glmmTMB with DHARMa"
+author: "Florian Hartig"
+date: "3/27/2018"
+output: 
+  html_document: 
+    keep_md: yes
+    toc: yes
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, cache = T)
+```
+
+```{r}
+library(DHARMa)
+library(glmmTMB)
+```
+
+# Testing general package behavior / general problems
+
+## Problems with binomial
+
+This crashes my R (memory allocation issue) on the current CRAN version (27.3.18). Installing the development version on GitHub fixes the problem. sessionInfo() at the end of the document
+
+```{r, eval = F}
+library(glmmTMB)
+data(cbpp, package="lme4")
+m <- glmmTMB(cbind(incidence, size-incidence) ~ period + (1 | herd), data=cbpp, family=binomial)
+summary(m)
+predict(m)
+```
+
+## n/k update problem 
+
+update doesn't work for n/k data
+
+```{r}
+library(DHARMa)
+library(glmmTMB)
+
+testData = createData(sampleSize = 200, family = binomial(), binomialTrials = 20)
+
+fittedModel <- glmmTMB(cbind(observedResponse1,observedResponse0) ~ Environment1 + (1|group) , family = "binomial", data = testData)
+temp = model.frame(fittedModel)
+update(fittedModel, temp)
+```
+
+
+## Residual problems
+
+* residual function doesn't work with factor response (bug)
+
+```{r, eval = F}
+library(DHARMa)
+library(glmmTMB)
+
+testData = createData(sampleSize = 200, family = binomial(), factorResponse = T)
+fittedModel <- glmmTMB(observedResponse ~ Environment1 + (1|group) , family = "binomial", data = testData)
+residuals(fittedModel)
+
+```
+
+
+* pearson residuals don't work with zi terms (not implemented)
+
+
+
+## with ~reform in pred / simulate
+
+Currently, glmmTMB doesn't support the reform argument. Also, 
+
+* predict() is conditional on all random effects, corresponding to lme4 re.form = NULL
+* simulate() is unconditional, i.e. all random effects will be resimulated, corresponding to lme4 re.form = 0
+
+all predictions and simulations are conditional on REs, problematic for some of the residual tests, see https://github.com/florianhartig/DHARMa/issues/43
+
+```{r}
+m1 <- glmmTMB(count~ mined + (1|site), family=poisson, data=Salamanders)
+
+#pred = predict(m1, re.form = 0)
+pred = predict(m1)
+```
+
+
+# DHARMa with glmmTMB example cases 
+
+## Test 1 - Simple poisson model
+
+```{r}
+m <- glmmTMB(count~ mined, family=poisson, data=Salamanders)
+summary(m)
+
+res = simulateResiduals(m)
+plot(res, asFactor = T)
+
+### creating new data based on the fitted models. Residuals should now be perfect
+
+Salamanders$count2 = simulate(m)$sim_1
+
+m <- glmmTMB(count2~ mined, family=poisson, data=Salamanders)
+
+res = simulateResiduals(m)
+plot(res, asFactor = T)
+```
+
+
+## Test 2 - Poisson + RE
+
+```{r}
+m <- glmmTMB(count~ mined + (1|site), family=poisson, data=Salamanders)
+summary(m)
+
+res = simulateResiduals(m)
+plot(res, rank = T)
+
+### creating new data based on the fitted models. Residuals should now be perfect, except for the reform pattern
+
+Salamanders$count2 = simulate(m)$sim_1
+
+m <- glmmTMB(count2~ mined + (1|site), family=poisson, data=Salamanders)
+
+res = simulateResiduals(m)
+plot(res, rank = T)
+```
+
+Fit is still fine, but note the pattern in the residual vs. predicted, which is caused by the reform problem (REs are included in the predictions)
+
+If we calculate unconditional REs by hand, pattern disappears
+
+```{r}
+x = fixef(m)
+pred = x$cond[1] + x$cond[2]*as.numeric(Salamanders$mined)
+plotResiduals(pred, res$scaledResiduals, asFactor = T)
+```
+
+
+
+## Test 3 - Binomial models
+
+Binomial required a few adjustments, because the simulate function in glmmTMB doesn't behave like glm / glmer, which returns lists of for the n/k case, and a vector instead
+
+standard binomial with DHARMa test data
+
+```{r}
+testData = createData(sampleSize = 100, fixedEffects = 2, family = binomial(), randomEffectVariance = 0)
+
+m <- glmmTMB(observedResponse ~ Environment1 , data=testData, family=binomial)
+res = simulateResiduals(m)
+plot(res)
+```
+
+with a missing predictor
+
+```{r}
+testData = createData(sampleSize = 100, fixedEffects = 2, family = binomial(), randomEffectVariance = 0)
+
+m <- glmmTMB(observedResponse ~ 1 , data=testData, family=binomial)
+res = simulateResiduals(m)
+plot(res)
+plotResiduals(testData$Environment1, res$scaledResiduals)
+```
+
+n/k example from the help
+
+```{r}
+data(cbpp, package="lme4")
+
+newDat = cbpp
+newDat$response = cbind(newDat$incidence, newDat$size-newDat$incidence)
+m <- glmmTMB(response ~ period , data=newDat, family=binomial)
+m
+
+res = simulateResiduals(m)
+plot(res, rank = T)
+
+### creating new data based on the fitted models. Residuals should now be perfect
+
+# R problem - sometimes newDat$newResponse is updated, and sometimes not ... I have no idea why
+
+newDat$newResponse = as.matrix(simulate(m))
+newDat$newResponse
+m2 <- glmmTMB(newResponse ~ period , data=newDat, family=binomial)
+m2
+
+res = simulateResiduals(m2)
+plot(res, rank = T)
+```
+
+
+## Test 4 - Zero-inflated negative binomial models
+
+no RE to test ZI intercept only
+
+```{r}
+m <- glmmTMB(count~1 , zi=~1, family=nbinom1, Salamanders)
+summary(m)
+
+res = simulateResiduals(m)
+plot(res, asFactor = T)
+
+### creating new data based on the fitted models. Residuals should now be perfect
+
+Salamanders$count2 = simulate(m)$sim_1
+m <- glmmTMB(count2~1 , zi=~1, family=nbinom1, Salamanders)
+summary(m)
+
+res = simulateResiduals(m)
+plot(res, asFactor = T)
+```
+
+Example from the help
+
+```{r}
+m <- glmmTMB(count~spp + mined + (1|site), zi=~spp + mined, family=nbinom2, Salamanders)
+summary(m)
+
+res = simulateResiduals(m)
+plot(res, rank = T)
+
+### creating new data based on the fitted models. Residuals should now be perfect
+
+Salamanders$count2 = simulate(m)$sim_1
+m <- glmmTMB(count~spp + mined + (1|site), zi=~spp + mined, family=nbinom2, Salamanders)
+summary(m)
+
+res = simulateResiduals(m)
+plot(res, rank = T)
+```
+
+There is still a slight correlation in both cases - I assume that this is again a problem of https://github.com/florianhartig/DHARMa/issues/43
+
+# Reproducibility info 
+
+```{r}
+sessionInfo()
+```
+
+

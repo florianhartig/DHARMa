@@ -1,12 +1,12 @@
 Package: DHARMa
 Title: Residual Diagnostics for Hierarchical (Multi-Level / Mixed) Regression Models
-Version: 0.1.6
+Version: 0.1.6.2
 Date: 2018-03-14
 Authors@R: c(person("Florian", "Hartig", email = "florian.hartig@biologie.uni-regensburg.de", role = c("aut", "cre"), comment = "Theoretical Ecology, University of Regensburg, Regensburg, Germany"))
 Description: The 'DHARMa' package uses a simulation-based approach to create
     readily interpretable scaled (quantile) residuals for fitted generalized linear mixed
     models. Currently supported are generalized linear mixed models from 'lme4' 
-    (classes 'lmerMod', 'glmerMod'), generalized additive models ('gam' from 'mgcv'), 
+    (classes 'lmerMod', 'glmerMod') and 'glmmTMB', generalized additive models ('gam' from 'mgcv'), 
     'glm' (including 'negbin' from 'MASS', but excluding quasi-distributions) and 'lm' model
     classes. Alternatively, externally created simulations, e.g. posterior predictive simulations 
     from Bayesian software such as 'JAGS', 'STAN', or 'BUGS' can be processed as well. 
@@ -30,7 +30,8 @@ Imports:
     doParallel,
     foreach,
     lme4,
-    mgcv
+    mgcv,
+    glmmTMB
 Suggests:
     knitr,
     testthat
