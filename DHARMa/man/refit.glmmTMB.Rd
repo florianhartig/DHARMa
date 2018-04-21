@@ -40,7 +40,8 @@ fittedModel <- lme4::lmer(observedResponse ~ Environment1 + (1|group) , data = t
 newResponse = simulate(fittedModel)
 refit(fittedModel, newResponse[,1])
 
-fittedModel <- lme4::glmer(observedResponse ~ Environment1 + (1|group) , data = testData, family = "poisson")
+fittedModel <- lme4::glmer(observedResponse ~ Environment1 + (1|group) , data = testData, 
+                           family = "poisson")
 newResponse = simulate(fittedModel)
 refit(fittedModel, newResponse[,1])
 
