@@ -15,7 +15,7 @@
 #' @example inst/examples/getRandomStateHelp.R
 #' @author Florian Hartig
 #' 
-getRandomState <- function(seed = NULL, ...){
+getRandomState <- function(seed = NULL){
   
   # better to explicitly access the global RS?
   # current = get(".Random.seed", .GlobalEnv, ifnotfound = NULL)
@@ -27,7 +27,7 @@ getRandomState <- function(seed = NULL, ...){
   }
   
   # setting seed
-  if(is.numeric(seed)) set.seed(seed, ...)
+  if(is.numeric(seed)) set.seed(seed)
 
   # ensuring that RNG has been initialized
   if (is.null(current))runif(1) 

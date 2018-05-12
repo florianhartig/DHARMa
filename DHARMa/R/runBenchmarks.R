@@ -28,7 +28,7 @@ runBenchmarks <- function(calculateStatistics, controlValues = NULL, nRep = 10, 
     
   }else{
     
-    library(foreach)
+    requireNamespace(foreach)
     
     if (parallel == T | parallel == "auto"){
       cores <- parallel::detectCores() - 1

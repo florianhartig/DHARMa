@@ -19,5 +19,5 @@ rm(.Random.seed)
 x = getRandomState(123)
 runif(1)
 x$restoreCurrent()
-.Random.seed
+exists(".Random.seed")
 

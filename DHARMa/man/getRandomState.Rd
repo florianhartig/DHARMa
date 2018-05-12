@@ -4,7 +4,7 @@
 \alias{getRandomState}
 \title{Record and restore a random state}
 \usage{
-getRandomState(seed = NULL, ...)
+getRandomState(seed = NULL)
 }
 \arguments{
 \item{seed}{seed argument to set.seed()}
@@ -44,7 +44,7 @@ rm(.Random.seed)
 x = getRandomState(123)
 runif(1)
 x$restoreCurrent()
-.Random.seed
+exists(".Random.seed")
 
 }
 \author{
