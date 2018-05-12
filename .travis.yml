@@ -16,9 +16,6 @@ sudo: false
 # This only works if sudo = false.
 cache: packages
 
-r_github_packages:
-  - glmmTMB/glmmTMB/glmmTMB
-
 r:
   - oldrel
   - release
