@@ -159,8 +159,7 @@ simulateResiduals <- function(fittedModel, n = 250, refit = F, integerResponse =
         out$refittedPredictedResponse[,i] = predict(refittedModel, type = "response")
         out$refittedFixedEffects[,i] = getFixedEffects(refittedModel)
         out$refittedResiduals[,i] = residuals(refittedModel, type = "response")
-        # try statement for glmmTMB
-        if(!out$modelClass == "glmmTMB") out$refittedPearsonResiduals[,i] = residuals(refittedModel, type = "pearson")
+        out$refittedDevianceResiduals[,i] = residuals(refittedModel, type = "deviance")
         #out$refittedRandomEffects[,i]  = ranef(refittedModel)
       }, silent = T)
     }
