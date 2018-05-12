@@ -40,6 +40,7 @@ simulateResiduals <- function(fittedModel, n = 250, refit = F, integerResponse =
   if (n < 2) stop("error in DHARMa::simulateResiduals: n > 1 is required to calculate scaled residuals")
   checkModel(fittedModel)  
   randomState <-getRandomState(seed)
+  on.exit({randomState$restoreCurrent()})
   ptm <- proc.time() 
 
   ####### extract model info ############
@@ -203,6 +204,7 @@ simulateResiduals <- function(fittedModel, n = 250, refit = F, integerResponse =
   
   out$time = proc.time() - ptm
   out$randomState = randomState
+
   class(out) = "DHARMa"
   return(out)
 }
