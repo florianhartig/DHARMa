@@ -147,11 +147,12 @@ testOverdispersionParametric <- function(model, method = c("residual", "var"), a
 #' 
 #' @param simulationOutput a DHARMa object with simulated residuals created with \code{\link{simulateResiduals}}
 #' @param plot whether to plot output
+#' @param k which number to count. Default is k = 0, testing for zeros
 #' @param alternative whether to test for 'more', 'less', or 'both' more or less zeros in the observed data
 #' @details shows the expected distribution of zeros against the observed
 #' @seealso \code{\link{testUniformity}}, \code{\link{testSimulatedResiduals}}, \code{\link{testTemporalAutocorrelation}}, \code{\link{testSpatialAutocorrelation}}, \code{\link{testOverdispersion}}, \code{\link{testOverdispersionParametric}}
 #' @export
-testZeroInflation <- function(simulationOutput,  plot = T, alternative = "more"){
+testZeroInflation <- function(simulationOutput, k=0, alternative = "greater", plot = T){
   
   countZeros <- function(x) sum( x == 0)
   
@@ -169,11 +170,16 @@ testZeroInflation <- function(simulationOutput,  plot = T, alternative = "more")
   out = list()
   out$statistic = c(ratioObsExp = zerosObserved / mean(zerosExpected))
   out$method = "DHARMa zero-inflation test via comparison to expected zeros with simulation under H0 = fitted model"
-  out$alternative = alternative
+  out$alternative = switch(alternative, 
+                           greater = paste(0, "Observed > Simulated (", Zero-inflation)", 
+                           two.sided = "Dispersion != 1 (Over / underdispersion)", 
+                           less = "Dispersion < 1 (Underdispersion)")
   out$p.value = p
   out$data.name = deparse(substitute(simulationOutput))
   
   class(out) = "htest"
+  
+  
   
   if(plot == T) {
     hist(zerosExpected, xlim = range(zerosExpected, zerosObserved, na.rm=T ))
