@@ -21,17 +21,18 @@ Imports:
     graphics,
     utils,
     grDevices,
+    parallel,
+    doParallel,
+    foreach,
     gap,
     qrnn,
     lmtest,
     ape,
     sfsmisc,
     MASS,
-    doParallel,
-    foreach,
     lme4,
     mgcv,
-    glmmTMB
+    glmmTMB (> 0.2)
 Suggests:
     knitr,
     testthat
