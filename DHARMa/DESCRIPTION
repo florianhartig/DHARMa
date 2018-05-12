@@ -32,7 +32,7 @@ Imports:
     MASS,
     lme4,
     mgcv,
-    glmmTMB (> 0.2)
+    glmmTMB (>= 0.2.1)
 Suggests:
     knitr,
     testthat
