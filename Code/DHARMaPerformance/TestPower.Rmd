@@ -1,0 +1,86 @@
+---
+title: "PowerTests"
+author: "Florian Hartig"
+date: "5/12/2018"
+output: 
+  html_document: 
+    keep_md: yes
+---
+
+
+```{r global_options, include=FALSE}
+knitr::opts_chunk$set(fig.width=7, fig.height=4.5, fig.align='center', warning=FALSE, message=FALSE, cache = T)
+```
+
+```{r, echo = F}
+library(AER)
+library(lme4)
+library(glmmTMB)
+library(DHARMa)
+```
+
+# Dispersion Tests
+
+## Benchmarking DHARMa dispersiontests against AER dispersiontest for Poisson GLM
+
+```{r}
+doCalculations <- function(control = 0){
+  testData = createData(sampleSize = 200, family = poisson(), overdispersion = control, randomEffectVariance = 0)
+  fittedModel <- glm(observedResponse ~ Environment1, data = testData, family = poisson())
+ 
+  out = list()
+  
+  res <- simulateResiduals(fittedModel = fittedModel, n = 250)
+  out$uniformTest = testUniformity(res)$p.value  
+  out$Dispersion = testDispersion(res, plot = F)$p.value  
+  out$DispersionAER = AER::dispersiontest(fittedModel)$p.value 
+  
+  res <- simulateResiduals(fittedModel = fittedModel, n = 250, refit = T)  
+  out$DispersionRefitted = testDispersion(res, plot = F)$p.value  
+  return(unlist(out))
+}
+
+# testing a single return
+doCalculations(control = 0.3)
+
+dispValues = seq(0,1.2, len = 20)
+
+# running benchmark
+out = runBenchmarks(doCalculations, controlValues = dispValues , nRep = 100,  parallel = F)
+
+tests = c("uniformity", "DHARMa disp basic" , "AER dispersiontest", "DHARMa disp refit")
+
+
+matplot(dispValues, t(out$summaries[,1,]), type = "l")
+legend("bottomright", tests, col = 1:4, lty = 1:4)
+
+```
+
+
+## Benchmarking DHARMa dispersiontests against pearson dispersiontest for glmms
+
+
+```{r}
+overdisp_fun <- function(model) {
+  ## number of variance parameters in 
+  ##   an n-by-n variance-covariance matrix
+  vpars <- function(m) {
+    nrow(m)*(nrow(m)+1)/2
+  }
+  model.df <- sum(sapply(VarCorr(model),vpars))+length(fixef(model))
+  rdf <- nrow(model.frame(model))-model.df
+  rp <- residuals(model,type="pearson")
+  Pearson.chisq <- sum(rp^2)
+  prat <- Pearson.chisq/rdf
+  pval <- pchisq(Pearson.chisq, df=rdf, lower.tail=FALSE)
+  c(chisq=Pearson.chisq,ratio=prat,rdf=rdf,p=pval)
+}
+```
+
+
+# Autocorrelation tests
+
+
+
+
+
