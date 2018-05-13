@@ -22,5 +22,8 @@ This function compares the observed number of zeros with the zeros expected from
 shows the expected distribution of zeros against the observed
 }
 \seealso{
-\code{\link{testUniformity}}, \code{\link{testSimulatedResiduals}}, \code{\link{testTemporalAutocorrelation}}, \code{\link{testSpatialAutocorrelation}}, \code{\link{testOverdispersion}}, \code{\link{testOverdispersionParametric}}
+\code{\link{testResiduals}}, \code{\link{testUniformity}}, \code{\link{testDispersion}}, \code{\link{testGeneric}}, \code{\link{testTemporalAutocorrelation}}, \code{\link{testSpatialAutocorrelation}}
+}
+\author{
+Florian Hartig
 }

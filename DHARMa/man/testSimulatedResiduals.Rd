@@ -17,3 +17,6 @@ Residual tests
 \details{
 Deprecated, switch your code to using the \code{\link{testResiduals}} function
 }
+\author{
+Florian Hartig
+}

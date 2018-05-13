@@ -2,26 +2,24 @@
 % Please edit documentation in R/tests.R
 \name{testResiduals}
 \alias{testResiduals}
-\title{DHARMa residual tests}
+\title{DHARMa general residual test}
 \usage{
-testResiduals(simulationOutput, type = c("uniformity", "dispersion",
-  "summary"), ...)
+testResiduals(simulationOutput, ...)
 }
 \arguments{
 \item{simulationOutput}{a DHARMa object with simulated residuals created with \code{\link{simulateResiduals}}}
 
-\item{type}{a string or a vector of string with the tests to be performed.}
-
-\item{...}{parameters to be passed on to the test.}
+\item{...}{parameters to be passed on to the tests.}
 }
 \description{
-Wrapper for all residual tests implemented in DHARMa
+Calls both uniformity and dispersion test
 }
 \details{
-This function is a wrapper for the various test functions implemented in DHARNa. Currently, this function calls only the \code{\link{testUniformity}} function. Other tests (see below) have to be called by hand
-
-Currently, this function calls only the \code{\link{testUniformity}} function. All other tests (see below) have to be called by hand.
+This function is a wrapper for the various test functions implemented in DHARMa. Currently, this function calls the \code{\link{testUniformity}} and the \code{\link{testDispersion}} functions. All other tests (see below) have to be called by hand.
 }
 \seealso{
-\code{\link{testUniformity}}, \code{\link{testZeroInflation}}, \code{\link{testTemporalAutocorrelation}},
+\code{\link{testUniformity}}, \code{\link{testDispersion}}, \code{\link{testZeroInflation}}, \code{\link{testGeneric}}, \code{\link{testTemporalAutocorrelation}}, \code{\link{testSpatialAutocorrelation}}
+}
+\author{
+Florian Hartig
 }

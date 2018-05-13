@@ -140,7 +140,7 @@ simulateResiduals <- function(fittedModel, n = 250, refit = F, integerResponse =
     out$refittedFixedEffects <- matrix(nrow = length(out$fittedFixedEffects), ncol = n )  
     #out$refittedRandomEffects <- matrix(nrow = length(out$fittedRandomEffects), ncol = n )  
     out$refittedResiduals = matrix(nrow = out$nObs, ncol = n)   
-    out$refittedPearsonResiduals = matrix(nrow = out$nObs, ncol = n)   
+    out$refittedDevianceResiduals = matrix(nrow = out$nObs, ncol = n)   
     
     for (i in 1:n){
       #tryCatch()

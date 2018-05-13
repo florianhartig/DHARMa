@@ -1,23 +1,23 @@
-#' DHARMa residual tests
+#' DHARMa general residual test
 #' 
-#' Wrapper for all residual tests implemented in DHARMa
+#' Calls both uniformity and dispersion test
 #'
-#' This function is a wrapper for the various test functions implemented in DHARNa. Currently, this function calls only the \code{\link{testUniformity}} function. Other tests (see below) have to be called by hand 
+#' This function is a wrapper for the various test functions implemented in DHARMa. Currently, this function calls the \code{\link{testUniformity}} and the \code{\link{testDispersion}} functions. All other tests (see below) have to be called by hand.
 #' 
 #' @param simulationOutput a DHARMa object with simulated residuals created with \code{\link{simulateResiduals}}
-#' @param type a string or a vector of string with the tests to be performed. 
-#' @param ... parameters to be passed on to the test.
-#' @details Currently, this function calls only the \code{\link{testUniformity}} function. All other tests (see below) have to be called by hand. 
+#' @param ... parameters to be passed on to the tests.
+#' @author Florian Hartig
 #' @export
-#' @seealso \code{\link{testUniformity}}, \code{\link{testZeroInflation}}, \code{\link{testTemporalAutocorrelation}}, 
-testResiduals <- function(simulationOutput, type = c("uniformity", "dispersion", "summary"), ...){
+#' @seealso \code{\link{testUniformity}}, \code{\link{testDispersion}}, \code{\link{testZeroInflation}}, \code{\link{testGeneric}}, \code{\link{testTemporalAutocorrelation}}, \code{\link{testSpatialAutocorrelation}}
+testResiduals <- function(simulationOutput, ...){
   
-  type <- match.arg(type)
+  out = list()
+  out$uniformity = testUniformity(simulationOutput, ...)
+  out$dispersion = testDispersion(simulationOutput, ...)
   
-  if(type == "uniformity") testUniformity(simulationOutput, ...)
-
+  print(out)
+  return(out)
 }
-
 
 #' Residual tests
 #' 
@@ -25,6 +25,7 @@ testResiduals <- function(simulationOutput, type = c("uniformity", "dispersion",
 #' 
 #' @param simulationOutput a DHARMa object with simulated residuals created with \code{\link{simulateResiduals}}
 #' @param ... additional arguments to \code{\link{testResiduals}}
+#' @author Florian Hartig
 #' @export
 testSimulatedResiduals <- function(simulationOutput){
   message("testSimulatedResiduals is deprecated, switch your code to using the testResiduals function")
@@ -38,7 +39,8 @@ testSimulatedResiduals <- function(simulationOutput){
 #' 
 #' @param simulationOutput a DHARMa object with simulated residuals created with \code{\link{simulateResiduals}}
 #' @details The function applies a KS test for uniformity on the simulated residuals
-#' @seealso \code{\link{testSimulatedResiduals}}, \code{\link{testZeroInflation}}, \code{\link{testTemporalAutocorrelation}}, \code{\link{testSpatialAutocorrelation}}, \code{\link{testOverdispersion}}, \code{\link{testOverdispersionParametric}}
+#' @author Florian Hartig
+#' @seealso \code{\link{testResiduals}}, \code{\link{testDispersion}}, \code{\link{testZeroInflation}}, \code{\link{testGeneric}}, \code{\link{testTemporalAutocorrelation}}, \code{\link{testSpatialAutocorrelation}}
 #' @export
 testUniformity<- function(simulationOutput){
   out <- suppressWarnings(ks.test(simulationOutput$scaledResiduals, 'punif'))
@@ -53,33 +55,34 @@ testUniformity<- function(simulationOutput){
 #' @param simulationOutput a DHARMa object with simulated residuals created with \code{\link{simulateResiduals}}
 #' @param plot whether to plot output
 #' @param alternative whether to test for "overdispersion", "underdispersion", or "both" (both reduces power)
-#' @param ... arguments to pass on to \code{\link{testSummary}}
+#' @param ... arguments to pass on to \code{\link{testGeneric}}
 #' @details The function implements two tests, depending on whether it is applied on a simulation with refit = F, or refit = T. 
 #' 
 #' If refit = F (not recommended), the function tests if the IQR of the scaled residuals deviate from the null hypothesis of a uniform distribution. Simulations show that this option is not properly calibrated and much less powerful than the parametric alternative \code{\link{testOverdispersionParametric}} and even the simple \code{\link{testUniformity}}, and therefore it's use is not recommended. A warning will be returned if the function is called. 
 #' 
 #' If refit = T, the function compares the approximate deviance (via squared pearson residuals) with the same quantity from the models refitted with simulated data. It is much slower than the parametric alternative \code{\link{testOverdispersionParametric}}, but simulations show that it is slightly more powerful than the latter, and more powerful than any other non-parametric test in DHARMa, and it doesn't make any parametric assumptions. However, given the computational cost, I would suggest that most users will be satisfied with the parametric overdispersion test. 
 #' 
-#' @seealso \code{\link{testSimulatedResiduals}}, \code{\link{testSimulatedResiduals}}, \code{\link{testZeroInflation}}, \code{\link{testTemporalAutocorrelation}}, \code{\link{testSpatialAutocorrelation}}, \code{\link{testOverdispersionParametric}}
+#' @author Florian Hartig
+#' @seealso \code{\link{testResiduals}}, \code{\link{testUniformity}}, \code{\link{testZeroInflation}}, \code{\link{testGeneric}}, \code{\link{testTemporalAutocorrelation}}, \code{\link{testSpatialAutocorrelation}}
 #' @example inst/examples/testsHelp.R
 #' @export
-testDispersion <- function(simulationOutput, alternative = c("greater", "two.sided", "less"), plot = T, ...){
+testDispersion <- function(simulationOutput, alternative = c("greater", "two.sided", "less"), plot = F, ...){
   
   alternative <- match.arg(alternative)
   
   if(simulationOutput$refit == F){
     spread <- function(x) sd(x - simulationOutput$fittedPredictedResponse) 
-    out = testSummary(simulationOutput, summary = spread, alternative = alternative, methodName = "DHARMa nonparametric dispersion test via sd of simulated data against sd observed data", plot = plot, ...)
+    out = testGeneric(simulationOutput, summary = spread, alternative = alternative, methodName = "DHARMa nonparametric dispersion test via sd of residuals fitted vs. simulated", plot = plot, ...)
   } else {
 
     out = list()
     
     observed = sum(residuals(simulationOutput$fittedModel, type = "deviance")^2)
-    ss = apply(simulationOutput$refittedDevianceResiduals^2 , 2, sum)
-    out$statistic = c(dispersion = observed / mean(ss))
-    out$method = "DHARMa nonparametric dispersion test via comparison to simulation under H0 = fitted model"
+    expected = apply(simulationOutput$refittedDevianceResiduals^2 , 2, sum)
+    out$statistic = c(dispersion = observed / mean(expected))
+    out$method = "DHARMa nonparametric dispersion test via mean deviance residual fitted vs. simulated-refitted"
     
-    p = ecdf(ss)(observed)
+    p = ecdf(expected)(observed)
     if(alternative == "greater") p = 1-p
     if(alternative == "less") p = p  
     if(alternative == "two.sided") p = min(p, 1-p) * 2   
@@ -89,7 +92,9 @@ testDispersion <- function(simulationOutput, alternative = c("greater", "two.sid
     class(out) = "htest"
 
     if(plot == T) {
-      hist(ss, xlim = range(ss, observed, na.rm = T))
+      plotTitle = gsub('(.{1,50})(\\s|$)', '\\1\n', out$method)
+      xLabel = paste("Simulated values, red line = fitted model. p-value (",out$alternative, ") = ", out$p.value, sep ="")
+      hist(expected, xlim = range(expected, observed, na.rm=T ), col = "lightgrey", main = plotTitle, xlab = xLabel, breaks = 20)
       abline(v = observed, lwd= 2, col = "red")
     }
   }
@@ -97,22 +102,28 @@ testDispersion <- function(simulationOutput, alternative = c("greater", "two.sid
   return(out)
 }
 
-
-testOverdispersion <- function(simulationOutput, plot = F){
+#' Simulated overdisperstion tests
+#' 
+#' @details Deprecated, switch your code to using the \code{\link{testDispersion}} function
+#' 
+#' @param simulationOutput a DHARMa object with simulated residuals created with \code{\link{simulateResiduals}}
+#' @param ... additional arguments to \code{\link{testDispersion}}
+#' @export
+testOverdispersion <- function(simulationOutput, ...){
   message("plotSimulatedResiduals is deprecated, switch your code to using the testDispersion function")
-  testDispersion(simulationOutput)
+  testDispersion(simulationOutput, ...)
 }
 
+#' Parametric overdisperstion tests
+#' 
+#' @details Deprecated, switch your code to using the \code{\link{testDispersion}} function. The function will do nothing, arguments will be ignored, the parametric tests is no longer recommend
+#' 
+#' @param ... arguments will be ignored, the parametric tests is no longer recommend
+#' @export
 testOverdispersionParametric <- function(...){
-  message("testOverdispersionParametric is deprecated, see release notes in DHARMA 0.2.0 - switch your code to using the testDispersion function")
+  message("testOverdispersionParametric is deprecated and no longer recommended, see release notes in DHARMA 0.2.0 - switch your code to using the testDispersion function")
   return(0)
 }
-
-
-#rd <- glm(trips ~ ., data = RecreationDemand, family = poisson)
-
-#testOverdispersionParametric(rd,method = "var")
-#testOverdispersionParametric(rd,method = "var")
 
 
 #' Tests for zero-inflation 
@@ -124,11 +135,12 @@ testOverdispersionParametric <- function(...){
 #' @param k which number to count. Default is k = 0, testing for zeros
 #' @param alternative whether to test for 'more', 'less', or 'both' more or less zeros in the observed data
 #' @details shows the expected distribution of zeros against the observed
-#' @seealso \code{\link{testUniformity}}, \code{\link{testSimulatedResiduals}}, \code{\link{testTemporalAutocorrelation}}, \code{\link{testSpatialAutocorrelation}}, \code{\link{testOverdispersion}}, \code{\link{testOverdispersionParametric}}
+#' @author Florian Hartig
+#' @seealso \code{\link{testResiduals}}, \code{\link{testUniformity}}, \code{\link{testDispersion}}, \code{\link{testGeneric}}, \code{\link{testTemporalAutocorrelation}}, \code{\link{testSpatialAutocorrelation}}
 #' @export
 testZeroInflation <- function(simulationOutput, ...){
   countZeros <- function(x) sum( x == 0)
-  testSummary(simulationOutput, countZeros, methodName = "DHARMa zero-inflation test via comparison to expected zeros with simulation under H0 = fitted model", ... )
+  testGeneric(simulationOutput, countZeros, methodName = "DHARMa zero-inflation test via comparison to expected zeros with simulation under H0 = fitted model", ... )
 }
 
 
@@ -137,8 +149,8 @@ testZeroInflation <- function(simulationOutput, ...){
 #' @export
 #' @author Florian Hartig
 #' 
-#' 
-testSummary <- function(simulationOutput, summary, alternative = c("greater", "two.sided", "less"), plot = T, methodName = "DHARMa generic simulation test"){
+#' @seealso \code{\link{testResiduals}}, \code{\link{testUniformity}}, \code{\link{testDispersion}}, \code{\link{testZeroInflation}}, \code{\link{testTemporalAutocorrelation}}, \code{\link{testSpatialAutocorrelation}}
+testGeneric <- function(simulationOutput, summary, alternative = c("greater", "two.sided", "less"), plot = T, methodName = "DHARMa generic simulation test"){
   
   alternative <- match.arg(alternative)
   
@@ -162,28 +174,29 @@ testSummary <- function(simulationOutput, summary, alternative = c("greater", "t
   class(out) = "htest"
                            
   if(plot == T) {
-   hist(expected, xlim = range(expected, observed, na.rm=T ), col = "lightgrey", main = "Histogram of simulated values\n red line is observed", xlab = methodName)
+    plotTitle = gsub('(.{1,50})(\\s|$)', '\\1\n', methodName)
+    xLabel = paste("Simulated values, red line = fitted model. p-value (",out$alternative, ") = ", out$p.value, sep ="")
+   hist(expected, xlim = range(expected, observed, na.rm=T ), col = "lightgrey", main = plotTitle, xlab = xLabel, breaks = 20)
    abline(v = observed, lwd= 2, col = "red")
   }
   return(out)
 }
 
 
-
-
 #' Test for temporal autocorrelation
-  #' 
-  #' This function performs a standard test for temporal autocorrelation on the simulated residuals
-  #' 
-  #' @param simulationOutput an object with simulated residuals created by \code{\link{simulateResiduals}}
-  #' @param time the time, in the same order as the data points. If set to "random", random values will be created
-  #' @param plot whether to plot output
-  #' @note The sense of being able to run the test with time = NULL (random values) is to test the rate of false positives under the current residual structure (random time corresponds to H0: no spatial autocorrelation), e.g. to check if the test has noninal error rates for particular residual structures (note that Durbin-Watson originally assumes normal residuals, error rates seem correct for uniform residuals, but may not be correct if there are still other residual problems).
-  #' @details The function performs a Durbin-Watson test on the uniformly scaled residuals, and plots the residuals against time. The DB test was originally be designed for normal residuals. In simulations, I didn't see a problem with this setting though. The alternative is to transform the uniform residuals to normal residuals and perform the DB test on those.
-  #' @seealso \code{\link{testUniformity}}, \code{\link{testZeroInflation}}, \code{\link{testSimulatedResiduals}}, \code{\link{testSpatialAutocorrelation}}, \code{\link{testOverdispersion}}, \code{\link{testOverdispersionParametric}}
-  #' @example inst/examples/testTemporalAutocorrelationHelp.R
-  #' @export
-  testTemporalAutocorrelation <- function(simulationOutput, time = NULL , plot = T){
+#' 
+#' This function performs a standard test for temporal autocorrelation on the simulated residuals
+#' 
+#' @param simulationOutput an object with simulated residuals created by \code{\link{simulateResiduals}}
+#' @param time the time, in the same order as the data points. If set to "random", random values will be created
+#' @param plot whether to plot output
+#' @note The sense of being able to run the test with time = NULL (random values) is to test the rate of false positives under the current residual structure (random time corresponds to H0: no spatial autocorrelation), e.g. to check if the test has noninal error rates for particular residual structures (note that Durbin-Watson originally assumes normal residuals, error rates seem correct for uniform residuals, but may not be correct if there are still other residual problems).
+#' @details The function performs a Durbin-Watson test on the uniformly scaled residuals, and plots the residuals against time. The DB test was originally be designed for normal residuals. In simulations, I didn't see a problem with this setting though. The alternative is to transform the uniform residuals to normal residuals and perform the DB test on those.
+#' @author Florian Hartig
+#' @seealso \code{\link{testResiduals}}, \code{\link{testUniformity}}, \code{\link{testDispersion}}, \code{\link{testZeroInflation}}, \code{\link{testGeneric}}, \code{\link{testSpatialAutocorrelation}}
+#' @example inst/examples/testTemporalAutocorrelationHelp.R
+#' @export
+testTemporalAutocorrelation <- function(simulationOutput, time = NULL , plot = T){
   
   if(is.null(time)) time = sample.int(simulationOutput$nObs, simulationOutput$nObs)
   
@@ -194,30 +207,31 @@ testSummary <- function(simulationOutput, summary, alternative = c("greater", "t
   plot(simulationOutput$scaledResiduals ~ time, col = rgb(col, maxColorValue = 255))
   }
   return(out)
-  }
-  
-  
-  #' Test for spatial autocorrelation
-  #' 
-  #' This function performs a standard test for spatial autocorrelation on the simulated residuals
-  #' 
-  #' @param simulationOutput a DHARMa object with simulated residuals created with \code{\link{simulateResiduals}}
-  #' @param x the x coordinate, in the same order as the data points. If not provided, random values will be created
-  #' @param y the x coordinate, in the same order as the data points. If not provided, random values will be created
-  #' @param distMat optional distance matrix. If not provided, a distance matrix will be calculated based on x and y. See details for explanation
-  #' @param plot whether to plot output
-  #' @details The function performs Moran.I test from the package ape, based on the provided distance matrix of the data points. 
-  #' 
-  #' There are several ways to specify this distance. If a distance matrix (distMat) is provided, calculations will be based on this distance matrix, and x,y coordinates will only used for the plotting (if provided)
-  #' If distMat is not provided, the function will calculate the euclidian distances between x,y coordinates, and test Moran.I based on these distances.
-  #' 
-  #' The sense of being able to run the test with x/y = NULL (random values) is to test the rate of false positives under the current residual structure (random x/y corresponds to H0: no spatial autocorrelation), e.g. to check if the test has noninal error rates for particular residual structures.
-  #' 
-  #' @seealso \code{\link{testUniformity}}, \code{\link{testZeroInflation}}, \code{\link{testTemporalAutocorrelation}}, \code{\link{testSimulatedResiduals}}, \code{\link{testOverdispersion}}, \code{\link{testOverdispersionParametric}}
-  #' @import grDevices
-  #' @example inst/examples/testSpatialAutocorrelationHelp.R
-  #' @export
-  testSpatialAutocorrelation <- function(simulationOutput, x = NULL, y  = NULL, distMat = NULL, plot = T){
+}
+
+
+#' Test for spatial autocorrelation
+#' 
+#' This function performs a standard test for spatial autocorrelation on the simulated residuals
+#' 
+#' @param simulationOutput a DHARMa object with simulated residuals created with \code{\link{simulateResiduals}}
+#' @param x the x coordinate, in the same order as the data points. If not provided, random values will be created
+#' @param y the x coordinate, in the same order as the data points. If not provided, random values will be created
+#' @param distMat optional distance matrix. If not provided, a distance matrix will be calculated based on x and y. See details for explanation
+#' @param plot whether to plot output
+#' @details The function performs Moran.I test from the package ape, based on the provided distance matrix of the data points. 
+#' 
+#' There are several ways to specify this distance. If a distance matrix (distMat) is provided, calculations will be based on this distance matrix, and x,y coordinates will only used for the plotting (if provided)
+#' If distMat is not provided, the function will calculate the euclidian distances between x,y coordinates, and test Moran.I based on these distances.
+#' 
+#' The sense of being able to run the test with x/y = NULL (random values) is to test the rate of false positives under the current residual structure (random x/y corresponds to H0: no spatial autocorrelation), e.g. to check if the test has noninal error rates for particular residual structures.
+#' 
+#' @author Florian Hartig
+#' @seealso \code{\link{testResiduals}}, \code{\link{testUniformity}}, \code{\link{testDispersion}}, \code{\link{testZeroInflation}}, \code{\link{testGeneric}}, \code{\link{testTemporalAutocorrelation}} 
+#' @import grDevices
+#' @example inst/examples/testSpatialAutocorrelationHelp.R
+#' @export
+testSpatialAutocorrelation <- function(simulationOutput, x = NULL, y  = NULL, distMat = NULL, plot = T){
   
   if( !is.null(x) & !is.null(distMat) ) warning("coordinates and distMat provided, coordinates will only be used for plotting")
   # if not provided, fill x and y with random numbers (Null model)
@@ -248,5 +262,4 @@ testSummary <- function(simulationOutput, summary, alternative = c("greater", "t
   plot(x,y, col = rgb(col, maxColorValue = 255) )
   }
   return(out)
-  }
-  
+}

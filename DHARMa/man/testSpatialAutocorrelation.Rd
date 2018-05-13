@@ -45,5 +45,8 @@ dM = as.matrix(dist(cbind(testData$x, testData$y)))
 testSpatialAutocorrelation(res, distMat = dM)
 }
 \seealso{
-\code{\link{testUniformity}}, \code{\link{testZeroInflation}}, \code{\link{testTemporalAutocorrelation}}, \code{\link{testSimulatedResiduals}}, \code{\link{testOverdispersion}}, \code{\link{testOverdispersionParametric}}
+\code{\link{testResiduals}}, \code{\link{testUniformity}}, \code{\link{testDispersion}}, \code{\link{testZeroInflation}}, \code{\link{testGeneric}}, \code{\link{testTemporalAutocorrelation}}
+}
+\author{
+Florian Hartig
 }

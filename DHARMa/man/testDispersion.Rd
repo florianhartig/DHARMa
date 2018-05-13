@@ -5,7 +5,7 @@
 \title{DHARMa dispersion tests}
 \usage{
 testDispersion(simulationOutput, alternative = c("greater", "two.sided",
-  "less"), plot = T, ...)
+  "less"), plot = F, ...)
 }
 \arguments{
 \item{simulationOutput}{a DHARMa object with simulated residuals created with \code{\link{simulateResiduals}}}
@@ -14,7 +14,7 @@ testDispersion(simulationOutput, alternative = c("greater", "two.sided",
 
 \item{plot}{whether to plot output}
 
-\item{...}{arguments to pass on to \code{\link{testSummary}}}
+\item{...}{arguments to pass on to \code{\link{testGeneric}}}
 }
 \description{
 This function performs a simulation-based test for over/underdispersion
@@ -29,7 +29,7 @@ If refit = T, the function compares the approximate deviance (via squared pearso
 \examples{
 # creating test data
 
-testData = createData(sampleSize = 200, overdispersion = 0.4, pZeroInflation = 0, randomEffectVariance = 0)
+testData = createData(sampleSize = 200, overdispersion = 0.5, pZeroInflation = 0, randomEffectVariance = 0)
 fittedModel <- glm(observedResponse ~ Environment1 , family = "poisson", data = testData)
 simulationOutput <- simulateResiduals(fittedModel = fittedModel)
 
@@ -41,33 +41,40 @@ testUniformity(simulationOutput)
 
 ###### Dispersion tests #######
 
-simulationOutput <- simulateResiduals(fittedModel = fittedModel)
 testDispersion(simulationOutput)
 
-simulationOutput <- simulateResiduals(fittedModel = fittedModel, refit = T)
-testDispersion(simulationOutput)
+###### Both together###########
+
+testResiduals(simulationOutput)
 
 ###### Special tests ##########
-
-simulationOutput <- simulateResiduals(fittedModel = fittedModel)
 
 # testing zero inflation
 testZeroInflation(simulationOutput)
 
 # testing generic summaries
 countOnes <- function(x) sum(x == 1)  # testing for number of 1s
-testSummary(simulationOutput, summary = countOnes) # 1-inflation
-testSummary(simulationOutput, summary = countOnes, alternative = "less") # 1-deficit
+testGeneric(simulationOutput, summary = countOnes) # 1-inflation
+testGeneric(simulationOutput, summary = countOnes, alternative = "less") # 1-deficit
 
 means <- function(x) mean(x) # testing if mean prediction fits
-testSummary(simulationOutput, summary = means) 
+testGeneric(simulationOutput, summary = means) 
 
 spread <- function(x) sd(x) # testing if mean sd fits
-testSummary(simulationOutput, summary = spread) 
+testGeneric(simulationOutput, summary = spread) 
 
-library(AER)
-dispersiontest(fittedModel)
+###### Refited ##############
+
+# if model is refitted, a different test will be called
+
+simulationOutput <- simulateResiduals(fittedModel = fittedModel, refit = T)
+testDispersion(simulationOutput)
+
+
 }
 \seealso{
-\code{\link{testSimulatedResiduals}}, \code{\link{testSimulatedResiduals}}, \code{\link{testZeroInflation}}, \code{\link{testTemporalAutocorrelation}}, \code{\link{testSpatialAutocorrelation}}, \code{\link{testOverdispersionParametric}}
+\code{\link{testResiduals}}, \code{\link{testUniformity}}, \code{\link{testZeroInflation}}, \code{\link{testGeneric}}, \code{\link{testTemporalAutocorrelation}}, \code{\link{testSpatialAutocorrelation}}
+}
+\author{
+Florian Hartig
 }
