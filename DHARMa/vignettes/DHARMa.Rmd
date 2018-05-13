@@ -331,13 +331,17 @@ simulationOutput2 <- simulateResiduals(fittedModel = fittedModel, refit = T, n =
 testDispersion(simulationOutput2)
 ```
 
-Note: previous versions of DHARMa (< 0.2.0) discouraged the simulated overdispersion test. I have since changed the code, and simulations show that it as powerful as the refitted or parametric test. Because of the generality and speed of this option, I see no good reason for refitting, and would recummend to run the standard test on the standard residuals. 
+Note: previous versions of DHARMa (< 0.2.0) discouraged the simulated overdispersion test in favor of the refitted and parametric tests. I have since changed the test function, and simulations show that it as powerful as the refitted or parametric test. Because of the generality and speed of this option, I see no good reason for either refitting or running parametric tests. Therefore 
 
-Power simulations (figure below, see extended simulations [here](https://github.com/florianhartig/DHARMa/blob/master/Code/SimulationExperiments/PowerOverdispersion.md)) show that option 2 is generally not preferable. I only kept it in the package for testing and future improvements. 
+1. My **recommendation** for testing dispersion is to simply use the standard dispersion test, based on the simulated residuals
+
+2. It's not clear to if the refitted test is better ... but it's available.
+
+3. In my simulations, parametric tests, such as AER::dispersiontest didn't provide higher power. Because of that, and because of the higher generality of the simulated tests, I no longer provide parametric tests in DHARMa. However, you can see various implementions of the parametric tests in the DHARMa GitHub repo under [Code/DHARMaPerformance/Power](https://github.com/florianhartig/DHARMa/blob/master/Code/DHARMaPerformance/Power)). 
+
+Below and example from there, which compares the four options to test for overdispersion (2 options to use DHARMa::testDispersoin, AER::dispersiontest, and DHARMa::testUniformity) for a Poisson glm
 
 ![Comparison of power from simulation studies](overdispersion.png)
-
-
 
 *A word of warning* that applies also to all other tests that follow: significance in hypothesis tests depends on at least 2 ingredients: strenght of the signal, and number of data points. Hence, the p-value alone is not a good indicator of the extent to which your residuals deviate from assumptions. Specifically, if you have a lot of data points, residual diagnostics will nearly inevitably become significant, because having a perfectly fitting model is very unlikely. That, however, doesn't neccessarily mean that you need to change your model. The p-values confirm that there is a deviation from your null hypothesis. It is, however, in your discretion to decide whether this deviation is worth worrying about. If you see a dispersion parameter of 1.01, I would not worry, even if the test is significant. A significant value of 5, however, is clearly a reason to move to a model that accounts for overdispersion. 
 
