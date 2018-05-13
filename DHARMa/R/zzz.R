@@ -8,7 +8,7 @@ getMessage <- function(){
 }
 
 .onLoad <- function(...) {
-  packageStartupMessage("Note that, since v0.1.6.3, DHARMa includes support for glmmTMB, but there are still a few limitations with this package. In particular, due to the way glmmTMB simulates, there can be spuriuous correlations when plotting residuals against fitted. Please consult https://github.com/florianhartig/DHARMa/issues/16 for details.")
+
 }
 
 .onAttach <- function(...) { 

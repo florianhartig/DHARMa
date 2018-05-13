@@ -4,12 +4,10 @@
 \alias{testResiduals}
 \title{DHARMa general residual test}
 \usage{
-testResiduals(simulationOutput, ...)
+testResiduals(simulationOutput)
 }
 \arguments{
 \item{simulationOutput}{a DHARMa object with simulated residuals created with \code{\link{simulateResiduals}}}
-
-\item{...}{parameters to be passed on to the tests.}
 }
 \description{
 Calls both uniformity and dispersion test

@@ -38,7 +38,7 @@ testGeneric(simulationOutput, summary = spread)
 
 # if model is refitted, a different test will be called
 
-simulationOutput <- simulateResiduals(fittedModel = fittedModel, refit = T)
+simulationOutput <- simulateResiduals(fittedModel = fittedModel, refit = TRUE)
 testDispersion(simulationOutput)
 
 

@@ -5,15 +5,14 @@
 #' This function is a wrapper for the various test functions implemented in DHARMa. Currently, this function calls the \code{\link{testUniformity}} and the \code{\link{testDispersion}} functions. All other tests (see below) have to be called by hand.
 #' 
 #' @param simulationOutput a DHARMa object with simulated residuals created with \code{\link{simulateResiduals}}
-#' @param ... parameters to be passed on to the tests.
 #' @author Florian Hartig
 #' @export
 #' @seealso \code{\link{testUniformity}}, \code{\link{testDispersion}}, \code{\link{testZeroInflation}}, \code{\link{testGeneric}}, \code{\link{testTemporalAutocorrelation}}, \code{\link{testSpatialAutocorrelation}}
-testResiduals <- function(simulationOutput, ...){
+testResiduals <- function(simulationOutput){
   
   out = list()
-  out$uniformity = testUniformity(simulationOutput, ...)
-  out$dispersion = testDispersion(simulationOutput, ...)
+  out$uniformity = testUniformity(simulationOutput)
+  out$dispersion = testDispersion(simulationOutput)
   
   print(out)
   return(out)
@@ -139,6 +138,7 @@ testOverdispersionParametric <- function(...){
 #' @param ... further arguments to \code{\link{testGeneric}}
 #' @details shows the expected distribution of zeros against the observed
 #' @author Florian Hartig
+#' @example inst/examples/testsHelp.R
 #' @seealso \code{\link{testResiduals}}, \code{\link{testUniformity}}, \code{\link{testDispersion}}, \code{\link{testGeneric}}, \code{\link{testTemporalAutocorrelation}}, \code{\link{testSpatialAutocorrelation}}
 #' @export
 testZeroInflation <- function(simulationOutput, ...){
@@ -154,10 +154,14 @@ testZeroInflation <- function(simulationOutput, ...){
 #' @param simulationOutput a DHARMa object with simulated residuals created with \code{\link{simulateResiduals}}
 #' @param summary a function that can be applied to simulated / observed data. See examples below
 #' @param alternative a character string specifying whether the test should test if observations are "greater", "less" or "two.sided" compared to the simulated null hypothesis  
+#' @param plot whether to plot the simulated summary
+#' @param methodName name of the test (will be used in plot)
+#' 
 #' @note the function can easily be remodeled to apply summaries on the residuals, by simply defining f = function(x) summary (x - predictions), as done in \code{\link{testDispersion}}
 #' 
 #' @export
 #' @author Florian Hartig
+#' @example inst/examples/testsHelp.R
 #' 
 #' @seealso \code{\link{testResiduals}}, \code{\link{testUniformity}}, \code{\link{testDispersion}}, \code{\link{testZeroInflation}}, \code{\link{testTemporalAutocorrelation}}, \code{\link{testSpatialAutocorrelation}}
 testGeneric <- function(simulationOutput, summary, alternative = c("greater", "two.sided", "less"), plot = T, methodName = "DHARMa generic simulation test"){
