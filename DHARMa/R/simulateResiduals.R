@@ -140,7 +140,7 @@ simulateResiduals <- function(fittedModel, n = 250, refit = F, integerResponse =
     out$refittedFixedEffects <- matrix(nrow = length(out$fittedFixedEffects), ncol = n )  
     #out$refittedRandomEffects <- matrix(nrow = length(out$fittedRandomEffects), ncol = n )  
     out$refittedResiduals = matrix(nrow = out$nObs, ncol = n)   
-    out$refittedDevianceResiduals = matrix(nrow = out$nObs, ncol = n)   
+    out$refittedPearsonResiduals = matrix(nrow = out$nObs, ncol = n)   
     
     for (i in 1:n){
       #tryCatch()
@@ -159,7 +159,7 @@ simulateResiduals <- function(fittedModel, n = 250, refit = F, integerResponse =
         out$refittedPredictedResponse[,i] = predict(refittedModel, type = "response")
         out$refittedFixedEffects[,i] = getFixedEffects(refittedModel)
         out$refittedResiduals[,i] = residuals(refittedModel, type = "response")
-        out$refittedDevianceResiduals[,i] = residuals(refittedModel, type = "deviance")
+        out$refittedPearsonResiduals[,i] = residuals(refittedModel, type = "pearson")
         #out$refittedRandomEffects[,i]  = ranef(refittedModel)
       }, silent = T)
     }
@@ -214,8 +214,7 @@ checkModel <- function(fittedModel){
   if(!(class(fittedModel)[1] %in% getPossibleModels())) warning("DHARMa: fittedModel not in class of supported models. Absolutely no guarantee that this will work!")
   
   if (class(fittedModel)[1] == "gam" ) if (class(fittedModel$family)[1] == "extended.family") stop("It seems you are trying to fit a model from mgcv that was fit with an extended.family. Simulation functions for these families are not yet implemented in DHARMa. See issue https://github.com/florianhartig/DHARMa/issues/11 for updates about this")
-  
-  if (class(fittedModel)[1] == "glmmTMB" ) warning("Note that there are a few limitations for using glmmTMB with DHARMa. Please consult https://github.com/florianhartig/DHARMa/issues/16 for details.")
+
 }
 
 

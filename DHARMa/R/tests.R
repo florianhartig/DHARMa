@@ -38,12 +38,13 @@ testSimulatedResiduals <- function(simulationOutput){
 #' This function tests the overall uniformity of the simulated residuals in a DHARMa object
 #' 
 #' @param simulationOutput a DHARMa object with simulated residuals created with \code{\link{simulateResiduals}}
+#' @param alternative a character string specifying whether the test should test if observations are "greater", "less" or "two.sided" compared to the simulated null hypothesis  
 #' @details The function applies a KS test for uniformity on the simulated residuals
 #' @author Florian Hartig
 #' @seealso \code{\link{testResiduals}}, \code{\link{testDispersion}}, \code{\link{testZeroInflation}}, \code{\link{testGeneric}}, \code{\link{testTemporalAutocorrelation}}, \code{\link{testSpatialAutocorrelation}}
 #' @export
-testUniformity<- function(simulationOutput){
-  out <- suppressWarnings(ks.test(simulationOutput$scaledResiduals, 'punif'))
+testUniformity<- function(simulationOutput, alternative = c("two.sided", "less", "greater")){
+  out <- suppressWarnings(ks.test(simulationOutput$scaledResiduals, 'punif', alternative = alternative))
   return(out)
 }
 
@@ -54,7 +55,7 @@ testUniformity<- function(simulationOutput){
 #' 
 #' @param simulationOutput a DHARMa object with simulated residuals created with \code{\link{simulateResiduals}}
 #' @param plot whether to plot output
-#' @param alternative whether to test for "overdispersion", "underdispersion", or "both" (both reduces power)
+#' @param alternative a character string specifying whether the test should test if observations are "greater", "less" or "two.sided" compared to the simulated null hypothesis. Greate corresponds to overdispersion.   
 #' @param ... arguments to pass on to \code{\link{testGeneric}}
 #' @details The function implements two tests, depending on whether it is applied on a simulation with refit = F, or refit = T. 
 #' 
@@ -77,8 +78,12 @@ testDispersion <- function(simulationOutput, alternative = c("greater", "two.sid
 
     out = list()
     
-    observed = sum(residuals(simulationOutput$fittedModel, type = "deviance")^2)
-    expected = apply(simulationOutput$refittedDevianceResiduals^2 , 2, sum)
+    observed = tryCatch(sum(residuals(simulationOutput$fittedModel, type = "pearson")^2), error = function(e) {
+      message(paste("DHARMa: the requested tests requires pearson residuals, but your model does not implement these calculations. Test will return NA. Error message:", e))
+      return(NA)
+    })
+    if(is.na(observed)) return(NA)
+    expected = apply(simulationOutput$refittedPearsonResiduals^2 , 2, sum)
     out$statistic = c(dispersion = observed / mean(expected))
     out$method = "DHARMa nonparametric dispersion test via mean deviance residual fitted vs. simulated-refitted"
     
@@ -131,9 +136,7 @@ testOverdispersionParametric <- function(...){
 #' This function compares the observed number of zeros with the zeros expected from simulations. 
 #' 
 #' @param simulationOutput a DHARMa object with simulated residuals created with \code{\link{simulateResiduals}}
-#' @param plot whether to plot output
-#' @param k which number to count. Default is k = 0, testing for zeros
-#' @param alternative whether to test for 'more', 'less', or 'both' more or less zeros in the observed data
+#' @param ... further arguments to \code{\link{testGeneric}}
 #' @details shows the expected distribution of zeros against the observed
 #' @author Florian Hartig
 #' @seealso \code{\link{testResiduals}}, \code{\link{testUniformity}}, \code{\link{testDispersion}}, \code{\link{testGeneric}}, \code{\link{testTemporalAutocorrelation}}, \code{\link{testSpatialAutocorrelation}}
@@ -145,6 +148,13 @@ testZeroInflation <- function(simulationOutput, ...){
 
 
 #' Generic simulation test of a summary statistic
+#' 
+#' This function tests if a user-defined summary differs when applied to simulated / observed data. 
+#' 
+#' @param simulationOutput a DHARMa object with simulated residuals created with \code{\link{simulateResiduals}}
+#' @param summary a function that can be applied to simulated / observed data. See examples below
+#' @param alternative a character string specifying whether the test should test if observations are "greater", "less" or "two.sided" compared to the simulated null hypothesis  
+#' @note the function can easily be remodeled to apply summaries on the residuals, by simply defining f = function(x) summary (x - predictions), as done in \code{\link{testDispersion}}
 #' 
 #' @export
 #' @author Florian Hartig
@@ -189,6 +199,7 @@ testGeneric <- function(simulationOutput, summary, alternative = c("greater", "t
 #' 
 #' @param simulationOutput an object with simulated residuals created by \code{\link{simulateResiduals}}
 #' @param time the time, in the same order as the data points. If set to "random", random values will be created
+#' @param alternative a character string specifying whether the test should test if observations are "greater", "less" or "two.sided" compared to the simulated null hypothesis  
 #' @param plot whether to plot output
 #' @note The sense of being able to run the test with time = NULL (random values) is to test the rate of false positives under the current residual structure (random time corresponds to H0: no spatial autocorrelation), e.g. to check if the test has noninal error rates for particular residual structures (note that Durbin-Watson originally assumes normal residuals, error rates seem correct for uniform residuals, but may not be correct if there are still other residual problems).
 #' @details The function performs a Durbin-Watson test on the uniformly scaled residuals, and plots the residuals against time. The DB test was originally be designed for normal residuals. In simulations, I didn't see a problem with this setting though. The alternative is to transform the uniform residuals to normal residuals and perform the DB test on those.
@@ -196,11 +207,11 @@ testGeneric <- function(simulationOutput, summary, alternative = c("greater", "t
 #' @seealso \code{\link{testResiduals}}, \code{\link{testUniformity}}, \code{\link{testDispersion}}, \code{\link{testZeroInflation}}, \code{\link{testGeneric}}, \code{\link{testSpatialAutocorrelation}}
 #' @example inst/examples/testTemporalAutocorrelationHelp.R
 #' @export
-testTemporalAutocorrelation <- function(simulationOutput, time = NULL , plot = T){
+testTemporalAutocorrelation <- function(simulationOutput, time = NULL , alternative = c("greater", "two.sided", "less"), plot = T){
   
   if(is.null(time)) time = sample.int(simulationOutput$nObs, simulationOutput$nObs)
   
-  out = lmtest::dwtest(simulationOutput$scaledResiduals ~ 1, order.by = time)
+  out = lmtest::dwtest(simulationOutput$scaledResiduals ~ 1, order.by = time, alternative = alternative)
   
   if(plot == T) {
   col = colorRamp(c("red", "white", "blue"))(simulationOutput$scaledResiduals)
@@ -218,6 +229,7 @@ testTemporalAutocorrelation <- function(simulationOutput, time = NULL , plot = T
 #' @param x the x coordinate, in the same order as the data points. If not provided, random values will be created
 #' @param y the x coordinate, in the same order as the data points. If not provided, random values will be created
 #' @param distMat optional distance matrix. If not provided, a distance matrix will be calculated based on x and y. See details for explanation
+#' @param alternative a character string specifying whether the test should test if observations are "greater", "less" or "two.sided" compared to the simulated null hypothesis  
 #' @param plot whether to plot output
 #' @details The function performs Moran.I test from the package ape, based on the provided distance matrix of the data points. 
 #' 
@@ -231,7 +243,9 @@ testTemporalAutocorrelation <- function(simulationOutput, time = NULL , plot = T
 #' @import grDevices
 #' @example inst/examples/testSpatialAutocorrelationHelp.R
 #' @export
-testSpatialAutocorrelation <- function(simulationOutput, x = NULL, y  = NULL, distMat = NULL, plot = T){
+testSpatialAutocorrelation <- function(simulationOutput, x = NULL, y  = NULL, distMat = NULL, alternative = c("greater", "two.sided", "less"), plot = T){
+  
+  alternative <- match.arg(alternative)
   
   if( !is.null(x) & !is.null(distMat) ) warning("coordinates and distMat provided, coordinates will only be used for plotting")
   # if not provided, fill x and y with random numbers (Null model)
@@ -244,7 +258,7 @@ testSpatialAutocorrelation <- function(simulationOutput, x = NULL, y  = NULL, di
   invDistMat <- 1/distMat
   diag(invDistMat) <- 0
   
-  MI = ape::Moran.I(simulationOutput$scaledResiduals, weight = invDistMat)
+  MI = ape::Moran.I(simulationOutput$scaledResiduals, weight = invDistMat, alternative = alternative)
   
   out = list()
   out$statistic = c(observed = MI$observed, expected = MI$expected, sd = MI$sd)

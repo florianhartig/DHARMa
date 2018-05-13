@@ -10,7 +10,7 @@ testDispersion(simulationOutput, alternative = c("greater", "two.sided",
 \arguments{
 \item{simulationOutput}{a DHARMa object with simulated residuals created with \code{\link{simulateResiduals}}}
 
-\item{alternative}{whether to test for "overdispersion", "underdispersion", or "both" (both reduces power)}
+\item{alternative}{a character string specifying whether the test should test if observations are "greater", "less" or "two.sided" compared to the simulated null hypothesis. Greate corresponds to overdispersion.}
 
 \item{plot}{whether to plot output}
 

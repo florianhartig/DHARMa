@@ -9,11 +9,7 @@ testZeroInflation(simulationOutput, ...)
 \arguments{
 \item{simulationOutput}{a DHARMa object with simulated residuals created with \code{\link{simulateResiduals}}}
 
-\item{plot}{whether to plot output}
-
-\item{k}{which number to count. Default is k = 0, testing for zeros}
-
-\item{alternative}{whether to test for 'more', 'less', or 'both' more or less zeros in the observed data}
+\item{...}{further arguments to \code{\link{testGeneric}}}
 }
 \description{
 This function compares the observed number of zeros with the zeros expected from simulations.

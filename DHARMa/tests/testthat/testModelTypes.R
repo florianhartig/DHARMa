@@ -32,7 +32,7 @@ runEverything = function(fittedModel, testData, DHARMaData = T){
   
   checkOutput(simulationOutput)
   
-  testOverdispersion(simulationOutput)
+  testDispersion(simulationOutput)
   testUniformity(simulationOutput = simulationOutput)
   testZeroInflation(simulationOutput = simulationOutput)
   testTemporalAutocorrelation(simulationOutput = simulationOutput, time = testData$time)
@@ -48,10 +48,7 @@ runEverything = function(fittedModel, testData, DHARMaData = T){
   
   plot(simulationOutput2, quantreg = F)
   
-  testOverdispersion(simulationOutput2)
-  testOverdispersion(simulationOutput2, alternative = "both", plot = F)
-  
-  testOverdispersionParametric(fittedModel)
+  testDispersion(simulationOutput2)
 }
 
 
@@ -76,8 +73,6 @@ test_that("lm works",
             runEverything(fittedModel, testData)
           }
 )
-
-
 
 
 # test_that("lmer gaussian with weights works",

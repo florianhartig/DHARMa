@@ -4,10 +4,13 @@
 \alias{testUniformity}
 \title{Test for overall uniformity}
 \usage{
-testUniformity(simulationOutput)
+testUniformity(simulationOutput, alternative = c("two.sided", "less",
+  "greater"))
 }
 \arguments{
 \item{simulationOutput}{a DHARMa object with simulated residuals created with \code{\link{simulateResiduals}}}
+
+\item{alternative}{a character string specifying whether the test should test if observations are "greater", "less" or "two.sided" compared to the simulated null hypothesis}
 }
 \description{
 This function tests the overall uniformity of the simulated residuals in a DHARMa object

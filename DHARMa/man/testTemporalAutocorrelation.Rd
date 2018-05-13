@@ -4,12 +4,15 @@
 \alias{testTemporalAutocorrelation}
 \title{Test for temporal autocorrelation}
 \usage{
-testTemporalAutocorrelation(simulationOutput, time = NULL, plot = T)
+testTemporalAutocorrelation(simulationOutput, time = NULL,
+  alternative = c("greater", "two.sided", "less"), plot = T)
 }
 \arguments{
 \item{simulationOutput}{an object with simulated residuals created by \code{\link{simulateResiduals}}}
 
 \item{time}{the time, in the same order as the data points. If set to "random", random values will be created}
+
+\item{alternative}{a character string specifying whether the test should test if observations are "greater", "less" or "two.sided" compared to the simulated null hypothesis}
 
 \item{plot}{whether to plot output}
 }

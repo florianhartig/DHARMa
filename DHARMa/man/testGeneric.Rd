@@ -7,8 +7,18 @@
 testGeneric(simulationOutput, summary, alternative = c("greater", "two.sided",
   "less"), plot = T, methodName = "DHARMa generic simulation test")
 }
+\arguments{
+\item{simulationOutput}{a DHARMa object with simulated residuals created with \code{\link{simulateResiduals}}}
+
+\item{summary}{a function that can be applied to simulated / observed data. See examples below}
+
+\item{alternative}{a character string specifying whether the test should test if observations are "greater", "less" or "two.sided" compared to the simulated null hypothesis}
+}
 \description{
-Generic simulation test of a summary statistic
+This function tests if a user-defined summary differs when applied to simulated / observed data.
+}
+\note{
+the function can easily be remodeled to apply summaries on the residuals, by simply defining f = function(x) summary (x - predictions), as done in \code{\link{testDispersion}}
 }
 \seealso{
 \code{\link{testResiduals}}, \code{\link{testUniformity}}, \code{\link{testDispersion}}, \code{\link{testZeroInflation}}, \code{\link{testTemporalAutocorrelation}}, \code{\link{testSpatialAutocorrelation}}

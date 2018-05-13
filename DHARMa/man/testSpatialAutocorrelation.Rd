@@ -5,7 +5,8 @@
 \title{Test for spatial autocorrelation}
 \usage{
 testSpatialAutocorrelation(simulationOutput, x = NULL, y = NULL,
-  distMat = NULL, plot = T)
+  distMat = NULL, alternative = c("greater", "two.sided", "less"),
+  plot = T)
 }
 \arguments{
 \item{simulationOutput}{a DHARMa object with simulated residuals created with \code{\link{simulateResiduals}}}
@@ -15,6 +16,8 @@ testSpatialAutocorrelation(simulationOutput, x = NULL, y = NULL,
 \item{y}{the x coordinate, in the same order as the data points. If not provided, random values will be created}
 
 \item{distMat}{optional distance matrix. If not provided, a distance matrix will be calculated based on x and y. See details for explanation}
+
+\item{alternative}{a character string specifying whether the test should test if observations are "greater", "less" or "two.sided" compared to the simulated null hypothesis}
 
 \item{plot}{whether to plot output}
 }
