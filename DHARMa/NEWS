@@ -1,15 +1,20 @@
 NOTE: for more news about the package, see https://github.com/florianhartig/DHARMa/releases
 
-DHARMa 0.1.7
+DHARMa 0.2.0
 
 
 New features
 
-- support for glmmTMB https://github.com/florianhartig/DHARMa/issues/16
+- support for glmmTMB https://github.com/florianhartig/DHARMa/issues/16, implemented since https://github.com/florianhartig/DHARMa/releases/tag/v0.1.6.2
+
+Major changes
+
+- remodeled benchmarks functions in https://github.com/florianhartig/DHARMa/releases/tag/v0.1.6.3
+- remodeled dispersion tests, adresses https://github.com/florianhartig/DHARMa/issues/62 
 
 Minor changes
 
-- changed plot function names
+- changed plot function names in https://github.com/florianhartig/DHARMa/releases/tag/v0.1.6.1
 
 Bugfixes
 
