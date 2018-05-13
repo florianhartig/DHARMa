@@ -8,8 +8,6 @@ testSimulatedResiduals(simulationOutput)
 }
 \arguments{
 \item{simulationOutput}{a DHARMa object with simulated residuals created with \code{\link{simulateResiduals}}}
-
-\item{...}{additional arguments to \code{\link{testResiduals}}}
 }
 \description{
 Residual tests

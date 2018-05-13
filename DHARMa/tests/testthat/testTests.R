@@ -17,19 +17,19 @@ testDispersion(simulationOutput, alternative = "less")
 testDispersion(simulationOutput, alternative = "greater")
 testDispersion(simulationOutput, alternative = "two.sided", plot = T)
 
+testOverdispersion(simulationOutput)
+testOverdispersionParametric(simulationOutput)
+
 ###### Both together###########
 
 testResiduals(simulationOutput)
-testResiduals(simulationOutput, alternative = "less")
-testResiduals(simulationOutput, alternative = "two.sided")
+testSimulatedResiduals(simulationOutput)
 
 ###### zero-inflation ##########
 
 # testing zero inflation
 testZeroInflation(simulationOutput)
 testZeroInflation(simulationOutput, alternative = "less")
-
-
 
 # testing generic summaries
 countOnes <- function(x) sum(x == 1)  # testing for number of 1s

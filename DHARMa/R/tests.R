@@ -23,12 +23,11 @@ testResiduals <- function(simulationOutput){
 #' @details Deprecated, switch your code to using the \code{\link{testResiduals}} function
 #' 
 #' @param simulationOutput a DHARMa object with simulated residuals created with \code{\link{simulateResiduals}}
-#' @param ... additional arguments to \code{\link{testResiduals}}
 #' @author Florian Hartig
 #' @export
 testSimulatedResiduals <- function(simulationOutput){
   message("testSimulatedResiduals is deprecated, switch your code to using the testResiduals function")
-  testResiduals(simulationOutput, ...)
+  testResiduals(simulationOutput)
 }
 
 
