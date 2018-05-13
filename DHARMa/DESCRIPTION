@@ -1,6 +1,6 @@
 Package: DHARMa
 Title: Residual Diagnostics for Hierarchical (Multi-Level / Mixed) Regression Models
-Version: 0.1.6.2
+Version: 0.1.6.3
 Date: 2018-03-14
 Authors@R: c(person("Florian", "Hartig", email = "florian.hartig@biologie.uni-regensburg.de", role = c("aut", "cre"), comment = "Theoretical Ecology, University of Regensburg, Regensburg, Germany"))
 Description: The 'DHARMa' package uses a simulation-based approach to create
