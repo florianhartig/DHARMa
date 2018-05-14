@@ -10,10 +10,12 @@
 #' @seealso \code{\link{testUniformity}}, \code{\link{testDispersion}}, \code{\link{testZeroInflation}}, \code{\link{testGeneric}}, \code{\link{testTemporalAutocorrelation}}, \code{\link{testSpatialAutocorrelation}}
 testResiduals <- function(simulationOutput){
   
+  oldpar = par(mfrow = c(1,2))
   out = list()
   out$uniformity = testUniformity(simulationOutput)
   out$dispersion = testDispersion(simulationOutput)
   
+  par(oldpar)
   print(out)
   return(out)
 }
@@ -41,8 +43,9 @@ testSimulatedResiduals <- function(simulationOutput){
 #' @author Florian Hartig
 #' @seealso \code{\link{testResiduals}}, \code{\link{testDispersion}}, \code{\link{testZeroInflation}}, \code{\link{testGeneric}}, \code{\link{testTemporalAutocorrelation}}, \code{\link{testSpatialAutocorrelation}}
 #' @export
-testUniformity<- function(simulationOutput, alternative = c("two.sided", "less", "greater")){
+testUniformity<- function(simulationOutput, alternative = c("two.sided", "less", "greater"), plot = T){
   out <- suppressWarnings(ks.test(simulationOutput$scaledResiduals, 'punif', alternative = alternative))
+  if(plot == T) plotQQunif(simulationOutput = simulationOutput)
   return(out)
 }
 
@@ -65,7 +68,7 @@ testUniformity<- function(simulationOutput, alternative = c("two.sided", "less",
 #' @seealso \code{\link{testResiduals}}, \code{\link{testUniformity}}, \code{\link{testZeroInflation}}, \code{\link{testGeneric}}, \code{\link{testTemporalAutocorrelation}}, \code{\link{testSpatialAutocorrelation}}
 #' @example inst/examples/testsHelp.R
 #' @export
-testDispersion <- function(simulationOutput, alternative = c("greater", "two.sided", "less"), plot = F, ...){
+testDispersion <- function(simulationOutput, alternative = c("greater", "two.sided", "less"), plot = T, ...){
   
   alternative <- match.arg(alternative)
   

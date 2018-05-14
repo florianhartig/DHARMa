@@ -5,7 +5,7 @@
 \title{Test for overall uniformity}
 \usage{
 testUniformity(simulationOutput, alternative = c("two.sided", "less",
-  "greater"))
+  "greater"), plot = T)
 }
 \arguments{
 \item{simulationOutput}{a DHARMa object with simulated residuals created with \code{\link{simulateResiduals}}}

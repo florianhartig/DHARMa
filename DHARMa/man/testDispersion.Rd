@@ -5,7 +5,7 @@
 \title{DHARMa dispersion tests}
 \usage{
 testDispersion(simulationOutput, alternative = c("greater", "two.sided",
-  "less"), plot = F, ...)
+  "less"), plot = T, ...)
 }
 \arguments{
 \item{simulationOutput}{a DHARMa object with simulated residuals created with \code{\link{simulateResiduals}}}
@@ -29,11 +29,11 @@ If refit = T, the function compares the approximate deviance (via squared pearso
 \examples{
 # creating test data
 
-testData = createData(sampleSize = 200, overdispersion = 0.5, pZeroInflation = 0, randomEffectVariance = 0)
+testData = createData(sampleSize = 200, overdispersion = 0.5, randomEffectVariance = 0)
 fittedModel <- glm(observedResponse ~ Environment1 , family = "poisson", data = testData)
 simulationOutput <- simulateResiduals(fittedModel = fittedModel)
 
-plot(simulationOutput)
+plot(simulationOutput, quantreg = F)
 
 ###### Distribution tests #####
 
@@ -67,7 +67,7 @@ testGeneric(simulationOutput, summary = spread)
 
 # if model is refitted, a different test will be called
 
-simulationOutput <- simulateResiduals(fittedModel = fittedModel, refit = TRUE)
+simulationOutput <- simulateResiduals(fittedModel = fittedModel, refit = TRUE, seed = 12)
 testDispersion(simulationOutput)
 
 
