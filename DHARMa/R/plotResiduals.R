@@ -31,7 +31,7 @@ plotQQunif <- function(simulationOutput, testUniformity = T){
 
   gap::qqunif(simulationOutput$scaledResiduals,pch=2,bty="n", logscale = F, col = "black", cex = 0.6, main = "QQ plot residuals", cex.main = 1)
   if(testUniformity == TRUE){
-    temp = testUniformity(simulationOutput)
+    temp = testUniformity(simulationOutput, plot = F)
     legend("topleft", c(paste("KS test: p=", round(temp$p.value, digits = 5)), paste("Deviation ", ifelse(temp$p.value < 0.05, "significant", "n.s."))), text.col = ifelse(temp$p.value < 0.05, "red", "black" ), bty="n")     
   }
 }
@@ -44,7 +44,7 @@ plotQQunif <- function(simulationOutput, testUniformity = T){
 #' @param pred either the predictor variable against which the residuals should be plotted, or a DHARMa object
 #' @param residuals residuals values. Leave empty if pred is a DHARMa object
 #' @param quantreg whether to perform a quantile regression on 0.25, 0.5, 0.75 on the residuals. If F, a spline will be created instead. Default NULL chooses T for nObs < 2000, and F otherwise. 
-#' @param rank if T, the values of pred will be rank transformed. This will usually make patterns easier to spot visually, especially if the distribution of the predictor is skewed. 
+#' @param rank if T, the values of pred will be rank transformed. This will usually make patterns easier to spot visually, especially if the distribution of the predictor is skewed. If pred is a factor, this has no effect. 
 #' @param asFactor should the predictor variable converted into a factor
 #' @param ... additional arguments to plot
 #' @details For a correctly specified model, we would expect uniformity in y direction when plotting against any predictor.
@@ -81,7 +81,7 @@ plotResiduals <- function(pred, residuals = NULL, quantreg = NULL, rank = FALSE,
 
   if (asFactor) pred = as.factor(pred)
   
-  if(! is.factor(pred)){
+  if(!is.factor(pred)){
     nuniq = length(unique(pred))
     ndata = length(pred)
     if(nuniq < 10 & ndata / nuniq > 10) message("DHARMa::plotResiduals - low number of unique predictor values, consider setting asFactor = T")
@@ -90,7 +90,7 @@ plotResiduals <- function(pred, residuals = NULL, quantreg = NULL, rank = FALSE,
     if (rank == T) pred = rank(pred, ties.method = "average")
     pred = pred / max(pred)    
   } else {
-    if (rank == T) warning("DHARMa::plotResiduals - predictor is a factor, rank = T has no effect")
+    # if (rank == T) warning("DHARMa::plotResiduals - predictor is a factor, rank = T has no effect")
   }
   
 
