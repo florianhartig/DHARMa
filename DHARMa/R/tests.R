@@ -88,10 +88,8 @@ testDispersion <- function(simulationOutput, alternative = c("greater", "two.sid
     out$statistic = c(dispersion = observed / mean(expected))
     out$method = "DHARMa nonparametric dispersion test via mean deviance residual fitted vs. simulated-refitted"
     
-    p = ecdf(expected)(observed)
-    if(alternative == "greater") p = 1-p
-    if(alternative == "less") p = p  
-    if(alternative == "two.sided") p = min(p, 1-p) * 2   
+    p = getP(simulated = expected, observed = observed, alternative = alternative)
+
     out$alternative = alternative
     out$p.value = p
     out$data.name = deparse(substitute(simulationOutput))
@@ -145,7 +143,7 @@ testOverdispersionParametric <- function(...){
 #' @export
 testZeroInflation <- function(simulationOutput, ...){
   countZeros <- function(x) sum( x == 0)
-  testGeneric(simulationOutput, countZeros, methodName = "DHARMa zero-inflation test via comparison to expected zeros with simulation under H0 = fitted model", ... )
+  testGeneric(simulationOutput = simulationOutput, summary = countZeros, methodName = "DHARMa zero-inflation test via comparison to expected zeros with simulation under H0 = fitted model", ... )
 }
 
 
@@ -172,16 +170,12 @@ testGeneric <- function(simulationOutput, summary, alternative = c("greater", "t
   
   observed = summary(simulationOutput$observedResponse)
   
-  expected = apply(simulationOutput$simulatedResponse, 2, summary)
+  simulated = apply(simulationOutput$simulatedResponse, 2, summary)
   
-  p = ecdf(expected)(observed)
-  
-  if(alternative == "greater") p = 1-p
-  if(alternative == "less") p = p  
-  if(alternative == "two.sided") p = min(p, 1-p) * 2     
-  
+  p = getP(simulated = simulated, observed = observed, alternative = alternative)
+
   out = list()
-  out$statistic = c(ratioObsSim = observed / mean(expected))
+  out$statistic = c(ratioObsSim = observed / mean(simulated))
   out$method = methodName
   out$alternative = alternative
   out$p.value = p
@@ -192,7 +186,7 @@ testGeneric <- function(simulationOutput, summary, alternative = c("greater", "t
   if(plot == T) {
     plotTitle = gsub('(.{1,50})(\\s|$)', '\\1\n', methodName)
     xLabel = paste("Simulated values, red line = fitted model. p-value (",out$alternative, ") = ", out$p.value, sep ="")
-   hist(expected, xlim = range(expected, observed, na.rm=T ), col = "lightgrey", main = plotTitle, xlab = xLabel, breaks = 20)
+   hist(simulated, xlim = range(simulated, observed, na.rm=T ), col = "lightgrey", main = plotTitle, xlab = xLabel, breaks = 20)
    abline(v = observed, lwd= 2, col = "red")
   }
   return(out)
@@ -283,3 +277,14 @@ testSpatialAutocorrelation <- function(simulationOutput, x = NULL, y  = NULL, di
   }
   return(out)
 }
+
+
+getP <- function(simulated, observed, alternative){
+
+  if(alternative == "greater") p = mean(simulated <= observed)
+  if(alternative == "less") p = mean(simulated >= observed) 
+  if(alternative == "two.sided") p = min(min(mean(simulated <= observed), mean(simulated >= observed) ) * 2,1)    
+  
+  return(p)
+}
+
