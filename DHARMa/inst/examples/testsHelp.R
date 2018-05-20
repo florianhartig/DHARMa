@@ -12,7 +12,7 @@ testUniformity(simulationOutput)
 
 ###### Dispersion tests #######
 
-testDispersion(simulationOutput)
+testDispersion(simulationOutput, alternative = "less") # underdispersion
 
 ###### Both together###########
 
