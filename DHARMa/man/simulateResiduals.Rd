@@ -23,7 +23,7 @@ simulateResiduals(fittedModel, n = 250, refit = F, integerResponse = NULL,
 \item{...}{parameters to pass to the simulate function of the model object. An important use of this is to specify whether simulations should be conditional on the current random effect estimates. See details.}
 }
 \value{
-A list with various objects. The most important are scaledResiduals, which contain the scaled residuals, and scaledResidualsNormal, which are the the scaled residuals transformed to a normal distribution
+A list with various objects. The most important are scaledResiduals, which contain the scaled residuals, and scaledResidualsNormal, which are the the scaled residuals transformed to a normal distribution.
 }
 \description{
 The function creates scaled residuals by simulating from the fitted model
@@ -62,12 +62,20 @@ simulationOutput <- simulateResiduals(fittedModel = fittedModel)
 # plot residuals, quantreg = T is better but costs more time
 plot(simulationOutput, quantreg = FALSE)
 
+# calculating summaries per group
+simulationOutput = recalculateResiduals(simulationOutput, group = testData$group)
+plot(simulationOutput, quantreg = FALSE)
+
 # create simulations with refitting, n=5 is very low, set higher when using this
 simulationOutput <- simulateResiduals(fittedModel = fittedModel, 
                                       n = 10, refit = TRUE)
 plot(simulationOutput, quantreg = FALSE)
 
+# grouping per random effect group works as above
+simulationOutput = recalculateResiduals(simulationOutput, group = testData$group)
+plot(simulationOutput, quantreg = FALSE)
+
 }
 \seealso{
-\code{\link{testSimulatedResiduals}}, \code{\link{plotSimulatedResiduals}}
+\code{\link{testResiduals}}, \code{\link{plot.DHARMa}}, \code{\link{print.DHARMa}}, \code{\link{recalculateResiduals}}
 }
