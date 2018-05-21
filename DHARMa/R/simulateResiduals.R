@@ -307,7 +307,7 @@ securityAssertion <- function(context = "Not provided", stop = F){
 #' @param group group of each data point
 #' @param aggregateBy function for the aggregation. Default is sum. This should only be changed if you know what you are doing. Note in particular that the expected residual distribution might not be flat any more if you choose general functions, such as sd etc. 
 #' 
-#' @return an object of class DHARMa, simular to what is returned by \code{\link{simulateResiduals}}, but with additional outputs for the new grouped calculations. Note that the relevant outputs are 2x in the object, the first is the grouped calculations (which is returned by $name access), and later another time, under identical name, the original output
+#' @return an object of class DHARMa, similar to what is returned by \code{\link{simulateResiduals}}, but with additional outputs for the new grouped calculations. Note that the relevant outputs are 2x in the object, the first is the grouped calculations (which is returned by $name access), and later another time, under identical name, the original output. Moreover, there is a function 'aggregateByGroup', which can be used to aggregate predictor variables in the same way as the variables calculated here 
 #' 
 #' @example inst/examples/simulateResidualsHelp.R
 #' @export
@@ -321,11 +321,11 @@ recalculateResiduals <- function(simulationOutput, group = NULL, aggregateBy = s
   else group =as.factor(group)
   out$nGroups = nlevels(group)
 
-  sumGroup <- function(x) aggregate(x, by=list(group), FUN=aggregateBy)[,2]
+  aggregateByGroup <- function(x) aggregate(x, by=list(group), FUN=aggregateBy)[,2]
   
-  out$observedResponse = sumGroup(simulationOutput$observedResponse)
-  out$fittedPredictedResponse = sumGroup(simulationOutput$fittedPredictedResponse)
-  out$simulatedResponse = apply(simulationOutput$simulatedResponse, 2, sumGroup)
+  out$observedResponse = aggregateByGroup(simulationOutput$observedResponse)
+  out$fittedPredictedResponse = aggregateByGroup(simulationOutput$fittedPredictedResponse)
+  out$simulatedResponse = apply(simulationOutput$simulatedResponse, 2, aggregateByGroup)
   out$scaledResiduals = rep(NA, out$nGroups)
 
   if (simulationOutput$refit == F){
@@ -337,10 +337,10 @@ recalculateResiduals <- function(simulationOutput, group = NULL, aggregateBy = s
   ######## refit = T ##################   
   } else {
 
-    out$refittedPredictedResponse <- apply(simulationOutput$refittedPredictedResponse, 2, sumGroup)
-    out$fittedResiduals = sumGroup(simulationOutput$fittedResiduals)
-    out$refittedResiduals = apply(simulationOutput$refittedResiduals, 2, sumGroup)
-    out$refittedPearsonResiduals = apply(simulationOutput$refittedPearsonResiduals, 2, sumGroup)
+    out$refittedPredictedResponse <- apply(simulationOutput$refittedPredictedResponse, 2, aggregateByGroup)
+    out$fittedResiduals = aggregateByGroup(simulationOutput$fittedResiduals)
+    out$refittedResiduals = apply(simulationOutput$refittedResiduals, 2, aggregateByGroup)
+    out$refittedPearsonResiduals = apply(simulationOutput$refittedPearsonResiduals, 2, aggregateByGroup)
     
     if(simulationOutput$integerResponse == T){
       for (i in 1:out$nGroups) out$scaledResiduals[i] <- ecdf(out$refittedResiduals[i,] + runif(out$nGroups, -0.5, 0.5))(out$fittedResiduals[i] + runif(1, -0.5, 0.5))
@@ -349,6 +349,7 @@ recalculateResiduals <- function(simulationOutput, group = NULL, aggregateBy = s
     } 
   }
   # hack - the c here will result in both old and new outputs to be present resulting output, but a named access should refer to the new, grouped calculations
+  out$aggregateByGroup = aggregateByGroup
   out = c(out, simulationOutput)
   out$original = simulationOutput
   class(out) = "DHARMa"
