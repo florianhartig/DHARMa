@@ -11,6 +11,8 @@ testUniformity(simulationOutput, alternative = c("two.sided", "less",
 \item{simulationOutput}{a DHARMa object with simulated residuals created with \code{\link{simulateResiduals}}}
 
 \item{alternative}{a character string specifying whether the test should test if observations are "greater", "less" or "two.sided" compared to the simulated null hypothesis}
+
+\item{plot}{if T, plots calls \code{\link{plotQQunif}} as well}
 }
 \description{
 This function tests the overall uniformity of the simulated residuals in a DHARMa object

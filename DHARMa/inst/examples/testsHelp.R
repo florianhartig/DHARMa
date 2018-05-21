@@ -4,7 +4,7 @@ testData = createData(sampleSize = 200, overdispersion = 0.5, randomEffectVarian
 fittedModel <- glm(observedResponse ~ Environment1 , family = "poisson", data = testData)
 simulationOutput <- simulateResiduals(fittedModel = fittedModel)
 
-plot(simulationOutput, quantreg = F)
+plot(simulationOutput, quantreg = FALSE)
 
 ###### Distribution tests #####
 
