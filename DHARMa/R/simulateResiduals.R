@@ -7,7 +7,7 @@
 #' @param integerResponse if T, noise will be added at to the residuals to maintain a uniform expectations for integer responses (such as Poisson or Binomial). Usually, the model will automatically detect the appropriate setting, so there is no need to adjust this setting.
 #' @param plot if T, \code{\link{plotSimulatedResiduals}} will be directly run after the simulations have terminated
 #' @param ... parameters to pass to the simulate function of the model object. An important use of this is to specify whether simulations should be conditional on the current random effect estimates. See details.
-#' @param seed the random seed. The default setting, recommended for any type of data analysis, is to reset the random number generator each time the function is run, meaning that you will always get the same result when running the same code. Setting seed = NA avoids the reset. This is only recommended for simulation experiments. See vignette for details.
+#' @param seed the random seed. The default setting, recommended for any type of data analysis, is to reset the random number generator each time the function is run, meaning that you will always get the same result when running the same code. NULL = no new seed is set, but previous random state will be restored after simulation. F = no seed is set, and random state will not be restored. The latter two options are only recommended for simulation experiments. See vignette for details.
 #' @return A list with various objects. The most important are scaledResiduals, which contain the scaled residuals, and scaledResidualsNormal, which are the the scaled residuals transformed to a normal distribution. 
 #' @details There are a number of important considerations when simulating from a more complex (hierarchical) model. 
 #' 
@@ -300,15 +300,18 @@ securityAssertion <- function(context = "Not provided", stop = F){
 
 
 #' Recalculate residuals with grouping
+#' 
+#' The purpose of this function is to recalculate scaled residuals per group, based on the simulations done by \code{\link{simulateResiduals}}
 #'
 #' @param simulationOutput an object with simualted residuals created by \code{\link{simulateResiduals}}
 #' @param group group of each data point
+#' @param aggregateBy function for the aggregation. Default is sum. This should only be changed if you know what you are doing. Note in particular that the expected residual distribution might not be flat any more if you choose general functions, such as sd etc. 
 #' 
 #' @return an object of class DHARMa, simular to what is returned by \code{\link{simulateResiduals}}, but with additional outputs for the new grouped calculations. Note that the relevant outputs are 2x in the object, the first is the grouped calculations (which is returned by $name access), and later another time, under identical name, the original output
 #' 
 #' @example inst/examples/simulateResidualsHelp.R
 #' @export
-recalculateResiduals <- function(simulationOutput, group = NULL){
+recalculateResiduals <- function(simulationOutput, group = NULL, aggregateBy = sum){
 
   if(!is.null(simulationOutput$original)) simulationOutput = simulationOutput$original
 
@@ -318,7 +321,7 @@ recalculateResiduals <- function(simulationOutput, group = NULL){
   else group =as.factor(group)
   out$nGroups = nlevels(group)
 
-  sumGroup <- function(x) aggregate(x, by=list(group), FUN=sum)[,2]
+  sumGroup <- function(x) aggregate(x, by=list(group), FUN=aggregateBy)[,2]
   
   out$observedResponse = sumGroup(simulationOutput$observedResponse)
   out$fittedPredictedResponse = sumGroup(simulationOutput$fittedPredictedResponse)

@@ -7,7 +7,7 @@
 getRandomState(seed = NULL)
 }
 \arguments{
-\item{seed}{seed argument to set.seed()}
+\item{seed}{seed argument to set.seed(). NULL = no seed, but random state will be restored. F = random state will not be restored}
 }
 \value{
 a list with various infos about the random state that after function execution, as well as a function to restore the previous state before the function execution
@@ -46,6 +46,14 @@ runif(1)
 x$restoreCurrent()
 exists(".Random.seed")
 
+# with false 
+
+rm(.Random.seed)
+x = getRandomState(seed = FALSE)
+exists(".Random.seed")
+runif(1)
+x$restoreCurrent()
+exists(".Random.seed")
 }
 \author{
 Florian Hartig
