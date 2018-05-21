@@ -10,10 +10,12 @@
 #' @seealso \code{\link{testUniformity}}, \code{\link{testDispersion}}, \code{\link{testZeroInflation}}, \code{\link{testGeneric}}, \code{\link{testTemporalAutocorrelation}}, \code{\link{testSpatialAutocorrelation}}
 testResiduals <- function(simulationOutput){
   
+  oldpar = par(mfrow = c(1,2))
   out = list()
   out$uniformity = testUniformity(simulationOutput)
   out$dispersion = testDispersion(simulationOutput)
   
+  par(oldpar)
   print(out)
   return(out)
 }
@@ -37,12 +39,14 @@ testSimulatedResiduals <- function(simulationOutput){
 #' 
 #' @param simulationOutput a DHARMa object with simulated residuals created with \code{\link{simulateResiduals}}
 #' @param alternative a character string specifying whether the test should test if observations are "greater", "less" or "two.sided" compared to the simulated null hypothesis  
+#' @param plot if T, plots calls \code{\link{plotQQunif}} as well 
 #' @details The function applies a KS test for uniformity on the simulated residuals
 #' @author Florian Hartig
 #' @seealso \code{\link{testResiduals}}, \code{\link{testDispersion}}, \code{\link{testZeroInflation}}, \code{\link{testGeneric}}, \code{\link{testTemporalAutocorrelation}}, \code{\link{testSpatialAutocorrelation}}
 #' @export
-testUniformity<- function(simulationOutput, alternative = c("two.sided", "less", "greater")){
+testUniformity<- function(simulationOutput, alternative = c("two.sided", "less", "greater"), plot = T){
   out <- suppressWarnings(ks.test(simulationOutput$scaledResiduals, 'punif', alternative = alternative))
+  if(plot == T) plotQQunif(simulationOutput = simulationOutput)
   return(out)
 }
 
@@ -65,7 +69,7 @@ testUniformity<- function(simulationOutput, alternative = c("two.sided", "less",
 #' @seealso \code{\link{testResiduals}}, \code{\link{testUniformity}}, \code{\link{testZeroInflation}}, \code{\link{testGeneric}}, \code{\link{testTemporalAutocorrelation}}, \code{\link{testSpatialAutocorrelation}}
 #' @example inst/examples/testsHelp.R
 #' @export
-testDispersion <- function(simulationOutput, alternative = c("greater", "two.sided", "less"), plot = F, ...){
+testDispersion <- function(simulationOutput, alternative = c("greater", "two.sided", "less"), plot = T, ...){
   
   alternative <- match.arg(alternative)
   
@@ -85,10 +89,8 @@ testDispersion <- function(simulationOutput, alternative = c("greater", "two.sid
     out$statistic = c(dispersion = observed / mean(expected))
     out$method = "DHARMa nonparametric dispersion test via mean deviance residual fitted vs. simulated-refitted"
     
-    p = ecdf(expected)(observed)
-    if(alternative == "greater") p = 1-p
-    if(alternative == "less") p = p  
-    if(alternative == "two.sided") p = min(p, 1-p) * 2   
+    p = getP(simulated = expected, observed = observed, alternative = alternative)
+
     out$alternative = alternative
     out$p.value = p
     out$data.name = deparse(substitute(simulationOutput))
@@ -142,7 +144,7 @@ testOverdispersionParametric <- function(...){
 #' @export
 testZeroInflation <- function(simulationOutput, ...){
   countZeros <- function(x) sum( x == 0)
-  testGeneric(simulationOutput, countZeros, methodName = "DHARMa zero-inflation test via comparison to expected zeros with simulation under H0 = fitted model", ... )
+  testGeneric(simulationOutput = simulationOutput, summary = countZeros, methodName = "DHARMa zero-inflation test via comparison to expected zeros with simulation under H0 = fitted model", ... )
 }
 
 
@@ -156,7 +158,9 @@ testZeroInflation <- function(simulationOutput, ...){
 #' @param plot whether to plot the simulated summary
 #' @param methodName name of the test (will be used in plot)
 #' 
-#' @note the function can easily be remodeled to apply summaries on the residuals, by simply defining f = function(x) summary (x - predictions), as done in \code{\link{testDispersion}}
+#' @details This function tests if a user-defined summary differs when applied to simulated / observed data. the function can easily be remodeled to apply summaries on the residuals, by simply defining f = function(x) summary (x - predictions), as done in \code{\link{testDispersion}}
+#' 
+#' @note The function that you supply is applied on the data as it is represented in your fitted model, which may not always correspond to how you think. This is important in particular when you use k/n binomial data, and want to test for 1-inflation. As an example, if have k/20 observations, and you provide your data via cbind (y, y-20), you have to test for 20-inflation (because this is how the data is represented in the model). However, if you provide data via y/20, and weights = 20, you should test for 1-inflation. In doubt, check how the data is internally represented in model.frame(model), or via simulate(model)
 #' 
 #' @export
 #' @author Florian Hartig
@@ -169,16 +173,12 @@ testGeneric <- function(simulationOutput, summary, alternative = c("greater", "t
   
   observed = summary(simulationOutput$observedResponse)
   
-  expected = apply(simulationOutput$simulatedResponse, 2, summary)
+  simulated = apply(simulationOutput$simulatedResponse, 2, summary)
   
-  p = ecdf(expected)(observed)
-  
-  if(alternative == "greater") p = 1-p
-  if(alternative == "less") p = p  
-  if(alternative == "two.sided") p = min(p, 1-p) * 2     
-  
+  p = getP(simulated = simulated, observed = observed, alternative = alternative)
+
   out = list()
-  out$statistic = c(ratioObsSim = observed / mean(expected))
+  out$statistic = c(ratioObsSim = observed / mean(simulated))
   out$method = methodName
   out$alternative = alternative
   out$p.value = p
@@ -189,7 +189,7 @@ testGeneric <- function(simulationOutput, summary, alternative = c("greater", "t
   if(plot == T) {
     plotTitle = gsub('(.{1,50})(\\s|$)', '\\1\n', methodName)
     xLabel = paste("Simulated values, red line = fitted model. p-value (",out$alternative, ") = ", out$p.value, sep ="")
-   hist(expected, xlim = range(expected, observed, na.rm=T ), col = "lightgrey", main = plotTitle, xlab = xLabel, breaks = 20)
+   hist(simulated, xlim = range(simulated, observed, na.rm=T ), col = "lightgrey", main = plotTitle, xlab = xLabel, breaks = 20)
    abline(v = observed, lwd= 2, col = "red")
   }
   return(out)
@@ -280,3 +280,14 @@ testSpatialAutocorrelation <- function(simulationOutput, x = NULL, y  = NULL, di
   }
   return(out)
 }
+
+
+getP <- function(simulated, observed, alternative){
+
+  if(alternative == "greater") p = mean(simulated <= observed)
+  if(alternative == "less") p = mean(simulated >= observed) 
+  if(alternative == "two.sided") p = min(min(mean(simulated <= observed), mean(simulated >= observed) ) * 2,1)    
+  
+  return(p)
+}
+

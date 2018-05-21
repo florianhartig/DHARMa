@@ -220,44 +220,29 @@ A third option is the treatment of integer responses. The background of this opt
 
 The simulateResiduals function will automatically check if the family is integer valued, and apply randomization if that is the case. I see no reason why one would not want to randomize for an integer-valued function, so the parameter should usually not be changed.
 
-#### Random seed and random state
+#### Calculating residuals per group
 
-DHARMa essentially performs a simulation experiment on the fitted model, to find out if the residuals fit to observation. A simulation means that random numbers are drawn, which meanst that results will be slightly different every time you do this.
+In many situations, it can be useful to look at residuals per group, e.g. to see how much the model over / underpredicts per plot, year or subject. To do this, use the recalculateResiduals() function, together with a grouping variable
 
-This can not only be confusing to a user, but it also bears the danger that a user would run the simulation several times and take the result that looks better. Do not do this if you want to interpret your p-values properly - this is essentially multiple testing!
-
-By default, DHARMa therefore fixes the random seed to the same value every time a simulation is run. This means that you will get exactly the same residual plot each time. If you want to avoid this behavior, for example for simulation experiments on DHARMa, use the setting "seed = NA" as above. 
-
-```{r}
-simulationOutput <- simulateResiduals(fittedModel = fittedModel, seed = NA)
-testUniformity(simulationOutput)
-simulationOutput <- simulateResiduals(fittedModel = fittedModel, seed = NA)
-testUniformity(simulationOutput)
+```{r, eval= F}
+simulationOutput = recalculateResiduals(simulationOutput, group = testData$group)
 ```
 
-Whether or not you fix the seed, the setting for the random seed and the random state are stored in 
+you can keep using the simulation output as before. Note, hover, that items such as simulationOutput$scaledResiduals now have as many entries as you have groups, so if you perform plots by hand, you have to aggregate predictors in the same way. For the latter purpose, recalculateResiduals adds a function aggregateByGroup to the output. 
+
+#### Reproducibility notes, random seed and random state
+
+As DHARMa uses simulations to calculate the residuals, a naive implementation of the algorithm would mean that residuals would look slightly different each time a DHARMa calculation is executed. This might only be confusing to a user, but it also bears the danger that one might run the simulation several times and take the result that looks better (which would amount to multiple testing / p-hacking). 
+
+By default, DHARMa therefore fixes the random seed to the same value every time a simulation is run, and afterwards restores the random state to the old value. This means that you will get exactly the same residual plot each time. If you want to avoid this behavior, for example for simulation experiments on DHARMa, use seed = NULL -> no seed set, but random state will be restored, or seed = F -> no seed set, and random state will not be restored. Whether or not you fix the seed, the setting for the random seed and the random state are stored in 
 
 ```{r, eval = F}
 simulationOutput$randomState
 ```
 
-If you do not use a seed, the random state will still recorded. If you want to reproduce simualtions for such a run, set the variable .Random.seed by hand, and simulate with seed = NA. 
+If you want to reproduce simualtions for such a run, set the variable .Random.seed by hand, and simulate with seed = NULL. 
 
-## Reproducibility notes
-
-If you running a stochastic algorithms such as the code in DHARMa, you should always set or record your random seed to make your final results reproducible (otherwise, results will change slightly every time you run the code). Do this via
-
-```{r}
-set.seed(123)
-```
-
-However, I do not recommend to do this from the start - it's useful for you to see that results in DHARMa may change slightly if you re-run the script. Just for the final result, the seed should be set or recorded to ensure complete reproducibility. In addition to that (general advice)
-
-```{r, eval = F}
-sessionInfo()
-```
-
-will lists the version number of R and all loaded packages - it is always wise to record this if producing results with R.
+Moreover (general advice), to ensure reproducibility, it's advisable to add a set.seed() at the beginning, and a session.info() at the end of your script. The latter will lists the version number of R and all loaded packages.
 
 # Visual diagnostics and tests of common misspecification problems 
 
@@ -528,38 +513,6 @@ A big advantage of the simulations is that you can test any problem that you thi
 
 You think your random effect estimates look weird? Run the model with the refit = T option and see how typical random effect estimates look for your problem.
 
-# Special cases and 
-
-## Binomial 0/1 data
-
-There are a lot of rumors about that can and cannot be checked with binomial 0/1 data. Let's consider a clearly misspecified binomial model
-
-```{r}
-testData = createData(sampleSize = 500, overdispersion = 0, fixedEffects = 5, family = binomial(), randomEffectVariance = 0)
-fittedModel <- glm(observedResponse ~ 1, family = "binomial", data = testData)
-
-simulationOutput <- simulateResiduals(fittedModel = fittedModel)
-```
-
-A rumor that is true is that, unlike in k/n or count data, such a misspecification will not produce overdispersion. 
-```{r}
-plot(simulationOutput, asFactor = T)
-```
-However, you can clearly see the misfit if you plot 
-
-```{r}
-plotResiduals(testData$Environment1, simulationOutput$scaledResiduals, quantreg = T)
-```
-
-Moreover, if you would perform the DHARMa procedure per group, you should also be able to see overdispersion. Unfortunately, however, this option is not yet implemented in DHARMa.
-
-
-## Negative binomial
-
-
-
-
-
 
 # Supported packages 
 
@@ -637,7 +590,7 @@ What is provided as simulatedResponse is up to the user, but median posterior pr
 
 **Important**: as DHARMa doesn't know the distribution fitted model, it is vital to specify the integerResponse option by hand (see above / ?simulateResiduals for details). 
 
-# Real-world examples
+# Case studies and examples
 
 **Note:** More real-world examples on the DHARMa GitHub repository [here](https://github.com/florianhartig/DHARMa/tree/master/Code/Examples) 
 
@@ -791,6 +744,38 @@ which shows that we have too many zeros. We need a GLMM with zero-inflation. The
 To be honest, however, if I hadn’t created the data with zero-inflation myself, I would be hard pressed to say with certainty that zero-inflation is the cause of these residual patterns. The reason is that, if a model is presented with zero-inflated data, the mean model predictions will be drawn towards the zeros, which in turn means that mean model-predictions underestimate the “normal” data. Hence zero-inflation often looks like overdispersion, and seeing such a pattern after accounting for overdispersion might as well mean that the distributional assumptions of the chosen model are not fulfilled (for example because overdispersion is more heavy-tailed than in the chose distribution). The best way to test if the problem is really due to zero-inflation is probably to run model selections (e.g. simulated LRTs) between a number of alternative models, e.g. a zero-inflated GLMM vs. a number of different overdispersed GLMMs.
 
 
+## Binomial 0/1 data
+
+There are a lot of rumors about that can and cannot be checked with binomial 0/1 data. Let's consider a clearly misspecified binomial model
+
+```{r}
+testData = createData(sampleSize = 500, overdispersion = 0, fixedEffects = 5, family = binomial(), randomEffectVariance = 3, numGroups = 25)
+fittedModel <- glm(observedResponse ~ 1, family = "binomial", data = testData)
+
+simulationOutput <- simulateResiduals(fittedModel = fittedModel)
+```
+
+A rumor that is true is that, unlike in k/n or count data, such a misspecification will not produce overdispersion. 
+```{r}
+plot(simulationOutput, asFactor = T)
+```
+
+However, you can clearly see the misfit if you plot 
+
+```{r}
+plotResiduals(testData$Environment1, simulationOutput$scaledResiduals, quantreg = T)
+```
+
+Moreover, if you perform the DHARMa procedure per group, you can see overdispersion created by the random effect variance (left without grouping, right with grouping)
+
+```{r}
+par(mfrow = c(1,2))
+testDispersion(simulationOutput)
+
+simulationOutput = recalculateResiduals(simulationOutput , group = testData$group)
+testDispersion(simulationOutput)
+
+```
 
 
 

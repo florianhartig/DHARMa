@@ -10,7 +10,7 @@
 #' 
 #' @return a list with various infos about the random state that after function execution, as well as a function to restore the previous state before the function execution
 #' 
-#' @param seed seed argument to set.seed()
+#' @param seed seed argument to set.seed(). NULL = no seed, but random state will be restored. F = random state will not be restored
 #' @export
 #' @example inst/examples/getRandomStateHelp.R
 #' @author Florian Hartig
@@ -22,10 +22,14 @@ getRandomState <- function(seed = NULL){
   
   current = mget(".Random.seed", envir = .GlobalEnv, ifnotfound = list(NULL))[[1]]
   
-  restoreCurrent <- function(){
-    if(is.null(current)) rm(".Random.seed", envir = .GlobalEnv) else assign(".Random.seed", current , envir = .GlobalEnv)
+  if(is.logical(seed) & seed == F){
+    restoreCurrent <- function(){}    
+  }else{
+    restoreCurrent <- function(){
+      if(is.null(current)) rm(".Random.seed", envir = .GlobalEnv) else assign(".Random.seed", current , envir = .GlobalEnv)
+    }    
   }
-  
+
   # setting seed
   if(is.numeric(seed)) set.seed(seed)
 

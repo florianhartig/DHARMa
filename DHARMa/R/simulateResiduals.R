@@ -7,8 +7,8 @@
 #' @param integerResponse if T, noise will be added at to the residuals to maintain a uniform expectations for integer responses (such as Poisson or Binomial). Usually, the model will automatically detect the appropriate setting, so there is no need to adjust this setting.
 #' @param plot if T, \code{\link{plotSimulatedResiduals}} will be directly run after the simulations have terminated
 #' @param ... parameters to pass to the simulate function of the model object. An important use of this is to specify whether simulations should be conditional on the current random effect estimates. See details.
-#' @param seed the random seed. The default setting, recommended for any type of data analysis, is to reset the random number generator each time the function is run, meaning that you will always get the same result when running the same code. Setting seed = NA avoids the reset. This is only recommended for simulation experiments. See vignette for details.
-#' @return A list with various objects. The most important are scaledResiduals, which contain the scaled residuals, and scaledResidualsNormal, which are the the scaled residuals transformed to a normal distribution
+#' @param seed the random seed. The default setting, recommended for any type of data analysis, is to reset the random number generator each time the function is run, meaning that you will always get the same result when running the same code. NULL = no new seed is set, but previous random state will be restored after simulation. F = no seed is set, and random state will not be restored. The latter two options are only recommended for simulation experiments. See vignette for details.
+#' @return A list with various objects. The most important are scaledResiduals, which contain the scaled residuals, and scaledResidualsNormal, which are the the scaled residuals transformed to a normal distribution. 
 #' @details There are a number of important considerations when simulating from a more complex (hierarchical) model. 
 #' 
 #' \strong{Re-simulating random effects / hierarchical structure}: the first is that in a hierarchical model, several layers of stochasticity are aligned on top of each other. Specifically, in a GLMM, we have a lower level stochastic process (random effect), whose result enters into a higher level (e.g. Poisson distribution). For other hierarchical models such as state-space models, similar considerations apply. When simulating, we have to decide if we want to re-simulate all stochastic levels, or only a subset of those. For example, in a GLMM, it is common to only simulate the last stochastic level (e.g. Poisson) conditional on the fitted random effects. 
@@ -29,7 +29,7 @@
 #' 
 #' #' \strong{How many simulations}: about the choice of n: my simulations didn't show major problems with a small n (if you get down to the order of a few 10, you will start seeing discretization artifacts from the empirical cummulative density estimates though). The default of 250 seems safe to me. If you want to be on the safe side, choose a high value (e.g. 1000) for producing your definite results.
 #'  
-#' @seealso \code{\link{testSimulatedResiduals}}, \code{\link{plotSimulatedResiduals}}
+#' @seealso \code{\link{testResiduals}}, \code{\link{plot.DHARMa}}, \code{\link{print.DHARMa}}, \code{\link{recalculateResiduals}}
 #' @example inst/examples/simulateResidualsHelp.R
 #' @import stats
 #' @export
@@ -194,7 +194,7 @@ simulateResiduals <- function(fittedModel, n = 250, refit = F, integerResponse =
     }
 
   }
-  
+
   ########### Wrapup ############
   
   out$scaledResidualsNormal = qnorm(out$scaledResiduals + 0.00 )
@@ -298,6 +298,64 @@ securityAssertion <- function(context = "Not provided", stop = F){
   else stop(paste(generalMessage, context))  
 }
 
+
+#' Recalculate residuals with grouping
+#' 
+#' The purpose of this function is to recalculate scaled residuals per group, based on the simulations done by \code{\link{simulateResiduals}}
+#'
+#' @param simulationOutput an object with simualted residuals created by \code{\link{simulateResiduals}}
+#' @param group group of each data point
+#' @param aggregateBy function for the aggregation. Default is sum. This should only be changed if you know what you are doing. Note in particular that the expected residual distribution might not be flat any more if you choose general functions, such as sd etc. 
+#' 
+#' @return an object of class DHARMa, similar to what is returned by \code{\link{simulateResiduals}}, but with additional outputs for the new grouped calculations. Note that the relevant outputs are 2x in the object, the first is the grouped calculations (which is returned by $name access), and later another time, under identical name, the original output. Moreover, there is a function 'aggregateByGroup', which can be used to aggregate predictor variables in the same way as the variables calculated here 
+#' 
+#' @example inst/examples/simulateResidualsHelp.R
+#' @export
+recalculateResiduals <- function(simulationOutput, group = NULL, aggregateBy = sum){
+
+  if(!is.null(simulationOutput$original)) simulationOutput = simulationOutput$original
+
+  out = list()
+  
+  if(is.null(group)) return(simulationOutput)
+  else group =as.factor(group)
+  out$nGroups = nlevels(group)
+
+  aggregateByGroup <- function(x) aggregate(x, by=list(group), FUN=aggregateBy)[,2]
+  
+  out$observedResponse = aggregateByGroup(simulationOutput$observedResponse)
+  out$fittedPredictedResponse = aggregateByGroup(simulationOutput$fittedPredictedResponse)
+  out$simulatedResponse = apply(simulationOutput$simulatedResponse, 2, aggregateByGroup)
+  out$scaledResiduals = rep(NA, out$nGroups)
+
+  if (simulationOutput$refit == F){
+    if(simulationOutput$integerResponse == T){
+      for (i in 1:out$nGroups) out$scaledResiduals[i] <- ecdf(out$simulatedResponse[i,] + runif(out$nGroups, -0.5, 0.5))(out$observedResponse[i] + runif(1, -0.5, 0.5))
+    } else {
+      for (i in 1:out$nGroups) out$scaledResiduals[i] <- ecdf(out$simulatedResponse[i,])(out$observedResponse[i])
+    } 
+  ######## refit = T ##################   
+  } else {
+
+    out$refittedPredictedResponse <- apply(simulationOutput$refittedPredictedResponse, 2, aggregateByGroup)
+    out$fittedResiduals = aggregateByGroup(simulationOutput$fittedResiduals)
+    out$refittedResiduals = apply(simulationOutput$refittedResiduals, 2, aggregateByGroup)
+    out$refittedPearsonResiduals = apply(simulationOutput$refittedPearsonResiduals, 2, aggregateByGroup)
+    
+    if(simulationOutput$integerResponse == T){
+      for (i in 1:out$nGroups) out$scaledResiduals[i] <- ecdf(out$refittedResiduals[i,] + runif(out$nGroups, -0.5, 0.5))(out$fittedResiduals[i] + runif(1, -0.5, 0.5))
+    } else {
+      for (i in 1:out$nGroups) out$scaledResiduals[i] <- ecdf(out$refittedResiduals[i,])(out$fittedResiduals[i])
+    } 
+  }
+  # hack - the c here will result in both old and new outputs to be present resulting output, but a named access should refer to the new, grouped calculations
+  out$aggregateByGroup = aggregateByGroup
+  out = c(out, simulationOutput)
+  out$original = simulationOutput
+  class(out) = "DHARMa"
+  return(out)
+}
+  
 
 
 

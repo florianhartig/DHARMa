@@ -42,6 +42,9 @@ runEverything = function(fittedModel, testData, DHARMaData = T){
   #testOverdispersion(simulationOutput)
   #testOverdispersion(simulationOutput, alternative = "both", plot = T)
   
+  simulationOutput <- recalculateResiduals(simulationOutput, group = testData$group)
+  testDispersion(simulationOutput)
+  
   simulationOutput2 <- simulateResiduals(fittedModel = fittedModel, refit = T, n = 5) # n=10 is very low, set higher for serious tests
   
   checkOutput(simulationOutput2)
@@ -49,6 +52,10 @@ runEverything = function(fittedModel, testData, DHARMaData = T){
   plot(simulationOutput2, quantreg = F)
   
   testDispersion(simulationOutput2)
+  
+  simulationOutput2 <- recalculateResiduals(simulationOutput2, group = testData$group)
+  testDispersion(simulationOutput2)
+  
 }
 
 

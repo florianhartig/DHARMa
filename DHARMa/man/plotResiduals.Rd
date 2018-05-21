@@ -14,7 +14,7 @@ plotResiduals(pred, residuals = NULL, quantreg = NULL, rank = FALSE,
 
 \item{quantreg}{whether to perform a quantile regression on 0.25, 0.5, 0.75 on the residuals. If F, a spline will be created instead. Default NULL chooses T for nObs < 2000, and F otherwise.}
 
-\item{rank}{if T, the values of pred will be rank transformed. This will usually make patterns easier to spot visually, especially if the distribution of the predictor is skewed.}
+\item{rank}{if T, the values of pred will be rank transformed. This will usually make patterns easier to spot visually, especially if the distribution of the predictor is skewed. If pred is a factor, this has no effect.}
 
 \item{asFactor}{should the predictor variable converted into a factor}
 
@@ -65,8 +65,12 @@ plotResiduals(pred = testData$group, residuals = simulationOutput$scaledResidual
               quantreg = FALSE, asFactor = TRUE)
 
 # All these options can also be provided to the main plotting function
-
 plot(simulationOutput, quantreg = FALSE, rank = TRUE)
+
+# If you want to plot summaries per group, use
+simulationOutput = recalculateResiduals(simulationOutput, group = testData$group)
+plot(simulationOutput, quantreg = FALSE) # note that you see the REs here
+
 
 }
 \seealso{

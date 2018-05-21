@@ -10,8 +10,16 @@ simulationOutput <- simulateResiduals(fittedModel = fittedModel)
 # plot residuals, quantreg = T is better but costs more time
 plot(simulationOutput, quantreg = FALSE)
 
+# calculating summaries per group
+simulationOutput = recalculateResiduals(simulationOutput, group = testData$group)
+plot(simulationOutput, quantreg = FALSE)
+
 # create simulations with refitting, n=5 is very low, set higher when using this
 simulationOutput <- simulateResiduals(fittedModel = fittedModel, 
                                       n = 10, refit = TRUE)
+plot(simulationOutput, quantreg = FALSE)
+
+# grouping per random effect group works as above
+simulationOutput = recalculateResiduals(simulationOutput, group = testData$group)
 plot(simulationOutput, quantreg = FALSE)
 

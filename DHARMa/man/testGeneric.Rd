@@ -21,17 +21,20 @@ testGeneric(simulationOutput, summary, alternative = c("greater", "two.sided",
 \description{
 This function tests if a user-defined summary differs when applied to simulated / observed data.
 }
+\details{
+This function tests if a user-defined summary differs when applied to simulated / observed data. the function can easily be remodeled to apply summaries on the residuals, by simply defining f = function(x) summary (x - predictions), as done in \code{\link{testDispersion}}
+}
 \note{
-the function can easily be remodeled to apply summaries on the residuals, by simply defining f = function(x) summary (x - predictions), as done in \code{\link{testDispersion}}
+The function that you supply is applied on the data as it is represented in your fitted model, which may not always correspond to how you think. This is important in particular when you use k/n binomial data, and want to test for 1-inflation. As an example, if have k/20 observations, and you provide your data via cbind (y, y-20), you have to test for 20-inflation (because this is how the data is represented in the model). However, if you provide data via y/20, and weights = 20, you should test for 1-inflation. In doubt, check how the data is internally represented in model.frame(model), or via simulate(model)
 }
 \examples{
 # creating test data
 
-testData = createData(sampleSize = 200, overdispersion = 0.5, pZeroInflation = 0, randomEffectVariance = 0)
+testData = createData(sampleSize = 200, overdispersion = 0.5, randomEffectVariance = 0)
 fittedModel <- glm(observedResponse ~ Environment1 , family = "poisson", data = testData)
 simulationOutput <- simulateResiduals(fittedModel = fittedModel)
 
-plot(simulationOutput)
+plot(simulationOutput, quantreg = FALSE)
 
 ###### Distribution tests #####
 
@@ -39,7 +42,7 @@ testUniformity(simulationOutput)
 
 ###### Dispersion tests #######
 
-testDispersion(simulationOutput)
+testDispersion(simulationOutput, alternative = "less") # underdispersion
 
 ###### Both together###########
 
@@ -65,7 +68,12 @@ testGeneric(simulationOutput, summary = spread)
 
 # if model is refitted, a different test will be called
 
-simulationOutput <- simulateResiduals(fittedModel = fittedModel, refit = TRUE)
+simulationOutput <- simulateResiduals(fittedModel = fittedModel, refit = TRUE, seed = 12)
+testDispersion(simulationOutput)
+
+###### Test per group ##############
+
+simulationOutput = recalculateResiduals(simulationOutput, group = testData$group)
 testDispersion(simulationOutput)
 
 

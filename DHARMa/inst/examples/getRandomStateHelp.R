@@ -21,3 +21,11 @@ runif(1)
 x$restoreCurrent()
 exists(".Random.seed")
 
+# with false 
+
+rm(.Random.seed)
+x = getRandomState(seed = FALSE)
+exists(".Random.seed")
+runif(1)
+x$restoreCurrent()
+exists(".Random.seed")

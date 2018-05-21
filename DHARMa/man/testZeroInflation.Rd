@@ -20,11 +20,11 @@ shows the expected distribution of zeros against the observed
 \examples{
 # creating test data
 
-testData = createData(sampleSize = 200, overdispersion = 0.5, pZeroInflation = 0, randomEffectVariance = 0)
+testData = createData(sampleSize = 200, overdispersion = 0.5, randomEffectVariance = 0)
 fittedModel <- glm(observedResponse ~ Environment1 , family = "poisson", data = testData)
 simulationOutput <- simulateResiduals(fittedModel = fittedModel)
 
-plot(simulationOutput)
+plot(simulationOutput, quantreg = FALSE)
 
 ###### Distribution tests #####
 
@@ -32,7 +32,7 @@ testUniformity(simulationOutput)
 
 ###### Dispersion tests #######
 
-testDispersion(simulationOutput)
+testDispersion(simulationOutput, alternative = "less") # underdispersion
 
 ###### Both together###########
 
@@ -58,7 +58,12 @@ testGeneric(simulationOutput, summary = spread)
 
 # if model is refitted, a different test will be called
 
-simulationOutput <- simulateResiduals(fittedModel = fittedModel, refit = TRUE)
+simulationOutput <- simulateResiduals(fittedModel = fittedModel, refit = TRUE, seed = 12)
+testDispersion(simulationOutput)
+
+###### Test per group ##############
+
+simulationOutput = recalculateResiduals(simulationOutput, group = testData$group)
 testDispersion(simulationOutput)
 
 
