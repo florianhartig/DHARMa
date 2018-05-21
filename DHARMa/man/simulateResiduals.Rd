@@ -18,7 +18,7 @@ simulateResiduals(fittedModel, n = 250, refit = F, integerResponse = NULL,
 
 \item{plot}{if T, \code{\link{plotSimulatedResiduals}} will be directly run after the simulations have terminated}
 
-\item{seed}{the random seed. The default setting, recommended for any type of data analysis, is to reset the random number generator each time the function is run, meaning that you will always get the same result when running the same code. Setting seed = NA avoids the reset. This is only recommended for simulation experiments. See vignette for details.}
+\item{seed}{the random seed. The default setting, recommended for any type of data analysis, is to reset the random number generator each time the function is run, meaning that you will always get the same result when running the same code. NULL = no new seed is set, but previous random state will be restored after simulation. F = no seed is set, and random state will not be restored. The latter two options are only recommended for simulation experiments. See vignette for details.}
 
 \item{...}{parameters to pass to the simulate function of the model object. An important use of this is to specify whether simulations should be conditional on the current random effect estimates. See details.}
 }

@@ -71,6 +71,11 @@ testGeneric(simulationOutput, summary = spread)
 simulationOutput <- simulateResiduals(fittedModel = fittedModel, refit = TRUE, seed = 12)
 testDispersion(simulationOutput)
 
+###### Test per group ##############
+
+simulationOutput = recalculateResiduals(simulationOutput, group = testData$group)
+testDispersion(simulationOutput)
+
 
 }
 \seealso{
