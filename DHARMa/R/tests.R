@@ -284,8 +284,8 @@ testSpatialAutocorrelation <- function(simulationOutput, x = NULL, y  = NULL, di
 
 getP <- function(simulated, observed, alternative){
 
-  if(alternative == "greater") p = mean(simulated <= observed)
-  if(alternative == "less") p = mean(simulated >= observed) 
+  if(alternative == "greater") p = mean(simulated >= observed)
+  if(alternative == "less") p = mean(simulated <= observed) 
   if(alternative == "two.sided") p = min(min(mean(simulated <= observed), mean(simulated >= observed) ) * 2,1)    
   
   return(p)
