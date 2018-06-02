@@ -1,6 +1,6 @@
 context("DHARMa tests")
 
-library(stringr)
+# erase? library(stringr)
 
 test_that("overdispersion is correct", {
   
