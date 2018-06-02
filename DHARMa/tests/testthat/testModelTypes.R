@@ -158,6 +158,10 @@ test_that("glm binomial n/k works",
             
             fittedModel <- glmmTMB(cbind(observedResponse1,observedResponse0) ~ Environment1 + (1|group) , family = "binomial", data = testData)
             runEverything(fittedModel, testData)
+            
+            fittedModel <- glmmTMB(cbind(observedResponse1,observedResponse0) ~ Environment1 + (1|group) , family = "betabinomial", data = testData)
+            runEverything(fittedModel, testData)
+            
           }
 )
 
@@ -188,6 +192,7 @@ test_that("glm poisson works",
             runEverything(fittedModel, testData)
             
             fittedModel <- glmmTMB(observedResponse ~ Environment1 + (1|group), zi=~1 , family = nbinom2, data = testData)
+            
             runEverything(fittedModel, testData)
           }
 )
