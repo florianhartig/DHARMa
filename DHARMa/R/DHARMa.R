@@ -35,14 +35,21 @@ print.DHARMa <- function(x, ...){
 #' @example inst/examples/createDharmaHelp.R
 #' @export
 createDHARMa <- function(scaledResiduals = NULL, simulatedResponse = NULL, observedResponse = NULL, fittedPredictedResponse = NULL, integerResponse = F){
-  out = list()
 
-  if(is.matrix(scaledResiduals) | is.data.frame(scaledResiduals)) stop("DHARMa::createDHARMa - matrix provided to parmaeter scaledResiduals - if you want to provide simulations, use parameter simulatedResponse")
+  out = list()
   
   if(is.null(scaledResiduals)) {
     if(!is.matrix(simulatedResponse) & !is.null(observedResponse)) stop("either scaled residuals or simulations and observations have to be provided")
+    if(ncol(simulatedResponse) < 2) stop("simulatedResponse with less than 2 simulations provided - cannot calculate residuals on that.")
+    
+    if(ncol(simulatedResponse) < 10) warning("simulatedResponse with less than 10 simulations provided. This rarely makes sense")
     
     out$nObs = length(observedResponse)
+    
+    if (out$nObs < 3) stop("warning - number of observations < 3 ... this rarely makes sense")
+    
+    if(! (out$nObs == nrow(simulatedResponse))) stop("dimensions of observedResponse and simulatedResponse do not match")
+    
     out$nSim = ncol(simulatedResponse)
       
     scaledResiduals = rep(NA, out$nObs)
@@ -56,7 +63,13 @@ createDHARMa <- function(scaledResiduals = NULL, simulatedResponse = NULL, obser
         #message("createDHARMa called with integerResponse = F. Note that this setting ")
       }
     }
+  } else {
+    
+    if(is.matrix(scaledResiduals) | is.data.frame(scaledResiduals)) stop("DHARMa::createDHARMa - matrix provided to parmaeter scaledResiduals - if you want to provide simulations, use parameter simulatedResponse")
+    
+    if(!is.vector(scaledResiduals)) stop("scaledResiduals should be a vector")
   }
+  
   out$observedResponse = observedResponse
   out$scaledResiduals = scaledResiduals
   out$nObs = length(scaledResiduals)
