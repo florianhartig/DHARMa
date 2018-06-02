@@ -64,7 +64,7 @@ simulateResiduals <- function(fittedModel, n = 250, refit = F, integerResponse =
   # TODO - check if that works 
   nKcase = is.matrix(out$observedResponse)
   if(nKcase){
-    if(family$family != "binomial") securityAssertion("nKcase")
+    if(! (family$family %in% c("binomial", "betabinomial"))) securityAssertion("nKcase")
     if(! (ncol(out$observedResponse)==2)) securityAssertion("nKcase")
     out$observedResponse = out$observedResponse[,1]
   }
@@ -358,8 +358,3 @@ recalculateResiduals <- function(simulationOutput, group = NULL, aggregateBy = s
   return(out)
 }
   
-
-
-
-
-
