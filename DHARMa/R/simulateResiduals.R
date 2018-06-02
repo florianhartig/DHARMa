@@ -199,12 +199,14 @@ simulateResiduals <- function(fittedModel, n = 250, refit = F, integerResponse =
   
   out$scaledResidualsNormal = qnorm(out$scaledResiduals + 0.00 )
 
-  if(plot == T) plot(out)
   
   out$time = proc.time() - ptm
   out$randomState = randomState
 
   class(out) = "DHARMa"
+  
+  if(plot == T) plot(out)
+  
   return(out)
 }
 
