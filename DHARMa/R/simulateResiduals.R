@@ -118,20 +118,10 @@ simulateResiduals <- function(fittedModel, n = 250, refit = F, integerResponse =
   ######## refit = F ################## 
 
   if (refit == F){
- 
-    for (i in 1:out$nObs){
-      
-      if(integerResponse == T){
-        out$scaledResiduals[i] <- ecdf(out$simulatedResponse[i,] + runif(out$nSim, -0.5, 0.5))(out$observedResponse[i] + runif(1, -0.5, 0.5))
-        #This option doesn't work!
-        #out$scaledResiduals[i] <- sum((out$simulatedResponse[i,] + runif(out$nSim, -0.5, 0.5)) < (out$observedResponse[i] + runif(out$nSim, -0.5, 0.5))) / out$nSim  
-      }else{
-        out$scaledResiduals[i] <- ecdf(out$simulatedResponse[i,])(out$observedResponse[i])
-      }
-    }
-  
-  ######## refit = T ################## 
     
+    out$scaledResiduals = getQuantile(simulations = out$simulatedResponse , observed = out$observedResponse , n = out$nObs, nSim = out$nSim, integerResponse = integerResponse)
+
+  ######## refit = T ################## 
   } else {
 
     # Adding new outputs
@@ -182,17 +172,7 @@ simulateResiduals <- function(fittedModel, n = 250, refit = F, integerResponse =
     
     ######### residual calculations ###########
 
-    for (i in 1:out$nObs){
-    
-      if(integerResponse == T){
-        out$scaledResiduals[i] <- ecdf(out$refittedResiduals[i,] + runif(out$nSim, -0.5, 0.5))(out$fittedResiduals[i] + runif(1, -0.5, 0.5)) 
-        #This option doesn't work!
-        #out$scaledResiduals[i] <- sum((out$refittedResiduals[i,] + runif(out$nSim, -0.5, 0.5)) < (out$fittedResiduals[i] + runif(out$nSim, -0.5, 0.5))) / out$nSim
-      }else{
-        out$scaledResiduals[i] <- ecdf(out$refittedResiduals[i,])(out$fittedResiduals[i])
-      }
-    }
-
+    out$scaledResiduals = getQuantile(simulations = out$refittedResiduals, observed = out$fittedResiduals, n = out$nObs, nSim = out$nSim, integerResponse = integerResponse)
   }
 
   ########### Wrapup ############
@@ -358,3 +338,45 @@ recalculateResiduals <- function(simulationOutput, group = NULL, aggregateBy = s
   return(out)
 }
   
+
+getQuantile <- function(simulations, observed, n, nSim, integerResponse){
+  
+  scaledResiduals = rep(NA, n)
+  
+  if(integerResponse == F){
+    
+    values = c(as.vector(t(simulations)), observed)
+    
+    if(any (duplicated(values))){
+      integerResponse = T
+      # repeated = unique(values[which(duplicated(values))])      
+      if(any(integerResponse)) message("Model family was recoginzed or set as continous, but duplicate values were detected in the simulation - changing to integer residuals (see help for details)")
+    } 
+  } 
+
+  for (i in 1:n){
+    if(integerResponse == T){
+      scaledResiduals[i] <- ecdf(simulations[i,] + runif(nSim, -0.5, 0.5))(observed[i] + runif(1, -0.5, 0.5))
+
+    }else{
+      scaledResiduals[i] <- ecdf(simulations[i,])(observed[i])
+    }
+  }
+  return(scaledResiduals)
+}
+
+# 
+# 
+# testData = createData(sampleSize = 200, family = gaussian(),
+#                       randomEffectVariance = 0, numGroups = 5)
+# fittedModel <- glmmTMB(observedResponse ~ Environment1,
+#                    data = testData)
+# simulationOutput <- simulateResiduals(fittedModel = fittedModel)
+# 
+# sims = simulationOutput$simulatedResponse
+# sims[1, c(1,6,8)] = 0
+# any(apply(sims, 1, anyDuplicated))
+# getQuantile(simulations = sims, observed = testData$observedResponse, n = 200, integerResponse = F, nSim = 250)
+# 
+# 
+# 
