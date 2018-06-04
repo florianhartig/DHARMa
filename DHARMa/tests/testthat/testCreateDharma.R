@@ -22,6 +22,10 @@ test_that("Standard creation works", {
   sim = createDHARMa(simulatedResponse = simulatedResponse, observedResponse = truth, fittedPredictedResponse = pred,  integerResponse = F)
   plot(sim, quantreg = F)
   
+  sim = createDHARMa(simulatedResponse = simulatedResponse, observedResponse = truth)
+  plot(sim, quantreg = F)
+  
+  
   sim = createDHARMa(scaledResiduals = simulationOutput$scaledResiduals, fittedPredictedResponse = pred,  integerResponse = F)
   plot(sim, quantreg = F)
   

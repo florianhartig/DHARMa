@@ -51,30 +51,32 @@ createDHARMa <- function(scaledResiduals = NULL, simulatedResponse = NULL, obser
     if(! (out$nObs == nrow(simulatedResponse))) stop("dimensions of observedResponse and simulatedResponse do not match")
     
     out$nSim = ncol(simulatedResponse)
-      
-    scaledResiduals = rep(NA, out$nObs)
+
+    out$scaledResiduals = getQuantile(simulations = simulatedResponse , observed = observedResponse , n = out$nObs, nSim = out$nSim, integerResponse = integerResponse)
     
-    for (i in 1:out$nObs){
-      
-      if(integerResponse == T){
-        scaledResiduals[i] <- ecdf(simulatedResponse[i,] + runif(out$nSim, -0.5, 0.5))(observedResponse[i] + runif(1, -0.5, 0.5))           
-      }else{
-        scaledResiduals[i] <- ecdf(simulatedResponse[i,])(observedResponse[i])
-        #message("createDHARMa called with integerResponse = F. Note that this setting ")
-      }
-    }
   } else {
     
     if(is.matrix(scaledResiduals) | is.data.frame(scaledResiduals)) stop("DHARMa::createDHARMa - matrix provided to parmaeter scaledResiduals - if you want to provide simulations, use parameter simulatedResponse")
     
     if(!is.vector(scaledResiduals)) stop("scaledResiduals should be a vector")
+    out$scaledResiduals = scaledResiduals
+    out$nObs = length(scaledResiduals)
   }
   
   out$observedResponse = observedResponse
-  out$scaledResiduals = scaledResiduals
-  out$nObs = length(scaledResiduals)
-  if(is.null(fittedPredictedResponse)) fittedPredictedResponse = rep(1, out$nObs) # makes sure that DHARM plots that rely on this vector won't crash
-  out$fittedPredictedResponse = fittedPredictedResponse
+  
+  # makes sure that DHARM plots that rely on this vector won't crash  
+  if(is.null(fittedPredictedResponse)){
+    if(! is.null(simulatedResponse)){
+      message("No fitted predicted response provided, using the mean of the simulations")
+      fittedPredictedResponse = apply(simulatedResponse, 1, mean)         
+    }else{
+      message("No fitted predicted response provided, DHARMa will not be able to plot residuals against predicted")
+      fittedPredictedResponse = as.factor(rep(1, out$nObs))       
+    }
+  }
+  out$fittedPredictedResponse = fittedPredictedResponse       
+ 
   class(out) = "DHARMa"
   return(out)
 }
