@@ -69,7 +69,7 @@ testUniformity<- function(simulationOutput, alternative = c("two.sided", "less",
 #' @seealso \code{\link{testResiduals}}, \code{\link{testUniformity}}, \code{\link{testZeroInflation}}, \code{\link{testGeneric}}, \code{\link{testTemporalAutocorrelation}}, \code{\link{testSpatialAutocorrelation}}
 #' @example inst/examples/testsHelp.R
 #' @export
-testDispersion <- function(simulationOutput, alternative = c("greater", "two.sided", "less"), plot = T, ...){
+testDispersion <- function(simulationOutput, alternative = c("two.sided", "greater", "less"), plot = T, ...){
   
   alternative <- match.arg(alternative)
   
@@ -167,7 +167,7 @@ testZeroInflation <- function(simulationOutput, ...){
 #' @example inst/examples/testsHelp.R
 #' 
 #' @seealso \code{\link{testResiduals}}, \code{\link{testUniformity}}, \code{\link{testDispersion}}, \code{\link{testZeroInflation}}, \code{\link{testTemporalAutocorrelation}}, \code{\link{testSpatialAutocorrelation}}
-testGeneric <- function(simulationOutput, summary, alternative = c("greater", "two.sided", "less"), plot = T, methodName = "DHARMa generic simulation test"){
+testGeneric <- function(simulationOutput, summary, alternative = c("two.sided", "greater", "less"), plot = T, methodName = "DHARMa generic simulation test"){
   
   alternative <- match.arg(alternative)
   
@@ -210,7 +210,7 @@ testGeneric <- function(simulationOutput, summary, alternative = c("greater", "t
 #' @seealso \code{\link{testResiduals}}, \code{\link{testUniformity}}, \code{\link{testDispersion}}, \code{\link{testZeroInflation}}, \code{\link{testGeneric}}, \code{\link{testSpatialAutocorrelation}}
 #' @example inst/examples/testTemporalAutocorrelationHelp.R
 #' @export
-testTemporalAutocorrelation <- function(simulationOutput, time = NULL , alternative = c("greater", "two.sided", "less"), plot = T){
+testTemporalAutocorrelation <- function(simulationOutput, time = NULL , alternative = c("two.sided", "greater", "less"), plot = T){
   
   if(is.null(time)) time = sample.int(simulationOutput$nObs, simulationOutput$nObs)
   
@@ -246,7 +246,7 @@ testTemporalAutocorrelation <- function(simulationOutput, time = NULL , alternat
 #' @import grDevices
 #' @example inst/examples/testSpatialAutocorrelationHelp.R
 #' @export
-testSpatialAutocorrelation <- function(simulationOutput, x = NULL, y  = NULL, distMat = NULL, alternative = c("greater", "two.sided", "less"), plot = T){
+testSpatialAutocorrelation <- function(simulationOutput, x = NULL, y  = NULL, distMat = NULL, alternative = c("two.sided", "greater", "less"), plot = T){
   
   alternative <- match.arg(alternative)
   

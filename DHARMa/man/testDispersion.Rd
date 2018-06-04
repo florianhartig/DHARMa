@@ -4,7 +4,7 @@
 \alias{testDispersion}
 \title{DHARMa dispersion tests}
 \usage{
-testDispersion(simulationOutput, alternative = c("greater", "two.sided",
+testDispersion(simulationOutput, alternative = c("two.sided", "greater",
   "less"), plot = T, ...)
 }
 \arguments{

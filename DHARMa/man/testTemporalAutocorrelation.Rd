@@ -5,7 +5,7 @@
 \title{Test for temporal autocorrelation}
 \usage{
 testTemporalAutocorrelation(simulationOutput, time = NULL,
-  alternative = c("greater", "two.sided", "less"), plot = T)
+  alternative = c("two.sided", "greater", "less"), plot = T)
 }
 \arguments{
 \item{simulationOutput}{an object with simulated residuals created by \code{\link{simulateResiduals}}}

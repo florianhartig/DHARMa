@@ -5,7 +5,7 @@
 \title{Test for spatial autocorrelation}
 \usage{
 testSpatialAutocorrelation(simulationOutput, x = NULL, y = NULL,
-  distMat = NULL, alternative = c("greater", "two.sided", "less"),
+  distMat = NULL, alternative = c("two.sided", "greater", "less"),
   plot = T)
 }
 \arguments{

@@ -4,7 +4,7 @@
 \alias{testGeneric}
 \title{Generic simulation test of a summary statistic}
 \usage{
-testGeneric(simulationOutput, summary, alternative = c("greater", "two.sided",
+testGeneric(simulationOutput, summary, alternative = c("two.sided", "greater",
   "less"), plot = T, methodName = "DHARMa generic simulation test")
 }
 \arguments{
