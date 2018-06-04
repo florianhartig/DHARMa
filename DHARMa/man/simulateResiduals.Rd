@@ -10,7 +10,7 @@ simulateResiduals(fittedModel, n = 250, refit = F, integerResponse = NULL,
 \arguments{
 \item{fittedModel}{fitted model object. Supported are generalized linear mixed models from 'lme4' (classes 'lmerMod', 'glmerMod'), generalized additive models ('gam' from 'mgcv', excluding extended families from 'mgcv'), 'glm' (including 'negbin' from 'MASS', but excluding quasi-distributions) and 'lm' model classes.}
 
-\item{n}{integer number > 1, number of simulations to run. If possible, set to at least 250, better 1000. See also details}
+\item{n}{integer number > 1, number of simulations to run. If possible, set to at least 250, better 1000. Smaller number > 50 can be chose if runtime is prohbitie, but discretization artefacts can occur at some point.}
 
 \item{refit}{if F, new data will be simulated and scaled residuals will be created by comparing observed data with new data. If T, the model will be refit on the simulated data (parametric bootstrap), and scaled residuals will be created by comparing observed with refitted residuals.}
 
@@ -23,13 +23,13 @@ simulateResiduals(fittedModel, n = 250, refit = F, integerResponse = NULL,
 \item{...}{parameters to pass to the simulate function of the model object. An important use of this is to specify whether simulations should be conditional on the current random effect estimates. See details.}
 }
 \value{
-A list with various objects. The most important are scaledResiduals, which contain the scaled residuals, and scaledResidualsNormal, which are the the scaled residuals transformed to a normal distribution.
+An S3 class of type "DHARMa", essentially a list with various elements. Implemented S3 functions include plot, print and \code{\link{residuals.DHARMa}}. Residuals returns the calculated scaled residuals, which can also be accessed via $scaledResiduals. The returned object additionally contains an element 'scaledResidualsNormal', which contains the scaled residuals transformed to a normal distribution (for stability reasons not recommended)
 }
 \description{
 The function creates scaled residuals by simulating from the fitted model
 }
 \details{
-There are a number of important considerations when simulating from a more complex (hierarchical) model. 
+There are a number of important considerations when simulating from a more complex (hierarchical) model: 
 
 \strong{Re-simulating random effects / hierarchical structure}: the first is that in a hierarchical model, several layers of stochasticity are aligned on top of each other. Specifically, in a GLMM, we have a lower level stochastic process (random effect), whose result enters into a higher level (e.g. Poisson distribution). For other hierarchical models such as state-space models, similar considerations apply. When simulating, we have to decide if we want to re-simulate all stochastic levels, or only a subset of those. For example, in a GLMM, it is common to only simulate the last stochastic level (e.g. Poisson) conditional on the fitted random effects. 
 
@@ -47,7 +47,10 @@ If the model is correctly specified, the simulated residuals should be flat rega
 
 The second option is much slower, and only important for running tests that rely on comparing observed to simulated residuals, e.g. the  \code{\link{testOverdispersion}} function
 
-#' \strong{How many simulations}: about the choice of n: my simulations didn't show major problems with a small n (if you get down to the order of a few 10, you will start seeing discretization artifacts from the empirical cummulative density estimates though). The default of 250 seems safe to me. If you want to be on the safe side, choose a high value (e.g. 1000) for producing your definite results.
+\strong{Residuals per group}: In many situations, it can be useful to look at residuals per group, e.g. to see how much the model over / underpredicts per plot, year or subject. To do this, use \code{\link{recalculateResiduals}}, together with a grouping variable (see also help)
+}
+\note{
+See \code{\link{testResiduals}} for an overview of residual tests, \code{\link{plot.DHARMa}} for an overview of available plots.
 }
 \examples{
 library(lme4)
@@ -61,6 +64,10 @@ simulationOutput <- simulateResiduals(fittedModel = fittedModel)
 
 # plot residuals, quantreg = T is better but costs more time
 plot(simulationOutput, quantreg = FALSE)
+
+# the calculated residuals can be accessed via 
+residuals(simulationOutput)
+simulationOutput$scaledResiduals
 
 # calculating summaries per group
 simulationOutput = recalculateResiduals(simulationOutput, group = testData$group)
@@ -77,5 +84,5 @@ plot(simulationOutput, quantreg = FALSE)
 
 }
 \seealso{
-\code{\link{testResiduals}}, \code{\link{plot.DHARMa}}, \code{\link{print.DHARMa}}, \code{\link{recalculateResiduals}}
+\code{\link{testResiduals}}, \code{\link{plot.DHARMa}}, \code{\link{print.DHARMa}}, \code{\link{residuals.DHARMa}}, \code{\link{recalculateResiduals}}
 }

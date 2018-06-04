@@ -32,6 +32,10 @@ simulationOutput <- simulateResiduals(fittedModel = fittedModel)
 # plot residuals, quantreg = T is better but costs more time
 plot(simulationOutput, quantreg = FALSE)
 
+# the calculated residuals can be accessed via 
+residuals(simulationOutput)
+simulationOutput$scaledResiduals
+
 # calculating summaries per group
 simulationOutput = recalculateResiduals(simulationOutput, group = testData$group)
 plot(simulationOutput, quantreg = FALSE)

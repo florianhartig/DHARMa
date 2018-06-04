@@ -22,6 +22,16 @@ print.DHARMa <- function(x, ...){
   } 
 } 
 
+#' Return residuals of a DHARMa simulation
+#' 
+#' @param object an object with simulated residuals created by \code{\link{simulateResiduals}}
+#' @details the function accesses the slot $scaledResiduals in a fitted DHARMa object
+#' @export
+#' @example inst/examples/simulateResidualsHelp.R
+#'
+residuals.DHARMa <- function(object){
+  return(object$scaledResiduals)
+}
 
 #' Convert simulated residuals or posterior predictive simulations to a DHARMa object
 #' 
