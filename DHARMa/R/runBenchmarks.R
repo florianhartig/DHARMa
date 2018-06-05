@@ -28,8 +28,6 @@ runBenchmarks <- function(calculateStatistics, controlValues = NULL, nRep = 10, 
     
   }else{
     
-    requireNamespace(foreach)
-    
     if (parallel == T | parallel == "auto"){
       cores <- parallel::detectCores() - 1
       message("parallel, set cores automatically to ", cores)
@@ -41,6 +39,8 @@ runBenchmarks <- function(calculateStatistics, controlValues = NULL, nRep = 10, 
     cl <- parallel::makeCluster(cores)
 
     doParallel::registerDoParallel(cl)
+    
+    `%dopar%` <- foreach::`%dopar%`
     
     if(is.null(controlValues)) simulations[[1]] =  foreach::foreach(i=1:nRep, .packages=c("lme4", "DHARMa"), .combine = rbind) %dopar% calculateStatistics() 
 
