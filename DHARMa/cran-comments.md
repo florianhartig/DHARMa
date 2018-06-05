@@ -1,3 +1,16 @@
+# Version 0.2.0
+
+## Submission 1
+
+This is major release with a number of important changes to the package. See DHARMa NEWS for changes. 
+
+This release was tested without apparent problems under
+
+* local MAC OS 10.13.4 (High Sierra), R 3.3.2
+* http://win-builder.r-project.org/ - oldrelease / devel / realease
+* Linux (Travis CI) - oldrel / release / devel
+ 
+
 # Version 0.1.6
 
 ## Submission 1

@@ -7,6 +7,7 @@ New features
 
 - support for glmmTMB https://github.com/florianhartig/DHARMa/issues/16, implemented since https://github.com/florianhartig/DHARMa/releases/tag/v0.1.6.2
 - support for grouping of residuals, see https://github.com/florianhartig/DHARMa/issues/22
+- residual function for DHARMa
 
 
 Major changes
