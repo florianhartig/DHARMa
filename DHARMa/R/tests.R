@@ -212,6 +212,8 @@ testGeneric <- function(simulationOutput, summary, alternative = c("two.sided", 
 #' @export
 testTemporalAutocorrelation <- function(simulationOutput, time = NULL , alternative = c("two.sided", "greater", "less"), plot = T){
   
+  alternative <- match.arg(alternative)
+  
   if(is.null(time)) time = sample.int(simulationOutput$nObs, simulationOutput$nObs)
   
   out = lmtest::dwtest(simulationOutput$scaledResiduals ~ 1, order.by = time, alternative = alternative)
@@ -249,7 +251,7 @@ testTemporalAutocorrelation <- function(simulationOutput, time = NULL , alternat
 testSpatialAutocorrelation <- function(simulationOutput, x = NULL, y  = NULL, distMat = NULL, alternative = c("two.sided", "greater", "less"), plot = T){
   
   alternative <- match.arg(alternative)
-  
+
   if( !is.null(x) & !is.null(distMat) ) warning("coordinates and distMat provided, coordinates will only be used for plotting")
   # if not provided, fill x and y with random numbers (Null model)
   if(is.null(x)) x = runif(simulationOutput$nObs, -1,1) 
