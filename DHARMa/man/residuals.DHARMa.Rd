@@ -4,10 +4,12 @@
 \alias{residuals.DHARMa}
 \title{Return residuals of a DHARMa simulation}
 \usage{
-\method{residuals}{DHARMa}(object)
+\method{residuals}{DHARMa}(object, ...)
 }
 \arguments{
 \item{object}{an object with simulated residuals created by \code{\link{simulateResiduals}}}
+
+\item{...}{optional arguments for compatibility with the generic function, no function implemented}
 }
 \description{
 Return residuals of a DHARMa simulation

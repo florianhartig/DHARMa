@@ -12,7 +12,7 @@ NULL
 #' Print simulated residuals
 #' 
 #' @param x an object with simulated residuals created by \code{\link{simulateResiduals}}
-#' @param ... optional arguments for compatibility with genetic, no function implemented
+#' @param ... optional arguments for compatibility with the generic function, no function implemented
 #' @export
 print.DHARMa <- function(x, ...){
   cat(paste("Object of Class DHARMa with simulated residuals based on", x$nSim, "simulations with refit =", x$refit , ". See ?DHARMa::simulateResiduals for help."), "\n", "\n")
@@ -25,11 +25,12 @@ print.DHARMa <- function(x, ...){
 #' Return residuals of a DHARMa simulation
 #' 
 #' @param object an object with simulated residuals created by \code{\link{simulateResiduals}}
+#' @param ... optional arguments for compatibility with the generic function, no function implemented
 #' @details the function accesses the slot $scaledResiduals in a fitted DHARMa object
 #' @export
 #' @example inst/examples/simulateResidualsHelp.R
 #'
-residuals.DHARMa <- function(object){
+residuals.DHARMa <- function(object, ...){
   return(object$scaledResiduals)
 }
 
