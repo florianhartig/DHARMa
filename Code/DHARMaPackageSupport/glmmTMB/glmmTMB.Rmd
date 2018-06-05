@@ -21,10 +21,11 @@ library(glmmTMB)
 
 ## Problems with binomial
 
-This crashes my R (memory allocation issue) on the current CRAN version (27.3.18). Installing the development version on GitHub fixes the problem. sessionInfo() at the end of the document
+This used crashes my R (memory allocation issue) on the current CRAN version (27.3.18). Installing the development version on GitHub fixes the problem. sessionInfo() at the end of the document
+
+-> update ... seeems to be fine now
 
 ```{r, eval = F}
-library(glmmTMB)
 data(cbpp, package="lme4")
 m <- glmmTMB(cbind(incidence, size-incidence) ~ period + (1 | herd), data=cbpp, family=binomial)
 summary(m)
@@ -35,16 +36,15 @@ predict(m)
 
 update doesn't work for n/k data
 
-```{r}
-library(DHARMa)
-library(glmmTMB)
-
+```{r, eval = F}
 testData = createData(sampleSize = 200, family = binomial(), binomialTrials = 20)
 
 fittedModel <- glmmTMB(cbind(observedResponse1,observedResponse0) ~ Environment1 + (1|group) , family = "binomial", data = testData)
 temp = model.frame(fittedModel)
 update(fittedModel, temp)
 ```
+
+soluation -> DHARMa has now a refit function implemented for glmmTMB
 
 
 ## Residual problems
@@ -229,6 +229,79 @@ plot(res, rank = T)
 ```
 
 There is still a slight correlation in both cases - I assume that this is again a problem of https://github.com/florianhartig/DHARMa/issues/43
+
+# Model types
+
+## Tweedie
+
+Tweedie distributions are continous, but can have point mass at zero, which makes them effectively semi-discrete - this can create patterns in the residuals if one simulates as for a continous distribution, see [here](https://github.com/florianhartig/DHARMa/issues/66).
+
+DHARMa therefore checks if there are repeated values in the simulations / observed data, and if so, switches to an integer distribution
+
+```{r}
+# Simulate Tweedie data
+set.seed(16)
+dat = data.frame( y = tweedie::rtweedie(200, mu = 2, phi = 2, p = 1.5),
+                  x = rnorm(200) )
+
+# Fit a model with single, unrelated explanatory variable
+fit1 = glmmTMB(y ~ x, data = dat,
+               family = tweedie)
+
+summary(fit1)
+
+dat = data.frame( y = simulate(fit1, 200)$sim_1,
+                  x = dat$x )
+
+fit1 = glmmTMB(y ~ x, data = dat,
+               family = tweedie)
+simres = simulateResiduals(fittedModel = fit1)
+
+plot(simres)
+
+
+```
+
+
+## Beta-binomial
+
+```{r}
+
+testData = createData(sampleSize = 200, overdispersion = 0, randomEffectVariance = 0, family = binomial(), binomialTrials = 20)
+            
+
+fittedModel <- glmmTMB(cbind(observedResponse1,observedResponse0) ~ Environment1 + (1|group) , family = "binomial", data = testData)
+
+
+fittedModel <- glmmTMB(cbind(observedResponse1,observedResponse0) ~ Environment1 + (1|group) , family = "betabinomial", data = testData)
+
+res = simulateResiduals(fittedModel)
+plot(res, rank = F)
+
+
+
+
+```
+
+
+
+## Beta
+
+Beta distribution is not implemented yet
+
+```{r}
+dat = data.frame(x = runif(200), y = rbeta(200, 0.5, 0.5))
+m1 <- glmmTMB(y~ x , family=beta_family, data=dat)
+summary(m1)
+
+#m1$modelInfo$family$variance(1,2)
+#simulate(m1)
+
+```
+
+
+
+
 
 # Reproducibility info 
 
