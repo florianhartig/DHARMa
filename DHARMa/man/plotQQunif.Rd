@@ -49,7 +49,7 @@ plotResiduals(pred = testData$group, residuals = simulationOutput$scaledResidual
               quantreg = FALSE, asFactor = TRUE)
 
 # All these options can also be provided to the main plotting function
-plot(simulationOutput, quantreg = FALSE, rank = TRUE)
+plot(simulationOutput, quantreg = FALSE, rank = F)
 
 # If you want to plot summaries per group, use
 simulationOutput = recalculateResiduals(simulationOutput, group = testData$group)

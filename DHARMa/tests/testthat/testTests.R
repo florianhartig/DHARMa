@@ -134,7 +134,7 @@ test_that("tests work", {
   
   # Standard use
   testTemporalAutocorrelation(simulationOutput, time =  testData$time)
-  testTemporalAutocorrelation(simulationOutput, time =  testData$time, alternative = "two.sided")
+  testTemporalAutocorrelation(simulationOutput, time =  testData$time, alternative = "greater")
   
   # If no time is provided, random values will be created
   testTemporalAutocorrelation(simulationOutput)

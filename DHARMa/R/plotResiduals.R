@@ -27,7 +27,9 @@ plot.DHARMa <- function(x, rank = TRUE, ...){
   
   plotQQunif(x)
   
-  plotResiduals(pred = x, residuals = NULL, xlab = "Predicted value (rank transformed)", ylab = "Standardized residual", main = "Residual vs. predicted\n lines should match", rank = T, ...)
+  xla = ifelse(rank, "Predicted values (rank transformed)", "Predicted values")
+  
+  plotResiduals(pred = x, residuals = NULL, xlab = xla, ylab = "Standardized residual", main = "Residual vs. predicted\n lines should match", rank = rank, ...)
   
   mtext("DHARMa scaled residual plots", outer = T)
   
@@ -125,8 +127,10 @@ plotResiduals <- function(pred, residuals = NULL, quantreg = NULL, rank = FALSE,
     if(nuniq < 10 & ndata / nuniq > 10) message("DHARMa::plotResiduals - low number of unique predictor values, consider setting asFactor = T")
     if(nuniq < 10 & ndata / nuniq > 10) message("DHARMa::plotResiduals - low number of unique predictor values, consider setting asFactor = T")
     # this rank tranforms the predictor
-    if (rank == T) pred = rank(pred, ties.method = "average")
-    pred = pred / max(pred)    
+    if (rank == T){
+      pred = rank(pred, ties.method = "average")
+      pred = pred / max(pred)          
+    } 
   } else {
     # if (rank == T) warning("DHARMa::plotResiduals - predictor is a factor, rank = T has no effect")
   }
