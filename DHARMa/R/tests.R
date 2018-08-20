@@ -211,6 +211,8 @@ testGeneric <- function(simulationOutput, summary, alternative = c("two.sided", 
 #' @example inst/examples/testTemporalAutocorrelationHelp.R
 #' @export
 testTemporalAutocorrelation <- function(simulationOutput, time = NULL , alternative = c("two.sided", "greater", "less"), plot = T){
+  # actually not sure if this is neccessary for dwtest, but seems better to aggregate
+  if(any(duplicated(time))) stop("testing for temporal autocorrelation requires unique time values - if you have several observations per location, use the recalculateResiduals function to aggregate residuals per location")
   
   alternative <- match.arg(alternative)
   
@@ -249,6 +251,8 @@ testTemporalAutocorrelation <- function(simulationOutput, time = NULL , alternat
 #' @example inst/examples/testSpatialAutocorrelationHelp.R
 #' @export
 testSpatialAutocorrelation <- function(simulationOutput, x = NULL, y  = NULL, distMat = NULL, alternative = c("two.sided", "greater", "less"), plot = T){
+  
+  if(any(duplicated(cbind(x,y)))) stop("testing for spatial autocorrelation requires unique x,y values - if you have several observations per location, use the recalculateResiduals function to aggregate residuals per location")
   
   alternative <- match.arg(alternative)
 

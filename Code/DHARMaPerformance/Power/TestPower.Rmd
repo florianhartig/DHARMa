@@ -57,10 +57,11 @@ legend("bottomright", tests, col = 1:4, lty = 1:4)
 ```
 
 
-## Benchmarking DHARMa dispersiontests against pearson dispersiontest for glmms
 
+## Benchmarking DHARMa dispersiontests against AER dispersiontest for Poisson GLM
 
 ```{r}
+
 overdisp_fun <- function(model) {
   ## number of variance parameters in 
   ##   an n-by-n variance-covariance matrix
@@ -73,9 +74,41 @@ overdisp_fun <- function(model) {
   Pearson.chisq <- sum(rp^2)
   prat <- Pearson.chisq/rdf
   pval <- pchisq(Pearson.chisq, df=rdf, lower.tail=FALSE)
-  c(chisq=Pearson.chisq,ratio=prat,rdf=rdf,p=pval)
+  list(chisq=Pearson.chisq,ratio=prat,rdf=rdf,p=pval)
 }
+
+doCalculations <- function(control = 0){
+  testData = createData(sampleSize = 200, family = poisson(), overdispersion = control, randomEffectVariance = 1)
+  fittedModel <- glmer(observedResponse ~ Environment1 + (1|group), data = testData, family = poisson())
+ 
+  out = list()
+  
+  res <- simulateResiduals(fittedModel = fittedModel, n = 250)
+  out$uniformTest = testUniformity(res)$p.value  
+  out$Dispersion = testDispersion(res, plot = F)$p.value  
+  out$DispersionAER = overdisp_fun(fittedModel)$pval 
+  
+  res <- simulateResiduals(fittedModel = fittedModel, n = 250, refit = T)  
+  out$DispersionRefitted = testDispersion(res, plot = F)$p.value  
+  return(unlist(out))
+}
+
+# testing a single return
+doCalculations(control = 0.3)
+
+dispValues = seq(0,1.2, len = 5)
+
+# running benchmark
+out = runBenchmarks(doCalculations, controlValues = dispValues , nRep = 10,  parallel = F)
+
+tests = c("uniformity", "DHARMa disp basic" , "GLMER dispersiontest", "DHARMa disp refit")
+
+
+matplot(dispValues, t(out$summaries[,1,]), type = "l")
+legend("bottomright", tests, col = 1:4, lty = 1:4)
+
 ```
+
 
 
 # Autocorrelation tests

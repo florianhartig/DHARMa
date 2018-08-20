@@ -212,11 +212,12 @@ plot(res, asFactor = T)
 Example from the help
 
 ```{r}
-m <- glmmTMB(count~spp + mined + (1|site), zi=~spp + mined, family=nbinom2, Salamanders)
+m <- glmmTMB(count~spp + mined + (1|site), zi=~spp + mined, 
+             family=nbinom2, Salamanders)
 summary(m)
 
 res = simulateResiduals(m)
-plot(res, rank = T)
+plot(res)
 
 ### creating new data based on the fitted models. Residuals should now be perfect
 
