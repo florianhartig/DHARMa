@@ -1,6 +1,7 @@
 
 
-testData = createData(sampleSize = 200, family = poisson(), numGroups = 20, randomEffectVariance = 0)
+testData = createData(sampleSize = 200, family = poisson(), numGroups = 40, 
+                      randomEffectVariance = 2)
 
 #len = sum(testData$group == 1)
 #testData$group[testData$group == 1] = sample(c(1,21),20, replace = T)
