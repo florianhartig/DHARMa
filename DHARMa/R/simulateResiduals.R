@@ -181,8 +181,18 @@ simulateResiduals <- function(fittedModel, n = 250, refit = F, integerResponse =
   ########### Wrapup ############
   
   out$scaledResidualsNormal = qnorm(out$scaledResiduals + 0.00 )
-
   
+  # outliers = list()
+  # outliers$fracLowerThanAllSimulated = sum(out$scaledResiduals == 0) / out$nSim
+  # outliers$fracHigherThanAllSimulated = sum(out$scaledResiduals == 1) / out$nSim
+  # 
+  # # see http://www.di.fc.ul.pt/~jpn/r/prob/range.html 
+  # # 1−(1−x)n
+  # outliers$samplingDist = ecdf(replicate(10000, min(runif(out$nSim))))
+  #   
+  # outliers$plowerThanAllSimulated = 1-outliers$samplingDist(fracLowerThanAllSimulated)
+  # outliers$plowerThanAllSimulated = 1-outliers$samplingDist(fracLowerThanAllSimulated)
+
   out$time = proc.time() - ptm
   out$randomState = randomState
 
@@ -301,6 +311,7 @@ recalculateResiduals <- function(simulationOutput, group = NULL, aggregateBy = s
   if(!is.null(simulationOutput$original)) simulationOutput = simulationOutput$original
 
   out = list()
+  out$original = simulationOutput
   
   if(is.null(group)) return(simulationOutput)
   else group =as.factor(group)
@@ -311,14 +322,11 @@ recalculateResiduals <- function(simulationOutput, group = NULL, aggregateBy = s
   out$observedResponse = aggregateByGroup(simulationOutput$observedResponse)
   out$fittedPredictedResponse = aggregateByGroup(simulationOutput$fittedPredictedResponse)
   out$simulatedResponse = apply(simulationOutput$simulatedResponse, 2, aggregateByGroup)
-  out$scaledResiduals = rep(NA, out$nGroups)
-
+  
   if (simulationOutput$refit == F){
-    if(simulationOutput$integerResponse == T){
-      for (i in 1:out$nGroups) out$scaledResiduals[i] <- ecdf(out$simulatedResponse[i,] + runif(out$nGroups, -0.5, 0.5))(out$observedResponse[i] + runif(1, -0.5, 0.5))
-    } else {
-      for (i in 1:out$nGroups) out$scaledResiduals[i] <- ecdf(out$simulatedResponse[i,])(out$observedResponse[i])
-    } 
+    
+    out$scaledResiduals = getQuantile(simulations = out$simulatedResponse , observed = out$observedResponse , n = out$nGroups, nSim = simulationOutput$nSim, integerResponse = simulationOutput$integerResponse)
+ 
   ######## refit = T ##################   
   } else {
 
@@ -326,22 +334,23 @@ recalculateResiduals <- function(simulationOutput, group = NULL, aggregateBy = s
     out$fittedResiduals = aggregateByGroup(simulationOutput$fittedResiduals)
     out$refittedResiduals = apply(simulationOutput$refittedResiduals, 2, aggregateByGroup)
     out$refittedPearsonResiduals = apply(simulationOutput$refittedPearsonResiduals, 2, aggregateByGroup)
-    
-    if(simulationOutput$integerResponse == T){
-      for (i in 1:out$nGroups) out$scaledResiduals[i] <- ecdf(out$refittedResiduals[i,] + runif(out$nGroups, -0.5, 0.5))(out$fittedResiduals[i] + runif(1, -0.5, 0.5))
-    } else {
-      for (i in 1:out$nGroups) out$scaledResiduals[i] <- ecdf(out$refittedResiduals[i,])(out$fittedResiduals[i])
-    } 
+  
+    out$scaledResiduals = getQuantile(simulations = out$refittedResiduals , observed = out$fittedResiduals , n = out$nGroups, nSim = simulationOutput$nSim, integerResponse = simulationOutput$integerResponse)
+
   }
+  
   # hack - the c here will result in both old and new outputs to be present resulting output, but a named access should refer to the new, grouped calculations
+  # question to myself - what's the use of that, why not erase the old outputs? they are anyway saved in the old object
+  
   out$aggregateByGroup = aggregateByGroup
   out = c(out, simulationOutput)
-  out$original = simulationOutput
   class(out) = "DHARMa"
   return(out)
 }
   
-
+#' Quantile calculations
+#' 
+#' @keywords internal
 getQuantile <- function(simulations, observed, n, nSim, integerResponse){
   
   scaledResiduals = rep(NA, n)
