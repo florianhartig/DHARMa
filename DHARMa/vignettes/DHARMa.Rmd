@@ -670,17 +670,9 @@ The next examples uses the fairly well known Owl dataset which is provided in gl
 The following shows a sequence of models, all checked with DHARMa. The example is discussed in a talk at ISEC 2018, see slides [here](https://www.slideshare.net/florianhartig/mon-c5hartig2493). 
 
 ```{r}
-library(glmmTMB)
-
-require("lattice")
-bwplot(reorder(Nest,NegPerChick) ~ NegPerChick | FoodTreatment:SexParent,
-       data=Owls)
-
-library(DHARMa)
-library(lme4)
 
 m1 <- glm(SiblingNegotiation ~ FoodTreatment*SexParent + offset(log(BroodSize)), data=Owls , family = poisson)
-res <- simulateResiduals(m2)
+res <- simulateResiduals(m1)
 plot(res)
 
 

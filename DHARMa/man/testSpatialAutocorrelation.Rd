@@ -73,7 +73,9 @@ testSpatialAutocorrelation(res, x =  testData$x, y = testData$y)
 # Because at least how the data are simualted, cluster are spatially independent
 
 res2 = recalculateResiduals(res, group = testData$group)
-testSpatialAutocorrelation(res2, x =  aggregate(testData$x, list(testData$group), mean)$x, y = aggregate(testData$y, list(testData$group), mean)$x)
+testSpatialAutocorrelation(res2, 
+                           x =  aggregate(testData$x, list(testData$group), mean)$x, 
+                           y = aggregate(testData$y, list(testData$group), mean)$x)
 
 # For lme4, possible to simulated residuals conditional on fitted REs (re.form)
 # This takes out most of the RSA - a remainder is probably due the shrinkage

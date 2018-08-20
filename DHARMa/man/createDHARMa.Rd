@@ -50,7 +50,10 @@ simulateMyfit <- function(n=10, fittedModel){
 
 sims = simulateMyfit(250, fittedModel)
 
-dharmaRes <- createDHARMa(simulatedResponse = sims, observedResponse = testData$observedResponse, fittedPredictedResponse = predict(fittedModel, type = "response"), integer = T)
+dharmaRes <- createDHARMa(simulatedResponse = sims, 
+                          observedResponse = testData$observedResponse, 
+                          fittedPredictedResponse = predict(fittedModel, type = "response"), 
+                          integer = TRUE)
 plot(dharmaRes, quantreg = FALSE)
 
 ## A BAYESIAN EXAMPLE
