@@ -266,7 +266,7 @@ A few general rules of thumb
 This this is how **overdispersion** looks like in the DHARMa residuals
 
 ```{r}
-testData = createData(sampleSize = 500, overdispersion = 2, family = poisson())
+testData = createData(sampleSize = 500, overdispersion = 0.6, family = poisson())
 fittedModel <- glmer(observedResponse ~ Environment1 + (1|group) , family = "poisson", data = testData)
 
 simulationOutput <- simulateResiduals(fittedModel = fittedModel)
@@ -662,6 +662,61 @@ plot(simulationOutput)
 The overdispersion looks better, but you can see that the residuals look a bit irregular. 
 
 Likely, the reason is the steep increase in the beginning that one can see in the raw data plot. One would probably need to apply another transformation or a nonlinear function to completely fit this away.
+
+## Owl example 
+
+The next examples uses the fairly well known Owl dataset which is provided in glmmTMB (see ?Owls for more info about the data).
+
+The following shows a sequence of models, all checked with DHARMa. The example is discussed in a talk at ISEC 2018, see slides [here](https://www.slideshare.net/florianhartig/mon-c5hartig2493). 
+
+```{r}
+library(glmmTMB)
+
+require("lattice")
+bwplot(reorder(Nest,NegPerChick) ~ NegPerChick | FoodTreatment:SexParent,
+       data=Owls)
+
+library(DHARMa)
+library(lme4)
+
+m1 <- glm(SiblingNegotiation ~ FoodTreatment*SexParent + offset(log(BroodSize)), data=Owls , family = poisson)
+res <- simulateResiduals(m2)
+plot(res)
+
+
+m2 <- glmer(SiblingNegotiation ~ FoodTreatment*SexParent + offset(log(BroodSize)) + (1|Nest), data=Owls , family = poisson)
+res <- simulateResiduals(m2)
+plot(res)
+
+
+m3 <- glmmTMB(SiblingNegotiation ~ FoodTreatment*SexParent + offset(log(BroodSize)) + (1|Nest), data=Owls , family = nbinom1)
+res <- simulateResiduals(m3)
+plot(res)
+summary(m3)
+
+plotResiduals(Owls$FoodTreatment, res$scaledResiduals)
+
+testDispersion(res)
+testZeroInflation(res)
+
+m4 <- glmmTMB(SiblingNegotiation ~ FoodTreatment*SexParent + offset(log(BroodSize)) + (1|Nest), ziformula = ~ FoodTreatment + SexParent,  data=Owls , family = nbinom1)
+summary(m4)
+
+library(DHARMa)
+res <- simulateResiduals(m4)
+plot(res)
+
+plotResiduals(Owls$FoodTreatment, res$scaledResiduals)
+
+testDispersion(res)
+testZeroInflation(res)
+
+m5 <- glmmTMB(SiblingNegotiation ~ FoodTreatment*SexParent + offset(log(BroodSize)) + (1|Nest), dispformula = ~ FoodTreatment , ziformula = ~ FoodTreatment + SexParent,  data=Owls , family = nbinom1)
+summary(m5)
+
+```
+
+
 
 
 ## Beetlecount / Poisson example 
