@@ -203,7 +203,7 @@ simulateResiduals <- function(fittedModel, n = 250, refit = F, integerResponse =
   return(out)
 }
 
-getPossibleModels<-function()c("lm", "glm", "negbin", "lmerMod", "glmerMod", "gam", "glmmTMB") 
+getPossibleModels<-function()c("lm", "glm", "negbin", "lmerMod", "glmerMod", "gam", "bam", "glmmTMB") 
 
 checkModel <- function(fittedModel){
   if(!(class(fittedModel)[1] %in% getPossibleModels())) warning("DHARMa: fittedModel not in class of supported models. Absolutely no guarantee that this will work!")
@@ -215,7 +215,7 @@ checkModel <- function(fittedModel){
 
 getFixedEffects <- function(fittedModel){
   
-  if(class(fittedModel)[1] %in% c("glm", "lm", "gam", "negbin") ){
+  if(class(fittedModel)[1] %in% c("glm", "lm", "gam", "bam", "negbin") ){
     out  = coef(fittedModel)
   } else if(class(fittedModel)[1] %in% c("glmerMod", "lmerMod")){
     out = lme4::fixef(fittedModel)
