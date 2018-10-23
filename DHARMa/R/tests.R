@@ -234,7 +234,7 @@ testTemporalAutocorrelation <- function(simulationOutput, time = NULL , alternat
 #' 
 #' @param simulationOutput a DHARMa object with simulated residuals created with \code{\link{simulateResiduals}}
 #' @param x the x coordinate, in the same order as the data points. If not provided, random values will be created
-#' @param y the x coordinate, in the same order as the data points. If not provided, random values will be created
+#' @param y the y coordinate, in the same order as the data points. If not provided, random values will be created
 #' @param distMat optional distance matrix. If not provided, a distance matrix will be calculated based on x and y. See details for explanation
 #' @param alternative a character string specifying whether the test should test if observations are "greater", "less" or "two.sided" compared to the simulated null hypothesis  
 #' @param plot whether to plot output
