@@ -266,6 +266,7 @@ testSpatialAutocorrelation <- function(simulationOutput, x = NULL, y  = NULL, di
   
   invDistMat <- 1/distMat
   diag(invDistMat) <- 0
+  invDistMat[is.infinite(invDistMat)] <- 0 
   
   MI = ape::Moran.I(simulationOutput$scaledResiduals, weight = invDistMat, alternative = alternative)
   
