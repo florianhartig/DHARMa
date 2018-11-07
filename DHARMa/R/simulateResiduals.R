@@ -364,7 +364,7 @@ getQuantile <- function(simulations, observed, n, nSim, integerResponse){
     if(any (duplicated(values))){
       integerResponse = T
       # repeated = unique(values[which(duplicated(values))])      
-      if(any(integerResponse)) message("Model family was recoginzed or set as continous, but duplicate values were detected in the simulation - changing to integer residuals (see ?simulateResiduals for details)")
+      if(any(integerResponse)) message("Model family was recognized or set as continuous, but duplicate values were detected in the simulation - changing to integer residuals (see ?simulateResiduals for details)")
     } 
   } 
 
