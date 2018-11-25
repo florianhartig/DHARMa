@@ -13,7 +13,7 @@ testSpatialAutocorrelation(simulationOutput, x = NULL, y = NULL,
 
 \item{x}{the x coordinate, in the same order as the data points. If not provided, random values will be created}
 
-\item{y}{the x coordinate, in the same order as the data points. If not provided, random values will be created}
+\item{y}{the y coordinate, in the same order as the data points. If not provided, random values will be created}
 
 \item{distMat}{optional distance matrix. If not provided, a distance matrix will be calculated based on x and y. See details for explanation}
 

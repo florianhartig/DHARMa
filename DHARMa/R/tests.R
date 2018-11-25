@@ -115,7 +115,7 @@ testDispersion <- function(simulationOutput, alternative = c("two.sided", "great
 #' @param ... additional arguments to \code{\link{testDispersion}}
 #' @export
 testOverdispersion <- function(simulationOutput, ...){
-  message("plotSimulatedResiduals is deprecated, switch your code to using the testDispersion function")
+  message("testOverdispersion is deprecated, switch your code to using the testDispersion function")
   testDispersion(simulationOutput, ...)
 }
 
