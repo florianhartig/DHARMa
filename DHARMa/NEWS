@@ -1,5 +1,14 @@
 NOTE: for more news about the package, see https://github.com/florianhartig/DHARMa/releases
 
+
+
+
+0.2.0.1 
+
+a number of smaller updates, mostly to help files
+fixes #82 / Bug in recalculateResiduals
+
+
 DHARMa 0.2.0
 
 
