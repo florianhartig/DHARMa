@@ -25,6 +25,8 @@ runEverything = function(fittedModel, testData, DHARMaData = T){
   
   print(class(fittedModel))
   
+  t = DHARMa:::getResponse(fittedModel)
+  
   x = simulate(fittedModel)
   refit(fittedModel, x[, 1:ncol(x)])
   
@@ -33,7 +35,7 @@ runEverything = function(fittedModel, testData, DHARMaData = T){
   checkOutput(simulationOutput)
   
   testDispersion(simulationOutput)
-  testUniformity(simulationOutput = simulationOutput)
+  expect_gt(testUniformity(simulationOutput = simulationOutput)$p.value, 0.00001)
   testZeroInflation(simulationOutput = simulationOutput)
   testTemporalAutocorrelation(simulationOutput = simulationOutput, time = testData$time)
   testSpatialAutocorrelation(simulationOutput = simulationOutput, x = testData$x, y = testData$y)
@@ -78,6 +80,10 @@ test_that("lm works",
             
             fittedModel <- glmmTMB(observedResponse ~ Environment1 + (1|group) , data = testData)
             runEverything(fittedModel, testData)
+            
+            fittedModel <- HLfit(observedResponse ~ Environment1 + (1|group) , data = testData)
+            runEverything(fittedModel, testData)
+            
           }
 )
 
@@ -113,6 +119,9 @@ test_that("binomial 1/0 works",
             
             fittedModel <- glmmTMB(observedResponse ~ Environment1 + (1|group) , family = "binomial", data = testData)
             runEverything(fittedModel, testData)
+            
+            fittedModel <- HLfit(observedResponse ~ Environment1 + (1|group) , family = "binomial",  data = testData)
+            runEverything(fittedModel, testData)
           }
 )
 
@@ -136,7 +145,10 @@ test_that("binomial y/n (factor) works",
             runEverything(fittedModel, testData)
             
             fittedModel <- glmmTMB(observedResponse ~ Environment1 + (1|group) , family = "binomial", data = testData)
-            # runEverything(fittedModel, testData)
+            runEverything(fittedModel, testData)
+            
+            fittedModel <- HLfit(observedResponse ~ Environment1 + (1|group) , family = "binomial",  data = testData)
+            runEverything(fittedModel, testData)
           }
 )
 
@@ -162,6 +174,9 @@ test_that("glm binomial n/k works",
             fittedModel <- glmmTMB(cbind(observedResponse1,observedResponse0) ~ Environment1 + (1|group) , family = "betabinomial", data = testData)
             runEverything(fittedModel, testData)
             
+            fittedModel <- HLfit(cbind(observedResponse1,observedResponse0) ~ Environment1 + (1|group) , family = "binomial",  data = testData)
+            runEverything(fittedModel, testData)
+  
           }
 )
 
@@ -192,7 +207,9 @@ test_that("glm poisson works",
             runEverything(fittedModel, testData)
             
             fittedModel <- glmmTMB(observedResponse ~ Environment1 + (1|group), zi=~1 , family = nbinom2, data = testData)
+            runEverything(fittedModel, testData)
             
+            fittedModel <- HLfit(observedResponse ~ Environment1 + (1|group) , family = "poisson",  data = testData)
             runEverything(fittedModel, testData)
           }
 )

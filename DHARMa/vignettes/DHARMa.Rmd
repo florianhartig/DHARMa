@@ -528,8 +528,6 @@ lme 4 is fully supported as specified in the help
 
 Current limitations of glmmTMB
 
-* residual function doesn't work with factor response (glmmTMB bug)
-* refit doesn't work with n/k data, because update doesnt' work   
 * pearson residuals don't work with zi terms (not implemented), which limits some of the overdispersion tests
 * Currently, glmmTMB doesn't support the reform argument. 
   * predict() is conditional on all random effects, corresponding to lme4 re.form = NULL
@@ -545,6 +543,9 @@ m <- glmmTMB(observedResponse ~ Environment1 , data=testData, family=binomial)
 res = simulateResiduals(m)
 plot(res)
 ```
+
+## spaMM
+
 
 
 ## Unsupported packages

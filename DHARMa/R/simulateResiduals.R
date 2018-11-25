@@ -64,13 +64,13 @@ simulateResiduals <- function(fittedModel, n = 250, refit = F, integerResponse =
   out$nObs = nobs(fittedModel)
   out$nSim = n
   out$refit = refit
-  out$observedResponse = model.frame(fittedModel)[,1] 
+  out$observedResponse = getResponse(fittedModel) 
   
   # TODO - check if that works 
   nKcase = is.matrix(out$observedResponse)
   if(nKcase){
-    if(! (family$family %in% c("binomial", "betabinomial"))) securityAssertion("nKcase")
-    if(! (ncol(out$observedResponse)==2)) securityAssertion("nKcase")
+    if(! (family$family %in% c("binomial", "betabinomial"))) securityAssertion("nKcase - wrong family")
+    if(! (ncol(out$observedResponse)==2)) securityAssertion("nKcase - wrong dimensions of response")
     out$observedResponse = out$observedResponse[,1]
   }
 
@@ -86,6 +86,8 @@ simulateResiduals <- function(fittedModel, n = 250, refit = F, integerResponse =
     
   if(out$modelClass %in% c("glmmTMB")){
     out$fittedPredictedResponse = predict(fittedModel, type = "response") 
+  }else if(out$modelClass %in% c("HLfit")){
+    out$fittedPredictedResponse = predict(fittedModel, type = "response", re.form = ~0)[,1L] 
   }else{
     out$fittedPredictedResponse = predict(fittedModel, type = "response", re.form = ~0) 
   }
@@ -189,7 +191,7 @@ simulateResiduals <- function(fittedModel, n = 250, refit = F, integerResponse =
   # outliers$fracHigherThanAllSimulated = sum(out$scaledResiduals == 1) / out$nSim
   # 
   # # see http://www.di.fc.ul.pt/~jpn/r/prob/range.html 
-  # # 1−(1−x)n
+  # # 1-(1-x)n
   # outliers$samplingDist = ecdf(replicate(10000, min(runif(out$nSim))))
   #   
   # outliers$plowerThanAllSimulated = 1-outliers$samplingDist(fracLowerThanAllSimulated)
@@ -219,75 +221,17 @@ getFixedEffects <- function(fittedModel){
   
   if(class(fittedModel)[1] %in% c("glm", "lm", "gam", "bam", "negbin") ){
     out  = coef(fittedModel)
-  } else if(class(fittedModel)[1] %in% c("glmerMod", "lmerMod")){
-    out = lme4::fixef(fittedModel)
+  } else if(class(fittedModel)[1] %in% c("glmerMod", "lmerMod", "HLfit")){
+    out = fixef(fittedModel)
   } else if(class(fittedModel)[1] %in% c("glmmTMB")){
     out = glmmTMB::fixef(fittedModel)
     out = out$cond
-  } else stop()
+  } else {
+    out = coef(fittedModel)
+    if(is.null(out)) out = fixef(fittedModel)
+  }
   return(out)
 }
-
-
-#' @importFrom lme4 refit
-NULL
-
-
-#' Refit a Model with a Different Response
-#' 
-#' @param object a fitted model
-#' @param newresp a new response
-#' @param ... further arguments, no effect implemented for this S3 class
-#' @example inst/examples/helpRefit.R
-#' @export
-refit.lm <- function(object, newresp, ...){
-  
-  newData <-model.frame(object)  
-
-  if(is.vector(newresp)){
-    newData[,1] = newresp
-  } else if (is.factor(newresp)){
-    # Hack to make the factor binomial case work
-    newData[,1] = as.numeric(newresp) - 1
-  } else {
-    # Hack to make the binomial n/k case work
-    newData[[1]] = NULL
-    newData = cbind(newresp, newData)
-  }     
-  
-  refittedModel = update(object, data = newData)
-  return(refittedModel)
-}
-
-#' Refit a Model with a Different Response
-#' 
-#' @param object a fitted model
-#' @param newresp a new response
-#' @param ... further arguments, no effect implemented for this S3 class
-#' @example inst/examples/helpRefit.R
-#' @export
-refit.glmmTMB <- function(object, newresp, ...){
-  
-  newData <-model.frame(object)  
-  
-  matrixResp = is.matrix(newData[[1]])
-
-  if(matrixResp & !is.null(ncol(newresp))){
-    # Hack to make the factor binomial case work
-    tmp = colnames(newData[[1]])
-    newData[[1]] = NULL
-    newData = cbind(newresp, newData)
-    colnames(newData)[1:2] = tmp
-  } else if(!is.null(ncol(newresp))){
-    newData[[1]] = newresp[,1]
-  } else {
-    newData[[1]] = newresp 
-  }
-
-  refittedModel = update(object, data = newData)
-  return(refittedModel)
-}
-
 
 securityAssertion <- function(context = "Not provided", stop = F){
   generalMessage = "Message from DHARMa package: a security assertion was not met. This means that during the execution of a DHARMa function, some unexpected conditions ocurred. Even if you didn't get an error, your results may not be reliable. Please check with the help if you use the functions as intended. If you think that the error is not on your side, I would be grateful if you could report the problem at https://github.com/florianhartig/DHARMa/issues \n\n Context:"
