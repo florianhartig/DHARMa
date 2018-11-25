@@ -694,7 +694,6 @@ testZeroInflation(res)
 m4 <- glmmTMB(SiblingNegotiation ~ FoodTreatment*SexParent + offset(log(BroodSize)) + (1|Nest), ziformula = ~ FoodTreatment + SexParent,  data=Owls , family = nbinom1)
 summary(m4)
 
-library(DHARMa)
 res <- simulateResiduals(m4)
 plot(res)
 
@@ -803,6 +802,7 @@ simulationOutput <- simulateResiduals(fittedModel = fittedModel)
 ```
 
 A rumor that is true is that, unlike in k/n or count data, such a misspecification will not produce overdispersion. 
+
 ```{r}
 plot(simulationOutput, asFactor = T)
 ```

@@ -12,6 +12,15 @@ testSpatialAutocorrelation(res)
 dM = as.matrix(dist(cbind(testData$x, testData$y)))
 testSpatialAutocorrelation(res, distMat = dM)
 
+# if there are multiple observations with the same x values,
+# create first ar group with unique values for each location
+# then aggregate the residuals per location, and calculate
+# spatial autocorreation on the new group
+
+res2 = recalculateResiduals(res, group = testData$group)
+testSpatialAutocorrelation(res)
+
+
 # carefull with clustered data and conditional / unconditional simulations
 # this originates from https://github.com/florianhartig/DHARMa/issues/81
 
