@@ -19,52 +19,8 @@ library(glmmTMB)
 
 # Testing general package behavior / general problems
 
-## Problems with binomial
 
-This used crashes my R (memory allocation issue) on the current CRAN version (27.3.18). Installing the development version on GitHub fixes the problem. sessionInfo() at the end of the document
-
--> update ... seeems to be fine now
-
-```{r, eval = F}
-data(cbpp, package="lme4")
-m <- glmmTMB(cbind(incidence, size-incidence) ~ period + (1 | herd), data=cbpp, family=binomial)
-summary(m)
-predict(m)
-```
-
-## n/k update problem 
-
-update doesn't work for n/k data
-
-```{r, eval = F}
-testData = createData(sampleSize = 200, family = binomial(), binomialTrials = 20)
-
-fittedModel <- glmmTMB(cbind(observedResponse1,observedResponse0) ~ Environment1 + (1|group) , family = "binomial", data = testData)
-temp = model.frame(fittedModel)
-update(fittedModel, temp)
-```
-
-soluation -> DHARMa has now a refit function implemented for glmmTMB
-
-
-## Residual problems
-
-* residual function doesn't work with factor response (bug)
-
-```{r, eval = F}
-library(DHARMa)
-library(glmmTMB)
-
-testData = createData(sampleSize = 200, family = binomial(), factorResponse = T)
-fittedModel <- glmmTMB(observedResponse ~ Environment1 + (1|group) , family = "binomial", data = testData)
-residuals(fittedModel)
-
-```
-
-
-* pearson residuals don't work with zi terms (not implemented)
-
-
+## Pearson residuals don't work with zi terms (not implemented)
 
 ## with ~reform in pred / simulate
 
@@ -78,8 +34,11 @@ all predictions and simulations are conditional on REs, problematic for some of 
 ```{r}
 m1 <- glmmTMB(count~ mined + (1|site), family=poisson, data=Salamanders)
 
+
 #pred = predict(m1, re.form = 0)
-pred = predict(m1)
+boxplot(Salamanders$mined, predict(m1, type = c("link")))
+boxplot(Salamanders$mined, predict(m1, type = c("response")))
+
 ```
 
 
@@ -288,7 +247,7 @@ plot(res, rank = F)
 
 ## Beta
 
-Beta distribution is not implemented yet
+Beta distribution seems to work fine
 
 ```{r}
 dat = data.frame(x = runif(200), y = rbeta(200, 0.5, 0.5))
@@ -296,11 +255,53 @@ m1 <- glmmTMB(y~ x , family=beta_family, data=dat)
 summary(m1)
 
 #m1$modelInfo$family$variance(1,2)
-#simulate(m1)
+simulate(m1)
+
+res <- simulateResiduals(m1)
+plot(res)
 
 ```
 
 
+# Old problems
+
+## Problems with binomial
+
+This used to create crashes my R (memory allocation issue) on the current CRAN version (27.3.18). Installing the development version on GitHub fixes the problem. sessionInfo() at the end of the document
+
+-> update ... seeems to be fine now
+
+```{r, eval = F}
+data(cbpp, package="lme4")
+m <- glmmTMB(cbind(incidence, size-incidence) ~ period + (1 | herd), data=cbpp, family=binomial)
+summary(m)
+predict(m)
+```
+
+## n/k update problem 
+
+update doesn't work for n/k data
+
+```{r, eval = F}
+testData = createData(sampleSize = 200, family = binomial(), binomialTrials = 20)
+
+fittedModel <- glmmTMB(cbind(observedResponse1,observedResponse0) ~ Environment1 + (1|group) , family = "binomial", data = testData)
+temp = model.frame(fittedModel)
+update(fittedModel, temp)
+```
+
+soluation -> DHARMa has now a refit function implemented for glmmTMB
+
+## residual function doesn't work with factor response (bug)
+
+```{r, eval = F}
+testData = createData(sampleSize = 200, family = binomial(), factorResponse = T)
+fittedModel <- glmmTMB(observedResponse ~ Environment1 + (1|group) , family = "binomial", data = testData)
+residuals(fittedModel)
+
+```
+
+solved
 
 
 
@@ -309,5 +310,7 @@ summary(m1)
 ```{r}
 sessionInfo()
 ```
+
+
 
 
