@@ -183,17 +183,6 @@ simulateResiduals <- function(fittedModel, n = 250, refit = F, integerResponse =
   ########### Wrapup ############
   
   out$scaledResidualsNormal = qnorm(out$scaledResiduals + 0.00 )
-  
-  # outliers = list()
-  # outliers$fracLowerThanAllSimulated = sum(out$scaledResiduals == 0) / out$nSim
-  # outliers$fracHigherThanAllSimulated = sum(out$scaledResiduals == 1) / out$nSim
-  # 
-  # # see http://www.di.fc.ul.pt/~jpn/r/prob/range.html 
-  # # 1−(1−x)n
-  # outliers$samplingDist = ecdf(replicate(10000, min(runif(out$nSim))))
-  #   
-  # outliers$plowerThanAllSimulated = 1-outliers$samplingDist(fracLowerThanAllSimulated)
-  # outliers$plowerThanAllSimulated = 1-outliers$samplingDist(fracLowerThanAllSimulated)
 
   out$time = proc.time() - ptm
   out$randomState = randomState

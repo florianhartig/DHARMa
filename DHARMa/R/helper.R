@@ -64,3 +64,21 @@ getQuantile <- function(simulations, observed, n, nSim, integerResponse){
 # 
 # 
 # 
+
+
+
+#' Check dot operator
+#'  
+#' @details modified from https://github.com/lcolladotor/dots
+#' 
+#' @keywords internal
+checkDots <- function(name, value, ...) {
+  args <- list(...)
+  if(!name %in% names(args)) {
+    ## Default value
+    return(value)
+  } else {
+    ## If the argument was defined in the ... part, return it
+    return(args[[name]])
+  }
+}

@@ -37,6 +37,24 @@ plot.DHARMa <- function(x, rank = TRUE, ...){
 }
 
 
+#' Histogram of DHARMa residuals
+#' 
+#' The function produces a histogram from a DHARMa output
+#' 
+#' @param x a DHARMa simulation output (class DHARMa)
+#' @param ... arguments to be passed on to hist. Breaks and col are fixed. 
+#' @seealso \code{\link{plotSimulatedResiduals}}, \code{\link{plotResiduals}}
+#' @example inst/examples/plotsHelp.R
+#' @export
+hist.DHARMa <- function(x, ...){
+  val = x$scaledResiduals
+  val[val == 0] = -0.01
+  val[val == 1] = 1.01
+  hist(val, breaks = seq(-0.02, 1.02, len = 53), col = c("red",rep("lightgrey",50), "red"), main = "Hist of DHARM residuals\nOutliers are marked red", ...)
+}
+
+
+
 
 #' DHARMa standard residual plots
 #' 
@@ -60,19 +78,26 @@ plotSimulatedResiduals <- function(simulationOutput, ...){
 #' 
 #' @param simulationOutput a DHARMa simulation output (class DHARMa)
 #' @param testUniformity if T, the function \code{\link{testUniformity}} will be called and the result will be added to the plot
+#' @param testOutliers if T, the function \code{\link{testOutliers}} will be called and the result will be added to the plot
 #' 
 #' @details the function calls qqunif from the R package gap to create a quantile-quantile plot for a uniform distribution.  
 #' @seealso \code{\link{plotSimulatedResiduals}}, \code{\link{plotResiduals}}
 #' @example inst/examples/plotsHelp.R
 #' @export
-plotQQunif <- function(simulationOutput, testUniformity = T){
+plotQQunif <- function(simulationOutput, testUniformity = T, testOutliers = T){
   
   if(class(simulationOutput) != "DHARMa") stop("DHARMa::plotQQunif wrong argument, simulationOutput must be a DHARMa object!")
 
   gap::qqunif(simulationOutput$scaledResiduals,pch=2,bty="n", logscale = F, col = "black", cex = 0.6, main = "QQ plot residuals", cex.main = 1)
+  
   if(testUniformity == TRUE){
     temp = testUniformity(simulationOutput, plot = F)
     legend("topleft", c(paste("KS test: p=", round(temp$p.value, digits = 5)), paste("Deviation ", ifelse(temp$p.value < 0.05, "significant", "n.s."))), text.col = ifelse(temp$p.value < 0.05, "red", "black" ), bty="n")     
+  }
+  
+  if(testOutliers == TRUE){
+    temp = testOutliers(simulationOutput, plot = F)
+    legend("bottomright", c(paste("Outlier test: p=", round(temp$p.value, digits = 5)), paste("Deviation ", ifelse(temp$p.value < 0.05, "significant", "n.s."))), text.col = ifelse(temp$p.value < 0.05, "red", "black" ), bty="n")     
   }
 }
 
@@ -138,8 +163,16 @@ plotResiduals <- function(pred, residuals = NULL, quantreg = NULL, rank = FALSE,
 
   
   if(is.null(quantreg)) if (length(res) > 2000) quantreg = FALSE else quantreg = TRUE
+
+  defaultCol = ifelse(res == 0 | res == 1, 2,1)   
+  defaultPch = ifelse(res == 0 | res == 1, 8,1)   
+
+  col = checkDots("col", defaultCol, ...)
+  pch = checkDots("pch", defaultPch, ...)
   
-  plot(res ~ pred, ylim = c(0,1), axes = FALSE, ...)
+  if(is.factor(pred)) plot(res ~ pred, ylim = c(0,1), axes = FALSE, ...)
+  else plot(res ~ pred, ylim = c(0,1), axes = FALSE, col = col, pch = pch, ...)
+  
   axis(1)
   axis(2, at=c(0, 0.25, 0.5, 0.75, 1))
   abline(h = c(0.25, 0.5, 0.75), col = "black", lwd = 0.5, lty = 2)
@@ -195,6 +228,7 @@ plotConventionalResiduals <- function(fittedModel){
   plot(predict(fittedModel), resid(fittedModel, type = "response") , main = "Raw residuals" , ylab = "Residual", xlab = "Predicted")  
   mtext("Conventional residual plots", outer = T)
 }
+
 
 
 
