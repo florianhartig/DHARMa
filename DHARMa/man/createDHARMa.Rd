@@ -4,13 +4,10 @@
 \alias{createDHARMa}
 \title{Convert simulated residuals or posterior predictive simulations to a DHARMa object}
 \usage{
-createDHARMa(scaledResiduals = NULL, simulatedResponse = NULL,
-  observedResponse = NULL, fittedPredictedResponse = NULL,
-  integerResponse = F)
+createDHARMa(simulatedResponse, observedResponse,
+  fittedPredictedResponse = NULL, integerResponse = F)
 }
 \arguments{
-\item{scaledResiduals}{optional scaled residuals from a simulation, e.g. Bayesian p-values. If those are not provided, simulated and true observations have to be provided.}
-
 \item{simulatedResponse}{matrix of observations simulated from the fitted model - row index for observations and colum index for simulations}
 
 \item{observedResponse}{true observations}

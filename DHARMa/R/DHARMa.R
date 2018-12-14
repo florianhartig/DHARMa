@@ -36,7 +36,6 @@ residuals.DHARMa <- function(object, ...){
 
 #' Convert simulated residuals or posterior predictive simulations to a DHARMa object
 #' 
-#' @param scaledResiduals optional scaled residuals from a simulation, e.g. Bayesian p-values. If those are not provided, simulated and true observations have to be provided. 
 #' @param simulatedResponse matrix of observations simulated from the fitted model - row index for observations and colum index for simulations 
 #' @param observedResponse true observations
 #' @param fittedPredictedResponse fitted predicted response. Optional, but will be neccessary for some plots. If scaled residuals are Bayesian p-values, using the median posterior prediction as fittedPredictedResponse is recommended. 
@@ -45,46 +44,31 @@ residuals.DHARMa <- function(object, ...){
 #' @note Either scaled residuals or (simulatedResponse AND observed response) have to be provided 
 #' @example inst/examples/createDharmaHelp.R
 #' @export
-createDHARMa <- function(scaledResiduals = NULL, simulatedResponse = NULL, observedResponse = NULL, fittedPredictedResponse = NULL, integerResponse = F){
+createDHARMa <- function(simulatedResponse , observedResponse , fittedPredictedResponse = NULL, integerResponse = F){
 
   out = list()
-  
-  if(is.null(scaledResiduals)) {
-    if(!is.matrix(simulatedResponse) & !is.null(observedResponse)) stop("either scaled residuals or simulations and observations have to be provided")
-    if(ncol(simulatedResponse) < 2) stop("simulatedResponse with less than 2 simulations provided - cannot calculate residuals on that.")
-    
-    if(ncol(simulatedResponse) < 10) warning("simulatedResponse with less than 10 simulations provided. This rarely makes sense")
-    
-    out$nObs = length(observedResponse)
-    
-    if (out$nObs < 3) stop("warning - number of observations < 3 ... this rarely makes sense")
-    
-    if(! (out$nObs == nrow(simulatedResponse))) stop("dimensions of observedResponse and simulatedResponse do not match")
-    
-    out$nSim = ncol(simulatedResponse)
-
-    out$scaledResiduals = getQuantile(simulations = simulatedResponse , observed = observedResponse , n = out$nObs, nSim = out$nSim, integerResponse = integerResponse)
-    
-  } else {
-    
-    if(is.matrix(scaledResiduals) | is.data.frame(scaledResiduals)) stop("DHARMa::createDHARMa - matrix provided to parmaeter scaledResiduals - if you want to provide simulations, use parameter simulatedResponse")
-    
-    if(!is.vector(scaledResiduals)) stop("scaledResiduals should be a vector")
-    out$scaledResiduals = scaledResiduals
-    out$nObs = length(scaledResiduals)
-  }
-  
   out$observedResponse = observedResponse
+  
+  if(!is.matrix(simulatedResponse) & !is.null(observedResponse)) stop("either scaled residuals or simulations and observations have to be provided")
+  if(ncol(simulatedResponse) < 2) stop("simulatedResponse with less than 2 simulations provided - cannot calculate residuals on that.")
+  
+  if(ncol(simulatedResponse) < 10) warning("simulatedResponse with less than 10 simulations provided. This rarely makes sense")
+  
+  out$nObs = length(observedResponse)
+  
+  if (out$nObs < 3) stop("warning - number of observations < 3 ... this rarely makes sense")
+  
+  if(! (out$nObs == nrow(simulatedResponse))) stop("dimensions of observedResponse and simulatedResponse do not match")
+  
+  out$nSim = ncol(simulatedResponse)
+
+  out$scaledResiduals = getQuantile(simulations = simulatedResponse , observed = observedResponse , n = out$nObs, nSim = out$nSim, integerResponse = integerResponse)
+    
   
   # makes sure that DHARM plots that rely on this vector won't crash  
   if(is.null(fittedPredictedResponse)){
-    if(! is.null(simulatedResponse)){
-      message("No fitted predicted response provided, using the mean of the simulations")
-      fittedPredictedResponse = apply(simulatedResponse, 1, mean)         
-    }else{
-      message("No fitted predicted response provided, DHARMa will not be able to plot residuals against predicted")
-      fittedPredictedResponse = as.factor(rep(1, out$nObs))       
-    }
+    message("No fitted predicted response provided, using the mean of the simulations")
+    fittedPredictedResponse = apply(simulatedResponse, 1, mean)         
   }
   out$fittedPredictedResponse = fittedPredictedResponse       
  
