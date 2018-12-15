@@ -2,8 +2,12 @@
 
 S3method(family,HLfit)
 S3method(fitted,gam)
+<<<<<<< HEAD
 S3method(getResponse,HLfit)
 S3method(getResponse,default)
+=======
+S3method(hist,DHARMa)
+>>>>>>> master
 S3method(plot,DHARMa)
 S3method(print,DHARMa)
 S3method(refit,glmmTMB)
@@ -22,6 +26,7 @@ export(runBenchmarks)
 export(simulateResiduals)
 export(testDispersion)
 export(testGeneric)
+export(testOutliers)
 export(testOverdispersion)
 export(testOverdispersionParametric)
 export(testResiduals)

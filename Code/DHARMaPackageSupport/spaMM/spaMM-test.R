@@ -15,6 +15,14 @@ family(fittedModel)
 class(fittedModel)[1]
 nobs(fittedModel)
 getResponse(fittedModel)
+<<<<<<< HEAD
+=======
+
+getResponse.HLfit <- function(object, ...){
+  response(object, ...)
+}
+
+>>>>>>> master
 simulate.HLfit(fittedModel, nsim = 2)
 predict.HLfit(fittedModel)
 coef(fittedModel)

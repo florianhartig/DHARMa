@@ -34,6 +34,7 @@ runEverything = function(fittedModel, testData, DHARMaData = T){
   
   checkOutput(simulationOutput)
   
+  testOutliers(simulationOutput)
   testDispersion(simulationOutput)
   expect_gt(testUniformity(simulationOutput = simulationOutput)$p.value, 0.00001)
   testZeroInflation(simulationOutput = simulationOutput)
