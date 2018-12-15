@@ -35,7 +35,7 @@ if pred is a factor, a boxplot will be plotted instead of a scatter plot. The di
 }
 \examples{
 testData = createData(sampleSize = 200, family = poisson(), 
-                      randomEffectVariance = 0, numGroups = 5)
+                      randomEffectVariance = 1, numGroups = 5)
 fittedModel <- glm(observedResponse ~ Environment1, 
                    family = "poisson", data = testData)
 simulationOutput <- simulateResiduals(fittedModel = fittedModel)
@@ -47,9 +47,11 @@ simulationOutput <- simulateResiduals(fittedModel = fittedModel)
 
 plot(simulationOutput, quantreg = FALSE)
 
-#############  qq plot  ######################
+#############  Distribution  ######################
 
 plotQQunif(simulationOutput = simulationOutput)
+
+hist(simulationOutput )
 
 #############  residual plots  ###############
 

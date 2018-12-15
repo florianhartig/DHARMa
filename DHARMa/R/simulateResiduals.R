@@ -183,17 +183,6 @@ simulateResiduals <- function(fittedModel, n = 250, refit = F, integerResponse =
   ########### Wrapup ############
   
   out$scaledResidualsNormal = qnorm(out$scaledResiduals + 0.00 )
-  
-  # outliers = list()
-  # outliers$fracLowerThanAllSimulated = sum(out$scaledResiduals == 0) / out$nSim
-  # outliers$fracHigherThanAllSimulated = sum(out$scaledResiduals == 1) / out$nSim
-  # 
-  # # see http://www.di.fc.ul.pt/~jpn/r/prob/range.html 
-  # # 1−(1−x)n
-  # outliers$samplingDist = ecdf(replicate(10000, min(runif(out$nSim))))
-  #   
-  # outliers$plowerThanAllSimulated = 1-outliers$samplingDist(fracLowerThanAllSimulated)
-  # outliers$plowerThanAllSimulated = 1-outliers$samplingDist(fracLowerThanAllSimulated)
 
   out$time = proc.time() - ptm
   out$randomState = randomState
@@ -350,47 +339,3 @@ recalculateResiduals <- function(simulationOutput, group = NULL, aggregateBy = s
   return(out)
 }
   
-#' Quantile calculations
-#' 
-#' @keywords internal
-getQuantile <- function(simulations, observed, n, nSim, integerResponse){
-  
-  scaledResiduals = rep(NA, n)
-  
-  if(integerResponse == F){
-    
-    values = c(as.vector(t(simulations)), observed)
-    
-    if(any (duplicated(values))){
-      integerResponse = T
-      # repeated = unique(values[which(duplicated(values))])      
-      if(any(integerResponse)) message("Model family was recognized or set as continuous, but duplicate values were detected in the simulation - changing to integer residuals (see ?simulateResiduals for details)")
-    } 
-  } 
-
-  for (i in 1:n){
-    if(integerResponse == T){
-      scaledResiduals[i] <- ecdf(simulations[i,] + runif(nSim, -0.5, 0.5))(observed[i] + runif(1, -0.5, 0.5))
-
-    }else{
-      scaledResiduals[i] <- ecdf(simulations[i,])(observed[i])
-    }
-  }
-  return(scaledResiduals)
-}
-
-# 
-# 
-# testData = createData(sampleSize = 200, family = gaussian(),
-#                       randomEffectVariance = 0, numGroups = 5)
-# fittedModel <- glmmTMB(observedResponse ~ Environment1,
-#                    data = testData)
-# simulationOutput <- simulateResiduals(fittedModel = fittedModel)
-# 
-# sims = simulationOutput$simulatedResponse
-# sims[1, c(1,6,8)] = 0
-# any(apply(sims, 1, anyDuplicated))
-# getQuantile(simulations = sims, observed = testData$observedResponse, n = 200, integerResponse = F, nSim = 250)
-# 
-# 
-# 

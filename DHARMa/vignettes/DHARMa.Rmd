@@ -12,7 +12,7 @@ vignette: >
 abstract: "The 'DHARMa' package uses a simulation-based approach to create readily interpretable scaled (quantile) residuals for fitted generalized linear mixed models. Currently supported are generalized linear mixed models from 'lme4' (classes 'lmerMod', 'glmerMod') and 'glmmTMB', generalized additive models ('gam' from 'mgcv'), 'glm' (including 'negbin' from 'MASS', but excluding quasi-distributions) and 'lm' model classes. Alternatively, externally created simulations, e.g. posterior predictive simulations from Bayesian software such as 'JAGS', 'STAN', or 'BUGS' can be processed as well. The resulting residuals are standardized to values between 0 and 1 and can be interpreted as intuitively as residuals from a linear regression. The package also provides a number of plot and test functions for typical model misspecification problems, such as over/underdispersion, zero-inflation, and residual spatial and temporal autocorrelation.\n \n \n"
 ---
 
-```{r, echo = F}
+```{r, echo = F, message = F}
 library(DHARMa)
 set.seed(123)
 ```
@@ -141,10 +141,11 @@ We can get a visual impression of these properties with the plot.DHARMa() functi
 plot(simulationOutput)
 ```
 
-which creates a qq-plot to detect overall deviations from the expected distribution, and a plot of the residuals against the predicted value. 
+which creates a qq-plot to detect overall deviations from the expected distribution (with added tests for uniformity and outliers), and a plot of the residuals against the predicted value. 
+
+In the plot res ~ predicted, simulation outliers are highlighted as red stars. By simulation outliers, I mean data points that are outside the range of simulated values. Because no data was simulated in that range, we actually don't know "how much" these values deviate from the model expecation, so the term "outlier" should be used with a grain of salt. Note also that the probability of an outlier depends on the number of simulations (in fact, it is 1/(nSim +1) for each side), so whether the existence of outliers is a reason for concern depends also on the number of simulations. 
 
 To provide a visual aid in detecting deviations from uniformity in y-direction, the plot of the residuals against the predicted values also performs an (optional) quantile regression, which provides 0.25, 0.5 and 0.75 quantile lines across the plots. These lines should be straight, horizontal, and at y-values of 0.25, 0.5 and 0.75. Note, however, that some deviations from this are to be expected by chance, even for a perfect model, especially if the sample size is small.  
-
 The quantile regression can be very slow for large datasets. You can chose to use a simpler method with the option quantreg = F. 
 
 If you want to plot the residuals against other predictors (highly recommend), you can use the function
@@ -160,17 +161,18 @@ which does the same quantile plot as the main plotting function.
 To support the visual inspection of the residuals, the DHARMa package provides a number of specialized goodness-of-fit tests on the simulated residuals. For example, the function 
 
 ```{r}
-testUniformity(simulationOutput = simulationOutput)
+testUniformity(simulationOutput)
 ```
 
 runs a KS test to test for overall uniformity of the residuals. There are a number of further tests 
 
+* testOutliers()
 * testOverdispersion()
 * testZeroinflation()
 * testTemporalAutocorrelation()
 * testSpatialAutocorrelation()
 
-that basically do what they say. See the help of the functions and further comments below for a more detailed description.
+that basically do what they say. Outliers are again defined as observed data that are outside of what is produced by the simualations. The test checks if the number of outliers is higher than one would expect by chance. See the help of the functions and further comments below for a more detailed description.
 
 ## Simulation options
 

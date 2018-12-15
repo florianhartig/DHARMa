@@ -32,6 +32,7 @@ runEverything = function(fittedModel, testData, DHARMaData = T){
   
   checkOutput(simulationOutput)
   
+  testOutliers(simulationOutput)
   testDispersion(simulationOutput)
   testUniformity(simulationOutput = simulationOutput)
   testZeroInflation(simulationOutput = simulationOutput)

@@ -4,12 +4,14 @@
 \alias{plotQQunif}
 \title{Quantile-quantile plot for a uniform distribution}
 \usage{
-plotQQunif(simulationOutput, testUniformity = T)
+plotQQunif(simulationOutput, testUniformity = T, testOutliers = T)
 }
 \arguments{
 \item{simulationOutput}{a DHARMa simulation output (class DHARMa)}
 
 \item{testUniformity}{if T, the function \code{\link{testUniformity}} will be called and the result will be added to the plot}
+
+\item{testOutliers}{if T, the function \code{\link{testOutliers}} will be called and the result will be added to the plot}
 }
 \description{
 The function produces a uniform quantile-quantile plot from a DHARMa output
@@ -19,7 +21,7 @@ the function calls qqunif from the R package gap to create a quantile-quantile p
 }
 \examples{
 testData = createData(sampleSize = 200, family = poisson(), 
-                      randomEffectVariance = 0, numGroups = 5)
+                      randomEffectVariance = 1, numGroups = 5)
 fittedModel <- glm(observedResponse ~ Environment1, 
                    family = "poisson", data = testData)
 simulationOutput <- simulateResiduals(fittedModel = fittedModel)
@@ -31,9 +33,11 @@ simulationOutput <- simulateResiduals(fittedModel = fittedModel)
 
 plot(simulationOutput, quantreg = FALSE)
 
-#############  qq plot  ######################
+#############  Distribution  ######################
 
 plotQQunif(simulationOutput = simulationOutput)
+
+hist(simulationOutput )
 
 #############  residual plots  ###############
 
