@@ -2,7 +2,7 @@ context("DHARMa tests")
 
 # erase? library(stringr)
 
-test_that("overdispersion is correct", {
+test_that("overdispersion recognized", {
   
   set.seed(123)
   
@@ -10,12 +10,17 @@ test_that("overdispersion is correct", {
   fittedModel <- glm(observedResponse ~ Environment1 , family = "poisson", data = testData)
   simulationOutput <- simulateResiduals(fittedModel = fittedModel)
   
+  x = testUniformity(simulationOutput, alternative = "greater")
+  expect_true(  x$p.value < 0.05)
+  x = testOutliers(simulationOutput, alternative = "greater")
+  expect_true(  x$p.value < 0.05)
   x = testDispersion(simulationOutput, alternative = "greater")
   expect_true(  x$p.value < 0.05)
   x = testZeroInflation(simulationOutput, alternative = "greater")
   expect_true(  x$p.value < 0.05)  
   
 })
+
 
 
 
