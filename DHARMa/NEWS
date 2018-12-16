@@ -1,22 +1,30 @@
 NOTE: for more news about the package, see https://github.com/florianhartig/DHARMa/releases
 
 
-0.2.0.4 
+DHARMa 0.2.1
+============
 
-Outlier detection
+New features
 
-0.2.0.3 
+- Outlier highlighting (in plots) and formal outlier test, implemented in https://github.com/florianhartig/DHARMa/pull/99
+- Support for the SPAMM package
 
-Support for the SPAMM package
+Major changes
 
-0.2.0.1 - 0.2.0.2
+- Remodelled createDHARMa function - option to directly provide scaled residuals was removed
+- Rewrote ecdf function for DHARMa to get fully balanced scale, in the course of https://github.com/florianhartig/DHARMa/pull/99
 
-a number of smaller updates, mostly to help files
-fixes #82 / Bug in recalculateResiduals
+Minor changes
+
+- a number of smaller updates, mostly to help files
+
+Bugfixes 
+
+- fixes #82 / Bug in recalculateResiduals
 
 
 DHARMa 0.2.0
-
+============
 
 New features
 
@@ -39,7 +47,9 @@ Bugfixes
 - fixed bug with zeroinflation test for k/n binomial data https://github.com/florianhartig/DHARMa/issues/55
 - fixed bug with p-value calculation via ecdf https://github.com/florianhartig/DHARMa/issues/55
 
+
 DHARMa 0.1.6
+============
 
 New features
 
@@ -63,7 +73,9 @@ Minor changes
 
 - fixes a bug in version 0.1.4 that occurred when running simulateResiduals with refit = T. Apologies for any inconvenience. 
 
+
 DHARMa 0.1.4 
+============
 
 Major changes
 
@@ -76,6 +88,7 @@ Minor changes
 - warnings in case the refit procedure fails or produces identical parameter values https://github.com/florianhartig/DHARMa/issues/20
 
 DHARMa 0.1.3 
+============
 
 Major changes
 
@@ -88,16 +101,19 @@ Minor changes
 - updates to the help 
 
 DHARMa 0.1.2
+============
 
 - This bugfix release fixes an issue with backwards compatibility introduced in the 0.1.1 release, which used the 'startsWith' function that is only available in R base since 3.3.0. In 0.1.2, all occurences of 'startsWith' were replaced with 'grepl', which restores the compatibility with older R versions.
 
 DHARMa 0.1.1
+============
 
 - including now the negative binomial models from MASS and lme4, as well as the possibility to create synthetic data from the negative binomial family
 
 - includes a createDHARMa function that allows using the plot functions of DHARMa also with externally created simualtions, for example for Bayesian predictive simulations
 
-DHARMA 0.1
+DHARMA 0.1.0
+============
 
 - initial release, with support for lm, glm, lme4 
 

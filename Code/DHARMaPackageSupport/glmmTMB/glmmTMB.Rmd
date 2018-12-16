@@ -6,6 +6,8 @@ output:
   html_document: 
     keep_md: yes
     toc: yes
+editor_options: 
+  chunk_output_type: console
 ---
 
 ```{r setup, include=FALSE}
@@ -13,11 +15,27 @@ knitr::opts_chunk$set(echo = TRUE, cache = T)
 ```
 
 ```{r}
+devtools::install_github("glmmTMB/glmmTMB/glmmTMB")
+
 library(DHARMa)
 library(glmmTMB)
 ```
 
-# Testing general package behavior / general problems
+# Testing general package behavior general problems
+
+```{r}
+testData = createData(sampleSize = 200, overdispersion = 0.5, family = poisson())
+
+m1 <- glmmTMB(observedResponse ~ Environment1 + (1|group), 
+                     family = "poisson", data = testData)
+
+predict(m1)
+
+
+simulationOutput <- simulateResiduals(fittedModel = m1)
+
+```
+
 
 
 ## Pearson residuals don't work with zi terms (not implemented)
@@ -39,6 +57,30 @@ m1 <- glmmTMB(count~ mined + (1|site), family=poisson, data=Salamanders)
 boxplot(Salamanders$mined, predict(m1, type = c("link")))
 boxplot(Salamanders$mined, predict(m1, type = c("response")))
 
+```
+
+
+```{r}
+testData = createData(sampleSize = 200, randomEffectVariance = 2, family = poisson())
+
+m1 <- glmmTMB(observedResponse ~ Environment1 + (1|group), 
+                     family = "poisson", data = testData)
+
+summary(m1)
+
+res <- simulateResiduals(fittedModel = m1)
+
+# this plot shows the residual pattern, despite the model being correct
+plot(res)
+
+# recalculate predictions by hand - see help ?predict.glmmTMB
+# To compute population-level predictions for a given grouping variable (i.e., setting all random effects for that grouping variable to zero), set the group value to NA.
+newdata=testData
+newdata$group = NA
+pred = predict(m1, newdata = newdata)
+
+# Now perform the plot
+plotResiduals(pred, res$scaledResiduals)
 ```
 
 
