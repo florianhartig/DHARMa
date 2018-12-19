@@ -201,6 +201,8 @@ getPossibleModels<-function()c("lm", "glm", "negbin", "lmerMod", "glmerMod", "ga
 checkModel <- function(fittedModel){
   if(!(class(fittedModel)[1] %in% getPossibleModels())) warning("DHARMa: fittedModel not in class of supported models. Absolutely no guarantee that this will work!")
   
+  if (class(fittedModel)[1] == "glmmTMB") message("It seems you are diagnosing a glmmTBM model. There are still a few minor limitations associatd with this package. The most important is that glmmTMB doesn't implement an option to create unconditional predictions from the model, which means that predicted values (in res ~ pred) plots include the random effects. With strong random effects, this can sometimes create diagonal patterns from bottom left to top right in the res ~ pred plot. All other tests and plots should work as desired. Please see https://github.com/florianhartig/DHARMa/issues/16 for further details.")
+
   if (class(fittedModel)[1] == "gam" ) if (class(fittedModel$family)[1] == "extended.family") stop("It seems you are trying to fit a model from mgcv that was fit with an extended.family. Simulation functions for these families are not yet implemented in DHARMa. See issue https://github.com/florianhartig/DHARMa/issues/11 for updates about this")
 
 }

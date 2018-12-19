@@ -39,9 +39,9 @@ testSimulatedResiduals <- function(simulationOutput){
 #' This function tests the overall uniformity of the simulated residuals in a DHARMa object
 #' 
 #' @param simulationOutput a DHARMa object with simulated residuals created with \code{\link{simulateResiduals}}
-#' @param alternative a character string specifying whether the test should test if observations are "greater", "less" or "two.sided" compared to the simulated null hypothesis  
+#' @param alternative a character string specifying whether the test should test if observations are "greater", "less" or "two.sided" compared to the simulated null hypothesis. See \code{\link[stats]{ks.test}} for details  
 #' @param plot if T, plots calls \code{\link{plotQQunif}} as well 
-#' @details The function applies a KS test for uniformity on the simulated residuals
+#' @details The function applies a \code{\link[stats]{ks.test}} for uniformity on the simulated residuals.
 #' @author Florian Hartig
 #' @seealso \code{\link{testResiduals}}, \code{\link{testDispersion}}, \code{\link{testZeroInflation}}, \code{\link{testGeneric}}, \code{\link{testTemporalAutocorrelation}}, \code{\link{testSpatialAutocorrelation}}
 #' @export

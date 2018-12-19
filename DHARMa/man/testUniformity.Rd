@@ -10,7 +10,7 @@ testUniformity(simulationOutput, alternative = c("two.sided", "less",
 \arguments{
 \item{simulationOutput}{a DHARMa object with simulated residuals created with \code{\link{simulateResiduals}}}
 
-\item{alternative}{a character string specifying whether the test should test if observations are "greater", "less" or "two.sided" compared to the simulated null hypothesis}
+\item{alternative}{a character string specifying whether the test should test if observations are "greater", "less" or "two.sided" compared to the simulated null hypothesis. See \code{\link[stats]{ks.test}} for details}
 
 \item{plot}{if T, plots calls \code{\link{plotQQunif}} as well}
 }
@@ -18,7 +18,7 @@ testUniformity(simulationOutput, alternative = c("two.sided", "less",
 This function tests the overall uniformity of the simulated residuals in a DHARMa object
 }
 \details{
-The function applies a KS test for uniformity on the simulated residuals
+The function applies a \code{\link[stats]{ks.test}} for uniformity on the simulated residuals.
 }
 \seealso{
 \code{\link{testResiduals}}, \code{\link{testDispersion}}, \code{\link{testZeroInflation}}, \code{\link{testGeneric}}, \code{\link{testTemporalAutocorrelation}}, \code{\link{testSpatialAutocorrelation}}

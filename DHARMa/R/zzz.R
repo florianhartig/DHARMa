@@ -14,6 +14,6 @@
 }
 
 .onAttach <- function(...) { 
-  packageStartupMessage("Note that, since v0.1.6.2, DHARMa includes support for glmmTMB, but there are still a few minor limitations associatd with this package. Please see https://github.com/florianhartig/DHARMa/issues/16 for details, in particular if you use this for production.")
+  #packageStartupMessage("Note that, since v0.1.6.2, DHARMa includes support for glmmTMB, but there are still a few minor limitations associatd with this package. Please see https://github.com/florianhartig/DHARMa/issues/16 for details, in particular if you use this for production.")
 }
 
