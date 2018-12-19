@@ -9,44 +9,11 @@ getResponse.default <- function (object, ...){
   model.frame(object)[,1] 
 }
 
-
-#' 
-#' 
-#' This function overwrites the standard fitted function for GAM
-#' @note See explanation at 
-#' @param object fitted model
-#' @param ... arguments to be passed on to stats::fitted
-#' @export
-fitted.gam <- function(object, ...){
-  class(object) = "glm"
-  out = stats::fitted(object, ...)
-  names(out) = as.character(1:length(out))
-  out
-}
-
-# Check that this works
-# plot(fitted(fittedModelGAM), predict(fittedModelGAM, type = "response"))
-
-
-
-#######  spaMM #########
-
-#' @export
-family.HLfit <- function(object, ...){
-  return(object$family)
-}
-
-#' @export
-getResponse.HLfit <- function(object, ...){
-  object$y[,1L]
-}
-
-###### REFIT PROCEDURES #######
-
-
 #' @importFrom lme4 refit
 NULL
 
+
+######### LM #############
 
 #' Refit a Model with a Different Response
 #' 
@@ -73,6 +40,31 @@ refit.lm <- function(object, newresp, ...){
   refittedModel = update(object, data = newData)
   return(refittedModel)
 }
+
+
+
+######## MGCV ############
+
+#' 
+#' 
+#' This function overwrites the standard fitted function for GAM
+#' @note See explanation at 
+#' @param object fitted model
+#' @param ... arguments to be passed on to stats::fitted
+#' @export
+fitted.gam <- function(object, ...){
+  class(object) = "glm"
+  out = stats::fitted(object, ...)
+  names(out) = as.character(1:length(out))
+  out
+}
+
+# Check that this works
+# plot(fitted(fittedModelGAM), predict(fittedModelGAM, type = "response"))
+
+
+
+######## glmmTMB ######
 
 #' Refit a Model with a Different Response
 #' 
@@ -102,6 +94,20 @@ refit.glmmTMB <- function(object, newresp, ...){
   refittedModel = update(object, data = newData)
   return(refittedModel)
 }
+
+
+#######  spaMM #########
+
+#' @export
+getResponse.HLfit <- function(object, ...){
+  return(response(object, ...))
+}
+
+#' @export
+refit.HLfit <- function(object, newresp, ...) {
+  update_resp(object, newresp)
+}
+
 
 
 
