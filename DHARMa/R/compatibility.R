@@ -1,4 +1,32 @@
 
+
+
+#' Test DHARMa compatibility
+#' 
+#' The function tests the compatibility of a model with DHARMa
+#' 
+#' @author Florian Hartig
+#' @export
+#' @return A report of possible problems
+#' 
+testModel <-function(fittedModel){
+  
+  try(family(fittedModel))
+  try(class(fittedModel)[1])
+  try(nobs(fittedModel))
+  try(getResponse(fittedModel))
+  try(simulate(fittedModel, nsim = 10))
+  try(predict(fittedModel))
+  try(coef(fittedModel))
+  try(ranef(fittedModel))
+  try(fixef(fittedModel))
+  try(refit(fittedModel, newresp = getResponse(fittedModel)))
+  
+}
+
+
+
+
 #' @export
 getResponse <- function (object, ...) {
   UseMethod("getResponse", object)
