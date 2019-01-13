@@ -8,9 +8,9 @@ simulateResiduals(fittedModel, n = 250, refit = F,
   integerResponse = NULL, plot = F, seed = 123, ...)
 }
 \arguments{
-\item{fittedModel}{fitted model object. Supported are generalized linear mixed models from 'lme4' (classes 'lmerMod', 'glmerMod'), generalized additive models ('gam' from 'mgcv', excluding extended families from 'mgcv'), 'glm' (including 'negbin' from 'MASS', but excluding quasi-distributions) and 'lm' model classes.}
+\item{fittedModel}{a fitted model  of a class supported by DHARMa}
 
-\item{n}{integer number > 1, number of simulations to run. If possible, set to at least 250, better 1000. Smaller number > 50 can be chose if runtime is prohbitie, but discretization artefacts can occur at some point.}
+\item{n}{number of simulations. Default is 100. A more save value would be 250 or even 1000. The smaller the number, the higher the stochastic error on the residuals. Also, for very small n, discretization artefacts can influence the tests.}
 
 \item{refit}{if F, new data will be simulated and scaled residuals will be created by comparing observed data with new data. If T, the model will be refit on the simulated data (parametric bootstrap), and scaled residuals will be created by comparing observed with refitted residuals.}
 

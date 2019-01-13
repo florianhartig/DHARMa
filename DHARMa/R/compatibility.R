@@ -5,6 +5,11 @@
 #' 
 #' The function tests the compatibility of a model with DHARMa
 #' 
+#' @importFrom lme4 fixef
+#' @importFrom lme4 ranef
+#' @importFrom spaMM response
+#' @importFrom spaMM update_resp
+#' 
 #' @author Florian Hartig
 #' @export
 #' @return A report of possible problems
@@ -20,13 +25,19 @@ testModel <-function(fittedModel){
   try(coef(fittedModel))
   try(ranef(fittedModel))
   try(fixef(fittedModel))
-  try(refit(fittedModel, newresp = getResponse(fittedModel)))
+  try(refit(fittedModel, newresp = DHARMa:::getResponse(fittedModel)))
   
 }
 
+# New S3 methods
 
-
-
+#' Get model response
+#' 
+#' Extract the response of a fitted model 
+#' 
+#' The purpose of this function is to savely extract the response (dependent variable) of the fitted model classes
+#' 
+#' @author Florian Hartig
 #' @export
 getResponse <- function (object, ...) {
   UseMethod("getResponse", object)
@@ -36,6 +47,24 @@ getResponse <- function (object, ...) {
 getResponse.default <- function (object, ...){
   model.frame(object)[,1] 
 }
+
+#' Get model simulations
+#' 
+#' Simulate from a fitted model
+#' 
+#' The purpose of this function is to standardize the simulations from a model in a standardized way
+#' 
+#' @author Florian Hartig
+#' @export
+getSimulations <- function (object, ...) {
+  UseMethod("getSimulations", object)
+}
+
+#' @export
+getSimulations <- function (object, ...){
+  simulate(object, ...)
+}
+
 
 #' @importFrom lme4 refit
 NULL
@@ -132,8 +161,13 @@ getResponse.HLfit <- function(object, ...){
 }
 
 #' @export
+getSimulations.HLfit <- function(object, ...){
+  return(as.data.frame(simulate(object, ...)))
+}
+
+#' @export
 refit.HLfit <- function(object, newresp, ...) {
-  update_resp(object, newresp)
+  update_resp(object, newresp, evaluate = TRUE)
 }
 
 

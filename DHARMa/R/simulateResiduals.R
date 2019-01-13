@@ -97,7 +97,7 @@ simulateResiduals <- function(fittedModel, n = 250, refit = F, integerResponse =
   
   ######## simulations ##################
   
-  simulations = simulate(fittedModel, nsim = n, ...)
+  simulations = getSimulations(fittedModel, nsim = n, ...)
   
   if(out$modelClass == "glmmTMB"){
     if(ncol(simulations) == 2*n){

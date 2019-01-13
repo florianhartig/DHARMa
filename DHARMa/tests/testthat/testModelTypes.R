@@ -1,10 +1,12 @@
 context("Tests DHARMa functions on all implemented model types")
 
+library(testthat)
 library(DHARMa)
 library(MASS)
 library(lme4)
 library(mgcv)
 library(glmmTMB)
+library(spaMM)
 
 checkOutput <- function(simulationOutput){
   
@@ -27,8 +29,11 @@ runEverything = function(fittedModel, testData, DHARMaData = T){
   
   t = DHARMa:::getResponse(fittedModel)
   
-  x = simulate(fittedModel)
-  refit(fittedModel, x[, 1:ncol(x)])
+  x = getSimulations(fittedModel, 2)
+  expect_equal(class(x), "data.frame")
+  refit(fittedModel, x[[1]])
+  
+  #class(x[, 1:ncol(x)])
   
   simulationOutput <- simulateResiduals(fittedModel = fittedModel, n = 100)
   
@@ -41,9 +46,7 @@ runEverything = function(fittedModel, testData, DHARMaData = T){
   testTemporalAutocorrelation(simulationOutput = simulationOutput, time = testData$time)
   testSpatialAutocorrelation(simulationOutput = simulationOutput, x = testData$x, y = testData$y)
   
-  # currently not testing the following because of warning
-  #testOverdispersion(simulationOutput)
-  #testOverdispersion(simulationOutput, alternative = "both", plot = T)
+  testDispersion(simulationOutput)
   
   simulationOutput <- recalculateResiduals(simulationOutput, group = testData$group)
   testDispersion(simulationOutput)
