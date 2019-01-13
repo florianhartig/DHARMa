@@ -15,10 +15,17 @@ DHARMa:::getFixedEffects(fittedModel)
 res = simulateResiduals(fittedModel)
 plot(res)
 
-testData = createData(sampleSize = 200, overdispersion = 0.0, randomEffectVariance = 1, family = poisson())
+testData = createData(sampleSize = 10000, overdispersion = 0.0, randomEffectVariance = 1, family = poisson())
+
 fittedModel <- HLfit(observedResponse ~ Environment1 + (1|group) , family = "poisson",  data = testData)
 res = simulateResiduals(fittedModel)
 plot(res)
+
+fittedModel <- glmer(observedResponse ~ Environment1 + (1|group) , family = "poisson",  data = testData)
+summary(fittedModel)
+res = simulateResiduals(fittedModel, re.form = ~0)
+plot(res)
+
 
 
 testData = createData(sampleSize = 200, overdispersion = 0.0, randomEffectVariance = 1, family = poisson())
@@ -37,7 +44,7 @@ testData = createData(sampleSize = 200, fixedEffects = c(1,0), overdispersion = 
 fittedModel <- HLfit(observedResponse ~ Environment1 + (1|group) , family = "binomial",  data = testData)
 res = simulateResiduals(fittedModel)
 plot(res)
-
+testResiduals(res)
 
 
 

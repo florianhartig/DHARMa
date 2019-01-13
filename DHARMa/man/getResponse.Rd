@@ -6,6 +6,11 @@
 \usage{
 getResponse(object, ...)
 }
+\arguments{
+\item{object}{a fitted model}
+
+\item{...}{additional parameters}
+}
 \description{
 Extract the response of a fitted model
 }

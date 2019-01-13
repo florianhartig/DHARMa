@@ -157,31 +157,30 @@ which does the same quantile plot as the main plotting function.
 
 ## Formal goodness-of-fit tests on the scaled residuals
 
-To support the visual inspection of the residuals, the DHARMa package provides a number of specialized goodness-of-fit tests on the simulated residuals. For example, the function 
+To support the visual inspection of the residuals, the DHARMa package provides a number of specialized goodness-of-fit tests on the simulated residuals:
 
-```{r}
-testUniformity(simulationOutput)
-```
-
-runs a KS test to test for overall uniformity of the residuals. There are a number of further tests 
-
+* testUniformity()
 * testOutliers()
-* testOverdispersion()
+* testDispersion()
 * testZeroinflation()
+* testGeneric()
 * testTemporalAutocorrelation()
 * testSpatialAutocorrelation()
 
-that basically do what they say. Outliers are again defined as observed data that are outside of what is produced by the simualations. The test checks if the number of outliers is higher than one would expect by chance. See the help of the functions and further comments below for a more detailed description.
+that basically do what they say. See the help of the functions and further comments below for a more detailed description. The wrapper function testResiduals calculates the first three tests, including their graphical outputs
+
+```{r, eval = F}
+testResiduals(simulationOutput)
+```
+
 
 ## Simulation options
 
-There are a few important technical details regarding how the simulations are performed, in particular regarding the treatments of random effects and integer responses. I would therefore strongly recommend to read the help of
+There are a few important technical details regarding how the simulations are performed, in particular regarding the treatments of random effects and integer responses. It is strongly recommended to read the help of
 
 ```{r, eval = F}
 ?simulateResiduals
 ```
-
-The short summary is this: apart from the number of simulations, there are three important options in the simulateResiduals function
 
 #### Refit
 
@@ -193,11 +192,7 @@ simulationOutput <- simulateResiduals(fittedModel = fittedModel, refit = T)
 
 * if refit = T, a parametric bootstrap is performed, meaning that the model is refit to the new data, and residuals are created by comparing observed residuals against refitted residuals 
 
-The second option is much much slower, and also seemed to have lower power in some tests I ran. It is therefore not recommended for standard residual diagnostics! I only recommend using it in two situations
-
-1. For running tests that rely on comparing observed to simulated residuals, e.g. the testOverdispersion function (see below), 
-
-2. Or, and this was my original motivation for introducing this option, if one expects that the tested model is biased. A bias could, for example, arise in small data situations, or when estimating models with shrinkage estimators that include a purposeful bias, such as ridge/lasso, random effects or the splines in GAMs. My idea was then that simulated data would not fit to the observations, but that residuals for model fits on simulated data would have the same patterns/bias than model fits on the observed data. 
+The second option is much much slower, and also seemed to have lower power in some tests I ran. ** It is therefore not recommended for standard residual diagnostics!** I only recommend using it if you know what you are doing, and have particular reasons, for example if you estimate that the tested model is biased. A bias could, for example, arise in small data situations, or when estimating models with shrinkage estimators that include a purposeful bias, such as ridge/lasso, random effects or the splines in GAMs. My idea was then that simulated data would not fit to the observations, but that residuals for model fits on simulated data would have the same patterns/bias than model fits on the observed data. 
 
 Note also that refit = T can sometimes run into numerical problems, if the fitted model does not converge on the newly simulated data. 
 
@@ -233,7 +228,7 @@ you can keep using the simulation output as before. Note, hover, that items such
 
 #### Reproducibility notes, random seed and random state
 
-As DHARMa uses simulations to calculate the residuals, a naive implementation of the algorithm would mean that residuals would look slightly different each time a DHARMa calculation is executed. This might only be confusing to a user, but it also bears the danger that one might run the simulation several times and take the result that looks better (which would amount to multiple testing / p-hacking). 
+As DHARMa uses simulations to calculate the residuals, a naive implementation of the algorithm would mean that residuals would look slightly different each time a DHARMa calculation is executed. This might both be confusing and bear the danger that a user would run the simulation several times and take the result that looks better (which would amount to multiple testing / p-hacking). 
 
 By default, DHARMa therefore fixes the random seed to the same value every time a simulation is run, and afterwards restores the random state to the old value. This means that you will get exactly the same residual plot each time. If you want to avoid this behavior, for example for simulation experiments on DHARMa, use seed = NULL -> no seed set, but random state will be restored, or seed = F -> no seed set, and random state will not be restored. Whether or not you fix the seed, the setting for the random seed and the random state are stored in 
 
@@ -249,9 +244,11 @@ Moreover (general advice), to ensure reproducibility, it's advisable to add a se
 
 In all plots / tests that were shown so far, the model was correctly specified, resulting in "perfect" residual plots. In this section, we discuss how to recognize and interpret model misspecifications in the scaled residuals. Note, however, that 
 
-1. The fact that a none of the here-presented tests shows as misspecification problem doesn't proof that the model is correctly specified. There are likely a large number of model misspecification problems that will not show a pattern in the standard residual plots
+1. The fact that none of the here-presented tests shows a misspecification problem doesn't proof that the model is correctly specified. There are likely a large number of structural problems that will not show a pattern in the standard residual plots. 
 
-2. Moreover, while a clear pattern in the DHARMa residuals likely highlights that the observed data does not originate from 
+2. Conversely, while a clear pattern in the residuals indicates with good reliability that the observed data would not be likely to originate from the fitted model, it doesn't neccessarily indicate that the model results are not usuable. There are many cases where it is common practice to work "wrong models". For example, random effect estimates (in particular in GLMMs) are often slightly biased, especially if the model is fit with MLE. For that reason, DHARMa will often show a slight pattern in the residuals even if the model is correctly specified, and tests for this can get significant for large sample sizes. Another example is data that is missing at random (MAR). It is know that this phenomenon does not createa bias on the fixed effect estimates, and it is therefore common practice to fit this data with mixed models. Nevertheless, DHARMa recognizes that the observed data looks different than what would be expected from the model assummptions, and flags the model as problemaetic
+  
+**Important conclusion: DHARMa only flags a difference between the observed and expected data - the user has to decide whether this difference is actually a problem for the analysis!**
 
 ## Overdispersion / underdispersion
 
@@ -391,7 +388,7 @@ simulationOutput <- simulateResiduals(fittedModel = fittedModel)
 plot(simulationOutput)
 ```
 
-### General zero/k-inflation or deficits
+### Testing generic summary statistics, e.g. for k-inflation or deficits
 
 To test for generic excess / deficits of particular values, we have the function testGeneric, which compares the values of a generic, user-provided summary statistics  
 
@@ -512,26 +509,23 @@ testSpatialAutocorrelation(simulationOutput = simulationOutput)
 
 The usual caveats for Moran.I apply, in particular that it may miss non-local and heterogeneous (non-stationary) spatial autocorrelation. The former should be better detectable visually in the spatial plot, or via regressions on the pattern. 
 
-## Custom tests 
-
-A big advantage of the simulations is that you can test any problem that you think you may have. For example, you think you have an excess of tens in your count data? Maybe a faulty measurement instrument that returns too many tens? Just compare the observed with the expected tens from the simulations.
-
-You think your random effect estimates look weird? Run the model with the refit = T option and see how typical random effect estimates look for your problem.
-
-
 # Supported packages 
 
 ## lm and glm
 
-lm and glm are fully supported as specified in the help
+lm and glm and MASS::glm.nb are fully supported.
 
 ## lme4
 
-lme 4 is fully supported as specified in the help
+lme4 model classes are fully supported. 
+
+## mgcv
+
+mgcv is partly supported. Non-standard distributions are not supported, because mgcv doesn't implement a simulate function for those.
 
 ## glmmTMB
 
-Current limitations of glmmTMB
+glmmTMB is partly supported. Current limitations of glmmTMB
 
 * pearson residuals don't work with zi terms (not implemented), which limits some of the overdispersion tests
 * Currently, glmmTMB doesn't support the reform argument. 
@@ -551,9 +545,9 @@ plot(res)
 
 ## spaMM
 
+spaMM is supported by DHARMa since 0.2.1
 
-
-## Unsupported packages
+## Other packages
 
 See my general comments about [adding new R packages to DHARMa](https://github.com/florianhartig/DHARMa/wiki/Adding-new-R-packages-to-DHARMA)
 

@@ -6,11 +6,11 @@
 \usage{
 testModel(fittedModel)
 }
-\value{
-A report of possible problems
+\arguments{
+\item{fittedModel}{the fitted model}
 }
 \description{
-The function tests the compatibility of a model with DHARMa
+This helper function tests the compatibility of a model with DHARMa by trying to run various functions that are needed
 }
 \author{
 Florian Hartig

@@ -3,16 +3,17 @@
 
 #' Test DHARMa compatibility
 #' 
-#' The function tests the compatibility of a model with DHARMa
+#' This helper function tests the compatibility of a model with DHARMa by trying to run various functions that are needed
 #' 
 #' @importFrom lme4 fixef
 #' @importFrom lme4 ranef
 #' @importFrom spaMM response
 #' @importFrom spaMM update_resp
 #' 
+#' @param fittedModel the fitted model
+#' 
 #' @author Florian Hartig
 #' @export
-#' @return A report of possible problems
 #' 
 testModel <-function(fittedModel){
   
@@ -25,7 +26,7 @@ testModel <-function(fittedModel){
   try(coef(fittedModel))
   try(ranef(fittedModel))
   try(fixef(fittedModel))
-  try(refit(fittedModel, newresp = DHARMa:::getResponse(fittedModel)))
+  try(refit(fittedModel, newresp = getResponse(fittedModel)))
   
 }
 
@@ -36,6 +37,9 @@ testModel <-function(fittedModel){
 #' Extract the response of a fitted model 
 #' 
 #' The purpose of this function is to savely extract the response (dependent variable) of the fitted model classes
+#' 
+#' @param object a fitted model
+#' @param ... additional parameters 
 #' 
 #' @author Florian Hartig
 #' @export
@@ -50,9 +54,12 @@ getResponse.default <- function (object, ...){
 
 #' Get model simulations
 #' 
-#' Simulate from a fitted model
+#' Wrapper to simulate from a fitted model
 #' 
-#' The purpose of this function is to standardize the simulations from a model in a standardized way
+#' The purpose of this wrapper for for the simulate function is to standardize the simulations from a model in a standardized way
+#' 
+#' @param object a fitted model
+#' @param ... additional parameters to be passed on, usually to the simulate function of the respective model class
 #' 
 #' @author Florian Hartig
 #' @export
@@ -61,7 +68,7 @@ getSimulations <- function (object, ...) {
 }
 
 #' @export
-getSimulations <- function (object, ...){
+getSimulations.default <- function (object, ...){
   simulate(object, ...)
 }
 

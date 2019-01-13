@@ -2,6 +2,19 @@
 
 ## Submission 1
 
+This is minor release, adding a few new functionalities and support for the package spaMM.
+
+This release was tested without apparent problems under
+
+* local MAC OS 10.14.1 (Mojave), R 3.5.1
+* http://win-builder.r-project.org/ - oldrelease / devel / release
+* Linux (Travis CI) - oldrel / release / devel
+
+
+# Version 0.2.0
+
+## Submission 1
+
 This is major release with a number of important changes to the package. See DHARMa NEWS for changes. 
 
 This release was tested without apparent problems under
