@@ -4,7 +4,7 @@
 \alias{createData}
 \title{Simulate test data}
 \usage{
-createData(sampleSize = 10, intercept = 0, fixedEffects = 1,
+createData(sampleSize = 100, intercept = 0, fixedEffects = 1,
   quadraticFixedEffects = NULL, numGroups = 10,
   randomEffectVariance = 1, overdispersion = 0, family = poisson(),
   scale = 1, cor = 0, roundPoissonVariance = NULL,

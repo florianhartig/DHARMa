@@ -21,7 +21,7 @@ This function tests the overall uniformity of the simulated residuals in a DHARM
 The function applies a \code{\link[stats]{ks.test}} for uniformity on the simulated residuals.
 }
 \seealso{
-\code{\link{testResiduals}}, \code{\link{testDispersion}}, \code{\link{testZeroInflation}}, \code{\link{testGeneric}}, \code{\link{testTemporalAutocorrelation}}, \code{\link{testSpatialAutocorrelation}}
+\code{\link{testResiduals}}, \code{\link{testOutliers}}, \code{\link{testDispersion}}, \code{\link{testZeroInflation}}, \code{\link{testGeneric}}, \code{\link{testTemporalAutocorrelation}}, \code{\link{testSpatialAutocorrelation}}
 }
 \author{
 Florian Hartig

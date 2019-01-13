@@ -6,8 +6,6 @@ output:
   html_document: 
     keep_md: yes
     toc: yes
-editor_options: 
-  chunk_output_type: console
 ---
 
 ```{r setup, include=FALSE}
@@ -15,27 +13,11 @@ knitr::opts_chunk$set(echo = TRUE, cache = T)
 ```
 
 ```{r}
-devtools::install_github("glmmTMB/glmmTMB/glmmTMB")
-
 library(DHARMa)
 library(glmmTMB)
 ```
 
-# Testing general package behavior general problems
-
-```{r}
-testData = createData(sampleSize = 200, overdispersion = 0.5, family = poisson())
-
-m1 <- glmmTMB(observedResponse ~ Environment1 + (1|group), 
-                     family = "poisson", data = testData)
-
-predict(m1)
-
-
-simulationOutput <- simulateResiduals(fittedModel = m1)
-
-```
-
+# Testing general package behavior / general problems
 
 
 ## Pearson residuals don't work with zi terms (not implemented)
@@ -57,30 +39,6 @@ m1 <- glmmTMB(count~ mined + (1|site), family=poisson, data=Salamanders)
 boxplot(Salamanders$mined, predict(m1, type = c("link")))
 boxplot(Salamanders$mined, predict(m1, type = c("response")))
 
-```
-
-
-```{r}
-testData = createData(sampleSize = 200, randomEffectVariance = 2, family = poisson())
-
-m1 <- glmmTMB(observedResponse ~ Environment1 + (1|group), 
-                     family = "poisson", data = testData)
-
-summary(m1)
-
-res <- simulateResiduals(fittedModel = m1)
-
-# this plot shows the residual pattern, despite the model being correct
-plot(res)
-
-# recalculate predictions by hand - see help ?predict.glmmTMB
-# To compute population-level predictions for a given grouping variable (i.e., setting all random effects for that grouping variable to zero), set the group value to NA.
-newdata=testData
-newdata$group = NA
-pred = predict(m1, newdata = newdata)
-
-# Now perform the plot
-plotResiduals(pred, res$scaledResiduals)
 ```
 
 
@@ -351,6 +309,24 @@ solved
 
 ```{r}
 sessionInfo()
+```
+
+
+Hi guys, I'm testing glmmTMB for DHARMA, and I'm encountering a problem with the development versin on GitHub, the following code runs with the CRAN version, but not with the GitHub version
+
+https://github.com/glmmTMB/glmmTMB/commit/b0084337f92736dfe84fd0f6386c1180a6103181
+
+
+```{r}
+library(DHARMa)
+library(glmmTMB)
+testData = createData(sampleSize = 500, intercept = 2, fixedEffects = c(1), overdispersion = 0, family = poisson(), quadraticFixedEffects = c(-3), randomEffectVariance = 0, pZeroInflation = 0.6)
+fittedModel <- glmmTMB(observedResponse ~ Environment1 + I(Environment1^2) + (1|group), ziformula = ~1 , family = "poisson", data = testData)
+summary(fittedModel)
+predict(fittedModel, type = "response") 
+
+simulationOutput <- simulateResiduals(fittedModel = fittedModel)
+plot(simulationOutput)
 ```
 
 

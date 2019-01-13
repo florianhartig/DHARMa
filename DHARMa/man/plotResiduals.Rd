@@ -24,7 +24,7 @@ plotResiduals(pred, residuals = NULL, quantreg = NULL, rank = FALSE,
 The function creates a generic residual plot with either spline or quantile regression
 }
 \details{
-For a correctly specified model, we would expect uniformity in y direction when plotting against any predictor.
+Plots residuals against a predictor. Outliers are highlighted in red (for more on oultiers, see \code{\link{testOutliers}}). For a correctly specified model, we would expect uniformity in y direction when plotting against any predictor.
 
 To provide a visual aid in detecting deviations from uniformity in y-direction, the plot of the residuals against the predited values also performs an (optional) quantile regression, which provides 0.25, 0.5 and 0.75 quantile lines across the plots. These lines should be straight, horizontal, and at y-values of 0.25, 0.5 and 0.75. Note, however, that some deviations from this are to be expected by chance, even for a perfect model, especially if the sample size is small.
 

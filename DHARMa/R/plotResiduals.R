@@ -4,13 +4,13 @@
 #' @param x an object with simualted residuals created by \code{\link{simulateResiduals}}
 #' @param rank if T (default), the values of pred will be rank transformed. This will usually make patterns easier to spot visually, especially if the distribution of the predictor is skewed. 
 #' @param ... further options for \code{\link{plotResiduals}}. Consider in particular parameters quantreg, rank and asFactor. xlab, ylab and main cannot be changed when using plotSimulatedResiduals, but can be changed when using plotResiduals.
-#' @details The function creates two plots. To the left, a qq-uniform plot to detect deviations from overall uniformity of the residuals (calling \code{\link{plotQQunif}}), and to the right, a plot of residuals against predicted values (calling \code{\link{plotResiduals}}). For a correctly specified model, we would expect 
+#' @details The function creates two plots. To the left, a qq-uniform plot to detect deviations from overall uniformity of the residuals (calling \code{\link{plotQQunif}}), and to the right, a plot of residuals against predicted values (calling \code{\link{plotResiduals}}). Outliers are highlighted in red (for more on oultiers, see \code{\link{testOutliers}}). For a correctly specified model, we would expect 
 #' 
 #' a) a straight 1-1 line in the uniform qq-plot -> evidence for an overal uniform (flat) distribution of the residuals
 #' 
 #' b) uniformity of residuals in the vertical direction in the res against predictor plot
 #' 
-#' Deviations of this can be interpreted as for a liner regression. See the vignette for detailed examples. 
+#' Deviations of this can be interpreted as for a linear regression. See the vignette for detailed examples. 
 #' 
 #' To provide a visual aid in detecting deviations from uniformity in y-direction, the plot of the residuals against the predited values also performs an (optional) quantile regression, which provides 0.25, 0.5 and 0.75 quantile lines across the plots. These lines should be straight, horizontal, and at y-values of 0.25, 0.5 and 0.75. Note, however, that some deviations from this are to be expected by chance, even for a perfect model, especially if the sample size is small. See further comments on this plot, and options, in \code{\link{plotResiduals}}
 #' 
@@ -112,7 +112,7 @@ plotQQunif <- function(simulationOutput, testUniformity = T, testOutliers = T){
 #' @param rank if T, the values of pred will be rank transformed. This will usually make patterns easier to spot visually, especially if the distribution of the predictor is skewed. If pred is a factor, this has no effect. 
 #' @param asFactor should the predictor variable converted into a factor
 #' @param ... additional arguments to plot
-#' @details For a correctly specified model, we would expect uniformity in y direction when plotting against any predictor.
+#' @details Plots residuals against a predictor. Outliers are highlighted in red (for more on oultiers, see \code{\link{testOutliers}}). For a correctly specified model, we would expect uniformity in y direction when plotting against any predictor.
 #' 
 #' To provide a visual aid in detecting deviations from uniformity in y-direction, the plot of the residuals against the predited values also performs an (optional) quantile regression, which provides 0.25, 0.5 and 0.75 quantile lines across the plots. These lines should be straight, horizontal, and at y-values of 0.25, 0.5 and 0.75. Note, however, that some deviations from this are to be expected by chance, even for a perfect model, especially if the sample size is small.
 #' 
