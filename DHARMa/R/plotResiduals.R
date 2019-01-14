@@ -27,9 +27,11 @@ plot.DHARMa <- function(x, rank = TRUE, ...){
   
   plotQQunif(x)
   
-  xla = ifelse(rank, "Predicted values (rank transformed)", "Predicted values")
+  xlab = checkDots("xlab", ifelse(rank, "Predicted values (rank transformed)", "Predicted values"), ...)
+  ylab = checkDots("ylab", "Standardized residual", ...)
+  main = checkDots("main", "Residual vs. predicted\n lines should match", ...)
   
-  plotResiduals(pred = x, residuals = NULL, xlab = xla, ylab = "Standardized residual", main = "Residual vs. predicted\n lines should match", rank = rank, ...)
+  plotResiduals(pred = x, residuals = NULL, xlab = xlab, ylab = ylab, main = main, rank = rank, ...)
   
   mtext("DHARMa scaled residual plots", outer = T)
   
@@ -47,10 +49,16 @@ plot.DHARMa <- function(x, rank = TRUE, ...){
 #' @example inst/examples/plotsHelp.R
 #' @export
 hist.DHARMa <- function(x, ...){
+  
   val = x$scaledResiduals
   val[val == 0] = -0.01
   val[val == 1] = 1.01
-  hist(val, breaks = seq(-0.02, 1.02, len = 53), col = c("red",rep("lightgrey",50), "red"), main = "Hist of DHARM residuals\nOutliers are marked red", ...)
+  
+  breaks = checkDots("breaks", seq(-0.02, 1.02, len = 53), ...)
+  col = checkDots("col", c("red",rep("lightgrey",50), "red"), ...)
+  main = checkDots("main", "Hist of DHARM residuals\nOutliers are marked red", ...)   
+
+  hist(val, breaks = breaks, col = col, main = main, ...)
 }
 
 
@@ -79,16 +87,17 @@ plotSimulatedResiduals <- function(simulationOutput, ...){
 #' @param simulationOutput a DHARMa simulation output (class DHARMa)
 #' @param testUniformity if T, the function \code{\link{testUniformity}} will be called and the result will be added to the plot
 #' @param testOutliers if T, the function \code{\link{testOutliers}} will be called and the result will be added to the plot
+#' @param ... arguments to be passed on to \code{\link[gap]{qqunif}}
 #' 
 #' @details the function calls qqunif from the R package gap to create a quantile-quantile plot for a uniform distribution.  
 #' @seealso \code{\link{plotSimulatedResiduals}}, \code{\link{plotResiduals}}
 #' @example inst/examples/plotsHelp.R
 #' @export
-plotQQunif <- function(simulationOutput, testUniformity = T, testOutliers = T){
+plotQQunif <- function(simulationOutput, testUniformity = T, testOutliers = T, ...){
   
   if(class(simulationOutput) != "DHARMa") stop("DHARMa::plotQQunif wrong argument, simulationOutput must be a DHARMa object!")
 
-  gap::qqunif(simulationOutput$scaledResiduals,pch=2,bty="n", logscale = F, col = "black", cex = 0.6, main = "QQ plot residuals", cex.main = 1)
+  gap::qqunif(simulationOutput$scaledResiduals,pch=2,bty="n", logscale = F, col = "black", cex = 0.6, main = "QQ plot residuals", cex.main = 1, ...)
   
   if(testUniformity == TRUE){
     temp = testUniformity(simulationOutput, plot = F)

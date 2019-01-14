@@ -4,7 +4,7 @@
 \alias{plotQQunif}
 \title{Quantile-quantile plot for a uniform distribution}
 \usage{
-plotQQunif(simulationOutput, testUniformity = T, testOutliers = T)
+plotQQunif(simulationOutput, testUniformity = T, testOutliers = T, ...)
 }
 \arguments{
 \item{simulationOutput}{a DHARMa simulation output (class DHARMa)}
@@ -12,6 +12,8 @@ plotQQunif(simulationOutput, testUniformity = T, testOutliers = T)
 \item{testUniformity}{if T, the function \code{\link{testUniformity}} will be called and the result will be added to the plot}
 
 \item{testOutliers}{if T, the function \code{\link{testOutliers}} will be called and the result will be added to the plot}
+
+\item{arguments}{to be passed on to \code{\link{gap::qqunif}}}
 }
 \description{
 The function produces a uniform quantile-quantile plot from a DHARMa output
