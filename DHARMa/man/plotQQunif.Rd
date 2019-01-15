@@ -13,7 +13,7 @@ plotQQunif(simulationOutput, testUniformity = T, testOutliers = T, ...)
 
 \item{testOutliers}{if T, the function \code{\link{testOutliers}} will be called and the result will be added to the plot}
 
-\item{arguments}{to be passed on to \code{\link{gap::qqunif}}}
+\item{...}{arguments to be passed on to \code{\link[gap]{qqunif}}}
 }
 \description{
 The function produces a uniform quantile-quantile plot from a DHARMa output

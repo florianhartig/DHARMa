@@ -107,7 +107,7 @@ test_that("binomial 1/0 works",
           {
             skip_on_cran()
             
-            testData = createData(sampleSize = 200, fixedEffects = c(1,0), overdispersion = 0, randomEffectVariance = 0, family = binomial())
+            testData = createData(sampleSize = 200, fixedEffects = c(1,0), randomEffectVariance = 0, family = binomial())
             
             fittedModel <- glm(observedResponse ~ Environment1 + Environment2 , family = "binomial", data = testData)
             runEverything(fittedModel, testData)
@@ -189,7 +189,7 @@ test_that("glm poisson works",
           {
             skip_on_cran()
             
-            testData = createData(sampleSize = 200, overdispersion = 0.5, randomEffectVariance = 1, family = poisson(), roundPoissonVariance = 0.1, pZeroInflation = 0.1)
+            testData = createData(sampleSize = 200, overdispersion = 0, randomEffectVariance = 0.001, family = poisson())
             #testData = createData(sampleSize = 200, randomEffectVariance = 1, family = negative.binomial(theta = 1.2, link = "log"))
             
             fittedModel <- glm(observedResponse ~ Environment1 , family = "poisson", data = testData)
