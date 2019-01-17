@@ -270,7 +270,7 @@ A few general rules of thumb
 This this is how **overdispersion** looks like in the DHARMa residuals
 
 ```{r}
-testData = createData(sampleSize = 500, overdispersion = 0.6, family = poisson())
+testData = createData(sampleSize = 500, overdispersion = 2, family = poisson())
 fittedModel <- glmer(observedResponse ~ Environment1 + (1|group) , family = "poisson", data = testData)
 
 simulationOutput <- simulateResiduals(fittedModel = fittedModel)
@@ -665,7 +665,7 @@ The overdispersion looks better, but you can see that the residuals look a bit i
 
 Likely, the reason is the steep increase in the beginning that one can see in the raw data plot. One would probably need to apply another transformation or a nonlinear function to completely fit this away.
 
-## Owl example 
+## Owl example (count data)
 
 The next examples uses the fairly well known Owl dataset which is provided in glmmTMB (see ?Owls for more info about the data).
 
@@ -708,88 +708,6 @@ m5 <- glmmTMB(SiblingNegotiation ~ FoodTreatment*SexParent + offset(log(BroodSiz
 summary(m5)
 
 ```
-
-
-
-
-## Beetlecount / Poisson example 
-
-
-#### Dataset
-
-
-```{r, echo=F, cache = T}
-altitude = rep(seq(0,1,len = 50), each = 20)
-dataID = 1:1000
-spatialCoordinate = rep(seq(0,30, len = 50), each = 20)
-
-moisture = runif(1000, -1,1)
-deadwood = runif(1000, -1,1)
-
-# random effects + zeroinflation
-plot = rep(1:50, each = 20)
-year = rep(1:20, times = 50)
-
-yearRandom = rnorm(20, 0, 1)
-plotRandom = rnorm(50, 0, 1)
-overdispersion = rnorm(1000, sd = 0.5)
-zeroinflation = rbinom(1000,1,0.6)
-
-beetles <- rpois(1000, exp( 0  + 12*altitude - 12*altitude^2 - 0.2 * moisture + deadwood 
-#  + overdispersion   + plotRandom[plot]
- + yearRandom[year]) * zeroinflation )
-
-data = data.frame(dataID, beetles, altitude, moisture, deadwood, plot, year, spatialCoordinate)
-```
-
-This example is a synthetic dataset of measured beetle counts over 50 plots across an altitudinal gradient that are yearly sampled over 20 years. The following plot shows the observed number of beetles (log10) vs. altitude. Additional variables in the data are soil moisture and the amount of deadwood on the plots. 
-
-```{r}
-par(mfrow = c(1,3))
-plot(log10(beetles) ~ altitude + I(altitude) + moisture, data = data, main = "Beetle counts", xlab = "Altitude")
-```
-
-Our question is: what is the effect of altitude on the abundance of the beetle? Let's start with a linear and quadratic term for altitude, linear effect of soil moisture, and random intercepts on plot and year
-
-```{r}
-mod <- glmer(beetles ~ altitude + I(altitude^2) + moisture + (1|plot) + (1|year), data = data, family=poisson, control = glmerControl(optCtrl = list(maxfun = 10000)))
-simulationOutput <- simulateResiduals(fittedModel = mod)
-plot(simulationOutput)
-summary(mod)
-```
-
-We see that we have a problem when we plot residuals against deadwood
-
-```{r, fig.width=4, fig.height=4}
-plotResiduals(data$deadwood, simulationOutput$scaledResiduals)
-```
-
-so let's add this term as well
-
-```{r}
-mod <- glmer(beetles ~ altitude + I(altitude^2) + moisture + deadwood + (1|plot) + (1|year) , data = data, family=poisson, control = glmerControl(optCtrl = list(maxfun = 10000)))
-simulationOutput <- simulateResiduals(fittedModel = mod)
-plot(simulationOutput)
-summary(mod)
-```
-
-still, there is obviously overdispersion in the data, so we'll add an individual level random effect to account for overdispersion
-
-```{r}
-mod <- glmer(beetles ~ altitude + I(altitude^2) + moisture + deadwood + (1|plot) + (1|year) + (1|dataID) , data = data, family=poisson, control = glmerControl(optCtrl = list(maxfun = 10000)))
-simulationOutput <- simulateResiduals(fittedModel = mod)
-plot(simulationOutput)
-```
-
-The data still looks overdispersed. The reason is that there is in fact no standard overdispersion, but zero-inflation in the data. We can look at the excess zeros via
-
-```{r, fig.width=4, fig.height=4}
-testZeroInflation(simulationOutput)
-```
-
-which shows that we have too many zeros. We need a GLMM with zero-inflation. The easiest option is to do this in a Bayesian framework, e.g. in JAGS as in [this example](https://github.com/florianhartig/LearningBayes/blob/master/CommentedCode/04-StandardModels/GLMM/Beetles.md)
-
-To be honest, however, if I hadn’t created the data with zero-inflation myself, I would be hard pressed to say with certainty that zero-inflation is the cause of these residual patterns. The reason is that, if a model is presented with zero-inflated data, the mean model predictions will be drawn towards the zeros, which in turn means that mean model-predictions underestimate the “normal” data. Hence zero-inflation often looks like overdispersion, and seeing such a pattern after accounting for overdispersion might as well mean that the distributional assumptions of the chosen model are not fulfilled (for example because overdispersion is more heavy-tailed than in the chose distribution). The best way to test if the problem is really due to zero-inflation is probably to run model selections (e.g. simulated LRTs) between a number of alternative models, e.g. a zero-inflated GLMM vs. a number of different overdispersed GLMMs.
 
 
 ## Binomial 0/1 data
