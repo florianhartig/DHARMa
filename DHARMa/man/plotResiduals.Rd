@@ -4,8 +4,8 @@
 \alias{plotResiduals}
 \title{Generic residual plot with either spline or quantile regression}
 \usage{
-plotResiduals(pred, residuals = NULL, quantreg = NULL, rank = FALSE,
-  asFactor = FALSE, ...)
+plotResiduals(pred, residuals = NULL, quantreg = NULL, rank = F,
+  asFactor = NULL, ...)
 }
 \arguments{
 \item{pred}{either the predictor variable against which the residuals should be plotted, or a DHARMa object}
@@ -16,9 +16,9 @@ plotResiduals(pred, residuals = NULL, quantreg = NULL, rank = FALSE,
 
 \item{rank}{if T, the values of pred will be rank transformed. This will usually make patterns easier to spot visually, especially if the distribution of the predictor is skewed. If pred is a factor, this has no effect.}
 
-\item{asFactor}{should the predictor variable converted into a factor}
+\item{asFactor}{should the predictor variable be treated as a factor. Default is to choose this for <10 unique predictions, as long as enough predictions are available to draw a boxplot.}
 
-\item{...}{additional arguments to plot}
+\item{...}{additional arguments to plot / boxplot.}
 }
 \description{
 The function creates a generic residual plot with either spline or quantile regression

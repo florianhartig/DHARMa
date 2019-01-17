@@ -29,13 +29,18 @@ getQuantile <- function(simulations, observed, n, nSim, integerResponse){
   
   if(integerResponse == F){
     
-    values = c(as.vector(t(simulations)), observed)
+    if(any(duplicated(observed))) message("Model family was recognized or set as continuous, but duplicate values were detected in the response. Consider if you are fitting an appropriate model.")
     
-    if(any (duplicated(values))){
-      integerResponse = T
-      # repeated = unique(values[which(duplicated(values))])      
-      if(any(integerResponse)) message("Model family was recognized or set as continuous, but duplicate values were detected in the simulation - changing to integer residuals (see ?simulateResiduals for details)")
-    } 
+    values = as.vector(simulations)[duplicated(as.vector(simulations))]
+    if(length(values) > 0){
+      if (all(values%%1==0)){
+        integerResponse = T
+        message("Model family was recognized or set as continuous, but duplicate values were detected in the simulation - changing to integer residuals (see ?simulateResiduals for details)")
+      } else {
+        message("Duplicate non-integer values found in the simulation. If this is because you are fitting a non-inter valued discrete response model, note that DHARMa does not perform appropriate randomization for such cases.")
+      }      
+      
+    }
   } 
   
   for (i in 1:n){

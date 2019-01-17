@@ -119,8 +119,8 @@ plotQQunif <- function(simulationOutput, testUniformity = T, testOutliers = T, .
 #' @param residuals residuals values. Leave empty if pred is a DHARMa object
 #' @param quantreg whether to perform a quantile regression on 0.25, 0.5, 0.75 on the residuals. If F, a spline will be created instead. Default NULL chooses T for nObs < 2000, and F otherwise. 
 #' @param rank if T, the values of pred will be rank transformed. This will usually make patterns easier to spot visually, especially if the distribution of the predictor is skewed. If pred is a factor, this has no effect. 
-#' @param asFactor should the predictor variable converted into a factor
-#' @param ... additional arguments to plot
+#' @param asFactor should the predictor variable be treated as a factor. Default is to choose this for <10 unique predictions, as long as enough predictions are available to draw a boxplot.
+#' @param ... additional arguments to plot / boxplot. 
 #' @details Plots residuals against a predictor. Outliers are highlighted in red (for more on oultiers, see \code{\link{testOutliers}}). For a correctly specified model, we would expect uniformity in y direction when plotting against any predictor.
 #' 
 #' To provide a visual aid in detecting deviations from uniformity in y-direction, the plot of the residuals against the predited values also performs an (optional) quantile regression, which provides 0.25, 0.5 and 0.75 quantile lines across the plots. These lines should be straight, horizontal, and at y-values of 0.25, 0.5 and 0.75. Note, however, that some deviations from this are to be expected by chance, even for a perfect model, especially if the sample size is small.
@@ -132,7 +132,7 @@ plotQQunif <- function(simulationOutput, testUniformity = T, testOutliers = T, .
 #' @seealso \code{\link{plotSimulatedResiduals}}, \code{\link{plotQQunif}}
 #' @example inst/examples/plotsHelp.R
 #' @export
-plotResiduals <- function(pred, residuals = NULL, quantreg = NULL, rank = FALSE, asFactor = FALSE, ...){
+plotResiduals <- function(pred, residuals = NULL, quantreg = NULL, rank = F, asFactor = NULL, ...){
   
   # conversions from DHARMa 
   if(class(pred) == "DHARMa"){
@@ -152,24 +152,19 @@ plotResiduals <- function(pred, residuals = NULL, quantreg = NULL, rank = FALSE,
       stop("DHARMa::plotResiduals - residuals and predictor do not have the same length. ")        
     }
   }
-
-  if (asFactor) pred = as.factor(pred)
   
   if(!is.factor(pred)){
-    nuniq = length(unique(pred))
-    ndata = length(pred)
-    if(nuniq < 10 & ndata / nuniq > 10) message("DHARMa::plotResiduals - low number of unique predictor values, consider setting asFactor = T")
-    if(nuniq < 10 & ndata / nuniq > 10) message("DHARMa::plotResiduals - low number of unique predictor values, consider setting asFactor = T")
-    # this rank tranforms the predictor
+
     if (rank == T){
       pred = rank(pred, ties.method = "average")
       pred = pred / max(pred)          
     } 
-  } else {
-    # if (rank == T) warning("DHARMa::plotResiduals - predictor is a factor, rank = T has no effect")
+        
+    nuniq = length(unique(pred))
+    ndata = length(pred)  
+    if(is.null(asFactor)) asFactor = (nuniq == 1) | (nuniq < 10 & ndata / nuniq > 10)
+    if (asFactor) pred = factor(pred)
   }
-  
-
   
   if(is.null(quantreg)) if (length(res) > 2000) quantreg = FALSE else quantreg = TRUE
 
