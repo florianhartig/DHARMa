@@ -1,6 +1,13 @@
 NOTE: for more news about the package, see https://github.com/florianhartig/DHARMa/releases
 
 
+DHARMa 0.2.2
+============
+
+Bugfixes 
+
+- fixes bug in Vignette (header lost)
+
 DHARMa 0.2.1
 ============
 
