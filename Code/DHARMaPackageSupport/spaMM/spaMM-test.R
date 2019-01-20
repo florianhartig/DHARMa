@@ -66,10 +66,6 @@ res = simulateResiduals(fit)
 plot(res)
 
 
-fit <- HLfit(y ~X1*X3+X2*X3+I(X2^2)+(1|batch),family=Gamma(log),
-      resid.model = ~ X3+I(X3^2) ,data=wafers)
-res = simulateResiduals(fit)
-plot(res)
 
 fit <- HLfit(y~X1+(X2|batch),data=wafers)
 res = simulateResiduals(fit)

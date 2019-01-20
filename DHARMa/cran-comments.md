@@ -1,3 +1,16 @@
+# Version 0.2.2
+
+## Submission 1
+
+This is bugfix release, fixing an issue in the vignette of version 0.2.1 that was published on CRAN a few days ago. Apologies for the oversight. 
+
+This release was tested without apparent problems under
+
+* local MAC OS 10.14.1 (Mojave), R 3.5.1
+* http://win-builder.r-project.org/ - oldrelease / devel / release
+* Linux (Travis CI) - oldrel / release / devel
+
+
 # Version 0.2.1
 
 ## Submission 1
