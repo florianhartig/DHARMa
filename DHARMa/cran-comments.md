@@ -2,7 +2,7 @@
 
 ## Submission 1
 
-This is bugfix release, fixing an issue in the vignette of version 0.2.1 that was published on CRAN a few days ago. Apologies for the oversight. 
+This is bugfix release for version 0.2.1, which was published on CRAN a few days ago. This new release 0.2.2 fixes an issue in the vignette (due to some old header command, title, abstract and TOC were not shown). Apologies for the oversight. 
 
 This release was tested without apparent problems under
 
