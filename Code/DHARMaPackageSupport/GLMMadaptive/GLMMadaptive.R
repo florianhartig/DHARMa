@@ -1,6 +1,7 @@
 devtools::install_github("drizopoulos/GLMMadaptive")
+#install.packages("GLMMadaptive")
 library(GLMMadaptive)
-
+library(DHARMa)
 
 # simulate some data
 set.seed(123L)
@@ -26,16 +27,28 @@ DF$id <- factor(id)
 
 ################################################
 
-fm1 <- mixed_model(fixed = y ~ year + group, random = ~ year | id, data = DF,
+fm1 <- mixed_model(fixed = y ~ year * group, random = ~ 1 | id, data = DF,
                    family = binomial())
 
+res = simulateResiduals(fm1)
 
-fixef(fm1)
-ranef(fm1)
-family(fm1)
-model.frame(fm1)
-simulate(fm1)
+predict
 
+
+class(fm1)
+
+getResponse(fm1)
+
+x = model.frame(fm1)[,1] 
+
+refit(fm1, x)
+
+
+x = family(fm1)
+
+nobs(fm1)
+
+testModel(fm1)
 
 
 

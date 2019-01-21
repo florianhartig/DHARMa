@@ -6,10 +6,13 @@ fittedModel <- corrHLfit(cbind(npos,ntot-npos)~maxNDVI1+seNDVI
                     data=Loaloa[1:30,],family=binomial(),
                     init.corrHLfit=list(Nugget=0.1),ranFix=list(nu=0.5))
 
-testModel(fittedModel)
+
 
 res = simulateResiduals(fittedModel)
 plot(res)
+
+
+testModel(fittedModel)
 
 
 data("blackcap")
@@ -24,7 +27,7 @@ plot(res)
 nullfit <- corrHLfit(migStatus ~ 1 + Matern(1|latitude+longitude),data=blackcap,
                      HLmethod="ML",init.corrHLfit=list(phi=1e-6)) 
 
-res = simulateResiduals(fullfit)
+res = simulateResiduals(nullfit)
 plot(res)
 
 data("scotlip") ## loads 'scotlip' data frame, but also 'Nmatrix'
