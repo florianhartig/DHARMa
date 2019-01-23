@@ -2,9 +2,15 @@
 % Please edit documentation in R/compatibility.R
 \name{getSimulations}
 \alias{getSimulations}
+\alias{getSimulations.default}
+\alias{getSimulations.MixMod}
 \title{Get model simulations}
 \usage{
 getSimulations(object, ...)
+
+\method{getSimulations}{default}(object, ...)
+
+\method{getSimulations}{MixMod}(object, ...)
 }
 \arguments{
 \item{object}{a fitted model}

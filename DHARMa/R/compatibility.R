@@ -17,17 +17,17 @@
 #' 
 testModel <-function(fittedModel){
   
-  try(family(fittedModel))
-  try(class(fittedModel)[1])
-  try(nobs(fittedModel))
-  try(getResponse(fittedModel))
-  try(simulate(fittedModel, nsim = 10))
-  try(predict(fittedModel))
-  try(coef(fittedModel))
-  try(ranef(fittedModel))
-  try(fixef(fittedModel))
-  try(refit(fittedModel, newresp = getResponse(fittedModel)))
-  
+  family(fittedModel)
+  class(fittedModel)[1]
+  nobs(fittedModel)
+  getResponse(fittedModel)
+
+  x = getSimulations(fittedModel, nsim = 10)
+  predict(fittedModel)
+  coef(fittedModel)
+  ranef(fittedModel)
+  fixef(fittedModel)
+  refit(fittedModel, newresp = getResponse(fittedModel))
 }
 
 # New S3 methods
@@ -47,10 +47,60 @@ getResponse <- function (object, ...) {
   UseMethod("getResponse", object)
 }
 
+#' @rdname getResponse
 #' @export
 getResponse.default <- function (object, ...){
   model.frame(object)[,1] 
 }
+
+
+
+#' Get model residuals
+#' 
+#' Extract the residuals of a fitted model 
+#' 
+#' The purpose of this function is to savely extract the residuals of the fitted model classes
+#' 
+#' @param object a fitted model
+#' @param ... additional parameters 
+#' 
+#' @author Florian Hartig
+#' @export
+getResiduals <- function (object, ...) {
+  UseMethod("getResiduals", object)
+}
+
+#' @rdname getResiduals
+#' @export
+getResiduals.default <- function (object, type = "response", ...){
+  residuals(fittedModel, type = type, ...)
+}
+
+
+#' Get model predictions
+#' 
+#' Extract the predictions of a fitted model 
+#' 
+#' The purpose of this function is to savely extract the predictions of the fitted model classes
+#' 
+#' @param object a fitted model
+#' @param ... additional parameters 
+#' 
+#' @author Florian Hartig
+#' @export
+getPredictions <- function (object, ...) {
+  UseMethod("getPredictions", object)
+}
+
+# re-form should be set to ~0 to avoid spurious residual patterns, see https://github.com/florianhartig/DHARMa/issues/43
+
+#' @rdname getPredictions
+#' @export
+#' 
+getPredictions.default <- function (object, type = "response", re.form = ~0, ...){
+  predict(object, type = type, re.form = re.form, ...)
+}
+
 
 #' Get model simulations
 #' 
@@ -67,6 +117,7 @@ getSimulations <- function (object, ...) {
   UseMethod("getSimulations", object)
 }
 
+#' @rdname getSimulations
 #' @export
 getSimulations.default <- function (object, ...){
   simulate(object, ...)
@@ -160,7 +211,19 @@ refit.glmmTMB <- function(object, newresp, ...){
 }
 
 
+#' @export
+getPredictions.glmmTMB <- function (object, type = "response", ...){
+  predict(object, type = type, ...)
+}
+
+
 #######  spaMM #########
+
+#' @rdname getPredictions
+#' @export
+getPredictions.HLfit <- function (object, type = "response", re.form = ~0, ...){
+  predict(object, type = type, re.form = re.form, ...)[,1L] 
+}
 
 #' @export
 getResponse.HLfit <- function(object, ...){
@@ -175,6 +238,60 @@ getSimulations.HLfit <- function(object, ...){
 #' @export
 refit.HLfit <- function(object, newresp, ...) {
   update_resp(object, newresp, evaluate = TRUE)
+}
+
+
+#######  GLMMadaptive #########
+
+#' @rdname getSimulations
+#' @export
+getSimulations.MixMod <- function(object, ...){
+  return(as.data.frame(simulate(object, ...)))
+}
+
+
+#' Refit a Model with a Different Response
+#' 
+#' @param object a fitted model
+#' @param newresp a new response
+#' @param ... further arguments, no effect implemented for this S3 class
+#' @example inst/examples/helpRefit.R
+#' @export
+refit.MixMod <- function(object, newresp, ...){
+  
+  newData <-model.frame(object)  
+  
+  matrixResp = is.matrix(newData[[1]])
+  
+  if(matrixResp & !is.null(ncol(newresp))){
+    # Hack to make the factor binomial case work
+    tmp = colnames(newData[[1]])
+    newData[[1]] = NULL
+    newData = cbind(newresp, newData)
+    colnames(newData)[1:2] = tmp
+  } else if(!is.null(ncol(newresp))){
+    newData[[1]] = newresp[,1]
+  } else {
+    newData[[1]] = newresp 
+  }
+  
+  refittedModel = update(object, data = newData)
+  return(refittedModel)
+}
+
+#' @rdname getPredictions
+#' @export
+getPredictions.MixMod <- function(object, type_pred = "response", type = "mean_subject", ...){
+  return(predict(object, type_pred = type_pred, type = type, ...))
+}
+
+
+# note: I chose here subject specific residuals to conform to the other packages, but other choices would probably be possible.
+
+#' @rdname getResiduals
+#' @export
+getResiduals.MixMod <- function (object, type = "subject_specific", ...){
+  residuals(fittedModel, type = type, ...)
 }
 
 

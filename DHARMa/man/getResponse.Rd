@@ -2,9 +2,12 @@
 % Please edit documentation in R/compatibility.R
 \name{getResponse}
 \alias{getResponse}
+\alias{getResponse.default}
 \title{Get model response}
 \usage{
 getResponse(object, ...)
+
+\method{getResponse}{default}(object, ...)
 }
 \arguments{
 \item{object}{a fitted model}
