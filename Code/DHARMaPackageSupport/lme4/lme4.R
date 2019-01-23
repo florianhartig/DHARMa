@@ -1,18 +1,13 @@
 library(lme4)
 library(DHARMa)
 
-testData = createData(sampleSize = 300, overdispersion = 2, randomEffectVariance = 0, family = poisson())
+testData = createData(sampleSize = 300, overdispersion = 0, randomEffectVariance = 0, family = poisson())
 
-##################################################
-# fitted poisson - clear overdispersion
-fittedModel <- glmer(observedResponse ~ Environment1 + (1|group) , family = 
-                       "poisson", data = testData)
+fittedModel <- glmer(observedResponse ~ Environment1 + (1|group) , family = "poisson", data = testData)
 
-testModel(fittedModel)
+res =  simulateResiduals(fittedModel)
+plot(res)
 
-x = simulate(fittedModel)
-plot(x)
-class(x)
 
 
 
@@ -26,3 +21,17 @@ gm2 <- glmer(cbind(incidence, size - incidence) ~ period +
 
 res = simulate(gm2)
 plot(res)
+
+
+
+library(lme4)
+
+testData = createData(sampleSize = 200, overdispersion = 0.5, family = poisson())
+fittedModel <- glmer(observedResponse ~ Environment1 + (1|group), 
+                     family = "poisson", data = testData,
+                     control=glmerControl(optCtrl=list(maxfun=20000) ))
+
+simulationOutput <- simulateResiduals(fittedModel = fittedModel)
+
+# plot residuals, quantreg = T is better but costs more time
+plot(simulationOutput, quantreg = FALSE)

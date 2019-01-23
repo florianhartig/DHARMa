@@ -61,7 +61,7 @@ simulateResiduals <- function(fittedModel, n = 250, refit = F, integerResponse =
   out$fittedModel = fittedModel
   out$modelClass = class(fittedModel)[1]
   
-  out$nObs = nobs(fittedModel)
+  out$nObs = nobs(fittedModel, level = 1)
   out$nSim = n
   out$refit = refit
   out$observedResponse = getResponse(fittedModel) 
@@ -77,23 +77,9 @@ simulateResiduals <- function(fittedModel, n = 250, refit = F, integerResponse =
   out$integerResponse = integerResponse
   out$problems = list()
   out$scaledResiduals = rep(NA, out$nObs)
-
-  ## following block re-used below, create function for this 
-
-  ##### calculating predictions #####
-  
-  # re-form should be set to ~0 to avoid spurious residual patterns, see https://github.com/florianhartig/DHARMa/issues/43
-    
-  if(out$modelClass %in% c("glmmTMB")){
-    out$fittedPredictedResponse = predict(fittedModel, type = "response") 
-  }else if(out$modelClass %in% c("HLfit")){
-    out$fittedPredictedResponse = predict(fittedModel, type = "response", re.form = ~0)[,1L] 
-  }else{
-    out$fittedPredictedResponse = predict(fittedModel, type = "response", re.form = ~0) 
-  }
-  
+  out$fittedPredictedResponse = getPredictions(fittedModel)
   out$fittedFixedEffects = getFixedEffects(fittedModel)
-  out$fittedResiduals = residuals(fittedModel, type = "response")
+  out$fittedResiduals = getResiduals(fittedModel)
   
   ######## simulations ##################
   
@@ -153,9 +139,9 @@ simulateResiduals <- function(fittedModel, n = 250, refit = F, integerResponse =
     
         refittedModel = refit(fittedModel, simObserved)
         
-        out$refittedPredictedResponse[,i] = predict(refittedModel, type = "response")
+        out$refittedPredictedResponse[,i] = getPredictions(refittedModel)
         out$refittedFixedEffects[,i] = getFixedEffects(refittedModel)
-        out$refittedResiduals[,i] = residuals(refittedModel, type = "response")
+        out$refittedResiduals[,i] = getResiduals(refittedModel)
         out$refittedPearsonResiduals[,i] = residuals(refittedModel, type = "pearson")
         #out$refittedRandomEffects[,i]  = ranef(refittedModel)
       }, silent = T)

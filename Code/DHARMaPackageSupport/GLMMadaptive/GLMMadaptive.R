@@ -30,25 +30,57 @@ DF$id <- factor(id)
 fm1 <- mixed_model(fixed = y ~ year * group, random = ~ 1 | id, data = DF,
                    family = binomial())
 
+predict(fm1)
+
 res = simulateResiduals(fm1)
 
-predict
+getSimulations(fm1, 10)
+
+getResiduals(fm1)
 
 
-class(fm1)
-
-getResponse(fm1)
-
-x = model.frame(fm1)[,1] 
-
-refit(fm1, x)
+predict.MixMod
 
 
-x = family(fm1)
+library(GLMMadaptive)
+library(DHARMa)
+testData = createData(sampleSize = 200, overdispersion = 0, randomEffectVariance = 0, family = poisson())
+fittedModel <- mixed_model(observedResponse ~ Environment1, random =  ~ 1 | group , family = "poisson", data = testData)
+nobs(fittedModel)
 
-nobs(fm1)
 
-testModel(fm1)
+getSimulations(fittedModel, 10)
+
+
+class(getSimulations(fittedModel, 10))
+dim(getSimulations(fittedModel, 10))
+str(getSimulations(fittedModel, 10))
+
+res =  simulateResiduals(fittedModel)
+plot(res)
+
+
+library(lme4)
+fittedModel <- glmer(observedResponse ~ Environment1 + (1|group) , family = "poisson", data = testData)
+
+nobs(fittedModel)
+
+class(getSimulations(fittedModel, 10))
+dim(getSimulations(fittedModel, 10))
+str(getSimulations(fittedModel, 10))
+
+res =  simulateResiduals(fittedModel)
+plot(res)
+
+
+
+residuals(fittedModel)
+
+predict(fittedModel) - testData$observedResponse
+
+
+res =  simulateResiduals(fittedModel)
+
 
 
 
