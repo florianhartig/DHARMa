@@ -54,7 +54,7 @@ simulateResiduals <- function(fittedModel, n = 250, refit = F, integerResponse =
   
   family = family(fittedModel)
   if(is.null(integerResponse)){
-    if (family$family %in% c("binomial", "poisson", "quasibinomial", "quasipoisson", "Negative Binom", "nbinom2", "nbinom1", "genpois", "compois", "truncated_poisson", "truncated_nbinom2", "truncated_nbinom1", "betabinomial") | grepl("Negative Binomial",family$family) ) integerResponse = T
+    if (family$family %in% c("binomial", "poisson", "quasibinomial", "quasipoisson", "Negative Binom", "nbinom2", "nbinom1", "genpois", "compois", "truncated_poisson", "truncated_nbinom2", "truncated_nbinom1", "betabinomial", "Poisson", "Tpoisson", "COMPoisson", "negbin", "Tnegbin") | grepl("Negative Binomial",family$family) ) integerResponse = T
     else integerResponse = F
   }
   
