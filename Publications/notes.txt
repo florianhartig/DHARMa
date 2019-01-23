@@ -1,0 +1,3 @@
+http://www.nowozin.net/sebastian/blog/bayesian-p-values.html
+
+https://cran.r-project.org/web/packages/bayesplot/vignettes/graphical-ppcs.html
