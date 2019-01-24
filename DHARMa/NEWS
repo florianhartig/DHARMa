@@ -1,5 +1,18 @@
 NOTE: for more news about the package, see https://github.com/florianhartig/DHARMa/releases
 
+DHARMa 0.2.3
+============
+
+
+New features
+
+- Supporting for the GLMMadaptive package
+
+
+Bugfixes
+
+- bugfix adding integer families for spaMM, thanks to Alexandre Courtiol https://github.com/florianhartig/DHARMa/pull/104
+
 
 DHARMa 0.2.2
 ============
