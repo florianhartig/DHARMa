@@ -189,6 +189,8 @@ Fixing discrete case
 mention merTools
 
 
+IMPORTANT: mention that most diagnostics go on summary statistics, not on the individual data points. Why not is not clear to me!
+
 
 
 
