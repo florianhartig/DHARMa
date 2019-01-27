@@ -7,6 +7,7 @@ library(lme4)
 library(mgcv)
 library(glmmTMB)
 library(spaMM)
+library(GLMMadaptive)
 
 checkOutput <- function(simulationOutput){
   
@@ -73,19 +74,22 @@ test_that("lm works",
             fittedModel <- lm(observedResponse ~ Environment1 + Environment2 , data = testData)
             runEverything(fittedModel, testData)
             
-            fittedModel <- glm(observedResponse ~ Environment1 , data = testData)
+            fittedModel <- glm(observedResponse ~ Environment1 + Environment2 , data = testData)
             runEverything(fittedModel, testData)
             
-            fittedModel <- gam(observedResponse ~ s(Environment1) , data = testData)
+            fittedModel <- gam(observedResponse ~ s(Environment1) + Environment2, data = testData)
             runEverything(fittedModel, testData)
             
-            fittedModel <- lmer(observedResponse ~ Environment1 + (1|group) , data = testData)
+            fittedModel <- lmer(observedResponse ~ Environment1 + Environment2 + (1|group) , data = testData)
             runEverything(fittedModel, testData)
             
-            fittedModel <- glmmTMB(observedResponse ~ Environment1 + (1|group) , data = testData)
+            fittedModel <- glmmTMB(observedResponse ~ Environment1 + Environment2 + (1|group) , data = testData)
             runEverything(fittedModel, testData)
             
-            fittedModel <- HLfit(observedResponse ~ Environment1 + (1|group) , data = testData)
+            fittedModel <- HLfit(observedResponse ~ Environment1 + Environment2 + (1|group) , data = testData)
+            runEverything(fittedModel, testData)
+            
+            fittedModel <- mixed_model(observedResponse ~ Environment1 + Environment2 , random = ~ 1 | group , data = testData)
             runEverything(fittedModel, testData)
             
           }

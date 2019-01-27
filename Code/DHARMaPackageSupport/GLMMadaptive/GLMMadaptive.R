@@ -1,4 +1,8 @@
 devtools::install_github("drizopoulos/GLMMadaptive")
+
+devtools::install_github(repo = "florianhartig/DHARMa", subdir = "DHARMa", 
+                         ref = "0.2.2.1")
+
 #install.packages("GLMMadaptive")
 library(GLMMadaptive)
 library(DHARMa)
