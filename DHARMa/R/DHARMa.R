@@ -47,6 +47,9 @@ residuals.DHARMa <- function(object, ...){
 createDHARMa <- function(simulatedResponse , observedResponse , fittedPredictedResponse = NULL, integerResponse = F){
 
   out = list()
+  out$simulatedResponse = simulatedResponse
+  out$refit = F
+  out$integerResponse = integerResponse
   out$observedResponse = observedResponse
   
   if(!is.matrix(simulatedResponse) & !is.null(observedResponse)) stop("either scaled residuals or simulations and observations have to be provided")
