@@ -13,6 +13,9 @@ Bugfixes
 
 - bugfix adding integer families for spaMM, thanks to Alexandre Courtiol https://github.com/florianhartig/DHARMa/pull/104
 
+- bugfix for createDHARMa
+
+
 
 DHARMa 0.2.2
 ============
