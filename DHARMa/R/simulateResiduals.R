@@ -100,11 +100,13 @@ simulateResiduals <- function(fittedModel, n = 250, refit = F, integerResponse =
   simulations = getSimulations(fittedModel, nsim = n, ...)
   
   if(out$modelClass == "glmmTMB"){
-    if(ncol(simulations) == 2*n){
-      out$simulatedResponse = simulations[,seq(1, (2*n), by = 2)]
-    }else{
-      out$simulatedResponse = simulations
-    }
+    if(is.vector(simulations[[1]])){
+      out$simulatedResponse = data.matrix(simulations)
+    } else if (is.matrix(simulations[[1]])){ 
+      # this is for the k/n binomial case
+      out$simulatedResponse = as.matrix(simulations)[,seq(1, (2*n), by = 2)]
+    } else securityAssertion("Simulation results produced unsupported data structure", stop = T)
+    
     # observation is factor - unlike lme4 and older, glmmTMB simulates nevertheless as numeric
     if(is.factor(out$observedResponse)) out$observedResponse = as.numeric(out$observedResponse) - 1
   }else{
