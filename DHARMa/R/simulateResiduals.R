@@ -208,21 +208,6 @@ checkModel <- function(fittedModel){
 }
 
 
-getFixedEffects <- function(fittedModel){
-  
-  if(class(fittedModel)[1] %in% c("glm", "lm", "gam", "bam", "negbin") ){
-    out  = coef(fittedModel)
-  } else if(class(fittedModel)[1] %in% c("glmerMod", "lmerMod", "HLfit")){
-    out = fixef(fittedModel)
-  } else if(class(fittedModel)[1] %in% c("glmmTMB")){
-    out = glmmTMB::fixef(fittedModel)
-    out = out$cond
-  } else {
-    out = coef(fittedModel)
-    if(is.null(out)) out = fixef(fittedModel)
-  }
-  return(out)
-}
 
 securityAssertion <- function(context = "Not provided", stop = F){
   generalMessage = "Message from DHARMa package: a security assertion was not met. This means that during the execution of a DHARMa function, some unexpected conditions ocurred. Even if you didn't get an error, your results may not be reliable. Please check with the help if you use the functions as intended. If you think that the error is not on your side, I would be grateful if you could report the problem at https://github.com/florianhartig/DHARMa/issues \n\n Context:"

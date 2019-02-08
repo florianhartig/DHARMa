@@ -77,6 +77,24 @@ getSimulations.default <- function (object, ...){
 NULL
 
 
+
+getFixedEffects <- function(fittedModel){
+  
+  if(class(fittedModel)[1] %in% c("glm", "lm", "gam", "bam", "negbin") ){
+    out  = coef(fittedModel)
+  } else if(class(fittedModel)[1] %in% c("glmerMod", "lmerMod", "HLfit")){
+    out = fixef(fittedModel)
+  } else if(class(fittedModel)[1] %in% c("glmmTMB")){
+    out = glmmTMB::fixef(fittedModel)
+    out = out$cond
+  } else {
+    out = coef(fittedModel)
+    if(is.null(out)) out = fixef(fittedModel)
+  }
+  return(out)
+}
+
+
 ######### LM #############
 
 #' Refit a Model with a Different Response
