@@ -5,7 +5,7 @@ Date: 2019-01-19
 Authors@R: c(person("Florian", "Hartig", email = "florian.hartig@biologie.uni-regensburg.de", role = c("aut", "cre"), comment = "Theoretical Ecology, University of Regensburg, Regensburg, Germany"))
 Description: The 'DHARMa' package uses a simulation-based approach to create
     readily interpretable scaled (quantile) residuals for fitted (generalized) linear mixed
-    models. Currently supported are (generalized) linear mixed models from 'lme4' 
+    models. Currently supported are linear and generalized linear (mixed) models from 'lme4' 
     (classes 'lmerMod', 'glmerMod'), 'glmmTMB' and 'spaMM', generalized additive models ('gam' from 
     'mgcv'), 'glm' (including 'negbin' from 'MASS', but excluding quasi-distributions) and 'lm' model
     classes. Moreover, externally created simulations, e.g. posterior predictive simulations 
