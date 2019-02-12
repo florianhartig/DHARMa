@@ -41,7 +41,7 @@ runEverything = function(fittedModel, testData, DHARMaData = T){
   
   testOutliers(simulationOutput)
   testDispersion(simulationOutput)
-  expect_gt(testUniformity(simulationOutput = simulationOutput)$p.value, 0.00001)
+  expect_gt(testUniformity(simulationOutput = simulationOutput)$p.value, 0.001)
   testZeroInflation(simulationOutput = simulationOutput)
   testTemporalAutocorrelation(simulationOutput = simulationOutput, time = testData$time)
   testSpatialAutocorrelation(simulationOutput = simulationOutput, x = testData$x, y = testData$y)

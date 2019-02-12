@@ -1,5 +1,12 @@
 NOTE: for more news about the package, see https://github.com/florianhartig/DHARMa/releases
 
+DHARMa 0.2.3
+============
+
+Bugfixes
+
+- added missing distributions https://github.com/florianhartig/DHARMa/pull/104
+- bugfix in simulate residuals https://github.com/florianhartig/DHARMa/issues/107
 
 DHARMa 0.2.2
 ============
