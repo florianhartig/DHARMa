@@ -1,3 +1,16 @@
+# Version 0.2.3
+
+## Submission 1
+
+This is a maintenance release with a few smaller bug fixes and a few improvements to the package. See NEWS for changes. 
+
+This release was tested without apparent problems under
+
+* local MAC OS 10.14.1 (Mojave), R 3.5.1
+* http://win-builder.r-project.org/ - oldrelease / devel / release
+* Linux (Travis CI) - oldrel / release / devel
+
+
 # Version 0.2.2
 
 ## Submission 1

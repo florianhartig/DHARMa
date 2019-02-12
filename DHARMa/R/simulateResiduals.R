@@ -54,7 +54,7 @@ simulateResiduals <- function(fittedModel, n = 250, refit = F, integerResponse =
   
   family = family(fittedModel)
   if(is.null(integerResponse)){
-    if (family$family %in% c("binomial", "poisson", "quasibinomial", "quasipoisson", "Negative Binom", "nbinom2", "nbinom1", "genpois", "compois", "truncated_poisson", "truncated_nbinom2", "truncated_nbinom1", "betabinomial") | grepl("Negative Binomial",family$family) ) integerResponse = T
+    if (family$family %in% c("binomial", "poisson", "quasibinomial", "quasipoisson", "Negative Binom", "nbinom2", "nbinom1", "genpois", "compois", "truncated_poisson", "truncated_nbinom2", "truncated_nbinom1", "betabinomial", "Poisson", "Tpoisson", "COMPoisson", "negbin", "Tnegbin") | grepl("Negative Binomial",family$family) ) integerResponse = T
     else integerResponse = F
   }
   
@@ -86,11 +86,13 @@ simulateResiduals <- function(fittedModel, n = 250, refit = F, integerResponse =
   simulations = getSimulations(fittedModel, nsim = n, ...)
   
   if(out$modelClass == "glmmTMB"){
-    if(ncol(simulations) == 2*n){
-      out$simulatedResponse = simulations[,seq(1, (2*n), by = 2)]
-    }else{
-      out$simulatedResponse = simulations
-    }
+    if(is.vector(simulations[[1]])){
+      out$simulatedResponse = data.matrix(simulations)
+    } else if (is.matrix(simulations[[1]])){ 
+      # this is for the k/n binomial case
+      out$simulatedResponse = as.matrix(simulations)[,seq(1, (2*n), by = 2)]
+    } else securityAssertion("Simulation results produced unsupported data structure", stop = T)
+    
     # observation is factor - unlike lme4 and older, glmmTMB simulates nevertheless as numeric
     if(is.factor(out$observedResponse)) out$observedResponse = as.numeric(out$observedResponse) - 1
   }else{
@@ -194,21 +196,6 @@ checkModel <- function(fittedModel){
 }
 
 
-getFixedEffects <- function(fittedModel){
-  
-  if(class(fittedModel)[1] %in% c("glm", "lm", "gam", "bam", "negbin") ){
-    out  = coef(fittedModel)
-  } else if(class(fittedModel)[1] %in% c("glmerMod", "lmerMod", "HLfit")){
-    out = fixef(fittedModel)
-  } else if(class(fittedModel)[1] %in% c("glmmTMB")){
-    out = glmmTMB::fixef(fittedModel)
-    out = out$cond
-  } else {
-    out = coef(fittedModel)
-    if(is.null(out)) out = fixef(fittedModel)
-  }
-  return(out)
-}
 
 securityAssertion <- function(context = "Not provided", stop = F){
   generalMessage = "Message from DHARMa package: a security assertion was not met. This means that during the execution of a DHARMa function, some unexpected conditions ocurred. Even if you didn't get an error, your results may not be reliable. Please check with the help if you use the functions as intended. If you think that the error is not on your side, I would be grateful if you could report the problem at https://github.com/florianhartig/DHARMa/issues \n\n Context:"

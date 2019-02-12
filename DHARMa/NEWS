@@ -3,6 +3,7 @@ NOTE: for more news about the package, see https://github.com/florianhartig/DHAR
 DHARMa 0.2.3
 ============
 
+<<<<<<< HEAD
 
 New features
 
@@ -16,6 +17,12 @@ Bugfixes
 - bugfix for createDHARMa
 
 
+=======
+Bugfixes
+
+- added missing distributions https://github.com/florianhartig/DHARMa/pull/104
+- bugfix in simulate residuals https://github.com/florianhartig/DHARMa/issues/107
+>>>>>>> master
 
 DHARMa 0.2.2
 ============

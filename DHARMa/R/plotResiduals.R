@@ -56,7 +56,7 @@ hist.DHARMa <- function(x, ...){
   
   breaks = checkDots("breaks", seq(-0.02, 1.02, len = 53), ...)
   col = checkDots("col", c("red",rep("lightgrey",50), "red"), ...)
-  main = checkDots("main", "Hist of DHARM residuals\nOutliers are marked red", ...)   
+  main = checkDots("main", "Hist of DHARMa residuals\nOutliers are marked red", ...)   
 
   hist(val, breaks = breaks, col = col, main = main, ...)
 }
