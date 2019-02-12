@@ -1,28 +1,27 @@
 NOTE: for more news about the package, see https://github.com/florianhartig/DHARMa/releases
 
-DHARMa 0.2.3
-============
 
-<<<<<<< HEAD
+DHARMa 0.2.4
+============
 
 New features
 
 - Supporting for the GLMMadaptive package
 
+Bugfixes
+
+- Vignette header
+
+
+DHARMa 0.2.3
+============
 
 Bugfixes
 
 - bugfix adding integer families for spaMM, thanks to Alexandre Courtiol https://github.com/florianhartig/DHARMa/pull/104
-
 - bugfix for createDHARMa
+- bugfix in simulate residuals for glmmTMB https://github.com/florianhartig/DHARMa/issues/107
 
-
-=======
-Bugfixes
-
-- added missing distributions https://github.com/florianhartig/DHARMa/pull/104
-- bugfix in simulate residuals https://github.com/florianhartig/DHARMa/issues/107
->>>>>>> master
 
 DHARMa 0.2.2
 ============
