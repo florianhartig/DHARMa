@@ -33,7 +33,8 @@ Imports:
     lme4,
     mgcv,
     glmmTMB (>= 0.2.1),
-    spaMM (>= 2.6.0)
+    spaMM (>= 2.6.0),
+    GLMMadaptive (>= 0.5-1)
 Suggests:
     knitr,
     testthat
