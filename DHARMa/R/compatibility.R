@@ -54,7 +54,6 @@ getResponse.default <- function (object, ...){
 }
 
 
-
 #' Get model residuals
 #' 
 #' Extract the residuals of a fitted model 
@@ -119,15 +118,26 @@ getSimulations <- function (object, ...) {
 
 #' @rdname getSimulations
 #' @export
-getSimulations.default <- function (object, ...){
-  simulate(object, ...)
+getSimulations.default <- function (object, nsim = 1, ...){
+  
+  simulations = as.data.frame(simulate(object, nsim = nsim, ...))
+  
+  if(is.vector(simulations[[1]])){
+    simulations = data.matrix(simulations)
+  } else if (is.matrix(simulations[[1]])){ 
+    # this is for the k/n binomial case
+    simulations = as.matrix(simulations)[,seq(1, (2*nsim), by = 2)]
+  } else if(is.factor(simulations[[1]])){
+    simulations = data.matrix(simulations) - 1
+  } else securityAssertion("Simulation results produced unsupported data structure", stop = T)
+  
+  return(simulations)
+  
 }
 
 
 #' @importFrom lme4 refit
 NULL
-
-
 
 getFixedEffects <- function(fittedModel){
   
@@ -234,7 +244,6 @@ getPredictions.glmmTMB <- function (object, type = "response", ...){
   predict(object, type = type, ...)
 }
 
-
 #######  spaMM #########
 
 #' @rdname getPredictions
@@ -249,23 +258,12 @@ getResponse.HLfit <- function(object, ...){
 }
 
 #' @export
-getSimulations.HLfit <- function(object, ...){
-  return(as.data.frame(simulate(object, ...)))
-}
-
-#' @export
 refit.HLfit <- function(object, newresp, ...) {
   update_resp(object, newresp, evaluate = TRUE)
 }
 
 
 #######  GLMMadaptive #########
-
-#' @rdname getSimulations
-#' @export
-getSimulations.MixMod <- function(object, ...){
-  return(as.data.frame(simulate(object, ...)))
-}
 
 
 #' Refit a Model with a Different Response
@@ -305,6 +303,10 @@ getPredictions.MixMod <- function(object, type_pred = "response", type = "mean_s
 
 
 # note: I chose here subject specific residuals to conform to the other packages, but other choices would probably be possible.
+
+# changed to mean_subject because of https://github.com/drizopoulos/GLMMadaptive/issues/12
+
+# reimplemented because of https://github.com/drizopoulos/GLMMadaptive/issues/11
 
 #' @rdname getResiduals
 #' @export

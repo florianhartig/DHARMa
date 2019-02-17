@@ -3,14 +3,11 @@
 \name{getSimulations}
 \alias{getSimulations}
 \alias{getSimulations.default}
-\alias{getSimulations.MixMod}
 \title{Get model simulations}
 \usage{
 getSimulations(object, ...)
 
-\method{getSimulations}{default}(object, ...)
-
-\method{getSimulations}{MixMod}(object, ...)
+\method{getSimulations}{default}(object, nsim = 1, ...)
 }
 \arguments{
 \item{object}{a fitted model}

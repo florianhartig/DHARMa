@@ -64,11 +64,19 @@ simulateResiduals <- function(fittedModel, n = 250, refit = F, integerResponse =
   out$nObs = nobs(fittedModel, level = 1)
   out$nSim = n
   out$refit = refit
+  
+  # response 
   out$observedResponse = getResponse(fittedModel) 
   
-  # TODO - check if that works 
-  nKcase = is.matrix(out$observedResponse)
-  if(nKcase){
+  # formatting response
+  if(is.factor(out$observedResponse)) {      
+    if(nlevels(out$observedResponse) != 2){
+      stop("The fitted model has a factorial response with number of levels not equal to 2 - there is currently no sensible application in DHARMa that would lead to this situation") 
+    }else{
+      out$observedResponse = as.numeric(out$observedResponse) - 1      
+    }
+  }
+  if(is.matrix(out$observedResponse)){
     if(! (family$family %in% c("binomial", "betabinomial"))) securityAssertion("nKcase - wrong family")
     if(! (ncol(out$observedResponse)==2)) securityAssertion("nKcase - wrong dimensions of response")
     out$observedResponse = out$observedResponse[,1]
@@ -83,30 +91,7 @@ simulateResiduals <- function(fittedModel, n = 250, refit = F, integerResponse =
   
   ######## simulations ##################
   
-  simulations = getSimulations(fittedModel, nsim = n, ...)
-  
-  if(out$modelClass == "glmmTMB"){
-    if(is.vector(simulations[[1]])){
-      out$simulatedResponse = data.matrix(simulations)
-    } else if (is.matrix(simulations[[1]])){ 
-      # this is for the k/n binomial case
-      out$simulatedResponse = as.matrix(simulations)[,seq(1, (2*n), by = 2)]
-    } else securityAssertion("Simulation results produced unsupported data structure", stop = T)
-    
-    # observation is factor - unlike lme4 and older, glmmTMB simulates nevertheless as numeric
-    if(is.factor(out$observedResponse)) out$observedResponse = as.numeric(out$observedResponse) - 1
-  }else{
-    if(is.vector(simulations[[1]])){
-      out$simulatedResponse = data.matrix(simulations)
-    } else if (is.matrix(simulations[[1]])){ 
-      # this is for the k/n binomial case
-      out$simulatedResponse = as.matrix(simulations)[,seq(1, (2*n), by = 2)]
-    } else if(is.factor(simulations[[1]])){
-      if(nlevels(simulations[[1]]) != 2) warning("The fitted model has a factorial response with number of levels not equal to 2 - there is currently no sensible application in DHARMa that would lead to this situation. Likely, you are trying something that doesn't work.")
-      out$simulatedResponse = data.matrix(simulations) - 1
-      out$observedResponse = as.numeric(out$observedResponse) - 1
-    } else securityAssertion("Simulation results produced unsupported data structure", stop = T)
-  }
+  out$simulatedResponse = getSimulations(fittedModel, nsim = n, ...)
     
   if(any(dim(out$simulatedResponse) != c(out$nObs, out$nSim) )) securityAssertion("Simulation results have wrong dimension", stop = T)
   
@@ -118,6 +103,8 @@ simulateResiduals <- function(fittedModel, n = 250, refit = F, integerResponse =
 
   ######## refit = T ################## 
   } else {
+    
+    if (checkRefit(fittedModel) == F) return(0)
 
     # Adding new outputs
 
@@ -185,6 +172,13 @@ simulateResiduals <- function(fittedModel, n = 250, refit = F, integerResponse =
 }
 
 getPossibleModels<-function()c("lm", "glm", "negbin", "lmerMod", "glmerMod", "gam", "bam", "glmmTMB", "HLfit", "MixMod") 
+
+getModelsSupportingRefit<-function()c("lm", "glm", "negbin", "lmerMod", "glmerMod", "gam", "bam", "glmmTMB", "HLfit") 
+
+checkRefit <- function(fittedModel){
+  if(!(class(fittedModel)[1] %in% getModelsSupportingRefit())) message("DHARMa does not support refit for this model class. No simulations will be performed")
+  return(FALSE)
+}
 
 checkModel <- function(fittedModel){
   if(!(class(fittedModel)[1] %in% getPossibleModels())) warning("DHARMa: fittedModel not in class of supported models. Absolutely no guarantee that this will work!")
