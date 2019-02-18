@@ -108,13 +108,15 @@ testOutliers <- function(simulationOutput, alternative = c("two.sided", "greater
 #' 
 #' @param simulationOutput a DHARMa object with simulated residuals created with \code{\link{simulateResiduals}}
 #' @param plot whether to plot output
-#' @param alternative a character string specifying whether the test should test if observations are "greater", "less" or "two.sided" compared to the simulated null hypothesis. Greate corresponds to overdispersion.   
+#' @param alternative a character string specifying whether the test should test if observations are "greater", "less" or "two.sided" compared to the simulated null hypothesis. Greater corresponds to overdispersion.   
 #' @param ... arguments to pass on to \code{\link{testGeneric}}
 #' @details The function implements two tests, depending on whether it is applied on a simulation with refit = F, or refit = T. 
 #' 
-#' If refit = F (not recommended), the function tests if the IQR of the scaled residuals deviate from the null hypothesis of a uniform distribution. Simulations show that this option is not properly calibrated and much less powerful than the parametric alternative \code{\link{testOverdispersionParametric}} and even the simple \code{\link{testUniformity}}, and therefore it's use is not recommended. A warning will be returned if the function is called. 
+#' If refit = F, the function tests the sd of the data against the sd of the simulated data. 
 #' 
-#' If refit = T, the function compares the approximate deviance (via squared pearson residuals) with the same quantity from the models refitted with simulated data. It is much slower than the parametric alternative \code{\link{testOverdispersionParametric}}, but simulations show that it is slightly more powerful than the latter, and more powerful than any other non-parametric test in DHARMa, and it doesn't make any parametric assumptions. However, given the computational cost, I would suggest that most users will be satisfied with the parametric overdispersion test. 
+#' If refit = T, the function compares the approximate deviance (via squared pearson residuals) with the same quantity from the models refitted with simulated data. Applying this is much slower than the previous alternative, but simulations show that it is slightly more powerful as well. 
+#' 
+#' However, given the computational cost, I would suggest that most users will be satisfied with the standard dispersion test. 
 #' 
 #' @author Florian Hartig
 #' @seealso \code{\link{testResiduals}}, \code{\link{testUniformity}},  \code{\link{testOutliers}}, \code{\link{testZeroInflation}}, \code{\link{testGeneric}}, \code{\link{testTemporalAutocorrelation}}, \code{\link{testSpatialAutocorrelation}}
