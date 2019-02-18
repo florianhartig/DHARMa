@@ -30,10 +30,8 @@ runEverything = function(fittedModel, testData, DHARMaData = T){
   
   t = DHARMa:::getResponse(fittedModel)
   
-  x = getSimulations(fittedModel, 2)
-  expect_equal(class(x), "data.frame")
-  refit(fittedModel, x[[1]])
-  
+  x = DHARMa:::getSimulations(fittedModel, 2)
+  #expect_equal(class(x), "data.frame")
   #class(x[, 1:ncol(x)])
   
   simulationOutput <- simulateResiduals(fittedModel = fittedModel, n = 100)
@@ -52,16 +50,22 @@ runEverything = function(fittedModel, testData, DHARMaData = T){
   simulationOutput <- recalculateResiduals(simulationOutput, group = testData$group)
   testDispersion(simulationOutput)
   
-  simulationOutput2 <- simulateResiduals(fittedModel = fittedModel, refit = T, n = 5) # n=10 is very low, set higher for serious tests
-  
-  checkOutput(simulationOutput2)
-  
-  plot(simulationOutput2, quantreg = F)
-  
-  testDispersion(simulationOutput2)
-  
-  simulationOutput2 <- recalculateResiduals(simulationOutput2, group = testData$group)
-  testDispersion(simulationOutput2)
+  if (DHARMa:::checkRefit(fittedModel) == T){
+    
+    if (! class(fittedModel) ==  "MixMod") refit(fittedModel, x[[1]])
+    
+    simulationOutput2 <- simulateResiduals(fittedModel = fittedModel, refit = T, n = 5) # n=10 is very low, set higher for serious tests
+    
+    checkOutput(simulationOutput2)
+    
+    plot(simulationOutput2, quantreg = F)
+    
+    testDispersion(simulationOutput2)
+    
+    simulationOutput2 <- recalculateResiduals(simulationOutput2, group = testData$group)
+    testDispersion(simulationOutput2)
+    
+  }
   
 }
 
@@ -89,8 +93,8 @@ test_that("lm works",
             fittedModel <- HLfit(observedResponse ~ Environment1 + Environment2 + (1|group) , data = testData)
             runEverything(fittedModel, testData)
             
-            fittedModel <- mixed_model(observedResponse ~ Environment1 + Environment2 , random = ~ 1 | group , data = testData)
-            runEverything(fittedModel, testData)
+            # not supported fittedModel <- mixed_model(observedResponse ~ Environment1 + Environment2 , random = ~ 1 | group , family = "gaussian", data = testData)
+            # runEverything(fittedModel, testData)
             
           }
 )
@@ -130,6 +134,10 @@ test_that("binomial 1/0 works",
             
             fittedModel <- HLfit(observedResponse ~ Environment1 + (1|group) , family = "binomial",  data = testData)
             runEverything(fittedModel, testData)
+            
+            fittedModel <- mixed_model(observedResponse ~ Environment1 , random = ~ 1 | group , family = "binomial", data = testData)
+            runEverything(fittedModel, testData)
+            
           }
 )
 
@@ -157,6 +165,10 @@ test_that("binomial y/n (factor) works",
             
             fittedModel <- HLfit(observedResponse ~ Environment1 + (1|group) , family = "binomial",  data = testData)
             runEverything(fittedModel, testData)
+            
+            fittedModel <- mixed_model(observedResponse ~ Environment1 , random = ~ 1 | group , family = "binomial", data = testData)
+            runEverything(fittedModel, testData)
+            
           }
 )
 
@@ -183,6 +195,9 @@ test_that("glm binomial n/k works",
             runEverything(fittedModel, testData)
             
             fittedModel <- HLfit(cbind(observedResponse1,observedResponse0) ~ Environment1 + (1|group) , family = "binomial",  data = testData)
+            runEverything(fittedModel, testData)
+            
+            fittedModel <- mixed_model(cbind(observedResponse1,observedResponse0) ~ Environment1 , random = ~ 1 | group , family = "binomial", data = testData)
             runEverything(fittedModel, testData)
   
           }
@@ -218,6 +233,9 @@ test_that("glm poisson works",
             runEverything(fittedModel, testData)
             
             fittedModel <- HLfit(observedResponse ~ Environment1 + (1|group) , family = "poisson",  data = testData)
+            runEverything(fittedModel, testData)
+            
+            fittedModel <- mixed_model(observedResponse ~ Environment1 , random = ~ 1 | group , family = "poisson", data = testData)
             runEverything(fittedModel, testData)
           }
 )
