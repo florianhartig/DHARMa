@@ -48,20 +48,18 @@ predict.MixMod
 
 library(GLMMadaptive)
 library(DHARMa)
+
 testData = createData(sampleSize = 200, overdispersion = 0, randomEffectVariance = 0, family = poisson())
-fittedModel <- mixed_model(observedResponse ~ Environment1, random =  ~ 1 | group , family = "poisson", data = testData)
+testData$group2 = sample.int(20, 200, replace = T)
+
+fittedModel <- mixed_model(observedResponse ~ Environment1, random =  ~ 1 | group / group2 , family = "poisson", data = testData)
 nobs(fittedModel)
 
 
-getSimulations(fittedModel, 10)
-
-
-class(getSimulations(fittedModel, 10))
-dim(getSimulations(fittedModel, 10))
-str(getSimulations(fittedModel, 10))
-
 res =  simulateResiduals(fittedModel)
 plot(res)
+
+res = simulateResiduals(fittedModel, refit = T)
 
 
 library(lme4)
