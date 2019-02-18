@@ -9,6 +9,9 @@ res =  simulateResiduals(fittedModel)
 plot(res)
 
 
+res =  simulateResiduals(fittedModel, refit = T)
+plot(res)
+
 
 
 ## GLMM with individual-level variability (accounting for overdispersion)

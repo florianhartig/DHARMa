@@ -277,6 +277,8 @@ refit.MixMod <- function(object, newresp, ...){
   
   newData <-model.frame(object)  
   
+  # It is stored in the component id and its name in the component id_name. Hence, you could do something like mframe_RE[[mod$id_name]] <- mod$id to include it in the model.frame of the random effects design matrix.
+  
   matrixResp = is.matrix(newData[[1]])
   
   if(matrixResp & !is.null(ncol(newresp))){

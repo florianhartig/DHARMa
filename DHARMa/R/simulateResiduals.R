@@ -117,8 +117,8 @@ simulateResiduals <- function(fittedModel, n = 250, refit = F, integerResponse =
     for (i in 1:n){
       #tryCatch()
       
-      if (out$modelClass == "glmmTMB" & ncol(simulations) == 2*n) simObserved = simulations[,(1+(2*(i-1))):(2+(2*(i-1)))]
-      else simObserved = simulations[[i]]
+      if (out$modelClass == "glmmTMB" & ncol(out$simulatedResponse) == 2*n) simObserved = out$simulatedResponse[,(1+(2*(i-1))):(2+(2*(i-1)))]
+      else simObserved = out$simulatedResponse[[i]]
       
       try({
         
@@ -176,8 +176,12 @@ getPossibleModels<-function()c("lm", "glm", "negbin", "lmerMod", "glmerMod", "ga
 getModelsSupportingRefit<-function()c("lm", "glm", "negbin", "lmerMod", "glmerMod", "gam", "bam", "glmmTMB", "HLfit") 
 
 checkRefit <- function(fittedModel){
-  if(!(class(fittedModel)[1] %in% getModelsSupportingRefit())) message("DHARMa does not support refit for this model class. No simulations will be performed")
-  return(FALSE)
+  if(!(class(fittedModel)[1] %in% getModelsSupportingRefit())){
+    message("DHARMa does not support refit for this model class. No simulations will be performed")
+    return(FALSE)
+  } else {
+    return(TRUE)
+  }
 }
 
 checkModel <- function(fittedModel){

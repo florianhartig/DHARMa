@@ -10,7 +10,7 @@ getResiduals(object, ...)
 
 \method{getResiduals}{default}(object, type = "response", ...)
 
-\method{getResiduals}{MixMod}(object, ...)
+\method{getResiduals}{MixMod}(object, type = "subject_specific", ...)
 }
 \arguments{
 \item{object}{a fitted model}

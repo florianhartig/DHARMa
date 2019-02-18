@@ -12,12 +12,14 @@ fittedModel <- glmer(observedResponse ~ Environment1 + (1|group) , family =
 simulationOutput <- simulateResiduals(fittedModel = fittedModel)
 plot(simulationOutput, rank = T)
 
-testOverdispersion(simulationOutput)
+testDispersion(simulationOutput)
 
 simulationOutput2 <- simulateResiduals(fittedModel = fittedModel, refit = T)
-testOverdispersion(simulationOutput2)
+plot(simulationOutput2)
 
-testOverdispersionParametric(fittedModel)
+testDispersion(simulationOutput2)
+
+testDispersion(fittedModel)
 
 
 ##################################################
