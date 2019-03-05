@@ -14,7 +14,7 @@ test_that("Standard creation works", {
   
   truth = testData$observedResponse
   pred = simulationOutput$fittedPredictedResponse
-  simulatedResponse = simulationOutput$simulatedResponse$simStandardized
+  simulatedResponse = simulationOutput$simulatedResponse
     
   sim = createDHARMa(simulatedResponse = simulatedResponse, 
                      observedResponse = truth, 
