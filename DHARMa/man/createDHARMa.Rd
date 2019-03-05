@@ -8,7 +8,7 @@ createDHARMa(simulatedResponse, observedResponse,
   fittedPredictedResponse = NULL, integerResponse = F)
 }
 \arguments{
-\item{simulatedResponse}{matrix of observations simulated from the fitted model - row index for observations and colum index for simulations}
+\item{simulatedResponse}{matrix or data.frame of observations simulated from the fitted model - row index for observations and colum index for simulations}
 
 \item{observedResponse}{true observations}
 

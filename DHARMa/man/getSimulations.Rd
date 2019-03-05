@@ -5,7 +5,7 @@
 \alias{getSimulations.default}
 \title{Get model simulations}
 \usage{
-getSimulations(object, ...)
+getSimulations(object, nsim = 1, ...)
 
 \method{getSimulations}{default}(object, nsim = 1, ...)
 }

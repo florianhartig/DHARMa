@@ -91,15 +91,22 @@ simulateResiduals <- function(fittedModel, n = 250, refit = F, integerResponse =
   
   ######## simulations ##################
   
+  # note: simulates are usually done like the data provided, so if k/n bionomial is provided with cbind will simulate in the same way
+  # for refit, some model classes expect the new response in the same way, while others don't, e.g. glmmTMB
+  
+  # debug help 
+  # > n=5
+  # > simulations = getSimulations(fittedModel, nsim = n)
+  
   out$simulatedResponse = getSimulations(fittedModel, nsim = n, ...)
-    
-  if(any(dim(out$simulatedResponse) != c(out$nObs, out$nSim) )) securityAssertion("Simulation results have wrong dimension", stop = T)
+
+  if(any(dim(out$simulatedResponse$simStandardized) != c(out$nObs, out$nSim) )) securityAssertion("Simulation results have wrong dimension", stop = T)  
   
   ######## refit = F ################## 
 
   if (refit == F){
-    
-    out$scaledResiduals = getQuantile(simulations = out$simulatedResponse , observed = out$observedResponse , n = out$nObs, nSim = out$nSim, integerResponse = integerResponse)
+
+    out$scaledResiduals = getQuantile(simulations = out$simulatedResponse$simStandardized, observed = out$observedResponse , n = out$nObs, nSim = out$nSim, integerResponse = integerResponse)
 
   ######## refit = T ################## 
   } else {
@@ -115,19 +122,17 @@ simulateResiduals <- function(fittedModel, n = 250, refit = F, integerResponse =
     out$refittedPearsonResiduals = matrix(nrow = out$nObs, ncol = n)   
     
     for (i in 1:n){
-      #tryCatch()
-      
-      if (out$modelClass == "glmmTMB" & ncol(out$simulatedResponse) == 2*n) simObserved = out$simulatedResponse[,(1+(2*(i-1))):(2+(2*(i-1)))]
-      else simObserved = out$simulatedResponse[[i]]
-      
-      try({
+
+        simObserved = out$simulatedResponse$simRefit[[i]]
+
+        try({
         
         # for testing
         # if (i==3) stop("x")
         # Note: also set silet = T for production
     
         refittedModel = refit(fittedModel, simObserved)
-        
+
         out$refittedPredictedResponse[,i] = getPredictions(refittedModel)
         out$refittedFixedEffects[,i] = getFixedEffects(refittedModel)
         out$refittedResiduals[,i] = getResiduals(refittedModel)
@@ -154,7 +159,7 @@ simulateResiduals <- function(fittedModel, n = 250, refit = F, integerResponse =
     
     ######### residual calculations ###########
 
-    out$scaledResiduals = getQuantile(simulations = out$refittedResiduals, observed = out$fittedResiduals, n = out$nObs, nSim = out$nSim, integerResponse = integerResponse)
+    out$scaledResiduals = DHARMa:::getQuantile(simulations = out$refittedResiduals, observed = out$fittedResiduals, n = out$nObs, nSim = out$nSim, integerResponse = integerResponse)
   }
 
   ########### Wrapup ############

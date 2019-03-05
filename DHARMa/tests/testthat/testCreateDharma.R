@@ -16,10 +16,16 @@ test_that("Standard creation works", {
   pred = simulationOutput$fittedPredictedResponse
   simulatedResponse = simulationOutput$simulatedResponse
     
-  sim = createDHARMa(simulatedResponse = simulatedResponse, observedResponse = truth, fittedPredictedResponse = pred,  integerResponse = T)
+  sim = createDHARMa(simulatedResponse = simulatedResponse, 
+                     observedResponse = truth, 
+                     fittedPredictedResponse = pred,  
+                     integerResponse = T)
   plot(sim, quantreg = F)
 
-  sim = createDHARMa(simulatedResponse = simulatedResponse, observedResponse = truth, fittedPredictedResponse = pred,  integerResponse = F)
+  sim = createDHARMa(simulatedResponse = simulatedResponse, 
+                     observedResponse = truth, 
+                     fittedPredictedResponse = pred,  
+                     integerResponse = F)
   plot(sim, quantreg = F)
   
   sim = createDHARMa(simulatedResponse = simulatedResponse, observedResponse = truth)

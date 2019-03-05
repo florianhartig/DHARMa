@@ -22,8 +22,14 @@ DHARMa.ecdf <- function (x)
 
 #' Quantile calculations
 #' 
+#' @param simlations simulations
+#' @param observed vector with observed data
+#' 
 #' @keywords internal
 getQuantile <- function(simulations, observed, n, nSim, integerResponse){
+  
+  # not 100% sure if that's neccessary
+  simulations = as.data.frame(simulations)
   
   scaledResiduals = rep(NA, n)
   

@@ -9,34 +9,62 @@ library(glmmTMB)
 library(spaMM)
 library(GLMMadaptive)
 
-checkOutput <- function(simulationOutput){
+
+#' Test DHARMa compatibility
+#' 
+#' @param fittedModel the fitted model
+#' @param test data
+#' 
+#' @author Florian Hartig
+#' 
+runEverything = function(fittedModel, testData){
+  
+  cat("\n\n============= NEW MODEL ====================\n\n")
+  
+  # DHARMa classes 
+
+  print(class(fittedModel))
+  
+  family(fittedModel)
+  class(fittedModel)[1]
+  n = nobs(fittedModel)
+  
+  #predict(fittedModel)
+  #coef(fittedModel)
+  #ranef(fittedModel)
+  #fixef(fittedModel)
+  
+  ## DHARMA specific functions
+  
+  x = getResponse(fittedModel)
+  expect_type(x, "double")
+  expect_length(x, n)
+  
+  getFixedEffects(fittedModel)
+  
+  x = getSimulations(fittedModel, nsim = 10)
+  expect_type(x, "list")
+  expect_equal(class(x$simStandardized), "matrix")
+  expect_true(typeof(x$simStandardized) %in% c("numeric", "integer", "double"))
+
+  if (DHARMa:::checkRefit(fittedModel) == T){
+    refit(fittedModel, x$simRefit[,1]) 
+    refit(fittedModel, x$simRefit[,2])
+  }
+  
+  # Test simulations 
+
+  simulationOutput <- simulateResiduals(fittedModel = fittedModel, n = 100)
   
   print(simulationOutput)
   
   if(any(simulationOutput$scaledResiduals < 0)) stop()
   if(any(simulationOutput$scaledResiduals > 1)) stop()
   if(any(is.na(simulationOutput$scaledResiduals))) stop()
-  
   if(length(simulationOutput$scaledResiduals) != length(simulationOutput$observedResponse)) stop()
   if(length(simulationOutput$fittedPredictedResponse) != length(simulationOutput$observedResponse)) stop()
   
-}
-
-runEverything = function(fittedModel, testData, DHARMaData = T){
-  
-  cat("\n\n============= NEW MODEL ====================\n\n")
-  
-  print(class(fittedModel))
-  
-  t = DHARMa:::getResponse(fittedModel)
-  
-  x = DHARMa:::getSimulations(fittedModel, 2)
-  #expect_equal(class(x), "data.frame")
-  #class(x[, 1:ncol(x)])
-  
-  simulationOutput <- simulateResiduals(fittedModel = fittedModel, n = 100)
-  
-  checkOutput(simulationOutput)
+  # Test tests 
   
   testOutliers(simulationOutput)
   testDispersion(simulationOutput)
@@ -51,9 +79,7 @@ runEverything = function(fittedModel, testData, DHARMaData = T){
   testDispersion(simulationOutput)
   
   if (DHARMa:::checkRefit(fittedModel) == T){
-    
-    if (! class(fittedModel) ==  "MixMod") refit(fittedModel, x[[1]])
-    
+
     simulationOutput2 <- simulateResiduals(fittedModel = fittedModel, refit = T, n = 5) # n=10 is very low, set higher for serious tests
     
     checkOutput(simulationOutput2)

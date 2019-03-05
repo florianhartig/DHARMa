@@ -36,7 +36,7 @@ residuals.DHARMa <- function(object, ...){
 
 #' Convert simulated residuals or posterior predictive simulations to a DHARMa object
 #' 
-#' @param simulatedResponse matrix of observations simulated from the fitted model - row index for observations and colum index for simulations 
+#' @param simulatedResponse matrix or data.frame of observations simulated from the fitted model - row index for observations and colum index for simulations 
 #' @param observedResponse true observations
 #' @param fittedPredictedResponse fitted predicted response. Optional, but will be neccessary for some plots. If scaled residuals are Bayesian p-values, using the median posterior prediction as fittedPredictedResponse is recommended. 
 #' @param integerResponse if T, noise will be added at to the residuals to maintain a uniform expectations for integer responses (such as Poisson or Binomial). Unlike in \code{\link{simulateResiduals}}, the nature of the data is not automatically detected, so this MUST be set by the user appropriately
@@ -46,26 +46,26 @@ residuals.DHARMa <- function(object, ...){
 #' @export
 createDHARMa <- function(simulatedResponse , observedResponse , fittedPredictedResponse = NULL, integerResponse = F){
 
+  simulatedResponse = as.matrix(simulatedResponse)
+  
   out = list()
   out$simulatedResponse = simulatedResponse
+  out$simulatedScale = apply(simulatedResponse, 1, sd)
   out$refit = F
   out$integerResponse = integerResponse
   out$observedResponse = observedResponse
-  
-  if(!is.matrix(simulatedResponse) & !is.null(observedResponse)) stop("either scaled residuals or simulations and observations have to be provided")
+
   if(ncol(simulatedResponse) < 2) stop("simulatedResponse with less than 2 simulations provided - cannot calculate residuals on that.")
-  
   if(ncol(simulatedResponse) < 10) warning("simulatedResponse with less than 10 simulations provided. This rarely makes sense")
   
   out$nObs = length(observedResponse)
-  
   if (out$nObs < 3) stop("warning - number of observations < 3 ... this rarely makes sense")
   
   if(! (out$nObs == nrow(simulatedResponse))) stop("dimensions of observedResponse and simulatedResponse do not match")
   
   out$nSim = ncol(simulatedResponse)
 
-  out$scaledResiduals = getQuantile(simulations = simulatedResponse , observed = observedResponse , n = out$nObs, nSim = out$nSim, integerResponse = integerResponse)
+  out$scaledResiduals = DHARMa:::getQuantile(simulations = simulatedResponse , observed = observedResponse , n = out$nObs, nSim = out$nSim, integerResponse = integerResponse)
     
   
   # makes sure that DHARM plots that rely on this vector won't crash  

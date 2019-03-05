@@ -1,35 +1,3 @@
-
-
-
-#' Test DHARMa compatibility
-#' 
-#' This helper function tests the compatibility of a model with DHARMa by trying to run various functions that are needed
-#' 
-#' @importFrom lme4 fixef
-#' @importFrom lme4 ranef
-#' @importFrom spaMM response
-#' @importFrom spaMM update_resp
-#' 
-#' @param fittedModel the fitted model
-#' 
-#' @author Florian Hartig
-#' @export
-#' 
-testModel <-function(fittedModel){
-  
-  family(fittedModel)
-  class(fittedModel)[1]
-  nobs(fittedModel)
-  getResponse(fittedModel)
-
-  x = getSimulations(fittedModel, nsim = 10)
-  predict(fittedModel)
-  coef(fittedModel)
-  ranef(fittedModel)
-  fixef(fittedModel)
-  refit(fittedModel, newresp = getResponse(fittedModel))
-}
-
 # New S3 methods
 
 #' Get model response
@@ -50,7 +18,13 @@ getResponse <- function (object, ...) {
 #' @rdname getResponse
 #' @export
 getResponse.default <- function (object, ...){
-  model.frame(object)[,1] 
+  x = model.frame(object)[,1] 
+  if(is.factor(x)){
+    if(nlevels(x) != 2) warning("The fitted model has a factorial response with number of levels not equal to 2 - there is currently no sensible application in DHARMa that would lead to this situation. Likely, you are trying something that doesn't work.")
+    else x = as.numeric(x) - 1
+  } 
+  if(is.matrix(x) || is.data.frame(x)) x = x[,1]
+  return(x)
 }
 
 
@@ -70,9 +44,14 @@ getResiduals <- function (object, ...) {
 }
 
 #' @rdname getResiduals
+#' 
+#' @param object a fitted model
+#' @param type the residual type
+#' @param var a simulation-based estimate of var
+#' 
 #' @export
-getResiduals.default <- function (object, type = "response", ...){
-  residuals(fittedModel, type = type, ...)
+getResiduals.default <- function (object, type = "response", var = NULL, ...){
+  residuals(object, type = type, ...)
 }
 
 
@@ -112,7 +91,7 @@ getPredictions.default <- function (object, type = "response", re.form = ~0, ...
 #' 
 #' @author Florian Hartig
 #' @export
-getSimulations <- function (object, ...) {
+getSimulations <- function (object, nsim = 1, ...) {
   UseMethod("getSimulations", object)
 }
 
@@ -120,25 +99,33 @@ getSimulations <- function (object, ...) {
 #' @export
 getSimulations.default <- function (object, nsim = 1, ...){
   
-  simulations = as.data.frame(simulate(object, nsim = nsim, ...))
+  out = list()
+  out$simOriginal = simulate(object, nsim = nsim, ...)
+  out$simStandardized = data.matrix(out$simOriginal)
+
+  if(ncol(out$simStandardized) == 2 * nsim){
+    out$simStandardized = out$simStandardized[,seq(1, (2*nsim), by = 2)]   
+    # if (class(object) == "glmmTMB")
+  }
+  out$simScale = apply(out$simStandardized, 1, sd)
   
-  if(is.vector(simulations[[1]])){
-    simulations = data.matrix(simulations)
-  } else if (is.matrix(simulations[[1]])){ 
-    # this is for the k/n binomial case
-    simulations = as.matrix(simulations)[,seq(1, (2*nsim), by = 2)]
-  } else if(is.factor(simulations[[1]])){
-    simulations = data.matrix(simulations) - 1
-  } else securityAssertion("Simulation results produced unsupported data structure", stop = T)
+  out$simRefit = as.data.frame(out$simOriginal)
   
-  return(simulations)
-  
+  # if ( & ncol(simulations) == 2*n){
+  #   simObserved = simulations[,(1+(2*(i-1))):(2+(2*(i-1)))]
+  # } else {
+  #   simObserved = simulations[,i]
+  # } 
+  return(out)
 }
 
 
 #' @importFrom lme4 refit
 NULL
 
+#' Get fixed effects
+#' 
+#' @export
 getFixedEffects <- function(fittedModel){
   
   if(class(fittedModel)[1] %in% c("glm", "lm", "gam", "bam", "negbin") ){

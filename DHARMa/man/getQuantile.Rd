@@ -6,6 +6,11 @@
 \usage{
 getQuantile(simulations, observed, n, nSim, integerResponse)
 }
+\arguments{
+\item{observed}{vector with observed data}
+
+\item{simlations}{simulations}
+}
 \description{
 Quantile calculations
 }

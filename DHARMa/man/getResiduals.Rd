@@ -8,7 +8,8 @@
 \usage{
 getResiduals(object, ...)
 
-\method{getResiduals}{default}(object, type = "response", ...)
+\method{getResiduals}{default}(object, type = "response", var = NULL,
+  ...)
 
 \method{getResiduals}{MixMod}(object, type = "subject_specific", ...)
 }
@@ -16,6 +17,12 @@ getResiduals(object, ...)
 \item{object}{a fitted model}
 
 \item{...}{additional parameters}
+
+\item{type}{the residual type}
+
+\item{var}{a simulation-based estimate of var}
+
+\item{object}{a fitted model}
 }
 \description{
 Extract the residuals of a fitted model
