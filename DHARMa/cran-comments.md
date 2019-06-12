@@ -1,3 +1,15 @@
+# Version 0.2.4
+
+## Submission 1
+
+This is a bugfix release, responding to an email from CRAN about a problem building the vignette. 
+
+This release was tested without apparent problems under
+
+* local MAC OS 10.14.1 (Mojave), R 3.5.1
+* http://win-builder.r-project.org/ - oldrelease / devel / release
+* Linux (Travis CI) - oldrel / release / devel
+
 # Version 0.2.3
 
 ## Submission 1

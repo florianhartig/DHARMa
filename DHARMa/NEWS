@@ -6,7 +6,7 @@ DHARMa 0.2.4
 
 Bugfixes
 
-- corrected capitalization in vignette (CRAN build problem)
+- corrected issues in the vignette 
 - small corrections to help
 
 DHARMa 0.2.3
