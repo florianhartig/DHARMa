@@ -2,7 +2,7 @@
 
 ## Submission 1
 
-This is a bugfix release, responding to an email from CRAN about a problem building the vignette. 
+This is a bugfix release, responding to an email from CRAN about a problem building the vignette. See NEWS for changes. 
 
 This release was tested without apparent problems under
 
