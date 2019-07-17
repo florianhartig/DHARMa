@@ -51,6 +51,18 @@ testUniformity<- function(simulationOutput, alternative = c("two.sided", "less",
   return(out)
 }
 
+
+# Experimental
+
+testBivariateUniformity<- function(simulationOutput, alternative = c("two.sided", "less", "greater"), plot = T){
+  #out <- suppressWarnings(ks.test(simulationOutput$scaledResiduals, 'punif', alternative = alternative))
+  #if(plot == T) plotQQunif(simulationOutput = simulationOutput)
+  return(out)
+}
+
+
+#unif.2017YMi(X, type = c("Q1", "Q2", "Q3"), lower = rep(0, ncol(X)),upper = rep(1, ncol(X)))
+
 #' Test for outliers 
 #' 
 #' This function tests if the number of observations that are strictly greater / smaller than all simulations are larger than expected 

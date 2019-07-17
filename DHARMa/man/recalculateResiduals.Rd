@@ -7,7 +7,7 @@
 recalculateResiduals(simulationOutput, group = NULL, aggregateBy = sum)
 }
 \arguments{
-\item{simulationOutput}{an object with simualted residuals created by \code{\link{simulateResiduals}}}
+\item{simulationOutput}{an object with simulated residuals created by \code{\link{simulateResiduals}}}
 
 \item{group}{group of each data point}
 

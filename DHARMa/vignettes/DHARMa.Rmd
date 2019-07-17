@@ -330,7 +330,7 @@ Note: previous versions of DHARMa (< 0.2.0) discouraged the simulated overdisper
 
 Below and example from there, which compares the four options to test for overdispersion (2 options to use DHARMa::testDispersoin, AER::dispersiontest, and DHARMa::testUniformity) for a Poisson glm
 
-![Comparison of power from simulation studies](overdispersion.png)
+![Comparison of power from simulation studies](Overdispersion.png)
 
 *A word of warning* that applies also to all other tests that follow: significance in hypothesis tests depends on at least 2 ingredients: strenght of the signal, and number of data points. Hence, the p-value alone is not a good indicator of the extent to which your residuals deviate from assumptions. Specifically, if you have a lot of data points, residual diagnostics will nearly inevitably become significant, because having a perfectly fitting model is very unlikely. That, however, doesn't neccessarily mean that you need to change your model. The p-values confirm that there is a deviation from your null hypothesis. It is, however, in your discretion to decide whether this deviation is worth worrying about. If you see a dispersion parameter of 1.01, I would not worry, even if the test is significant. A significant value of 5, however, is clearly a reason to move to a model that accounts for overdispersion. 
 

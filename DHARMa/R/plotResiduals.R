@@ -115,8 +115,8 @@ plotQQunif <- function(simulationOutput, testUniformity = T, testOutliers = T, .
 #' 
 #' The function creates a generic residual plot with either spline or quantile regression
 #' 
-#' @param pred either the predictor variable against which the residuals should be plotted, or a DHARMa object
-#' @param residuals residuals values. Leave empty if pred is a DHARMa object
+#' @param pred either the predictor variable against which the residuals should be plotted, or a DHARMa object, in which case res ~ pred is plotted
+#' @param residuals residuals values. Can be either numerical values, or a DHARMa object, from which residual values can be extracted
 #' @param quantreg whether to perform a quantile regression on 0.25, 0.5, 0.75 on the residuals. If F, a spline will be created instead. Default NULL chooses T for nObs < 2000, and F otherwise. 
 #' @param rank if T, the values of pred will be rank transformed. This will usually make patterns easier to spot visually, especially if the distribution of the predictor is skewed. If pred is a factor, this has no effect. 
 #' @param asFactor should the predictor variable be treated as a factor. Default is to choose this for <10 unique predictions, as long as enough predictions are available to draw a boxplot.
@@ -143,6 +143,8 @@ plotResiduals <- function(pred, residuals = NULL, quantreg = NULL, rank = F, asF
     if (is.null(residuals)) stop("DHARMa::plotResiduals - residual can only be NULL if pred is of class DHARMa")
     res = residuals
   }
+  if(class(residuals) == "DHARMa") res = residuals$scaledResiduals
+  
 
   # CHECK FOR LENGTH AND NA PROBLEM
   if(length(pred) != length(res)) {
@@ -198,10 +200,9 @@ plotResiduals <- function(pred, residuals = NULL, quantreg = NULL, rank = F, asF
       }
       matlines(sort(pred), matrix(unlist(p), nrow = length(pred), ncol = length(p)), col = "red", lty = 1)
     }
-  }else{
-
   }
   
+  return(data.frame(pred, res))
   
 }
 
