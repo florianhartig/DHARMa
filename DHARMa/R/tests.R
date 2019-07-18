@@ -283,7 +283,7 @@ testTemporalAutocorrelation <- function(simulationOutput, time = NULL , alternat
   
   if(is.null(time)){
     time = sample.int(simulationOutput$nObs, simulationOutput$nObs)
-    warning("DHARMa::testTemporalAutocorrelation - no time argument provided, using random times for each data point")
+    message("DHARMa::testTemporalAutocorrelation - no time argument provided, using random times for each data point")
   } 
   
   out = lmtest::dwtest(simulationOutput$scaledResiduals ~ 1, order.by = time, alternative = alternative)
@@ -324,16 +324,16 @@ testSpatialAutocorrelation <- function(simulationOutput, x = NULL, y  = NULL, di
   
   alternative <- match.arg(alternative)
 
-  if( (!is.null(x) | !is.null(y)) & !is.null(distMat) ) warning("both coordinates and distMat provided, calculations will be done based on the distance matrix, coordinates will only be used for plotting")
+  if( (!is.null(x) | !is.null(y)) & !is.null(distMat) ) message("both coordinates and distMat provided, calculations will be done based on the distance matrix, coordinates will only be used for plotting")
   # if not provided, fill x and y with random numbers (Null model)
   if(is.null(x)){
     x = runif(simulationOutput$nObs, -1,1) 
-    warning("DHARMa::testSpatialAutocorrelation - no x coordinates provided, using random values for each data point")
+    message("DHARMa::testSpatialAutocorrelation - no x coordinates provided, using random values for each data point")
   } 
   
   if(is.null(y)){
     y = runif(simulationOutput$nObs, -1,1)
-    warning("DHARMa::testSpatialAutocorrelation - no x coordinates provided, using random values for each data point")
+    message("DHARMa::testSpatialAutocorrelation - no x coordinates provided, using random values for each data point")
   } 
   
   # if not provided, create distance matrix based on x and y
