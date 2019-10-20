@@ -17,7 +17,7 @@ transformQuantiles(res, quantileFunction = qnorm, outlierValue = 7)
 The purpose of this function is to transform the DHARMa quantile residuals (which have a uniform distribution) to a particular pdf.
 }
 \details{
-See also https://github.com/florianhartig/DHARMa/issues/39
+Some of the papers on simulated quantile residuals transforming the residuals (which are natively uniform) back to a normal distribution. I presume this is because of the larger familiarity of most users with normal residuals. Personally, I never considered this desirable, for the reasons explained in https://github.com/florianhartig/DHARMa/issues/39, but with this function, I wanted to give users the option to plot normal residuals if they so wish.
 }
 \examples{
 plot(res$fittedPredictedResponse, transformQuantiles(res))
