@@ -57,6 +57,7 @@ testUniformity<- function(simulationOutput, alternative = c("two.sided", "less",
 testBivariateUniformity<- function(simulationOutput, alternative = c("two.sided", "less", "greater"), plot = T){
   #out <- suppressWarnings(ks.test(simulationOutput$scaledResiduals, 'punif', alternative = alternative))
   #if(plot == T) plotQQunif(simulationOutput = simulationOutput)
+  out = NULL
   return(out)
 }
 

@@ -20,5 +20,12 @@ The purpose of this function is to transform the DHARMa quantile residuals (whic
 Some of the papers on simulated quantile residuals transforming the residuals (which are natively uniform) back to a normal distribution. I presume this is because of the larger familiarity of most users with normal residuals. Personally, I never considered this desirable, for the reasons explained in https://github.com/florianhartig/DHARMa/issues/39, but with this function, I wanted to give users the option to plot normal residuals if they so wish.
 }
 \examples{
+
+set.seed(1)
+testData = createData(sampleSize = 200, family = poisson())
+fittedModel <- glmer(observedResponse ~ Environment1 + (1|group), 
+                     family = "poisson", data = testData)
+res <- simulateResiduals(fittedModel = fittedModel)
 plot(res$fittedPredictedResponse, transformQuantiles(res))
+
 }
