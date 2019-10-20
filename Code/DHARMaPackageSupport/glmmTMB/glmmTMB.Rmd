@@ -31,6 +31,17 @@ Currently, glmmTMB doesn't support the reform argument. Also,
 
 all predictions and simulations are conditional on REs, problematic for some of the residual tests, see https://github.com/florianhartig/DHARMa/issues/43
 
+
+```{r}
+ # creating test data according to standard poisson GLMM assumptions
+testData = createData(sampleSize = 200, randomEffectVariance = 1.5, family = poisson(), numGroups = 20)
+m1 <- glmmTMB(observedResponse ~ Environment1 + (1|group), family = "poisson", data = testData)
+res = simulateResiduals(m1)
+plot(res)
+```
+
+
+
 ```{r}
 m1 <- glmmTMB(count~ mined + (1|site), family=poisson, data=Salamanders)
 
@@ -102,7 +113,7 @@ Binomial required a few adjustments, because the simulate function in glmmTMB do
 standard binomial with DHARMa test data
 
 ```{r}
-testData = createData(sampleSize = 100, fixedEffects = 2, family = binomial(), randomEffectVariance = 0)
+testData = createData(sampleSize = 100, fixedEffects = , family = binomial(), randomEffectVariance = 0)
 
 m <- glmmTMB(observedResponse ~ Environment1 , data=testData, family=binomial)
 res = simulateResiduals(m)
