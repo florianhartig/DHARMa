@@ -15,7 +15,7 @@ plotSimulatedResiduals(simulationOutput, ...)
 DEPRECATED, use plot() instead
 }
 \note{
-THis function is deprecated. Use \code{\link{plot.DHARMa}}
+This function is deprecated. Use \code{\link{plot.DHARMa}}
 }
 \seealso{
 \code{\link{plotResiduals}}, \code{\link{plotQQunif}}
