@@ -10,7 +10,7 @@ testTemporalAutocorrelation(simulationOutput, time = NULL,
 \arguments{
 \item{simulationOutput}{an object with simulated residuals created by \code{\link{simulateResiduals}}}
 
-\item{time}{the time, in the same order as the data points. If set to "random", random values will be created}
+\item{time}{the time, in the same order as the data points. If not provided, random values will be created}
 
 \item{alternative}{a character string specifying whether the test should test if observations are "greater", "less" or "two.sided" compared to the simulated null hypothesis}
 
@@ -21,9 +21,17 @@ This function performs a standard test for temporal autocorrelation on the simul
 }
 \details{
 The function performs a Durbin-Watson test on the uniformly scaled residuals, and plots the residuals against time. The DB test was originally be designed for normal residuals. In simulations, I didn't see a problem with this setting though. The alternative is to transform the uniform residuals to normal residuals and perform the DB test on those.
+
+If no time values are provided, random values will be created. The sense of being able to run the test with time = NULL (random values) is to test the rate of false positives under the current residual structure (random time corresponds to H0: no spatial autocorrelation), e.g. to check if the test has noninal error rates for particular residual structures (note that Durbin-Watson originally assumes normal residuals, error rates seem correct for uniform residuals, but may not be correct if there are still other residual problems).
+
+Testing for temporal autocorrelation requires unique time values - if you have several observations per time value, either use the recalculateResiduals function to aggregate residuals per time step, or extract the residuals from the fitted object, and plot / test each of them independently for temporally repeated subgroups (typical choices would be location / subject etc.). Note that the latter must be done by hand, outside testSpatialAutocorrelation.
 }
 \note{
-The sense of being able to run the test with time = NULL (random values) is to test the rate of false positives under the current residual structure (random time corresponds to H0: no spatial autocorrelation), e.g. to check if the test has noninal error rates for particular residual structures (note that Durbin-Watson originally assumes normal residuals, error rates seem correct for uniform residuals, but may not be correct if there are still other residual problems).
+Important to note for all autocorrelation tests (spatial / temporal): the autocorrelation tests are valid to check for residual autocorrelation in models that don't assume such a correlation (in this case, you can use conditional or unconditional simulations), or if there is remaining residual autocorrelation after accounting for it in a spatial/temporal model (in that case, you have to use conditional simulations), but if checking unconditional simulations from a model with an autocorrelation structure on data that corresponds to this model, they will be significant, even if the model fully accounts for this structure. 
+
+This behavior is not really a bug, but rather originates from the definition of the quantile residuals: quantile residuals are calculated independently per data point, i.e. without consideratin of any correlation structure between data points that may exist in the simulations. As a result, the simulated distributions from a unconditional simulaton will typically not reflect the correlation structure that is present in each single simulation, and the same is true for the subsequently calculated quantile residuals. 
+
+The bottomline here is that spatial / temporal / other autoregressive models should either be tested based on conditional simulations, or (ideally) custom tests should be used that are not based on quantile residuals, but rather compare the correlation structure in the simulated data with the correlation structure in the observed data.
 }
 \examples{
 testData = createData(sampleSize = 40, family = gaussian())
@@ -35,6 +43,40 @@ testTemporalAutocorrelation(res, time =  testData$time)
 
 # If no time is provided, random values will be created
 testTemporalAutocorrelation(res)
+
+# If you have several observations per time step
+
+timeSeries1 = createData(sampleSize = 40, family = gaussian())
+timeSeries1$location = 1
+timeSeries2 = createData(sampleSize = 40, family = gaussian())
+timeSeries2$location = 2
+testData = rbind(timeSeries1, timeSeries2)
+
+fittedModel <- lm(observedResponse ~ Environment1, data = testData)
+res = simulateResiduals(fittedModel)
+
+# for this, you cannot do testTemporalAutocorrelation(res, time = testData$time)
+# because here we would have observations with the same time, i.e. 
+# zero difference in time. We have two options a) aggregate observations
+# b) calculate / test per subset. Testing per subset might also be useful
+# if you have several locations, regardless of whether the times are 
+# identical, because you would expect the autocorrelation structure to be 
+# independent per location
+
+# testing grouped residuals 
+
+res = recalculateResiduals(res, group = testData$time)
+testTemporalAutocorrelation(res, time = unique(testData$time))
+
+# plotting and testing per subgroup
+
+# extract subgroup
+testData$Residuals = res$scaledResiduals
+temp = testData[testData$location == 1,]
+
+# plots and tests
+plot(Residuals ~ time, data = temp)
+lmtest::dwtest(temp$Residuals ~ 1, order.by = temp$time)
 
 }
 \seealso{
