@@ -1,9 +1,20 @@
+Submission Checklist
+
+
+
+
+
+
+https://cran.r-project.org/web/checks/check_results_DHARMa.html
+
+
+
 
 ## Prepare release
 
 * All issues resolved?
-* Appropriate unit tests created?
-* Update help / description files -> date, version number, etc.
+  * Appropriate unit tests created?
+  * Update help / description files -> date, version number, etc.
 * Make sure RStudio check function checks out
 * Cross-check compatibility with CRAN requirements
 
