@@ -211,7 +211,7 @@ plotResiduals <- function(pred, residuals = NULL, quantreg = NULL, rank = F, asF
     }
   }
   
-  return(data.frame(pred, res))
+  invisible(data.frame(pred, res))
   
 }
 
