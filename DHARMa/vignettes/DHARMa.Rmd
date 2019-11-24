@@ -70,9 +70,9 @@ These steps are visualized in the following figure
 
 <img src="ECDFmotivation.png" width="400">
 
-The key motivation behind this definition is that we have a clear expectations how these residuals should be distributed. If the model is correctly specified, then the observed data should look as if they were created from the fitted model. Hence, for a correctly specified model, all values of the cumulative distribution should appear with equal probability. That means we expect the distribution of the residuals to be flat, regardless of the model structure (Poisson, binomial, random effects and so on).
+The key advantage of this definition is that the so-defined residuals always have the same, known distribution, independent of the model that is fit, if the model is correctly specified. To see this, note that, if the observed data was created from the same data-generating process that we simulate from, all values of the cumulative distribution should appear with equal probability. That means we expect the distribution of the residuals to be flat, regardless of the model structure (Poisson, binomial, random effects and so on).
 
-I currently prepare a more exact statistical justification for the approach in an accompanying paper, but if you must provide a reference in the meantime I would suggest citing 
+I currently prepare a more exact statistical justification for the approach in an accompanying paper, but if you must provide a reference in the meantime, I would suggest citing 
 
 * Dunn, K. P., and Smyth, G. K. (1996). Randomized quantile residuals. Journal of Computational and Graphical Statistics 5, 1-10. 
 
@@ -144,10 +144,11 @@ plot(simulationOutput)
 
 which creates a qq-plot to detect overall deviations from the expected distribution (with added tests for uniformity and outliers), and a plot of the residuals against the predicted value. 
 
-In the plot res ~ predicted, simulation outliers are highlighted as red stars. By simulation outliers, I mean data points that are outside the range of simulated values. Because no data was simulated in that range, we actually don't know "how much" these values deviate from the model expecation, so the term "outlier" should be used with a grain of salt. Note also that the probability of an outlier depends on the number of simulations (in fact, it is 1/(nSim +1) for each side), so whether the existence of outliers is a reason for concern depends also on the number of simulations. 
+In the plot res ~ predicted, simulation outliers are highlighted as red stars. By simulation outliers, I mean data points that are outside the range of simulated values. Because no data was simulated in that range, we actually don't know "how much" these values deviate from the model expectation, so the term "outlier" should be used with a grain of salt. Note also that the probability of an outlier depends on the number of simulations (in fact, it is 1/(nSim +1) for each side), so whether the existence of outliers is a reason for concern depends also on the number of simulations. 
 
 To provide a visual aid in detecting deviations from uniformity in y-direction, the plot function calculates an (optional) quantile regression, which compares the empirical 0.25, 0.5 and 0.75 quantiles in y direction (red solid lines) with the theoretical 0.25, 0.5 and 0.75 quantiles (dashed black line). 
-Assymptotically (i.e. for lots of data / residuals), if the model is correct, theoretical and the empirical quantiles should be identical (i.e. dashed and solid lines should match).
+
+Asymptotically (i.e. for lots of data / residuals), if the model is correct, theoretical and the empirical quantiles should be identical (i.e. dashed and solid lines should match).
  
 In practice, however, there will be only a finite and often small number of residuals. If the model is correct, these residuals are drawn from the theoretical (uniform) distribution, but because of the limited sample size, the empirical quantiles of these residuals will never perfectly match the theoretical quantiles. It's the same as in a normal linear regression - even if the model is entirely correct, the qq-plot (or any other residual plot) for a few data points will never perfectly match the theoretical quantiles.
 
@@ -216,7 +217,7 @@ If the model is correctly specified and the fitting procedure is unbiased (discl
 
 #### Integer treatment / randomization
 
-A third option is the treatment of integer responses. The background of this option is that, for integer-valued variables, some additional steps are neccessary to make sure that the residual distribution becomes flat (essentially, we have to smoothen away the integer nature of the data). The idea is explained in 
+A third option is the treatment of integer responses. The background of this option is that, for integer-valued variables, some additional steps are necessary to make sure that the residual distribution becomes flat (essentially, we have to smoothen away the integer nature of the data). The idea is explained in 
 
 * Dunn, K. P., and Smyth, G. K. (1996). Randomized quantile residuals. Journal of Computational and Graphical Statistics 5, 1-10. 
 
@@ -244,7 +245,7 @@ simulationOutput$randomState
 
 If you want to reproduce simualtions for such a run, set the variable .Random.seed by hand, and simulate with seed = NULL. 
 
-Moreover (general advice), to ensure reproducibility, it's advisable to add a set.seed() at the beginning, and a session.info() at the end of your script. The latter will lists the version number of R and all loaded packages.
+Moreover (general advice), to ensure reproducibility, it's advisable to add a set.seed() at the beginning, and a session.info() at the end of your script. The latter will list the version number of R and all loaded packages.
 
 # Interpreting residuals and recognizing misspecification problems 
 
@@ -252,7 +253,7 @@ In all plots / tests that were shown so far, the model was correctly specified, 
 
 1. The fact that none of the here-presented tests shows a misspecification problem doesn't proof that the model is correctly specified. There are likely a large number of structural problems that will not show a pattern in the standard residual plots. 
 
-2. Conversely, while a clear pattern in the residuals indicates with good reliability that the observed data would not be likely to originate from the fitted model, it doesn't neccessarily indicate that the model results are not usuable. There are many cases where it is common practice to work "wrong models". For example, random effect estimates (in particular in GLMMs) are often slightly biased, especially if the model is fit with MLE. For that reason, DHARMa will often show a slight pattern in the residuals even if the model is correctly specified, and tests for this can get significant for large sample sizes. Another example is data that is missing at random (MAR) (see [here](https://github.com/florianhartig/DHARMa/issues/101)). It is know that this phenomenon does not createa bias on the fixed effect estimates, and it is therefore common practice to fit this data with mixed models. Nevertheless, DHARMa recognizes that the observed data looks different than what would be expected from the model assummptions, and flags the model as problemaetic
+2. Conversely, while a clear pattern in the residuals indicates with good reliability that the observed data would not be likely to originate from the fitted model, it doesn't necessarily  indicate that the model results are not useable. There are many cases where it is common practice to work "wrong models". For example, random effect estimates (in particular in GLMMs) are often slightly biased, especially if the model is fit with MLE. For that reason, DHARMa will often show a slight pattern in the residuals even if the model is correctly specified, and tests for this can get significant for large sample sizes. Another example is data that is missing at random (MAR) (see [here](https://github.com/florianhartig/DHARMa/issues/101)). It is known that this phenomenon does not createa bias on the fixed effect estimates, and it is therefore common practice to fit this data with mixed models. Nevertheless, DHARMa recognizes that the observed data looks different than what would be expected from the model assumptions, and flags the model as problematic
   
 **Important conclusion: DHARMa only flags a difference between the observed and expected data - the user has to decide whether this difference is actually a problem for the analysis!**
 
@@ -297,8 +298,12 @@ summary(fittedModel)
 
 simulationOutput <- simulateResiduals(fittedModel = fittedModel)
 plot(simulationOutput)
+```
+
+```{r fig.width=4.5, fig.height=4.5}
 testUniformity(simulationOutput = simulationOutput)
 ```
+
 
 Here, we get too many residuals around 0.5, which means that we are not getting as many residuals as we would expect in the tail of the distribution than expected from the fitted model. 
 
@@ -314,7 +319,7 @@ DHARMa therefore contains two overdispersion tests that compares the dispersion 
 
 You can call these tests as follows: 
 
-```{r overDispersionTest, echo = T}
+```{r overDispersionTest, echo = T, fig.width=4.5, fig.height=4.5}
 
 # Option 2
 testDispersion(simulationOutput)
@@ -336,7 +341,7 @@ Below and example from there, which compares the four options to test for overdi
 
 ![Comparison of power from simulation studies](Overdispersion.png)
 
-*A word of warning* that applies also to all other tests that follow: significance in hypothesis tests depends on at least 2 ingredients: strenght of the signal, and number of data points. Hence, the p-value alone is not a good indicator of the extent to which your residuals deviate from assumptions. Specifically, if you have a lot of data points, residual diagnostics will nearly inevitably become significant, because having a perfectly fitting model is very unlikely. That, however, doesn't neccessarily mean that you need to change your model. The p-values confirm that there is a deviation from your null hypothesis. It is, however, in your discretion to decide whether this deviation is worth worrying about. If you see a dispersion parameter of 1.01, I would not worry, even if the test is significant. A significant value of 5, however, is clearly a reason to move to a model that accounts for overdispersion. 
+*A word of warning* that applies also to all other tests that follow: significance in hypothesis tests depends on at least 2 ingredients: strenght of the signal, and number of data points. Hence, the p-value alone is not a good indicator of the extent to which your residuals deviate from assumptions. Specifically, if you have a lot of data points, residual diagnostics will nearly inevitably become significant, because having a perfectly fitting model is very unlikely. That, however, doesn't necessarily mean that you need to change your model. The p-values confirm that there is a deviation from your null hypothesis. It is, however, in your discretion to decide whether this deviation is worth worrying about. If you see a dispersion parameter of 1.01, I would not worry, even if the test is significant. A significant value of 5, however, is clearly a reason to move to a model that accounts for overdispersion. 
 
 ## Zero-inflation / k-inflation or deficits
 
@@ -400,7 +405,7 @@ To test for generic excess / deficits of particular values, we have the function
 
 Choose one of alternative = c("greater", "two.sided", "less") to test for inflation / deficit or both. Default is "greater" = inflation. 
 
-```{r}
+```{r, fig.width=4.5, fig.height=4.5}
 countOnes <- function(x) sum(x == 1)  # testing for number of 1s
 testGeneric(simulationOutput, summary = countOnes, alternative = "greater") # 1-inflation
 ```
@@ -508,7 +513,7 @@ The spatial autocorrelation test performs the Moran.I test from the package ape 
 
 An additional test against randomized space (H0) can be performed, for the same reasons as explained above.
 
-```{r, fig.width=4, fig.height=4}
+```{r, fig.width=4.5, fig.height=4.5}
 testSpatialAutocorrelation(simulationOutput = simulationOutput, x = testData$x, y= testData$y)
 testSpatialAutocorrelation(simulationOutput = simulationOutput)
 ```
@@ -646,13 +651,14 @@ plot(simulationOutput)
 
 The residuals look clearly overdispersed. We can confirm that with the omnibus test
 
-```{r}
+
+```{r, fig.width=4.5, fig.height=4.5}
 testUniformity(simulationOutput = simulationOutput)
 ```
 
 Or with the more powerful overdispersion test 
 
-```{r}
+```{r, fig.width=4.5, fig.height=4.5}
 testOverdispersion(simulationOutput = simulationOutput)
 ```
 
