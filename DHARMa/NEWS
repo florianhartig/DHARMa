@@ -1,8 +1,19 @@
 NOTE: for more news about the package, see https://github.com/florianhartig/DHARMa/releases
 
+DHARMa 0.2.6
+============
+
+Bugfixes
+
+- return of plotResiduals set to invisible
+
 
 DHARMa 0.2.5
 ============
+
+New features
+
+- transformQuantiles function added to transform uniform DHARMa residuals to normal or other residuals
 
 Minor changes
 
