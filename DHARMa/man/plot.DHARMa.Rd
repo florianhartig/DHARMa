@@ -25,7 +25,7 @@ b) uniformity of residuals in the vertical direction in the res against predicto
 
 Deviations of this can be interpreted as for a linear regression. See the vignette for detailed examples. 
 
-To provide a visual aid in detecting deviations from uniformity in y-direction, the plot of the residuals against the predited values also performs an (optional) quantile regression, which provides 0.25, 0.5 and 0.75 quantile lines across the plots. These lines should be straight, horizontal, and at y-values of 0.25, 0.5 and 0.75. Note, however, that some deviations from this are to be expected by chance, even for a perfect model, especially if the sample size is small. See further comments on this plot, and options, in \code{\link{plotResiduals}}
+To provide a visual aid in detecting deviations from uniformity in y-direction, the plot of the residuals against the predited values also performs an (optional) quantile regression, which provides 0.25, 0.5 and 0.75 quantile lines across the plots. These lines should be straight, horizontal, and at y-values of 0.25, 0.5 and 0.75. Note, however, that some deviations from this are to be expected by chance, even for a perfect model, especially if the sample size is small. See further comments on this plot, it's interpreation and options, in \code{\link{plotResiduals}}
 
 The quantile regression can take some time to calculate, especially for larger datasets. For that reason, quantreg = F can be set to produce a smooth spline instead. This is default for n > 2000.
 }
@@ -53,6 +53,9 @@ hist(simulationOutput )
 
 # rank transformation, using a simulationOutput
 plotResiduals(simulationOutput, rank = TRUE, quantreg = FALSE)
+
+# smooth scatter plot - usually used for large datasets, default for n > 10000
+plotResiduals(simulationOutput, rank = TRUE, quantreg = FALSE, smoothScatter = TRUE)
 
 # residual vs predictors, using explicit values for pred, residual 
 plotResiduals(pred = testData$Environment1, 

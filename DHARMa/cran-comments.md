@@ -1,3 +1,28 @@
+# Version 0.2.6
+
+## Submission 1, 26.11.19
+
+This release fixes a bug in the vignette that appeared after last release last week. See NEWS for changes. 
+
+This release was tested without apparent problems under
+
+* local MAC OS 10.14.1 (Mojave), R 3.6.1
+* http://win-builder.r-project.org/ - oldrelease / devel / release
+* Linux (Travis CI) - oldrel / release / devel
+
+
+# Version 0.2.5
+
+## Submission 1
+
+This is a minor bugfix release. See NEWS for changes. 
+
+This release was tested without apparent problems under
+
+* local MAC OS 10.14.1 (Mojave), R 3.6.1
+* http://win-builder.r-project.org/ - oldrelease / devel / release
+* Linux (Travis CI) - oldrel / release / devel
+
 # Version 0.2.4
 
 ## Submission 1
