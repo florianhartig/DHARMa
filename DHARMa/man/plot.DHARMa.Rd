@@ -54,6 +54,9 @@ hist(simulationOutput )
 # rank transformation, using a simulationOutput
 plotResiduals(simulationOutput, rank = TRUE, quantreg = FALSE)
 
+# smooth scatter plot - usually used for large datasets, default for n > 10000
+plotResiduals(simulationOutput, rank = TRUE, quantreg = FALSE, smoothScatter = T)
+
 # residual vs predictors, using explicit values for pred, residual 
 plotResiduals(pred = testData$Environment1, 
               residuals = simulationOutput$scaledResiduals, quantreg = FALSE)

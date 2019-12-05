@@ -120,6 +120,7 @@ plotQQunif <- function(simulationOutput, testUniformity = T, testOutliers = T, .
 #' @param quantreg whether to perform a quantile regression on 0.25, 0.5, 0.75 on the residuals. If F, a spline will be created instead. Default NULL chooses T for nObs < 2000, and F otherwise. 
 #' @param rank if T, the values of pred will be rank transformed. This will usually make patterns easier to spot visually, especially if the distribution of the predictor is skewed. If pred is a factor, this has no effect. 
 #' @param asFactor should the predictor variable be treated as a factor. Default is to choose this for <10 unique predictions, as long as enough predictions are available to draw a boxplot.
+#' @param smoothScatter if T, a smooth scatter plot will plotted instead of a normal scatter plot. This makes sense when the number of residuals is very large. Default NULL chooses T for nObs < 10000, and F otherwise. 
 #' @param ... additional arguments to plot / boxplot. 
 #' @details The function plots residuals against a predictor (e.g. fitted value, or any other predictor). 
 #' 
@@ -141,7 +142,7 @@ plotQQunif <- function(simulationOutput, testUniformity = T, testOutliers = T, .
 #' @seealso \code{\link{plotSimulatedResiduals}}, \code{\link{plotQQunif}}
 #' @example inst/examples/plotsHelp.R
 #' @export
-plotResiduals <- function(pred, residuals = NULL, quantreg = NULL, rank = F, asFactor = NULL, ...){
+plotResiduals <- function(pred, residuals = NULL, quantreg = NULL, rank = F, asFactor = NULL, smoothScatter = NULL, ...){
   
   # conversions from DHARMa 
   if(class(pred) == "DHARMa"){
@@ -178,6 +179,7 @@ plotResiduals <- function(pred, residuals = NULL, quantreg = NULL, rank = F, asF
   }
   
   if(is.null(quantreg)) if (length(res) > 2000) quantreg = FALSE else quantreg = TRUE
+  if(is.null(smoothScatter)) if (length(res) > 10000) smoothScatter = TRUE else smoothScatter = FALSE
 
   defaultCol = ifelse(res == 0 | res == 1, 2,1)   
   defaultPch = ifelse(res == 0 | res == 1, 8,1)   
@@ -186,6 +188,10 @@ plotResiduals <- function(pred, residuals = NULL, quantreg = NULL, rank = F, asF
   pch = checkDots("pch", defaultPch, ...)
   
   if(is.factor(pred)) plot(res ~ pred, ylim = c(0,1), axes = FALSE, ...)
+  else if (smoothScatter == TRUE) {
+    smoothScatter(pred, res , ylim = c(0,1), axes = FALSE, colramp = colorRampPalette(c("white", "black")))
+    points(pred[defaultCol == 2], res[defaultCol == 2], col = "red", cex = 0.5)
+  }
   else plot(res ~ pred, ylim = c(0,1), axes = FALSE, col = col, pch = pch, ...)
   
   axis(1)

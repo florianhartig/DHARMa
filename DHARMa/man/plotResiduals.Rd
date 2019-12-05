@@ -5,7 +5,7 @@
 \title{Generic residual plot with either spline or quantile regression}
 \usage{
 plotResiduals(pred, residuals = NULL, quantreg = NULL, rank = F,
-  asFactor = NULL, ...)
+  asFactor = NULL, smoothScatter = NULL, ...)
 }
 \arguments{
 \item{pred}{either the predictor variable against which the residuals should be plotted, or a DHARMa object, in which case res ~ pred is plotted}
@@ -17,6 +17,8 @@ plotResiduals(pred, residuals = NULL, quantreg = NULL, rank = F,
 \item{rank}{if T, the values of pred will be rank transformed. This will usually make patterns easier to spot visually, especially if the distribution of the predictor is skewed. If pred is a factor, this has no effect.}
 
 \item{asFactor}{should the predictor variable be treated as a factor. Default is to choose this for <10 unique predictions, as long as enough predictions are available to draw a boxplot.}
+
+\item{smoothScatter}{if T, a smooth scatter plot will plotted instead of a normal scatter plot. This makes sense when the number of residuals is very large. Default NULL chooses T for nObs < 10000, and F otherwise.}
 
 \item{...}{additional arguments to plot / boxplot.}
 }
@@ -65,6 +67,9 @@ hist(simulationOutput )
 
 # rank transformation, using a simulationOutput
 plotResiduals(simulationOutput, rank = TRUE, quantreg = FALSE)
+
+# smooth scatter plot - usually used for large datasets, default for n > 10000
+plotResiduals(simulationOutput, rank = TRUE, quantreg = FALSE, smoothScatter = T)
 
 # residual vs predictors, using explicit values for pred, residual 
 plotResiduals(pred = testData$Environment1, 
