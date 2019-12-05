@@ -23,7 +23,7 @@ hist(simulationOutput )
 plotResiduals(simulationOutput, rank = TRUE, quantreg = FALSE)
 
 # smooth scatter plot - usually used for large datasets, default for n > 10000
-plotResiduals(simulationOutput, rank = TRUE, quantreg = FALSE, smoothScatter = T)
+plotResiduals(simulationOutput, rank = TRUE, quantreg = FALSE, smoothScatter = TRUE)
 
 # residual vs predictors, using explicit values for pred, residual 
 plotResiduals(pred = testData$Environment1, 

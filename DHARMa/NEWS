@@ -3,9 +3,22 @@ NOTE: for more news about the package, see https://github.com/florianhartig/DHAR
 DHARMa 0.2.6
 ============
 
+
+New features
+
+- added smooth scatter in plotResiduals https://github.com/florianhartig/DHARMa/commit/da01d8c7a9a74558817e4a73fe826084164cf05d
+
 Bugfixes
 
-- return of plotResiduals set to invisible
+
+
+
+DHARMa 0.2.6
+============
+
+Bugfixes
+
+- return of plotResiduals set to invisible 
 
 
 DHARMa 0.2.5
