@@ -36,7 +36,8 @@ Imports:
     spaMM (>= 2.6.0)
 Suggests:
     knitr,
-    testthat
+    testthat,
+    KernSmooth
 License: GPL (>= 3)
 URL: http://florianhartig.github.io/DHARMa/
 BugReports: https://github.com/florianhartig/DHARMa/issues
