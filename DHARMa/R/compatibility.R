@@ -77,7 +77,6 @@ getSimulations.default <- function (object, ...){
 NULL
 
 
-
 getFixedEffects <- function(fittedModel){
   
   if(class(fittedModel)[1] %in% c("glm", "lm", "gam", "bam", "negbin") ){
@@ -123,6 +122,33 @@ refit.lm <- function(object, newresp, ...){
   return(refittedModel)
 }
 
+######### GLM #############
+
+
+#' Plot for a glm
+#' 
+#' @param x a fitted glm
+#' @param ... further arguments to be based on to plot.DHARMa
+#' @export
+plot.glm <- function(x, ...){
+  res <- simulateResiduals(x)
+  plot(res, ...)
+  invisible(res)
+}
+
+#' Refit a Model with a Different Response
+#' 
+#' @param x a fitted glm
+#' @param type type of residuals
+#' @param ... further arguments to be based on to plot.DHARMa
+#' @export
+residuals.glm <- function(object, type = c("DHARMa", "deviance", "pearson", "working", "response", "partial"), ...){
+  type <- match.arg(type)
+  if(type == "DHARMa"){
+    res <- simulateResiduals(object)
+    plot(res, ...)   
+  }
+}
 
 
 ######## MGCV ############
