@@ -4,7 +4,7 @@
 #'
 #' This function is a wrapper for the various test functions implemented in DHARMa. Currently, this function calls the \code{\link{testUniformity}} and the \code{\link{testDispersion}} functions. All other tests (see below) have to be called by hand.
 #' 
-#' @param simulationOutput a DHARMa object with simulated residuals created with \code{\link{simulateResiduals}}
+#' @param simulationOutput an object of class DHARMa with simulated quantile residuals, either created via \code{\link{simulateResiduals}} or by \code{\link{createDHARMa}} for simulations created outside DHARMa 
 #' @author Florian Hartig
 #' @export
 #' @seealso \code{\link{testUniformity}}, \code{\link{testOutliers}}, \code{\link{testDispersion}}, \code{\link{testZeroInflation}}, \code{\link{testGeneric}}, \code{\link{testTemporalAutocorrelation}}, \code{\link{testSpatialAutocorrelation}}
@@ -25,7 +25,7 @@ testResiduals <- function(simulationOutput){
 #' 
 #' @details Deprecated, switch your code to using the \code{\link{testResiduals}} function
 #' 
-#' @param simulationOutput a DHARMa object with simulated residuals created with \code{\link{simulateResiduals}}
+#' @param simulationOutput an object of class DHARMa with simulated quantile residuals, either created via \code{\link{simulateResiduals}} or by \code{\link{createDHARMa}} for simulations created outside DHARMa 
 #' @author Florian Hartig
 #' @export
 testSimulatedResiduals <- function(simulationOutput){
@@ -38,7 +38,7 @@ testSimulatedResiduals <- function(simulationOutput){
 #' 
 #' This function tests the overall uniformity of the simulated residuals in a DHARMa object
 #' 
-#' @param simulationOutput a DHARMa object with simulated residuals created with \code{\link{simulateResiduals}}
+#' @param simulationOutput an object of class DHARMa with simulated quantile residuals, either created via \code{\link{simulateResiduals}} or by \code{\link{createDHARMa}} for simulations created outside DHARMa 
 #' @param alternative a character string specifying whether the test should test if observations are "greater", "less" or "two.sided" compared to the simulated null hypothesis. See \code{\link[stats]{ks.test}} for details  
 #' @param plot if T, plots calls \code{\link{plotQQunif}} as well 
 #' @details The function applies a \code{\link[stats]{ks.test}} for uniformity on the simulated residuals.
@@ -68,7 +68,7 @@ testBivariateUniformity<- function(simulationOutput, alternative = c("two.sided"
 #' 
 #' This function tests if the number of observations that are strictly greater / smaller than all simulations are larger than expected 
 #' 
-#' @param simulationOutput a DHARMa object with simulated residuals created with \code{\link{simulateResiduals}}
+#' @param simulationOutput an object of class DHARMa with simulated quantile residuals, either created via \code{\link{simulateResiduals}} or by \code{\link{createDHARMa}} for simulations created outside DHARMa 
 #' @param alternative a character string specifying whether the test should test if observations are "greater", "less" or "two.sided" compared to the simulated null hypothesis  
 #' @param plot if T, the function will create an additional plot
 #' @details DHARMa residuals are created by simulating from the fitted model, and comparing the simulated values to the observed data. It can occur that all simulated values are higher or smaller than the observed data, in which case they get the residual value of 0 and 1, respectively. I refer to these values as simulation outliers, or simply outliers. 
@@ -119,7 +119,7 @@ testOutliers <- function(simulationOutput, alternative = c("two.sided", "greater
 #' 
 #' This function performs a simulation-based test for over/underdispersion 
 #' 
-#' @param simulationOutput a DHARMa object with simulated residuals created with \code{\link{simulateResiduals}}
+#' @param simulationOutput an object of class DHARMa with simulated quantile residuals, either created via \code{\link{simulateResiduals}} or by \code{\link{createDHARMa}} for simulations created outside DHARMa 
 #' @param plot whether to plot output
 #' @param alternative a character string specifying whether the test should test if observations are "greater", "less" or "two.sided" compared to the simulated null hypothesis. Greater corresponds to overdispersion.   
 #' @param ... arguments to pass on to \code{\link{testGeneric}}
@@ -177,7 +177,7 @@ testDispersion <- function(simulationOutput, alternative = c("two.sided", "great
 #' 
 #' @details Deprecated, switch your code to using the \code{\link{testDispersion}} function
 #' 
-#' @param simulationOutput a DHARMa object with simulated residuals created with \code{\link{simulateResiduals}}
+#' @param simulationOutput an object of class DHARMa with simulated quantile residuals, either created via \code{\link{simulateResiduals}} or by \code{\link{createDHARMa}} for simulations created outside DHARMa 
 #' @param ... additional arguments to \code{\link{testDispersion}}
 #' @export
 testOverdispersion <- function(simulationOutput, ...){
@@ -201,7 +201,7 @@ testOverdispersionParametric <- function(...){
 #' 
 #' This function compares the observed number of zeros with the zeros expected from simulations. 
 #' 
-#' @param simulationOutput a DHARMa object with simulated residuals created with \code{\link{simulateResiduals}}
+#' @param simulationOutput an object of class DHARMa with simulated quantile residuals, either created via \code{\link{simulateResiduals}} or by \code{\link{createDHARMa}} for simulations created outside DHARMa 
 #' @param ... further arguments to \code{\link{testGeneric}}
 #' @details shows the expected distribution of zeros against the observed
 #' @author Florian Hartig
@@ -218,7 +218,7 @@ testZeroInflation <- function(simulationOutput, ...){
 #' 
 #' This function tests if a user-defined summary differs when applied to simulated / observed data. 
 #' 
-#' @param simulationOutput a DHARMa object with simulated residuals created with \code{\link{simulateResiduals}}
+#' @param simulationOutput an object of class DHARMa with simulated quantile residuals, either created via \code{\link{simulateResiduals}} or by \code{\link{createDHARMa}} for simulations created outside DHARMa 
 #' @param summary a function that can be applied to simulated / observed data. See examples below
 #' @param alternative a character string specifying whether the test should test if observations are "greater", "less" or "two.sided" compared to the simulated null hypothesis  
 #' @param plot whether to plot the simulated summary
@@ -311,7 +311,7 @@ testTemporalAutocorrelation <- function(simulationOutput, time = NULL , alternat
 #' 
 #' This function performs a standard test for spatial autocorrelation on the simulated residuals
 #' 
-#' @param simulationOutput a DHARMa object with simulated residuals created with \code{\link{simulateResiduals}}
+#' @param simulationOutput an object of class DHARMa with simulated quantile residuals, either created via \code{\link{simulateResiduals}} or by \code{\link{createDHARMa}} for simulations created outside DHARMa 
 #' @param x the x coordinate, in the same order as the data points. If not provided, random values will be created
 #' @param y the y coordinate, in the same order as the data points. If not provided, random values will be created
 #' @param distMat optional distance matrix. If not provided, a distance matrix will be calculated based on x and y. See details for explanation
@@ -390,4 +390,5 @@ getP <- function(simulated, observed, alternative){
   
   return(p)
 }
+
 

@@ -9,7 +9,7 @@ testGeneric(simulationOutput, summary, alternative = c("two.sided",
   methodName = "DHARMa generic simulation test")
 }
 \arguments{
-\item{simulationOutput}{a DHARMa object with simulated residuals created with \code{\link{simulateResiduals}}}
+\item{simulationOutput}{an object of class DHARMa with simulated quantile residuals, either created via \code{\link{simulateResiduals}} or by \code{\link{createDHARMa}} for simulations created outside DHARMa}
 
 \item{summary}{a function that can be applied to simulated / observed data. See examples below}
 

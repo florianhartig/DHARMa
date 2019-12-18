@@ -7,7 +7,7 @@
 testResiduals(simulationOutput)
 }
 \arguments{
-\item{simulationOutput}{a DHARMa object with simulated residuals created with \code{\link{simulateResiduals}}}
+\item{simulationOutput}{an object of class DHARMa with simulated quantile residuals, either created via \code{\link{simulateResiduals}} or by \code{\link{createDHARMa}} for simulations created outside DHARMa}
 }
 \description{
 Calls both uniformity and dispersion test

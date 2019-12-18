@@ -8,7 +8,7 @@ testDispersion(simulationOutput, alternative = c("two.sided", "greater",
   "less"), plot = T, ...)
 }
 \arguments{
-\item{simulationOutput}{a DHARMa object with simulated residuals created with \code{\link{simulateResiduals}}}
+\item{simulationOutput}{an object of class DHARMa with simulated quantile residuals, either created via \code{\link{simulateResiduals}} or by \code{\link{createDHARMa}} for simulations created outside DHARMa}
 
 \item{alternative}{a character string specifying whether the test should test if observations are "greater", "less" or "two.sided" compared to the simulated null hypothesis. Greater corresponds to overdispersion.}
 
