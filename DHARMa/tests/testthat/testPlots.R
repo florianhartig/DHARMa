@@ -12,6 +12,13 @@ doPlots <- function(simulationOutput){
   # residual vs. X plots, various options
   plotResiduals(pred = simulationOutput)
   plotResiduals(pred = simulationOutput$fittedPredictedResponse, residuals = simulationOutput$scaledResiduals)
+  
+  # hist 
+  
+  hist(simulationOutput)  
+  hist(simulationOutput, col = "red")
+  
+  
 }
 
 doTests <- function(simulationOutput, testData){
