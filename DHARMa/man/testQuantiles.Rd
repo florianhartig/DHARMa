@@ -20,10 +20,43 @@ testQuantiles(simulationOutput, predictor = NULL, quantiles = c(0.25,
 This function tests
 }
 \details{
-The function fits quantile gams for the specified quantiles on the residuals, and reports the p-values for each individually, as well as a combined p-value that is adjusted for multiple testing.
+The function fits quantile regressions (via package qgam) on the residuals, and compares their location to the expected location (because of the uniform distributionm, the expected location is 0.5 for the 0.5 quantile). 
+
+A significant p-value for the splines means the fitted spline deviates from a flat line at the expected location (p-values of intercept and spline are combined via Benjamini & Hochberg adjustment to control the FDR)
+
+The p-values of the splines are combined into a total p-value via Benjamini & Hochberg adjustment to control the FDR.
+}
+\examples{
+testData = createData(sampleSize = 200, overdispersion = 0.0, randomEffectVariance = 0)
+fittedModel <- glm(observedResponse ~ Environment1, family = "poisson", data = testData)
+simulationOutput <- simulateResiduals(fittedModel = fittedModel)
+
+# the plot function runs 4 tests
+
+x = testQuantiles(simulationOutput)
+x # the test shows a combined p-value, corrected for multiple testing
+x$pvals # pvalues for the individual quantiles
+x$qgamFits # access the fitted quantile regression 
+summary(x$qgamFits[[1]]) # summary of the first fitted quantile
+
+# possible to test parcticular quantiles
+testQuantiles(simulationOutput, quantiles = c(0.7))
+
+#  model with missing environmental predictor
+fittedModel <- glm(observedResponse ~ 1 , family = "poisson", data = testData)
+simulationOutput <- simulateResiduals(fittedModel = fittedModel)
+
+testQuantiles(simulationOutput, predictor = testData$Environment1)
+
+# the test is automatically performed in 
+\dontrun{
+plot(simulationOutput)
+plotResiduals(simulationOutput)
+}
+
 }
 \seealso{
-\code{\link{testResiduals}}, \code{\link{testUniformity}}, \code{\link{testDispersion}}, \code{\link{testZeroInflation}}, \code{\link{testGeneric}}, \code{\link{testTemporalAutocorrelation}}, \code{\link{testSpatialAutocorrelation}}
+\code{\link{testResiduals}}, \code{\link{testUniformity}}, \code{\link{testDispersion}}, \code{\link{testZeroInflation}}, \code{\link{testGeneric}}, \code{\link{testTemporalAutocorrelation}}, \code{\link{testSpatialAutocorrelation}}, \code{\link{testOutliers}}
 }
 \author{
 Florian Hartig

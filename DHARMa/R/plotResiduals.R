@@ -155,6 +155,8 @@ plotResiduals <- function(pred, residuals = NULL, quantreg = NULL, rank = F, asF
   
   ylab = checkDots("ylab", "Standardized residual", ...)
   
+  ##### Conversions #####
+  
   # conversions from DHARMa 
   if(class(pred) == "DHARMa"){
     if (! is.null(residuals)) stop("DHARMa::plotResiduals - can't provide both a DHARMa object to pred and additional residuals")
@@ -166,7 +168,8 @@ plotResiduals <- function(pred, residuals = NULL, quantreg = NULL, rank = F, asF
   }
   if(class(residuals) == "DHARMa") res = residuals$scaledResiduals
   
-
+  ##### Checks #####
+  
   # CHECK FOR LENGTH AND NA PROBLEM
   if(length(pred) != length(res)) {
     if(any(is.na(pred))){
@@ -175,6 +178,8 @@ plotResiduals <- function(pred, residuals = NULL, quantreg = NULL, rank = F, asF
       stop("DHARMa::plotResiduals - residuals and predictor do not have the same length. ")        
     }
   }
+  
+  ##### Rank transform and factor conversion#####
   
   if(!is.factor(pred)){
 
@@ -188,30 +193,42 @@ plotResiduals <- function(pred, residuals = NULL, quantreg = NULL, rank = F, asF
     if(is.null(asFactor)) asFactor = (nuniq == 1) | (nuniq < 10 & ndata / nuniq > 10)
     if (asFactor) pred = factor(pred)
   }
+
+  ##### Residual scatter plots #####
   
   if(is.null(quantreg)) if (length(res) > 2000) quantreg = FALSE else quantreg = TRUE
-  if(is.null(smoothScatter)) if (length(res) > 10000) smoothScatter = TRUE else smoothScatter = FALSE
+  
+  switchScatter = 10000
+  if(is.null(smoothScatter)) if (length(res) > switchScatter) smoothScatter = TRUE else smoothScatter = FALSE
 
-  defaultCol = ifelse(res == 0 | res == 1, 2,1)   
+  blackcol = rgb(0,0,0, alpha = max(0.1, 1 - 3 * length(res) / switchScatter))
+  
+  defaultCol = ifelse(res == 0 | res == 1, 2,blackcol)
   defaultPch = ifelse(res == 0 | res == 1, 8,1)   
 
   col = checkDots("col", defaultCol, ...)
   pch = checkDots("pch", defaultPch, ...)
   
-  if(is.factor(pred)) plot(res ~ pred, ylim = c(0,1), axes = FALSE, ...)
+  if(is.factor(pred)){
+    plot(res ~ pred, ylim = c(0,1), axes = FALSE, ...)
+  } 
   else if (smoothScatter == TRUE) {
     smoothScatter(pred, res , ylim = c(0,1), axes = FALSE, colramp = colorRampPalette(c("white", "black")))
     points(pred[defaultCol == 2], res[defaultCol == 2], col = "red", cex = 0.5)
   }
-  else plot(res ~ pred, ylim = c(0,1), axes = FALSE, col = col, pch = pch, ylab = ylab, ...)
+  else{
+    plot(res ~ pred, ylim = c(0,1), axes = FALSE, col = col, pch = pch, ylab = ylab, ...)
+  } 
   
   axis(1)
   axis(2, at=c(0, 0.25, 0.5, 0.75, 1))
   
+  ##### Quantile regressions #####
+  
+  main = checkDots("main", "Residual vs. predicted", ...)
+  
   if(is.numeric(pred)){
     if(quantreg == F){
-      
-      main = checkDots("main", "Residual vs. predicted\n", ...)
       title(main = main, cex.main = 1)
       abline(h = c(0.25, 0.5, 0.75), col = "black", lwd = 0.5, lty = 2)
       try({
@@ -219,21 +236,11 @@ plotResiduals <- function(pred, residuals = NULL, quantreg = NULL, rank = F, asF
         abline(h = 0.5, col = "red", lwd = 2)
       }, silent = T)
     }else{
-      # probs = c(0.25, 0.50, 0.75)
-      # w <- p <- list()
-      # for(i in seq_along(probs)){
-      #   try({
-      #     capture.output(w[[i]] <- qrnn::qrnn.fit(x = as.matrix(pred), y = as.matrix(res), n.hidden = 4, tau = probs[i], iter.max = 1000, n.trials = 1, penalty = 1))
-      #     p[[i]] <- qrnn::qrnn.predict(as.matrix(sort(pred)), w[[i]])
-      #   }, silent = T)
-      # }
-      # matlines(sort(pred), matrix(unlist(p), nrow = length(pred), ncol = length(p)), col = "red", lty = 1)
       
       out = testQuantiles(simulationOutput, pred, quantiles = quantiles, plot = F)
       
-      main = "Residual vs. predicted"
       if(any(out$pvals < 0.05)){
-        main = paste(main, "Significant quantile deviations (red curves)", sep ="\n")
+        main = paste(main, "Quantile deviations detected (red curves)", sep ="\n")
         if(out$p.value <= 0.05){
           main = paste(main, "Combined adjusted quantile test signficant", sep ="\n")
         } else {
@@ -264,8 +271,7 @@ plotResiduals <- function(pred, residuals = NULL, quantreg = NULL, rank = F, asF
       
     }
   }
-  
-  invisible(data.frame(pred, res))
+  return(out)
 }
 
 

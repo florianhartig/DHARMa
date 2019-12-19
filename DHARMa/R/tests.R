@@ -5,16 +5,18 @@
 #' This function is a wrapper for the various test functions implemented in DHARMa. Currently, this function calls the \code{\link{testUniformity}} and the \code{\link{testDispersion}} functions. All other tests (see below) have to be called by hand.
 #' 
 #' @param simulationOutput an object of class DHARMa with simulated quantile residuals, either created via \code{\link{simulateResiduals}} or by \code{\link{createDHARMa}} for simulations created outside DHARMa 
+#' @param plot if T, plots functions of the tests are called
 #' @author Florian Hartig
+#' @seealso \code{\link{testUniformity}}, \code{\link{testOutliers}}, \code{\link{testDispersion}}, \code{\link{testZeroInflation}}, \code{\link{testGeneric}}, \code{\link{testTemporalAutocorrelation}}, \code{\link{testSpatialAutocorrelation}}, \code{\link{testQuantiles}} 
+#' @example inst/examples/testsHelp.R
 #' @export
-#' @seealso \code{\link{testUniformity}}, \code{\link{testOutliers}}, \code{\link{testDispersion}}, \code{\link{testZeroInflation}}, \code{\link{testGeneric}}, \code{\link{testTemporalAutocorrelation}}, \code{\link{testSpatialAutocorrelation}}
-testResiduals <- function(simulationOutput){
-  
+testResiduals <- function(simulationOutput, plot = T){
+
   oldpar = par(mfrow = c(1,3))
   out = list()
-  out$uniformity = testUniformity(simulationOutput)
-  out$dispersion = testDispersion(simulationOutput)
-  out$outliers = testOutliers(simulationOutput)
+  out$uniformity = testUniformity(simulationOutput, plot = plot)
+  out$dispersion = testDispersion(simulationOutput, plot = plot)
+  out$outliers = testOutliers(simulationOutput, plot = plot)
   
   par(oldpar)
   print(out)
@@ -43,7 +45,8 @@ testSimulatedResiduals <- function(simulationOutput){
 #' @param plot if T, plots calls \code{\link{plotQQunif}} as well 
 #' @details The function applies a \code{\link[stats]{ks.test}} for uniformity on the simulated residuals.
 #' @author Florian Hartig
-#' @seealso \code{\link{testResiduals}}, \code{\link{testOutliers}}, \code{\link{testDispersion}}, \code{\link{testZeroInflation}}, \code{\link{testGeneric}}, \code{\link{testTemporalAutocorrelation}}, \code{\link{testSpatialAutocorrelation}}
+#' @seealso \code{\link{testResiduals}}, \code{\link{testOutliers}}, \code{\link{testDispersion}}, \code{\link{testZeroInflation}}, \code{\link{testGeneric}}, \code{\link{testTemporalAutocorrelation}}, \code{\link{testSpatialAutocorrelation}}, \code{\link{testQuantiles}}
+#' @example inst/examples/testsHelp.R 
 #' @export
 testUniformity<- function(simulationOutput, alternative = c("two.sided", "less", "greater"), plot = T){
   out <- suppressWarnings(ks.test(simulationOutput$scaledResiduals, 'punif', alternative = alternative))
@@ -53,11 +56,75 @@ testUniformity<- function(simulationOutput, alternative = c("two.sided", "less",
 
 
 # Experimental
-
 testBivariateUniformity<- function(simulationOutput, alternative = c("two.sided", "less", "greater"), plot = T){
   #out <- suppressWarnings(ks.test(simulationOutput$scaledResiduals, 'punif', alternative = alternative))
   #if(plot == T) plotQQunif(simulationOutput = simulationOutput)
   out = NULL
+  return(out)
+}
+
+
+
+#' Test for quantiles
+#' 
+#' This function tests 
+#' 
+#' @param simulationOutput an object of class DHARMa with simulated quantile residuals, either created via \code{\link{simulateResiduals}} or by \code{\link{createDHARMa}} for simulations created outside DHARMa 
+#' @param predictor an optional predictor variable to be used, instead of the predicted response (default)
+#' @param quantiles the quantiles to be tested
+#' @param plot if T, the function will create an additional plot
+#' @details The function fits quantile regressions (via package qgam) on the residuals, and compares their location to the expected location (because of the uniform distributionm, the expected location is 0.5 for the 0.5 quantile). 
+#' 
+#' A significant p-value for the splines means the fitted spline deviates from a flat line at the expected location (p-values of intercept and spline are combined via Benjamini & Hochberg adjustment to control the FDR)
+#' 
+#' The p-values of the splines are combined into a total p-value via Benjamini & Hochberg adjustment to control the FDR.
+#' 
+#' @author Florian Hartig
+#' @example inst/examples/testQuantilesHelp.R
+#' @seealso \code{\link{testResiduals}}, \code{\link{testUniformity}}, \code{\link{testDispersion}}, \code{\link{testZeroInflation}}, \code{\link{testGeneric}}, \code{\link{testTemporalAutocorrelation}}, \code{\link{testSpatialAutocorrelation}}, \code{\link{testOutliers}}
+#' @export
+testQuantiles <- function(simulationOutput, predictor = NULL, quantiles = c(0.25,0.5,0.75), plot = T){
+  
+  if(is.null(predictor)){
+    pred = simulationOutput$fittedPredictedResponse
+  } else {
+    pred = predictor
+  }
+  
+  if(plot == F){
+    
+    dat=data.frame(res =  simulationOutput$scaledResiduals , pred = pred)
+    
+    quantileFits <- list()
+    pval = rep(NA, length(quantiles))
+    predictions = data.frame(pred = sort(dat$pred))
+    predictions = cbind(predictions, matrix(ncol = 2 * length(quantiles), nrow = nrow(dat)))
+    for(i in 1:length(quantiles)){
+      datTemp = dat
+      datTemp$res = datTemp$res - quantiles[i]
+      capture.output(quantileFits[[i]] <- qgam::qgam(res ~ s(pred) ,  data =datTemp, qu = quantiles[i]))
+      
+      x = summary(quantileFits[[i]])
+      pval[i] = min(p.adjust(c(x$p.table[1,4], x$s.table[1,4]), method = "BH"))
+      quantPre = predict(quantileFits[[i]], newdata = predictions, se = T)
+      predictions[, 2*i] = quantPre$fit + quantiles[i]
+      predictions[, 2*i + 1] = quantPre$se.fit
+    }
+    
+    out = list()
+    out$method = "Test for location of quantiles via qgam"
+    out$alternative = "both"
+    out$pvals = pval
+    out$p.value = min(p.adjust(pval, method = "BH"))
+    out$data.name = deparse(substitute(simulationOutput))
+    out$predictions = predictions
+    out$qgamFits = quantileFits
+    
+    class(out) = "htest"
+    
+  } else if(plot == T) {
+    out <- plotResiduals(pred = pred, residuals = simulationOutput$scaledResiduals, quantiles = quantiles)
+  }
   return(out)
 }
 
@@ -79,7 +146,8 @@ testBivariateUniformity<- function(simulationOutput, alternative = c("two.sided"
 #' 
 #' 
 #' @author Florian Hartig
-#' @seealso \code{\link{testResiduals}}, \code{\link{testUniformity}}, \code{\link{testDispersion}}, \code{\link{testZeroInflation}}, \code{\link{testGeneric}}, \code{\link{testTemporalAutocorrelation}}, \code{\link{testSpatialAutocorrelation}}
+#' @seealso \code{\link{testResiduals}}, \code{\link{testUniformity}}, \code{\link{testDispersion}}, \code{\link{testZeroInflation}}, \code{\link{testGeneric}}, \code{\link{testTemporalAutocorrelation}}, \code{\link{testSpatialAutocorrelation}}, \code{\link{testQuantiles}}
+#' @example inst/examples/testsHelp.R 
 #' @export
 testOutliers <- function(simulationOutput, alternative = c("two.sided", "greater", "less"), plot = T){
 
@@ -142,7 +210,7 @@ testOutliers <- function(simulationOutput, alternative = c("two.sided", "greater
 #' However, given the computational cost, I would suggest that most users will be satisfied with the standard dispersion test. 
 #' 
 #' @author Florian Hartig
-#' @seealso \code{\link{testResiduals}}, \code{\link{testUniformity}},  \code{\link{testOutliers}}, \code{\link{testZeroInflation}}, \code{\link{testGeneric}}, \code{\link{testTemporalAutocorrelation}}, \code{\link{testSpatialAutocorrelation}}
+#' @seealso \code{\link{testResiduals}}, \code{\link{testUniformity}},  \code{\link{testOutliers}}, \code{\link{testZeroInflation}}, \code{\link{testGeneric}}, \code{\link{testTemporalAutocorrelation}}, \code{\link{testSpatialAutocorrelation}}, \code{\link{testQuantiles}} 
 #' @example inst/examples/testsHelp.R
 #' @export
 testDispersion <- function(simulationOutput, alternative = c("two.sided", "greater", "less"), plot = T, ...){
@@ -224,7 +292,7 @@ testOverdispersionParametric <- function(...){
 #' @details shows the expected distribution of zeros against the observed
 #' @author Florian Hartig
 #' @example inst/examples/testsHelp.R
-#' @seealso \code{\link{testResiduals}}, \code{\link{testUniformity}}, \code{\link{testOutliers}}, \code{\link{testDispersion}}, \code{\link{testGeneric}}, \code{\link{testTemporalAutocorrelation}}, \code{\link{testSpatialAutocorrelation}}
+#' @seealso \code{\link{testResiduals}}, \code{\link{testUniformity}}, \code{\link{testOutliers}}, \code{\link{testDispersion}}, \code{\link{testGeneric}}, \code{\link{testTemporalAutocorrelation}}, \code{\link{testSpatialAutocorrelation}}, \code{\link{testQuantiles}} 
 #' @export
 testZeroInflation <- function(simulationOutput, ...){
   countZeros <- function(x) sum( x == 0)
@@ -249,8 +317,7 @@ testZeroInflation <- function(simulationOutput, ...){
 #' @export
 #' @author Florian Hartig
 #' @example inst/examples/testsHelp.R
-#' 
-#' @seealso \code{\link{testResiduals}}, \code{\link{testUniformity}}, \code{\link{testOutliers}}, \code{\link{testDispersion}}, \code{\link{testZeroInflation}}, \code{\link{testTemporalAutocorrelation}}, \code{\link{testSpatialAutocorrelation}}
+#' @seealso \code{\link{testResiduals}}, \code{\link{testUniformity}}, \code{\link{testOutliers}}, \code{\link{testDispersion}}, \code{\link{testZeroInflation}}, \code{\link{testTemporalAutocorrelation}}, \code{\link{testSpatialAutocorrelation}}, \code{\link{testQuantiles}} 
 testGeneric <- function(simulationOutput, summary, alternative = c("two.sided", "greater", "less"), plot = T, methodName = "DHARMa generic simulation test"){
   
   alternative <- match.arg(alternative)
@@ -273,7 +340,7 @@ testGeneric <- function(simulationOutput, summary, alternative = c("two.sided", 
   if(plot == T) {
     plotTitle = gsub('(.{1,50})(\\s|$)', '\\1\n', methodName)
     xLabel = paste("Simulated values, red line = fitted model. p-value (",out$alternative, ") = ", out$p.value, sep ="")
-   hist(simulated, xlim = range(simulated, observed, na.rm=T ), col = "lightgrey", main = plotTitle, xlab = xLabel, breaks = 20)
+   hist(simulated, xlim = range(simulated, observed, na.rm=T ), col = "lightgrey", main = plotTitle, xlab = xLabel, breaks = 20, cex.main = 0.8)
    abline(v = observed, lwd= 2, col = "red")
   }
   return(out)
@@ -301,7 +368,7 @@ testGeneric <- function(simulationOutput, summary, alternative = c("two.sided", 
 #' The bottomline here is that spatial / temporal / other autoregressive models should either be tested based on conditional simulations, or (ideally) custom tests should be used that are not based on quantile residuals, but rather compare the correlation structure in the simulated data with the correlation structure in the observed data. 
 #' 
 #' @author Florian Hartig
-#' @seealso \code{\link{testResiduals}}, \code{\link{testUniformity}}, \code{\link{testOutliers}}, \code{\link{testDispersion}}, \code{\link{testZeroInflation}}, \code{\link{testGeneric}}, \code{\link{testSpatialAutocorrelation}}
+#' @seealso \code{\link{testResiduals}}, \code{\link{testUniformity}}, \code{\link{testOutliers}}, \code{\link{testDispersion}}, \code{\link{testZeroInflation}}, \code{\link{testGeneric}}, \code{\link{testSpatialAutocorrelation}}, \code{\link{testQuantiles}} 
 #' @example inst/examples/testTemporalAutocorrelationHelp.R
 #' @export
 testTemporalAutocorrelation <- function(simulationOutput, time = NULL , alternative = c("two.sided", "greater", "less"), plot = T){
@@ -319,7 +386,7 @@ testTemporalAutocorrelation <- function(simulationOutput, time = NULL , alternat
   
   if(plot == T) {
   col = colorRamp(c("red", "white", "blue"))(simulationOutput$scaledResiduals)
-  plot(simulationOutput$scaledResiduals ~ time, col = rgb(col, maxColorValue = 255))
+  plot(simulationOutput$scaledResiduals ~ time, col = rgb(col, maxColorValue = 255), main = out$method, cex.main = 0.8)
   }
   return(out)
 }
@@ -351,7 +418,7 @@ testTemporalAutocorrelation <- function(simulationOutput, time = NULL , alternat
 #' The bottomline here is that spatial / temporal / other autoregressive models should either be tested based on conditional simulations, or (ideally) custom tests should be used that are not based on quantile residuals, but rather compare the correlation structure in the simulated data with the correlation structure in the observed data. 
 #' 
 #' @author Florian Hartig
-#' @seealso \code{\link{testResiduals}}, \code{\link{testUniformity}}, \code{\link{testOutliers}}, \code{\link{testDispersion}}, \code{\link{testZeroInflation}}, \code{\link{testGeneric}}, \code{\link{testTemporalAutocorrelation}} 
+#' @seealso \code{\link{testResiduals}}, \code{\link{testUniformity}}, \code{\link{testOutliers}}, \code{\link{testDispersion}}, \code{\link{testZeroInflation}}, \code{\link{testGeneric}}, \code{\link{testTemporalAutocorrelation}}, \code{\link{testQuantiles}} 
 #' @import grDevices
 #' @example inst/examples/testSpatialAutocorrelationHelp.R
 #' @export
@@ -394,7 +461,7 @@ testSpatialAutocorrelation <- function(simulationOutput, x = NULL, y  = NULL, di
   
   col = colorRamp(c("red", "white", "blue"))(simulationOutput$scaledResiduals)
   
-  plot(x,y, col = rgb(col, maxColorValue = 255) )
+  plot(x,y, col = rgb(col, maxColorValue = 255), main = out$method, cex.main = 0.8 )
   }
   return(out)
 }
@@ -410,60 +477,3 @@ getP <- function(simulated, observed, alternative){
 }
 
 
-
-#' Test for quantiles
-#' 
-#' This function tests 
-#' 
-#' @param simulationOutput an object of class DHARMa with simulated quantile residuals, either created via \code{\link{simulateResiduals}} or by \code{\link{createDHARMa}} for simulations created outside DHARMa 
-#' @param predictor an optional predictor variable to be used, instead of the predicted response (default)
-#' @param quantiles the quantiles to be tested
-#' @param plot if T, the function will create an additional plot
-#' @details The function fits quantile gams for the specified quantiles on the residuals, and reports the p-values for each individually, as well as a combined p-value that is adjusted for multiple testing. 
-#' @author Florian Hartig
-#' @seealso \code{\link{testResiduals}}, \code{\link{testUniformity}}, \code{\link{testDispersion}}, \code{\link{testZeroInflation}}, \code{\link{testGeneric}}, \code{\link{testTemporalAutocorrelation}}, \code{\link{testSpatialAutocorrelation}}
-#' @export
-testQuantiles <- function(simulationOutput, predictor = NULL, quantiles = c(0.25,0.5,0.75), plot = T){
-  
-  if(plot == F){
-  
-  if(is.null(predictor)){
-    pred = simulationOutput$fittedPredictedResponse
-  } else {
-    pred = predictor
-  }
-  
-  dat=data.frame(res =  simulationOutput$scaledResiduals , pred = pred)
-  
-  quantileFits <- list()
-  pval = rep(NA, length(quantiles))
-  predictions = data.frame(pred = sort(dat$pred))
-  predictions = cbind(predictions, matrix(ncol = 2 * length(quantiles), nrow = nrow(dat)))
-  for(i in 1:length(quantiles)){
-    datTemp = dat
-    datTemp$res = datTemp$res - quantiles[i]
-    capture.output(quantileFits[[i]] <- qgam::qgam(res ~ s(pred) ,  data =datTemp, qu = quantiles[i]))
-    
-    x = summary(quantileFits[[i]])
-    pval[i] = x$p.table[1,4]
-    quantPre = predict(quantileFits[[i]], newdata = predictions, se = T)
-    predictions[, 2*i] = quantPre$fit + quantiles[i]
-    predictions[, 2*i + 1] = quantPre$se.fit
-  }
-
-  out = list()
-  out$statistic = NA
-  out$method = "Test for quantiles via qgam"
-  out$alternative = "both"
-  out$pvals = pval
-  out$p.value = min(p.adjust(pval))
-  out$data.name = deparse(substitute(simulationOutput))
-  out$predictions = predictions
-  
-  class(out) = "htest"
-  
-  } else if(plot == T) {
-    out <- plotResiduals(simulationOutput, predictor = predictor, quantiles = quantiles)
-  }
-  return(out)
-}

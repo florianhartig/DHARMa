@@ -4,10 +4,12 @@
 \alias{testResiduals}
 \title{DHARMa general residual test}
 \usage{
-testResiduals(simulationOutput)
+testResiduals(simulationOutput, plot = T)
 }
 \arguments{
 \item{simulationOutput}{an object of class DHARMa with simulated quantile residuals, either created via \code{\link{simulateResiduals}} or by \code{\link{createDHARMa}} for simulations created outside DHARMa}
+
+\item{plot}{if T, plots functions of the tests are called}
 }
 \description{
 Calls both uniformity and dispersion test
@@ -15,8 +17,59 @@ Calls both uniformity and dispersion test
 \details{
 This function is a wrapper for the various test functions implemented in DHARMa. Currently, this function calls the \code{\link{testUniformity}} and the \code{\link{testDispersion}} functions. All other tests (see below) have to be called by hand.
 }
+\examples{
+testData = createData(sampleSize = 200, overdispersion = 0.5, randomEffectVariance = 0)
+fittedModel <- glm(observedResponse ~ Environment1 , family = "poisson", data = testData)
+simulationOutput <- simulateResiduals(fittedModel = fittedModel)
+
+# the plot function runs 4 tests
+# i) KS test i) Dispersion test iii) Outlier test iv) quantile test
+plot(simulationOutput, quantreg = T)
+
+# testResiduals tests distribution, dispersion and outliers
+testResiduals(simulationOutput)
+
+####### Individual tests #######
+
+# KS test for correct distribution of residuals
+testUniformity(simulationOutput)
+
+# Dispersion test
+testDispersion(simulationOutput) # tests under and overdispersion
+testDispersion(simulationOutput, alternative = "less") # only underdispersion
+testDispersion(simulationOutput, alternative = "less") # only underdispersion
+
+# if model is refitted, a different test will be called
+simulationOutput2 <- simulateResiduals(fittedModel = fittedModel, refit = TRUE, seed = 12)
+testDispersion(simulationOutput2)
+
+# often useful to test dispersion per group (e.g. binomial data, see vignette)
+simulationOutput3 = recalculateResiduals(simulationOutput, group = testData$group)
+testDispersion(simulationOutput3)
+
+# Outlier test (number of observations outside simulation envelope)
+testOutliers(simulationOutput) 
+
+# testing zero inflation
+testZeroInflation(simulationOutput)
+
+# testing generic summaries
+countOnes <- function(x) sum(x == 1)  # testing for number of 1s
+testGeneric(simulationOutput, summary = countOnes) # 1-inflation
+testGeneric(simulationOutput, summary = countOnes, alternative = "less") # 1-deficit
+
+means <- function(x) mean(x) # testing if mean prediction fits
+testGeneric(simulationOutput, summary = means) 
+
+spread <- function(x) sd(x) # testing if mean sd fits
+testGeneric(simulationOutput, summary = spread) 
+
+
+
+
+}
 \seealso{
-\code{\link{testUniformity}}, \code{\link{testOutliers}}, \code{\link{testDispersion}}, \code{\link{testZeroInflation}}, \code{\link{testGeneric}}, \code{\link{testTemporalAutocorrelation}}, \code{\link{testSpatialAutocorrelation}}
+\code{\link{testUniformity}}, \code{\link{testOutliers}}, \code{\link{testDispersion}}, \code{\link{testZeroInflation}}, \code{\link{testGeneric}}, \code{\link{testTemporalAutocorrelation}}, \code{\link{testSpatialAutocorrelation}}, \code{\link{testQuantiles}}
 }
 \author{
 Florian Hartig

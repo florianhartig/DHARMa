@@ -13,6 +13,8 @@ doPlots <- function(simulationOutput){
   plotResiduals(pred = simulationOutput)
   plotResiduals(pred = simulationOutput$fittedPredictedResponse, residuals = simulationOutput$scaledResiduals)
   
+  # plotResiduals(simulationOutput, col = "red")
+  
   # hist 
   
   hist(simulationOutput)  
