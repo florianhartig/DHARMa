@@ -27,13 +27,11 @@ plot.DHARMa <- function(x, rank = TRUE, ...){
   
   plotQQunif(x)
   
-  xlab = checkDots("xlab", ifelse(rank, "Predicted values (rank transformed)", "Predicted values"), ...)
-  ylab = checkDots("ylab", "Standardized residual", ...)
-  main = checkDots("main", "Residual vs. predicted\n lines should match", ...)
+  xlab = checkDots("xlab", ifelse(rank, "Model predictions (rank transformed)", "Model predictions"), ...)
+
+  plotResiduals(pred = x, residuals = NULL, xlab = xlab, rank = rank, ...)
   
-  plotResiduals(pred = x, residuals = NULL, xlab = xlab, ylab = ylab, main = main, rank = rank, ...)
-  
-  mtext("DHARMa scaled residual plots", outer = T)
+  mtext("DHARMa residual diagnostics", outer = T)
   
   par(oldpar)
 }
@@ -44,24 +42,29 @@ plot.DHARMa <- function(x, rank = TRUE, ...){
 #' The function produces a histogram from a DHARMa output
 #' 
 #' @param x a DHARMa simulation output (class DHARMa)
-#' @param ... arguments to be passed on to hist. Breaks and col are fixed. 
+#' @param breaks breaks for hist() function
+#' @param col col for hist bars
+#' @param main plot main
+#' @param xlab plot xlab
+#' @param cex.main plot cex.main
+#' @param ... other arguments to be passed on to hist
 #' @seealso \code{\link{plotSimulatedResiduals}}, \code{\link{plotResiduals}}
 #' @example inst/examples/plotsHelp.R
 #' @export
-hist.DHARMa <- function(x, ...){
+hist.DHARMa <- function(x, 
+                        breaks = seq(-0.02, 1.02, len = 53), 
+                        col = c("red",rep("lightgrey",50), "red"),
+                        main = "Hist of DHARMa residuals",
+                        xlab = "Residuals (outliers are marked red)",
+                        cex.main = 1,
+                        ...){
   
   val = x$scaledResiduals
   val[val == 0] = -0.01
   val[val == 1] = 1.01
-  
-  breaks = checkDots("breaks", seq(-0.02, 1.02, len = 53), ...)
-  col = checkDots("col", c("red",rep("lightgrey",50), "red"), ...)
-  main = checkDots("main", "Hist of DHARMa residuals\nOutliers are marked red", ...)   
 
-  hist(val, breaks = breaks, col = col, main = main, ...)
+  hist(val, breaks = breaks, col = col, main = main, xlab = xlab, cex.main = cex.main, ...)
 }
-
-
 
 
 #' DHARMa standard residual plots
@@ -93,7 +96,7 @@ plotSimulatedResiduals <- function(simulationOutput, ...){
 #' @seealso \code{\link{plotSimulatedResiduals}}, \code{\link{plotResiduals}}
 #' @example inst/examples/plotsHelp.R
 #' @export
-plotQQunif <- function(simulationOutput, testUniformity = T, testOutliers = T, ...){
+plotQQunif <- function(simulationOutput, testUniformity = T, testOutliers = T, testDispersion = T, ...){
   
   if(class(simulationOutput) != "DHARMa") stop("DHARMa::plotQQunif wrong argument, simulationOutput must be a DHARMa object!")
 
@@ -108,6 +111,12 @@ plotQQunif <- function(simulationOutput, testUniformity = T, testOutliers = T, .
     temp = testOutliers(simulationOutput, plot = F)
     legend("bottomright", c(paste("Outlier test: p=", round(temp$p.value, digits = 5)), paste("Deviation ", ifelse(temp$p.value < 0.05, "significant", "n.s."))), text.col = ifelse(temp$p.value < 0.05, "red", "black" ), bty="n")     
   }
+  
+  if(testDispersion == TRUE){
+    temp = testDispersion(simulationOutput, plot = F)
+    legend("center", c(paste("Dispersion test: p=", round(temp$p.value, digits = 5)), paste("Deviation ", ifelse(temp$p.value < 0.05, "significant", "n.s."))), text.col = ifelse(temp$p.value < 0.05, "red", "black" ), bty="n")     
+  }
+  
 }
 
 
@@ -142,7 +151,9 @@ plotQQunif <- function(simulationOutput, testUniformity = T, testOutliers = T, .
 #' @seealso \code{\link{plotSimulatedResiduals}}, \code{\link{plotQQunif}}
 #' @example inst/examples/plotsHelp.R
 #' @export
-plotResiduals <- function(pred, residuals = NULL, quantreg = NULL, rank = F, asFactor = NULL, smoothScatter = NULL, ...){
+plotResiduals <- function(pred, residuals = NULL, quantreg = NULL, rank = F, asFactor = NULL, smoothScatter = NULL, quantiles = c(0.25, 0.5, 0.75), ...){
+  
+  ylab = checkDots("ylab", "Standardized residual", ...)
   
   # conversions from DHARMa 
   if(class(pred) == "DHARMa"){
@@ -192,33 +203,69 @@ plotResiduals <- function(pred, residuals = NULL, quantreg = NULL, rank = F, asF
     smoothScatter(pred, res , ylim = c(0,1), axes = FALSE, colramp = colorRampPalette(c("white", "black")))
     points(pred[defaultCol == 2], res[defaultCol == 2], col = "red", cex = 0.5)
   }
-  else plot(res ~ pred, ylim = c(0,1), axes = FALSE, col = col, pch = pch, ...)
+  else plot(res ~ pred, ylim = c(0,1), axes = FALSE, col = col, pch = pch, ylab = ylab, ...)
   
   axis(1)
   axis(2, at=c(0, 0.25, 0.5, 0.75, 1))
-  abline(h = c(0.25, 0.5, 0.75), col = "black", lwd = 0.5, lty = 2)
   
   if(is.numeric(pred)){
     if(quantreg == F){
+      
+      main = checkDots("main", "Residual vs. predicted\n", ...)
+      title(main = main, cex.main = 1)
+      abline(h = c(0.25, 0.5, 0.75), col = "black", lwd = 0.5, lty = 2)
       try({
         lines(smooth.spline(pred, res, df = 10), lty = 2, lwd = 2, col = "red")
         abline(h = 0.5, col = "red", lwd = 2)
       }, silent = T)
     }else{
-      probs = c(0.25, 0.50, 0.75)
-      w <- p <- list()
-      for(i in seq_along(probs)){
-        try({
-          capture.output(w[[i]] <- qrnn::qrnn.fit(x = as.matrix(pred), y = as.matrix(res), n.hidden = 4, tau = probs[i], iter.max = 1000, n.trials = 1, penalty = 1))
-          p[[i]] <- qrnn::qrnn.predict(as.matrix(sort(pred)), w[[i]])
-        }, silent = T)
+      # probs = c(0.25, 0.50, 0.75)
+      # w <- p <- list()
+      # for(i in seq_along(probs)){
+      #   try({
+      #     capture.output(w[[i]] <- qrnn::qrnn.fit(x = as.matrix(pred), y = as.matrix(res), n.hidden = 4, tau = probs[i], iter.max = 1000, n.trials = 1, penalty = 1))
+      #     p[[i]] <- qrnn::qrnn.predict(as.matrix(sort(pred)), w[[i]])
+      #   }, silent = T)
+      # }
+      # matlines(sort(pred), matrix(unlist(p), nrow = length(pred), ncol = length(p)), col = "red", lty = 1)
+      
+      out = testQuantiles(simulationOutput, pred, quantiles = quantiles, plot = F)
+      
+      main = "Residual vs. predicted"
+      if(any(out$pvals < 0.05)){
+        main = paste(main, "Significant quantile deviations (red curves)", sep ="\n")
+        if(out$p.value <= 0.05){
+          main = paste(main, "Combined adjusted quantile test signficant", sep ="\n")
+        } else {
+          main = paste(main, "Combined adjusted quantile test n.s.", sep ="\n")
+        }
+        maincol = "red"
+      } else {
+        main = paste(main, "No signficiant problems detected", sep ="\n")
+        maincol = "black"
       }
-      matlines(sort(pred), matrix(unlist(p), nrow = length(pred), ncol = length(p)), col = "red", lty = 1)
+      
+      title(main = main, cex.main = 0.8, 
+            col.main = maincol)
+      
+      for(i in 1:length(quantiles)){
+        
+        lineCol = ifelse(out$pvals[i] <= 0.05, "red", "black")
+        filCol = ifelse(out$pvals[i] <= 0.05, "#FF000040", "#00000020")
+        
+        abline(h = quantiles[i], col = lineCol, lwd = 0.5, lty = 2)
+        polygon(c(out$predictions$pred, rev(out$predictions$pred)),
+                c(out$predictions[,2*i] - out$predictions[,2*i+1], rev(out$predictions[,2*i] + out$predictions[,2*i+1])), 
+                col = "#00000020", border = F)
+        lines(out$predictions$pred, out$predictions[,2*i], col = lineCol, lwd = 2)
+      }
+      
+      # legend("bottomright", c(paste("Quantile test: p=", round(out$p.value, digits = 5)), paste("Deviation ", ifelse(out$p.value < 0.05, "significant", "n.s."))), text.col = ifelse(out$p.value < 0.05, "red", "black" ), bty="n")  
+      
     }
   }
   
   invisible(data.frame(pred, res))
-  
 }
 
 

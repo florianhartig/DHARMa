@@ -108,7 +108,17 @@ testOutliers <- function(simulationOutput, alternative = c("two.sided", "greater
   class(out) = "htest"  
   
   if(plot == T) {
-    hist(simulationOutput)
+    
+    hist(simulationOutput, main = "")
+    
+    main = ifelse(out$p.value <= 0.05, 
+                  "Outlier test significant", 
+                  "Outlier test n.s.")
+    
+    title(main = main, cex.main = 1, 
+          col.main = ifelse(out$p.value <= 0.05, "red", "black"))
+    
+    # legend("center", c(paste("p=", round(out$p.value, digits = 5)), paste("Deviation ", ifelse(out$p.value < 0.05, "significant", "n.s."))), text.col = ifelse(out$p.value < 0.05, "red", "black" )) 
     
   } 
   return(out)
@@ -163,10 +173,18 @@ testDispersion <- function(simulationOutput, alternative = c("two.sided", "great
     class(out) = "htest"
 
     if(plot == T) {
-      plotTitle = gsub('(.{1,50})(\\s|$)', '\\1\n', out$method)
+      #plotTitle = gsub('(.{1,50})(\\s|$)', '\\1\n', out$method)
       xLabel = paste("Simulated values, red line = fitted model. p-value (",out$alternative, ") = ", out$p.value, sep ="")
-      hist(expected, xlim = range(expected, observed, na.rm=T ), col = "lightgrey", main = plotTitle, xlab = xLabel, breaks = 20)
+      
+      hist(expected, xlim = range(expected, observed, na.rm=T ), col = "lightgrey", main = "", xlab = xLabel, breaks = 20, cex.main = 1)
       abline(v = observed, lwd= 2, col = "red")
+      
+      main = ifelse(out$p.value <= 0.05, 
+                    "Dispersion test significant", 
+                    "Dispersion test n.s.")
+      
+      title(main = main, cex.main = 1, 
+            col.main = ifelse(out$p.value <= 0.05, "red", "black"))
     }
   }
 
@@ -392,3 +410,60 @@ getP <- function(simulated, observed, alternative){
 }
 
 
+
+#' Test for quantiles
+#' 
+#' This function tests 
+#' 
+#' @param simulationOutput an object of class DHARMa with simulated quantile residuals, either created via \code{\link{simulateResiduals}} or by \code{\link{createDHARMa}} for simulations created outside DHARMa 
+#' @param predictor an optional predictor variable to be used, instead of the predicted response (default)
+#' @param quantiles the quantiles to be tested
+#' @param plot if T, the function will create an additional plot
+#' @details The function fits quantile gams for the specified quantiles on the residuals, and reports the p-values for each individually, as well as a combined p-value that is adjusted for multiple testing. 
+#' @author Florian Hartig
+#' @seealso \code{\link{testResiduals}}, \code{\link{testUniformity}}, \code{\link{testDispersion}}, \code{\link{testZeroInflation}}, \code{\link{testGeneric}}, \code{\link{testTemporalAutocorrelation}}, \code{\link{testSpatialAutocorrelation}}
+#' @export
+testQuantiles <- function(simulationOutput, predictor = NULL, quantiles = c(0.25,0.5,0.75), plot = T){
+  
+  if(plot == F){
+  
+  if(is.null(predictor)){
+    pred = simulationOutput$fittedPredictedResponse
+  } else {
+    pred = predictor
+  }
+  
+  dat=data.frame(res =  simulationOutput$scaledResiduals , pred = pred)
+  
+  quantileFits <- list()
+  pval = rep(NA, length(quantiles))
+  predictions = data.frame(pred = sort(dat$pred))
+  predictions = cbind(predictions, matrix(ncol = 2 * length(quantiles), nrow = nrow(dat)))
+  for(i in 1:length(quantiles)){
+    datTemp = dat
+    datTemp$res = datTemp$res - quantiles[i]
+    capture.output(quantileFits[[i]] <- qgam::qgam(res ~ s(pred) ,  data =datTemp, qu = quantiles[i]))
+    
+    x = summary(quantileFits[[i]])
+    pval[i] = x$p.table[1,4]
+    quantPre = predict(quantileFits[[i]], newdata = predictions, se = T)
+    predictions[, 2*i] = quantPre$fit + quantiles[i]
+    predictions[, 2*i + 1] = quantPre$se.fit
+  }
+
+  out = list()
+  out$statistic = NA
+  out$method = "Test for quantiles via qgam"
+  out$alternative = "both"
+  out$pvals = pval
+  out$p.value = min(p.adjust(pval))
+  out$data.name = deparse(substitute(simulationOutput))
+  out$predictions = predictions
+  
+  class(out) = "htest"
+  
+  } else if(plot == T) {
+    out <- plotResiduals(simulationOutput, predictor = predictor, quantiles = quantiles)
+  }
+  return(out)
+}

@@ -5,7 +5,8 @@
 \title{Generic residual plot with either spline or quantile regression}
 \usage{
 plotResiduals(pred, residuals = NULL, quantreg = NULL, rank = F,
-  asFactor = NULL, smoothScatter = NULL, ...)
+  asFactor = NULL, smoothScatter = NULL, quantiles = c(0.25, 0.5,
+  0.75), ...)
 }
 \arguments{
 \item{pred}{either the predictor variable against which the residuals should be plotted, or a DHARMa object, in which case res ~ pred is plotted}

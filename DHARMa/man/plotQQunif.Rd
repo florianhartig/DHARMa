@@ -4,7 +4,8 @@
 \alias{plotQQunif}
 \title{Quantile-quantile plot for a uniform distribution}
 \usage{
-plotQQunif(simulationOutput, testUniformity = T, testOutliers = T, ...)
+plotQQunif(simulationOutput, testUniformity = T, testOutliers = T,
+  testDispersion = T, ...)
 }
 \arguments{
 \item{simulationOutput}{a DHARMa simulation output (class DHARMa)}

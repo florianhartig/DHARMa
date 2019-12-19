@@ -4,12 +4,25 @@
 \alias{hist.DHARMa}
 \title{Histogram of DHARMa residuals}
 \usage{
-\method{hist}{DHARMa}(x, ...)
+\method{hist}{DHARMa}(x, breaks = seq(-0.02, 1.02, len = 53),
+  col = c("red", rep("lightgrey", 50), "red"),
+  main = "Hist of DHARMa residuals",
+  xlab = "Residuals (outliers are marked red)", cex.main = 1, ...)
 }
 \arguments{
 \item{x}{a DHARMa simulation output (class DHARMa)}
 
-\item{...}{arguments to be passed on to hist. Breaks and col are fixed.}
+\item{breaks}{breaks for hist() function}
+
+\item{col}{col for hist bars}
+
+\item{main}{plot main}
+
+\item{xlab}{plot xlab}
+
+\item{cex.main}{plot cex.main}
+
+\item{...}{other arguments to be passed on to hist}
 }
 \description{
 The function produces a histogram from a DHARMa output
