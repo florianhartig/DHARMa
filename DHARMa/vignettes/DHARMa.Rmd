@@ -649,18 +649,12 @@ simulationOutput <- simulateResiduals(fittedModel = mod1)
 plot(simulationOutput)
 ```
 
-The residuals look clearly overdispersed. We can confirm that with the omnibus test
+We see various signals of overdispersion
 
-
-```{r, fig.width=4.5, fig.height=4.5}
-testUniformity(simulationOutput = simulationOutput)
-```
-
-Or with the more powerful overdispersion test 
-
-```{r, fig.width=4.5, fig.height=4.5}
-testOverdispersion(simulationOutput = simulationOutput)
-```
+* QQ: s-shaped QQ plot, distribution test (KS) signficant
+* QQ: Dispersion test is significant
+* QQ: Outlier test significant
+* Res ~ predicted: Quantile fits are spread out too far
 
 OK, so let's add overdispersion through an individual-level random effect
 
@@ -668,12 +662,23 @@ OK, so let's add overdispersion through an individual-level random effect
 mod2 <- glmer(cbind(N_parasitized, N_adult) ~ logDensity + (1|ID), data = data, family=binomial)
 simulationOutput <- simulateResiduals(fittedModel = mod2)
 plot(simulationOutput)
-
 ```
 
-The overdispersion looks better, but you can see that the residuals look a bit irregular. 
+The overdispersion looks better, but you can see that the residuals still look a bit irregular (although tests are n.s.). The raw data looks a bit humped-shaped, so we might be tempted to add a quadratic effect. 
 
-Likely, the reason is the steep increase in the beginning that one can see in the raw data plot. One would probably need to apply another transformation or a nonlinear function to completely fit this away.
+```{r}
+mod3 <- glmer(cbind(N_parasitized, N_adult) ~ logDensity + I(logDensity^2) + (1|ID), data = data, family=binomial)
+simulationOutput <- simulateResiduals(fittedModel = mod3)
+plot(simulationOutput)
+```
+
+The residuals look perfect now. That being said, we dont' have a lot of  data, and we have to be sure we're not overfitting. A likelihood ratio test tells us that the quadratic effect is not significantly supported. 
+
+```{r}
+anova(mod2, mod3)
+```
+
+We learn from that: increasing model complexity always improves the residuals, but according to standard statistical arguments (power, bias-variance trade-off) it's not always advisable to get them perfect, just good enough!
 
 ## Owl example (count data)
 
