@@ -34,7 +34,7 @@ residuals.DHARMa <- function(object, ...){
   return(object$scaledResiduals)
 }
 
-#' Convert simulated residuals or posterior predictive simulations to a DHARMa object
+#' Create a DHARMa object from hand-coded simulations or Bayesian posterior predictive simulations
 #' 
 #' @param simulatedResponse matrix of observations simulated from the fitted model - row index for observations and colum index for simulations 
 #' @param observedResponse true observations
@@ -77,5 +77,57 @@ createDHARMa <- function(simulatedResponse , observedResponse , fittedPredictedR
  
   class(out) = "DHARMa"
   return(out)
+}
+
+
+#' Ensures that an object is of class DHARMa
+#' 
+#' @param simulationOutput a DHARMa simulation output or an object that can be converted into a DHARMa simulation output
+#' @param convert if TRUE, attempts to convert model + numeric to DHARMa, if "Model", converts only supported models to DHARMa
+#' @details The 
+#' @keywords internal
+ensureDHARMa <- function(simulationOutput, 
+                         convert = F){
+  
+  if(inherits(simulationOutput, "DHARMa")){
+    return(simulationOutput)
+  } else {
+    
+    if(convert == FALSE) stop("wrong argument to function, simulationOutput must be a DHARMa object!") 
+    else {
+      
+      if (class(simulationOutput)[1] %in% getPossibleModels()){
+        if (convert == "Model" | convert == T) return(simulateResiduals(simulationOutput))
+      } else if(is.vector(simulationOutput, mode = "numeric") & convert == T) {
+        out = list()
+        out$scaledResiduals = simulationOutput
+        out$nObs = length(out$scaledResiduals)
+        class(out) = "DHARMa"
+        return(out)  
+      }  
+    }
+  }
+  stop("wrong argument to function, simulationOutput must be a DHARMa object or a numeric vector of quantile residuals!")     
+}
+
+
+#' Ensures that an object is of class DHARMa
+#' 
+#' @param simulationOutput a DHARMa simulation output or an object that can be converted into a DHARMa simulation output
+#' @param predictor a predictor
+#' @details The 
+#' @keywords internal
+ensurePredictor <- function(simulationOutput,
+                           predictor = NULL){
+  if(!is.null(predictor)){
+    
+    if(length(predictor) != length(simulationOutput$scaledResiduals)) stop("DHARMa: residuals an predictor do not have the same length. The issue is possibly that you have NAs in your predictor that were removed during the model fit. Remove the NA values from your predictor.")
+  } else {
+    
+    
+    predictor = simulationOutput$fittedPredictedResponse
+    if(is.null(predictor)) stop("DHARMa: can't extract predictor from simulationOutput, and no predictor provided")
+  }
+  return(predictor)
 }
 

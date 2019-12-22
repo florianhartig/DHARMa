@@ -15,7 +15,10 @@ testZeroInflation(simulationOutput, ...)
 This function compares the observed number of zeros with the zeros expected from simulations.
 }
 \details{
-shows the expected distribution of zeros against the observed
+shows the expected distribution of zeros against the observed values.
+}
+\note{
+This function is a wrapper for \code{\link{testGeneric}}, where the summary argument is set to function(x) sum(x == 0)
 }
 \examples{
 testData = createData(sampleSize = 200, overdispersion = 0.5, randomEffectVariance = 0)

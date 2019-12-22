@@ -4,15 +4,11 @@
 \alias{plotResiduals}
 \title{Generic residual plot with either spline or quantile regression}
 \usage{
-plotResiduals(pred, residuals = NULL, quantreg = NULL, rank = F,
-  asFactor = NULL, smoothScatter = NULL, quantiles = c(0.25, 0.5,
-  0.75), ...)
+plotResiduals(simulationOutput, predictor = NULL, quantreg = NULL,
+  rank = F, asFactor = NULL, smoothScatter = NULL,
+  quantiles = c(0.25, 0.5, 0.75), ...)
 }
 \arguments{
-\item{pred}{either the predictor variable against which the residuals should be plotted, or a DHARMa object, in which case res ~ pred is plotted}
-
-\item{residuals}{residuals values. Can be either numerical values, or a DHARMa object, from which residual values can be extracted}
-
 \item{quantreg}{whether to perform a quantile regression on 0.25, 0.5, 0.75 on the residuals. If F, a spline will be created instead. Default NULL chooses T for nObs < 2000, and F otherwise.}
 
 \item{rank}{if T, the values of pred will be rank transformed. This will usually make patterns easier to spot visually, especially if the distribution of the predictor is skewed. If pred is a factor, this has no effect.}
@@ -22,6 +18,10 @@ plotResiduals(pred, residuals = NULL, quantreg = NULL, rank = F,
 \item{smoothScatter}{if T, a smooth scatter plot will plotted instead of a normal scatter plot. This makes sense when the number of residuals is very large. Default NULL chooses T for nObs < 10000, and F otherwise.}
 
 \item{...}{additional arguments to plot / boxplot.}
+
+\item{pred}{either the predictor variable against which the residuals should be plotted, or a DHARMa object, in which case res ~ pred is plotted}
+
+\item{residuals}{residuals values. Can be either numerical values, or a DHARMa object, from which residual values can be extracted}
 }
 \description{
 The function creates a generic residual plot with either spline or quantile regression to highlight patterns in the residuals. Outliers are highlighted in red

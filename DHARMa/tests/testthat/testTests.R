@@ -10,13 +10,13 @@ test_that("overdispersion recognized", {
   fittedModel <- glm(observedResponse ~ Environment1 , family = "poisson", data = testData)
   simulationOutput <- simulateResiduals(fittedModel = fittedModel)
   
-  x = testUniformity(simulationOutput)
+  x = testUniformity(simulationOutput, plot = F)
   expect_true(  x$p.value < 0.05)
-  x = testOutliers(simulationOutput)
+  x = testOutliers(simulationOutput, plot = F)
   expect_true(  x$p.value < 0.05)
-  x = testDispersion(simulationOutput, alternative = "greater")
+  x = testDispersion(simulationOutput, alternative = "greater", plot = F)
   expect_true(  x$p.value < 0.05)
-  x = testZeroInflation(simulationOutput, alternative = "greater")
+  x = testZeroInflation(simulationOutput, alternative = "greater", plot = F)
   expect_true(  x$p.value < 0.05)  
   
 })

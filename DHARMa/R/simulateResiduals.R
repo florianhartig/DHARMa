@@ -203,8 +203,17 @@ simulateResiduals <- function(fittedModel, n = 250, refit = F, integerResponse =
 
 getPossibleModels<-function()c("lm", "glm", "negbin", "lmerMod", "glmerMod", "gam", "bam", "glmmTMB", "HLfit") 
 
-checkModel <- function(fittedModel){
-  if(!(class(fittedModel)[1] %in% getPossibleModels())) warning("DHARMa: fittedModel not in class of supported models. Absolutely no guarantee that this will work!")
+#' @param fittedModel a model 
+#' @param stop whether to stop  
+#' @keywords internal
+checkModel <- function(fittedModel, stop = F){
+  
+  out = T
+  
+  if(!(class(fittedModel)[1] %in% getPossibleModels())){
+    if(stop == FALSE) warning("DHARMa: fittedModel not in class of supported models. Absolutely no guarantee that this will work!")
+    else stop("DHARMa: fittedModel not in class of supported models") 
+  } 
   
   if (class(fittedModel)[1] == "glmmTMB") message("It seems you are diagnosing a glmmTMB model. There are still a few minor limitations associated with this package. The most important is that glmmTMB doesn't implement an option to create unconditional predictions from the model, which means that predicted values (in res ~ pred) plots include the random effects. With strong random effects, this can sometimes create diagonal patterns from bottom left to top right in the res ~ pred plot. All other tests and plots should work as desired. Please see https://github.com/florianhartig/DHARMa/issues/16 for further details.")
 

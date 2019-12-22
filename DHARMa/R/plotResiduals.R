@@ -29,7 +29,7 @@ plot.DHARMa <- function(x, rank = TRUE, ...){
   
   xlab = checkDots("xlab", ifelse(rank, "Model predictions (rank transformed)", "Model predictions"), ...)
 
-  plotResiduals(pred = x, residuals = NULL, xlab = xlab, rank = rank, ...)
+  plotResiduals(simulationOutput = x, xlab = xlab, rank = rank, ...)
   
   mtext("DHARMa residual diagnostics", outer = T)
   
@@ -58,6 +58,8 @@ hist.DHARMa <- function(x,
                         xlab = "Residuals (outliers are marked red)",
                         cex.main = 1,
                         ...){
+  
+  x = ensureDHARMa(x, convert = T)
   
   val = x$scaledResiduals
   val[val == 0] = -0.01
@@ -98,7 +100,7 @@ plotSimulatedResiduals <- function(simulationOutput, ...){
 #' @export
 plotQQunif <- function(simulationOutput, testUniformity = T, testOutliers = T, testDispersion = T, ...){
   
-  if(class(simulationOutput) != "DHARMa") stop("DHARMa::plotQQunif wrong argument, simulationOutput must be a DHARMa object!")
+  simulationOutput = ensureDHARMa(simulationOutput, convert = "Model")
 
   gap::qqunif(simulationOutput$scaledResiduals,pch=2,bty="n", logscale = F, col = "black", cex = 0.6, main = "QQ plot residuals", cex.main = 1, ...)
   
@@ -151,33 +153,16 @@ plotQQunif <- function(simulationOutput, testUniformity = T, testOutliers = T, t
 #' @seealso \code{\link{plotSimulatedResiduals}}, \code{\link{plotQQunif}}
 #' @example inst/examples/plotsHelp.R
 #' @export
-plotResiduals <- function(pred, residuals = NULL, quantreg = NULL, rank = F, asFactor = NULL, smoothScatter = NULL, quantiles = c(0.25, 0.5, 0.75), ...){
+plotResiduals <- function(simulationOutput, predictor = NULL, quantreg = NULL, rank = F, asFactor = NULL, smoothScatter = NULL, quantiles = c(0.25, 0.5, 0.75), ...){
   
-  ylab = checkDots("ylab", "Standardized residual", ...)
-  
-  ##### Conversions #####
-  
-  # conversions from DHARMa 
-  if(class(pred) == "DHARMa"){
-    if (! is.null(residuals)) stop("DHARMa::plotResiduals - can't provide both a DHARMa object to pred and additional residuals")
-    res = pred$scaledResiduals
-    pred = pred$fittedPredictedResponse
-  } else {
-    if (is.null(residuals)) stop("DHARMa::plotResiduals - residual can only be NULL if pred is of class DHARMa")
-    res = residuals
-  }
-  if(class(residuals) == "DHARMa") res = residuals$scaledResiduals
   
   ##### Checks #####
   
-  # CHECK FOR LENGTH AND NA PROBLEM
-  if(length(pred) != length(res)) {
-    if(any(is.na(pred))){
-      stop("DHARMa::plotResiduals - residuals and predictor do not have the same length. The issue is likely that you have NAs in your predictor that were removed during the model fit. Remove the NA values from your predictor.")      
-    } else {
-      stop("DHARMa::plotResiduals - residuals and predictor do not have the same length. ")        
-    }
-  }
+  ylab = checkDots("ylab", "Standardized residual", ...)
+  
+  simulationOutput = ensureDHARMa(simulationOutput, convert = T)
+  res = simulationOutput$scaledResiduals
+  pred = ensurePredictor(simulationOutput, predictor)
   
   ##### Rank transform and factor conversion#####
   
@@ -213,7 +198,7 @@ plotResiduals <- function(pred, residuals = NULL, quantreg = NULL, rank = F, asF
     plot(res ~ pred, ylim = c(0,1), axes = FALSE, ...)
   } 
   else if (smoothScatter == TRUE) {
-    smoothScatter(pred, res , ylim = c(0,1), axes = FALSE, colramp = colorRampPalette(c("white", "black")))
+    smoothScatter(pred, res , ylim = c(0,1), axes = FALSE, colramp = colorRampPalette(c("white", "darkgrey")))
     points(pred[defaultCol == 2], res[defaultCol == 2], col = "red", cex = 0.5)
   }
   else{
@@ -226,6 +211,7 @@ plotResiduals <- function(pred, residuals = NULL, quantreg = NULL, rank = F, asF
   ##### Quantile regressions #####
   
   main = checkDots("main", "Residual vs. predicted", ...)
+  out = NULL
   
   if(is.numeric(pred)){
     if(quantreg == F){
