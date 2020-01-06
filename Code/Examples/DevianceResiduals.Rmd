@@ -37,7 +37,7 @@ res2 = residuals(fittedModel2, type = "deviance")
 
 ```{r, fig.height=7, fig.width=7}
 par(mfrow = c(2,2))
-plot(fitted(fittedModel), res2, main = "Model 1, mean counts large")
+plot(fitted(fittedModel), res, main = "Model 1, mean counts large")
 plot(fitted(fittedModel2), res2, main = "Model 2, mean counts small")
 qqnorm(res )
 qqnorm(res2)
