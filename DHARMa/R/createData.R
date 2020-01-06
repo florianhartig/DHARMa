@@ -47,7 +47,7 @@ createData <- function(sampleSize = 100, intercept = 0, fixedEffects = 1, quadra
     # Create random effects
 
     group = rep(1:numGroups, each = sampleSize/numGroups)
-    groupRandom = rnorm(numGroups, sd = randomEffectVariance)
+    groupRandom = rnorm(numGroups, sd = sqrt(randomEffectVariance))
 
     ########################################################################
     # Creation of linear prediction
