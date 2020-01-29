@@ -1,6 +1,14 @@
-# Deviance residuals
-Florian Hartig  
-25 Nov 2016  
+---
+title: "Deviance residuals"
+author: "Florian Hartig"
+date: "25 Nov 2016"
+output: 
+  html_document: 
+    keep_md: yes
+    toc: true
+abstract: "This document demonstrates that deviance residuals for GLMs are not normal, symmetric or homoscedastic, unless the distribution (in this case Poisson) is itself in a range that is approximately normal."
+
+---
 
 # Poisson GLM
 
@@ -30,7 +38,7 @@ res2 = residuals(fittedModel2, type = "deviance")
 
 ```r
 par(mfrow = c(2,2))
-plot(fitted(fittedModel), res2, main = "Model 1, mean counts large")
+plot(fitted(fittedModel), res, main = "Model 1, mean counts large")
 plot(fitted(fittedModel2), res2, main = "Model 2, mean counts small")
 qqnorm(res )
 qqnorm(res2)
