@@ -1,7 +1,7 @@
 Package: DHARMa
 Title: Residual Diagnostics for Hierarchical (Multi-Level / Mixed) Regression Models
-Version: 0.2.6
-Date: 2019-11-24
+Version: 0.2.7
+Date: 2020-02-10
 Authors@R: c(person("Florian", "Hartig", email = "florian.hartig@biologie.uni-regensburg.de", role = c("aut", "cre"), comment=c(ORCID="0000-0002-6255-9059")))
 Description: The 'DHARMa' package uses a simulation-based approach to create
     readily interpretable scaled (quantile) residuals for fitted (generalized) linear mixed
@@ -33,7 +33,7 @@ Imports:
     mgcv,
     glmmTMB (>= 0.2.1),
     spaMM (>= 2.6.0),
-    qgam
+    qgam (>= 1.3.1)
 Suggests:
     knitr,
     testthat,
