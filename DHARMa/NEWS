@@ -1,16 +1,13 @@
 NOTE: for more news about the package, see https://github.com/florianhartig/DHARMa/releases
 
-DHARMa 0.2.6
+DHARMa 0.2.7
 ============
-
 
 New features
 
 - added smooth scatter in plotResiduals https://github.com/florianhartig/DHARMa/commit/da01d8c7a9a74558817e4a73fe826084164cf05d
 
-Bugfixes
-
-
+- glmmTMB now fully supported through new compulsory version 1.0 of glmmTMB, which includes the re.form argument in the simulations required by DHARMa https://github.com/florianhartig/DHARMa/pull/140
 
 
 DHARMa 0.2.6

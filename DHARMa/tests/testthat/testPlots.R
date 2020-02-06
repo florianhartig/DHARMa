@@ -1,5 +1,10 @@
 
-doPlots <- function(simulationOutput){
+doClassFunctions <- function(simulationOutput){
+  print(simulationOutput)
+  expect_vector(residuals(simulationOutput))
+}
+
+doPlots <- function(simulationOutput, testData){
   plot(simulationOutput, quantreg = T, rank = F, asFactor = T)
   plot(simulationOutput, quantreg = F, rank = F)
   
@@ -12,6 +17,7 @@ doPlots <- function(simulationOutput){
   # residual vs. X plots, various options
   plotResiduals(pred = simulationOutput)
   plotResiduals(pred = simulationOutput$fittedPredictedResponse, residuals = simulationOutput$scaledResiduals)
+  hist(simulationOutput)  
 }
 
 doTests <- function(simulationOutput, testData){
@@ -45,13 +51,15 @@ test_that("Plots work",
             testData = createData(sampleSize = 100, overdispersion = 0, randomEffectVariance = 0, family = binomial())
             fittedModel <- glm(observedResponse ~ Environment1 ,family = "binomial", data = testData)
             simulationOutput <- simulateResiduals(fittedModel = fittedModel)
-            doPlots(simulationOutput)
+            doClassFunctions(simulationOutput)
+            doPlots(simulationOutput, testData)
             
             
             testData = createData(sampleSize = 100, overdispersion = 0, randomEffectVariance = 2, numGroups = 4, family = gaussian())
             fittedModel <- glm(observedResponse ~ group , data = testData)
             simulationOutput <- simulateResiduals(fittedModel = fittedModel)
-            doPlots(simulationOutput)
+            doClassFunctions(simulationOutput)
+            doPlots(simulationOutput, testData)
             plotResiduals(testData$group, simulationOutput$scaledResiduals)
           }
 )

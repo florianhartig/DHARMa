@@ -340,6 +340,38 @@ simulationOutput <- simulateResiduals(fittedModel = fittedModel)
 plot(simulationOutput)
 ```
 
+# refit problem 
+
+```{r}
+library(DHARMa)
+library(glmmTMB)
+library(lme4)
+
+testData = createData(sampleSize = 200, randomEffectVariance = 1.5, family = poisson(), numGroups = 20)
+m1 <- glmmTMB(observedResponse ~ Environment1 + (1|group), family = "poisson", data = testData)
+
+m2 = refit(m1, newresp = simulate(m1)[,1])
+class(m2)
+
+# m2 looks like a normal glmmTMB object. But this doesn't work
+m3 = refit(m2, newresp = simulate(m1)[,1])
+
+# no problem with lme4
+m1 <- glmer(observedResponse ~ Environment1 + (1|group), family = "poisson", data = testData)
+m2 = refit(m1, newresp = simulate(m1)[,1])
+m3 = refit(m2, newresp = simulate(m1)[,1])
+
+
+res = simulateResiduals(m1)
+plot(res)
+
+res = simulateResiduals(m1, refit = T, n = 5)
+plot(res)
+
+res = simulateResiduals(m2, refit = T, n = 5)
+plot(res)
+
+```
 
 
 
