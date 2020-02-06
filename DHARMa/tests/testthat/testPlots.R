@@ -1,7 +1,7 @@
 
 doClassFunctions <- function(simulationOutput){
   print(simulationOutput)
-  expect_vector(residuals(simulationOutput))
+  expect_true(class(residuals(simulationOutput)) == "numeric")
 }
 
 doPlots <- function(simulationOutput, testData){
