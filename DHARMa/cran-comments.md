@@ -2,7 +2,7 @@
 
 ## Submission 1, 4.2.20
 
-This release fixes a bug in the vignette that appeared after last release last week. See NEWS for changes. 
+This is a minor update of DHARMa, mainly enhancing compatibility with glmmTMB. See NEWS for changes. 
 
 This release was tested without apparent problems under
 

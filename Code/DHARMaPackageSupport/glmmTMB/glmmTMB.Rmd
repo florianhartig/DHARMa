@@ -351,8 +351,6 @@ testData = createData(sampleSize = 200, randomEffectVariance = 1.5, family = poi
 m1 <- glmmTMB(observedResponse ~ Environment1 + (1|group), family = "poisson", data = testData)
 
 m2 = refit(m1, newresp = simulate(m1)[,1])
-class(m2)
-
 # m2 looks like a normal glmmTMB object. But this doesn't work
 m3 = refit(m2, newresp = simulate(m1)[,1])
 
@@ -360,6 +358,8 @@ m3 = refit(m2, newresp = simulate(m1)[,1])
 m1 <- glmer(observedResponse ~ Environment1 + (1|group), family = "poisson", data = testData)
 m2 = refit(m1, newresp = simulate(m1)[,1])
 m3 = refit(m2, newresp = simulate(m1)[,1])
+
+
 
 
 res = simulateResiduals(m1)
