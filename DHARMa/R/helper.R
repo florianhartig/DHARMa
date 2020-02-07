@@ -8,7 +8,7 @@ DHARMa.ecdf <- function (x)
   x <- sort(x)
   n <- length(x)
   if (n < 1) 
-    stop("'x' must have 1 or more non-missing values")
+    stop(paste("DHARMa.ecdf - length vector < 1", x))
   vals <- unique(x)
   rval <- approxfun(vals, cumsum(tabulate(match(x, vals)))/ (n +1), 
                     method = "linear", yleft = 0, yright = 1, ties = "ordered")

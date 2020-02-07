@@ -1,3 +1,15 @@
+# Version 0.2.7
+
+## Submission 1, 4.2.20
+
+This is a minor update of DHARMa, mainly enhancing compatibility with glmmTMB. See NEWS for changes. 
+
+This release was tested without apparent problems under
+
+* local MAC OS 10.14.1 (Mojave), R 3.6.1
+* http://win-builder.r-project.org/ - oldrelease / devel / release
+* Linux (Travis CI) - oldrel / release / devel
+
 # Version 0.2.6
 
 ## Submission 1, 26.11.19
