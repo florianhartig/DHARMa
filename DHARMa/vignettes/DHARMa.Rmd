@@ -157,7 +157,7 @@ Thus, for a limited amount of data, the question one has to ask is if the deviat
 If you want to plot the residuals against other predictors (highly recommend), you can use the function
 
 ```{r, eval = F}
-plotResiduals(YOURPREDICTOR, simulationOutput$scaledResiduals)
+plotResiduals(simulationOutput, YOURPREDICTOR)
 ```
 
 which does the same quantile plot as the main plotting function. 
@@ -465,8 +465,8 @@ It is difficult to see that there is a problem at all in the general plot, but i
 
 ```{r}
 par(mfrow = c(1,2))
-plotResiduals(testData$Environment1,  simulationOutput$scaledResiduals)
-plotResiduals(testData$Environment2,  simulationOutput$scaledResiduals)
+plotResiduals(simulationOutput, testData$Environment1)
+plotResiduals(simulationOutput, testData$Environment2)
 ```
 
 ## Temporal autocorrelation
@@ -703,7 +703,7 @@ res <- simulateResiduals(m3)
 plot(res)
 summary(m3)
 
-plotResiduals(Owls$FoodTreatment, res$scaledResiduals)
+plotResiduals(res, Owls$FoodTreatment)
 
 testDispersion(res)
 testZeroInflation(res)
@@ -714,7 +714,7 @@ summary(m4)
 res <- simulateResiduals(m4)
 plot(res)
 
-plotResiduals(Owls$FoodTreatment, res$scaledResiduals)
+plotResiduals(res, Owls$FoodTreatment)
 
 testDispersion(res)
 testZeroInflation(res)
@@ -745,7 +745,7 @@ plot(simulationOutput, asFactor = T)
 However, you can clearly see the misfit if you plot 
 
 ```{r}
-plotResiduals(testData$Environment1, simulationOutput$scaledResiduals, quantreg = T)
+plotResiduals(simulationOutput, testData$Environment1, quantreg = T)
 ```
 
 Moreover, if you perform the DHARMa procedure per group, you can see overdispersion created by the random effect variance (left without grouping, right with grouping)

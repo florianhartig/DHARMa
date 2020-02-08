@@ -8,7 +8,7 @@ simulationOutput <- simulateResiduals(fittedModel = fittedModel)
 # plot residuals, quantreg = T is better but costs more time
 plot(simulationOutput, quantreg = T)
 
-x = plotResiduals(testData$Environment1, simulationOutput,rank = T)
+x = plotResiduals(simulationOutput, testData$Environment1, rank = T)
 
 
 library(SHT)

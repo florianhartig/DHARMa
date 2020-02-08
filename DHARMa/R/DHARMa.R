@@ -131,3 +131,21 @@ ensurePredictor <- function(simulationOutput,
   return(predictor)
 }
 
+
+print.DHARMa.startupInfo <- function()
+{ 
+  version <- packageVersion('DHARMa')
+  hello <- paste("This is DHARMa ",version,". For overview type '?DHARMa'. Note that with DHARMa 0.3.x, the syntax of plotResiduals has changed. You have to provide now always first the simulations, and then (optimally) the variable against which you want the residuals to be plotted." ,sep="")
+  packageStartupMessage(hello)
+}
+
+.onLoad <- function(...) {
+  
+}
+
+.onAttach <- function(...) { 
+  print.DHARMa.startupInfo()
+}
+
+
+

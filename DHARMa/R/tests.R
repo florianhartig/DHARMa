@@ -474,7 +474,7 @@ testSpatialAutocorrelation <- function(simulationOutput, x = NULL, y  = NULL, di
   out$method = "DHARMa Moran's I test for spatial autocorrelation"
   out$alternative = "Spatial autocorrelation"
   out$p.value = MI$p.value
-  out$data.name = deparse(substitute(simulationOutput))
+  # out$data.name = deparse(substitute(simulationOutput))
   
   class(out) = "htest"
   

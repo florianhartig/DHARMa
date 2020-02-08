@@ -201,6 +201,8 @@ simulateResiduals <- function(fittedModel, n = 250, refit = F, integerResponse =
 
 getPossibleModels<-function()c("lm", "glm", "negbin", "lmerMod", "glmerMod", "gam", "bam", "glmmTMB", "HLfit") 
 
+#' Check if models is supported
+#' 
 #' @param fittedModel a model 
 #' @param stop whether to stop  
 #' @keywords internal

@@ -24,7 +24,7 @@ simulationOutput <- simulateResiduals(fittedModel = fittedModel)
 
 # the plot function runs 4 tests
 # i) KS test i) Dispersion test iii) Outlier test iv) quantile test
-plot(simulationOutput, quantreg = T)
+plot(simulationOutput, quantreg = TRUE)
 
 # testResiduals tests distribution, dispersion and outliers
 testResiduals(simulationOutput)

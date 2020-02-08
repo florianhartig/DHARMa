@@ -15,8 +15,8 @@ doPlots <- function(simulationOutput, testData){
   plotQQunif(simulationOutput = simulationOutput)
 
   # residual vs. X plots, various options
-  plotResiduals(pred = simulationOutput)
-  plotResiduals(pred = simulationOutput$fittedPredictedResponse, residuals = simulationOutput$scaledResiduals)
+  plotResiduals(simulationOutput)
+  plotResiduals(simulationOutput$scaledResiduals, predictor = simulationOutput$fittedPredictedResponse)
   hist(simulationOutput)
 }
 
@@ -60,6 +60,6 @@ test_that("Plots work",
             simulationOutput <- simulateResiduals(fittedModel = fittedModel)
             doClassFunctions(simulationOutput)
             doPlots(simulationOutput, testData)
-            plotResiduals(testData$group, simulationOutput$scaledResiduals)
+            plotResiduals(simulationOutput, testData$group)
           }
 )

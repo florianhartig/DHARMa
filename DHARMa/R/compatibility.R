@@ -45,8 +45,9 @@ getSimulations.default <- function (object, ...){
 #' @importFrom lme4 refit
 NULL
 
-
-
+#' getFixedEffects 
+#' 
+#' @importFrom lme4 fixef 
 getFixedEffects <- function(fittedModel){
   
   if(class(fittedModel)[1] %in% c("glm", "lm", "gam", "bam", "negbin") ){
@@ -150,6 +151,7 @@ refit.glmmTMB <- function(object, newresp, ...){
 #######  spaMM #########
 
 #' @export
+#' @importFrom spaMM response 
 getResponse.HLfit <- function(object, ...){
   return(response(object, ...))
 }
@@ -160,6 +162,7 @@ getSimulations.HLfit <- function(object, ...){
 }
 
 #' @export
+#' @importFrom spaMM update_resp 
 refit.HLfit <- function(object, newresp, ...) {
   update_resp(object, newresp, evaluate = TRUE)
 }
