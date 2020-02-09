@@ -147,7 +147,7 @@ plotQQunif <- function(simulationOutput, testUniformity = T, testOutliers = T, t
 #' 
 #' @note The quantile regression can take some time to calculate, especially for larger datasets. For that reason, quantreg = F can be set to produce a smooth spline instead. 
 #' 
-#' @seealso \code{\link{plotSimulatedResiduals}}, \code{\link{plotQQunif}}
+#' @seealso \code{\link{plotQQunif}}
 #' @example inst/examples/plotsHelp.R
 #' @export
 plotResiduals <- function(simulationOutput, predictor = NULL, quantreg = NULL, rank = F, asFactor = NULL, smoothScatter = NULL, quantiles = c(0.25, 0.5, 0.75), ...){

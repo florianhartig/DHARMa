@@ -4,10 +4,15 @@
 \alias{residuals.DHARMa}
 \title{Return residuals of a DHARMa simulation}
 \usage{
-\method{residuals}{DHARMa}(object, ...)
+\method{residuals}{DHARMa}(object, quantileFunction = NULL,
+  outlierValues = NULL, ...)
 }
 \arguments{
 \item{object}{an object with simulated residuals created by \code{\link{simulateResiduals}}}
+
+\item{quantileFunction}{optional - a quantile function to transform the uniform 0/1 scaling of DHARMa to another distribution}
+
+\item{outlierValues}{if a quantile function with infinite support (such as dnorm) is used, residuals that are 0/1 are mapped to -Inf / Inf. outlierValues allows to convert -Inf / Inf values to an optional min / max value.}
 
 \item{...}{optional arguments for compatibility with the generic function, no function implemented}
 }
@@ -15,36 +20,43 @@
 Return residuals of a DHARMa simulation
 }
 \details{
-the function accesses the slot $scaledResiduals in a fitted DHARMa object
+the function accesses the slot $scaledResiduals in a fitted DHARMa object, and optionally transforms the standard DHARMa quantile residuals (which have a uniform distribution) to a particular pdf.
+}
+\note{
+some of the papers on simulated quantile residuals transforming the residuals (which are natively uniform) back to a normal distribution. I presume this is because of the larger familiarity of most users with normal residuals. Personally, I never considered this desirable, for the reasons explained in https://github.com/florianhartig/DHARMa/issues/39, but with this function, I wanted to give users the option to plot normal residuals if they so wish.
 }
 \examples{
 library(lme4)
 
 testData = createData(sampleSize = 200, overdispersion = 0.5, family = poisson())
 fittedModel <- glmer(observedResponse ~ Environment1 + (1|group), 
-                     family = "poisson", data = testData,
-                     control=glmerControl(optCtrl=list(maxfun=20000) ))
+                     family = "poisson", data = testData)
 
 simulationOutput <- simulateResiduals(fittedModel = fittedModel)
 
-# plot residuals, quantreg = T is better but costs more time
-plot(simulationOutput, quantreg = FALSE)
+# standard plot 
+plot(simulationOutput)
+
+# one of the possible test, for other options see ?testResiduals 
+testOutliers(simulationOutput)
+
+# for various other plots and tests, see the help / vignette
 
 # the calculated residuals can be accessed via 
 residuals(simulationOutput)
-simulationOutput$scaledResiduals
+
+# transform residuals to other pdf, see ?residuals.DHARMa for details
+residuals(simulationOutput, quantileFunction = qnorm, outlierValues = c(-7,7))
 
 # calculating summaries per group
 simulationOutput = recalculateResiduals(simulationOutput, group = testData$group)
 plot(simulationOutput, quantreg = FALSE)
 
-# create simulations with refitting, n=5 is very low, set higher when using this
+# create residuals with refitting, see ?simulateResiduals for details
+# n=10 is very low, set higher when using this for real
 simulationOutput <- simulateResiduals(fittedModel = fittedModel, 
                                       n = 10, refit = TRUE)
 plot(simulationOutput, quantreg = FALSE)
 
-# grouping per random effect group works as above
-simulationOutput = recalculateResiduals(simulationOutput, group = testData$group)
-plot(simulationOutput, quantreg = FALSE)
 
 }

@@ -15,7 +15,7 @@ testResiduals(simulationOutput, plot = T)
 Calls both uniformity and dispersion test
 }
 \details{
-This function is a wrapper for the various test functions implemented in DHARMa. Currently, this function calls the \code{\link{testUniformity}} and the \code{\link{testDispersion}} functions. All other tests (see below) have to be called by hand.
+This function is a wrapper for the various test functions implemented in DHARMa. Currently, this function calls the \code{\link{testUniformity}} and the \code{\link{testDispersion}} functions. All other tests (see list below) have to be called by hand.
 }
 \examples{
 testData = createData(sampleSize = 200, overdispersion = 0.5, randomEffectVariance = 0)

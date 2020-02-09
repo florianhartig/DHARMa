@@ -88,5 +88,5 @@ plot(simulationOutput, asFactor = TRUE) # we see one residual point per RE
 
 }
 \seealso{
-\code{\link{plotSimulatedResiduals}}, \code{\link{plotQQunif}}
+\code{\link{plotQQunif}}
 }

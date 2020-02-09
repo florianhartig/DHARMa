@@ -25,14 +25,30 @@ print.DHARMa <- function(x, ...){
 #' Return residuals of a DHARMa simulation
 #' 
 #' @param object an object with simulated residuals created by \code{\link{simulateResiduals}}
+#' @param quantileFunction optional - a quantile function to transform the uniform 0/1 scaling of DHARMa to another distribution
+#' @param outlierValues if a quantile function with infinite support (such as dnorm) is used, residuals that are 0/1 are mapped to -Inf / Inf. outlierValues allows to convert -Inf / Inf values to an optional min / max value.  
 #' @param ... optional arguments for compatibility with the generic function, no function implemented
-#' @details the function accesses the slot $scaledResiduals in a fitted DHARMa object
+#' @details the function accesses the slot $scaledResiduals in a fitted DHARMa object, and optionally transforms the standard DHARMa quantile residuals (which have a uniform distribution) to a particular pdf. 
+#' 
+#' @note some of the papers on simulated quantile residuals transforming the residuals (which are natively uniform) back to a normal distribution. I presume this is because of the larger familiarity of most users with normal residuals. Personally, I never considered this desirable, for the reasons explained in https://github.com/florianhartig/DHARMa/issues/39, but with this function, I wanted to give users the option to plot normal residuals if they so wish. 
+#' 
 #' @export
 #' @example inst/examples/simulateResidualsHelp.R
 #'
-residuals.DHARMa <- function(object, ...){
-  return(object$scaledResiduals)
+residuals.DHARMa <- function(object, quantileFunction = NULL, outlierValues = NULL, ...){
+  
+  if(is.null(quantileFunction)){
+    return(object$scaledResiduals)
+  } else {
+    res = quantileFunction(object$scaledResiduals)
+    if(!is.null(outlierValues)){
+      res = ifelse(res == -Inf, outlierValues[1], res)
+      res = ifelse(res == Inf, outlierValues[2], res)         
+    }
+    return(res)
+  }
 }
+
 
 #' Create a DHARMa object from hand-coded simulations or Bayesian posterior predictive simulations
 #' 

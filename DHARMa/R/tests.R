@@ -2,7 +2,7 @@
 #' 
 #' Calls both uniformity and dispersion test
 #'
-#' This function is a wrapper for the various test functions implemented in DHARMa. Currently, this function calls the \code{\link{testUniformity}} and the \code{\link{testDispersion}} functions. All other tests (see below) have to be called by hand.
+#' This function is a wrapper for the various test functions implemented in DHARMa. Currently, this function calls the \code{\link{testUniformity}} and the \code{\link{testDispersion}} functions. All other tests (see list below) have to be called by hand.
 #' 
 #' @param simulationOutput an object of class DHARMa with simulated quantile residuals, either created via \code{\link{simulateResiduals}} or by \code{\link{createDHARMa}} for simulations created outside DHARMa 
 #' @param plot if T, plots functions of the tests are called
@@ -404,8 +404,18 @@ testTemporalAutocorrelation <- function(simulationOutput, time = NULL , alternat
   out = lmtest::dwtest(simulationOutput$scaledResiduals ~ 1, order.by = time, alternative = alternative)
   
   if(plot == T) {
-  col = colorRamp(c("red", "white", "blue"))(simulationOutput$scaledResiduals)
-  plot(simulationOutput$scaledResiduals ~ time, col = rgb(col, maxColorValue = 255), main = out$method, cex.main = 0.8)
+    
+    if (out$p.value < 0.05){
+      main = paste(out$method, "\n autocorrelation significant")
+      maincol = "red"
+    } else {
+      main = paste(out$method, "\n autocorrelation n.s.")
+      maincol = "black"
+    }
+    
+   plot(simulationOutput$scaledResiduals ~ time, type = "l", ylab = "Scaled residuals", xlab = "Time")
+    title(main = main, cex.main = 0.8, 
+          col.main = maincol)
   }
   return(out)
 }

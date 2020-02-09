@@ -43,11 +43,9 @@ getSimulations.default <- function (object, ...){
 
 
 #' @importFrom lme4 refit
+#' @importFrom lme4 fixef 
 NULL
 
-#' getFixedEffects 
-#' 
-#' @importFrom lme4 fixef 
 getFixedEffects <- function(fittedModel){
   
   if(class(fittedModel)[1] %in% c("glm", "lm", "gam", "bam", "negbin") ){
