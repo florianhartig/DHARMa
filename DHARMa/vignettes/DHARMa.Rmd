@@ -428,13 +428,20 @@ So far, most of the things that we have tested could also have been detected wit
 Heteroscedasticity means that there is a systematic dependency of the dispersion / variance on another variable in the model. It is not sufficiently appreciated that also binomial or Poisson models can show heteroscedasticity. Basically, it means that the level of over/underdispersion depends on another parameter. Here an example where we create such data 
 
 ```{r}
-testData = createData(sampleSize = 500, intercept = 0, overdispersion = function(x){return(rnorm(length(x), sd = 2*abs(x)))}, family = poisson(), randomEffectVariance = 0)
-fittedModel <- glmer(observedResponse ~ Environment1 + (1|group), family = "poisson", data = testData)
+testData = createData(sampleSize = 500, intercept = 0, overdispersion = function(x){return(rnorm(length(x), sd = 2 * abs(x)))}, family = poisson(), randomEffectVariance = 0)
+fittedModel <- glm(observedResponse ~ Environment1 , family = "poisson", data = testData)
 
 simulationOutput <- simulateResiduals(fittedModel = fittedModel)
 plot(simulationOutput)
-testUniformity(simulationOutput = simulationOutput)
 ```
+
+The 
+
+```{r}
+testQuantiles(simulationOutput)
+plotResiduals(simulationOutput)
+```
+
 
 Adding a simple overdispersion correction will try to find a compromise between the different levels of dispersion in the model. The qq plot looks better now, but there is still a pattern in the residuals 
 
@@ -446,7 +453,6 @@ fittedModel <- glmer(observedResponse ~ Environment1 + (1|group) + (1|ID), famil
 
 simulationOutput <- simulateResiduals(fittedModel = fittedModel)
 plot(simulationOutput)
-testUniformity(simulationOutput = simulationOutput)
 ```
 
 To remove this pattern, you would need to make the dispersion parameter dependent on a predictor (e.g. in JAGS), or apply a transformation on the data. 
