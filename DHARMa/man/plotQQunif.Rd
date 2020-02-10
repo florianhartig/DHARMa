@@ -4,7 +4,8 @@
 \alias{plotQQunif}
 \title{Quantile-quantile plot for a uniform distribution}
 \usage{
-plotQQunif(simulationOutput, testUniformity = T, testOutliers = T, ...)
+plotQQunif(simulationOutput, testUniformity = T, testOutliers = T,
+  testDispersion = T, ...)
 }
 \arguments{
 \item{simulationOutput}{a DHARMa simulation output (class DHARMa)}
@@ -12,6 +13,8 @@ plotQQunif(simulationOutput, testUniformity = T, testOutliers = T, ...)
 \item{testUniformity}{if T, the function \code{\link{testUniformity}} will be called and the result will be added to the plot}
 
 \item{testOutliers}{if T, the function \code{\link{testOutliers}} will be called and the result will be added to the plot}
+
+\item{testDispersion}{if T, the function \code{\link{testDispersion}} will be called and the result will be added to the plot}
 
 \item{...}{arguments to be passed on to \code{\link[gap]{qqunif}}}
 }
@@ -50,11 +53,11 @@ plotResiduals(simulationOutput, rank = TRUE, quantreg = FALSE)
 plotResiduals(simulationOutput, rank = TRUE, quantreg = FALSE, smoothScatter = TRUE)
 
 # residual vs predictors, using explicit values for pred, residual 
-plotResiduals(pred = testData$Environment1, 
-              residuals = simulationOutput$scaledResiduals, quantreg = FALSE)
+plotResiduals(simulationOutput, predictor = testData$Environment1, 
+              quantreg = FALSE)
 
 # if pred is a factor, or asFactor = T, will produce a boxplot
-plotResiduals(pred = testData$group, residuals = simulationOutput$scaledResiduals, 
+plotResiduals(simulationOutput, predictor = testData$group,
               quantreg = FALSE, asFactor = TRUE)
 
 # All these options can also be provided to the main plotting function

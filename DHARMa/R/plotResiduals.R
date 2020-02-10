@@ -27,13 +27,11 @@ plot.DHARMa <- function(x, rank = TRUE, ...){
   
   plotQQunif(x)
   
-  xlab = checkDots("xlab", ifelse(rank, "Predicted values (rank transformed)", "Predicted values"), ...)
-  ylab = checkDots("ylab", "Standardized residual", ...)
-  main = checkDots("main", "Residual vs. predicted\n lines should match", ...)
+  xlab = checkDots("xlab", ifelse(rank, "Model predictions (rank transformed)", "Model predictions"), ...)
+
+  plotResiduals(simulationOutput = x, xlab = xlab, rank = rank, ...)
   
-  plotResiduals(pred = x, residuals = NULL, xlab = xlab, ylab = ylab, main = main, rank = rank, ...)
-  
-  mtext("DHARMa scaled residual plots", outer = T)
+  mtext("DHARMa residual diagnostics", outer = T)
   
   par(oldpar)
 }
@@ -44,24 +42,31 @@ plot.DHARMa <- function(x, rank = TRUE, ...){
 #' The function produces a histogram from a DHARMa output
 #' 
 #' @param x a DHARMa simulation output (class DHARMa)
-#' @param ... arguments to be passed on to hist. Breaks and col are fixed. 
+#' @param breaks breaks for hist() function
+#' @param col col for hist bars
+#' @param main plot main
+#' @param xlab plot xlab
+#' @param cex.main plot cex.main
+#' @param ... other arguments to be passed on to hist
 #' @seealso \code{\link{plotSimulatedResiduals}}, \code{\link{plotResiduals}}
 #' @example inst/examples/plotsHelp.R
 #' @export
-hist.DHARMa <- function(x, ...){
+hist.DHARMa <- function(x, 
+                        breaks = seq(-0.02, 1.02, len = 53), 
+                        col = c("red",rep("lightgrey",50), "red"),
+                        main = "Hist of DHARMa residuals",
+                        xlab = "Residuals (outliers are marked red)",
+                        cex.main = 1,
+                        ...){
+  
+  x = ensureDHARMa(x, convert = T)
   
   val = x$scaledResiduals
   val[val == 0] = -0.01
   val[val == 1] = 1.01
-  
-  breaks = checkDots("breaks", seq(-0.02, 1.02, len = 53), ...)
-  col = checkDots("col", c("red",rep("lightgrey",50), "red"), ...)
-  main = checkDots("main", "Hist of DHARMa residuals\nOutliers are marked red", ...)   
 
-  hist(val, breaks = breaks, col = col, main = main, ...)
+  hist(val, breaks = breaks, col = col, main = main, xlab = xlab, cex.main = cex.main, ...)
 }
-
-
 
 
 #' DHARMa standard residual plots
@@ -87,15 +92,16 @@ plotSimulatedResiduals <- function(simulationOutput, ...){
 #' @param simulationOutput a DHARMa simulation output (class DHARMa)
 #' @param testUniformity if T, the function \code{\link{testUniformity}} will be called and the result will be added to the plot
 #' @param testOutliers if T, the function \code{\link{testOutliers}} will be called and the result will be added to the plot
+#' @param testDispersion if T, the function \code{\link{testDispersion}} will be called and the result will be added to the plot
 #' @param ... arguments to be passed on to \code{\link[gap]{qqunif}}
 #' 
 #' @details the function calls qqunif from the R package gap to create a quantile-quantile plot for a uniform distribution.  
 #' @seealso \code{\link{plotSimulatedResiduals}}, \code{\link{plotResiduals}}
 #' @example inst/examples/plotsHelp.R
 #' @export
-plotQQunif <- function(simulationOutput, testUniformity = T, testOutliers = T, ...){
+plotQQunif <- function(simulationOutput, testUniformity = T, testOutliers = T, testDispersion = T, ...){
   
-  if(class(simulationOutput) != "DHARMa") stop("DHARMa::plotQQunif wrong argument, simulationOutput must be a DHARMa object!")
+  simulationOutput = ensureDHARMa(simulationOutput, convert = "Model")
 
   gap::qqunif(simulationOutput$scaledResiduals,pch=2,bty="n", logscale = F, col = "black", cex = 0.6, main = "QQ plot residuals", cex.main = 1, ...)
   
@@ -108,6 +114,12 @@ plotQQunif <- function(simulationOutput, testUniformity = T, testOutliers = T, .
     temp = testOutliers(simulationOutput, plot = F)
     legend("bottomright", c(paste("Outlier test: p=", round(temp$p.value, digits = 5)), paste("Deviation ", ifelse(temp$p.value < 0.05, "significant", "n.s."))), text.col = ifelse(temp$p.value < 0.05, "red", "black" ), bty="n")     
   }
+  
+  if(testDispersion == TRUE){
+    temp = testDispersion(simulationOutput, plot = F)
+    legend("center", c(paste("Dispersion test: p=", round(temp$p.value, digits = 5)), paste("Deviation ", ifelse(temp$p.value < 0.05, "significant", "n.s."))), text.col = ifelse(temp$p.value < 0.05, "red", "black" ), bty="n")     
+  }
+  
 }
 
 
@@ -115,55 +127,41 @@ plotQQunif <- function(simulationOutput, testUniformity = T, testOutliers = T, .
 #' 
 #' The function creates a generic residual plot with either spline or quantile regression to highlight patterns in the residuals. Outliers are highlighted in red
 #' 
-#' @param pred either the predictor variable against which the residuals should be plotted, or a DHARMa object, in which case res ~ pred is plotted
-#' @param residuals residuals values. Can be either numerical values, or a DHARMa object, from which residual values can be extracted
+#' @param simulationOutput usually a DHARMa object, from which residual values can be extracted. Alternatively, a vector with residuals or a fitted model can be provided, which will then be transformed into a DHARMa object
+#' @param predictor either the predictor variable against which the residuals should be plotted, or a DHARMa object, in which case res ~ pred is plotted
 #' @param quantreg whether to perform a quantile regression on 0.25, 0.5, 0.75 on the residuals. If F, a spline will be created instead. Default NULL chooses T for nObs < 2000, and F otherwise. 
 #' @param rank if T, the values of pred will be rank transformed. This will usually make patterns easier to spot visually, especially if the distribution of the predictor is skewed. If pred is a factor, this has no effect. 
 #' @param asFactor should the predictor variable be treated as a factor. Default is to choose this for <10 unique predictions, as long as enough predictions are available to draw a boxplot.
-#' @param smoothScatter if T, a smooth scatter plot will plotted instead of a normal scatter plot. This makes sense when the number of residuals is very large. Default NULL chooses T for nObs < 10000, and F otherwise. 
+#' @param smoothScatter if T, a smooth scatter plot will plotted instead of a normal scatter plot. This makes sense when the number of residuals is very large. Default NULL chooses T for nObs < 10000, and F otherwise.
+#' @param quantiles for a quantile regression, which quanties should be plotted 
 #' @param ... additional arguments to plot / boxplot. 
-#' @details The function plots residuals against a predictor (e.g. fitted value, or any other predictor). 
+#' @details The function plots residuals against a predictor (by default against the fitted value, extracted from the DHARMa object, or any other predictor). 
 #' 
 #' Outliers are highlighted in red (for information on definition and interpretation of outliers, see \code{\link{testOutliers}}). 
 #' 
-#' To provide a visual aid in detecting deviations from uniformity in y-direction, the plot function calculates an (optional) quantile regression, which compares the empirical 0.25, 0.5 and 0.75 quantiles in y direction (red solid lines) with the theoretical 0.25, 0.5 and 0.75 quantiles (dashed black line). 
+#' To provide a visual aid in detecting deviations from uniformity in y-direction, the plot function calculates an (optional) quantile regression, which compares the empirical 0.25, 0.5 and 0.75 quantiles (default) in y direction (red solid lines) with the theoretical 0.25, 0.5 and 0.75 quantiles (dashed black line). 
 #' 
-#' Assymptotically (i.e. for lots of data / residuals), if the model is correct, theoretical and the empirical quantiles should be identical (i.e. dashed and solid lines should match).
-#' 
-#' In practice, however, there will be only a finite and often small number of residuals. If the model is correct, these residuals are drawn from the theoretical (uniform) distribution, but because of the limited sample size, the empirical quantiles of these residuals will never perfectly match the theoretical quantiles. It's the same as in a normal linear regression - even if the model is entirely correct, the qq-plot (or any other residual plot) for a few data points will never perfectly match the theoretical quantiles.
-#' 
-#' Thus, for a limited amount of data, the question one has to ask is if the deviation of the empirical (red) from the expected (dashed) distribution is strong enough so that one can reject the null hypothesis that the residuals are drawn from a uniform distribution. To answer this question, DHARMa has various tests implemented (see later). Unfortunately, there is not yet a dedicated test for trends in the red quantile lines, so at the moment it's up to the user to make the call of a deviation in the residual pattern is is still acceptable, i.e. could appear do to random  variation.
-#' 
-#' 
-#' @note The quantile regression can take some time to calculate, especially for larger datasets. For that reason, quantreg = F can be set to produce a smooth spline instead. 
+#' Assymptotically (i.e. for lots of data / residuals), if the model is correct, theoretical and the empirical quantiles should be identical (i.e. dashed and solid lines should match). A p-value for the deviation is calculated for each quantile line. Significant deviations are highlighted by red color. 
 #' 
 #' If pred is a factor, a boxplot will be plotted instead of a scatter plot. The distribution for each factor level should be uniformly distributed, so the box should go from 0.25 to 0.75, with the median line at 0.5. Again, chance deviations from this will increases when the sample size is smaller. You can run null simulations to test if the deviations you see exceed what you would expect from random variation. If you want to create box plots for categorical predictors (e.g. because you only have a small number of unique numberic predictor values), you can convert your predictor with as.factor(pred)
 #' 
-#' @seealso \code{\link{plotSimulatedResiduals}}, \code{\link{plotQQunif}}
+#' @note The quantile regression can take some time to calculate, especially for larger datasets. For that reason, quantreg = F can be set to produce a smooth spline instead. 
+#' 
+#' @seealso \code{\link{plotQQunif}}
 #' @example inst/examples/plotsHelp.R
 #' @export
-plotResiduals <- function(pred, residuals = NULL, quantreg = NULL, rank = F, asFactor = NULL, smoothScatter = NULL, ...){
+plotResiduals <- function(simulationOutput, predictor = NULL, quantreg = NULL, rank = F, asFactor = NULL, smoothScatter = NULL, quantiles = c(0.25, 0.5, 0.75), ...){
   
-  # conversions from DHARMa 
-  if(class(pred) == "DHARMa"){
-    if (! is.null(residuals)) stop("DHARMa::plotResiduals - can't provide both a DHARMa object to pred and additional residuals")
-    res = pred$scaledResiduals
-    pred = pred$fittedPredictedResponse
-  } else {
-    if (is.null(residuals)) stop("DHARMa::plotResiduals - residual can only be NULL if pred is of class DHARMa")
-    res = residuals
-  }
-  if(class(residuals) == "DHARMa") res = residuals$scaledResiduals
   
-
-  # CHECK FOR LENGTH AND NA PROBLEM
-  if(length(pred) != length(res)) {
-    if(any(is.na(pred))){
-      stop("DHARMa::plotResiduals - residuals and predictor do not have the same length. The issue is likely that you have NAs in your predictor that were removed during the model fit. Remove the NA values from your predictor.")      
-    } else {
-      stop("DHARMa::plotResiduals - residuals and predictor do not have the same length. ")        
-    }
-  }
+  ##### Checks #####
+  
+  ylab = checkDots("ylab", "Standardized residual", ...)
+  
+  simulationOutput = ensureDHARMa(simulationOutput, convert = T)
+  res = simulationOutput$scaledResiduals
+  pred = ensurePredictor(simulationOutput, predictor)
+  
+  ##### Rank transform and factor conversion#####
   
   if(!is.factor(pred)){
 
@@ -177,48 +175,86 @@ plotResiduals <- function(pred, residuals = NULL, quantreg = NULL, rank = F, asF
     if(is.null(asFactor)) asFactor = (nuniq == 1) | (nuniq < 10 & ndata / nuniq > 10)
     if (asFactor) pred = factor(pred)
   }
+
+  ##### Residual scatter plots #####
   
   if(is.null(quantreg)) if (length(res) > 2000) quantreg = FALSE else quantreg = TRUE
-  if(is.null(smoothScatter)) if (length(res) > 10000) smoothScatter = TRUE else smoothScatter = FALSE
+  
+  switchScatter = 10000
+  if(is.null(smoothScatter)) if (length(res) > switchScatter) smoothScatter = TRUE else smoothScatter = FALSE
 
-  defaultCol = ifelse(res == 0 | res == 1, 2,1)   
+  blackcol = rgb(0,0,0, alpha = max(0.1, 1 - 3 * length(res) / switchScatter))
+  
+  defaultCol = ifelse(res == 0 | res == 1, 2,blackcol)
   defaultPch = ifelse(res == 0 | res == 1, 8,1)   
 
   col = checkDots("col", defaultCol, ...)
   pch = checkDots("pch", defaultPch, ...)
   
-  if(is.factor(pred)) plot(res ~ pred, ylim = c(0,1), axes = FALSE, ...)
+  if(is.factor(pred)){
+    plot(res ~ pred, ylim = c(0,1), axes = FALSE, ...)
+  } 
   else if (smoothScatter == TRUE) {
-    smoothScatter(pred, res , ylim = c(0,1), axes = FALSE, colramp = colorRampPalette(c("white", "black")))
+    smoothScatter(pred, res , ylim = c(0,1), axes = FALSE, colramp = colorRampPalette(c("white", "darkgrey")))
     points(pred[defaultCol == 2], res[defaultCol == 2], col = "red", cex = 0.5)
   }
-  else plot(res ~ pred, ylim = c(0,1), axes = FALSE, col = col, pch = pch, ...)
+  else{
+    plot(res ~ pred, ylim = c(0,1), axes = FALSE, col = col, pch = pch, ylab = ylab, ...)
+  } 
   
   axis(1)
   axis(2, at=c(0, 0.25, 0.5, 0.75, 1))
-  abline(h = c(0.25, 0.5, 0.75), col = "black", lwd = 0.5, lty = 2)
+  
+  ##### Quantile regressions #####
+  
+  main = checkDots("main", "Residual vs. predicted", ...)
+  out = NULL
   
   if(is.numeric(pred)){
     if(quantreg == F){
+      title(main = main, cex.main = 1)
+      abline(h = c(0.25, 0.5, 0.75), col = "black", lwd = 0.5, lty = 2)
       try({
         lines(smooth.spline(pred, res, df = 10), lty = 2, lwd = 2, col = "red")
         abline(h = 0.5, col = "red", lwd = 2)
       }, silent = T)
     }else{
-      probs = c(0.25, 0.50, 0.75)
-      w <- p <- list()
-      for(i in seq_along(probs)){
-        try({
-          capture.output(w[[i]] <- qrnn::qrnn.fit(x = as.matrix(pred), y = as.matrix(res), n.hidden = 4, tau = probs[i], iter.max = 1000, n.trials = 1, penalty = 1))
-          p[[i]] <- qrnn::qrnn.predict(as.matrix(sort(pred)), w[[i]])
-        }, silent = T)
+      
+      out = testQuantiles(simulationOutput, pred, quantiles = quantiles, plot = F)
+      
+      if(any(out$pvals < 0.05)){
+        main = paste(main, "Quantile deviations detected (red curves)", sep ="\n")
+        if(out$p.value <= 0.05){
+          main = paste(main, "Combined adjusted quantile test signficant", sep ="\n")
+        } else {
+          main = paste(main, "Combined adjusted quantile test n.s.", sep ="\n")
+        }
+        maincol = "red"
+      } else {
+        main = paste(main, "No signficiant problems detected", sep ="\n")
+        maincol = "black"
       }
-      matlines(sort(pred), matrix(unlist(p), nrow = length(pred), ncol = length(p)), col = "red", lty = 1)
+      
+      title(main = main, cex.main = 0.8, 
+            col.main = maincol)
+      
+      for(i in 1:length(quantiles)){
+        
+        lineCol = ifelse(out$pvals[i] <= 0.05, "red", "black")
+        filCol = ifelse(out$pvals[i] <= 0.05, "#FF000040", "#00000020")
+        
+        abline(h = quantiles[i], col = lineCol, lwd = 0.5, lty = 2)
+        polygon(c(out$predictions$pred, rev(out$predictions$pred)),
+                c(out$predictions[,2*i] - out$predictions[,2*i+1], rev(out$predictions[,2*i] + out$predictions[,2*i+1])), 
+                col = "#00000020", border = F)
+        lines(out$predictions$pred, out$predictions[,2*i], col = lineCol, lwd = 2)
+      }
+      
+      # legend("bottomright", c(paste("Quantile test: p=", round(out$p.value, digits = 5)), paste("Deviation ", ifelse(out$p.value < 0.05, "significant", "n.s."))), text.col = ifelse(out$p.value < 0.05, "red", "black" ), bty="n")  
+      
     }
   }
-  
-  invisible(data.frame(pred, res))
-  
+  return(out)
 }
 
 

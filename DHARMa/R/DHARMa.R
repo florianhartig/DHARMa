@@ -25,16 +25,32 @@ print.DHARMa <- function(x, ...){
 #' Return residuals of a DHARMa simulation
 #' 
 #' @param object an object with simulated residuals created by \code{\link{simulateResiduals}}
+#' @param quantileFunction optional - a quantile function to transform the uniform 0/1 scaling of DHARMa to another distribution
+#' @param outlierValues if a quantile function with infinite support (such as dnorm) is used, residuals that are 0/1 are mapped to -Inf / Inf. outlierValues allows to convert -Inf / Inf values to an optional min / max value.  
 #' @param ... optional arguments for compatibility with the generic function, no function implemented
-#' @details the function accesses the slot $scaledResiduals in a fitted DHARMa object
+#' @details the function accesses the slot $scaledResiduals in a fitted DHARMa object, and optionally transforms the standard DHARMa quantile residuals (which have a uniform distribution) to a particular pdf. 
+#' 
+#' @note some of the papers on simulated quantile residuals transforming the residuals (which are natively uniform) back to a normal distribution. I presume this is because of the larger familiarity of most users with normal residuals. Personally, I never considered this desirable, for the reasons explained in https://github.com/florianhartig/DHARMa/issues/39, but with this function, I wanted to give users the option to plot normal residuals if they so wish. 
+#' 
 #' @export
 #' @example inst/examples/simulateResidualsHelp.R
 #'
-residuals.DHARMa <- function(object, ...){
-  return(object$scaledResiduals)
+residuals.DHARMa <- function(object, quantileFunction = NULL, outlierValues = NULL, ...){
+  
+  if(is.null(quantileFunction)){
+    return(object$scaledResiduals)
+  } else {
+    res = quantileFunction(object$scaledResiduals)
+    if(!is.null(outlierValues)){
+      res = ifelse(res == -Inf, outlierValues[1], res)
+      res = ifelse(res == Inf, outlierValues[2], res)         
+    }
+    return(res)
+  }
 }
 
-#' Convert simulated residuals or posterior predictive simulations to a DHARMa object
+
+#' Create a DHARMa object from hand-coded simulations or Bayesian posterior predictive simulations
 #' 
 #' @param simulatedResponse matrix of observations simulated from the fitted model - row index for observations and colum index for simulations 
 #' @param observedResponse true observations
@@ -78,4 +94,74 @@ createDHARMa <- function(simulatedResponse , observedResponse , fittedPredictedR
   class(out) = "DHARMa"
   return(out)
 }
+
+
+#' Ensures that an object is of class DHARMa
+#' 
+#' @param simulationOutput a DHARMa simulation output or an object that can be converted into a DHARMa simulation output
+#' @param convert if TRUE, attempts to convert model + numeric to DHARMa, if "Model", converts only supported models to DHARMa
+#' @details The 
+#' @keywords internal
+ensureDHARMa <- function(simulationOutput, 
+                         convert = F){
+  
+  if(inherits(simulationOutput, "DHARMa")){
+    return(simulationOutput)
+  } else {
+    
+    if(convert == FALSE) stop("wrong argument to function, simulationOutput must be a DHARMa object!") 
+    else {
+      
+      if (class(simulationOutput)[1] %in% getPossibleModels()){
+        if (convert == "Model" | convert == T) return(simulateResiduals(simulationOutput))
+      } else if(is.vector(simulationOutput, mode = "numeric") & convert == T) {
+        out = list()
+        out$scaledResiduals = simulationOutput
+        out$nObs = length(out$scaledResiduals)
+        class(out) = "DHARMa"
+        return(out)  
+      }  
+    }
+  }
+  stop("wrong argument to function, simulationOutput must be a DHARMa object or a numeric vector of quantile residuals!")     
+}
+
+
+#' Ensures that an object is of class DHARMa
+#' 
+#' @param simulationOutput a DHARMa simulation output or an object that can be converted into a DHARMa simulation output
+#' @param predictor a predictor
+#' @details The 
+#' @keywords internal
+ensurePredictor <- function(simulationOutput,
+                           predictor = NULL){
+  if(!is.null(predictor)){
+    
+    if(length(predictor) != length(simulationOutput$scaledResiduals)) stop("DHARMa: residuals an predictor do not have the same length. The issue is possibly that you have NAs in your predictor that were removed during the model fit. Remove the NA values from your predictor.")
+  } else {
+    
+    
+    predictor = simulationOutput$fittedPredictedResponse
+    if(is.null(predictor)) stop("DHARMa: can't extract predictor from simulationOutput, and no predictor provided")
+  }
+  return(predictor)
+}
+
+
+print.DHARMa.startupInfo <- function()
+{ 
+  version <- packageVersion('DHARMa')
+  hello <- paste("This is DHARMa ",version,". For overview type '?DHARMa'. Note that with DHARMa 0.3.x, the syntax of plotResiduals has changed. You have to provide now always first the simulations, and then (optimally) the variable against which you want the residuals to be plotted." ,sep="")
+  packageStartupMessage(hello)
+}
+
+.onLoad <- function(...) {
+  
+}
+
+.onAttach <- function(...) { 
+  print.DHARMa.startupInfo()
+}
+
+
 

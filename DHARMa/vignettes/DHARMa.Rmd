@@ -103,20 +103,36 @@ citation("DHARMa")
 
 ## Calculating scaled residuals 
 
-The scaled (quantile) residuals are calculated with the simulateResiduals() function. The default number of simulations to run is 250, which proved to be a reasonable compromise between computation time and precision, but if high precision is desired, n should be raised to 1000 at least. 
+Let's assume we have a fitted model that is supported by DHARMa.
 
 ```{r}
+testData = createData(sampleSize = 250)
+fittedModel <- glmer(observedResponse ~ Environment1 + (1|group) , family = "poisson", data = testData)
+```
+
+Most functions in DHARMa could be calculated directly on the fitted model. So, for example, if you are only interested in testing dispersion, you could calculate
+
+```{r}
+testDispersion(fittedModel)
+```
+
+In this case, the randomized quantile residuals are calculated on the fly. However, residual calculation can take a while, and would have to be repeated by every other test you call. It is therefore highly recommended to first calculate the residuals once, using the simulateResiduals() function. This function returns a DHARMa object, which can then be passed on to all other plots and test functions. 
+
+```{r}
+# get residuals
 simulationOutput <- simulateResiduals(fittedModel = fittedModel, n = 250)
 ```
+
+Using the simulateResiduals function has the added benefit that you can modify the way residuals are calculated. For example, the default number of simulations to run is 250, which proved to be a reasonable compromise between computation time and precision, but if high precision is desired, n should be raised to 1000 at least. 
 
 What the function does is a) creating n new synthetic datasets by simulating from the fitted model, b) calculates the cumulative distribution of simulated values for each observed value, and c) returning the quantile value that corresponds to the observed value. 
 
 For example, a scaled residual value of 0.5 means that half of the simulated data are higher than the observed value, and half of them lower. A value of 0.99 would mean that nearly all simulated data are lower than the observed value. The minimum/maximum values for the residuals are 0 and 1. 
 
-The calculated residuals are stored in 
+The calculated residuals can be accesed via
 
 ```{r, eval = F}
-simulationOutput$scaledResiduals
+residuals(simulationOutput)
 ```
 
 As discussed above, for a correctly specified model we would expect 
@@ -125,10 +141,10 @@ As discussed above, for a correctly specified model we would expect
 
 * uniformity in y direction if we plot against any predictor. 
 
-Note: the expected uniform distribution is the only differences to the linear regression that one has to keep in mind when interpreting DHARMa residuals. If you cannot get used to this and you must have residuals that behave exactly like a linear regression, you can access a normal transformation of the residuals via  
+Note: the expected uniform distribution is the only differences to the linear regression that one has to keep in mind when interpreting DHARMa residuals. If you cannot get used to this and you must have residuals that behave exactly like a linear regression, you can transform the uniform distribution to another distribution, for example normal. 
 
 ```{r, eval = F}
-simulationOutput$scaledResidualsNormal
+residuals(simulationOutput, quantileFunction = qnorm, outlierValues = c(-7,7))
 ```
 
 These normal residuals will behave exactly like the residuals of a linear regression. However, for reasons of a) numeric stability with low number of simulations and b) my conviction that it is much easier to visually detect deviations from uniformity than normality, I would STRONGLY advice against using this transformation. 
@@ -146,18 +162,12 @@ which creates a qq-plot to detect overall deviations from the expected distribut
 
 In the plot res ~ predicted, simulation outliers are highlighted as red stars. By simulation outliers, I mean data points that are outside the range of simulated values. Because no data was simulated in that range, we actually don't know "how much" these values deviate from the model expectation, so the term "outlier" should be used with a grain of salt. Note also that the probability of an outlier depends on the number of simulations (in fact, it is 1/(nSim +1) for each side), so whether the existence of outliers is a reason for concern depends also on the number of simulations. 
 
-To provide a visual aid in detecting deviations from uniformity in y-direction, the plot function calculates an (optional) quantile regression, which compares the empirical 0.25, 0.5 and 0.75 quantiles in y direction (red solid lines) with the theoretical 0.25, 0.5 and 0.75 quantiles (dashed black line). 
-
-Asymptotically (i.e. for lots of data / residuals), if the model is correct, theoretical and the empirical quantiles should be identical (i.e. dashed and solid lines should match).
- 
-In practice, however, there will be only a finite and often small number of residuals. If the model is correct, these residuals are drawn from the theoretical (uniform) distribution, but because of the limited sample size, the empirical quantiles of these residuals will never perfectly match the theoretical quantiles. It's the same as in a normal linear regression - even if the model is entirely correct, the qq-plot (or any other residual plot) for a few data points will never perfectly match the theoretical quantiles.
-
-Thus, for a limited amount of data, the question one has to ask is if the deviation of the empirical (red) from the expected (dashed) distribution is strong enough so that one can reject the null hypothesis that the residuals are drawn from a uniform distribution. To answer this question, DHARMa has various tests implemented (see later). Unfortunately, there is not yet a dedicated test for trends in the red quantile lines, so at the moment it's up to the user to make the call of a deviation in the residual pattern is is still acceptable, i.e. could appear do to random  variation.
+To provide a visual aid in detecting deviations from uniformity in y-direction, the plot function calculates an (optional) quantile regression, which compares the empirical 0.25, 0.5 and 0.75 quantiles in y direction (red solid lines) with the theoretical 0.25, 0.5 and 0.75 quantiles (dashed black line), and provides a p-value for the deviation from the expected quantile.
 
 If you want to plot the residuals against other predictors (highly recommend), you can use the function
 
 ```{r, eval = F}
-plotResiduals(YOURPREDICTOR, simulationOutput$scaledResiduals)
+plotResiduals(simulationOutput, YOURPREDICTOR)
 ```
 
 which does the same quantile plot as the main plotting function. 
@@ -169,6 +179,7 @@ To support the visual inspection of the residuals, the DHARMa package provides a
 * testUniformity()
 * testOutliers()
 * testDispersion()
+* testQuantiles()
 * testZeroinflation()
 * testGeneric()
 * testTemporalAutocorrelation()
@@ -417,13 +428,20 @@ So far, most of the things that we have tested could also have been detected wit
 Heteroscedasticity means that there is a systematic dependency of the dispersion / variance on another variable in the model. It is not sufficiently appreciated that also binomial or Poisson models can show heteroscedasticity. Basically, it means that the level of over/underdispersion depends on another parameter. Here an example where we create such data 
 
 ```{r}
-testData = createData(sampleSize = 500, intercept = 0, overdispersion = function(x){return(rnorm(length(x), sd = 2*abs(x)))}, family = poisson(), randomEffectVariance = 0)
-fittedModel <- glmer(observedResponse ~ Environment1 + (1|group), family = "poisson", data = testData)
+testData = createData(sampleSize = 500, intercept = 0, overdispersion = function(x){return(rnorm(length(x), sd = 2 * abs(x)))}, family = poisson(), randomEffectVariance = 0)
+fittedModel <- glm(observedResponse ~ Environment1 , family = "poisson", data = testData)
 
 simulationOutput <- simulateResiduals(fittedModel = fittedModel)
 plot(simulationOutput)
-testUniformity(simulationOutput = simulationOutput)
 ```
+
+The 
+
+```{r}
+testQuantiles(simulationOutput)
+plotResiduals(simulationOutput)
+```
+
 
 Adding a simple overdispersion correction will try to find a compromise between the different levels of dispersion in the model. The qq plot looks better now, but there is still a pattern in the residuals 
 
@@ -435,7 +453,6 @@ fittedModel <- glmer(observedResponse ~ Environment1 + (1|group) + (1|ID), famil
 
 simulationOutput <- simulateResiduals(fittedModel = fittedModel)
 plot(simulationOutput)
-testUniformity(simulationOutput = simulationOutput)
 ```
 
 To remove this pattern, you would need to make the dispersion parameter dependent on a predictor (e.g. in JAGS), or apply a transformation on the data. 
@@ -465,8 +482,8 @@ It is difficult to see that there is a problem at all in the general plot, but i
 
 ```{r}
 par(mfrow = c(1,2))
-plotResiduals(testData$Environment1,  simulationOutput$scaledResiduals)
-plotResiduals(testData$Environment2,  simulationOutput$scaledResiduals)
+plotResiduals(simulationOutput, testData$Environment1)
+plotResiduals(simulationOutput, testData$Environment2)
 ```
 
 ## Temporal autocorrelation
@@ -649,18 +666,12 @@ simulationOutput <- simulateResiduals(fittedModel = mod1)
 plot(simulationOutput)
 ```
 
-The residuals look clearly overdispersed. We can confirm that with the omnibus test
+We see various signals of overdispersion
 
-
-```{r, fig.width=4.5, fig.height=4.5}
-testUniformity(simulationOutput = simulationOutput)
-```
-
-Or with the more powerful overdispersion test 
-
-```{r, fig.width=4.5, fig.height=4.5}
-testOverdispersion(simulationOutput = simulationOutput)
-```
+* QQ: s-shaped QQ plot, distribution test (KS) signficant
+* QQ: Dispersion test is significant
+* QQ: Outlier test significant
+* Res ~ predicted: Quantile fits are spread out too far
 
 OK, so let's add overdispersion through an individual-level random effect
 
@@ -668,12 +679,23 @@ OK, so let's add overdispersion through an individual-level random effect
 mod2 <- glmer(cbind(N_parasitized, N_adult) ~ logDensity + (1|ID), data = data, family=binomial)
 simulationOutput <- simulateResiduals(fittedModel = mod2)
 plot(simulationOutput)
-
 ```
 
-The overdispersion looks better, but you can see that the residuals look a bit irregular. 
+The overdispersion looks better, but you can see that the residuals still look a bit irregular (although tests are n.s.). The raw data looks a bit humped-shaped, so we might be tempted to add a quadratic effect. 
 
-Likely, the reason is the steep increase in the beginning that one can see in the raw data plot. One would probably need to apply another transformation or a nonlinear function to completely fit this away.
+```{r}
+mod3 <- glmer(cbind(N_parasitized, N_adult) ~ logDensity + I(logDensity^2) + (1|ID), data = data, family=binomial)
+simulationOutput <- simulateResiduals(fittedModel = mod3)
+plot(simulationOutput)
+```
+
+The residuals look perfect now. That being said, we dont' have a lot of  data, and we have to be sure we're not overfitting. A likelihood ratio test tells us that the quadratic effect is not significantly supported. 
+
+```{r}
+anova(mod2, mod3)
+```
+
+We learn from that: increasing model complexity always improves the residuals, but according to standard statistical arguments (power, bias-variance trade-off) it's not always advisable to get them perfect, just good enough!
 
 ## Owl example (count data)
 
@@ -698,7 +720,7 @@ res <- simulateResiduals(m3)
 plot(res)
 summary(m3)
 
-plotResiduals(Owls$FoodTreatment, res$scaledResiduals)
+plotResiduals(res, Owls$FoodTreatment)
 
 testDispersion(res)
 testZeroInflation(res)
@@ -709,7 +731,7 @@ summary(m4)
 res <- simulateResiduals(m4)
 plot(res)
 
-plotResiduals(Owls$FoodTreatment, res$scaledResiduals)
+plotResiduals(res, Owls$FoodTreatment)
 
 testDispersion(res)
 testZeroInflation(res)
@@ -740,7 +762,7 @@ plot(simulationOutput, asFactor = T)
 However, you can clearly see the misfit if you plot 
 
 ```{r}
-plotResiduals(testData$Environment1, simulationOutput$scaledResiduals, quantreg = T)
+plotResiduals(simulationOutput, testData$Environment1, quantreg = T)
 ```
 
 Moreover, if you perform the DHARMa procedure per group, you can see overdispersion created by the random effect variance (left without grouping, right with grouping)

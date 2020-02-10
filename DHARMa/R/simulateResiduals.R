@@ -8,7 +8,7 @@
 #' @param plot if TRUE, \code{\link{plotSimulatedResiduals}} will be directly run after the simulations have terminated
 #' @param ... parameters to pass to the simulate function of the model object. An important use of this is to specify whether simulations should be conditional on the current random effect estimates. See also details
 #' @param seed the random seed. The default setting, recommended for any type of data analysis, is to reset the random number generator each time the function is run, meaning that you will always get the same result when running the same code. NULL = no new seed is set, but previous random state will be restored after simulation. FALSE = no seed is set, and random state will not be restored. The latter two options are only recommended for simulation experiments. See vignette for details.
-#' @return An S3 class of type "DHARMa", essentially a list with various elements. Implemented S3 functions include plot, print and \code{\link{residuals.DHARMa}}. Residuals returns the calculated scaled residuals, which can also be accessed via $scaledResiduals. The returned object additionally contains an element 'scaledResidualsNormal', which contains the scaled residuals transformed to a normal distribution (for stability reasons not recommended)
+#' @return An S3 class of type "DHARMa", essentially a list with various elements. Implemented S3 functions include plot, print and \code{\link{residuals.DHARMa}}. Residuals returns the calculated scaled residuals.
 #' 
 #' @details There are a number of important considerations when simulating from a more complex (hierarchical) model: 
 #' 
@@ -32,11 +32,11 @@
 #' 
 #' \strong{Residuals per group}: In many situations, it can be useful to look at residuals per group, e.g. to see how much the model over / underpredicts per plot, year or subject. To do this, use \code{\link{recalculateResiduals}}, together with a grouping variable (see also help)
 #' 
-#' \strong{Transformation to other distributions}: DHARMa calculates residuals for which the theoretical expectation (assuming a correctly specified model) is uniform. To transfor this residuals to another distribution (e.g. so that a correctly specified model will have normal residuals) see \code{\link{transformQuantiles}} 
+#' \strong{Transformation to other distributions}: DHARMa calculates residuals for which the theoretical expectation (assuming a correctly specified model) is uniform. To transfor this residuals to another distribution (e.g. so that a correctly specified model will have normal residuals) see \code{\link{residuals.DHARMa}}. 
 #' 
 #' @note See \code{\link{testResiduals}} for an overview of residual tests, \code{\link{plot.DHARMa}} for an overview of available plots. 
 #' 
-#' @seealso \code{\link{testResiduals}}, \code{\link{plot.DHARMa}}, \code{\link{print.DHARMa}}, \code{\link{residuals.DHARMa}}, \code{\link{recalculateResiduals}}, \code{\link{transformQuantiles}}
+#' @seealso \code{\link{testResiduals}}, \code{\link{plot.DHARMa}}, \code{\link{print.DHARMa}}, \code{\link{residuals.DHARMa}}, \code{\link{recalculateResiduals}}
 #' 
 #' @example inst/examples/simulateResidualsHelp.R
 #' @import stats
@@ -186,8 +186,6 @@ simulateResiduals <- function(fittedModel, n = 250, refit = F, integerResponse =
   }
 
   ########### Wrapup ############
-  
-  out$scaledResidualsNormal = qnorm(out$scaledResiduals + 0.00 )
 
   out$time = proc.time() - ptm
   out$randomState = randomState
@@ -201,8 +199,19 @@ simulateResiduals <- function(fittedModel, n = 250, refit = F, integerResponse =
 
 getPossibleModels<-function()c("lm", "glm", "negbin", "lmerMod", "glmerMod", "gam", "bam", "glmmTMB", "HLfit") 
 
-checkModel <- function(fittedModel){
-  if(!(class(fittedModel)[1] %in% getPossibleModels())) warning("DHARMa: fittedModel not in class of supported models. Absolutely no guarantee that this will work!")
+#' Check if models is supported
+#' 
+#' @param fittedModel a model 
+#' @param stop whether to stop  
+#' @keywords internal
+checkModel <- function(fittedModel, stop = F){
+  
+  out = T
+  
+  if(!(class(fittedModel)[1] %in% getPossibleModels())){
+    if(stop == FALSE) warning("DHARMa: fittedModel not in class of supported models. Absolutely no guarantee that this will work!")
+    else stop("DHARMa: fittedModel not in class of supported models") 
+  } 
   
   if (class(fittedModel)[1] == "gam" ) if (class(fittedModel$family)[1] == "extended.family") stop("It seems you are trying to fit a model from mgcv that was fit with an extended.family. Simulation functions for these families are not yet implemented in DHARMa. See issue https://github.com/florianhartig/DHARMa/issues/11 for updates about this")
 

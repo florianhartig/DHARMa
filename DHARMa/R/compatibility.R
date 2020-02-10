@@ -1,35 +1,4 @@
 
-
-
-#' Test DHARMa compatibility
-#' 
-#' This helper function tests the compatibility of a model with DHARMa by trying to run various functions that are needed
-#' 
-#' @importFrom lme4 fixef
-#' @importFrom lme4 ranef
-#' @importFrom spaMM response
-#' @importFrom spaMM update_resp
-#' 
-#' @param fittedModel the fitted model
-#' 
-#' @author Florian Hartig
-#' @export
-#' 
-testModel <-function(fittedModel){
-  
-  try(family(fittedModel))
-  try(class(fittedModel)[1])
-  try(nobs(fittedModel))
-  try(getResponse(fittedModel))
-  try(simulate(fittedModel, nsim = 10))
-  try(predict(fittedModel))
-  try(coef(fittedModel))
-  try(ranef(fittedModel))
-  try(fixef(fittedModel))
-  try(refit(fittedModel, newresp = getResponse(fittedModel)))
-  
-}
-
 # New S3 methods
 
 #' Get model response
@@ -74,9 +43,8 @@ getSimulations.default <- function (object, ...){
 
 
 #' @importFrom lme4 refit
+#' @importFrom lme4 fixef 
 NULL
-
-
 
 getFixedEffects <- function(fittedModel){
   
@@ -181,6 +149,7 @@ refit.glmmTMB <- function(object, newresp, ...){
 #######  spaMM #########
 
 #' @export
+#' @importFrom spaMM response 
 getResponse.HLfit <- function(object, ...){
   return(response(object, ...))
 }
@@ -191,6 +160,7 @@ getSimulations.HLfit <- function(object, ...){
 }
 
 #' @export
+#' @importFrom spaMM update_resp 
 refit.HLfit <- function(object, newresp, ...) {
   update_resp(object, newresp, evaluate = TRUE)
 }
