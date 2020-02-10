@@ -17,7 +17,7 @@ fittedModel <- glm(observedResponse ~ 1, family = "binomial", data = testData)
 
 simulationOutput <- simulateResiduals(fittedModel = fittedModel)
 
-plotResiduals(testData$Environment1, simulationOutput$scaledResiduals)
+plotResiduals(simulationOutput,  testData$Environment1)
 
 plotSimulatedResiduals(simulationOutput = simulationOutput, quantreg = FALSE)
 ```

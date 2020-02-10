@@ -24,8 +24,59 @@ Because no data was simulated in the range of the observed value, we actually do
  
 The probability of an outlier depends on the number of simulations (in fact, it is 1/(nSim +1) for each side), so whether the existence of outliers is a reason for concern depends also on the number of simulations. The expected number of outliers is therefore binomially distributed, and we can calculate a p-value from that
 }
+\examples{
+testData = createData(sampleSize = 200, overdispersion = 0.5, randomEffectVariance = 0)
+fittedModel <- glm(observedResponse ~ Environment1 , family = "poisson", data = testData)
+simulationOutput <- simulateResiduals(fittedModel = fittedModel)
+
+# the plot function runs 4 tests
+# i) KS test i) Dispersion test iii) Outlier test iv) quantile test
+plot(simulationOutput, quantreg = TRUE)
+
+# testResiduals tests distribution, dispersion and outliers
+testResiduals(simulationOutput)
+
+####### Individual tests #######
+
+# KS test for correct distribution of residuals
+testUniformity(simulationOutput)
+
+# Dispersion test
+testDispersion(simulationOutput) # tests under and overdispersion
+testDispersion(simulationOutput, alternative = "less") # only underdispersion
+testDispersion(simulationOutput, alternative = "less") # only underdispersion
+
+# if model is refitted, a different test will be called
+simulationOutput2 <- simulateResiduals(fittedModel = fittedModel, refit = TRUE, seed = 12)
+testDispersion(simulationOutput2)
+
+# often useful to test dispersion per group (e.g. binomial data, see vignette)
+simulationOutput3 = recalculateResiduals(simulationOutput, group = testData$group)
+testDispersion(simulationOutput3)
+
+# Outlier test (number of observations outside simulation envelope)
+testOutliers(simulationOutput) 
+
+# testing zero inflation
+testZeroInflation(simulationOutput)
+
+# testing generic summaries
+countOnes <- function(x) sum(x == 1)  # testing for number of 1s
+testGeneric(simulationOutput, summary = countOnes) # 1-inflation
+testGeneric(simulationOutput, summary = countOnes, alternative = "less") # 1-deficit
+
+means <- function(x) mean(x) # testing if mean prediction fits
+testGeneric(simulationOutput, summary = means) 
+
+spread <- function(x) sd(x) # testing if mean sd fits
+testGeneric(simulationOutput, summary = spread) 
+
+
+
+
+}
 \seealso{
-\code{\link{testResiduals}}, \code{\link{testUniformity}}, \code{\link{testDispersion}}, \code{\link{testZeroInflation}}, \code{\link{testGeneric}}, \code{\link{testTemporalAutocorrelation}}, \code{\link{testSpatialAutocorrelation}}
+\code{\link{testResiduals}}, \code{\link{testUniformity}}, \code{\link{testDispersion}}, \code{\link{testZeroInflation}}, \code{\link{testGeneric}}, \code{\link{testTemporalAutocorrelation}}, \code{\link{testSpatialAutocorrelation}}, \code{\link{testQuantiles}}
 }
 \author{
 Florian Hartig

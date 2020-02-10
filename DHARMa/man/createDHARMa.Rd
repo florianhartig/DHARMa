@@ -2,7 +2,7 @@
 % Please edit documentation in R/DHARMa.R
 \name{createDHARMa}
 \alias{createDHARMa}
-\title{Convert simulated residuals or posterior predictive simulations to a DHARMa object}
+\title{Create a DHARMa object from hand-coded simulations or Bayesian posterior predictive simulations}
 \usage{
 createDHARMa(simulatedResponse, observedResponse,
   fittedPredictedResponse = NULL, integerResponse = F)
@@ -17,7 +17,7 @@ createDHARMa(simulatedResponse, observedResponse,
 \item{integerResponse}{if T, noise will be added at to the residuals to maintain a uniform expectations for integer responses (such as Poisson or Binomial). Unlike in \code{\link{simulateResiduals}}, the nature of the data is not automatically detected, so this MUST be set by the user appropriately}
 }
 \description{
-Convert simulated residuals or posterior predictive simulations to a DHARMa object
+Create a DHARMa object from hand-coded simulations or Bayesian posterior predictive simulations
 }
 \details{
 The use of this function is to convert simulated residuals (e.g. from a point estimate, or Bayesian p-values) to a DHARMa object, to make use of the plotting / test functions in DHARMa

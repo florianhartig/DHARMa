@@ -18,6 +18,3 @@ library(DHARMa)
 vignette("DHARMa", package="DHARMa")
 ```
 
-# Acknowledgements
-
-A question by Catalina Gutiérrez Chacón provided me with the motivation write the first version of DHARMa. Thanks to Jochen Fründ, Tomer J. Czaczkes, Luis Cayuela Delgado and Alexandre Courtiol for useful suggestions to improve the software. 

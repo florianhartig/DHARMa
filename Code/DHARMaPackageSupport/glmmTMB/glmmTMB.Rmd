@@ -101,7 +101,7 @@ If we calculate unconditional REs by hand, pattern disappears
 ```{r}
 x = fixef(m)
 pred = x$cond[1] + x$cond[2]*as.numeric(Salamanders$mined)
-plotResiduals(pred, res$scaledResiduals, asFactor = T)
+plotResiduals(res, pred, asFactor = T)
 ```
 
 
@@ -128,7 +128,7 @@ testData = createData(sampleSize = 100, fixedEffects = 2, family = binomial(), r
 m <- glmmTMB(observedResponse ~ 1 , data=testData, family=binomial)
 res = simulateResiduals(m)
 plot(res)
-plotResiduals(testData$Environment1, res$scaledResiduals)
+plotResiduals(res, testData$Environment1)
 ```
 
 n/k example from the help

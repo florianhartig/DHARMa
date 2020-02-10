@@ -23,7 +23,7 @@ simulateResiduals(fittedModel, n = 250, refit = F,
 \item{...}{parameters to pass to the simulate function of the model object. An important use of this is to specify whether simulations should be conditional on the current random effect estimates. See also details}
 }
 \value{
-An S3 class of type "DHARMa", essentially a list with various elements. Implemented S3 functions include plot, print and \code{\link{residuals.DHARMa}}. Residuals returns the calculated scaled residuals, which can also be accessed via $scaledResiduals. The returned object additionally contains an element 'scaledResidualsNormal', which contains the scaled residuals transformed to a normal distribution (for stability reasons not recommended)
+An S3 class of type "DHARMa", essentially a list with various elements. Implemented S3 functions include plot, print and \code{\link{residuals.DHARMa}}. Residuals returns the calculated scaled residuals.
 }
 \description{
 The function creates scaled residuals by simulating from the fitted model
@@ -51,7 +51,7 @@ The second option is much slower, and only important for running tests that rely
 
 \strong{Residuals per group}: In many situations, it can be useful to look at residuals per group, e.g. to see how much the model over / underpredicts per plot, year or subject. To do this, use \code{\link{recalculateResiduals}}, together with a grouping variable (see also help)
 
-\strong{Transformation to other distributions}: DHARMa calculates residuals for which the theoretical expectation (assuming a correctly specified model) is uniform. To transfor this residuals to another distribution (e.g. so that a correctly specified model will have normal residuals) see \code{\link{transformQuantiles}}
+\strong{Transformation to other distributions}: DHARMa calculates residuals for which the theoretical expectation (assuming a correctly specified model) is uniform. To transfor this residuals to another distribution (e.g. so that a correctly specified model will have normal residuals) see \code{\link{residuals.DHARMa}}.
 }
 \note{
 See \code{\link{testResiduals}} for an overview of residual tests, \code{\link{plot.DHARMa}} for an overview of available plots.
@@ -61,32 +61,36 @@ library(lme4)
 
 testData = createData(sampleSize = 200, overdispersion = 0.5, family = poisson())
 fittedModel <- glmer(observedResponse ~ Environment1 + (1|group), 
-                     family = "poisson", data = testData,
-                     control=glmerControl(optCtrl=list(maxfun=20000) ))
+                     family = "poisson", data = testData)
 
 simulationOutput <- simulateResiduals(fittedModel = fittedModel)
 
-# plot residuals, quantreg = T is better but costs more time
-plot(simulationOutput, quantreg = FALSE)
+# standard plot 
+plot(simulationOutput)
+
+# one of the possible test, for other options see ?testResiduals 
+testOutliers(simulationOutput)
+
+# for various other plots and tests, see the help / vignette
 
 # the calculated residuals can be accessed via 
 residuals(simulationOutput)
-simulationOutput$scaledResiduals
+
+# transform residuals to other pdf, see ?residuals.DHARMa for details
+residuals(simulationOutput, quantileFunction = qnorm, outlierValues = c(-7,7))
 
 # calculating summaries per group
 simulationOutput = recalculateResiduals(simulationOutput, group = testData$group)
 plot(simulationOutput, quantreg = FALSE)
 
-# create simulations with refitting, n=5 is very low, set higher when using this
+# create residuals with refitting, see ?simulateResiduals for details
+# n=10 is very low, set higher when using this for real
 simulationOutput <- simulateResiduals(fittedModel = fittedModel, 
                                       n = 10, refit = TRUE)
 plot(simulationOutput, quantreg = FALSE)
 
-# grouping per random effect group works as above
-simulationOutput = recalculateResiduals(simulationOutput, group = testData$group)
-plot(simulationOutput, quantreg = FALSE)
 
 }
 \seealso{
-\code{\link{testResiduals}}, \code{\link{plot.DHARMa}}, \code{\link{print.DHARMa}}, \code{\link{residuals.DHARMa}}, \code{\link{recalculateResiduals}}, \code{\link{transformQuantiles}}
+\code{\link{testResiduals}}, \code{\link{plot.DHARMa}}, \code{\link{print.DHARMa}}, \code{\link{residuals.DHARMa}}, \code{\link{recalculateResiduals}}
 }

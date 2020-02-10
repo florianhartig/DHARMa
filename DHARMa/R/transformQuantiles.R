@@ -1,19 +1,13 @@
-#' Transform quantiles to pdf
+#' Transform quantiles to pdf (deprecated)
 #'
-#' The purpose of this function is to transform the DHARMa quantile residuals (which have a uniform distribution) to a particular pdf. 
+#' The purpose of this function was to transform the DHARMa quantile residuals (which have a uniform distribution) to a particular pdf. Since DHARMa 0.3.0, this functionality is integrated in the \code{\link{residuals.DHARMa}} function. Please switch to using this function.
 #' 
-#' @param res DHARMa residuals
-#' @param quantileFunction the quantile function of the desired distribution
-#' @param outlierValue the value that should be assigned to residuals that are 0/1 and thus typically mapped to -Inf / Inf for continous distributions with infinte support
+#' @param res an object with simulated residuals created by \code{\link{simulateResiduals}}
+#' @param quantileFunction optional - a quantile function to transform the uniform 0/1 scaling of DHARMa to another distribution
+#' @param outlierValue if a quantile function with infinite support (such as dnorm) is used, residuals that are 0/1 are mapped to -Inf / Inf. outlierValues allows to convert -Inf / Inf values to an optional min / max value.  
 #' 
-#' @details Some of the papers on simulated quantile residuals transforming the residuals (which are natively uniform) back to a normal distribution. I presume this is because of the larger familiarity of most users with normal residuals. Personally, I never considered this desirable, for the reasons explained in https://github.com/florianhartig/DHARMa/issues/39, but with this function, I wanted to give users the option to plot normal residuals if they so wish. 
 #' @export
-#' @example inst/examples/transformQuantilesHelp.R
 #'
 transformQuantiles <- function(res, quantileFunction = qnorm, outlierValue = 7){
-  
-  res = quantileFunction(res$scaledResiduals)
-  res = ifelse(res == -Inf, -outlierValue, res)
-  res = ifelse(res == Inf, outlierValue, res)
-  return(res)
+  message("This function is deprecated. Please use residuals() instead")
 }
