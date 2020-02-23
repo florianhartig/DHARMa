@@ -109,19 +109,23 @@ testQuantiles <- function(simulationOutput, predictor = NULL, quantiles = c(0.25
     for(i in 1:length(quantiles)){
       datTemp = dat
       datTemp$res = datTemp$res - quantiles[i]
-      capture.output(quantileFits[[i]] <- qgam::qgam(res ~ s(pred) ,  data =datTemp, qu = quantiles[i]))
       
-      x = summary(quantileFits[[i]])
-      pval[i] = min(p.adjust(c(x$p.table[1,4], x$s.table[1,4]), method = "BH"))
-      quantPre = predict(quantileFits[[i]], newdata = predictions, se = T)
-      predictions[, 2*i] = quantPre$fit + quantiles[i]
-      predictions[, 2*i + 1] = quantPre$se.fit
+      quantResult = try(capture.output(quantileFits[[i]] <- qgam::qgam(res ~ s(pred) ,  data =datTemp, qu = quantiles[i])), silent = T)
+      if(inherits(quantResult, "try-error")){
+        message
+      } else {
+        x = summary(quantileFits[[i]])
+        pval[i] = min(p.adjust(c(x$p.table[1,4], x$s.table[1,4]), method = "BH")) # correction for test on slope and intercept
+        quantPre = predict(quantileFits[[i]], newdata = predictions, se = T)
+        predictions[, 2*i] = quantPre$fit + quantiles[i]
+        predictions[, 2*i + 1] = quantPre$se.fit        
+      }
     }
 
     out$method = "Test for location of quantiles via qgam"
     out$alternative = "both"
     out$pvals = pval
-    out$p.value = min(p.adjust(pval, method = "BH"))
+    out$p.value = min(p.adjust(pval, method = "BH")) # correction for multiple quantile tests
     out$predictions = predictions
     out$qgamFits = quantileFits
     
@@ -405,17 +409,18 @@ testTemporalAutocorrelation <- function(simulationOutput, time = NULL , alternat
   
   if(plot == T) {
     
-    if (out$p.value < 0.05){
-      main = paste(out$method, "\n autocorrelation significant")
-      maincol = "red"
-    } else {
-      main = paste(out$method, "\n autocorrelation n.s.")
-      maincol = "black"
-    }
+    oldpar <- par(mfrow = c(1,2))
     
-   plot(simulationOutput$scaledResiduals ~ time, type = "l", ylab = "Scaled residuals", xlab = "Time")
-    title(main = main, cex.main = 0.8, 
-          col.main = maincol)
+
+    
+   
+   plot(simulationOutput$scaledResiduals[order(time)] ~ time[order(time)], type = "l", ylab = "Scaled residuals", xlab = "Time", main = "Residuals vs. time")
+
+    acf(simulationOutput$scaledResiduals[order(time)], main = "Autocorrelation")
+    
+    legend("topright", c(paste(out$method, " p=", round(out$p.value, digits = 5)), paste("Deviation ", ifelse(out$p.value < 0.05, "significant", "n.s."))), text.col = ifelse(out$p.value < 0.05, "red", "black" ), bty="n")     
+    
+    par(oldpar)
   }
   return(out)
 }
