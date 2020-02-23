@@ -12,19 +12,8 @@ New features
 Changes
 
 - transformQuantiles is deprecated, functionality included in residuals()
-- syntax change for plotResiduals, see help
+- syntax change for plotResiduals, see ?plotResiduals
 - nearly all functions can now also be called directly with a fitted model (for computational efficiency, however, it is still recommended to calculate the residuals first)
-
-
-DHARMa 0.2.7
-============
-
-New features
-
-- switch to qgam for plots
-
-- change of syntax for models 
-
 
 DHARMa 0.2.7
 ============

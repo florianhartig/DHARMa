@@ -4,9 +4,8 @@
 \alias{testGeneric}
 \title{Generic simulation test of a summary statistic}
 \usage{
-testGeneric(simulationOutput, summary, alternative = c("two.sided",
-  "greater", "less"), plot = T,
-  methodName = "DHARMa generic simulation test")
+testGeneric(simulationOutput, summary, alternative = c("two.sided", "greater",
+  "less"), plot = T, methodName = "DHARMa generic simulation test")
 }
 \arguments{
 \item{simulationOutput}{an object of class DHARMa with simulated quantile residuals, either created via \code{\link{simulateResiduals}} or by \code{\link{createDHARMa}} for simulations created outside DHARMa}

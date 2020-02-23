@@ -4,9 +4,8 @@
 \alias{hist.DHARMa}
 \title{Histogram of DHARMa residuals}
 \usage{
-\method{hist}{DHARMa}(x, breaks = seq(-0.02, 1.02, len = 53),
-  col = c("red", rep("lightgrey", 50), "red"),
-  main = "Hist of DHARMa residuals",
+\method{hist}{DHARMa}(x, breaks = seq(-0.02, 1.02, len = 53), col = c("red",
+  rep("lightgrey", 50), "red"), main = "Hist of DHARMa residuals",
   xlab = "Residuals (outliers are marked red)", cex.main = 1, ...)
 }
 \arguments{

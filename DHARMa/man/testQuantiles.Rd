@@ -4,8 +4,8 @@
 \alias{testQuantiles}
 \title{Test for quantiles}
 \usage{
-testQuantiles(simulationOutput, predictor = NULL, quantiles = c(0.25,
-  0.5, 0.75), plot = T)
+testQuantiles(simulationOutput, predictor = NULL, quantiles = c(0.25, 0.5,
+  0.75), plot = T)
 }
 \arguments{
 \item{simulationOutput}{an object of class DHARMa with simulated quantile residuals, either created via \code{\link{simulateResiduals}} or by \code{\link{createDHARMa}} for simulations created outside DHARMa}

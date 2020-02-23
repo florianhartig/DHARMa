@@ -4,8 +4,7 @@
 \alias{residuals.DHARMa}
 \title{Return residuals of a DHARMa simulation}
 \usage{
-\method{residuals}{DHARMa}(object, quantileFunction = NULL,
-  outlierValues = NULL, ...)
+\method{residuals}{DHARMa}(object, quantileFunction = NULL, outlierValues = NULL, ...)
 }
 \arguments{
 \item{object}{an object with simulated residuals created by \code{\link{simulateResiduals}}}

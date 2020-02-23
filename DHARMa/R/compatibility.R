@@ -116,6 +116,10 @@ fitted.gam <- function(object, ...){
 
 ######## glmmTMB ######
 
+
+# glmmTMB 1.0 has a refit function, but this didn't work, so I switched back to this one ... should be solved ideally, see https://github.com/glmmTMB/glmmTMB/issues/549
+
+
 #' Refit a Model with a Different Response
 #' 
 #' @param object a fitted model

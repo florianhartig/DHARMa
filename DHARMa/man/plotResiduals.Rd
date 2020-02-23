@@ -5,8 +5,8 @@
 \title{Generic residual plot with either spline or quantile regression}
 \usage{
 plotResiduals(simulationOutput, predictor = NULL, quantreg = NULL,
-  rank = F, asFactor = NULL, smoothScatter = NULL,
-  quantiles = c(0.25, 0.5, 0.75), ...)
+  rank = F, asFactor = NULL, smoothScatter = NULL, quantiles = c(0.25,
+  0.5, 0.75), ...)
 }
 \arguments{
 \item{simulationOutput}{usually a DHARMa object, from which residual values can be extracted. Alternatively, a vector with residuals or a fitted model can be provided, which will then be transformed into a DHARMa object}

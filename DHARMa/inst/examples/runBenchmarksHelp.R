@@ -1,4 +1,4 @@
-returnP <- function(){
+returnP <- function(counter=NULL){
   testData = createData(sampleSize = 20, family = gaussian())
   fittedModel <- lm(observedResponse ~ Environment1, data = testData)
   res <- simulateResiduals(fittedModel = fittedModel, n = 250)
