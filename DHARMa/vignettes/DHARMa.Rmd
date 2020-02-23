@@ -152,15 +152,22 @@ These normal residuals will behave exactly like the residuals of a linear regres
 
 ## Plotting the scaled residuals
 
-We can get a visual impression of these properties with the plot.DHARMa() function
+The main plot function for DHARMa residuals is the plot.DHARMa() function
 
 ```{r}
 plot(simulationOutput)
 ```
 
-which creates a qq-plot to detect overall deviations from the expected distribution (with added tests for uniformity and outliers), and a plot of the residuals against the predicted value. 
+The plot function creates two plots, which can also be called separately
 
-In the plot res ~ predicted, simulation outliers are highlighted as red stars. By simulation outliers, I mean data points that are outside the range of simulated values. Because no data was simulated in that range, we actually don't know "how much" these values deviate from the model expectation, so the term "outlier" should be used with a grain of salt. Note also that the probability of an outlier depends on the number of simulations (in fact, it is 1/(nSim +1) for each side), so whether the existence of outliers is a reason for concern depends also on the number of simulations. 
+```{r, eval = F}
+plotQQunif(simulationOutput) # left plot in plot.DHARMa()
+plotResiduals(simulationOutput) # right plot in plot.DHARMa()
+```
+
+* plotQQunif creates a qq-plot to detect overall deviations from the expected distribution, by default with added tests for uniformity, dispersion and outliers.  
+
+* plotResiduals produces a plot of the residuals against the predicted value (or alternatively, other variable). Simulation outliers (data points that are outside the range of simulated values) are highlighted as red stars. These points should be carefully interpreted, because we actually don't know "how much" these values deviate from the model expectation. Note also that the probability of an outlier depends on the number of simulations (in fact, it is 1/(nSim +1) for each side), so whether the existence of outliers is a reason for concern depends also on the number of simulations. 
 
 To provide a visual aid in detecting deviations from uniformity in y-direction, the plot function calculates an (optional) quantile regression, which compares the empirical 0.25, 0.5 and 0.75 quantiles in y direction (red solid lines) with the theoretical 0.25, 0.5 and 0.75 quantiles (dashed black line), and provides a p-value for the deviation from the expected quantile.
 
@@ -170,27 +177,30 @@ If you want to plot the residuals against other predictors (highly recommend), y
 plotResiduals(simulationOutput, YOURPREDICTOR)
 ```
 
-which does the same quantile plot as the main plotting function. 
+You can also generate a histogram of the residuals via
 
-## Formal goodness-of-fit tests on the scaled residuals
+```{r, eval = F}
+hist(simulationOutput)
+```
+
+## Goodness-of-fit tests on the scaled residuals
 
 To support the visual inspection of the residuals, the DHARMa package provides a number of specialized goodness-of-fit tests on the simulated residuals:
 
-* testUniformity()
-* testOutliers()
-* testDispersion()
-* testQuantiles()
-* testZeroinflation()
-* testGeneric()
-* testTemporalAutocorrelation()
-* testSpatialAutocorrelation()
+* testUniformity() - tests if the overall distribution conforms to expectations
+* testOutliers() - tests if there are more simulation outliers than expected
+* testDispersion() - tests if the simulated dispersion is equal to the observed dispersion
+* testQuantiles() - fits a quantile regression or residuals against a predictor (default predicted value), and tests of this conforms to the expected quantile
+* testZeroinflation() - tests if there are more zeros than expected 
+* testGeneric() - test if a generic summary statistics deviates from model expectations
+* testTemporalAutocorrelation() - tests for temporal autocorrelation in the residuals
+* testSpatialAutocorrelation() - tests for spatial autocorrelation in the residuals. Can also be used with a generic distance function
 
-that basically do what they say. See the help of the functions and further comments below for a more detailed description. The wrapper function testResiduals calculates the first three tests, including their graphical outputs
+See the help of the functions and further comments below for a more detailed description. The wrapper function testResiduals calculates the first three tests, including their graphical outputs
 
 ```{r, eval = F}
 testResiduals(simulationOutput)
 ```
-
 
 ## Simulation options
 
