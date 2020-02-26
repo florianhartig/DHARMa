@@ -3,13 +3,14 @@
 #' This function runs statistical benchmarks, including Power / Type I error simulations for an arbitrary test with a control parameter
 #' 
 #' @param controlValues a vector with a control parameter (e.g. to vary the strength of a problem the test should be specific to)
-#' @param calculateStatistics the statistics to be benchmarked. Should return one value, or a vector of values. If controlValues are given, must accept a paramteter control
+#' @param calculateStatistics the statistics to be benchmarked. Should return one value, or a vector of values. If controlValues are given, must accept a paramteter called "control"
 #' @param nRep number of replicates per level of the controlValues
 #' @param alpha significance level
 #' @param parallel whether to use parallel computations. Possible values are F, T (sets the cores automatically to number of available cores -1), or an integer number for the number of cores that should be used for the cluster
 #' @param ... additional parameters to calculateStatistics 
 #' @note The benchmark function in DHARMa are intended for development purposes, and for users that want to test / confirm the properties of functions in DHARMa. If you are running an applied data analysis, they are probably of little use. 
 #' @export 
+#' @example inst/examples/runBenchmarksHelp.R
 #' @importFrom foreach "%dopar%"
 runBenchmarks <- function(calculateStatistics, controlValues = NULL, nRep = 10, alpha = 0.05, parallel = F, ...){
   
@@ -40,21 +41,27 @@ runBenchmarks <- function(calculateStatistics, controlValues = NULL, nRep = 10, 
 
     doParallel::registerDoParallel(cl)
     
-    `%dopar%` <- foreach::`%dopar%`
-    
-    if(is.null(controlValues)) simulations[[1]] =  foreach::foreach(i=1:nRep, .packages=c("lme4", "DHARMa"), .combine = rbind) %dopar% calculateStatistics() 
+    # `%dopar%` <- foreach::`%dopar%`
+    # 
+    # if(is.null(controlValues)) simulations[[1]] =  foreach::foreach(i=1:nRep, .packages=c("lme4", "DHARMa"), .combine = rbind) %dopar% calculateStatistics() 
+    # 
+    # else for(j in 1:length(controlValues)){
+    #   simulations[[j]] = foreach::foreach(i=1:nRep, .packages=c("lme4", "DHARMa"), .combine = rbind) %dopar% calculateStatistics(controlValues[j])
+    # }
 
-    else for(j in 1:length(controlValues)){
-      simulations[[j]] = foreach::foreach(i=1:nRep, .packages=c("lme4", "DHARMa"), .combine = rbind) %dopar% calculateStatistics(controlValues[j])
-    }
+    # doesn't see to work properly
+    parallel::clusterEvalQ(cl, {for(p in (.packages())) library(p, character.only=TRUE)})
+    # parallel::clusterExport(cl = cl, c("calculateStatistics"), envir = environment())
+    
+    parallel::clusterExport(cl = cl, varlist = ls(envir = .GlobalEnv))
 
     # parallel::clusterExport(cl=cl,varlist = c("calculateStatistics"), envir=environment())
     # parallel::clusterExport(cl=cl,varlist = c("controlValues", "alpha", envir=environment())
-    #if(is.null(controlValues)) simulations[[1]] =  parallel::parSapply(cl, 1:nRep, calculateStatistics())
-    #else for(j in 1:length(controlValues)){
-    #  simulations[[j]] = parallel::parSapply(cl, 1:nRep, calculateStatistics(controlValues[j]))
-    #}
     
+    if(is.null(controlValues)) simulations[[1]] =  parallel::parSapply(cl, 1:nRep, calculateStatistics)
+    else for(j in 1:length(controlValues)){
+     simulations[[j]] = parallel::parSapply(cl, 1:nRep, calculateStatistics, control = controlValues[j])
+    }
     
     parallel::stopCluster(cl)
   }

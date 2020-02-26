@@ -8,7 +8,7 @@ runBenchmarks(calculateStatistics, controlValues = NULL, nRep = 10,
   alpha = 0.05, parallel = F, ...)
 }
 \arguments{
-\item{calculateStatistics}{the statistics to be benchmarked. Should return one value, or a vector of values. If controlValues are given, must accept a paramteter control}
+\item{calculateStatistics}{the statistics to be benchmarked. Should return one value, or a vector of values. If controlValues are given, must accept a paramteter called "control"}
 
 \item{controlValues}{a vector with a control parameter (e.g. to vary the strength of a problem the test should be specific to)}
 
@@ -28,10 +28,10 @@ The benchmark function in DHARMa are intended for development purposes, and for 
 }
 \examples{
 returnP <- function(counter=NULL){
-  testData = createData(sampleSize = 20, family = gaussian())
+  testData = DHARMa::createData(sampleSize = 20, family = gaussian())
   fittedModel <- lm(observedResponse ~ Environment1, data = testData)
-  res <- simulateResiduals(fittedModel = fittedModel, n = 250)
-  out <- c(testUniformity(res)$p.value, res$scaledResiduals)
+  res <- DHARMa::simulateResiduals(fittedModel = fittedModel, n = 250)
+  out <- c(DHARMa::testUniformity(res, plot = FALSE)$p.value, res$scaledResiduals)
   return(out)
 }
 
@@ -42,14 +42,14 @@ returnP()
 out = runBenchmarks(returnP, nRep = 20)
 
 # running benchmark parallel
-out = runBenchmarks(returnP, nRep = 500, parallel = T)
+out = runBenchmarks(returnP, nRep = 500, parallel = TRUE)
 
 
 returnP <- function(control = 0){
-  testData = createData(sampleSize = 20, family = poisson(), overdispersion = control)
+  testData = DHARMa::createData(sampleSize = 20, family = poisson(), overdispersion = control)
   fittedModel <- glm(observedResponse ~ Environment1, data = testData, family = poisson())
-  res <- simulateResiduals(fittedModel = fittedModel, n = 250)
-  out <- suppressWarnings(c(testUniformity(res)$p.value, res$scaledResiduals))
+  res <- DHARMa::simulateResiduals(fittedModel = fittedModel, n = 250)
+  out <- suppressWarnings(c(DHARMa::testUniformity(res, plot = FALSE)$p.value, res$scaledResiduals))
   return(out)
 }
 
@@ -60,6 +60,6 @@ returnP(control = 1)
 out = runBenchmarks(returnP, controlValues = c(0,0.5,1), nRep = 20)
 
 # running benchmark parallel
-out = runBenchmarks(returnP, controlValues = c(0,0.5,1), nRep = 500, parallel = T)
+out = runBenchmarks(returnP, controlValues = c(0,0.5,1), nRep = 500, parallel = TRUE)
 
 }
