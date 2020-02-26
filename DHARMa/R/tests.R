@@ -408,20 +408,17 @@ testTemporalAutocorrelation <- function(simulationOutput, time = NULL , alternat
   out = lmtest::dwtest(simulationOutput$scaledResiduals ~ 1, order.by = time, alternative = alternative)
   
   if(plot == T) {
-    
     oldpar <- par(mfrow = c(1,2))
-    
-
-    
-   
-   plot(simulationOutput$scaledResiduals[order(time)] ~ time[order(time)], type = "l", ylab = "Scaled residuals", xlab = "Time", main = "Residuals vs. time")
-
+    plot(simulationOutput$scaledResiduals[order(time)] ~ time[order(time)], 
+         type = "l", ylab = "Scaled residuals", xlab = "Time", main = "Residuals vs. time")
     acf(simulationOutput$scaledResiduals[order(time)], main = "Autocorrelation")
-    
-    legend("topright", c(paste(out$method, " p=", round(out$p.value, digits = 5)), paste("Deviation ", ifelse(out$p.value < 0.05, "significant", "n.s."))), text.col = ifelse(out$p.value < 0.05, "red", "black" ), bty="n")     
-    
+    legend("topright", 
+           c(paste(out$method, " p=", round(out$p.value, digits = 5)), 
+             paste("Deviation ", ifelse(out$p.value < 0.05, "significant", "n.s."))), 
+           text.col = ifelse(out$p.value < 0.05, "red", "black" ), bty="n")     
     par(oldpar)
   }
+  
   return(out)
 }
 
@@ -493,11 +490,21 @@ testSpatialAutocorrelation <- function(simulationOutput, x = NULL, y  = NULL, di
   
   class(out) = "htest"
   
+  
+  
+  if(plot == T) {
+    oldpar <- par(mfrow = c(1,1))
+    
+    col = colorRamp(c("red", "white", "blue"))(simulationOutput$scaledResiduals)
+    plot(x,y, col = rgb(col, maxColorValue = 255), main = out$method, cex.main = 0.8 )
+    
+    # TODO implement correlogram
+    par(oldpar)
+  }
+  
   if(plot == T) {
   
-  col = colorRamp(c("red", "white", "blue"))(simulationOutput$scaledResiduals)
-  
-  plot(x,y, col = rgb(col, maxColorValue = 255), main = out$method, cex.main = 0.8 )
+
   }
   return(out)
 }
