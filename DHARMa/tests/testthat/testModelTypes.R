@@ -221,6 +221,8 @@ test_that("glm poisson works",
 )
 
 
+
+
 # test_that("glmer poisson with weights works",
 #           {
 #             skip_on_cran()
@@ -229,4 +231,40 @@ test_that("glm poisson works",
 #             runEverything(fittedModel, testData)
 #           }
 # )
+
+
+##### Warnings #####
+
+
+test_that("glm poisson weights throws warning",
+          {
+            skip_on_cran()
+            
+            weights = rep(c(1,1.1), each = 100)
+            
+            testData = createData(sampleSize = 200, overdispersion = 0.5, randomEffectVariance = 0.5, family = poisson())
+
+            fittedModel <- glm(observedResponse ~ Environment1 , family = "poisson", data = testData, weights = weights)
+            expect_warning(simulateResiduals(fittedModel))
+            
+            fittedModel <- gam(observedResponse ~ Environment1 , family = "poisson", data = testData, weights = weights)
+            expect_warning(simulateResiduals(fittedModel))
+            
+            fittedModel <- glmer(observedResponse ~ Environment1 + (1|group) , family = "poisson", data = testData, weights = weights)
+            expect_warning(simulateResiduals(fittedModel))
+            
+            fittedModel <- glmer.nb(observedResponse ~ Environment1 + (1|group) , data = testData, weights = weights)
+            expect_warning(simulateResiduals(fittedModel))
+            
+            fittedModel <- glm.nb(observedResponse ~ Environment1,  data = testData, weights = weights)
+            expect_warning(simulateResiduals(fittedModel))
+            
+            fittedModel <- glmmTMB(observedResponse ~ Environment1 , family = "poisson", data = testData, weights = weights)
+            expect_warning(simulateResiduals(fittedModel))
+            
+            testData$weights = weights
+            fittedModel <- HLfit(observedResponse ~ Environment1 + (1|group) , family = "poisson",  data = testData, prior.weights = weights)
+            expect_warning(simulateResiduals(fittedModel))
+          }
+)
 

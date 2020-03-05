@@ -189,7 +189,7 @@ testOutliers <- function(simulationOutput, alternative = c("two.sided", "greater
   
   if(plot == T) {
     
-    hist(simulationOutput, main = "")
+    hist(simulationOutput, main = "", max(round(simulationOutput$nSim / 5), 20))
     
     main = ifelse(out$p.value <= 0.05, 
                   "Outlier test significant", 
@@ -217,9 +217,9 @@ testOutliers <- function(simulationOutput, alternative = c("two.sided", "greater
 #' 
 #' If refit = F, the function tests the sd of the data against the sd of the simulated data. 
 #' 
-#' If refit = T, the function compares the approximate deviance (via squared pearson residuals) with the same quantity from the models refitted with simulated data. Applying this is much slower than the previous alternative, but simulations show that it is slightly more powerful as well. 
+#' If refit = T, the function compares the approximate deviance (via squared pearson residuals) with the same quantity from the models refitted with simulated data. Applying this is much slower than the previous alternative, but simulations show that it is slightly more powerful as well. However, given the computational cost, I would suggest that most users will be satisfied with the standard dispersion test. 
 #' 
-#' However, given the computational cost, I would suggest that most users will be satisfied with the standard dispersion test. 
+#' @note The dispersion test can be quite different if it is evaluate on conditional or unconditional simulations (see \code{\link{simulateResiduals}}). The default in DHARMa is to use unconditional simulations, but I recommend trying both. 
 #' 
 #' @author Florian Hartig
 #' @seealso \code{\link{testResiduals}}, \code{\link{testUniformity}},  \code{\link{testOutliers}}, \code{\link{testZeroInflation}}, \code{\link{testGeneric}}, \code{\link{testTemporalAutocorrelation}}, \code{\link{testSpatialAutocorrelation}}, \code{\link{testQuantiles}} 
@@ -360,7 +360,7 @@ testGeneric <- function(simulationOutput, summary, alternative = c("two.sided", 
   if(plot == T) {
     plotTitle = gsub('(.{1,50})(\\s|$)', '\\1\n', methodName)
     xLabel = paste("Simulated values, red line = fitted model. p-value (",out$alternative, ") = ", out$p.value, sep ="")
-   hist(simulated, xlim = range(simulated, observed, na.rm=T ), col = "lightgrey", main = plotTitle, xlab = xLabel, breaks = 20, cex.main = 0.8)
+   hist(simulated, xlim = range(simulated, observed, na.rm=T ), col = "lightgrey", main = plotTitle, xlab = xLabel, breaks = max(round(simulationOutput$nSim / 5), 20), cex.main = 0.8)
    abline(v = observed, lwd= 2, col = "red")
   }
   return(out)

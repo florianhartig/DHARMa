@@ -63,6 +63,36 @@ getFixedEffects <- function(fittedModel){
 }
 
 
+#' Check weights
+#' 
+#' Checks if a model was fit with the weight argument
+#' 
+#' The purpose of this function is to check if a model was fit with the weights
+#' 
+#' @param object a fitted model
+#' @param ... additional parameters 
+#' 
+#' @author Florian Hartig
+#' @export
+hasWeigths <- function (object, ...) {
+  UseMethod("hasWeigths", object)
+}
+
+#' @export
+hasWeigths.default <- function (object, ...){
+  if(" (weights)" %in% colnames(model.frame(object))) return(TRUE)
+  else (return(FALSE))
+}
+
+
+hasNA <- function(fittedModel){
+  x = rownames(model.frame(fittedModel))
+  if(length(x) < as.numeric(x[length(x) ])) return(TRUE)
+  else return(FALSE)
+}
+
+
+
 ######### LM #############
 
 #' Refit a Model with a Different Response
@@ -90,6 +120,15 @@ refit.lm <- function(object, newresp, ...){
   refittedModel = update(object, data = newData)
   return(refittedModel)
 }
+
+
+hasWeigths.lm <- function(object, ...){
+  if(length(unique(object$prior.weights)) != 1) return(TRUE)
+  else return(FALSE)
+}
+
+
+######### GLM #############
 
 
 
@@ -169,6 +208,11 @@ refit.HLfit <- function(object, newresp, ...) {
   update_resp(object, newresp, evaluate = TRUE)
 }
 
+#' @export
+hasWeigths.HLfit <- function(object, ...){
+  if(length(unique(object$prior.weights)) != 1) return(TRUE)
+  else return(FALSE)
+}
 
 
 
