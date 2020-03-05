@@ -547,87 +547,6 @@ testSpatialAutocorrelation(simulationOutput = simulationOutput)
 
 The usual caveats for Moran.I apply, in particular that it may miss non-local and heterogeneous (non-stationary) spatial autocorrelation. The former should be better detectable visually in the spatial plot, or via regressions on the pattern. 
 
-# Supported packages 
-
-## lm and glm
-
-lm and glm and MASS::glm.nb are fully supported.
-
-## lme4
-
-lme4 model classes are fully supported. 
-
-## mgcv
-
-mgcv is partly supported. Non-standard distributions are not supported, because mgcv doesn't implement a simulate function for those.
-
-## glmmTMB
-
-glmmTMB is partly supported. Current limitations of glmmTMB
-
-* pearson residuals don't work with zi terms (not implemented), which limits some of the overdispersion tests
-* Currently, glmmTMB doesn't support the reform argument. 
-  * predict() is conditional on all random effects, corresponding to lme4 re.form = NULL
-  * simulate() is unconditional, i.e. all random effects will be resimulated, corresponding to lme4 re.form = 0
-  * That means that all predictions and simulations are conditional on REs, which can sometimes create a positive correlation between res and predicted , see https://github.com/florianhartig/DHARMa/issues/43
-  
-
-```{r}
-library(glmmTMB)
-testData = createData(sampleSize = 100, fixedEffects = 2, family = binomial(), randomEffectVariance = 0)
-
-m <- glmmTMB(observedResponse ~ Environment1 , data=testData, family=binomial)
-res = simulateResiduals(m)
-plot(res)
-```
-
-## spaMM
-
-spaMM is supported by DHARMa since 0.2.1
-
-## Other packages
-
-See my general comments about [adding new R packages to DHARMa](https://github.com/florianhartig/DHARMa/wiki/Adding-new-R-packages-to-DHARMA)
-
-As noted there, if you want to use DHARMa for a specific case, you could write a custom simulate function for the specific model you are working with. This will usually involve using the predict function and adding the random distribution, plus potentially drawing new data for the random effects or other hierarchical levels.
-
-As an example, for an poisson glm, a simulate function could be programmed as in the following example, which also shows how the results are read into DHARMa and plotted (see also following section)
-
-```{r, eval = T}
-testData = createData(sampleSize = 200, overdispersion = 0.5, family = poisson())
-fittedModel <- glm(observedResponse ~ Environment1, family = "poisson", data = testData)
-
-simulatePoissonGLM <- function(fittedModel, n){
-  pred = predict(fittedModel, type = "response")
-  nObs = length(pred)
-  sim = matrix(nrow = nObs, ncol = n)
-  for(i in 1:n) sim[,i] = rpois(nObs, pred)
-  return(sim)
-}
-
-sim = simulatePoissonGLM(fittedModel, 100)
-
-DHARMaRes = createDHARMa(simulatedResponse = sim, observedResponse = testData$observedResponse, 
-             fittedPredictedResponse = predict(fittedModel))
-plot(DHARMaRes, quantreg = F)
-```
-
-
-## Importing external simulations (e.g. from Bayesian software or unsupported packages)
-
-As mentioned earlier, the quantile residuals defined in DHARMa are the frequentist equivalent of the so-called "Bayesian p-values", i.e. residuals created from posterior predictive simulations in a Bayesian analysis.
-
-To make the plots and tests in DHARMa also available for Bayesian analysis, DHARMa provides the option to convert externally created posterior predictive simulations into a DHARMa object
-
-
-```{r, eval = F}
-res = createDHARMa(scaledResiduals = posteriorPredictiveSimulations, simulatedResponse = medianPosteriorPredictions, observedResponse = observations, integerResponse = ?)
-```
-
-What is provided as simulatedResponse is up to the user, but median posterior predictions seem most sensible to me. After the conversion, all DHARMa plots can be used, however, note that Bayesian p-values != DHARMA residuals, because in the Bayesian analysis, parameters are varied as well. 
-
-**Important**: as DHARMa doesn't know the distribution fitted model, it is vital to specify the integerResponse option by hand (see above / ?simulateResiduals for details). 
-
 # Case studies and examples
 
 **Note:** More real-world examples on the DHARMa GitHub repository [here](https://github.com/florianhartig/DHARMa/tree/master/Code/Examples) 
@@ -751,10 +670,26 @@ summary(m5)
 
 ```
 
+# Notes on particular data types 
 
-## Binomial 0/1 data
 
-There are a lot of rumors about that can and cannot be checked with binomial 0/1 data. Let's consider a clearly misspecified binomial model
+## Poisson data
+
+The main concern in Poisson data is dispersion. Poisson regression are nearly always overdispersed. If you address this problem with quasi-poisson models, you will not be able to test the model with DHARMa. It is anyway better to move to a negative Binomial, or an observation-level random effect. 
+
+Once that is done, you should check for heteroskedasticity (via standard plot, also against all predictors), and for zero-inflation. As noted, zero-inflation tests are often negative, and rather show up as underdispersion. Work through the owl example below. 
+
+## Proportional data
+
+Proportional data is often modelled with beta regressions. Those can be tested with DHARMa. Note that beta regressions are often 0 or 1 inflated. Both should be tested with testZeroInflation or testGeneric. 
+
+Note: diskrete oportions, of the type k/n should NOT be modeled with the beta regression. Use the binomial (see below).
+
+## Binomial data
+
+There are a lot of rumors about that can and cannot be checked with binomial 0/1 data. Note that binomial data behaves slighly different when you have a 0/1 response than when you have a k/n response. 
+
+Let's consider a clearly misspecified binomial model with 0/1 response data
 
 ```{r}
 testData = createData(sampleSize = 500, overdispersion = 0, fixedEffects = 5, family = binomial(), randomEffectVariance = 3, numGroups = 25)
@@ -763,19 +698,19 @@ fittedModel <- glm(observedResponse ~ 1, family = "binomial", data = testData)
 simulationOutput <- simulateResiduals(fittedModel = fittedModel)
 ```
 
-A rumor that is true is that, unlike in k/n or count data, such a misspecification will not produce overdispersion. 
+A true rumor that is that, unlike in k/n or count data, such a misspecification will not produce overdispersion if tested directly. The reason is that there is basically no "dispersion" in a 0/1 signal.  
 
 ```{r}
 plot(simulationOutput, asFactor = T)
 ```
 
-However, you can clearly see the misfit if you plot 
+However, you can still clearly see the misfit if you plot, e.g. 
 
 ```{r}
 plotResiduals(simulationOutput, testData$Environment1, quantreg = T)
 ```
 
-Moreover, if you perform the DHARMa procedure per group, you can see overdispersion created by the random effect variance (left without grouping, right with grouping)
+Moreover, you will see overdispersion from the misfit if you group your data. Grouping basically transforms the 0/1 response in a k/n response. Here, I show the difference of the dispersion test for the same data, once ungrouped (left), and grouped according the the random effects group (right)
 
 ```{r}
 par(mfrow = c(1,2))
@@ -786,6 +721,88 @@ testDispersion(simulationOutput)
 
 ```
 
+
+
+# Supported packages 
+
+## lm and glm
+
+lm and glm and MASS::glm.nb are fully supported.
+
+## lme4
+
+lme4 model classes are fully supported. 
+
+## mgcv
+
+mgcv is partly supported. Non-standard distributions are not supported, because mgcv doesn't implement a simulate function for those.
+
+## glmmTMB
+
+glmmTMB is partly supported. Current limitations of glmmTMB
+
+* pearson residuals don't work with zi terms (not implemented), which limits some of the overdispersion tests
+* Currently, glmmTMB doesn't support the reform argument. 
+  * predict() is conditional on all random effects, corresponding to lme4 re.form = NULL
+  * simulate() is unconditional, i.e. all random effects will be resimulated, corresponding to lme4 re.form = 0
+  * That means that all predictions and simulations are conditional on REs, which can sometimes create a positive correlation between res and predicted , see https://github.com/florianhartig/DHARMa/issues/43
+  
+
+```{r}
+library(glmmTMB)
+testData = createData(sampleSize = 100, fixedEffects = 2, family = binomial(), randomEffectVariance = 0)
+
+m <- glmmTMB(observedResponse ~ Environment1 , data=testData, family=binomial)
+res = simulateResiduals(m)
+plot(res)
+```
+
+## spaMM
+
+spaMM is supported by DHARMa since 0.2.1
+
+## Other packages
+
+See my general comments about [adding new R packages to DHARMa](https://github.com/florianhartig/DHARMa/wiki/Adding-new-R-packages-to-DHARMA)
+
+As noted there, if you want to use DHARMa for a specific case, you could write a custom simulate function for the specific model you are working with. This will usually involve using the predict function and adding the random distribution, plus potentially drawing new data for the random effects or other hierarchical levels.
+
+As an example, for an poisson glm, a simulate function could be programmed as in the following example, which also shows how the results are read into DHARMa and plotted (see also following section)
+
+```{r, eval = T}
+testData = createData(sampleSize = 200, overdispersion = 0.5, family = poisson())
+fittedModel <- glm(observedResponse ~ Environment1, family = "poisson", data = testData)
+
+simulatePoissonGLM <- function(fittedModel, n){
+  pred = predict(fittedModel, type = "response")
+  nObs = length(pred)
+  sim = matrix(nrow = nObs, ncol = n)
+  for(i in 1:n) sim[,i] = rpois(nObs, pred)
+  return(sim)
+}
+
+sim = simulatePoissonGLM(fittedModel, 100)
+
+DHARMaRes = createDHARMa(simulatedResponse = sim, observedResponse = testData$observedResponse, 
+             fittedPredictedResponse = predict(fittedModel))
+plot(DHARMaRes, quantreg = F)
+```
+
+
+## Importing external simulations (e.g. from Bayesian software or unsupported packages)
+
+As mentioned earlier, the quantile residuals defined in DHARMa are the frequentist equivalent of the so-called "Bayesian p-values", i.e. residuals created from posterior predictive simulations in a Bayesian analysis.
+
+To make the plots and tests in DHARMa also available for Bayesian analysis, DHARMa provides the option to convert externally created posterior predictive simulations into a DHARMa object
+
+
+```{r, eval = F}
+res = createDHARMa(scaledResiduals = posteriorPredictiveSimulations, simulatedResponse = medianPosteriorPredictions, observedResponse = observations, integerResponse = ?)
+```
+
+What is provided as simulatedResponse is up to the user, but median posterior predictions seem most sensible to me. After the conversion, all DHARMa plots can be used, however, note that Bayesian p-values != DHARMA residuals, because in the Bayesian analysis, parameters are varied as well. 
+
+**Important**: as DHARMa doesn't know the distribution fitted model, it is vital to specify the integerResponse option by hand (see above / ?simulateResiduals for details). 
 
 
 
