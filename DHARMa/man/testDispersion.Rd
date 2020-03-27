@@ -24,9 +24,10 @@ The function implements two tests, depending on whether it is applied on a simul
 
 If refit = F, the function tests the sd of the data against the sd of the simulated data. 
 
-If refit = T, the function compares the approximate deviance (via squared pearson residuals) with the same quantity from the models refitted with simulated data. Applying this is much slower than the previous alternative, but simulations show that it is slightly more powerful as well. 
-
-However, given the computational cost, I would suggest that most users will be satisfied with the standard dispersion test.
+If refit = T, the function compares the approximate deviance (via squared pearson residuals) with the same quantity from the models refitted with simulated data. Applying this is much slower than the previous alternative, but simulations show that it is slightly more powerful as well. However, given the computational cost, I would suggest that most users will be satisfied with the standard dispersion test.
+}
+\note{
+The dispersion test can be quite different if it is evaluate on conditional or unconditional simulations (see \code{\link{simulateResiduals}}). The default in DHARMa is to use unconditional simulations, but I recommend trying both.
 }
 \examples{
 testData = createData(sampleSize = 200, overdispersion = 0.5, randomEffectVariance = 0)

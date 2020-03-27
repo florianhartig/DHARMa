@@ -131,7 +131,7 @@ plotQQunif <- function(simulationOutput, testUniformity = T, testOutliers = T, t
 #' @param predictor either the predictor variable against which the residuals should be plotted, or a DHARMa object, in which case res ~ pred is plotted
 #' @param quantreg whether to perform a quantile regression on 0.25, 0.5, 0.75 on the residuals. If F, a spline will be created instead. Default NULL chooses T for nObs < 2000, and F otherwise. 
 #' @param rank if T, the values of pred will be rank transformed. This will usually make patterns easier to spot visually, especially if the distribution of the predictor is skewed. If pred is a factor, this has no effect. 
-#' @param asFactor should the predictor variable be treated as a factor. Default is to choose this for <10 unique predictions, as long as enough predictions are available to draw a boxplot.
+#' @param asFactor should a numeric predictor be treated as a factor. Default is to choose this for < 10 unique predictions, as long as enough predictions are available to draw a boxplot.
 #' @param smoothScatter if T, a smooth scatter plot will plotted instead of a normal scatter plot. This makes sense when the number of residuals is very large. Default NULL chooses T for nObs < 10000, and F otherwise.
 #' @param quantiles for a quantile regression, which quanties should be plotted 
 #' @param ... additional arguments to plot / boxplot. 

@@ -224,9 +224,9 @@ checkModel <- function(fittedModel, stop = F){
     else stop("DHARMa: fittedModel not in class of supported models") 
   } 
   
-  if(hasWeigths(fittedModel)) warning("Your fitted model includes weights. For many GLMs, weights are not included in the simulations, and simulated quantile residuals are therefore not reliable. See ?checkModel for details")
+  # if(hasWeigths(fittedModel)) warning("Your fitted model includes weights. For many GLMs, weights are not included in the simulations, and simulated quantile residuals are therefore not reliable. See ?checkModel for details")
   
-  if(hasNA(fittedModel)) message("It seems there were NA values in the data used for fitting the model. This can create problems if you supply additional data to DHARMa functions. See ?checkModel for details")
+  # if(hasNA(fittedModel)) message("It seems there were NA values in the data used for fitting the model. This can create problems if you supply additional data to DHARMa functions. See ?checkModel for details")
   
   if (class(fittedModel)[1] == "gam" ) if (class(fittedModel$family)[1] == "extended.family") stop("It seems you are trying to fit a model from mgcv that was fit with an extended.family. Simulation functions for these families are not yet implemented in DHARMa. See issue https://github.com/florianhartig/DHARMa/issues/11 for updates about this")
 

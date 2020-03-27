@@ -739,23 +739,7 @@ mgcv is partly supported. Non-standard distributions are not supported, because 
 
 ## glmmTMB
 
-glmmTMB is partly supported. Current limitations of glmmTMB
-
-* pearson residuals don't work with zi terms (not implemented), which limits some of the overdispersion tests
-* Currently, glmmTMB doesn't support the reform argument. 
-  * predict() is conditional on all random effects, corresponding to lme4 re.form = NULL
-  * simulate() is unconditional, i.e. all random effects will be resimulated, corresponding to lme4 re.form = 0
-  * That means that all predictions and simulations are conditional on REs, which can sometimes create a positive correlation between res and predicted , see https://github.com/florianhartig/DHARMa/issues/43
-  
-
-```{r}
-library(glmmTMB)
-testData = createData(sampleSize = 100, fixedEffects = 2, family = binomial(), randomEffectVariance = 0)
-
-m <- glmmTMB(observedResponse ~ Environment1 , data=testData, family=binomial)
-res = simulateResiduals(m)
-plot(res)
-```
+glmmTMB is nearly fully supported since DHARMa 0.2.7 and glmmTMB 1.0.0. A remaining limitation is that you can't adjust whether simulation are conditional or not, so simulateResiduals(model, re.form = NULL) will have no effect, simulations will always be done from the full model. 
 
 ## spaMM
 
