@@ -7,7 +7,7 @@
 #' @param integerResponse if TRUE, noise will be added at to the residuals to maintain a uniform expectations for integer responses (such as Poisson or Binomial). Usually, the model will automatically detect the appropriate setting, so there is no need to adjust this setting.
 #' @param plot if TRUE, \code{\link{plotSimulatedResiduals}} will be directly run after the simulations have terminated
 #' @param ... parameters to pass to the simulate function of the model object. An important use of this is to specify whether simulations should be conditional on the current random effect estimates, e.g. via re.form. Note that not all models support syntax to specify conditionao or unconditional simulations. See also details
-#' @param seed the random seed. The default setting, recommended for any type of data analysis, is to reset the random number generator each time the function is run, meaning that you will always get the same result when running the same code. NULL = no new seed is set, but previous random state will be restored after simulation. FALSE = no seed is set, and random state will not be restored. The latter two options are only recommended for simulation experiments. See vignette for details.
+#' @param seed the random seed to be used within DHARMa. The default setting, recommended for most users, is keep the random seed on a fixed value 123. This means that you will always get the same randomization and thus teh same result when running the same code. NULL = no new seed is set, but previous random state will be restored after simulation. FALSE = no seed is set, and random state will not be restored. The latter two options are only recommended for simulation experiments. See vignette for details.
 #' @return An S3 class of type "DHARMa", essentially a list with various elements. Implemented S3 functions include plot, print and \code{\link{residuals.DHARMa}}. Residuals returns the calculated scaled residuals.
 #' 
 #' @details There are a number of important considerations when simulating from a more complex (hierarchical) model: 
@@ -125,6 +125,15 @@ simulateResiduals <- function(fittedModel, n = 250, refit = F, integerResponse =
   }
     
   if(any(dim(out$simulatedResponse) != c(out$nObs, out$nSim) )) securityAssertion("Simulation results have wrong dimension", stop = T)
+  
+  if(any(! is.finite(out$simulatedResponse))) message("Simulations from your fitted model produce infinite values. Consider if this is sensible")
+
+  if(any(is.nan(out$simulatedResponse))) securityAssertion("Simulations from your fitted model produce NaN values. DHARMa cannot calculated residuals for this. This is nearly certainly an error of the regression package you are using", stop = T)
+  if(any(is.na(out$simulatedResponse))) securityAssertion("Simulations from your fitted model produce NA values. DHARMa cannot calculated residuals for this. This is nearly certainly an error of the regression package you are using", stop = T
+                                                           
+)
+    
+
   
   ######## refit = F ################## 
 
@@ -248,12 +257,16 @@ securityAssertion <- function(context = "Not provided", stop = F){
 #' @param simulationOutput an object with simulated residuals created by \code{\link{simulateResiduals}}
 #' @param group group of each data point
 #' @param aggregateBy function for the aggregation. Default is sum. This should only be changed if you know what you are doing. Note in particular that the expected residual distribution might not be flat any more if you choose general functions, such as sd etc. 
+#' @param seed the random seed to be used within DHARMa. The default setting, recommended for most users, is keep the random seed on a fixed value 123. This means that you will always get the same randomization and thus teh same result when running the same code. NULL = no new seed is set, but previous random state will be restored after simulation. FALSE = no seed is set, and random state will not be restored. The latter two options are only recommended for simulation experiments. See vignette for details.
 #' 
 #' @return an object of class DHARMa, similar to what is returned by \code{\link{simulateResiduals}}, but with additional outputs for the new grouped calculations. Note that the relevant outputs are 2x in the object, the first is the grouped calculations (which is returned by $name access), and later another time, under identical name, the original output. Moreover, there is a function 'aggregateByGroup', which can be used to aggregate predictor variables in the same way as the variables calculated here 
 #' 
 #' @example inst/examples/simulateResidualsHelp.R
 #' @export
-recalculateResiduals <- function(simulationOutput, group = NULL, aggregateBy = sum){
+recalculateResiduals <- function(simulationOutput, group = NULL, aggregateBy = sum, seed = 123){
+  
+  randomState <-getRandomState(seed)
+  on.exit({randomState$restoreCurrent()})
 
   if(!is.null(simulationOutput$original)) simulationOutput = simulationOutput$original
 
@@ -291,6 +304,7 @@ recalculateResiduals <- function(simulationOutput, group = NULL, aggregateBy = s
   
   out$aggregateByGroup = aggregateByGroup
   out = c(out, simulationOutput)
+  out$randomState = randomState
   class(out) = "DHARMa"
   return(out)
 }

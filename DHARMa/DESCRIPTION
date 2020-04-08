@@ -33,13 +33,14 @@ Imports:
     mgcv,
     glmmTMB (>= 1.0.0),
     spaMM (>= 2.6.0),
-    qgam (>= 1.3.2)
+    qgam (>= 1.3.2),
+    gstat
 Suggests:
     knitr,
     testthat,
     KernSmooth
 License: GPL (>= 3)
-URL: http://florianhartig.github.io/DHARMa/
+URL: https://github.com/project-Gen3sis/R-package
 BugReports: https://github.com/florianhartig/DHARMa/issues
 LazyData: true
 RoxygenNote: 7.0.2.9000
