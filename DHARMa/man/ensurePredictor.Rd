@@ -2,19 +2,16 @@
 % Please edit documentation in R/DHARMa.R
 \name{ensurePredictor}
 \alias{ensurePredictor}
-\title{Ensures that an object is of class DHARMa}
+\title{Ensures the existence of a valid predictor to plot residuals against}
 \usage{
 ensurePredictor(simulationOutput, predictor = NULL)
 }
 \arguments{
 \item{simulationOutput}{a DHARMa simulation output or an object that can be converted into a DHARMa simulation output}
 
-\item{predictor}{a predictor}
+\item{predictor}{an optional predictor. If no predictor is provided, will try to extract the fitted value}
 }
 \description{
-Ensures that an object is of class DHARMa
-}
-\details{
-The
+Ensures the existence of a valid predictor to plot residuals against
 }
 \keyword{internal}

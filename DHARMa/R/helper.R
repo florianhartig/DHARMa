@@ -23,8 +23,8 @@ DHARMa.ecdf <- function (x)
 #' Quantile calculations
 #' 
 #' @keywords internal
-getQuantile <- function(simulations, observed, n, nSim, integerResponse){
-  
+getQuantile <- function(simulations, observed, n, nSim, integerResponse, seed){
+
   scaledResiduals = rep(NA, n)
   
   if(integerResponse == F){
