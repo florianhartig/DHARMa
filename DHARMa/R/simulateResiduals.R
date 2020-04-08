@@ -47,6 +47,8 @@ simulateResiduals <- function(fittedModel, n = 250, refit = F, integerResponse =
   
   if (n < 2) stop("error in DHARMa::simulateResiduals: n > 1 is required to calculate scaled residuals")
   checkModel(fittedModel)  
+  randomState <-getRandomState(seed)
+  on.exit({randomState$restoreCurrent()})
   ptm <- proc.time() 
 
   ####### extract model info ############
@@ -137,7 +139,7 @@ simulateResiduals <- function(fittedModel, n = 250, refit = F, integerResponse =
 
   if (refit == FALSE){
     
-    out$scaledResiduals = getQuantile(simulations = out$simulatedResponse , observed = out$observedResponse , n = out$nObs, nSim = out$nSim, integerResponse = integerResponse, seed = seed)
+    out$scaledResiduals = getQuantile(simulations = out$simulatedResponse , observed = out$observedResponse , n = out$nObs, nSim = out$nSim, integerResponse = integerResponse)
 
   ######## refit = T ################## 
   } else {
@@ -190,7 +192,7 @@ simulateResiduals <- function(fittedModel, n = 250, refit = F, integerResponse =
     
     ######### residual calculations ###########
 
-    out$scaledResiduals = getQuantile(simulations = out$refittedResiduals, observed = out$fittedResiduals, n = out$nObs, nSim = out$nSim, integerResponse = integerResponse, seed = seed)
+    out$scaledResiduals = getQuantile(simulations = out$refittedResiduals, observed = out$fittedResiduals, n = out$nObs, nSim = out$nSim, integerResponse = integerResponse)
   }
 
   ########### Wrapup ############
@@ -262,6 +264,9 @@ securityAssertion <- function(context = "Not provided", stop = F){
 #' @example inst/examples/simulateResidualsHelp.R
 #' @export
 recalculateResiduals <- function(simulationOutput, group = NULL, aggregateBy = sum, seed = 123){
+  
+  randomState <-getRandomState(seed)
+  on.exit({randomState$restoreCurrent()})
 
   if(!is.null(simulationOutput$original)) simulationOutput = simulationOutput$original
 
@@ -280,7 +285,7 @@ recalculateResiduals <- function(simulationOutput, group = NULL, aggregateBy = s
   
   if (simulationOutput$refit == F){
     
-    out$scaledResiduals = getQuantile(simulations = out$simulatedResponse , observed = out$observedResponse , n = out$nGroups, nSim = simulationOutput$nSim, integerResponse = simulationOutput$integerResponse, seed = seed)
+    out$scaledResiduals = getQuantile(simulations = out$simulatedResponse , observed = out$observedResponse , n = out$nGroups, nSim = simulationOutput$nSim, integerResponse = simulationOutput$integerResponse)
  
   ######## refit = T ##################   
   } else {
@@ -299,6 +304,7 @@ recalculateResiduals <- function(simulationOutput, group = NULL, aggregateBy = s
   
   out$aggregateByGroup = aggregateByGroup
   out = c(out, simulationOutput)
+  out$randomState = randomState
   class(out) = "DHARMa"
   return(out)
 }

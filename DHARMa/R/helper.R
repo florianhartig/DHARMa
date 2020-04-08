@@ -24,10 +24,7 @@ DHARMa.ecdf <- function (x)
 #' 
 #' @keywords internal
 getQuantile <- function(simulations, observed, n, nSim, integerResponse, seed){
-  
-  randomState <-getRandomState(seed)
-  on.exit({randomState$restoreCurrent()})
-  
+
   scaledResiduals = rep(NA, n)
   
   if(integerResponse == F){

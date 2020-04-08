@@ -56,11 +56,15 @@ residuals.DHARMa <- function(object, quantileFunction = NULL, outlierValues = NU
 #' @param observedResponse true observations
 #' @param fittedPredictedResponse optional fitted predicted response. For Bayesian posterior predictive simulations, using the median posterior prediction as fittedPredictedResponse is recommended. If not provided, the mean simulatedResponse will be used. 
 #' @param integerResponse if T, noise will be added at to the residuals to maintain a uniform expectations for integer responses (such as Poisson or Binomial). Unlike in \code{\link{simulateResiduals}}, the nature of the data is not automatically detected, so this MUST be set by the user appropriately
+#' @param seed the random seed to be used within DHARMa. The default setting, recommended for most users, is keep the random seed on a fixed value 123. This means that you will always get the same randomization and thus teh same result when running the same code. NULL = no new seed is set, but previous random state will be restored after simulation. FALSE = no seed is set, and random state will not be restored. The latter two options are only recommended for simulation experiments. See vignette for details.
 #' @details The use of this function is to convert simulated residuals (e.g. from a point estimate, or Bayesian p-values) to a DHARMa object, to make use of the plotting / test functions in DHARMa 
 #' @note Either scaled residuals or (simulatedResponse AND observed response) have to be provided 
 #' @example inst/examples/createDharmaHelp.R
 #' @export
-createDHARMa <- function(simulatedResponse , observedResponse , fittedPredictedResponse = NULL, integerResponse = F){
+createDHARMa <- function(simulatedResponse , observedResponse , fittedPredictedResponse = NULL, integerResponse = F, seed = 123){
+  
+  randomState <-getRandomState(seed)
+  on.exit({randomState$restoreCurrent()})
 
   out = list()
   out$simulatedResponse = simulatedResponse
@@ -90,7 +94,7 @@ createDHARMa <- function(simulatedResponse , observedResponse , fittedPredictedR
     fittedPredictedResponse = apply(simulatedResponse, 1, mean)         
   }
   out$fittedPredictedResponse = fittedPredictedResponse       
- 
+  out$randomState = randomState
   class(out) = "DHARMa"
   return(out)
 }
