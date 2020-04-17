@@ -4,12 +4,17 @@
 \alias{getSimulations}
 \title{Get model simulations}
 \usage{
-getSimulations(object, ...)
+getSimulations(object, nsim = 1, ...)
 }
 \arguments{
 \item{object}{a fitted model}
 
 \item{...}{additional parameters to be passed on, usually to the simulate function of the respective model class}
+
+\item{nsin}{number of simulations}
+}
+\value{
+a matrix with simulations
 }
 \description{
 Wrapper to simulate from a fitted model

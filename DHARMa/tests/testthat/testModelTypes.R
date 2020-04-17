@@ -46,7 +46,8 @@ runEverything = function(fittedModel, testData, DHARMaData = T){
   testTemporalAutocorrelation(simulationOutput = simulationOutput, time = testData$time)
   testSpatialAutocorrelation(simulationOutput = simulationOutput, x = testData$x, y = testData$y)
   
-  testDispersion(simulationOutput)
+  x = testDispersion(simulationOutput)
+  expect_true(x$p.value > 0.001)
   
   simulationOutput <- recalculateResiduals(simulationOutput, group = testData$group)
   testDispersion(simulationOutput)

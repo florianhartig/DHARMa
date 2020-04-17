@@ -12,13 +12,32 @@
 #' 
 #' @author Florian Hartig
 #' @export
-getResponse <- function (object, ...) {
-  UseMethod("getResponse", object)
+getObservedResponse <- function (object, ...) {
+  UseMethod("getObservedResponse", object)
 }
 
 #' @export
-getResponse.default <- function (object, ...){
-  model.frame(object)[,1] 
+getObservedResponse.default <- function (object, ...){
+  out = model.frame(object)[,1] 
+
+  # check for weights in k/n case
+  if(family(object)$family %in% c("binomial", "betabinomial") & "(weights)" %in% colnames(model.frame(object))){
+    x = model.frame(object)
+    out = out * x$`(weights)`
+  }
+    
+  # check for k/n binomial
+  if(is.matrix(out)){
+    if(!(ncol(out) == 2)) securityAssertion("nKcase - wrong dimensions of response")
+    if(!(family(object)$family %in% c("binomial", "betabinomial"))) securityAssertion("nKcase - wrong family")
+
+    out = out[,1]
+  } 
+  
+  # observation is factor - unlike lme4 and older, glmmTMB simulates nevertheless as numeric
+  if(is.factor(out)) out = as.numeric(out) - 1
+
+  return(out)
 }
 
 #' Get model simulations
@@ -28,17 +47,41 @@ getResponse.default <- function (object, ...){
 #' The purpose of this wrapper for for the simulate function is to standardize the simulations from a model in a standardized way
 #' 
 #' @param object a fitted model
+#' @param nsin number of simulations
 #' @param ... additional parameters to be passed on, usually to the simulate function of the respective model class
+#' 
+#' @return a matrix with simulations
 #' 
 #' @author Florian Hartig
 #' @export
-getSimulations <- function (object, ...) {
+getSimulations <- function (object, nsim = 1 , ...) {
   UseMethod("getSimulations", object)
 }
 
 #' @export
-getSimulations.default <- function (object, ...){
-  simulate(object, ...)
+getSimulations.default <- function (object, nsim = 1 , ...){
+  out = simulate(object, nsim = nsim , ...)
+  
+  if(family(object)$family %in% c("binomial", "betabinomial") & "(weights)" %in% colnames(model.frame(object))){
+    x = model.frame(object)
+    out = out * x$`(weights)`
+  }
+  
+  if(is.vector(out[[1]])){
+    out = data.matrix(out)
+  } else if (is.matrix(out[[1]])){ 
+    # this is for the k/n binomial case
+    out = as.matrix(out)[,seq(1, (2*nsim), by = 2)]
+  } else if(is.factor(simulations[[1]])){
+    if(nlevels(simulations[[1]]) != 2){
+      warning("The fitted model has a factorial response with number of levels not equal to 2 - there is currently no sensible application in DHARMa that would lead to this situation. Likely, you are trying something that doesn't work.")
+    } 
+    else{
+      out = data.matrix(out) - 1      
+    }
+  } else securityAssertion("Simulation results produced unsupported data structure", stop = TRUE)
+  
+  return(out)
 }
 
 
@@ -62,6 +105,46 @@ getFixedEffects <- function(fittedModel){
   return(out)
 }
 
+#' Get model refit
+#' 
+#' Wrapper to refit a fitted model
+#' 
+#' The purpose of this wrapper is to standardize the refit of a model
+#' 
+#' @param object a fitted model
+#' @param ... additional parameters to be passed on, usually to the simulate function of the respective model class
+#' 
+#' @author Florian Hartig
+#' @export
+getRefit <- function (object, newresp, ...) {
+  UseMethod("getRefit", object)
+}
+
+#' @export
+getRefit.default <- function (object, newresp, ...){
+  refit(object, newresp, ...)
+}
+
+
+#' Get model fitted
+#' 
+#' Wrapper to get the fitted value a fitted model
+#' 
+#' The purpose of this wrapper is to standardize extract the fitted values 
+#' 
+#' @param object a fitted model
+#' @param ... additional parameters to be passed on, usually to the simulate function of the respective model class
+#' 
+#' @author Florian Hartig
+#' @export
+getFitted <- function (object, ...) {
+  UseMethod("getFitted", object)
+}
+
+#' @export
+getRefit.default <- function (object,...){
+  fitted(object, ...)
+}
 
 #' Check weights
 #' 
@@ -80,7 +163,7 @@ hasWeigths <- function (object, ...) {
 
 #' @export
 hasWeigths.default <- function (object, ...){
-  if(" (weights)" %in% colnames(model.frame(object))) return(TRUE)
+  if("(weights)" %in% colnames(model.frame(object))) return(TRUE)
   else (return(FALSE))
 }
 
@@ -102,7 +185,7 @@ hasNA <- function(fittedModel){
 #' @param ... further arguments, no effect implemented for this S3 class
 #' @example inst/examples/helpRefit.R
 #' @export
-refit.lm <- function(object, newresp, ...){
+getRefit.lm <- function(object, newresp, ...){
   
   newData <-model.frame(object)  
   
@@ -141,7 +224,7 @@ hasWeigths.lm <- function(object, ...){
 #' @param object fitted model
 #' @param ... arguments to be passed on to stats::fitted
 #' @export
-fitted.gam <- function(object, ...){
+getFitted.gam <- function(object, ...){
   class(object) = "glm"
   out = stats::fitted(object, ...)
   names(out) = as.character(1:length(out))
@@ -166,7 +249,7 @@ fitted.gam <- function(object, ...){
 #' @param ... further arguments, no effect implemented for this S3 class
 #' @example inst/examples/helpRefit.R
 #' @export
-refit.glmmTMB <- function(object, newresp, ...){
+getRefit.glmmTMB <- function(object, newresp, ...){
   
   newData <-model.frame(object)  
   
@@ -189,12 +272,38 @@ refit.glmmTMB <- function(object, newresp, ...){
 }
 
 
+# glmmTMB simulates normal counts (and not proportions in any case, so the check for the other models is not needed), see #158
+# note that if observation is factor - unlike lme4 and older, glmmTMB simulates nevertheless as numeric
+
+#' @export
+getSimulations.glmmTMB <- function (object, nsim = 1, ...){
+  out = simulate(object, nsim = nsim, ...)
+  
+  if(is.vector(out[[1]])){
+    out = data.matrix(out)
+  } else if (is.matrix(out[[1]])){ 
+    # this is for the k/n binomial case
+    out = as.matrix(out)[,seq(1, (2*nsim), by = 2)]
+  } else securityAssertion("Simulation results produced unsupported data structure", stop = TRUE)
+  
+  return(out)
+}
+
 #######  spaMM #########
 
 #' @export
 #' @importFrom spaMM response 
-getResponse.HLfit <- function(object, ...){
-  return(response(object, ...))
+getObservedResponse.HLfit <- function(object, ...){
+  out = response(object, ...)
+
+  nKcase = is.matrix(out$observedResponse)
+  if(nKcase){
+    if(! (family(object) %in% c("binomial", "betabinomial"))) securityAssertion("nKcase - wrong family")
+    if(! (ncol(out)==2)) securityAssertion("nKcase - wrong dimensions of response")
+    out = out[,1]
+  }
+  return(out)
+  
 }
 
 #' @export
@@ -204,7 +313,7 @@ getSimulations.HLfit <- function(object, ...){
 
 #' @export
 #' @importFrom spaMM update_resp 
-refit.HLfit <- function(object, newresp, ...) {
+getRefit.HLfit <- function(object, newresp, ...) {
   update_resp(object, newresp, evaluate = TRUE)
 }
 
