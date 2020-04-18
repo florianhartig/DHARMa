@@ -4,10 +4,12 @@
 \alias{getSimulations}
 \title{Get model simulations}
 \usage{
-getSimulations(object, nsim = 1, ...)
+getSimulations(object, nsim = 1, type = c("normal", "refit"), ...)
 }
 \arguments{
 \item{object}{a fitted model}
+
+\item{type}{if simulations should be prepared for getQuantile or for refit}
 
 \item{...}{additional parameters to be passed on, usually to the simulate function of the respective model class}
 

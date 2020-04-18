@@ -48,39 +48,45 @@ getObservedResponse.default <- function (object, ...){
 #' 
 #' @param object a fitted model
 #' @param nsin number of simulations
+#' @param type if simulations should be prepared for getQuantile or for refit
 #' @param ... additional parameters to be passed on, usually to the simulate function of the respective model class
 #' 
 #' @return a matrix with simulations
 #' 
 #' @author Florian Hartig
 #' @export
-getSimulations <- function (object, nsim = 1 , ...) {
+getSimulations <- function (object, nsim = 1 , type = c("normal", "refit"), ...) {
   UseMethod("getSimulations", object)
 }
 
 #' @export
-getSimulations.default <- function (object, nsim = 1 , ...){
+getSimulations.default <- function (object, nsim = 1, type = c("normal", "refit"), ...){
+  
+  type <- match.arg(type)
+  
   out = simulate(object, nsim = nsim , ...)
   
-  if(family(object)$family %in% c("binomial", "betabinomial")){
-    if("(weights)" %in% colnames(model.frame(object))){
-      x = model.frame(object)
-      out = out * x$`(weights)`
-    } else if (is.matrix(out[[1]])){ 
-      # this is for the k/n binomial case
-      out = as.matrix(out)[,seq(1, (2*nsim), by = 2)]
-    } else if(is.factor(out[[1]])){
-      if(nlevels(out[[1]]) != 2){
-        warning("The fitted model has a factorial response with number of levels not equal to 2 - there is currently no sensible application in DHARMa that would lead to this situation. Likely, you are trying something that doesn't work.")
-      } 
-      else{
-        out = as.numeric(out) - 1      
-      }
-    } else securityAssertion("Simulation results produced unsupported data structure for a binomial model", stop = TRUE)   
-  } 
-  
-  if(is.vector(out[[1]])){
-    out = data.matrix(out)
+  if (type == "normal"){
+    if(family(object)$family %in% c("binomial", "betabinomial")){
+      if("(weights)" %in% colnames(model.frame(object))){
+        x = model.frame(object)
+        out = out * x$`(weights)`
+      } else if (is.matrix(out[[1]])){ 
+        # this is for the k/n binomial case
+        out = as.matrix(out)[,seq(1, (2*nsim), by = 2)]
+      } else if(is.factor(out[[1]])){
+        if(nlevels(out[[1]]) != 2){
+          warning("The fitted model has a factorial response with number of levels not equal to 2 - there is currently no sensible application in DHARMa that would lead to this situation. Likely, you are trying something that doesn't work.")
+        } 
+        else{
+          out = as.numeric(out) - 1      
+        }
+      } else securityAssertion("Simulation results produced unsupported data structure for a binomial model", stop = TRUE)   
+    } 
+    
+    if(is.vector(out[[1]])){
+      out = data.matrix(out)
+    }     
   } 
   
   return(out)
@@ -278,15 +284,21 @@ getRefit.glmmTMB <- function(object, newresp, ...){
 # note that if observation is factor - unlike lme4 and older, glmmTMB simulates nevertheless as numeric
 
 #' @export
-getSimulations.glmmTMB <- function (object, nsim = 1, ...){
-  out = simulate(object, nsim = nsim, ...)
-
-  if (is.matrix(out[[1]])){ 
-    # this is for the k/n binomial case
-    out = as.matrix(out)[,seq(1, (2*nsim), by = 2)]
-  } 
+getSimulations.glmmTMB <- function (object, nsim = 1, type = c("normal", "refit"), ...){
   
-  if(is.vector(out[[1]])) out = data.matrix(out)
+  type <- match.arg(type)
+  
+  out = simulate(object, nsim = nsim, ...)
+  
+  if (type == "normal"){
+    if (is.matrix(out[[1]])){ 
+      # this is for the k/n binomial case
+      out = as.matrix(out)[,seq(1, (2*nsim), by = 2)]
+    } 
+    if(is.vector(out[[1]])) out = data.matrix(out)
+  }else{
+    # if (out$modelClass == "glmmTMB" & ncol(simulations) == 2*n) simObserved = simulations[,(1+(2*(i-1))):(2+(2*(i-1)))]    
+  }
   
   # else securityAssertion("Simulation results produced unsupported data structure", stop = TRUE)
   
@@ -311,8 +323,14 @@ getObservedResponse.HLfit <- function(object, ...){
 }
 
 #' @export
-getSimulations.HLfit <- function(object, ...){
-  return(as.data.frame(simulate(object, ...)))
+getSimulations.HLfit <- function(object, type = c("normal", "refit"), ...){
+
+  type <- match.arg(type)
+  out = simulate(object, ...)
+  if(type == "refit"){
+    out = as.data.frame(out)
+  }
+  return(out)
 }
 
 #' @export

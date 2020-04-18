@@ -2,6 +2,7 @@ library(glmmTMB)
 library(DHARMa)
 library(lme4) # for data
 library(mgcv)
+library(spaMM)
 
 
 tmpMatrix = glmmTMB(cbind(incidence, size - incidence) ~ period + (1 | herd),
@@ -32,6 +33,14 @@ gamMatrix = gam(cbind(incidence, size - incidence) ~ period,
 
 gamWeights = gam(prop ~ period ,
                  data = cbpp2, weights = size, family = binomial)
+
+
+spaMMMatrix = HLfit(cbind(incidence, size - incidence) ~ period,
+                data = cbpp, family = binomial)
+
+# does not work
+spaMMMWeights = HLfit(incidence ~ period ,
+                 data = cbpp2, prior.weights = size, family = binomial)
 
 
 

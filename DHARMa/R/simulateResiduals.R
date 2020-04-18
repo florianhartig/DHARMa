@@ -56,11 +56,6 @@ simulateResiduals <- function(fittedModel, n = 250, refit = F, integerResponse =
   out = list()
   
   family = family(fittedModel)
-  if(is.null(integerResponse)){
-    if (family$family %in% c("binomial", "poisson", "quasibinomial", "quasipoisson", "Negative Binom", "nbinom2", "nbinom1", "genpois", "compois", "truncated_poisson", "truncated_nbinom2", "truncated_nbinom1", "betabinomial", "Poisson", "Tpoisson", "COMPoisson", "negbin", "Tnegbin") | grepl("Negative Binomial",family$family) ) integerResponse = TRUE
-    else integerResponse = FALSE
-  }
-  
   out$fittedModel = fittedModel
   out$modelClass = class(fittedModel)[1]
   
@@ -68,15 +63,15 @@ simulateResiduals <- function(fittedModel, n = 250, refit = F, integerResponse =
   out$nSim = n
   out$refit = refit
   out$observedResponse = getObservedResponse(fittedModel) 
-
-  out$integerResponse = integerResponse
-  out$problems = list()
-  out$scaledResiduals = rep(NA, out$nObs)
-
-  ## following block re-used below, create function for this 
-
-  ##### calculating predictions #####
   
+  if(is.null(integerResponse)){
+    if (family$family %in% c("binomial", "poisson", "quasibinomial", "quasipoisson", "Negative Binom", "nbinom2", "nbinom1", "genpois", "compois", "truncated_poisson", "truncated_nbinom2", "truncated_nbinom1", "betabinomial", "Poisson", "Tpoisson", "COMPoisson", "negbin", "Tnegbin") | grepl("Negative Binomial",family$family) ) integerResponse = TRUE
+    else integerResponse = FALSE
+  }
+  out$integerResponse = integerResponse
+
+  out$problems = list()
+
   # re-form should be set to ~0 to avoid spurious residual patterns, see https://github.com/florianhartig/DHARMa/issues/43
     
   if(out$modelClass %in% c("HLfit")){
@@ -88,20 +83,13 @@ simulateResiduals <- function(fittedModel, n = 250, refit = F, integerResponse =
   out$fittedFixedEffects = getFixedEffects(fittedModel)
   out$fittedResiduals = residuals(fittedModel, type = "response")
   
-  ######## simulations ##################
-  
-  out$simulatedResponse = getSimulations(fittedModel, nsim = n, ...)
-  
-  if(any(dim(out$simulatedResponse) != c(out$nObs, out$nSim) )) securityAssertion("Simulation results have wrong dimension", stop = T)
-  
-  if(any(! is.finite(out$simulatedResponse))) message("Simulations from your fitted model produce infinite values. Consider if this is sensible")
-  
-  if(any(is.nan(out$simulatedResponse))) securityAssertion("Simulations from your fitted model produce NaN values. DHARMa cannot calculated residuals for this. This is nearly certainly an error of the regression package you are using", stop = T)
-  if(any(is.na(out$simulatedResponse))) securityAssertion("Simulations from your fitted model produce NA values. DHARMa cannot calculated residuals for this. This is nearly certainly an error of the regression package you are using", stop = T)
-
   ######## refit = F ################## 
 
   if (refit == FALSE){
+    
+    out$simulatedResponse = getSimulations(fittedModel, nsim = n, type = "normal", ...)
+    
+    checkSimulations(out$simulatedResponse, out$nObs, out$nSim)
     
     out$scaledResiduals = getQuantile(simulations = out$simulatedResponse , observed = out$observedResponse , n = out$nObs, nSim = out$nSim, integerResponse = integerResponse)
 
@@ -116,12 +104,12 @@ simulateResiduals <- function(fittedModel, n = 250, refit = F, integerResponse =
     out$refittedResiduals = matrix(nrow = out$nObs, ncol = n)   
     out$refittedPearsonResiduals = matrix(nrow = out$nObs, ncol = n)   
     
+    out$simulatedResponse = getSimulations(fittedModel, nsim = n, type = "refit", ...)
+    
     for (i in 1:n){
-      #tryCatch()
-      
-      if (out$modelClass == "glmmTMB" & ncol(simulations) == 2*n) simObserved = simulations[,(1+(2*(i-1))):(2+(2*(i-1)))]
-      else simObserved = simulations[[i]]
-      
+
+      simObserved = out$simulatedResponse[[i]]
+  
       try({
         
         # for testing
@@ -207,11 +195,29 @@ checkModel <- function(fittedModel, stop = F){
 
 
 
-securityAssertion <- function(context = "Not provided", stop = F){
-  generalMessage = "Message from DHARMa package: a security assertion was not met. This means that during the execution of a DHARMa function, some unexpected conditions occurred. Even if you didn't get an error, your results may not be reliable. Please check with the help if you use the functions as intended. If you think that the error is not on your side, I would be grateful if you could report the problem at https://github.com/florianhartig/DHARMa/issues \n\n Context:"
-  if (stop == F) warning(paste(generalMessage, context))  
-  else stop(paste(generalMessage, context))  
+#' Check simulated data
+#' 
+#' The function checks if the simulated data seems fine
+#' 
+#' @param simulatedResponse the simulated response
+#' @param nObs number of observations
+#' @param nSim number of simulations
+#' 
+#' @keywords internal
+checkSimulations <- function(simulatedResponse, nObs, nSim){
+  
+  if(!inherits(simulatedResponse, "matrix")) securityAssertion("Simulation from the model produced wrong class", stop = T)
+  
+  if(any(dim(simulatedResponse) != c(nObs, nSim) )) securityAssertion("Simulation from the model produced wrong dimension", stop = T)
+  
+  if(any(!is.finite(simulatedResponse))) message("Simulations from your fitted model produce infinite values. Consider if this is sensible")
+  
+  if(any(is.nan(simulatedResponse))) securityAssertion("Simulations from your fitted model produce NaN values. DHARMa cannot calculated residuals for this. This is nearly certainly an error of the regression package you are using", stop = T)
+  if(any(is.na(simulatedResponse))) securityAssertion("Simulations from your fitted model produce NA values. DHARMa cannot calculated residuals for this. This is nearly certainly an error of the regression package you are using", stop = T)
+  
 }
+
+
 
 
 #' Recalculate residuals with grouping

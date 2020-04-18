@@ -7,6 +7,7 @@ library(lme4)
 library(mgcv)
 library(glmmTMB)
 library(spaMM)
+set.seed(123)
 
 checkOutput <- function(simulationOutput){
   
@@ -28,13 +29,25 @@ runEverything = function(fittedModel, testData, DHARMaData = T){
   print(class(fittedModel))
   
   t = DHARMa:::getObservedResponse(fittedModel)
+  expect_true(is.vector(t))
   
   x = getSimulations(fittedModel, 2)
-  expect_equal(class(x), "data.frame")
-  refit(fittedModel, x[[1]])
+  expect_true(is.matrix(x))  
+  expect_true(ncol(x) == 2) 
   
-  #class(x[, 1:ncol(x)])
+  x = getSimulations(fittedModel, 1)
+  expect_true(is.matrix(x))  
+  expect_true(ncol(x) == 1) 
   
+  x = getSimulations(fittedModel, 1, type = "refit")
+  expect_true(is.data.frame(x))  
+  
+  x = getSimulations(fittedModel, 2, type = "refit")
+  expect_true(is.data.frame(x))  
+  
+  fittedModel2 = getRefit(fittedModel, x[[1]])
+  expect_false(any(DHARMa:::getFixedEffects(fittedModel) - DHARMa:::getFixedEffects(fittedModel2) > 0.5))
+
   simulationOutput <- simulateResiduals(fittedModel = fittedModel, n = 100)
   
   checkOutput(simulationOutput)
@@ -229,7 +242,7 @@ test_that("glm binomial n/k with weights works",
 )
 
 
-# Binomial Poisson --------------------------------------------------------
+# Poisson --------------------------------------------------------
 
 
 test_that("glm poisson works",
