@@ -27,7 +27,7 @@ runEverything = function(fittedModel, testData, DHARMaData = T){
   
   print(class(fittedModel))
   
-  t = DHARMa:::getResponse(fittedModel)
+  t = DHARMa:::getObservedResponse(fittedModel)
   
   x = getSimulations(fittedModel, 2)
   expect_equal(class(x), "data.frame")
@@ -220,8 +220,10 @@ test_that("glm binomial n/k with weights works",
             fittedModel <- glmmTMB(prop ~ Environment1 + (1|group) , family = "betabinomial", data = testData, weights = rep(20,200))
             runEverything(fittedModel, testData)
             
-            fittedModel <- HLfit(prop ~ Environment1 + (1|group) , family = "binomial",  data = testData, weights = rep(20,200))
-            runEverything(fittedModel, testData)
+            
+            # spaMM doesn't support binomial k/n via weights
+            #fittedModel <- HLfit(prop ~ Environment1 + (1|group) , family = "binomial",  data = testData, prior.weights = rep(20,200))
+            #runEverything(fittedModel, testData)
             
           }
 )
