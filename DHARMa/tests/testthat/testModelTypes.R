@@ -66,6 +66,9 @@ runEverything = function(fittedModel, testData, DHARMaData = T){
 }
 
 
+
+# LM ----------------------------------------------------------------------
+
 test_that("lm works",
           {
             skip_on_cran()
@@ -104,6 +107,8 @@ test_that("lm works",
 
 
 
+# Binomial 1/0 ------------------------------------------------------------
+
 test_that("binomial 1/0 works",
           {
             skip_on_cran()
@@ -131,6 +136,8 @@ test_that("binomial 1/0 works",
 )
 
 
+# Binomial y/n (factor) ------------------------------------------------------------
+
 test_that("binomial y/n (factor) works",
           {
             skip_on_cran()
@@ -157,6 +164,7 @@ test_that("binomial y/n (factor) works",
           }
 )
 
+# Binomial n/k (Matrix) ------------------------------------------------------------
 
 test_that("glm binomial n/k works",
           {
@@ -184,6 +192,42 @@ test_that("glm binomial n/k works",
   
           }
 )
+
+
+# Binomial n/k (Weights) ------------------------------------------------------------
+
+test_that("glm binomial n/k with weights works",
+          {
+            skip_on_cran()
+            
+            testData = createData(sampleSize = 200, overdispersion = 0, randomEffectVariance = 0, family = binomial(), binomialTrials = 20)
+            
+            testData$prop = testData$observedResponse1 / 20   
+            
+            
+            fittedModel <- glm(prop  ~ Environment1 , family = "binomial", data = testData, weights = rep(20,200))
+            runEverything(fittedModel, testData)
+            
+            fittedModel <- gam(prop ~ s(Environment1) ,family = "binomial", data = testData, weights = rep(20,200))
+            runEverything(fittedModel, testData)
+            
+            fittedModel <- glmer(prop ~ Environment1 + (1|group) , family = "binomial", data = testData, weights = rep(20,200))
+            runEverything(fittedModel, testData)
+            
+            fittedModel <- glmmTMB(prop ~ Environment1 + (1|group) , family = "binomial", data = testData, weights = rep(20,200))
+            runEverything(fittedModel, testData)
+            
+            fittedModel <- glmmTMB(prop ~ Environment1 + (1|group) , family = "betabinomial", data = testData, weights = rep(20,200))
+            runEverything(fittedModel, testData)
+            
+            fittedModel <- HLfit(prop ~ Environment1 + (1|group) , family = "binomial",  data = testData, weights = rep(20,200))
+            runEverything(fittedModel, testData)
+            
+          }
+)
+
+
+# Binomial Poisson --------------------------------------------------------
 
 
 test_that("glm poisson works",

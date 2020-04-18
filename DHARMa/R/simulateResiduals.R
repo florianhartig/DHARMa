@@ -90,7 +90,7 @@ simulateResiduals <- function(fittedModel, n = 250, refit = F, integerResponse =
   
   ######## simulations ##################
   
-  simulations = getSimulations(fittedModel, nsim = n, ...)
+  out$simulatedResponse = getSimulations(fittedModel, nsim = n, ...)
   
   if(any(dim(out$simulatedResponse) != c(out$nObs, out$nSim) )) securityAssertion("Simulation results have wrong dimension", stop = T)
   

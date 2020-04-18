@@ -71,7 +71,7 @@ getObservedResponse(glmWeights)
 getObservedResponse(gamMatrix)
 getObservedResponse(gamWeights)
 
-getSimulations(tmpMatrix)
+getSimulations(tmpMatrix, 1)
 getSimulations(tmbWeights)
 
 getSimulations(lme4Matrix)

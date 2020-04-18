@@ -62,24 +62,26 @@ getSimulations <- function (object, nsim = 1 , ...) {
 getSimulations.default <- function (object, nsim = 1 , ...){
   out = simulate(object, nsim = nsim , ...)
   
-  if(family(object)$family %in% c("binomial", "betabinomial") & "(weights)" %in% colnames(model.frame(object))){
-    x = model.frame(object)
-    out = out * x$`(weights)`
-  }
+  if(family(object)$family %in% c("binomial", "betabinomial")){
+    if("(weights)" %in% colnames(model.frame(object))){
+      x = model.frame(object)
+      out = out * x$`(weights)`
+    } else if (is.matrix(out[[1]])){ 
+      # this is for the k/n binomial case
+      out = as.matrix(out)[,seq(1, (2*nsim), by = 2)]
+    } else if(is.factor(out[[1]])){
+      if(nlevels(out[[1]]) != 2){
+        warning("The fitted model has a factorial response with number of levels not equal to 2 - there is currently no sensible application in DHARMa that would lead to this situation. Likely, you are trying something that doesn't work.")
+      } 
+      else{
+        out = as.numeric(out) - 1      
+      }
+    } else securityAssertion("Simulation results produced unsupported data structure for a binomial model", stop = TRUE)   
+  } 
   
   if(is.vector(out[[1]])){
     out = data.matrix(out)
-  } else if (is.matrix(out[[1]])){ 
-    # this is for the k/n binomial case
-    out = as.matrix(out)[,seq(1, (2*nsim), by = 2)]
-  } else if(is.factor(simulations[[1]])){
-    if(nlevels(simulations[[1]]) != 2){
-      warning("The fitted model has a factorial response with number of levels not equal to 2 - there is currently no sensible application in DHARMa that would lead to this situation. Likely, you are trying something that doesn't work.")
-    } 
-    else{
-      out = data.matrix(out) - 1      
-    }
-  } else securityAssertion("Simulation results produced unsupported data structure", stop = TRUE)
+  } 
   
   return(out)
 }
@@ -278,13 +280,15 @@ getRefit.glmmTMB <- function(object, newresp, ...){
 #' @export
 getSimulations.glmmTMB <- function (object, nsim = 1, ...){
   out = simulate(object, nsim = nsim, ...)
-  
-  if(is.vector(out[[1]])){
-    out = data.matrix(out)
-  } else if (is.matrix(out[[1]])){ 
+
+  if (is.matrix(out[[1]])){ 
     # this is for the k/n binomial case
     out = as.matrix(out)[,seq(1, (2*nsim), by = 2)]
-  } else securityAssertion("Simulation results produced unsupported data structure", stop = TRUE)
+  } 
+  
+  if(is.vector(out[[1]])) out = data.matrix(out)
+  
+  # else securityAssertion("Simulation results produced unsupported data structure", stop = TRUE)
   
   return(out)
 }
