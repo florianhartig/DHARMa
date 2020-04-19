@@ -24,6 +24,7 @@
 plot.DHARMa <- function(x, rank = TRUE, ...){
   
   oldpar <- par(mfrow = c(1,2), oma = c(0,1,2,1))
+  on.exit(par(oldpar))
   
   plotQQunif(x)
   
@@ -32,8 +33,6 @@ plot.DHARMa <- function(x, rank = TRUE, ...){
   plotResiduals(simulationOutput = x, xlab = xlab, rank = rank, ...)
   
   mtext("DHARMa residual diagnostics", outer = T)
-  
-  par(oldpar)
 }
 
 
@@ -130,8 +129,8 @@ plotQQunif <- function(simulationOutput, testUniformity = T, testOutliers = T, t
 #' @param simulationOutput on object, usually a DHARMa object, from which residual values can be extracted. Alternatively, a vector with residuals or a fitted model can be provided, which will then be transformed into a DHARMa object.
 #' @param form optional predictor against which the residuals should be plotted. Default is to used the predicted(simulationOutput)  
 #' @param quantreg whether to perform a quantile regression on 0.25, 0.5, 0.75 on the residuals. If F, a spline will be created instead. Default NULL chooses T for nObs < 2000, and F otherwise. 
-#' @param rank if T, the values of pred will be rank transformed. This will usually make patterns easier to spot visually, especially if the distribution of the predictor is skewed. If pred is a factor, this has no effect. 
-#' @param asFactor should a numeric predictor be treated as a factor. Default is to choose this for < 10 unique predictions, as long as enough predictions are available to draw a boxplot.
+#' @param rank if T, the values provided in form will be rank transformed. This will usually make patterns easier to spot visually, especially if the distribution of the predictor is skewed. If form is a factor, this has no effect. 
+#' @param asFactor should a numeric predictor provided in form be treated as a factor. Default is to choose this for < 10 unique values, as long as enough predictions are available to draw a boxplot.
 #' @param smoothScatter if T, a smooth scatter plot will plotted instead of a normal scatter plot. This makes sense when the number of residuals is very large. Default NULL chooses T for nObs < 10000, and F otherwise.
 #' @param quantiles for a quantile regression, which quanties should be plotted 
 #' @param ... additional arguments to plot / boxplot. 
@@ -143,7 +142,7 @@ plotQQunif <- function(simulationOutput, testUniformity = T, testOutliers = T, t
 #' 
 #' Assymptotically (i.e. for lots of data / residuals), if the model is correct, theoretical and the empirical quantiles should be identical (i.e. dashed and solid lines should match). A p-value for the deviation is calculated for each quantile line. Significant deviations are highlighted by red color. 
 #' 
-#' If pred is a factor, a boxplot will be plotted instead of a scatter plot. The distribution for each factor level should be uniformly distributed, so the box should go from 0.25 to 0.75, with the median line at 0.5. Again, chance deviations from this will increases when the sample size is smaller. You can run null simulations to test if the deviations you see exceed what you would expect from random variation. If you want to create box plots for categorical predictors (e.g. because you only have a small number of unique numberic predictor values), you can convert your predictor with as.factor(pred)
+#' If form is a factor, a boxplot will be plotted instead of a scatter plot. The distribution for each factor level should be uniformly distributed, so the box should go from 0.25 to 0.75, with the median line at 0.5. Again, chance deviations from this will increases when the sample size is smaller. You can run null simulations to test if the deviations you see exceed what you would expect from random variation. If you want to create box plots for categorical predictors (e.g. because you only have a small number of unique numberic predictor values), you can convert your predictor with as.factor(pred)
 #' 
 #' @note The quantile regression can take some time to calculate, especially for larger datasets. For that reason, quantreg = F can be set to produce a smooth spline instead. 
 #' 
@@ -159,7 +158,7 @@ plotResiduals <- function(simulationOutput, form = NULL, quantreg = NULL, rank =
   
   simulationOutput = ensureDHARMa(simulationOutput, convert = T)
   res = simulationOutput$scaledResiduals
-  pred = ensurePredictor(simulationOutput, predictor)
+  pred = ensurePredictor(simulationOutput, form)
   
   ##### Rank transform and factor conversion#####
   
@@ -278,7 +277,8 @@ plotResiduals <- function(simulationOutput, form = NULL, quantreg = NULL, rank =
 #' @param fittedModel a fitted model object
 #' @export
 plotConventionalResiduals <- function(fittedModel){
-  par(mfrow = c(1,3), oma = c(0,1,2,1))
+  opar <- par(mfrow = c(1,3), oma = c(0,1,2,1))
+  on.exit(par(opar))
   plot(predict(fittedModel), resid(fittedModel, type = "deviance"), main = "Deviance" , ylab = "Residual", xlab = "Predicted")
   plot(predict(fittedModel), resid(fittedModel, type = "pearson") , main = "Pearson", ylab = "Residual", xlab = "Predicted")
   plot(predict(fittedModel), resid(fittedModel, type = "response") , main = "Raw residuals" , ylab = "Residual", xlab = "Predicted")  

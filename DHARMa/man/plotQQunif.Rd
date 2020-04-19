@@ -53,11 +53,11 @@ plotResiduals(simulationOutput, rank = TRUE, quantreg = FALSE)
 plotResiduals(simulationOutput, rank = TRUE, quantreg = FALSE, smoothScatter = TRUE)
 
 # residual vs predictors, using explicit values for pred, residual 
-plotResiduals(simulationOutput, predictor = testData$Environment1, 
+plotResiduals(simulationOutput, form = testData$Environment1, 
               quantreg = FALSE)
 
 # if pred is a factor, or asFactor = T, will produce a boxplot
-plotResiduals(simulationOutput, predictor = testData$group,
+plotResiduals(simulationOutput, form = testData$group,
               quantreg = FALSE, asFactor = TRUE)
 
 # All these options can also be provided to the main plotting function
