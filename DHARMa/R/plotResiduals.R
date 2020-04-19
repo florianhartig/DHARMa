@@ -79,7 +79,7 @@ hist.DHARMa <- function(x,
 #' @seealso \code{\link{plotResiduals}}, \code{\link{plotQQunif}}
 #' @export
 plotSimulatedResiduals <- function(simulationOutput, ...){
-  message("plotSimulatedResiduals is deprecated, switch your code to using the plot function")
+  message("plotSimulatedResiduals is deprecated, please switch your code to simply using the plot() function")
   plot(simulationOutput, ...)
 }
 
@@ -158,6 +158,7 @@ plotResiduals <- function(simulationOutput, form = NULL, quantreg = NULL, rank =
   
   simulationOutput = ensureDHARMa(simulationOutput, convert = T)
   res = simulationOutput$scaledResiduals
+  if(inherits(form, "DHARMa"))stop("DHARMa::plotResiduals > argument form cannot be of class DHARMa. Note that the syntax of plotResiduals has changed since DHARMa 0.3.0. See ?plotResiduals.")
   pred = ensurePredictor(simulationOutput, form)
   
   ##### Rank transform and factor conversion#####
@@ -257,6 +258,26 @@ plotResiduals <- function(simulationOutput, form = NULL, quantreg = NULL, rank =
 }
 
 
+#' Ensures the existence of a valid predictor to plot residuals against
+#'
+#' @param simulationOutput a DHARMa simulation output or an object that can be converted into a DHARMa simulation output
+#' @param predictor an optional predictor. If no predictor is provided, will try to extract the fitted value
+#' @keywords internal
+ensurePredictor <- function(simulationOutput,
+                            predictor = NULL){
+  if(!is.null(predictor)){
+    
+    if(length(predictor) != length(simulationOutput$scaledResiduals)) stop("DHARMa: residuals an predictor do not have the same length. The issue is possibly that you have NAs in your predictor that were removed during the model fit. Remove the NA values from your predictor.")
+  } else {
+    
+    predictor = simulationOutput$fittedPredictedResponse
+    if(is.null(predictor)) stop("DHARMa: can't extract predictor from simulationOutput, and no predictor provided")
+  }
+  return(predictor)
+}
+
+
+
 
 #plot(simulationOutput)
 
@@ -338,4 +359,6 @@ plotConventionalResiduals <- function(fittedModel){
 #   #     lines(unique(dat$pred)[-1],fit$coef[1] + fit$coef[-1], col = "blue", lwd = 2, lty = 2)
 #   #     abline(h = 0.75, col = "blue", lwd = 2, lty =2)   
 # }
+
+
 

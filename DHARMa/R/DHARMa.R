@@ -132,20 +132,3 @@ ensureDHARMa <- function(simulationOutput,
 }
 
 
-#' Ensures the existence of a valid predictor to plot residuals against
-#'
-#' @param simulationOutput a DHARMa simulation output or an object that can be converted into a DHARMa simulation output
-#' @param predictor an optional predictor. If no predictor is provided, will try to extract the fitted value
-#' @keywords internal
-ensurePredictor <- function(simulationOutput,
-                           predictor = NULL){
-  if(!is.null(predictor)){
-
-    if(length(predictor) != length(simulationOutput$scaledResiduals)) stop("DHARMa: residuals an predictor do not have the same length. The issue is possibly that you have NAs in your predictor that were removed during the model fit. Remove the NA values from your predictor.")
-  } else {
-
-    predictor = simulationOutput$fittedPredictedResponse
-    if(is.null(predictor)) stop("DHARMa: can't extract predictor from simulationOutput, and no predictor provided")
-  }
-  return(predictor)
-}
