@@ -254,7 +254,7 @@ plotResiduals <- function(simulationOutput, form = NULL, quantreg = NULL, rank =
       
     }
   }
-  return(out)
+  invisible(out)
 }
 
 
