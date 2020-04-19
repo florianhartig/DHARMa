@@ -15,6 +15,12 @@ Changes
 - syntax change for plotResiduals, see ?plotResiduals
 - nearly all functions can now also be called directly with a fitted model (for computational efficiency, however, it is still recommended to calculate the residuals first)
 
+Bugfixes
+
+- bugfix #158 for fitting glmmTMB binomial with proportions 
+- 
+
+
 DHARMa 0.2.7
 ============
 
