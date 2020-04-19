@@ -4,14 +4,14 @@
 \alias{plotResiduals}
 \title{Generic residual plot with either spline or quantile regression}
 \usage{
-plotResiduals(simulationOutput, predictor = NULL, quantreg = NULL,
-  rank = F, asFactor = NULL, smoothScatter = NULL, quantiles = c(0.25,
-  0.5, 0.75), ...)
+plotResiduals(simulationOutput, form = NULL, quantreg = NULL, rank = F,
+  asFactor = NULL, smoothScatter = NULL, quantiles = c(0.25, 0.5, 0.75),
+  ...)
 }
 \arguments{
-\item{simulationOutput}{usually a DHARMa object, from which residual values can be extracted. Alternatively, a vector with residuals or a fitted model can be provided, which will then be transformed into a DHARMa object}
+\item{simulationOutput}{on object, usually a DHARMa object, from which residual values can be extracted. Alternatively, a vector with residuals or a fitted model can be provided, which will then be transformed into a DHARMa object.}
 
-\item{predictor}{either the predictor variable against which the residuals should be plotted, or a DHARMa object, in which case res ~ pred is plotted}
+\item{form}{optional predictor against which the residuals should be plotted. Default is to used the predicted(simulationOutput)}
 
 \item{quantreg}{whether to perform a quantile regression on 0.25, 0.5, 0.75 on the residuals. If F, a spline will be created instead. Default NULL chooses T for nObs < 2000, and F otherwise.}
 

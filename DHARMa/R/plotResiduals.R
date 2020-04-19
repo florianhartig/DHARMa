@@ -127,8 +127,8 @@ plotQQunif <- function(simulationOutput, testUniformity = T, testOutliers = T, t
 #' 
 #' The function creates a generic residual plot with either spline or quantile regression to highlight patterns in the residuals. Outliers are highlighted in red
 #' 
-#' @param simulationOutput usually a DHARMa object, from which residual values can be extracted. Alternatively, a vector with residuals or a fitted model can be provided, which will then be transformed into a DHARMa object
-#' @param predictor either the predictor variable against which the residuals should be plotted, or a DHARMa object, in which case res ~ pred is plotted
+#' @param simulationOutput on object, usually a DHARMa object, from which residual values can be extracted. Alternatively, a vector with residuals or a fitted model can be provided, which will then be transformed into a DHARMa object.
+#' @param form optional predictor against which the residuals should be plotted. Default is to used the predicted(simulationOutput)  
 #' @param quantreg whether to perform a quantile regression on 0.25, 0.5, 0.75 on the residuals. If F, a spline will be created instead. Default NULL chooses T for nObs < 2000, and F otherwise. 
 #' @param rank if T, the values of pred will be rank transformed. This will usually make patterns easier to spot visually, especially if the distribution of the predictor is skewed. If pred is a factor, this has no effect. 
 #' @param asFactor should a numeric predictor be treated as a factor. Default is to choose this for < 10 unique predictions, as long as enough predictions are available to draw a boxplot.
@@ -150,7 +150,7 @@ plotQQunif <- function(simulationOutput, testUniformity = T, testOutliers = T, t
 #' @seealso \code{\link{plotQQunif}}
 #' @example inst/examples/plotsHelp.R
 #' @export
-plotResiduals <- function(simulationOutput, predictor = NULL, quantreg = NULL, rank = F, asFactor = NULL, smoothScatter = NULL, quantiles = c(0.25, 0.5, 0.75), ...){
+plotResiduals <- function(simulationOutput, form = NULL, quantreg = NULL, rank = F, asFactor = NULL, smoothScatter = NULL, quantiles = c(0.25, 0.5, 0.75), ...){
   
   
   ##### Checks #####
