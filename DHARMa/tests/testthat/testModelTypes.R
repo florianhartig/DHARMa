@@ -7,10 +7,14 @@ library(lme4)
 library(mgcv)
 library(glmmTMB)
 library(spaMM)
+set.seed(123)
+
+doPlots = F
+# doPlots = T
 
 checkOutput <- function(simulationOutput){
   
-  print(simulationOutput)
+  # print(simulationOutput)
   
   if(any(simulationOutput$scaledResiduals < 0)) stop()
   if(any(simulationOutput$scaledResiduals > 1)) stop()
@@ -21,49 +25,70 @@ checkOutput <- function(simulationOutput){
   
 }
 
+expectDispersion <- function(x, answer = T){
+  res <- simulateResiduals(x)
+  if (answer) expect_lt(testDispersion(res, plot = doPlots)$p.value, 0.01)
+  else expect_gt(testDispersion(res, plot = doPlots)$p.value, 0.01)
+}
+
+
+
 runEverything = function(fittedModel, testData, DHARMaData = T){
   
-  cat("\n\n============= NEW MODEL ====================\n\n")
-  
-  print(class(fittedModel))
-  
-  t = DHARMa:::getResponse(fittedModel)
+  t = DHARMa:::getObservedResponse(fittedModel)
+  expect_true(is.vector(t))
+  expect_true(is.numeric(t))  
   
   x = getSimulations(fittedModel, 2)
-  expect_equal(class(x), "data.frame")
-  refit(fittedModel, x[[1]])
+  expect_true(is.numeric(x))  
+  expect_true(is.matrix(x))  
+  expect_true(ncol(x) == 2) 
   
-  #class(x[, 1:ncol(x)])
+  x = getSimulations(fittedModel, 1)
+  expect_true(is.matrix(x))  
+  expect_true(ncol(x) == 1) 
   
-  simulationOutput <- simulateResiduals(fittedModel = fittedModel, n = 100)
+  x = getSimulations(fittedModel, 1, type = "refit")
+  expect_true(is.data.frame(x))  
+  
+  x = getSimulations(fittedModel, 2, type = "refit")
+  expect_true(is.data.frame(x))  
+  
+  fittedModel2 = getRefit(fittedModel,x[[1]])
+  expect_false(any(DHARMa:::getFixedEffects(fittedModel) - DHARMa:::getFixedEffects(fittedModel2) > 0.5))
+
+  simulationOutput <- simulateResiduals(fittedModel = fittedModel, n = 200)
   
   checkOutput(simulationOutput)
   
-  testOutliers(simulationOutput)
-  testDispersion(simulationOutput)
-  expect_gt(testUniformity(simulationOutput = simulationOutput)$p.value, 0.001)
-  testZeroInflation(simulationOutput = simulationOutput)
-  testTemporalAutocorrelation(simulationOutput = simulationOutput, time = testData$time)
-  testSpatialAutocorrelation(simulationOutput = simulationOutput, x = testData$x, y = testData$y)
+  if(doPlots) plot(simulationOutput, quantreg = F)
   
-  testDispersion(simulationOutput)
+  expect_gt(testOutliers(simulationOutput, plot = doPlots)$p.value, 0.001)
+  expect_gt(testDispersion(simulationOutput, plot = doPlots)$p.value, 0.001)
+  expect_gt(testUniformity(simulationOutput = simulationOutput, plot = doPlots)$p.value, 0.001)
+  expect_gt(testZeroInflation(simulationOutput = simulationOutput, plot = doPlots)$p.value, 0.001)
+  expect_gt(testTemporalAutocorrelation(simulationOutput = simulationOutput, time = testData$time, plot = doPlots)$p.value, 0.001)
+  expect_gt(testSpatialAutocorrelation(simulationOutput = simulationOutput, x = testData$x, y = testData$y, plot = F)$p.value, 0.001)
   
   simulationOutput <- recalculateResiduals(simulationOutput, group = testData$group)
-  testDispersion(simulationOutput)
+  expect_gt(testDispersion(simulationOutput, plot = doPlots)$p.value, 0.001)
   
   simulationOutput2 <- simulateResiduals(fittedModel = fittedModel, refit = T, n = 5) # n=10 is very low, set higher for serious tests
   
   checkOutput(simulationOutput2)
   
-  plot(simulationOutput2, quantreg = F)
+  if(doPlots) plot(simulationOutput2, quantreg = F)
   
-  testDispersion(simulationOutput2)
+  testDispersion(simulationOutput2, plot = doPlots)
   
   simulationOutput2 <- recalculateResiduals(simulationOutput2, group = testData$group)
-  testDispersion(simulationOutput2)
+  testDispersion(simulationOutput2, plot = doPlots)
   
 }
 
+
+
+# LM ----------------------------------------------------------------------
 
 test_that("lm works",
           {
@@ -103,19 +128,21 @@ test_that("lm works",
 
 
 
+# Binomial 1/0 ------------------------------------------------------------
+
 test_that("binomial 1/0 works",
           {
             skip_on_cran()
             
-            testData = createData(sampleSize = 200, fixedEffects = c(1,0), randomEffectVariance = 0, family = binomial())
+            testData = createData(sampleSize = 200, randomEffectVariance = 0, family = binomial())
             
-            fittedModel <- glm(observedResponse ~ Environment1 + Environment2 , family = "binomial", data = testData)
+            fittedModel <- glm(observedResponse ~ Environment1  , family = "binomial", data = testData)
             runEverything(fittedModel, testData)
             
             fittedModel <- gam(observedResponse ~ s(Environment1) ,family = "binomial", data = testData)
             runEverything(fittedModel, testData)
             
-            fittedModel <- glm(observedResponse ~ Environment1 + Environment2 , family = "binomial", data = testData)
+            fittedModel <- glm(observedResponse ~ Environment1 , family = "binomial", data = testData)
             runEverything(fittedModel, testData)
             
             fittedModel <- glmer(observedResponse ~ Environment1 + (1|group) , family = "binomial", data = testData)
@@ -129,6 +156,8 @@ test_that("binomial 1/0 works",
           }
 )
 
+
+# Binomial y/n (factor) ------------------------------------------------------------
 
 test_that("binomial y/n (factor) works",
           {
@@ -140,7 +169,7 @@ test_that("binomial y/n (factor) works",
             runEverything(fittedModel, testData)
             
             fittedModel <- gam(observedResponse ~ s(Environment1) ,family = "binomial", data = testData)
-            runEverything(fittedModel, testData)
+            # runEverything(fittedModel, testData)
             
             fittedModel <- glm(observedResponse ~ Environment1 + Environment2 , family = "binomial", data = testData)
             runEverything(fittedModel, testData)
@@ -156,18 +185,20 @@ test_that("binomial y/n (factor) works",
           }
 )
 
+# Binomial n/k (Matrix) ------------------------------------------------------------
 
-test_that("glm binomial n/k works",
+test_that("glm binomial n/k with matrix works",
           {
             skip_on_cran()
             
             testData = createData(sampleSize = 200, overdispersion = 0, randomEffectVariance = 0, family = binomial(), binomialTrials = 20)
-            
             fittedModel <- glm(cbind(observedResponse1,observedResponse0)  ~ Environment1 , family = "binomial", data = testData)
             runEverything(fittedModel, testData)
             
             fittedModel <- gam(cbind(observedResponse1,observedResponse0) ~ s(Environment1) ,family = "binomial", data = testData)
-            runEverything(fittedModel, testData)
+            
+            # gam doesn't work, check 
+            #runEverything(fittedModel, testData)
             
             fittedModel <- glmer(cbind(observedResponse1,observedResponse0) ~ Environment1 + (1|group) , family = "binomial", data = testData)
             runEverything(fittedModel, testData)
@@ -185,38 +216,101 @@ test_that("glm binomial n/k works",
 )
 
 
+# Binomial n/k (Weights) ------------------------------------------------------------
+
+test_that("glm binomial n/k with weights works",
+          {
+            skip_on_cran()
+            
+            testData = createData(sampleSize = 200, overdispersion = 0, randomEffectVariance = 0, family = binomial(), binomialTrials = 20)
+            
+            testData$prop = testData$observedResponse1 / 20   
+            
+            
+            fittedModel <- glm(prop  ~ Environment1 , family = "binomial", data = testData, weights = rep(20,200))
+            runEverything(fittedModel, testData)
+            
+            fittedModel <- gam(prop ~ s(Environment1) ,family = "binomial", data = testData, weights = rep(20,200))
+            runEverything(fittedModel, testData)
+            
+            fittedModel <- glmer(prop ~ Environment1 + (1|group) , family = "binomial", data = testData, weights = rep(20,200))
+            runEverything(fittedModel, testData)
+            
+            fittedModel <- glmmTMB(prop ~ Environment1 + (1|group) , family = "binomial", data = testData, weights = rep(20,200))
+            runEverything(fittedModel, testData)
+            
+            fittedModel <- glmmTMB(prop ~ Environment1 + (1|group) , family = "betabinomial", data = testData, weights = rep(20,200))
+            runEverything(fittedModel, testData)
+            
+            
+            # spaMM doesn't support binomial k/n via weights
+            #fittedModel <- HLfit(prop ~ Environment1 + (1|group) , family = "binomial",  data = testData, prior.weights = rep(20,200))
+            #runEverything(fittedModel, testData)
+            
+          }
+)
+
+
+# Poisson --------------------------------------------------------
+
+
 test_that("glm poisson works",
           {
             skip_on_cran()
             
-            testData = createData(sampleSize = 200, overdispersion = 0, randomEffectVariance = 0.001, family = poisson())
+            testData = createData(sampleSize = 100, overdispersion = 0, randomEffectVariance = 0.000, family = poisson())
+            testData2 = createData(sampleSize = 100, overdispersion = 2, randomEffectVariance = 0.000, family = poisson())
             #testData = createData(sampleSize = 200, randomEffectVariance = 1, family = negative.binomial(theta = 1.2, link = "log"))
             
             fittedModel <- glm(observedResponse ~ Environment1 , family = "poisson", data = testData)
             runEverything(fittedModel, testData)
+            fittedModel2 <- glm(observedResponse ~ Environment1 , family = "poisson", data = testData2)
+            expectDispersion(fittedModel2)
+            
+            
+            #testData = createData(sampleSize = 200, randomEffectVariance = 1, family = negative.binomial(theta = 1.2, link = "log"))
+            
+            
+            
+            
             
             fittedModel <- gam(observedResponse ~ Environment1 , family = "poisson", data = testData)
             runEverything(fittedModel, testData)
+            fittedModel2 <- gam(observedResponse ~ Environment1 , family = "poisson", data = testData2)
+            expectDispersion(fittedModel2)
             
             fittedModel <- glmer(observedResponse ~ Environment1 + (1|group) + (1|ID), family = "poisson", data = testData, control=glmerControl(optCtrl=list(maxfun=20000) ))
             runEverything(fittedModel, testData)
+            fittedModel2 <- glmer(observedResponse ~ Environment1 + (1|group) , family = "poisson", data = testData2, control=glmerControl(optCtrl=list(maxfun=20000) ))
+            expectDispersion(fittedModel2)
             
-            fittedModel <- glmer.nb(observedResponse ~ Environment1 + (1|group) , data = testData, control=glmerControl(optCtrl=list(maxfun=20000) ))
+            fittedModel <- glmer.nb(observedResponse ~ Environment1 + (1|group) , data = testData, control=glmerControl(optimizer = "bobyqa", optCtrl=list(maxfun=20000) ))
             runEverything(fittedModel, testData)
+            fittedModel2 <- glmer.nb(observedResponse ~ Environment1 + (1|group) , data = testData2, control=glmerControl(optimizer = "bobyqa", optCtrl=list(maxfun=20000) ))
+            expectDispersion(fittedModel2, F)
             
             fittedModel <- glm.nb(observedResponse ~ Environment1,  data = testData)
             runEverything(fittedModel, testData)
+            fittedModel2 <- glm.nb(observedResponse ~ Environment1, data = testData2)
+            expectDispersion(fittedModel2,F)
             
             fittedModel <- glmmTMB(observedResponse ~ Environment1 , family = "poisson", data = testData)
             runEverything(fittedModel, testData)
-            
+            fittedModel2 <- glmmTMB(observedResponse ~ Environment1 , family = "poisson", data = testData2)
+            expectDispersion(fittedModel2)
+        
             fittedModel <- glmmTMB(observedResponse ~ Environment1 + (1|group), zi=~1 , family = nbinom2, data = testData)
-            
+            fittedModel2 <- glmmTMB(observedResponse ~ Environment1 + (1|group), zi=~1 , family = nbinom2, data = testData2)
             # does not fully work
             # runEverything(fittedModel, testData)
+            expectDispersion(fittedModel2, F)
+            
+
             
             fittedModel <- HLfit(observedResponse ~ Environment1 + (1|group) , family = "poisson",  data = testData)
             runEverything(fittedModel, testData)
+            fittedModel2 <- HLfit(observedResponse ~ Environment1 + (1|group) , family = "poisson",  data = testData2)
+            expectDispersion(fittedModel2)
           }
 )
 

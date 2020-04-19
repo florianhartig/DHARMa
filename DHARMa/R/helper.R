@@ -25,7 +25,7 @@ DHARMa.ecdf <- function (x)
 #' @keywords internal
 getQuantile <- function(simulations, observed, n, nSim, integerResponse, seed){
 
-  scaledResiduals = rep(NA, n)
+
   
   if(integerResponse == F){
     
@@ -42,11 +42,11 @@ getQuantile <- function(simulations, observed, n, nSim, integerResponse, seed){
       
     }
   } 
-  
+
+  scaledResiduals = rep(NA, n)  
   for (i in 1:n){
     if(integerResponse == T){
       scaledResiduals[i] <- DHARMa.ecdf(simulations[i,] + runif(nSim, -0.5, 0.5))(observed[i] + runif(1, -0.5, 0.5))
-      
     }else{
       scaledResiduals[i] <- DHARMa.ecdf(simulations[i,])(observed[i])
     }
@@ -87,3 +87,11 @@ checkDots <- function(name, value, ...) {
     return(args[[name]])
   }
 }
+
+
+securityAssertion <- function(context = "Not provided", stop = F){
+  generalMessage = "Message from DHARMa: During the execution of a DHARMa function, some unexpected conditions occurred. Even if you didn't get an error, your results may not be reliable. Please check with the help if you use the functions as intended. If you think that the error is not on your side, I would be grateful if you could report the problem at https://github.com/florianhartig/DHARMa/issues \n\n Context:"
+  if (stop == F) warning(paste(generalMessage, context))  
+  else stop(paste(generalMessage, context))  
+}
+
