@@ -79,15 +79,17 @@ getSimulations.default <- function (object, nsim = 1, type = c("normal", "refit"
           warning("The fitted model has a factorial response with number of levels not equal to 2 - there is currently no sensible application in DHARMa that would lead to this situation. Likely, you are trying something that doesn't work.")
         } 
         else{
-          out = as.numeric(out) - 1      
+          out = data.matrix(out) - 1
         }
-      } else securityAssertion("Simulation results produced unsupported data structure for a binomial model", stop = TRUE)   
+      } 
     } 
     
-    if(is.vector(out[[1]])){
-      out = data.matrix(out)
-    }     
-  } 
+    if(!is.matrix(out)) out = data.matrix(out)
+  } else{
+    if(family(object)$family %in% c("binomial", "betabinomial")){
+      if (!is.matrix(out[[1]]) & !is.numeric(out)) data.frame(data.matrix(out)-1)
+    }
+  }
   
   return(out)
 }
@@ -151,7 +153,7 @@ getFitted <- function (object, ...) {
 
 #' @export
 getRefit.default <- function (object,...){
-  fitted(object, ...)
+  refit(object, ...)
 }
 
 #' Check weights
@@ -247,7 +249,7 @@ getFitted.gam <- function(object, ...){
 ######## glmmTMB ######
 
 
-# glmmTMB 1.0 has a refit function, but this didn't work, so I switched back to this one ... should be solved ideally, see https://github.com/glmmTMB/glmmTMB/issues/549
+# 
 
 
 #' Refit a Model with a Different Response
@@ -256,25 +258,22 @@ getFitted.gam <- function(object, ...){
 #' @param newresp a new response
 #' @param ... further arguments, no effect implemented for this S3 class
 #' @example inst/examples/helpRefit.R
+#' 
+#' @note since glmmTMB 1.0 has a refit function, but this didn't work, so I switched back to this implementation, which is a hack based on the update function.
+#' 
 #' @export
 getRefit.glmmTMB <- function(object, newresp, ...){
+  newData <-model.frame(object)    
   
-  newData <-model.frame(object)  
-  
-  matrixResp = is.matrix(newData[[1]])
-  
-  if(matrixResp & !is.null(ncol(newresp))){
-    # Hack to make the factor binomial case work
+  # hack to make update work - for some reason, glmmTMB wants the matrix embedded in the df for update to work  ... should be solved ideally, see https://github.com/glmmTMB/glmmTMB/issues/549
+  if(is.matrix(newresp)){
     tmp = colnames(newData[[1]])
     newData[[1]] = NULL
     newData = cbind(newresp, newData)
-    colnames(newData)[1:2] = tmp
-  } else if(!is.null(ncol(newresp))){
-    newData[[1]] = newresp[,1]
+    colnames(newData)[1:2] = tmp    
   } else {
-    newData[[1]] = newresp 
+    newData[[1]] = newresp
   }
-  
   refittedModel = update(object, data = newData)
   return(refittedModel)
 }
@@ -295,8 +294,43 @@ getSimulations.glmmTMB <- function (object, nsim = 1, type = c("normal", "refit"
       # this is for the k/n binomial case
       out = as.matrix(out)[,seq(1, (2*nsim), by = 2)]
     } 
-    if(is.vector(out[[1]])) out = data.matrix(out)
+    if(!is.matrix(out)) out = data.matrix(out)
   }else{
+    
+    # check for weights in k/n case
+    if(family(object)$family %in% c("binomial", "betabinomial")){
+      if("(weights)" %in% colnames(model.frame(object))){
+        w = model.frame(object)
+        w = w$`(weights)`
+        tmp <- function(x)x/w
+        out = apply(out, 2, tmp)
+        out = as.data.frame(out)
+      }
+      else if(is.matrix(out[[1]]) & !is.matrix(model.frame(object)[[1]])){
+        out = as.data.frame(as.matrix(out)[,seq(1, (2*nsim), by = 2)])
+      }
+    }
+       
+       
+       
+
+    
+    
+    # matrixResp = 
+    # 
+    # if(matrixResp & !is.null(ncol(newresp))){
+    #   # Hack to make the factor binomial case work
+    #   tmp = colnames(newData[[1]])
+    #   newData[[1]] = NULL
+    #   newData = cbind(newresp, newData)
+    #   colnames(newData)[1:2] = tmp
+    # } else if(!is.null(ncol(newresp))){
+    #   newData[[1]] = newresp[,1]
+    # } else {
+    #   newData[[1]] = newresp 
+    # }
+    
+    
     # if (out$modelClass == "glmmTMB" & ncol(simulations) == 2*n) simObserved = simulations[,(1+(2*(i-1))):(2+(2*(i-1)))]    
   }
   
@@ -312,22 +346,29 @@ getSimulations.glmmTMB <- function (object, nsim = 1, type = c("normal", "refit"
 getObservedResponse.HLfit <- function(object, ...){
   out = response(object, ...)
 
-  nKcase = is.matrix(out$observedResponse)
+  nKcase = is.matrix(out)
   if(nKcase){
     if(! (family(object) %in% c("binomial", "betabinomial"))) securityAssertion("nKcase - wrong family")
     if(! (ncol(out)==2)) securityAssertion("nKcase - wrong dimensions of response")
     out = out[,1]
   }
+  
+  if(!is.numeric(out)) out = as.numeric(out) 
+  
   return(out)
   
 }
 
 #' @export
-getSimulations.HLfit <- function(object, type = c("normal", "refit"), ...){
+getSimulations.HLfit <- function(object, nsim = 1, type = c("normal", "refit"), ...){
 
   type <- match.arg(type)
-  out = simulate(object, ...)
-  if(type == "refit"){
+  
+  capture.output({out = simulate(object, nsim = nsim, ...)})
+  
+  if(type == "normal"){
+    if(!is.matrix(out)) out = data.matrix(out)
+  }else{
     out = as.data.frame(out)
   }
   return(out)

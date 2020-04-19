@@ -251,10 +251,10 @@ recalculateResiduals <- function(simulationOutput, group = NULL, aggregateBy = s
   
   out$observedResponse = aggregateByGroup(simulationOutput$observedResponse)
   out$fittedPredictedResponse = aggregateByGroup(simulationOutput$fittedPredictedResponse)
-  out$simulatedResponse = apply(simulationOutput$simulatedResponse, 2, aggregateByGroup)
-  
+
   if (simulationOutput$refit == F){
     
+    out$simulatedResponse = apply(simulationOutput$simulatedResponse, 2, aggregateByGroup)
     out$scaledResiduals = getQuantile(simulations = out$simulatedResponse , observed = out$observedResponse , n = out$nGroups, nSim = simulationOutput$nSim, integerResponse = simulationOutput$integerResponse)
  
   ######## refit = T ##################   

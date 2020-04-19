@@ -83,6 +83,10 @@ getObservedResponse(gamWeights)
 getSimulations(tmpMatrix, 1)
 getSimulations(tmbWeights)
 
+getSimulations(tmpMatrix, 1, type = "refit")
+getSimulations(tmbWeights, 1, type = "refit")
+
+
 getSimulations(lme4Matrix)
 getSimulations(lme4Weights)
 

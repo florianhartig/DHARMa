@@ -16,6 +16,9 @@
 \description{
 Refit a Model with a Different Response
 }
+\note{
+since glmmTMB 1.0 has a refit function, but this didn't work, so I switched back to this implementation, which is a hack based on the update function.
+}
 \examples{
 testData = createData(sampleSize = 200, family = poisson())
 
