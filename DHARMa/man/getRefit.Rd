@@ -2,20 +2,58 @@
 % Please edit documentation in R/compatibility.R
 \name{getRefit}
 \alias{getRefit}
+\alias{getRefit.default}
+\alias{getRefit.lm}
+\alias{getRefit.glmmTMB}
+\alias{getRefit.HLfit}
 \title{Get model refit}
 \usage{
 getRefit(object, newresp, ...)
+
+\method{getRefit}{default}(object, newresp, ...)
+
+\method{getRefit}{lm}(object, newresp, ...)
+
+\method{getRefit}{glmmTMB}(object, newresp, ...)
+
+\method{getRefit}{HLfit}(object, newresp, ...)
 }
 \arguments{
 \item{object}{a fitted model}
 
-\item{...}{additional parameters to be passed on, usually to the simulate function of the respective model class}
+\item{newresp}{the new response that should be used to refit the model}
+
+\item{...}{additional parameters to be passed on to the refit or update class that is used to refit the model}
 }
 \description{
 Wrapper to refit a fitted model
 }
 \details{
-The purpose of this wrapper is to standardize the refit of a model
+The purpose of this wrapper is to standardize the refit of a model. The behavior of this function depends on the supplied model. When available, it uses the refit method, otherwise it will use update. For glmmTMB: since version 1.0, glmmTMB has a refit function, but this didn't work, so I switched back to this implementation, which is a hack based on the update function.
+}
+\examples{
+testData = createData(sampleSize = 400, family = gaussian())
+
+fittedModel <- lm(observedResponse ~ Environment1 , data = testData)
+
+# response that was used to fit the model
+getObservedResponse(fittedModel)
+
+# predictions of the model for these points
+getFitted(fittedModel)
+
+# extract simulations from the model as matrix
+getSimulations(fittedModel, nsim = 2)
+
+# extract simulations from the model for refit (often requires different structure)
+x = getSimulations(fittedModel, nsim = 2, type = "refit")
+
+getRefit(fittedModel, x[[1]])
+
+getRefit(fittedModel, getObservedResponse(fittedModel))
+}
+\seealso{
+\code{\link{getObservedResponse}}, \code{\link{getSimulations}}, \code{\link{getFixedEffects}}
 }
 \author{
 Florian Hartig

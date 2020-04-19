@@ -2,18 +2,27 @@
 % Please edit documentation in R/compatibility.R
 \name{getSimulations}
 \alias{getSimulations}
+\alias{getSimulations.default}
+\alias{getSimulations.glmmTMB}
+\alias{getSimulations.HLfit}
 \title{Get model simulations}
 \usage{
 getSimulations(object, nsim = 1, type = c("normal", "refit"), ...)
+
+\method{getSimulations}{default}(object, nsim = 1, type = c("normal", "refit"), ...)
+
+\method{getSimulations}{glmmTMB}(object, nsim = 1, type = c("normal", "refit"), ...)
+
+\method{getSimulations}{HLfit}(object, nsim = 1, type = c("normal", "refit"), ...)
 }
 \arguments{
 \item{object}{a fitted model}
 
+\item{nsim}{number of simulations}
+
 \item{type}{if simulations should be prepared for getQuantile or for refit}
 
 \item{...}{additional parameters to be passed on, usually to the simulate function of the respective model class}
-
-\item{nsin}{number of simulations}
 }
 \value{
 a matrix with simulations
@@ -23,6 +32,30 @@ Wrapper to simulate from a fitted model
 }
 \details{
 The purpose of this wrapper for for the simulate function is to standardize the simulations from a model in a standardized way
+}
+\examples{
+testData = createData(sampleSize = 400, family = gaussian())
+
+fittedModel <- lm(observedResponse ~ Environment1 , data = testData)
+
+# response that was used to fit the model
+getObservedResponse(fittedModel)
+
+# predictions of the model for these points
+getFitted(fittedModel)
+
+# extract simulations from the model as matrix
+getSimulations(fittedModel, nsim = 2)
+
+# extract simulations from the model for refit (often requires different structure)
+x = getSimulations(fittedModel, nsim = 2, type = "refit")
+
+getRefit(fittedModel, x[[1]])
+
+getRefit(fittedModel, getObservedResponse(fittedModel))
+}
+\seealso{
+\code{\link{getObservedResponse}}, \code{\link{getRefit}}, \code{\link{getFixedEffects}}, \code{\link{getFitted}}
 }
 \author{
 Florian Hartig

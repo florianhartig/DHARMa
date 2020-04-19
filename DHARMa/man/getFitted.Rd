@@ -2,9 +2,15 @@
 % Please edit documentation in R/compatibility.R
 \name{getFitted}
 \alias{getFitted}
+\alias{getFitted.default}
+\alias{getFitted.gam}
 \title{Get model fitted}
 \usage{
 getFitted(object, ...)
+
+\method{getFitted}{default}(object, ...)
+
+\method{getFitted}{gam}(object, ...)
 }
 \arguments{
 \item{object}{a fitted model}
@@ -16,6 +22,30 @@ Wrapper to get the fitted value a fitted model
 }
 \details{
 The purpose of this wrapper is to standardize extract the fitted values
+}
+\examples{
+testData = createData(sampleSize = 400, family = gaussian())
+
+fittedModel <- lm(observedResponse ~ Environment1 , data = testData)
+
+# response that was used to fit the model
+getObservedResponse(fittedModel)
+
+# predictions of the model for these points
+getFitted(fittedModel)
+
+# extract simulations from the model as matrix
+getSimulations(fittedModel, nsim = 2)
+
+# extract simulations from the model for refit (often requires different structure)
+x = getSimulations(fittedModel, nsim = 2, type = "refit")
+
+getRefit(fittedModel, x[[1]])
+
+getRefit(fittedModel, getObservedResponse(fittedModel))
+}
+\seealso{
+\code{\link{getObservedResponse}}, \code{\link{getSimulations}}, \code{\link{getRefit}}, \code{\link{getFixedEffects}}
 }
 \author{
 Florian Hartig

@@ -10,12 +10,16 @@
 #' @param object a fitted model
 #' @param ... additional parameters 
 #' 
+#' @example inst/examples/wrappersHelp.R
+#' 
+#' @seealso \code{\link{getRefit}}, \code{\link{getSimulations}}, \code{\link{getFixedEffects}}, \code{\link{getFitted}}
 #' @author Florian Hartig
 #' @export
 getObservedResponse <- function (object, ...) {
   UseMethod("getObservedResponse", object)
 }
 
+#' @rdname getObservedResponse
 #' @export
 getObservedResponse.default <- function (object, ...){
   out = model.frame(object)[,1] 
@@ -47,18 +51,21 @@ getObservedResponse.default <- function (object, ...){
 #' The purpose of this wrapper for for the simulate function is to standardize the simulations from a model in a standardized way
 #' 
 #' @param object a fitted model
-#' @param nsin number of simulations
+#' @param nsim number of simulations
 #' @param type if simulations should be prepared for getQuantile or for refit
 #' @param ... additional parameters to be passed on, usually to the simulate function of the respective model class
 #' 
 #' @return a matrix with simulations
+#' @example inst/examples/wrappersHelp.R
 #' 
+#' @seealso \code{\link{getObservedResponse}}, \code{\link{getRefit}}, \code{\link{getFixedEffects}}, \code{\link{getFitted}}
 #' @author Florian Hartig
 #' @export
 getSimulations <- function (object, nsim = 1 , type = c("normal", "refit"), ...) {
   UseMethod("getSimulations", object)
 }
 
+#' @rdname getSimulations
 #' @export
 getSimulations.default <- function (object, nsim = 1, type = c("normal", "refit"), ...){
   
@@ -99,6 +106,17 @@ getSimulations.default <- function (object, nsim = 1, type = c("normal", "refit"
 #' @importFrom lme4 fixef 
 NULL
 
+
+#' Extract fixed effects of a supported model
+#' 
+#' A wrapper to extract fixed effects of a supported model
+#' 
+#' @param fittedModel a fitted model
+#' 
+#' @example inst/examples/wrappersHelp.R
+#' 
+#' @seealso \code{\link{getObservedResponse}}, \code{\link{getSimulations}}, \code{\link{getRefit}}, \code{\link{getFitted}}
+#' @export
 getFixedEffects <- function(fittedModel){
   
   if(class(fittedModel)[1] %in% c("glm", "lm", "gam", "bam", "negbin") ){
@@ -119,17 +137,22 @@ getFixedEffects <- function(fittedModel){
 #' 
 #' Wrapper to refit a fitted model
 #' 
-#' The purpose of this wrapper is to standardize the refit of a model
-#' 
 #' @param object a fitted model
-#' @param ... additional parameters to be passed on, usually to the simulate function of the respective model class
+#' @param newresp the new response that should be used to refit the model
+#' @param ... additional parameters to be passed on to the refit or update class that is used to refit the model
 #' 
+#' @details The purpose of this wrapper is to standardize the refit of a model. The behavior of this function depends on the supplied model. When available, it uses the refit method, otherwise it will use update. For glmmTMB: since version 1.0, glmmTMB has a refit function, but this didn't work, so I switched back to this implementation, which is a hack based on the update function.
+#' 
+#' @example inst/examples/wrappersHelp.R
+#' 
+#' @seealso \code{\link{getObservedResponse}}, \code{\link{getSimulations}}, \code{\link{getFixedEffects}}
 #' @author Florian Hartig
 #' @export
 getRefit <- function (object, newresp, ...) {
   UseMethod("getRefit", object)
 }
 
+#' @rdname getRefit
 #' @export
 getRefit.default <- function (object, newresp, ...){
   refit(object, newresp, ...)
@@ -145,15 +168,20 @@ getRefit.default <- function (object, newresp, ...){
 #' @param object a fitted model
 #' @param ... additional parameters to be passed on, usually to the simulate function of the respective model class
 #' 
+#' @example inst/examples/wrappersHelp.R
+#' 
+#' @seealso \code{\link{getObservedResponse}}, \code{\link{getSimulations}}, \code{\link{getRefit}}, \code{\link{getFixedEffects}}
+#' 
 #' @author Florian Hartig
 #' @export
 getFitted <- function (object, ...) {
   UseMethod("getFitted", object)
 }
 
+#' @rdname getFitted
 #' @export
-getRefit.default <- function (object,...){
-  refit(object, ...)
+getFitted.default <- function (object,...){
+  fitted(object, ...)
 }
 
 #' Check weights
@@ -188,12 +216,7 @@ hasNA <- function(fittedModel){
 
 ######### LM #############
 
-#' Refit a Model with a Different Response
-#' 
-#' @param object a fitted model
-#' @param newresp a new response
-#' @param ... further arguments, no effect implemented for this S3 class
-#' @example inst/examples/helpRefit.R
+#' @rdname getRefit
 #' @export
 getRefit.lm <- function(object, newresp, ...){
   
@@ -227,12 +250,9 @@ hasWeigths.lm <- function(object, ...){
 
 ######## MGCV ############
 
-#' 
-#' 
-#' This function overwrites the standard fitted function for GAM
-#' @note See explanation at 
-#' @param object fitted model
-#' @param ... arguments to be passed on to stats::fitted
+# This function overwrites the standard fitted function for GAM
+
+#' @rdname getFitted
 #' @export
 getFitted.gam <- function(object, ...){
   class(object) = "glm"
@@ -248,19 +268,7 @@ getFitted.gam <- function(object, ...){
 
 ######## glmmTMB ######
 
-
-# 
-
-
-#' Refit a Model with a Different Response
-#' 
-#' @param object a fitted model
-#' @param newresp a new response
-#' @param ... further arguments, no effect implemented for this S3 class
-#' @example inst/examples/helpRefit.R
-#' 
-#' @note since glmmTMB 1.0 has a refit function, but this didn't work, so I switched back to this implementation, which is a hack based on the update function.
-#' 
+#' @rdname getRefit
 #' @export
 getRefit.glmmTMB <- function(object, newresp, ...){
   newData <-model.frame(object)    
@@ -282,6 +290,7 @@ getRefit.glmmTMB <- function(object, newresp, ...){
 # glmmTMB simulates normal counts (and not proportions in any case, so the check for the other models is not needed), see #158
 # note that if observation is factor - unlike lme4 and older, glmmTMB simulates nevertheless as numeric
 
+#' @rdname getSimulations
 #' @export
 getSimulations.glmmTMB <- function (object, nsim = 1, type = c("normal", "refit"), ...){
   
@@ -341,6 +350,7 @@ getSimulations.glmmTMB <- function (object, nsim = 1, type = c("normal", "refit"
 
 #######  spaMM #########
 
+#' @rdname getObservedResponse
 #' @export
 #' @importFrom spaMM response 
 getObservedResponse.HLfit <- function(object, ...){
@@ -359,6 +369,7 @@ getObservedResponse.HLfit <- function(object, ...){
   
 }
 
+#' @rdname getSimulations
 #' @export
 getSimulations.HLfit <- function(object, nsim = 1, type = c("normal", "refit"), ...){
 
@@ -374,6 +385,7 @@ getSimulations.HLfit <- function(object, nsim = 1, type = c("normal", "refit"), 
   return(out)
 }
 
+#' @rdname getRefit
 #' @export
 #' @importFrom spaMM update_resp 
 getRefit.HLfit <- function(object, newresp, ...) {
