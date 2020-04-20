@@ -8,7 +8,7 @@ output:
 vignette: >
   %\VignetteIndexEntry{Vignette for the DHARMa package}
   %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}
+  \usepackage[utf8]{inputenc}
 abstract: "The 'DHARMa' package uses a simulation-based approach to create  readily interpretable scaled (quantile) residuals for fitted (generalized) linear mixed models. Currently supported are linear and generalized linear (mixed) models from 'lme4' (classes 'lmerMod', 'glmerMod'), 'glmmTMB' and 'spaMM', generalized additive models ('gam' from 'mgcv'), 'glm' (including 'negbin' from 'MASS', but excluding quasi-distributions) and 'lm' model classes. Moreover, externally created simulations, e.g. posterior predictive simulations from Bayesian software such as 'JAGS', 'STAN', or 'BUGS' can be processed as well. The resulting residuals are standardized to values between 0 and 1 and can be interpreted as intuitively as residuals from a linear regression. The package also provides a number of plot and test functions for typical model misspecification problems, such as over/underdispersion, zero-inflation, and residual spatial and temporal autocorrelation. \n \n \n"
 editor_options: 
   chunk_output_type: console
@@ -78,9 +78,9 @@ I currently prepare a more exact statistical justification for the approach in a
 
 * Gelman, A. & Hill, J. Data analysis using regression and multilevel/hierarchical models Cambridge University Press, 2006
 
-p.s.: DHARMa stands for “Diagnostics for HierArchical Regression Models” – which, strictly speaking, would make DHARM. But in German, Darm means intestines; plus, the meaning of DHARMa in Hinduism makes the current abbreviation so much more suitable for a package that tests whether your model is in harmony with your data:
+p.s.: DHARMa stands for "Diagnostics for HierArchical Regression Models" - which, strictly speaking, would make DHARM. But in German, Darm means intestines; plus, the meaning of DHARMa in Hinduism makes the current abbreviation so much more suitable for a package that tests whether your model is in harmony with your data:
 
-> From Wikipedia, 28/08/16: In Hinduism, dharma signifies behaviours that are considered to be in accord with rta, the order that makes life and universe possible, and includes duties, rights, laws, conduct, virtues and ‘‘right way of living’’.
+> From Wikipedia, 28/08/16: In Hinduism, dharma signifies behaviours that are considered to be in accord with rta, the order that makes life and universe possible, and includes duties, rights, laws, conduct, virtues and 'right way of living'.
 
 # Workflow in DHARMa
 
@@ -553,7 +553,7 @@ The usual caveats for Moran.I apply, in particular that it may miss non-local an
 
 ## Budworm example (count-proportion n/k binomial)
 
-This example comes from [Jochen Fründ](https://jochenfruend.wordpress.com/). Measured are the number of parasitized observations, with population density as a covariate
+This example comes from [Jochen Fruend](https://jochenfruend.wordpress.com/). Measured are the number of parasitized observations, with population density as a covariate
 
 ```{r, echo = F}
 data = structure(list(N_parasitized = c(226, 689, 481, 960, 1177, 266, 
