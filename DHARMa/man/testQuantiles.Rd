@@ -46,7 +46,7 @@ fittedModel <- glm(observedResponse ~ 1 , family = "poisson", data = testData)
 simulationOutput <- simulateResiduals(fittedModel = fittedModel)
 testQuantiles(simulationOutput, predictor = testData$Environment1)
 
-# the test is automatically performed in 
+# the quantile test is automatically performed in 
 \dontrun{
 plot(simulationOutput)
 plotResiduals(simulationOutput)
