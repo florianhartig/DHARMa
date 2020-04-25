@@ -23,10 +23,10 @@ simulateResiduals(fittedModel, n = 250, refit = F, integerResponse = NULL,
 \item{...}{parameters to pass to the simulate function of the model object. An important use of this is to specify whether simulations should be conditional on the current random effect estimates, e.g. via re.form. Note that not all models support syntax to specify conditionao or unconditional simulations. See also details}
 }
 \value{
-An S3 class of type "DHARMa", essentially a list with various elements. Implemented S3 functions include plot, print and \code{\link{residuals.DHARMa}}. Residuals returns the calculated scaled residuals.
+An S3 class of type "DHARMa", essentially a list with various elements. Residuals can be extracted with \code{\link{residuals.DHARMa}}. The two main plot functions are \code{\link{plot.DHARMa}}, \code{\link{plotResiduals}}. For a list of further plot functions and tests, see the help.
 }
 \description{
-The function creates scaled residuals by simulating from the fitted model
+The function creates scaled residuals by simulating from the fitted model.
 }
 \details{
 There are a number of important considerations when simulating from a more complex (hierarchical) model: 
@@ -92,5 +92,5 @@ plot(simulationOutput, quantreg = FALSE)
 
 }
 \seealso{
-\code{\link{testResiduals}}, \code{\link{plot.DHARMa}}, \code{\link{print.DHARMa}}, \code{\link{residuals.DHARMa}}, \code{\link{recalculateResiduals}}
+\code{\link{testResiduals}}, \code{\link{plot.DHARMa}}, \code{\link{plotResiduals}}, \code{\link{print.DHARMa}}, \code{\link{residuals.DHARMa}}, \code{\link{recalculateResiduals}}
 }

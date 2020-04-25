@@ -1,6 +1,7 @@
 #' Create simulated residuals
 #' 
-#' The function creates scaled residuals by simulating from the fitted model
+#' The function creates scaled residuals by simulating from the fitted model. Residuals can be extracted with \code{\link{residuals.DHARMa}}. See \code{\link{testResiduals}} for an overview of residual tests, \code{\link{plot.DHARMa}} for an overview of available plots. 
+#' 
 #' @param fittedModel a fitted model  of a class supported by DHARMa
 #' @param n number of simulations. Default is 100. A more save value would be 250 or even 1000. The smaller the number, the higher the stochastic error on the residuals. Also, for very small n, discretization artefacts can influence the tests. 
 #' @param refit if FALSE, new data will be simulated and scaled residuals will be created by comparing observed data with new data. If TRUE, the model will be refit on the simulated data (parametric bootstrap), and scaled residuals will be created by comparing observed with refitted residuals.
@@ -8,7 +9,8 @@
 #' @param plot if TRUE, \code{\link{plotSimulatedResiduals}} will be directly run after the simulations have terminated
 #' @param ... parameters to pass to the simulate function of the model object. An important use of this is to specify whether simulations should be conditional on the current random effect estimates, e.g. via re.form. Note that not all models support syntax to specify conditionao or unconditional simulations. See also details
 #' @param seed the random seed to be used within DHARMa. The default setting, recommended for most users, is keep the random seed on a fixed value 123. This means that you will always get the same randomization and thus teh same result when running the same code. NULL = no new seed is set, but previous random state will be restored after simulation. FALSE = no seed is set, and random state will not be restored. The latter two options are only recommended for simulation experiments. See vignette for details.
-#' @return An S3 class of type "DHARMa", essentially a list with various elements. Implemented S3 functions include plot, print and \code{\link{residuals.DHARMa}}. Residuals returns the calculated scaled residuals.
+#' 
+#' @return An S3 class of type "DHARMa", essentially a list with various elements.
 #' 
 #' @details There are a number of important considerations when simulating from a more complex (hierarchical) model: 
 #' 
@@ -34,9 +36,7 @@
 #' 
 #' \strong{Transformation to other distributions}: DHARMa calculates residuals for which the theoretical expectation (assuming a correctly specified model) is uniform. To transfor this residuals to another distribution (e.g. so that a correctly specified model will have normal residuals) see \code{\link{residuals.DHARMa}}. 
 #' 
-#' @note See \code{\link{testResiduals}} for an overview of residual tests, \code{\link{plot.DHARMa}} for an overview of available plots. 
-#' 
-#' @seealso \code{\link{testResiduals}}, \code{\link{plot.DHARMa}}, \code{\link{print.DHARMa}}, \code{\link{residuals.DHARMa}}, \code{\link{recalculateResiduals}}
+#' @seealso \code{\link{testResiduals}}, \code{\link{plot.DHARMa}}, \code{\link{plotResiduals}}, \code{\link{print.DHARMa}}, \code{\link{residuals.DHARMa}}, \code{\link{recalculateResiduals}}
 #' 
 #' @example inst/examples/simulateResidualsHelp.R
 #' @import stats
