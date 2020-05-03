@@ -4,7 +4,8 @@
 \alias{getQuantile}
 \title{Quantile calculations}
 \usage{
-getQuantile(simulations, observed, n, nSim, integerResponse, seed)
+getQuantile(simulations, observed, n, nSim, integerResponse, seed,
+  method = c("PIT", "traditional"))
 }
 \description{
 Quantile calculations
