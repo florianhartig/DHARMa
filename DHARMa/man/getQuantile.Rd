@@ -8,9 +8,9 @@ getQuantile(simulations, observed, integerResponse, method = c("PIT",
   "traditional"))
 }
 \arguments{
-\item{simulations}{model simulations}
+\item{simulations}{a matrix with simulations from a fitted model. Rows = observations, columns = replicate simulations}
 
-\item{observed}{observed data}
+\item{observed}{a vector with the observed data}
 
 \item{integerResponse}{is the response integer-valued. Only has an effect for method = "traditional"}
 

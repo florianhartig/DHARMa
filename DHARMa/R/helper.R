@@ -24,8 +24,8 @@ DHARMa.ecdf <- function (x)
 #'
 #' calculates residual quantiles from a given simulation
 #'
-#' @param simulations model simulations
-#' @param observed observed data
+#' @param simulations a matrix with simulations from a fitted model. Rows = observations, columns = replicate simulations
+#' @param observed a vector with the observed data
 #' @param integerResponse is the response integer-valued. Only has an effect for method = "traditional"
 #' @param method the quantile randomization method used. See details
 #'
