@@ -61,10 +61,11 @@ residuals.DHARMa <- function(object, quantileFunction = NULL, outlierValues = NU
 #' @note Either scaled residuals or (simulatedResponse AND observed response) have to be provided
 #' @example inst/examples/createDharmaHelp.R
 #' @export
-createDHARMa <- function(simulatedResponse , observedResponse , fittedPredictedResponse = NULL, integerResponse = F, seed = 123){
+createDHARMa <- function(simulatedResponse , observedResponse , fittedPredictedResponse = NULL, integerResponse = F, seed = 123,  method = c("PIT", "traditional")){
 
   randomState <-getRandomState(seed)
   on.exit({randomState$restoreCurrent()})
+  match.arg(method)
 
   out = list()
   out$simulatedResponse = simulatedResponse
@@ -85,7 +86,7 @@ createDHARMa <- function(simulatedResponse , observedResponse , fittedPredictedR
 
   out$nSim = ncol(simulatedResponse)
 
-  out$scaledResiduals = getQuantile(simulations = simulatedResponse , observed = observedResponse , n = out$nObs, nSim = out$nSim, integerResponse = integerResponse, seed = seed)
+  out$scaledResiduals = getQuantile(simulations = simulatedResponse , observed = observedResponse , integerResponse = integerResponse, method = method)
 
 
   # makes sure that DHARM plots that rely on this vector won't crash

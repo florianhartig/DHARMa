@@ -1,22 +1,12 @@
 library(lme4)
 
-testData = createData(sampleSize = 200, overdispersion = 0.5, family = poisson())
+testData = createData(sampleSize = 200, family = binomial())
 fittedModel <- glmer(observedResponse ~ Environment1 + (1|group),
-                     family = "poisson", data = testData)
+                     family = "binomial", data = testData)
 
-simulationOutput <- simulateResiduals(fittedModel = fittedModel, method = "PIT")
+simulationOutput <- simulateResiduals(fittedModel = fittedModel, method = "PIT", plot = T)
+simulationOutput <- simulateResiduals(fittedModel = fittedModel, method = "traditional", plot = T)
+simulationOutput <- simulateResiduals(fittedModel = fittedModel, method = "df", plot = T)
 
-# standard plot
-plot(simulationOutput)
 
-# one of the possible test, for other options see ?testResiduals
-testOutliers(simulationOutput)
-
-# for various other plots and tests, see the help / vignette
-
-# the calculated residuals can be accessed via
-residuals(simulationOutput)
-
-# transform residuals to other pdf, see ?residuals.DHARMa for details
-residuals(simulationOutput, quantileFunction = qnorm, outlierValues = c(-7,7))
 

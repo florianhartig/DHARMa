@@ -20,12 +20,32 @@ DHARMa.ecdf <- function (x)
 
 
 
-#' Quantile calculations
+#' calculate quantiles
 #'
-#' @keywords internal
-getQuantile <- function(simulations, observed, n, nSim, integerResponse, seed, method = c("PIT", "traditional")){
+#' calculates residual quantiles from a given simulation
+#'
+#' @param simulations model simulations
+#' @param observed observed data
+#' @param integerResponse is the response integer-valued. Only has an effect for method = "traditional"
+#' @param method the quantile randomization method used. See details
+#'
+#' @details The function calculates residual quantiles from the simulated data. For continous distributions, this will simply the the value of the ecdf.
+#'
+#' For discrete data, there are two options implemented.
+#'
+#' The current default (available since DHARMa 0.3.1) are probability integral transform (PIT-) residuals (Smith, J. Q. "Diagnostic checks of non‐standard time series models." Journal of Forecasting 4.3 (1985): 283-291.), see also Warton, David I., Loïc Thibaut, and Yi Alice Wang. "The PIT-trap—A “model-free” bootstrap procedure for inference about regression models with discrete, multivariate responses." PloS one 12.7 (2017).
+#'
+#' Before DHARMa 0.3.1, a different randomization procedure was used, in which the a U(-0.5, 0.5) distribution was added on observations and simualtions for discrete distributions. This, however, has the disadvantage that a) one has to know if the distribution is discrete (DHARMa tries to recognize this automatically), and b) that it leads to inefficiencies for some distributions such as the the Tweedie, which are partly continous, partly discrte (see e.g. https://github.com/florianhartig/DHARMa/issues/168).
+#'
+#' @export
+getQuantile <- function(simulations, observed, integerResponse, method = c("PIT", "traditional")){
 
   method = match.arg(method)
+
+  n = length(observed)
+  if (nrow(simulations) != n) stop("DHARMa::getquantile: wrong dimension of simulations")
+  nSim = ncol(simulations)
+
 
   if(method == "traditional"){
 

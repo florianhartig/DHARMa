@@ -8,7 +8,7 @@
 #' @param plot if TRUE, \code{\link{plotResiduals}} will be directly run after the residuals have been calculated
 #' @param ... parameters to pass to the simulate function of the model object. An important use of this is to specify whether simulations should be conditional on the current random effect estimates, e.g. via re.form. Note that not all models support syntax to specify conditionao or unconditional simulations. See also details
 #' @param seed the random seed to be used within DHARMa. The default setting, recommended for most users, is keep the random seed on a fixed value 123. This means that you will always get the same randomization and thus teh same result when running the same code. NULL = no new seed is set, but previous random state will be restored after simulation. FALSE = no seed is set, and random state will not be restored. The latter two options are only recommended for simulation experiments. See vignette for details.
-#' @param method quantile randomization method.
+#' @param method the quantile randomization method used. The two options implemented at the moment are probability integral transform (PIT-) residuals (current default), and the "traditional" randomization procedure, that was used in DHARMa until version 0.3.0. For details, see \code{\link{getQuantile}}
 #' @return An S3 class of type "DHARMa", essentially a list with various elements. Implemented S3 functions include plot, print and \code{\link{residuals.DHARMa}}. Residuals returns the calculated scaled residuals.
 #'
 #' @details There are a number of important considerations when simulating from a more complex (hierarchical) model:
@@ -93,7 +93,7 @@ simulateResiduals <- function(fittedModel, n = 250, refit = F, integerResponse =
 
     checkSimulations(out$simulatedResponse, out$nObs, out$nSim)
 
-    out$scaledResiduals = getQuantile(simulations = out$simulatedResponse , observed = out$observedResponse , n = out$nObs, nSim = out$nSim, integerResponse = integerResponse, method = method)
+    out$scaledResiduals = getQuantile(simulations = out$simulatedResponse , observed = out$observedResponse , integerResponse = integerResponse, method = method)
 
   ######## refit = T ##################
   } else {
@@ -146,7 +146,7 @@ simulateResiduals <- function(fittedModel, n = 250, refit = F, integerResponse =
 
     ######### residual calculations ###########
 
-    out$scaledResiduals = getQuantile(simulations = out$refittedResiduals, observed = out$fittedResiduals, n = out$nObs, nSim = out$nSim, integerResponse = integerResponse)
+    out$scaledResiduals = getQuantile(simulations = out$refittedResiduals, observed = out$fittedResiduals, integerResponse = integerResponse, method = method)
   }
 
   ########### Wrapup ############
@@ -230,15 +230,16 @@ checkSimulations <- function(simulatedResponse, nObs, nSim){
 #' @param group group of each data point
 #' @param aggregateBy function for the aggregation. Default is sum. This should only be changed if you know what you are doing. Note in particular that the expected residual distribution might not be flat any more if you choose general functions, such as sd etc.
 #' @param seed the random seed to be used within DHARMa. The default setting, recommended for most users, is keep the random seed on a fixed value 123. This means that you will always get the same randomization and thus teh same result when running the same code. NULL = no new seed is set, but previous random state will be restored after simulation. FALSE = no seed is set, and random state will not be restored. The latter two options are only recommended for simulation experiments. See vignette for details.
-#'
+#' @param method the quantile randomization method used. The two options implemented at the moment are probability integral transform (PIT-) residuals (current default), and the "traditional" randomization procedure, that was used in DHARMa until version 0.3.0. For details, see \code{\link{getQuantile}}
 #' @return an object of class DHARMa, similar to what is returned by \code{\link{simulateResiduals}}, but with additional outputs for the new grouped calculations. Note that the relevant outputs are 2x in the object, the first is the grouped calculations (which is returned by $name access), and later another time, under identical name, the original output. Moreover, there is a function 'aggregateByGroup', which can be used to aggregate predictor variables in the same way as the variables calculated here
 #'
 #' @example inst/examples/simulateResidualsHelp.R
 #' @export
-recalculateResiduals <- function(simulationOutput, group = NULL, aggregateBy = sum, seed = 123){
+recalculateResiduals <- function(simulationOutput, group = NULL, aggregateBy = sum, seed = 123, method = c("PIT", "traditional")){
 
   randomState <-getRandomState(seed)
   on.exit({randomState$restoreCurrent()})
+  match.arg(method)
 
   if(!is.null(simulationOutput$original)) simulationOutput = simulationOutput$original
 
@@ -257,7 +258,7 @@ recalculateResiduals <- function(simulationOutput, group = NULL, aggregateBy = s
   if (simulationOutput$refit == F){
 
     out$simulatedResponse = apply(simulationOutput$simulatedResponse, 2, aggregateByGroup)
-    out$scaledResiduals = getQuantile(simulations = out$simulatedResponse , observed = out$observedResponse , n = out$nGroups, nSim = simulationOutput$nSim, integerResponse = simulationOutput$integerResponse)
+    out$scaledResiduals = getQuantile(simulations = out$simulatedResponse , observed = out$observedResponse , integerResponse = simulationOutput$integerResponse, method = method)
 
   ######## refit = T ##################
   } else {
@@ -267,7 +268,7 @@ recalculateResiduals <- function(simulationOutput, group = NULL, aggregateBy = s
     out$refittedResiduals = apply(simulationOutput$refittedResiduals, 2, aggregateByGroup)
     out$refittedPearsonResiduals = apply(simulationOutput$refittedPearsonResiduals, 2, aggregateByGroup)
 
-    out$scaledResiduals = getQuantile(simulations = out$refittedResiduals , observed = out$fittedResiduals , n = out$nGroups, nSim = simulationOutput$nSim, integerResponse = simulationOutput$integerResponse)
+    out$scaledResiduals = getQuantile(simulations = out$refittedResiduals , observed = out$fittedResiduals , integerResponse = simulationOutput$integerResponse, method = method)
 
   }
 
