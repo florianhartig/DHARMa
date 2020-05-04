@@ -43,7 +43,7 @@ Below the status of the automatic Travis CI tests on the master branch (if this 
 
 [![Build Status](https://travis-ci.org/florianhartig/DHARMa.svg?branch=master)](https://travis-ci.org/florianhartig/DHARMa)
 
-### Older releases
+### Development branches / older releases
 
 To install a specific (older) release, or a particular branch, decide for the version number that you want to install in [https://github.com/florianhartig/DHARMa/releases](https://github.com/florianhartig/DHARMa/releases) (version numbering corresponds to CRAN, but there may be smaller releases that were not pushed to CRAN), or branch and run 
 

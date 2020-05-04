@@ -57,14 +57,16 @@ residuals.DHARMa <- function(object, quantileFunction = NULL, outlierValues = NU
 #' @param fittedPredictedResponse optional fitted predicted response. For Bayesian posterior predictive simulations, using the median posterior prediction as fittedPredictedResponse is recommended. If not provided, the mean simulatedResponse will be used.
 #' @param integerResponse if T, noise will be added at to the residuals to maintain a uniform expectations for integer responses (such as Poisson or Binomial). Unlike in \code{\link{simulateResiduals}}, the nature of the data is not automatically detected, so this MUST be set by the user appropriately
 #' @param seed the random seed to be used within DHARMa. The default setting, recommended for most users, is keep the random seed on a fixed value 123. This means that you will always get the same randomization and thus teh same result when running the same code. NULL = no new seed is set, but previous random state will be restored after simulation. FALSE = no seed is set, and random state will not be restored. The latter two options are only recommended for simulation experiments. See vignette for details.
+#' @param method the quantile randomization method used. The two options implemented at the moment are probability integral transform (PIT-) residuals (current default), and the "traditional" randomization procedure, that was used in DHARMa until version 0.3.0. For details, see \code{\link{getQuantile}}
 #' @details The use of this function is to convert simulated residuals (e.g. from a point estimate, or Bayesian p-values) to a DHARMa object, to make use of the plotting / test functions in DHARMa
 #' @note Either scaled residuals or (simulatedResponse AND observed response) have to be provided
 #' @example inst/examples/createDharmaHelp.R
 #' @export
-createDHARMa <- function(simulatedResponse , observedResponse , fittedPredictedResponse = NULL, integerResponse = F, seed = 123){
+createDHARMa <- function(simulatedResponse , observedResponse , fittedPredictedResponse = NULL, integerResponse = F, seed = 123,  method = c("PIT", "traditional")){
 
   randomState <-getRandomState(seed)
   on.exit({randomState$restoreCurrent()})
+  match.arg(method)
 
   out = list()
   out$simulatedResponse = simulatedResponse
@@ -85,7 +87,7 @@ createDHARMa <- function(simulatedResponse , observedResponse , fittedPredictedR
 
   out$nSim = ncol(simulatedResponse)
 
-  out$scaledResiduals = getQuantile(simulations = simulatedResponse , observed = observedResponse , n = out$nObs, nSim = out$nSim, integerResponse = integerResponse, seed = seed)
+  out$scaledResiduals = getQuantile(simulations = simulatedResponse , observed = observedResponse , integerResponse = integerResponse, method = method)
 
 
   # makes sure that DHARM plots that rely on this vector won't crash
