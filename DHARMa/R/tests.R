@@ -112,7 +112,7 @@ testQuantiles <- function(simulationOutput, predictor = NULL, quantiles = c(0.25
 
       quantResult = try(capture.output(quantileFits[[i]] <- qgam::qgam(res ~ s(pred) ,  data =datTemp, qu = quantiles[i])), silent = T)
       if(inherits(quantResult, "try-error")){
-        message("Unable to calculate quantile regression for quantile ", quantiles[i], ". Possibly to few (unique) data points / predictions.")
+        message("Unable to calculate quantile regression for quantile ", quantiles[i], ". Possibly to few (unique) data points / predictions. Will be ommited in plots and significance calculations.")
       } else {
         x = summary(quantileFits[[i]])
         pval[i] = min(p.adjust(c(x$p.table[1,4], x$s.table[1,4]), method = "BH")) # correction for test on slope and intercept
