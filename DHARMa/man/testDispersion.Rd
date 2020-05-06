@@ -20,9 +20,9 @@ testDispersion(simulationOutput, alternative = c("two.sided", "greater",
 This function performs a simulation-based test for over/underdispersion
 }
 \details{
-The function implements two tests, depending on whether it is applied on a simulation with refit = F, or refit = T. 
+The function implements two tests, depending on whether it is applied on a simulation with refit = F, or refit = T.
 
-If refit = F, the function tests the sd of the data against the sd of the simulated data. 
+If refit = F, the function tests the sd of the data against the sd of the simulated data.
 
 If refit = T, the function compares the approximate deviance (via squared pearson residuals) with the same quantity from the models refitted with simulated data. Applying this is much slower than the previous alternative, but simulations show that it is slightly more powerful as well. However, given the computational cost, I would suggest that most users will be satisfied with the standard dispersion test.
 }
