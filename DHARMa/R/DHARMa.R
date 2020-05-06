@@ -50,6 +50,38 @@ residuals.DHARMa <- function(object, quantileFunction = NULL, outlierValues = NU
 }
 
 
+
+#' Return outliers
+#'
+#' Returns the outliers of a DHARMa object
+#'
+#' @param object an object with simulated residuals created by \code{\link{simulateResiduals}}
+#' @param lowerQuantile lower threshold for outliers. Default is zero = outside simulation envelope
+#' @param upperQuantile upper threshold for outliers. Default is 1 = outside simulation envelope
+#' @param return wheter to return an indices of outliers or a logical vector
+#'
+#' @details First of all, note that the standard definition of outlier in the DHARMa plots and outlier tests is an observation that is outside the simulation envelope. How far outside that is depends a lot on how many simulations you do. If you have 100 data points and to 100 simulations, you would expect to have one "outlier" on average, even with a perfectly fitting model. This is in fact what the outlier test tests.
+#'
+#' Thus, keep in mind that for a small number of simulations, outliers are mostly a technical term: these are points that are outside our simulations, but we don't know how far away they are.
+#'
+#' If you are seriously interested in HOW FAR outside the expected distribution a data point is, you should increase the number of simulations in \code{\link{simulateResiduals}} to be sure to get the tail of the data distribution correctly. In this case, it may make sense to adjust lowerQuantile and upperQuantile, e.g. to 0.025, 0.975, which would define outliers as values outside the central 95% of the distribution.
+#'
+#' Also, note that outliers are particularly concerning if they have a strong influence on the model fit. One could test the influence, for example, by removing them from the data, or by some meausures of leverage, e.g. generalisations for Cook's distance as in Pinho, L. G. B., Nobre, J. S., & Singer, J. M. (2015). Cook’s distance for generalized linear mixed models. Computational Statistics & Data Analysis, 82, 126–136. doi:10.1016/j.csda.2014.08.008. At the moment, however, no such function is provided in DHARMa.
+#'
+#' @export
+#'
+outliers <- function(object, lowerQuantile = 0, upperQuantile = 1, return = c("index", "logical")){
+
+  return = match.arg(return)
+
+  out = residuals(object) >= upperQuantile | residuals(object) <= lowerQuantile
+
+  if(return == "logical") return(out)
+  else(return(which(out)))
+}
+
+
+
 #' Create a DHARMa object from hand-coded simulations or Bayesian posterior predictive simulations
 #'
 #' @param simulatedResponse matrix of observations simulated from the fitted model - row index for observations and colum index for simulations
