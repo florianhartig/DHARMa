@@ -15,7 +15,7 @@ testZeroInflation(simulationOutput, ...)
 This function compares the observed number of zeros with the zeros expected from simulations.
 }
 \details{
-The plot shows the expected distribution of zeros against the observed values, the ratioObsSim shows observed vs. simulated zeros. A value < 1 means that the observed data has less zeros than expected, a value > 1 means that it has more zeros than expected (aka zero-inflation). Per default, the function tests both sides. 
+The plot shows the expected distribution of zeros against the observed values, the ratioObsSim shows observed vs. simulated zeros. A value < 1 means that the observed data has less zeros than expected, a value > 1 means that it has more zeros than expected (aka zero-inflation). Per default, the function tests both sides.
 
 Some notes about common problems / questions:
 

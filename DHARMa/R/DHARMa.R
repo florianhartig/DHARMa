@@ -50,6 +50,38 @@ residuals.DHARMa <- function(object, quantileFunction = NULL, outlierValues = NU
 }
 
 
+
+#' Return outliers
+#'
+#' Returns the outliers of a DHARMa object
+#'
+#' @param object an object with simulated residuals created by \code{\link{simulateResiduals}}
+#' @param lowerQuantile lower threshold for outliers. Default is zero = outside simulation envelope
+#' @param upperQuantile upper threshold for outliers. Default is 1 = outside simulation envelope
+#' @param return wheter to return an indices of outliers or a logical vector
+#'
+#' @details First of all, note that the standard definition of outlier in the DHARMa plots and outlier tests is an observation that is outside the simulation envelope. How far outside that is depends a lot on how many simulations you do. If you have 100 data points and to 100 simulations, you would expect to have one "outlier" on average, even with a perfectly fitting model. This is in fact what the outlier test tests.
+#'
+#' Thus, keep in mind that for a small number of simulations, outliers are mostly a technical term: these are points that are outside our simulations, but we don't know how far away they are.
+#'
+#' If you are seriously interested in HOW FAR outside the expected distribution a data point is, you should increase the number of simulations in \code{\link{simulateResiduals}} to be sure to get the tail of the data distribution correctly. In this case, it may make sense to adjust lowerQuantile and upperQuantile, e.g. to 0.025, 0.975, which would define outliers as values outside the central 95% of the distribution.
+#'
+#' Also, note that outliers are particularly concerning if they have a strong influence on the model fit. One could test the influence, for example, by removing them from the data, or by some meausures of leverage, e.g. generalisations for Cook's distance as in Pinho, L. G. B., Nobre, J. S., & Singer, J. M. (2015). Cook’s distance for generalized linear mixed models. Computational Statistics & Data Analysis, 82, 126–136. doi:10.1016/j.csda.2014.08.008. At the moment, however, no such function is provided in DHARMa.
+#'
+#' @export
+#'
+outliers <- function(object, lowerQuantile = 0, upperQuantile = 1, return = c("index", "logical")){
+
+  return = match.arg(return)
+
+  out = residuals(object) >= upperQuantile | residuals(object) <= lowerQuantile
+
+  if(return == "logical") return(out)
+  else(return(which(out)))
+}
+
+
+
 #' Create a DHARMa object from hand-coded simulations or Bayesian posterior predictive simulations
 #'
 #' @param simulatedResponse matrix of observations simulated from the fitted model - row index for observations and colum index for simulations
@@ -57,14 +89,16 @@ residuals.DHARMa <- function(object, quantileFunction = NULL, outlierValues = NU
 #' @param fittedPredictedResponse optional fitted predicted response. For Bayesian posterior predictive simulations, using the median posterior prediction as fittedPredictedResponse is recommended. If not provided, the mean simulatedResponse will be used.
 #' @param integerResponse if T, noise will be added at to the residuals to maintain a uniform expectations for integer responses (such as Poisson or Binomial). Unlike in \code{\link{simulateResiduals}}, the nature of the data is not automatically detected, so this MUST be set by the user appropriately
 #' @param seed the random seed to be used within DHARMa. The default setting, recommended for most users, is keep the random seed on a fixed value 123. This means that you will always get the same randomization and thus teh same result when running the same code. NULL = no new seed is set, but previous random state will be restored after simulation. FALSE = no seed is set, and random state will not be restored. The latter two options are only recommended for simulation experiments. See vignette for details.
+#' @param method the quantile randomization method used. The two options implemented at the moment are probability integral transform (PIT-) residuals (current default), and the "traditional" randomization procedure, that was used in DHARMa until version 0.3.0. For details, see \code{\link{getQuantile}}
 #' @details The use of this function is to convert simulated residuals (e.g. from a point estimate, or Bayesian p-values) to a DHARMa object, to make use of the plotting / test functions in DHARMa
 #' @note Either scaled residuals or (simulatedResponse AND observed response) have to be provided
 #' @example inst/examples/createDharmaHelp.R
 #' @export
-createDHARMa <- function(simulatedResponse , observedResponse , fittedPredictedResponse = NULL, integerResponse = F, seed = 123){
+createDHARMa <- function(simulatedResponse , observedResponse , fittedPredictedResponse = NULL, integerResponse = F, seed = 123,  method = c("PIT", "traditional")){
 
   randomState <-getRandomState(seed)
   on.exit({randomState$restoreCurrent()})
+  match.arg(method)
 
   out = list()
   out$simulatedResponse = simulatedResponse
@@ -85,7 +119,7 @@ createDHARMa <- function(simulatedResponse , observedResponse , fittedPredictedR
 
   out$nSim = ncol(simulatedResponse)
 
-  out$scaledResiduals = getQuantile(simulations = simulatedResponse , observed = observedResponse , n = out$nObs, nSim = out$nSim, integerResponse = integerResponse, seed = seed)
+  out$scaledResiduals = getQuantile(simulations = simulatedResponse , observed = observedResponse , integerResponse = integerResponse, method = method)
 
 
   # makes sure that DHARM plots that rely on this vector won't crash

@@ -18,10 +18,10 @@ testOutliers(simulationOutput, alternative = c("two.sided", "greater",
 This function tests if the number of observations that are strictly greater / smaller than all simulations are larger than expected
 }
 \details{
-DHARMa residuals are created by simulating from the fitted model, and comparing the simulated values to the observed data. It can occur that all simulated values are higher or smaller than the observed data, in which case they get the residual value of 0 and 1, respectively. I refer to these values as simulation outliers, or simply outliers. 
+DHARMa residuals are created by simulating from the fitted model, and comparing the simulated values to the observed data. It can occur that all simulated values are higher or smaller than the observed data, in which case they get the residual value of 0 and 1, respectively. I refer to these values as simulation outliers, or simply outliers.
 
-Because no data was simulated in the range of the observed value, we actually don't know "how much" these values deviate from the model expecation, so the term "outlier" should be used with a grain of salt - it's not a judgement about the probability of a deviation from an expectation, but denotes that we are outside the simulated range. The number of outliers would usually decrease if the number of DHARMa simulations is increased. 
- 
+Because no data was simulated in the range of the observed value, we actually don't know "how much" these values deviate from the model expecation, so the term "outlier" should be used with a grain of salt - it's not a judgement about the probability of a deviation from an expectation, but denotes that we are outside the simulated range. The number of outliers would usually decrease if the number of DHARMa simulations is increased.
+
 The probability of an outlier depends on the number of simulations (in fact, it is 1/(nSim +1) for each side), so whether the existence of outliers is a reason for concern depends also on the number of simulations. The expected number of outliers is therefore binomially distributed, and we can calculate a p-value from that
 }
 \examples{
