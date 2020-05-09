@@ -4,7 +4,12 @@
 \alias{checkDots}
 \title{Check dot operator}
 \usage{
-checkDots(name, value, ...)
+checkDots(name, default, ...)
+}
+\arguments{
+\item{name}{variable name}
+
+\item{default}{variable default}
 }
 \description{
 Check dot operator

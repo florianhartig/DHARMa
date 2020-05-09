@@ -111,14 +111,17 @@ getQuantile <- function(simulations, observed, integerResponse, method = c("PIT"
 
 #' Check dot operator
 #'
+#' @param name variable name
+#' @param default variable default
+#'
 #' @details modified from https://github.com/lcolladotor/dots
 #'
 #' @keywords internal
-checkDots <- function(name, value, ...) {
+checkDots <- function(name, default, ...) {
   args <- list(...)
   if(!name %in% names(args)) {
     ## Default value
-    return(value)
+    return(default)
   } else {
     ## If the argument was defined in the ... part, return it
     return(args[[name]])
