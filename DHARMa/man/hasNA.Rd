@@ -12,3 +12,6 @@ hasNA(object)
 \description{
 checks if the fitted model excluded NA values
 }
+\details{
+Checks if the fitted model excluded NA values
+}

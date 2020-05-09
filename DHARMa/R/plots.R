@@ -27,7 +27,7 @@ plot.DHARMa <- function(x, rank = TRUE, ...){
   on.exit(par(oldpar))
 
   plotQQunif(x)
-  plotResiduals(x)
+  plotResiduals(x, rank = rank, ...)
 
   mtext("DHARMa residual diagnostics", outer = T)
 }

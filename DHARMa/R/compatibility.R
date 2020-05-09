@@ -44,11 +44,13 @@ getObservedResponse.default <- function (object, ...){
   return(out)
 }
 
+weightsWarning = "Model was fit with prior weights. These will be ignored in the simulation. See ?getSimulations for details"
+
 #' Get model simulations
 #'
 #' Wrapper to simulate from a fitted model
 #'
-#' The purpose of this wrapper for for the simulate function is to standardize the simulations from a model in a standardized way
+#' The purpose of this wrapper for for the simulate function is to return the simulations from a model in a standardized way
 #'
 #' @param object a fitted model
 #' @param nsim number of simulations
@@ -59,6 +61,12 @@ getObservedResponse.default <- function (object, ...){
 #' @example inst/examples/wrappersHelp.R
 #'
 #' @seealso \code{\link{getObservedResponse}}, \code{\link{getRefit}}, \code{\link{getFixedEffects}}, \code{\link{getFitted}}
+#'
+#' @details The function is a wrapper for for the simulate function is to return the simulations from a model in a standardized way.
+#'
+#' Note: if the model was fit with weights, the function will throw a warning if used with a model class whose simulate function does not include the weightsi in the simulations. Note that the results may or may not be appropriate in this case, depending on how you use the weights.
+#'
+#'
 #' @author Florian Hartig
 #' @export
 getSimulations <- function (object, nsim = 1 , type = c("normal", "refit"), ...) {
@@ -184,44 +192,13 @@ getFitted.default <- function (object,...){
   fitted(object, ...)
 }
 
-#' Check weights
-#'
-#' Checks if a model was fit with the weight argument
-#'
-#' The purpose of this function is to check if a model was fit with the weights
-#'
-#' @param object a fitted model
-#' @param ... additional parameters
-#'
-#' @author Florian Hartig
-#' @export
-hasWeigths <- function (object, excludeBinomial, ...) {
-  UseMethod("hasWeigths", object)
-}
-
-#' @export
-hasWeigths.default <- function (object, ...){
-
-  if(family(object)$family %in% c("binomial", "betabinomial")) return
-
-  # check objects with prior.weights
-  if(!is.null(object$prior.weights)){
-    if(length(unique(object$prior.weights)) != 1) return(TRUE)
-    else return(FALSE)
-  }
-
-  # check classes with weights in model.frame
-  if("(weights)" %in% colnames(model.frame(object))) return(TRUE)
-  else (return(FALSE))
-}
-
 #' has NA
 #'
 #' checks if the fitted model excluded NA values
 #'
 #' @param object a fitted model
 #'
-#' @detail Checks if the fitted model excluded NA values
+#' @details Checks if the fitted model excluded NA values
 #'
 #' @export
 hasNA <- function(object){
@@ -229,8 +206,6 @@ hasNA <- function(object){
   if(length(x) < as.numeric(x[length(x) ])) return(TRUE)
   else return(FALSE)
 }
-
-
 
 ######### LM #############
 
@@ -264,6 +239,12 @@ hasWeigths.lm <- function(object, ...){
 
 ######### GLM #############
 
+#' @rdname getSimulations
+#' @export
+getSimulations.negbin<- function (object, nsim = 1, type = c("normal", "refit"), ...){
+  if("(weights)" %in% colnames(model.frame(object))) warning(weightsWarning)
+  getSimulations.default(object = object, nsim = nsim, type = type, ...)
+}
 
 
 ######## MGCV ############
@@ -282,6 +263,17 @@ getFitted.gam <- function(object, ...){
 # Check that this works
 # plot(fitted(fittedModelGAM), predict(fittedModelGAM, type = "response"))
 
+
+######## lme4 ############
+
+
+#' @rdname getSimulations
+#' @export
+getSimulations.lmerMod <- function (object, nsim = 1, type = c("normal", "refit"), ...){
+
+  if("(weights)" %in% colnames(model.frame(object))) warning(weightsWarning)
+  getSimulations.default(object = object, nsim = nsim, type = type, ...)
+}
 
 
 ######## glmmTMB ######
@@ -311,6 +303,8 @@ getRefit.glmmTMB <- function(object, newresp, ...){
 #' @rdname getSimulations
 #' @export
 getSimulations.glmmTMB <- function (object, nsim = 1, type = c("normal", "refit"), ...){
+
+  if("(weights)" %in% colnames(model.frame(object)) & ! family(object)$family %in% c("binomial", "betabinomial")) warning(weightsWarning)
 
   type <- match.arg(type)
 

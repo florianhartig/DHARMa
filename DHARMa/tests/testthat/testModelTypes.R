@@ -226,7 +226,6 @@ test_that("glm binomial n/k with weights works",
 
             testData$prop = testData$observedResponse1 / 20
 
-
             fittedModel <- glm(prop  ~ Environment1 , family = "binomial", data = testData, weights = rep(20,200))
             runEverything(fittedModel, testData)
 
@@ -329,41 +328,55 @@ test_that("glm poisson works",
 
 # hasWeights tests --------------------------------------------------------------
 
-
 test_that("glm poisson weights throws warning",
-          #           {
-          #             skip_on_cran()
-          #
-          #             weights = rep(c(1,1.1), each = 100)
-          #
-          #             testData = createData(sampleSize = 200, overdispersion = 0.5, randomEffectVariance = 0.5, family = poisson())
-          #
-          #             fittedModel <- glm(observedResponse ~ Environment1 , family = "poisson", data = testData, weights = weights)
-          #             expect_warning(simulateResiduals(fittedModel))
-          #
-          #             fittedModel <- gam(observedResponse ~ Environment1 , family = "poisson", data = testData, weights = weights)
-          #             expect_warning(simulateResiduals(fittedModel))
-          #
-          #             fittedModel <- glmer(observedResponse ~ Environment1 + (1|group) , family = "poisson", data = testData, weights = weights)
-          #             expect_warning(simulateResiduals(fittedModel))
-          #
-          #             fittedModel <- glmer.nb(observedResponse ~ Environment1 + (1|group) , data = testData, weights = weights)
-          #             expect_warning(simulateResiduals(fittedModel))
-          #
-          #             fittedModel <- glm.nb(observedResponse ~ Environment1,  data = testData, weights = weights)
-          #             expect_warning(simulateResiduals(fittedModel))
-          #
-          #             fittedModel <- glmmTMB(observedResponse ~ Environment1 , family = "poisson", data = testData, weights = weights)
-          #             expect_warning(simulateResiduals(fittedModel))
-          #
-          #             testData$weights = weights
-          #             fittedModel <- HLfit(observedResponse ~ Environment1 + (1|group) , family = "poisson",  data = testData, prior.weights = weights)
-          #             expect_warning(simulateResiduals(fittedModel))
-          #           }
-          # )
+                    {
+                      skip_on_cran()
 
+                      weights = rep(c(1,1.1), each = 100)
 
+                      testData = createData(sampleSize = 200, overdispersion = 0.5, randomEffectVariance = 0.5, family = poisson())
 
+                      # lm weights are considered in simulate(), should not throw warning
+                      fittedModel <- lm(observedResponse ~ Environment1 , data = testData, weights = weights)
+                      simulateResiduals(fittedModel)
+
+                      # glm gaussian still the same
+                      fittedModel <- glm(observedResponse ~ Environment1 , data = testData, weights = weights)
+                      simulateResiduals(fittedModel)
+
+                      # glm behaves nice, throws a warning that simulate ignores weights for poisson
+                      fittedModel <- glm(observedResponse ~ Environment1 , weights = weights, data = testData, family = "poisson")
+                      expect_warning(simulateResiduals(fittedModel))
+
+                      # gam also warns
+                      fittedModel <- gam(observedResponse ~ Environment1 , weights = weights, data = testData, family = "poisson")
+                      expect_warning(simulateResiduals(fittedModel))
+
+                      # lmer does not warn!
+                      fittedModel <- lmer(observedResponse ~ Environment1 + (1|group) , data = testData, weights = weights)
+                      expect_warning(simulateResiduals(fittedModel))
+
+                      # glmer warns, OK
+                      fittedModel <- glmer(observedResponse ~ Environment1 + (1|group) , family = "poisson", data = testData, weights = weights)
+                      expect_warning(simulateResiduals(fittedModel))
+
+                      # glmer.nb warns
+                      fittedModel <- glmer.nb(observedResponse ~ Environment1 + (1|group) , data = testData, weights = weights)
+                      expect_warning(simulateResiduals(fittedModel))
+
+                      # glm.nb does not warn, does not seem to simulate according to weights
+                      fittedModel <- glm.nb(observedResponse ~ Environment1,  data = testData, weights = weights)
+                      expect_warning(simulateResiduals(fittedModel))
+
+                      #
+                      fittedModel <- glmmTMB(observedResponse ~ Environment1 , family = "poisson", data = testData, weights = weights)
+                      expect_warning(simulateResiduals(fittedModel))
+
+                      # spaMM does not warn, but seems to be simulating with correct (heteroskedastic) variance.
+                      fittedModel <- HLfit(observedResponse ~ Environment1 + (1|group) , family = "poisson",  data = testData, prior.weights = weights)
+                      expect_warning(simulateResiduals(fittedModel))
+                    }
+          )
 
 # isNA tests --------------------------------------------------------------
 
@@ -398,7 +411,7 @@ test_that("isNA works",
             fittedModel <- HLfit(observedResponse ~ Environment1 + (1|group) , family = "poisson",  data = testData)
             expect_true(hasNA(fittedModel))
 
-            ###############
+            # now without NA
 
             testData = createData(sampleSize = 200, overdispersion = 0.5, randomEffectVariance = 0.5, family = poisson(), hasNA = F)
 
