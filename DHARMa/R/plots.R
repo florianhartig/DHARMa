@@ -27,10 +27,7 @@ plot.DHARMa <- function(x, rank = TRUE, ...){
   on.exit(par(oldpar))
 
   plotQQunif(x)
-
-  xlab = checkDots("xlab", ifelse(rank, "Model predictions (rank transformed)", "Model predictions"), ...)
-
-  plotResiduals(simulationOutput = x, xlab = xlab, rank = rank, ...)
+  plot(x)
 
   mtext("DHARMa residual diagnostics", outer = T)
 }
@@ -154,11 +151,17 @@ plotResiduals <- function(simulationOutput, form = NULL, quantreg = NULL, rank =
 
   ##### Checks #####
 
-  ylab = checkDots("ylab", "Standardized residual", ...)
+
+  a <- list(...)
+  a$ylab = checkDots("ylab", "Standardized residual", ...)
+  if(is.null(form)){
+    a$xlab = checkDots("xlab", ifelse(rank, "Model predictions (rank transformed)", "Model predictions"), ...)
+  }
 
   simulationOutput = ensureDHARMa(simulationOutput, convert = T)
   res = simulationOutput$scaledResiduals
   if(inherits(form, "DHARMa"))stop("DHARMa::plotResiduals > argument form cannot be of class DHARMa. Note that the syntax of plotResiduals has changed since DHARMa 0.3.0. See ?plotResiduals.")
+
   pred = ensurePredictor(simulationOutput, form)
 
   ##### Rank transform and factor conversion#####
@@ -185,21 +188,24 @@ plotResiduals <- function(simulationOutput, form = NULL, quantreg = NULL, rank =
 
   blackcol = rgb(0,0,0, alpha = max(0.1, 1 - 3 * length(res) / switchScatter))
 
-  defaultCol = ifelse(res == 0 | res == 1, 2,blackcol)
-  defaultPch = ifelse(res == 0 | res == 1, 8,1)
 
-  col = checkDots("col", defaultCol, ...)
-  pch = checkDots("pch", defaultPch, ...)
-
+  # categorical plot
   if(is.factor(pred)){
-    plot(res ~ pred, ylim = c(0,1), axes = FALSE, ...)
+    do.call(plot, append(list(res ~ pred, ylim = c(0,1), axes = FALSE), a))
   }
+  # smooth scatter
   else if (smoothScatter == TRUE) {
-    smoothScatter(pred, res , ylim = c(0,1), axes = FALSE, colramp = colorRampPalette(c("white", "darkgrey")))
+    defaultCol = ifelse(res == 0 | res == 1, 2,blackcol)
+    do.call(graphics::smoothScatter, append(list(x = pred, y = res , ylim = c(0,1), axes = FALSE, colramp = colorRampPalette(c("white", "darkgrey"))),a))
     points(pred[defaultCol == 2], res[defaultCol == 2], col = "red", cex = 0.5)
   }
+  # normal plot
   else{
-    plot(res ~ pred, ylim = c(0,1), axes = FALSE, col = col, pch = pch, ylab = ylab, ...)
+    defaultCol = ifelse(res == 0 | res == 1, 2,blackcol)
+    defaultPch = ifelse(res == 0 | res == 1, 8,1)
+    a$col = checkDots("col", defaultCol, ...)
+    a$pch = checkDots("pch", defaultPch, ...)
+    do.call(plot, append(list(res ~ pred, ylim = c(0,1), axes = FALSE), a))
   }
 
   axis(1)
