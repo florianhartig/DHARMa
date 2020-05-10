@@ -118,6 +118,8 @@ getSimulations.default <- function (object, nsim = 1, type = c("normal", "refit"
 #'
 #' @example inst/examples/wrappersHelp.R
 #'
+#' @importFrom lme4 fixef
+#'
 #' @seealso \code{\link{getObservedResponse}}, \code{\link{getSimulations}}, \code{\link{getRefit}}, \code{\link{getFitted}}
 #' @export
 getFixedEffects <- function(fittedModel){
@@ -156,11 +158,13 @@ getRefit <- function (object, newresp, ...) {
 }
 
 #' @rdname getRefit
+#'
+#' @importFrom lme4 refit
+#'
 #' @export
 getRefit.default <- function (object, newresp, ...){
   refit(object, newresp, ...)
 }
-
 
 #' Get model fitted
 #'

@@ -46,7 +46,7 @@ createData(sampleSize = 100, intercept = 0, fixedEffects = 1,
 
 \item{replicates}{number of datasets to create}
 
-\item{hasNa}{should an NA be added to the environmental predictor (for test purposes)}
+\item{hasNA}{should an NA be added to the environmental predictor (for test purposes)}
 }
 \description{
 This function creates synthetic dataset with various problems such as overdispersion, zero-inflation, etc.
