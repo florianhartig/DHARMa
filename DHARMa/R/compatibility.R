@@ -110,11 +110,6 @@ getSimulations.default <- function (object, nsim = 1, type = c("normal", "refit"
 }
 
 
-#' @importFrom lme4 refit
-#' @importFrom lme4 fixef
-NULL
-
-
 #' Extract fixed effects of a supported model
 #'
 #' A wrapper to extract fixed effects of a supported model
@@ -201,11 +196,13 @@ getFitted.default <- function (object,...){
 #' @details Checks if the fitted model excluded NA values
 #'
 #' @export
-hasNA <- function(object){
-  x = rownames(model.frame(object))
-  if(length(x) < as.numeric(x[length(x) ])) return(TRUE)
-  else return(FALSE)
-}
+
+
+# hasNA <- function(object){
+#   x = rownames(model.frame(object))
+#   if(length(x) < as.numeric(x[length(x) ])) return(TRUE)
+#   else return(FALSE)
+# }
 
 ######### LM #############
 
@@ -364,9 +361,8 @@ getSimulations.glmmTMB <- function (object, nsim = 1, type = c("normal", "refit"
 
 #' @rdname getObservedResponse
 #' @export
-#' @importFrom spaMM response
 getObservedResponse.HLfit <- function(object, ...){
-  out = response(object, ...)
+  out = spaMM::response(object, ...)
 
   nKcase = is.matrix(out)
   if(nKcase){
@@ -399,8 +395,7 @@ getSimulations.HLfit <- function(object, nsim = 1, type = c("normal", "refit"), 
 
 #' @rdname getRefit
 #' @export
-#' @importFrom spaMM update_resp
 getRefit.HLfit <- function(object, newresp, ...) {
-  update_resp(object, newresp, evaluate = TRUE)
+  spaMM::update_resp(object, newresp, evaluate = TRUE)
 }
 

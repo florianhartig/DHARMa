@@ -368,12 +368,17 @@ test_that("glm poisson weights throws warning",
                       fittedModel <- glm.nb(observedResponse ~ Environment1,  data = testData, weights = weights)
                       expect_warning(simulateResiduals(fittedModel))
 
-                      #
+                      # glmmTMB does not warn, implemented warning in DHARMa
                       fittedModel <- glmmTMB(observedResponse ~ Environment1 , family = "poisson", data = testData, weights = weights)
                       expect_warning(simulateResiduals(fittedModel))
 
                       # spaMM does not warn, but seems to be simulating with correct (heteroskedastic) variance.
-                      fittedModel <- HLfit(observedResponse ~ Environment1 + (1|group) , family = "poisson",  data = testData, prior.weights = weights)
+                      # weights cannot be fit with poisson, because spaMM directly interpretes weights as variance
+                      expect_error( fittedModel <- HLfit(observedResponse ~ Environment1 + (1|group) , family = "poisson",  data = testData, prior.weights = weights))
+                      fittedModel <- HLfit(observedResponse ~ Environment1 + (1|group) , family = negbin(),  data = testData, prior.weights = weights)
+                      fittedModel <- fitme(observedResponse ~ Environment1 + (1|group) , family = negbin(),  data = testData, prior.weights = weights)
+
+
                       expect_warning(simulateResiduals(fittedModel))
                     }
           )
@@ -381,65 +386,65 @@ test_that("glm poisson weights throws warning",
 # isNA tests --------------------------------------------------------------
 
 
-test_that("isNA works",
-          {
-            skip_on_cran()
-
-            testData = createData(sampleSize = 200, overdispersion = 0.5, randomEffectVariance = 0.5, family = poisson(), hasNA = T)
-
-            fittedModel <- lm(observedResponse ~ Environment1 , data = testData)
-            expect_true(hasNA(fittedModel))
-
-            fittedModel <- glm(observedResponse ~ Environment1 , family = "poisson", data = testData)
-            expect_true(hasNA(fittedModel))
-
-            fittedModel <- gam(observedResponse ~ Environment1 , family = "poisson", data = testData)
-            expect_true(hasNA(fittedModel))
-
-            fittedModel <- glmer(observedResponse ~ Environment1 + (1|group) , family = "poisson", data = testData)
-            expect_true(hasNA(fittedModel))
-
-            fittedModel <- glmer.nb(observedResponse ~ Environment1 + (1|group) , data = testData)
-            expect_true(hasNA(fittedModel))
-
-            fittedModel <- glm.nb(observedResponse ~ Environment1,  data = testData)
-            expect_true(hasNA(fittedModel))
-
-            fittedModel <- glmmTMB(observedResponse ~ Environment1 , family = "poisson", data = testData)
-            expect_true(hasNA(fittedModel))
-
-            fittedModel <- HLfit(observedResponse ~ Environment1 + (1|group) , family = "poisson",  data = testData)
-            expect_true(hasNA(fittedModel))
-
-            # now without NA
-
-            testData = createData(sampleSize = 200, overdispersion = 0.5, randomEffectVariance = 0.5, family = poisson(), hasNA = F)
-
-            fittedModel <- lm(observedResponse ~ Environment1 , data = testData)
-            expect_false(hasNA(fittedModel))
-
-            fittedModel <- glm(observedResponse ~ Environment1 , family = "poisson", data = testData)
-            expect_false(hasNA(fittedModel))
-
-            fittedModel <- gam(observedResponse ~ Environment1 , family = "poisson", data = testData)
-            expect_false(hasNA(fittedModel))
-
-            fittedModel <- glmer(observedResponse ~ Environment1 + (1|group) , family = "poisson", data = testData)
-            expect_false(hasNA(fittedModel))
-
-            fittedModel <- glmer.nb(observedResponse ~ Environment1 + (1|group) , data = testData)
-            expect_false(hasNA(fittedModel))
-
-            fittedModel <- glm.nb(observedResponse ~ Environment1,  data = testData)
-            expect_false(hasNA(fittedModel))
-
-            fittedModel <- glmmTMB(observedResponse ~ Environment1 , family = "poisson", data = testData)
-            expect_false(hasNA(fittedModel))
-
-            fittedModel <- HLfit(observedResponse ~ Environment1 + (1|group) , family = "poisson",  data = testData)
-            expect_false(hasNA(fittedModel))
-
-
-          }
-)
-
+# test_that("isNA works",
+#           {
+#             skip_on_cran()
+#
+#             testData = createData(sampleSize = 200, overdispersion = 0.5, randomEffectVariance = 0.5, family = poisson(), hasNA = T)
+#
+#             fittedModel <- lm(observedResponse ~ Environment1 , data = testData)
+#             expect_true(hasNA(fittedModel))
+#
+#             fittedModel <- glm(observedResponse ~ Environment1 , family = "poisson", data = testData)
+#             expect_true(hasNA(fittedModel))
+#
+#             fittedModel <- gam(observedResponse ~ Environment1 , family = "poisson", data = testData)
+#             expect_true(hasNA(fittedModel))
+#
+#             fittedModel <- glmer(observedResponse ~ Environment1 + (1|group) , family = "poisson", data = testData)
+#             expect_true(hasNA(fittedModel))
+#
+#             fittedModel <- glmer.nb(observedResponse ~ Environment1 + (1|group) , data = testData)
+#             expect_true(hasNA(fittedModel))
+#
+#             fittedModel <- glm.nb(observedResponse ~ Environment1,  data = testData)
+#             expect_true(hasNA(fittedModel))
+#
+#             fittedModel <- glmmTMB(observedResponse ~ Environment1 , family = "poisson", data = testData)
+#             expect_true(hasNA(fittedModel))
+#
+#             fittedModel <- HLfit(observedResponse ~ Environment1 + (1|group) , family = "poisson",  data = testData)
+#             expect_true(hasNA(fittedModel))
+#
+#             # now without NA
+#
+#             testData = createData(sampleSize = 200, overdispersion = 0.5, randomEffectVariance = 0.5, family = poisson(), hasNA = F)
+#
+#             fittedModel <- lm(observedResponse ~ Environment1 , data = testData)
+#             expect_false(hasNA(fittedModel))
+#
+#             fittedModel <- glm(observedResponse ~ Environment1 , family = "poisson", data = testData)
+#             expect_false(hasNA(fittedModel))
+#
+#             fittedModel <- gam(observedResponse ~ Environment1 , family = "poisson", data = testData)
+#             expect_false(hasNA(fittedModel))
+#
+#             fittedModel <- glmer(observedResponse ~ Environment1 + (1|group) , family = "poisson", data = testData)
+#             expect_false(hasNA(fittedModel))
+#
+#             fittedModel <- glmer.nb(observedResponse ~ Environment1 + (1|group) , data = testData)
+#             expect_false(hasNA(fittedModel))
+#
+#             fittedModel <- glm.nb(observedResponse ~ Environment1,  data = testData)
+#             expect_false(hasNA(fittedModel))
+#
+#             fittedModel <- glmmTMB(observedResponse ~ Environment1 , family = "poisson", data = testData)
+#             expect_false(hasNA(fittedModel))
+#
+#             fittedModel <- HLfit(observedResponse ~ Environment1 + (1|group) , family = "poisson",  data = testData)
+#             expect_false(hasNA(fittedModel))
+#
+#
+#           }
+# )
+#

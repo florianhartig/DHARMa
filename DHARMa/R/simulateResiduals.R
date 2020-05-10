@@ -38,6 +38,7 @@
 #'
 #' @seealso \code{\link{testResiduals}}, \code{\link{plot.DHARMa}}, \code{\link{plotResiduals}}, \code{\link{print.DHARMa}}, \code{\link{residuals.DHARMa}}, \code{\link{recalculateResiduals}}
 #'
+#'
 #' @example inst/examples/simulateResidualsHelp.R
 #' @import stats
 #' @export
@@ -173,11 +174,10 @@ getPossibleModels<-function()c("lm", "glm", "negbin", "lmerMod", "glmerMod", "ga
 #'
 #' @details The main purpose of this function os to check if the fitted model class is supported by DHARMa. The function additionally checks for properties of the fitted model that could create problems for calculating residuals or working with the resuls in DHARMa.
 #'
-#' NA values in the data: checkModel will detect if there were NA values in the data frame. For NA values, most regression models will remove the entire observation from the data. This is not a problem for DHARMa - residuals are then only calculated for non-NA rows in the data. However, if you provide additional predictors to DHARMa, for example to plot residuals against a predictor, you will have to remove all NA rows that were also removed in the model. For most models, you can get the rows of the data that were actually used in the fit via rownames(model.frame(fittedModel))
 #'
 #' @example inst/examples/checkModelHelp.R
 #'
-#' @export
+#' @keywords internal
 checkModel <- function(fittedModel, stop = F){
 
   out = T
@@ -187,7 +187,12 @@ checkModel <- function(fittedModel, stop = F){
     else stop("DHARMa: fittedModel not in class of supported models")
   }
 
-  if(hasNA(fittedModel)) message("It seems there were NA values in the data used for fitting the model. This can create problems if you supply additional data to DHARMa functions. See ?checkModel for details")
+  # if(hasNA(fittedModel)) message("It seems there were NA values in the data used for fitting the model. This can create problems if you supply additional data to DHARMa functions. See ?checkModel for details")
+
+  # TODO: check as implemented does not work reliably, check if there is any other option to check for NA
+
+  #  NA values in the data: checkModel will detect if there were NA values in the data frame. For NA values, most regression models will remove the entire observation from the data. This is not a problem for DHARMa - residuals are then only calculated for non-NA rows in the data. However, if you provide additional predictors to DHARMa, for example to plot residuals against a predictor, you will have to remove all NA rows that were also removed in the model. For most models, you can get the rows of the data that were actually used in the fit via rownames(model.frame(fittedModel))
+
 
   if (class(fittedModel)[1] == "gam" ) if (class(fittedModel$family)[1] == "extended.family") stop("It seems you are trying to fit a model from mgcv that was fit with an extended.family. Simulation functions for these families are not yet implemented in DHARMa. See issue https://github.com/florianhartig/DHARMa/issues/11 for updates about this")
 

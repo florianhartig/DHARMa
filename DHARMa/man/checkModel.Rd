@@ -12,12 +12,10 @@ checkModel(fittedModel, stop = F)
 \item{stop}{whether to throw an error if the model is not supported by DHARMa}
 }
 \description{
-The function checks if the fitted model is supported by DHARMa, and if there are other issues, for example the use of weights, that could create problems for calculating quantile residuals
+The function checks if the fitted model is supported by DHARMa, and if there are other issues that could create problems
 }
 \details{
 The main purpose of this function os to check if the fitted model class is supported by DHARMa. The function additionally checks for properties of the fitted model that could create problems for calculating residuals or working with the resuls in DHARMa.
-
-NA values in the data: checkModel will detect if there were NA values in the data frame. For NA values, most regression models will remove the entire observation from the data. This is not a problem for DHARMa - residuals are then only calculated for non-NA rows in the data. However, if you provide additional predictors to DHARMa, for example to plot residuals against a predictor, you will have to remove all NA rows that were also removed in the model. For most models, you can get the rows of the data that were actually used in the fit via rownames(model.frame(fittedModel))
 }
 \examples{
 
@@ -31,3 +29,4 @@ sel = as.numeric(rownames(model.frame(fittedModel)))
 # now use the indices when plotting against other variables
 plotResiduals(res, form = testData$Environment1[sel])
 }
+\keyword{internal}
