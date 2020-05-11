@@ -31,6 +31,19 @@ The vignette, which can also be read online [here](https://cran.r-project.org/we
 citation("DHARMa")
 ```
 
+To fit a model, rum 
+
+
+```{r}
+testData = createData(sampleSize = 200, family = poisson())
+m1 <- glm(observedResponse ~ Environment1, 
+                     family = "poisson", data = testData)
+
+res <- simulateResiduals(m1, plot = T)
+```
+
+And read to help of ?simulateResiduals and the vignette to understand what you can do with res. 
+
 ### Development release 
 
 If you want to install the current (development) version from this repository, run
