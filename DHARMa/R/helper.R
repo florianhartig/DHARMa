@@ -39,7 +39,7 @@ DHARMa.ecdf <- function (x)
 #'
 #' @references
 #'
-#' Smith, J. Q. "Diagnostic checks of non‐standard time series models." Journal of Forecasting 4.3 (1985): 283-291.
+#' Smith, J. Q. "Diagnostic checks of non-standard time series models." Journal of Forecasting 4.3 (1985): 283-291.
 #'
 #' Dunn, P.K., & Smyth, G.K. (1996). Randomized quantile residuals. Journal of Computational and Graphical Statistics 5, 236-244.
 #'

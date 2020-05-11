@@ -29,7 +29,7 @@ The current default (available since DHARMa 0.3.1) are probability integral tran
 Before DHARMa 0.3.1, a different randomization procedure was used, in which the a U(-0.5, 0.5) distribution was added on observations and simualtions for discrete distributions. For a completely discrete distribution, the two procedures should deliver equivalent results, but the second method has the disadvantage that a) one has to know if the distribution is discrete (DHARMa tries to recognize this automatically), and b) that it leads to inefficiencies for some distributions such as the the Tweedie, which are partly continous, partly discrte (see e.g. https://github.com/florianhartig/DHARMa/issues/168).
 }
 \references{
-Smith, J. Q. "Diagnostic checks of non‐standard time series models." Journal of Forecasting 4.3 (1985): 283-291.
+Smith, J. Q. "Diagnostic checks of non-standard time series models." Journal of Forecasting 4.3 (1985): 283-291.
 
 Dunn, P.K., & Smyth, G.K. (1996). Randomized quantile residuals. Journal of Computational and Graphical Statistics 5, 236-244.
 
