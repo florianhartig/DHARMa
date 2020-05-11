@@ -26,7 +26,7 @@ knitr::opts_chunk$set(fig.width=8.5, fig.height=5.5, fig.align='center', warning
 
 # Motivation 
 
-Residual interpretation for generalized linear mixed models (GLMMs) is often problematic. As an example, here two Poisson GLMMs, one that is lacking a quadratic effect, and one that fits the data perfectly. I show three standard residuals diagnostics each. Which is the misspecified model?
+The interpretation of conventional residuals for generalized linear (mixed) and other hierarchical statistical models is often problematic. As an example, here the result of conventional Deviance, Pearson and raw residuals for two Poisson GLMMs, one that is lacking a quadratic effect, and one that fits the data perfectly. Could you tell which is the correct model?
 
 ```{r, echo = F, fig.width=8, fig.height=3.5}
 library(lme4)
@@ -44,15 +44,15 @@ plotConventionalResiduals(fittedModel)
 
 ```
 
-Just for completeness - it was the first one. But don't get too excited if you got it right. Either you were lucky, or you noted that the first model seems a bit overdispersed (range of the Pearson residuals). But even when noting that, would you have added a quadratic effect, instead of adding an overdispersion correction? The point here is that misspecifications in GL(M)Ms cannot reliably be diagnosed with standard residual plots, and GLMMs are thus often not as thoroughly checked as LMs. 
+Just for completeness - it was the first one. But don't get too excited if you got it right. Either you were lucky, or you noted that the first model seems a bit overdispersed (by the range of the Pearson residuals). But even so, would you have added a quadratic effect, instead of adding an overdispersion correction? The point here is that misspecifications in GL(M)Ms cannot reliably be diagnosed with standard residual plots, and thus GLMMs are often not as thoroughly checked as they should. 
 
-One reason why GL(M)Ms residuals are harder to interpret is that the expected distribution of the data changes with the fitted values. Reweighting with the expected variance, as done in Pearson residuals, or using deviance residuals, helps a bit, but does not lead to visually homogenous residuals even if the model is correctly specified. As a result, standard residual plots, when interpreted in the same way as for linear models, seem to show all kind of problems, such as non-normality, heteroscedasticity, even if the model is correctly specified. Questions on the R mailing lists and forums show that practitioners are regularly confused about whether such patterns in GL(M)M residuals are a problem or not. 
+One reason why GL(M)Ms residuals are harder to interpret is that the expected distribution of the data (aka predictive distribution) changes with the fitted values. Reweighting with the expected dispersion, as done in Pearson residuals, or using deviance residuals, helps to some extent, but it does not lead to visually homogenous residuals, even if the model is correctly specified. As a result, standard residual plots, when interpreted in the same way as for linear models, seem to show all kind of problems, such as non-normality, heteroscedasticity, even if the model is correctly specified. Questions on the R mailing lists and forums show that practitioners are regularly confused about whether such patterns in GL(M)M residuals are a problem or not. 
 
-But even experienced statistical analysts currently have few options to diagnose misspecification problems in GLMMs. In my experience, the current standard practice is to eyeball the residual plots for major misspecifications, potentially have a look at the random effect distribution, and then run a test for overdispersion, which is usually positive, after which the model is modified towards an overdispersed / zero-inflated distribution. This approach, however, has a number of problems, notably:
+But even experienced statistical analysts currently have few options to diagnose misspecification problems in GLMMs. In my experience, the current standard practice is to eyeball the residual plots for major misspecifications, potentially have a look at the random effect distribution, and then run a test for overdispersion, which is usually positive, after which the model is modified towards an overdispersed / zero-inflated distribution. This approach, however, has a number of drawbacks, notably:
 
-* Overdispersion often comes from missing or misspecified predictors. Standard residual plots make it difficult to test for residual patterns against the predictors to check for candidates.
+* Overdispersion is often the result of missing predictos or a misspecified model structure. Standard residual plots make it difficult to identify these probelms by examining residual correlations or patterns of residuals against predictors. 
 
-* Not all overdispersion is the same. For count data, the negative binomial creates a different distribution than adding observation-level random effects to the Poisson. Once overdispersion is corrected, such violations of distributional assumptions are not detectable with standard overdispersion tests (because the tests only looks at total dispersion), and nearly impossible to see visually from standard residual plots. 
+* Not all overdispersion is the same. For count data, the negative binomial creates a different distribution than adding observation-level random effects to the Poisson. Once overdispersion is corrected for, such violations of distributional assumptions are not detectable with standard overdispersion tests (because the tests only looks at total dispersion), and nearly impossible to see visually from standard residual plots. 
 
 * Dispersion frequently varies with predictors (heteroscedasticity). This can have a significant effect on the inference. While it is standard to tests for heteroscedasticity in linear regressions, heteroscedasticity is currently hardly ever tested for in GLMMs, although it is likely as frequent and influential. 
 
@@ -116,39 +116,33 @@ Most functions in DHARMa could be calculated directly on the fitted model. So, f
 testDispersion(fittedModel)
 ```
 
-In this case, the randomized quantile residuals are calculated on the fly. However, residual calculation can take a while, and would have to be repeated by every other test you call. It is therefore highly recommended to first calculate the residuals once, using the simulateResiduals() function. This function returns a DHARMa object, which can then be passed on to all other plots and test functions. 
+In this case, the randomized quantile residuals are calculated on the fly. However, residual calculation can take a while, and would have to be repeated by every other test you call. It is therefore highly recommended to first calculate the residuals once, using the simulateResiduals() function. 
 
 ```{r}
-# get residuals
-simulationOutput <- simulateResiduals(fittedModel = fittedModel, n = 250)
+simulationOutput <- simulateResiduals(fittedModel = fittedModel, plot = T)
 ```
 
-Using the simulateResiduals function has the added benefit that you can modify the way residuals are calculated. For example, the default number of simulations to run is 250, which proved to be a reasonable compromise between computation time and precision, but if high precision is desired, n should be raised to 1000 at least. 
-
-What the function does is a) creating n new synthetic datasets by simulating from the fitted model, b) calculates the cumulative distribution of simulated values for each observed value, and c) returning the quantile value that corresponds to the observed value. 
-
-For example, a scaled residual value of 0.5 means that half of the simulated data are higher than the observed value, and half of them lower. A value of 0.99 would mean that nearly all simulated data are lower than the observed value. The minimum/maximum values for the residuals are 0 and 1. 
-
-The calculated residuals can be accesed via
+The function implements the algorithm discussed above, i.e. it a) creates n new synthetic datasets by simulating from the fitted model, b) calculates the cumulative distribution of simulated values for each observed value, and c) calculates the quantile (residual) value that corresponds to the observed value. Those quantiles are called "scaled residuals" in DHARMa. For example, a scaled residual value of 0.5 means that half of the simulated data are higher than the observed value, and half of them lower. A value of 0.99 would mean that nearly all simulated data are lower than the observed value. The minimum/maximum values for the residuals are 0 and 1. The function returns an object of class DHARMa, containing the simulations and the scaled residuals, which can then be passed on to all other plots and test functions. When specifying the optional argument plot = T, the standard DHARMa residual plot is displayed directly, which will be discussed below. The calculated residuals can be accesed via
 
 ```{r, eval = F}
 residuals(simulationOutput)
 ```
 
-As discussed above, for a correctly specified model we would expect 
+Using the simulateResiduals function has the added benefit that you can modify the way in which residuals are calculated. For example, the default number of simulations to run is n = 250, which proved to be a reasonable compromise between computation time and precision, but if high precision is desired, n should be raised to 1000 at least. 
 
-* a uniform (flat) distribution of the overall residuals 
+As discussed above, for a correctly specified model we would expect assymptotically 
+
+* a uniform (flat) distribution of the scaled residuals 
 
 * uniformity in y direction if we plot against any predictor. 
 
-Note: the expected uniform distribution is the only differences to the linear regression that one has to keep in mind when interpreting DHARMa residuals. If you cannot get used to this and you must have residuals that behave exactly like a linear regression, you can transform the uniform distribution to another distribution, for example normal. 
+Note: the expected uniform distribution is the only differences to the linear regression that one has to keep in mind when interpreting DHARMa residuals. If you cannot get used to this and you must have residuals that behave exactly like a linear regression, you can transform the uniform distribution to another distribution, for example normal, in the residual() function via 
 
 ```{r, eval = F}
 residuals(simulationOutput, quantileFunction = qnorm, outlierValues = c(-7,7))
 ```
 
-These normal residuals will behave exactly like the residuals of a linear regression. However, for reasons of a) numeric stability with low number of simulations and b) my conviction that it is much easier to visually detect deviations from uniformity than normality, I would STRONGLY advice against using this transformation. 
-
+These normal residuals will behave exactly like the residuals of a linear regression. However, for reasons of a) numeric stability with low number of simulations and b) my conviction that it is much easier to visually detect deviations from uniformity than normality, I would advice against using this transformation. 
 
 ## Plotting the scaled residuals
 
@@ -165,7 +159,7 @@ plotQQunif(simulationOutput) # left plot in plot.DHARMa()
 plotResiduals(simulationOutput) # right plot in plot.DHARMa()
 ```
 
-* plotQQunif creates a qq-plot to detect overall deviations from the expected distribution, by default with added tests for uniformity, dispersion and outliers.  
+* plotQQunif creates a qq-plot to detect overall deviations from the expected distribution, by default with added tests for correct distribution (KS test), dispersion and outliers. Note that outliers in DHARMa are values that are by default defined as values outside the simulation envelope, not in terms of a particular quantile. Thus, which values will appear as outliers will depend on the number of simulations. If you want outliers in terms of a particuar quantile, you can use the outliers() function.    
 
 * plotResiduals produces a plot of the residuals against the predicted value (or alternatively, other variable). Simulation outliers (data points that are outside the range of simulated values) are highlighted as red stars. These points should be carefully interpreted, because we actually don't know "how much" these values deviate from the model expectation. Note also that the probability of an outlier depends on the number of simulations (in fact, it is 1/(nSim +1) for each side), so whether the existence of outliers is a reason for concern depends also on the number of simulations. 
 

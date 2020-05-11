@@ -376,7 +376,7 @@ test_that("glm poisson weights throws warning",
                       # weights cannot be fit with poisson, because spaMM directly interpretes weights as variance
                       testData$weights = weights
 
-                      # doesn't throw error / warning
+                      # doesn't throw error / warning, but seems intended, see https://github.com/florianhartig/DHARMa/issues/175
                       #expect_error( fittedModel <- HLfit(observedResponse ~ Environment1 + (1|group) , family = "poisson",  data = testData, prior.weights = weights))
                       fittedModel <- HLfit(observedResponse ~ Environment1 + (1|group) , family = negbin(1),  data = testData, prior.weights = weights)
                       simulateResiduals(fittedModel)
