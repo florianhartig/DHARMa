@@ -14,14 +14,13 @@ editor_options:
   chunk_output_type: console
 ---
 
+```{r global_options, include=FALSE}
+knitr::opts_chunk$set(fig.width=8.5, fig.height=5.5, fig.align='center', warning=FALSE, message=FALSE, cache = T)
+```
+
 ```{r, echo = F, message = F}
 library(DHARMa)
 set.seed(123)
-```
-
-
-```{r global_options, include=FALSE}
-knitr::opts_chunk$set(fig.width=8.5, fig.height=5.5, fig.align='center', warning=FALSE, message=FALSE, cache = F)
 ```
 
 # Motivation 
@@ -110,21 +109,21 @@ testData = createData(sampleSize = 250)
 fittedModel <- glmer(observedResponse ~ Environment1 + (1|group) , family = "poisson", data = testData)
 ```
 
-Most functions in DHARMa could be calculated directly on the fitted model. So, for example, if you are only interested in testing dispersion, you could calculate
+Most functions in DHARMa could be calculated directly on the fitted model. So, for example, if you are only interested in testing dispersion, you could calculate 
 
-```{r}
+```{r, fig.show='hide'}
 testDispersion(fittedModel)
 ```
 
 In this case, the randomized quantile residuals are calculated on the fly. However, residual calculation can take a while, and would have to be repeated by every other test you call. It is therefore highly recommended to first calculate the residuals once, using the simulateResiduals() function. 
 
-```{r}
+```{r, fig.show='hide'}
 simulationOutput <- simulateResiduals(fittedModel = fittedModel, plot = T)
 ```
 
 The function implements the algorithm discussed above, i.e. it a) creates n new synthetic datasets by simulating from the fitted model, b) calculates the cumulative distribution of simulated values for each observed value, and c) calculates the quantile (residual) value that corresponds to the observed value. Those quantiles are called "scaled residuals" in DHARMa. For example, a scaled residual value of 0.5 means that half of the simulated data are higher than the observed value, and half of them lower. A value of 0.99 would mean that nearly all simulated data are lower than the observed value. The minimum/maximum values for the residuals are 0 and 1. The function returns an object of class DHARMa, containing the simulations and the scaled residuals, which can then be passed on to all other plots and test functions. When specifying the optional argument plot = T, the standard DHARMa residual plot is displayed directly, which will be discussed below. The calculated residuals can be accesed via
 
-```{r, eval = F}
+```{r, results = "hide"}
 residuals(simulationOutput)
 ```
 
@@ -290,8 +289,8 @@ A few general rules of thumb
 This this is how **overdispersion** looks like in the DHARMa residuals
 
 ```{r}
-testData = createData(sampleSize = 500, overdispersion = 2, family = poisson())
-fittedModel <- glmer(observedResponse ~ Environment1 + (1|group) , family = "poisson", data = testData)
+testData = createData(sampleSize = 200, overdispersion = 1.5, family = poisson())
+fittedModel <- glm(observedResponse ~  Environment1 , family = "poisson", data = testData)
 
 simulationOutput <- simulateResiduals(fittedModel = fittedModel)
 plot(simulationOutput)
@@ -307,18 +306,9 @@ This is an example of underdispersion
 testData = createData(sampleSize = 500, intercept=0, fixedEffects = 2, overdispersion = 0, family = poisson(), roundPoissonVariance = 0.001, randomEffectVariance = 0)
 fittedModel <- glmer(observedResponse ~ Environment1 + (1|group) , family = "poisson", data = testData)
 
-summary(fittedModel)
-
-# plotConventionalResiduals(fittedModel)
-
 simulationOutput <- simulateResiduals(fittedModel = fittedModel)
 plot(simulationOutput)
 ```
-
-```{r fig.width=4.5, fig.height=4.5}
-testUniformity(simulationOutput = simulationOutput)
-```
-
 
 Here, we get too many residuals around 0.5, which means that we are not getting as many residuals as we would expect in the tail of the distribution than expected from the fitted model. 
 
@@ -439,13 +429,11 @@ simulationOutput <- simulateResiduals(fittedModel = fittedModel)
 plot(simulationOutput)
 ```
 
-The 
+The exact p-values for the quantile lines in the plot can be displayed via 
 
-```{r}
+```{r, eval = F}
 testQuantiles(simulationOutput)
-plotResiduals(simulationOutput)
 ```
-
 
 Adding a simple overdispersion correction will try to find a compromise between the different levels of dispersion in the model. The qq plot looks better now, but there is still a pattern in the residuals 
 
@@ -479,7 +467,7 @@ fittedModel <- glmer(observedResponse ~ Environment1 + Environment2 + (1|group) 
 simulationOutput <- simulateResiduals(fittedModel = fittedModel)
 # plotConventionalResiduals(fittedModel)
 plot(simulationOutput, quantreg = T)
-testUniformity(simulationOutput = simulationOutput)
+# testUniformity(simulationOutput = simulationOutput)
 ```
 
 It is difficult to see that there is a problem at all in the general plot, but it becomes clear if we plot against the environment
@@ -506,12 +494,11 @@ simulationOutput <- simulateResiduals(fittedModel = fittedModel)
 
 The function testTemporalAutocorrelation performs a Durbin-Watson test from the package lmtest on the uniform residuals to test for temporal autocorrelation in the residuals, and additionally plots the residuals against time. 
 
-The function also has an option to perform the test against randomized time (H0) - the sense of this is to be able to run simulations for testing if the test has correct error rates in the respective situation, i.e. is not oversensitive (too high sensitivity has sometimes been reported for Durbin-Watson). 
-
-```{r, fig.width=4, fig.height=4}
+```{r}
 testTemporalAutocorrelation(simulationOutput = simulationOutput, time = testData$time)
-testTemporalAutocorrelation(simulationOutput = simulationOutput)
 ```
+
+If no time varialbe is provided, the function uses a random time (H0) - apart from testing, the sense of this is to be able to run simulations for testing if the test has correct error rates in the respective situation, i.e. is not oversensitive (too high sensitivity has sometimes been reported for Durbin-Watson). 
 
 Note general caveats mentioned about the DW test in the help of testTemporalAutocorrelation(). In general, as for spatial autocorrelation, it is difficult to specify one test, because temporal and spatial autocorrelation can appear in many flavors, short-scale and long scale, homogenous or not, and so on. The pre-defined functions in DHARMa are a starting point, but they are not something you should rely on blindly. 
 
@@ -536,7 +523,7 @@ An additional test against randomized space (H0) can be performed, for the same 
 
 ```{r, fig.width=4.5, fig.height=4.5}
 testSpatialAutocorrelation(simulationOutput = simulationOutput, x = testData$x, y= testData$y)
-testSpatialAutocorrelation(simulationOutput = simulationOutput)
+# testSpatialAutocorrelation(simulationOutput = simulationOutput) # again, this uses random x,y
 ```
 
 The usual caveats for Moran.I apply, in particular that it may miss non-local and heterogeneous (non-stationary) spatial autocorrelation. The former should be better detectable visually in the spatial plot, or via regressions on the pattern. 
@@ -577,8 +564,9 @@ data$logDensity = log10(data$density.attack+1)
 ```
 
 
-```{r, fig.width=4, fig.height=4}
-plot(N_parasitized / (N_adult + N_parasitized ) ~ logDensity, xlab = "Density", ylab = "Proportion infected", data = data)
+```{r, fig.width=5, fig.height=5}
+plot(N_parasitized / (N_adult + N_parasitized ) ~ logDensity, 
+     xlab = "Density", ylab = "Proportion infected", data = data)
 ```
 
 Let's fit the data with a regular binomial n/k glm
@@ -645,9 +633,9 @@ Somewhat better, but not good. Move to neg binom, to adjust dispersion
 
 ```{r}
 m3 <- glmmTMB(SiblingNegotiation ~ FoodTreatment*SexParent + offset(log(BroodSize)) + (1|Nest), data=Owls , family = nbinom1)
-summary(m3)
 
 res <- simulateResiduals(m3, plot = T)
+par(mfrow = c(1,3))
 plotResiduals(res, Owls$FoodTreatment)
 testDispersion(res)
 testZeroInflation(res)
@@ -657,10 +645,9 @@ We see underdispersion now. In a model with variable dispersion, this is often t
 
 ```{r}
 m4 <- glmmTMB(SiblingNegotiation ~ FoodTreatment*SexParent + offset(log(BroodSize)) + (1|Nest), ziformula = ~ FoodTreatment + SexParent,  data=Owls , family = nbinom1)
-summary(m4)
 
-res <- simulateResiduals(m4)
-plot(res)
+res <- simulateResiduals(m4, plot = T)
+par(mfrow = c(1,3))
 plotResiduals(res, Owls$FoodTreatment)
 testDispersion(res)
 testZeroInflation(res)
@@ -670,9 +657,9 @@ This looks a lot better. Trying a slightly different model specification
 
 ```{r}
 m5 <- glmmTMB(SiblingNegotiation ~ FoodTreatment*SexParent + offset(log(BroodSize)) + (1|Nest), dispformula = ~ FoodTreatment , ziformula = ~ FoodTreatment + SexParent,  data=Owls , family = nbinom1)
-summary(m5)
 
-simulateResiduals(m5, plot = T)
+res <- simulateResiduals(m4, plot = T)
+par(mfrow = c(1,3))
 plotResiduals(res, Owls$FoodTreatment)
 testDispersion(res)
 testZeroInflation(res)
@@ -727,7 +714,6 @@ testDispersion(simulationOutput)
 
 simulationOutput = recalculateResiduals(simulationOutput , group = testData$group)
 testDispersion(simulationOutput)
-
 ```
 
 
