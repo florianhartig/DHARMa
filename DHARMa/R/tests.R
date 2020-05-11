@@ -110,7 +110,10 @@ testQuantiles <- function(simulationOutput, predictor = NULL, quantiles = c(0.25
       datTemp = dat
       datTemp$res = datTemp$res - quantiles[i]
 
-      quantResult = try(capture.output(quantileFits[[i]] <- qgam::qgam(res ~ s(pred) ,  data =datTemp, qu = quantiles[i])), silent = T)
+      # settings for k = the dimension of the basis used to represent the smooth term.
+      # see https://github.com/mfasiolo/qgam/issues/37
+      dimSmooth =  min(length(unique(datTemp$pred)), 10)
+      quantResult = try(capture.output(quantileFits[[i]] <- qgam::qgam(res ~ s(pred, k = dimSmooth) ,  data =datTemp, qu = quantiles[i])), silent = T)
       if(inherits(quantResult, "try-error")){
         message("Unable to calculate quantile regression for quantile ", quantiles[i], ". Possibly to few (unique) data points / predictions. Will be ommited in plots and significance calculations.")
       } else {
