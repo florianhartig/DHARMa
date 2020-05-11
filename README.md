@@ -31,7 +31,7 @@ The vignette, which can also be read online [here](https://cran.r-project.org/we
 citation("DHARMa")
 ```
 
-To fit a model, rum 
+To fit a model (from any package supported by DHARMa), run 
 
 
 ```{r}
@@ -42,7 +42,7 @@ m1 <- glm(observedResponse ~ Environment1,
 res <- simulateResiduals(m1, plot = T)
 ```
 
-And read to help of ?simulateResiduals and the vignette to understand what you can do with res. 
+and read to help of ?simulateResiduals and the vignette to understand what you can do with the object res. 
 
 ### Development release 
 
