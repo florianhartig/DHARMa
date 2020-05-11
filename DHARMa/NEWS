@@ -1,10 +1,19 @@
 NOTE: for more news about the package, see https://github.com/florianhartig/DHARMa/releases
 
-
+DHARMa 0.3.1
+============
 
 Major changes
 
-- added PIT quantile calculations based on suggestion in #168
+- added PIT quantile calculations based on suggestion in #168. For details see ?getQuantiles
+
+Bugfixes
+
+- bugfix for passing on parameters to plot.default through plotR.DHARMa and plotResiduals
+
+Minor changes
+
+- added checks / warnings for models fit with weights
 
 
 DHARMa 0.3.0

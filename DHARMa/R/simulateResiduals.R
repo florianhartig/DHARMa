@@ -1,6 +1,7 @@
 #' Create simulated residuals
 #'
-#' The function creates scaled residuals by simulating from the fitted model
+#' The function creates scaled residuals by simulating from the fitted model. Residuals can be extracted with \code{\link{residuals.DHARMa}}. See \code{\link{testResiduals}} for an overview of residual tests, \code{\link{plot.DHARMa}} for an overview of available plots.
+#'
 #' @param fittedModel a fitted model  of a class supported by DHARMa
 #' @param n number of simulations. Default is 100. A more save value would be 250 or even 1000. The smaller the number, the higher the stochastic error on the residuals. Also, for very small n, discretization artefacts can influence the tests.
 #' @param refit if FALSE, new data will be simulated and scaled residuals will be created by comparing observed data with new data. If TRUE, the model will be refit on the simulated data (parametric bootstrap), and scaled residuals will be created by comparing observed with refitted residuals.
@@ -35,9 +36,8 @@
 #'
 #' \strong{Transformation to other distributions}: DHARMa calculates residuals for which the theoretical expectation (assuming a correctly specified model) is uniform. To transfor this residuals to another distribution (e.g. so that a correctly specified model will have normal residuals) see \code{\link{residuals.DHARMa}}.
 #'
-#' @note See \code{\link{testResiduals}} for an overview of residual tests, \code{\link{plot.DHARMa}} for an overview of available plots.
+#' @seealso \code{\link{testResiduals}}, \code{\link{plot.DHARMa}}, \code{\link{plotResiduals}}, \code{\link{print.DHARMa}}, \code{\link{residuals.DHARMa}}, \code{\link{recalculateResiduals}}
 #'
-#' @seealso \code{\link{testResiduals}}, \code{\link{plot.DHARMa}}, \code{\link{print.DHARMa}}, \code{\link{residuals.DHARMa}}, \code{\link{recalculateResiduals}}
 #'
 #' @example inst/examples/simulateResidualsHelp.R
 #' @import stats
@@ -163,18 +163,16 @@ simulateResiduals <- function(fittedModel, n = 250, refit = F, integerResponse =
 
 getPossibleModels<-function()c("lm", "glm", "negbin", "lmerMod", "glmerMod", "gam", "bam", "glmmTMB", "HLfit")
 
+
+
 #' Check if the fitted model is supported by DHARMa
 #'
-#' The function checks if the fitted model is supported by DHARMa, and if there are other issues, for example the use of weights, that could create problems for calculating quantile residuals
+#' The function checks if the fitted model is supported by DHARMa, and if there are other issues that could create problems
 #'
 #' @param fittedModel a fitted model
 #' @param stop whether to throw an error if the model is not supported by DHARMa
 #'
-#' @details The main purpose of this function os to check if the fitted model class is supported by DHARMa. The function additionally checks for properties of the fitted model that could create problems for calculating residuals or working with the resuls in DHARMa. At the moment, two such issues are checked
-#'
-#' 1) Use of weights: most regression models in R support the use of the weights argument. Unfortunately, the argument means different things, depending on the context. In many situations, weights basically reweights the likelihood. In this case, simulated quantile residuals cannot be used, because the weighting
-#'
-#' 2) NA values in the data: checkModel will detect if there were NA values in the data frame. For NA values, most regression models will remove the entire observation from the data. This is not a problem for DHARMa - residuals are then only calculated for non-NA rows in the data. However, if you provide additional predictors to DHARMa, for example to plot residuals against a predictor, you will have to remove all NA rows that were also removed in the model, otherwise the lengths of the vectors will not match.
+#' @details The main purpose of this function os to check if the fitted model class is supported by DHARMa. The function additionally checks for properties of the fitted model that could create problems for calculating residuals or working with the resuls in DHARMa.
 #'
 #'
 #' @keywords internal
@@ -187,9 +185,13 @@ checkModel <- function(fittedModel, stop = F){
     else stop("DHARMa: fittedModel not in class of supported models")
   }
 
-  # if(hasWeigths(fittedModel)) warning("Your fitted model includes weights. For many GLMs, weights are not included in the simulations, and simulated quantile residuals are therefore not reliable. See ?checkModel for details")
-
   # if(hasNA(fittedModel)) message("It seems there were NA values in the data used for fitting the model. This can create problems if you supply additional data to DHARMa functions. See ?checkModel for details")
+
+  # TODO: check as implemented does not work reliably, check if there is any other option to check for NA
+  # #' @example inst/examples/checkModelHelp.R
+
+  #  NA values in the data: checkModel will detect if there were NA values in the data frame. For NA values, most regression models will remove the entire observation from the data. This is not a problem for DHARMa - residuals are then only calculated for non-NA rows in the data. However, if you provide additional predictors to DHARMa, for example to plot residuals against a predictor, you will have to remove all NA rows that were also removed in the model. For most models, you can get the rows of the data that were actually used in the fit via rownames(model.frame(fittedModel))
+
 
   if (class(fittedModel)[1] == "gam" ) if (class(fittedModel$family)[1] == "extended.family") stop("It seems you are trying to fit a model from mgcv that was fit with an extended.family. Simulation functions for these families are not yet implemented in DHARMa. See issue https://github.com/florianhartig/DHARMa/issues/11 for updates about this")
 
@@ -281,4 +283,3 @@ recalculateResiduals <- function(simulationOutput, group = NULL, aggregateBy = s
   class(out) = "DHARMa"
   return(out)
 }
-

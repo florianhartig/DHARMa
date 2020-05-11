@@ -1,5 +1,16 @@
+---
+title: '144'
+author: "Florian Hartig"
+date: "5/10/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
 library(mgcv)
-#library(mgcViz)
 library(DHARMa)
 
 
@@ -9,14 +20,9 @@ data1<-as.data.frame(cbind(X,Y))
 mod<-gam(Y~s(X,k=3),data=data1)
 plot(mod,resid=TRUE)
 
+dim(simulate(mod))
 
-simulate(mod)
-
-simout <- simulateResiduals(mod, plot=T)
-
-predict(mod)
-
-x = simulateResiduals(mod)
-
-?mgcViz
+library(mgcViz)
+dim(simulate(mod))
+```
 

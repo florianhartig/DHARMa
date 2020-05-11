@@ -110,7 +110,10 @@ testQuantiles <- function(simulationOutput, predictor = NULL, quantiles = c(0.25
       datTemp = dat
       datTemp$res = datTemp$res - quantiles[i]
 
-      quantResult = try(capture.output(quantileFits[[i]] <- qgam::qgam(res ~ s(pred) ,  data =datTemp, qu = quantiles[i])), silent = T)
+      # settings for k = the dimension of the basis used to represent the smooth term.
+      # see https://github.com/mfasiolo/qgam/issues/37
+      dimSmooth =  min(length(unique(datTemp$pred)), 10)
+      quantResult = try(capture.output(quantileFits[[i]] <- qgam::qgam(res ~ s(pred, k = dimSmooth) ,  data =datTemp, qu = quantiles[i])), silent = T)
       if(inherits(quantResult, "try-error")){
         message("Unable to calculate quantile regression for quantile ", quantiles[i], ". Possibly to few (unique) data points / predictions. Will be ommited in plots and significance calculations.")
       } else {
@@ -219,7 +222,7 @@ testOutliers <- function(simulationOutput, alternative = c("two.sided", "greater
 #'
 #' If refit = T, the function compares the approximate deviance (via squared pearson residuals) with the same quantity from the models refitted with simulated data. Applying this is much slower than the previous alternative, but simulations show that it is slightly more powerful as well. However, given the computational cost, I would suggest that most users will be satisfied with the standard dispersion test.
 #'
-#' @note The dispersion test can be quite different if it is evaluate on conditional or unconditional simulations (see \code{\link{simulateResiduals}}). The default in DHARMa is to use unconditional simulations, but I recommend trying both.
+#' @note The results of the dispersion test can can differ depending on whether it is evaluated on conditional (= conditional on fitted random effects) or unconditional (= REs are re-simulated) simulations. You can change betwee conditional or unconditional simulations in  \code{\link{simulateResiduals}} if this is supported by the regression package that you use. The default in DHARMa is to use unconditional simulations, but I have often found that conditional simulations are more sensitive to dispersion problems. I recommend trying both, as neither test should be positive if the dispersion is correct.
 #'
 #' @author Florian Hartig
 #' @seealso \code{\link{testResiduals}}, \code{\link{testUniformity}},  \code{\link{testOutliers}}, \code{\link{testZeroInflation}}, \code{\link{testGeneric}}, \code{\link{testTemporalAutocorrelation}}, \code{\link{testSpatialAutocorrelation}}, \code{\link{testQuantiles}}
