@@ -626,46 +626,61 @@ The next examples uses the fairly well known Owl dataset which is provided in gl
 
 The following shows a sequence of models, all checked with DHARMa. The example is discussed in a talk at ISEC 2018, see slides [here](https://www.slideshare.net/florianhartig/mon-c5hartig2493). 
 
-```{r}
 
+```{r}
 m1 <- glm(SiblingNegotiation ~ FoodTreatment*SexParent + offset(log(BroodSize)), data=Owls , family = poisson)
 res <- simulateResiduals(m1)
 plot(res)
+```
 
+OK, this is highly overdispersed. Let's add a RE on nest
 
+```{r}
 m2 <- glmer(SiblingNegotiation ~ FoodTreatment*SexParent + offset(log(BroodSize)) + (1|Nest), data=Owls , family = poisson)
 res <- simulateResiduals(m2)
 plot(res)
+```
 
+Somewhat better, but not good. Move to neg binom, to adjust dispersion
 
+```{r}
 m3 <- glmmTMB(SiblingNegotiation ~ FoodTreatment*SexParent + offset(log(BroodSize)) + (1|Nest), data=Owls , family = nbinom1)
-res <- simulateResiduals(m3)
-plot(res)
 summary(m3)
 
+res <- simulateResiduals(m3, plot = T)
 plotResiduals(res, Owls$FoodTreatment)
-
 testDispersion(res)
 testZeroInflation(res)
+```
 
+We see underdispersion now. In a model with variable dispersion, this is often the signal that some other distributional assumptions are violated, that is why I checked for zero-inflation, and it looks as if there is some. Therefore fitting a zero-inflated model
+
+```{r}
 m4 <- glmmTMB(SiblingNegotiation ~ FoodTreatment*SexParent + offset(log(BroodSize)) + (1|Nest), ziformula = ~ FoodTreatment + SexParent,  data=Owls , family = nbinom1)
 summary(m4)
 
 res <- simulateResiduals(m4)
 plot(res)
-
 plotResiduals(res, Owls$FoodTreatment)
-
 testDispersion(res)
 testZeroInflation(res)
+```
 
+This looks a lot better. Trying a slightly different model specification 
+
+```{r}
 m5 <- glmmTMB(SiblingNegotiation ~ FoodTreatment*SexParent + offset(log(BroodSize)) + (1|Nest), dispformula = ~ FoodTreatment , ziformula = ~ FoodTreatment + SexParent,  data=Owls , family = nbinom1)
 summary(m5)
 
+simulateResiduals(m5, plot = T)
+plotResiduals(res, Owls$FoodTreatment)
+testDispersion(res)
+testZeroInflation(res)
 ```
 
-# Notes on particular data types 
+but that seems to make little difference. Both models would be acceptable in terms of their fit to the data. Which one should you prefer? This is not a question for residual checkes. Residual checks tell you which models can be rejected with the data. Which of the typically many acceptable models you should fit must be decided by your scientific question, and/or possibly by model selection methods. 
 
+# Notes on particular data types 
 
 ## Poisson data
 
