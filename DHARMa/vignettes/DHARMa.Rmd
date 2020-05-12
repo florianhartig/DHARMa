@@ -209,9 +209,9 @@ There are a few important technical details regarding how the simulations are pe
 simulationOutput <- simulateResiduals(fittedModel = fittedModel, refit = T)
 ```
 
-* if refit = F (default), new data is simulated from the fitted model, and residuals are calculated by comparing the observed data to the new data
+* if refit = F (default), new datasets are simulated from the fitted model, and residuals are calculated by comparing the observed data to the new data
 
-* if refit = T, a parametric bootstrap is performed, meaning that the model is refit to the new data, and residuals are created by comparing observed residuals against refitted residuals 
+* if refit = T, a parametric bootstrap is performed, meaning that the model is refit to all new datasets, and residuals are created by comparing observed residuals against refitted residuals 
 
 The second option is much much slower, and also seemed to have lower power in some tests I ran. ** It is therefore not recommended for standard residual diagnostics!** I only recommend using it if you know what you are doing, and have particular reasons, for example if you estimate that the tested model is biased. A bias could, for example, arise in small data situations, or when estimating models with shrinkage estimators that include a purposeful bias, such as ridge/lasso, random effects or the splines in GAMs. My idea was then that simulated data would not fit to the observations, but that residuals for model fits on simulated data would have the same patterns/bias than model fits on the observed data. 
 

@@ -1,8 +1,8 @@
-# Version 0.3.0
+# Version 0.3.1
 
 ## Submission 1
 
-## Submission 1, 20.4.20
+## Submission 1, 11.5.20
 
 This is a minor update of DHARMa, with a few stability improvement and bugfixes. See NEWS for changes. 
 
