@@ -119,9 +119,9 @@ plotQQunif <- function(simulationOutput, testUniformity = T, testOutliers = T, t
 }
 
 
-#' Generic residual plot with either spline or quantile regression
+#' Generic res ~ pred scatter plot with spline or quantile regression on top
 #'
-#' The function creates a generic residual plot with either spline or quantile regression to highlight patterns in the residuals. Outliers are highlighted in red
+#' The function creates a generic residual plot with either spline or quantile regression to highlight patterns in the residuals. Outliers are highlighted in red.
 #'
 #' @param simulationOutput on object, usually a DHARMa object, from which residual values can be extracted. Alternatively, a vector with residuals or a fitted model can be provided, which will then be transformed into a DHARMa object.
 #' @param form optional predictor against which the residuals should be plotted. Default is to used the predicted(simulationOutput)
@@ -140,6 +140,8 @@ plotQQunif <- function(simulationOutput, testUniformity = T, testOutliers = T, t
 #' Assymptotically (i.e. for lots of data / residuals), if the model is correct, theoretical and the empirical quantiles should be identical (i.e. dashed and solid lines should match). A p-value for the deviation is calculated for each quantile line. Significant deviations are highlighted by red color.
 #'
 #' If form is a factor, a boxplot will be plotted instead of a scatter plot. The distribution for each factor level should be uniformly distributed, so the box should go from 0.25 to 0.75, with the median line at 0.5. Again, chance deviations from this will increases when the sample size is smaller. You can run null simulations to test if the deviations you see exceed what you would expect from random variation. If you want to create box plots for categorical predictors (e.g. because you only have a small number of unique numberic predictor values), you can convert your predictor with as.factor(pred)
+#' 
+#' @return if quantile tests are performed, the function returns them invible.
 #'
 #' @note The quantile regression can take some time to calculate, especially for larger datasets. For that reason, quantreg = F can be set to produce a smooth spline instead.
 #'
