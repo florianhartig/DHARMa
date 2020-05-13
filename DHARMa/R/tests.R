@@ -530,5 +530,3 @@ getP <- function(simulated, observed, alternative){
 
   return(p)
 }
-
-
