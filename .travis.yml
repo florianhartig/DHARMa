@@ -27,4 +27,3 @@ addons:
   apt:
     packages:
       - libnlopt-dev
-      - libglpk-dev
