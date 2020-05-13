@@ -2,20 +2,70 @@
 % Please edit documentation in R/compatibility.R
 \name{getSimulations}
 \alias{getSimulations}
+\alias{getSimulations.default}
+\alias{getSimulations.negbin}
+\alias{getSimulations.lmerMod}
+\alias{getSimulations.glmmTMB}
+\alias{getSimulations.HLfit}
 \title{Get model simulations}
 \usage{
-getSimulations(object, ...)
+getSimulations(object, nsim = 1, type = c("normal", "refit"), ...)
+
+\method{getSimulations}{default}(object, nsim = 1, type = c("normal", "refit"), ...)
+
+\method{getSimulations}{negbin}(object, nsim = 1, type = c("normal", "refit"), ...)
+
+\method{getSimulations}{lmerMod}(object, nsim = 1, type = c("normal", "refit"), ...)
+
+\method{getSimulations}{glmmTMB}(object, nsim = 1, type = c("normal", "refit"), ...)
+
+\method{getSimulations}{HLfit}(object, nsim = 1, type = c("normal", "refit"), ...)
 }
 \arguments{
 \item{object}{a fitted model}
 
+\item{nsim}{number of simulations}
+
+\item{type}{if simulations should be prepared for getQuantile or for refit}
+
 \item{...}{additional parameters to be passed on, usually to the simulate function of the respective model class}
+}
+\value{
+a matrix with simulations
 }
 \description{
 Wrapper to simulate from a fitted model
 }
 \details{
-The purpose of this wrapper for for the simulate function is to standardize the simulations from a model in a standardized way
+The purpose of this wrapper for for the simulate function is to return the simulations from a model in a standardized way
+
+The function is a wrapper for for the simulate function is to return the simulations from a model in a standardized way.
+
+Note: if the model was fit with weights, the function will throw a warning if used with a model class whose simulate function does not include the weightsi in the simulations. Note that the results may or may not be appropriate in this case, depending on how you use the weights.
+}
+\examples{
+testData = createData(sampleSize = 400, family = gaussian())
+
+fittedModel <- lm(observedResponse ~ Environment1 , data = testData)
+
+# response that was used to fit the model
+getObservedResponse(fittedModel)
+
+# predictions of the model for these points
+getFitted(fittedModel)
+
+# extract simulations from the model as matrix
+getSimulations(fittedModel, nsim = 2)
+
+# extract simulations from the model for refit (often requires different structure)
+x = getSimulations(fittedModel, nsim = 2, type = "refit")
+
+getRefit(fittedModel, x[[1]])
+
+getRefit(fittedModel, getObservedResponse(fittedModel))
+}
+\seealso{
+\code{\link{getObservedResponse}}, \code{\link{getRefit}}, \code{\link{getFixedEffects}}, \code{\link{getFitted}}
 }
 \author{
 Florian Hartig

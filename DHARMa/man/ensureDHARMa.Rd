@@ -11,6 +11,9 @@ ensureDHARMa(simulationOutput, convert = F)
 
 \item{convert}{if TRUE, attempts to convert model + numeric to DHARMa, if "Model", converts only supported models to DHARMa}
 }
+\value{
+an object of class DHARMa
+}
 \description{
 Ensures that an object is of class DHARMa
 }

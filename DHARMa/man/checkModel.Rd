@@ -2,16 +2,19 @@
 % Please edit documentation in R/simulateResiduals.R
 \name{checkModel}
 \alias{checkModel}
-\title{Check if models is supported}
+\title{Check if the fitted model is supported by DHARMa}
 \usage{
 checkModel(fittedModel, stop = F)
 }
 \arguments{
-\item{fittedModel}{a model}
+\item{fittedModel}{a fitted model}
 
-\item{stop}{whether to stop}
+\item{stop}{whether to throw an error if the model is not supported by DHARMa}
 }
 \description{
-Check if models is supported
+The function checks if the fitted model is supported by DHARMa, and if there are other issues that could create problems
+}
+\details{
+The main purpose of this function os to check if the fitted model class is supported by DHARMa. The function additionally checks for properties of the fitted model that could create problems for calculating residuals or working with the resuls in DHARMa.
 }
 \keyword{internal}
