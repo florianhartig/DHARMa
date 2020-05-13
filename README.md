@@ -25,11 +25,24 @@ library(DHARMa)
 ?DHARMa
 vignette("DHARMa", package="DHARMa")
 ```
-The vignette can also be read online [here](https://cran.r-project.org/web/packages/DHARMa/vignettes/DHARMa.html). To cite the package, run 
+The vignette, which can also be read online [here](https://cran.r-project.org/web/packages/DHARMa/vignettes/DHARMa.html), provides many exampless about how to use the package function for the supported regression models. To cite the package, run 
 
 ```{r}
 citation("DHARMa")
 ```
+
+To fit a model (from any package supported by DHARMa), run 
+
+
+```{r}
+testData = createData(sampleSize = 200, family = poisson())
+m1 <- glm(observedResponse ~ Environment1, 
+                     family = "poisson", data = testData)
+
+res <- simulateResiduals(m1, plot = T)
+```
+
+and read to help of ?simulateResiduals and the vignette to understand what you can do with the object res. 
 
 ### Development release 
 
@@ -39,11 +52,11 @@ If you want to install the current (development) version from this repository, r
 devtools::install_github(repo = "florianhartig/DHARMa", subdir = "DHARMa", 
 dependencies = T, build_vignettes = T)
 ```
-Below the status of the automatic Travis CI tests on the master branch (if this doesn load see [here](https://travis-ci.org/florianhartig/DHARMa))
+Below the status of the automatic Travis CI tests on the master branch (if this doesn't load see [here](https://travis-ci.org/florianhartig/DHARMa))
 
 [![Build Status](https://travis-ci.org/florianhartig/DHARMa.svg?branch=master)](https://travis-ci.org/florianhartig/DHARMa)
 
-### Older releases
+### Development branches / older releases
 
 To install a specific (older) release, or a particular branch, decide for the version number that you want to install in [https://github.com/florianhartig/DHARMa/releases](https://github.com/florianhartig/DHARMa/releases) (version numbering corresponds to CRAN, but there may be smaller releases that were not pushed to CRAN), or branch and run 
 

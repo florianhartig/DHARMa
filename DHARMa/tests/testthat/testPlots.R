@@ -16,7 +16,7 @@ doPlots <- function(simulationOutput, testData){
 
   # residual vs. X plots, various options
   plotResiduals(simulationOutput)
-  plotResiduals(simulationOutput$scaledResiduals, predictor = simulationOutput$fittedPredictedResponse)
+  plotResiduals(simulationOutput$scaledResiduals, form = simulationOutput$fittedPredictedResponse)
   hist(simulationOutput)
 }
 

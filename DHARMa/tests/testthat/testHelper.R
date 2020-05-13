@@ -12,6 +12,9 @@ test_that("ensureDHARMa", {
   pred = testData$Environment1
   
   fittedModel <- glm(observedResponse ~ Environment1 , family = "poisson", data = testData)
+  
+  expect_error(getSimulations(fittedModel, 1, type = "refdt"))  
+  
   simulationOutput <- simulateResiduals(fittedModel = fittedModel)
   
   expect_s3_class(DHARMa:::ensureDHARMa(simulationOutput), "DHARMa")  

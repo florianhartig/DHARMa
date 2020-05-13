@@ -5,7 +5,7 @@
 \title{Recalculate residuals with grouping}
 \usage{
 recalculateResiduals(simulationOutput, group = NULL, aggregateBy = sum,
-  seed = 123)
+  seed = 123, method = c("PIT", "traditional"))
 }
 \arguments{
 \item{simulationOutput}{an object with simulated residuals created by \code{\link{simulateResiduals}}}
@@ -15,6 +15,8 @@ recalculateResiduals(simulationOutput, group = NULL, aggregateBy = sum,
 \item{aggregateBy}{function for the aggregation. Default is sum. This should only be changed if you know what you are doing. Note in particular that the expected residual distribution might not be flat any more if you choose general functions, such as sd etc.}
 
 \item{seed}{the random seed to be used within DHARMa. The default setting, recommended for most users, is keep the random seed on a fixed value 123. This means that you will always get the same randomization and thus teh same result when running the same code. NULL = no new seed is set, but previous random state will be restored after simulation. FALSE = no seed is set, and random state will not be restored. The latter two options are only recommended for simulation experiments. See vignette for details.}
+
+\item{method}{the quantile randomization method used. The two options implemented at the moment are probability integral transform (PIT-) residuals (current default), and the "traditional" randomization procedure, that was used in DHARMa until version 0.3.0. For details, see \code{\link{getQuantile}}}
 }
 \value{
 an object of class DHARMa, similar to what is returned by \code{\link{simulateResiduals}}, but with additional outputs for the new grouped calculations. Note that the relevant outputs are 2x in the object, the first is the grouped calculations (which is returned by $name access), and later another time, under identical name, the original output. Moreover, there is a function 'aggregateByGroup', which can be used to aggregate predictor variables in the same way as the variables calculated here
