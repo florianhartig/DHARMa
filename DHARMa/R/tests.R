@@ -162,7 +162,7 @@ testQuantiles <- function(simulationOutput, predictor = NULL, quantiles = c(0.25
 #' @seealso \code{\link{testResiduals}}, \code{\link{testUniformity}}, \code{\link{testDispersion}}, \code{\link{testZeroInflation}}, \code{\link{testGeneric}}, \code{\link{testTemporalAutocorrelation}}, \code{\link{testSpatialAutocorrelation}}, \code{\link{testQuantiles}}
 #' @example inst/examples/testsHelp.R
 #' @export
-testOutliers <- function(simulationOutput, alternative = c("two.sided", "greater", "less"), margin = c("both", "upper", "lower"), plot = T){
+testOutliers <- function(simulationOutput, alternative = c("greater", "two.sided", "less"), margin = c("both", "upper", "lower"), plot = T){
 
   # check inputs
   alternative <- match.arg(alternative)
@@ -192,7 +192,7 @@ testOutliers <- function(simulationOutput, alternative = c("two.sided", "greater
 
   if(plot == T) {
 
-    hist(simulationOutput, main = "", max(round(simulationOutput$nSim / 5), 20))
+    hist(simulationOutput, main = "")
 
     main = ifelse(out$p.value <= 0.05,
                   "Outlier test significant",

@@ -4,7 +4,7 @@
 \alias{testOutliers}
 \title{Test for outliers}
 \usage{
-testOutliers(simulationOutput, alternative = c("two.sided", "greater",
+testOutliers(simulationOutput, alternative = c("greater", "two.sided",
   "less"), margin = c("both", "upper", "lower"), plot = T)
 }
 \arguments{
