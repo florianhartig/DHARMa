@@ -149,6 +149,7 @@ testQuantiles <- function(simulationOutput, predictor = NULL, quantiles = c(0.25
 #'
 #' @param simulationOutput an object of class DHARMa with simulated quantile residuals, either created via \code{\link{simulateResiduals}} or by \code{\link{createDHARMa}} for simulations created outside DHARMa
 #' @param alternative a character string specifying whether the test should test if observations are "greater", "less" or "two.sided" compared to the simulated null hypothesis
+#' @param margin whether to test for outliers only at the lower, only at the upper, or both sides (default) of the simulated data distribution
 #' @param plot if T, the function will create an additional plot
 #' @details DHARMa residuals are created by simulating from the fitted model, and comparing the simulated values to the observed data. It can occur that all simulated values are higher or smaller than the observed data, in which case they get the residual value of 0 and 1, respectively. I refer to these values as simulation outliers, or simply outliers.
 #'
@@ -161,34 +162,33 @@ testQuantiles <- function(simulationOutput, predictor = NULL, quantiles = c(0.25
 #' @seealso \code{\link{testResiduals}}, \code{\link{testUniformity}}, \code{\link{testDispersion}}, \code{\link{testZeroInflation}}, \code{\link{testGeneric}}, \code{\link{testTemporalAutocorrelation}}, \code{\link{testSpatialAutocorrelation}}, \code{\link{testQuantiles}}
 #' @example inst/examples/testsHelp.R
 #' @export
-testOutliers <- function(simulationOutput, alternative = c("two.sided", "greater", "less"), plot = T){
+testOutliers <- function(simulationOutput, alternative = c("two.sided", "greater", "less"), margin = c("both", "upper", "lower"), plot = T){
 
-  out = list()
-  out$data.name = deparse(substitute(simulationOutput))
-
+  # check inputs
+  alternative <- match.arg(alternative)
+  margin = match.arg(margin)
   simulationOutput = ensureDHARMa(simulationOutput, convert = "Model")
 
-  alternative <- match.arg(alternative)
 
-  out$alternative = alternative
-  out$method = "DHARMa outlier test based on exact binomial test"
+  # calculation of outliers
+  if(margin == "both") outliers = sum(simulationOutput$scaledResiduals == 0) + sum(simulationOutput$scaledResiduals == 1)
+  else if (margin == "upper") outliers = sum(simulationOutput$scaledResiduals == 1)
+  else if (margin == "lower") outliers = sum(simulationOutput$scaledResiduals == 0)
 
-  outLow = sum(simulationOutput$scaledResiduals == 0)
-  outHigh = sum(simulationOutput$scaledResiduals == 1)
-  trials = simulationOutput$nObs
+  # calculations of trials and H0
+  if(margin == "both") trials = 2* simulationOutput$nObs
+  else trials = simulationOutput$nObs
   outFreqH0 = 1/(simulationOutput$nSim +1)
 
-  out$testlow = binom.test(outLow, trials, p = outFreqH0, alternative = "less")
-  out$testhigh = binom.test(outHigh, trials, p = outFreqH0, alternative = "greater")
+  out = binom.test(outliers, trials, p = outFreqH0, alternative = alternative)
 
-  out$statistic = c(outLow = outLow, outHigh = outHigh, nobs = trials, freqH0 = outFreqH0)
+  # overwrite information in binom.test
 
-  if(alternative == "greater") p = out$testlow$p.value
-  if(alternative == "less") p = out$testhigh$p.value
-  if(alternative == "two.sided") p = min(min(out$testlow$p.value, out$testhigh$p.value) * 2,1)
+  # TODO - here again the problem with the deparse(substitute(simulationOutput)) on DHARMa object
+  #out$data.name = deparse(substitute(simulationOutput))
 
-  out$p.value = p
-  class(out) = "htest"
+  out$margin = margin
+  out$method = "DHARMa outlier test based on exact binomial test"
 
   if(plot == T) {
 

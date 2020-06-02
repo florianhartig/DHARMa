@@ -5,12 +5,14 @@
 \title{Test for outliers}
 \usage{
 testOutliers(simulationOutput, alternative = c("two.sided", "greater",
-  "less"), plot = T)
+  "less"), margin = c("both", "upper", "lower"), plot = T)
 }
 \arguments{
 \item{simulationOutput}{an object of class DHARMa with simulated quantile residuals, either created via \code{\link{simulateResiduals}} or by \code{\link{createDHARMa}} for simulations created outside DHARMa}
 
 \item{alternative}{a character string specifying whether the test should test if observations are "greater", "less" or "two.sided" compared to the simulated null hypothesis}
+
+\item{margin}{whether to test for outliers only at the lower, only at the upper, or both sides (default) of the simulated data distribution}
 
 \item{plot}{if T, the function will create an additional plot}
 }
