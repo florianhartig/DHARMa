@@ -2,7 +2,7 @@
 % Please edit documentation in R/plots.R
 \name{plotResiduals}
 \alias{plotResiduals}
-\title{Generic residual plot with either spline or quantile regression}
+\title{Generic res ~ pred scatter plot with spline or quantile regression on top}
 \usage{
 plotResiduals(simulationOutput, form = NULL, quantreg = NULL, rank = F,
   asFactor = NULL, smoothScatter = NULL, quantiles = c(0.25, 0.5, 0.75),
@@ -25,8 +25,11 @@ plotResiduals(simulationOutput, form = NULL, quantreg = NULL, rank = F,
 
 \item{...}{additional arguments to plot / boxplot.}
 }
+\value{
+if quantile tests are performed, the function returns them invible.
+}
 \description{
-The function creates a generic residual plot with either spline or quantile regression to highlight patterns in the residuals. Outliers are highlighted in red
+The function creates a generic residual plot with either spline or quantile regression to highlight patterns in the residuals. Outliers are highlighted in red.
 }
 \details{
 The function plots residuals against a predictor (by default against the fitted value, extracted from the DHARMa object, or any other predictor).
