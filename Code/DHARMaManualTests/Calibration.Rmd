@@ -1,0 +1,43 @@
+---
+title: "Calibration of p-values"
+author: "Florian Hartig"
+date: "6/3/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r}
+  reps = 200
+
+  pVals = matrix(ncol = 6, nrow = reps)
+
+  for(i in 1:reps){
+    testData = createData(sampleSize = 1000, overdispersion = 0, pZeroInflation = 0, randomEffectVariance = 0, family = gaussian())
+    fittedModel <- lm(observedResponse ~ Environment1 , data = testData)
+    simulationOutput <- simulateResiduals(fittedModel = fittedModel, n = 1000)
+    pVals[i,1] = testOutliers(simulationOutput, plot = F, alternative = "two.sided")$p.value
+    pVals[i,2] = testOutliers(simulationOutput, plot = F, alternative = "greater")$p.value
+    pVals[i,3] = testOutliers(simulationOutput, plot = F, alternative = "less")$p.value
+
+    pVals[i,4] = testOutliers(simulationOutput, plot = F, alternative = "two.sided", margin = "upper")$p.value
+    pVals[i,5] = testOutliers(simulationOutput, plot = F, alternative = "greater", margin = "upper")$p.value
+    pVals[i,6] = testOutliers(simulationOutput, plot = F, alternative = "less", margin = "upper")$p.value
+  }
+  
+```
+
+
+
+```{r}
+par(mfrow = c(2,3))
+for(i in 1:6) hist(pVals[,i])
+
+
+```
+
+
+

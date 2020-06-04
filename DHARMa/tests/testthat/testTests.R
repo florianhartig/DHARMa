@@ -177,7 +177,18 @@ test_that("tests work", {
 })
 
 
+# Test Outliers
+test_that("testOutliers", {
 
+  testData = createData(sampleSize = 1000, overdispersion = 0, pZeroInflation = 0, randomEffectVariance = 0)
+  fittedModel <- glm(observedResponse ~ Environment1 , family = "poisson", data = testData)
+  simulationOutput <- simulateResiduals(fittedModel = fittedModel)
+
+  x = testOutliers(simulationOutput, plot = T, alternative = "two.sided")
+  x
+  testOutliers(simulationOutput, plot = T, margin = "lower")
+  testOutliers(simulationOutput, plot = T, alternative = "two.sided", margin = "lower")
+  testOutliers(simulationOutput, plot = T, margin = "upper")
 
 
 

@@ -145,7 +145,7 @@ testQuantiles <- function(simulationOutput, predictor = NULL, quantiles = c(0.25
 
 #' Test for outliers
 #'
-#' This function tests if the number of observations that are strictly greater / smaller than all simulations are larger than expected
+#' This function tests if the number of observations outside the simulatio envelope are larger or smaller than expected
 #'
 #' @param simulationOutput an object of class DHARMa with simulated quantile residuals, either created via \code{\link{simulateResiduals}} or by \code{\link{createDHARMa}} for simulations created outside DHARMa
 #' @param alternative a character string specifying whether the test should test if observations are "greater", "less" or "two.sided" compared to the simulated null hypothesis
@@ -153,9 +153,11 @@ testQuantiles <- function(simulationOutput, predictor = NULL, quantiles = c(0.25
 #' @param plot if T, the function will create an additional plot
 #' @details DHARMa residuals are created by simulating from the fitted model, and comparing the simulated values to the observed data. It can occur that all simulated values are higher or smaller than the observed data, in which case they get the residual value of 0 and 1, respectively. I refer to these values as simulation outliers, or simply outliers.
 #'
-#' Because no data was simulated in the range of the observed value, we actually don't know "how much" these values deviate from the model expecation, so the term "outlier" should be used with a grain of salt - it's not a judgement about the probability of a deviation from an expectation, but denotes that we are outside the simulated range. The number of outliers would usually decrease if the number of DHARMa simulations is increased.
+#' Because no data was simulated in the range of the observed value, we don't know "how much" these values deviate from the model expectation, so the term "outlier" should be used with a grain of salt - it's not a judgment about the magnitude of a deviation from an expectation, but simply that we are outside the simulated range. The number of outliers naturally decreases if the number of DHARMa simulations is increased.
 #'
-#' The probability of an outlier depends on the number of simulations (in fact, it is 1/(nSim +1) for each side), so whether the existence of outliers is a reason for concern depends also on the number of simulations. The expected number of outliers is therefore binomially distributed, and we can calculate a p-value from that
+#' That being said, under the null Hypothesis that the model is correct, we can say how many outliers we expect (in fact, it is 1/(nSim +1) for each side). We can look for deviations from this expectation.
+#'
+#' Per default, the testOutliers test looks for both an excess and a lack of outliers at both margins of the simulation envelope (this behavior can be changed via alternative and margin). An excess of outliers is to be interpreted as too many values outside the simulation envelope. This could be caused by overdispersion, or by what we classically call outliers. A lack of outliers would be caused, for example, by underdispersion.
 #'
 #'
 #' @author Florian Hartig
@@ -165,30 +167,35 @@ testQuantiles <- function(simulationOutput, predictor = NULL, quantiles = c(0.25
 testOutliers <- function(simulationOutput, alternative = c("greater", "two.sided", "less"), margin = c("both", "upper", "lower"), plot = T){
 
   # check inputs
-  alternative <- match.arg(alternative)
+  alternative = match.arg(alternative)
   margin = match.arg(margin)
+  data.name = deparse(substitute(simulationOutput)) # needs to be before ensureDHARMa
   simulationOutput = ensureDHARMa(simulationOutput, convert = "Model")
 
-
   # calculation of outliers
-  if(margin == "both") outliers = sum(simulationOutput$scaledResiduals == 0) + sum(simulationOutput$scaledResiduals == 1)
-  else if (margin == "upper") outliers = sum(simulationOutput$scaledResiduals == 1)
-  else if (margin == "lower") outliers = sum(simulationOutput$scaledResiduals == 0)
+  if(margin == "both")  outliers = sum(simulationOutput$scaledResiduals %in% c(0, 1))
+  if(margin == "upper") outliers = sum(simulationOutput$scaledResiduals == 1)
+  if(margin == "lower") outliers = sum(simulationOutput$scaledResiduals == 0)
 
   # calculations of trials and H0
-  if(margin == "both") trials = 2* simulationOutput$nObs
-  else trials = simulationOutput$nObs
-  outFreqH0 = 1/(simulationOutput$nSim +1)
+  outFreqH0 = 1/(simulationOutput$nSim +1) * ifelse(margin == "both", 2, 1)
+  trials = simulationOutput$nObs
 
   out = binom.test(outliers, trials, p = outFreqH0, alternative = alternative)
 
   # overwrite information in binom.test
 
-  # TODO - here again the problem with the deparse(substitute(simulationOutput)) on DHARMa object
-  #out$data.name = deparse(substitute(simulationOutput))
-
+  out$data.name = data.name
   out$margin = margin
   out$method = "DHARMa outlier test based on exact binomial test"
+
+  names(out$statistic) = paste("outliers at", margin, "margin(s)")
+  names(out$parameter) = "simulations"
+  names(out$estimate) = paste("frequency of outliers (expected:", out$null.value,")")
+
+  out$interval = "tst"
+
+  out$interval =
 
   if(plot == T) {
 
@@ -467,11 +474,11 @@ testTemporalAutocorrelation <- function(simulationOutput, time = NULL , alternat
 #' @export
 testSpatialAutocorrelation <- function(simulationOutput, x = NULL, y  = NULL, distMat = NULL, alternative = c("two.sided", "greater", "less"), plot = T){
 
+  alternative <- match.arg(alternative)
+  data.name = deparse(substitute(simulationOutput)) # needs to be before ensureDHARMa
   simulationOutput = ensureDHARMa(simulationOutput, convert = T)
 
   if(any(duplicated(cbind(x,y)))) stop("testing for spatial autocorrelation requires unique x,y values - if you have several observations per location, either use the recalculateResiduals function to aggregate residuals per location, or extract the residuals from the fitted object, and plot / test each of them independently for spatially repeated subgroups (a typical scenario would repeated spatial observation, in which case one could plot / test each time step separately for temporal autocorrelation). Note that the latter must be done by hand, outside testSpatialAutocorrelation.")
-
-  alternative <- match.arg(alternative)
 
   if( (!is.null(x) | !is.null(y)) & !is.null(distMat) ) message("both coordinates and distMat provided, calculations will be done based on the distance matrix, coordinates will only be used for plotting")
   # if not provided, fill x and y with random numbers (Null model)
@@ -498,7 +505,7 @@ testSpatialAutocorrelation <- function(simulationOutput, x = NULL, y  = NULL, di
   out$method = "DHARMa Moran's I test for spatial autocorrelation"
   out$alternative = "Spatial autocorrelation"
   out$p.value = MI$p.value
-  # out$data.name = deparse(substitute(simulationOutput))
+  out$data.name = data.name
 
   class(out) = "htest"
 
