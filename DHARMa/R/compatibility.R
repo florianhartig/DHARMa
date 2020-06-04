@@ -64,7 +64,9 @@ weightsWarning = "Model was fit with prior weights. These will be ignored in the
 #'
 #' @details The function is a wrapper for for the simulate function is to return the simulations from a model in a standardized way.
 #'
-#' Note: if the model was fit with weights, the function will throw a warning if used with a model class whose simulate function does not include the weightsi in the simulations. Note that the results may or may not be appropriate in this case, depending on how you use the weights.
+#' If the model was fit with weights, the function will throw a warning if used with a model class whose simulate function does not include the weights in the simulations. Note that the results may or may not be appropriate in this case, depending on how you use the weights.
+#'
+#' @note
 #'
 #'
 #' @author Florian Hartig
@@ -402,4 +404,26 @@ getSimulations.HLfit <- function(object, nsim = 1, type = c("normal", "refit"), 
 getRefit.HLfit <- function(object, newresp, ...) {
   spaMM::update_resp(object, newresp, evaluate = TRUE)
 }
+
+
+####### brms #########
+
+#' @rdname getSimulations
+#' @export
+getSimulations.brmsfit <- function(object, nsim = 1, type = c("normal", "refit"), ...){
+
+  type <- match.arg(type)
+
+  capture.output({out = t(posterior_predict(object, nsamples = nsim, summary = FALSE, ...))})
+
+  if(type == "normal"){
+    if(!is.matrix(out)) out = data.matrix(out)
+  }else{
+    out = as.data.frame(out)
+  }
+  return(out)
+}
+
+
+
 

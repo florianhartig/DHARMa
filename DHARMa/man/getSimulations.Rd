@@ -7,6 +7,7 @@
 \alias{getSimulations.lmerMod}
 \alias{getSimulations.glmmTMB}
 \alias{getSimulations.HLfit}
+\alias{getSimulations.brmsfit}
 \title{Get model simulations}
 \usage{
 getSimulations(object, nsim = 1, type = c("normal", "refit"), ...)
@@ -20,6 +21,8 @@ getSimulations(object, nsim = 1, type = c("normal", "refit"), ...)
 \method{getSimulations}{glmmTMB}(object, nsim = 1, type = c("normal", "refit"), ...)
 
 \method{getSimulations}{HLfit}(object, nsim = 1, type = c("normal", "refit"), ...)
+
+\method{getSimulations}{brmsfit}(object, nsim = 1, type = c("normal", "refit"), ...)
 }
 \arguments{
 \item{object}{a fitted model}
@@ -41,7 +44,10 @@ The purpose of this wrapper for for the simulate function is to return the simul
 
 The function is a wrapper for for the simulate function is to return the simulations from a model in a standardized way.
 
-Note: if the model was fit with weights, the function will throw a warning if used with a model class whose simulate function does not include the weightsi in the simulations. Note that the results may or may not be appropriate in this case, depending on how you use the weights.
+If the model was fit with weights, the function will throw a warning if used with a model class whose simulate function does not include the weights in the simulations. Note that the results may or may not be appropriate in this case, depending on how you use the weights.
+}
+\note{
+
 }
 \examples{
 testData = createData(sampleSize = 400, family = gaussian())
