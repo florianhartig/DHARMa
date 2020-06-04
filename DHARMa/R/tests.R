@@ -148,28 +148,28 @@ testQuantiles <- function(simulationOutput, predictor = NULL, quantiles = c(0.25
 #' This function tests if the number of observations outside the simulatio envelope are larger or smaller than expected
 #'
 #' @param simulationOutput an object of class DHARMa with simulated quantile residuals, either created via \code{\link{simulateResiduals}} or by \code{\link{createDHARMa}} for simulations created outside DHARMa
-#' @param alternative a character string specifying whether the test should test if observations are "greater", "less" or "two.sided" compared to the simulated null hypothesis
+#' @param alternative a character string specifying whether the test should test if observations are "greater", "less" or "two.sided" (default) compared to the simulated null hypothesis
 #' @param margin whether to test for outliers only at the lower, only at the upper, or both sides (default) of the simulated data distribution
 #' @param plot if T, the function will create an additional plot
 #' @details DHARMa residuals are created by simulating from the fitted model, and comparing the simulated values to the observed data. It can occur that all simulated values are higher or smaller than the observed data, in which case they get the residual value of 0 and 1, respectively. I refer to these values as simulation outliers, or simply outliers.
 #'
-#' Because no data was simulated in the range of the observed value, we don't know "how much" these values deviate from the model expectation, so the term "outlier" should be used with a grain of salt - it's not a judgment about the magnitude of a deviation from an expectation, but simply that we are outside the simulated range. The number of outliers naturally decreases if the number of DHARMa simulations is increased.
+#' Because no data was simulated in the range of the observed value, we don't know "how strongly" these values deviate from the model expectation, so the term "outlier" should be used with a grain of salt - it's not a judgment about the magnitude of a deviation from an expectation, but simply that we are outside the simulated range, and thus cannot say anything more about the location of the residual.
 #'
-#' That being said, under the null Hypothesis that the model is correct, we can say how many outliers we expect (in fact, it is 1/(nSim +1) for each side). We can look for deviations from this expectation.
+#' Note also that the number of outliers will decrease as we increase the number of simulations. Under the null hypothesis that the model is correct, we expect nData /(nSim +1) outliers at each margin of the distribution. For a reason, consider that if the data and the model distribution are identical, the probability that a given observation is higher than all simulations is 1/(nSim +1).
 #'
-#' Per default, the testOutliers test looks for both an excess and a lack of outliers at both margins of the simulation envelope (this behavior can be changed via alternative and margin). An excess of outliers is to be interpreted as too many values outside the simulation envelope. This could be caused by overdispersion, or by what we classically call outliers. A lack of outliers would be caused, for example, by underdispersion.
+#' Based on this null expectation, we can test for an excess or lack of outliers. Per default, testOutliers() looks for both, so if you get a significant p-value, you have to check if you have to many or too few outliers. An excess of outliers is to be interpreted as too many values outside the simulation envelope. This could be caused by overdispersion, or by what we classically call outliers. A lack of outliers would be caused, for example, by underdispersion.
 #'
 #'
 #' @author Florian Hartig
 #' @seealso \code{\link{testResiduals}}, \code{\link{testUniformity}}, \code{\link{testDispersion}}, \code{\link{testZeroInflation}}, \code{\link{testGeneric}}, \code{\link{testTemporalAutocorrelation}}, \code{\link{testSpatialAutocorrelation}}, \code{\link{testQuantiles}}
-#' @example inst/examples/testsHelp.R
+#' @example inst/examples/testOutliersHelp.R
 #' @export
-testOutliers <- function(simulationOutput, alternative = c("greater", "two.sided", "less"), margin = c("both", "upper", "lower"), plot = T){
+testOutliers <- function(simulationOutput, alternative = c("two.sided", "greater", "less"), margin = c("both", "upper", "lower"), plot = T){
 
   # check inputs
   alternative = match.arg(alternative)
   margin = match.arg(margin)
-  data.name = deparse(substitute(simulationOutput)) # needs to be before ensureDHARMa
+  data.name = deparse(substitute(simulationOutput)) # remember: needs to be called before ensureDHARMa
   simulationOutput = ensureDHARMa(simulationOutput, convert = "Model")
 
   # calculation of outliers

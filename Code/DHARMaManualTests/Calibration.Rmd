@@ -16,9 +16,11 @@ knitr::opts_chunk$set(echo = TRUE)
   pVals = matrix(ncol = 6, nrow = reps)
 
   for(i in 1:reps){
-    testData = createData(sampleSize = 1000, overdispersion = 0, pZeroInflation = 0, randomEffectVariance = 0, family = gaussian())
+    testData = createData(sampleSize = 10000, overdispersion = 0, pZeroInflation = 0, randomEffectVariance = 0, family = gaussian())
     fittedModel <- lm(observedResponse ~ Environment1 , data = testData)
-    simulationOutput <- simulateResiduals(fittedModel = fittedModel, n = 1000)
+    simulationOutput <- simulateResiduals(fittedModel = fittedModel, n = 100)
+    
+    
     pVals[i,1] = testOutliers(simulationOutput, plot = F, alternative = "two.sided")$p.value
     pVals[i,2] = testOutliers(simulationOutput, plot = F, alternative = "greater")$p.value
     pVals[i,3] = testOutliers(simulationOutput, plot = F, alternative = "less")$p.value
@@ -34,7 +36,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```{r}
 par(mfrow = c(2,3))
-for(i in 1:6) hist(pVals[,i])
+for(i in 1:6) hist(pVals[,i], breaks = 50)
 
 
 ```

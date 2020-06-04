@@ -4,78 +4,55 @@
 \alias{testOutliers}
 \title{Test for outliers}
 \usage{
-testOutliers(simulationOutput, alternative = c("greater", "two.sided",
+testOutliers(simulationOutput, alternative = c("two.sided", "greater",
   "less"), margin = c("both", "upper", "lower"), plot = T)
 }
 \arguments{
 \item{simulationOutput}{an object of class DHARMa with simulated quantile residuals, either created via \code{\link{simulateResiduals}} or by \code{\link{createDHARMa}} for simulations created outside DHARMa}
 
-\item{alternative}{a character string specifying whether the test should test if observations are "greater", "less" or "two.sided" compared to the simulated null hypothesis}
+\item{alternative}{a character string specifying whether the test should test if observations are "greater", "less" or "two.sided" (default) compared to the simulated null hypothesis}
 
 \item{margin}{whether to test for outliers only at the lower, only at the upper, or both sides (default) of the simulated data distribution}
 
 \item{plot}{if T, the function will create an additional plot}
 }
 \description{
-This function tests if the number of observations that are strictly greater / smaller than all simulations are larger than expected
+This function tests if the number of observations outside the simulatio envelope are larger or smaller than expected
 }
 \details{
 DHARMa residuals are created by simulating from the fitted model, and comparing the simulated values to the observed data. It can occur that all simulated values are higher or smaller than the observed data, in which case they get the residual value of 0 and 1, respectively. I refer to these values as simulation outliers, or simply outliers.
 
-Because no data was simulated in the range of the observed value, we actually don't know "how much" these values deviate from the model expecation, so the term "outlier" should be used with a grain of salt - it's not a judgement about the probability of a deviation from an expectation, but denotes that we are outside the simulated range. The number of outliers would usually decrease if the number of DHARMa simulations is increased.
+Because no data was simulated in the range of the observed value, we don't know "how strongly" these values deviate from the model expectation, so the term "outlier" should be used with a grain of salt - it's not a judgment about the magnitude of a deviation from an expectation, but simply that we are outside the simulated range, and thus cannot say anything more about the location of the residual.
 
-The probability of an outlier depends on the number of simulations (in fact, it is 1/(nSim +1) for each side), so whether the existence of outliers is a reason for concern depends also on the number of simulations. The expected number of outliers is therefore binomially distributed, and we can calculate a p-value from that
+Note also that the number of outliers will decrease as we increase the number of simulations. Under the null hypothesis that the model is correct, we expect nData /(nSim +1) outliers at each margin of the distribution. For a reason, consider that if the data and the model distribution are identical, the probability that a given observation is higher than all simulations is 1/(nSim +1).
+
+Based on this null expectation, we can test for an excess or lack of outliers. Per default, testOutliers() looks for both, so if you get a significant p-value, you have to check if you have to many or too few outliers. An excess of outliers is to be interpreted as too many values outside the simulation envelope. This could be caused by overdispersion, or by what we classically call outliers. A lack of outliers would be caused, for example, by underdispersion.
 }
 \examples{
-testData = createData(sampleSize = 200, overdispersion = 0.5, randomEffectVariance = 0)
+set.seed(123)
+
+testData = createData(sampleSize = 200, overdispersion = 1, randomEffectVariance = 0)
 fittedModel <- glm(observedResponse ~ Environment1 , family = "poisson", data = testData)
 simulationOutput <- simulateResiduals(fittedModel = fittedModel)
 
-# the plot function runs 4 tests
-# i) KS test i) Dispersion test iii) Outlier test iv) quantile test
-plot(simulationOutput, quantreg = TRUE)
+# default outlier test (with plot)
+testOutliers(simulationOutput)
 
-# testResiduals tests distribution, dispersion and outliers
-testResiduals(simulationOutput)
+# note that default is to test outliers at both margins for both an excess and a lack
+# of outliers. Here we see that we mostly have an excess of outliers at the upper
+# margin. You see that it is an exces because the frequency of outliers is 0.055,
+# while expected is 0.008
 
-####### Individual tests #######
+# Let's see what would have happened if we would just have checked the lower margin
+testOutliers(simulationOutput, margin = "lower", plot = F)
 
-# KS test for correct distribution of residuals
-testUniformity(simulationOutput)
+# OK, now the frequency of outliers is 0, so we have too few, but this is n.s. against
+# the expectation
 
-# Dispersion test
-testDispersion(simulationOutput) # tests under and overdispersion
-testDispersion(simulationOutput, alternative = "less") # only underdispersion
-testDispersion(simulationOutput, alternative = "less") # only underdispersion
+# just for completeness, what would have happened if we would have checked both
+# margins, but just for a lack of outliers (i.e. underdispersion)
 
-# if model is refitted, a different test will be called
-simulationOutput2 <- simulateResiduals(fittedModel = fittedModel, refit = TRUE, seed = 12)
-testDispersion(simulationOutput2)
-
-# often useful to test dispersion per group (e.g. binomial data, see vignette)
-simulationOutput3 = recalculateResiduals(simulationOutput, group = testData$group)
-testDispersion(simulationOutput3)
-
-# Outlier test (number of observations outside simulation envelope)
-testOutliers(simulationOutput) 
-
-# testing zero inflation
-testZeroInflation(simulationOutput)
-
-# testing generic summaries
-countOnes <- function(x) sum(x == 1)  # testing for number of 1s
-testGeneric(simulationOutput, summary = countOnes) # 1-inflation
-testGeneric(simulationOutput, summary = countOnes, alternative = "less") # 1-deficit
-
-means <- function(x) mean(x) # testing if mean prediction fits
-testGeneric(simulationOutput, summary = means) 
-
-spread <- function(x) sd(x) # testing if mean sd fits
-testGeneric(simulationOutput, summary = spread) 
-
-
-
-
+testOutliers(simulationOutput, alternative = "less", plot = F)
 }
 \seealso{
 \code{\link{testResiduals}}, \code{\link{testUniformity}}, \code{\link{testDispersion}}, \code{\link{testZeroInflation}}, \code{\link{testGeneric}}, \code{\link{testTemporalAutocorrelation}}, \code{\link{testSpatialAutocorrelation}}, \code{\link{testQuantiles}}
