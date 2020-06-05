@@ -44,7 +44,7 @@ testOutliers(simulationOutput)
 # while expected is 0.008
 
 # Let's see what would have happened if we would just have checked the lower margin
-testOutliers(simulationOutput, margin = "lower", plot = F)
+testOutliers(simulationOutput, margin = "lower", plot = FALSE)
 
 # OK, now the frequency of outliers is 0, so we have too few, but this is n.s. against
 # the expectation
@@ -52,7 +52,7 @@ testOutliers(simulationOutput, margin = "lower", plot = F)
 # just for completeness, what would have happened if we would have checked both
 # margins, but just for a lack of outliers (i.e. underdispersion)
 
-testOutliers(simulationOutput, alternative = "less", plot = F)
+testOutliers(simulationOutput, alternative = "less", plot = FALSE)
 }
 \seealso{
 \code{\link{testResiduals}}, \code{\link{testUniformity}}, \code{\link{testDispersion}}, \code{\link{testZeroInflation}}, \code{\link{testGeneric}}, \code{\link{testTemporalAutocorrelation}}, \code{\link{testSpatialAutocorrelation}}, \code{\link{testQuantiles}}
