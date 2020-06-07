@@ -145,54 +145,61 @@ testQuantiles <- function(simulationOutput, predictor = NULL, quantiles = c(0.25
 
 #' Test for outliers
 #'
-#' This function tests if the number of observations that are strictly greater / smaller than all simulations are larger than expected
+#' This function tests if the number of observations outside the simulatio envelope are larger or smaller than expected
 #'
 #' @param simulationOutput an object of class DHARMa with simulated quantile residuals, either created via \code{\link{simulateResiduals}} or by \code{\link{createDHARMa}} for simulations created outside DHARMa
-#' @param alternative a character string specifying whether the test should test if observations are "greater", "less" or "two.sided" compared to the simulated null hypothesis
+#' @param alternative a character string specifying whether the test should test if observations are "greater", "less" or "two.sided" (default) compared to the simulated null hypothesis
+#' @param margin whether to test for outliers only at the lower, only at the upper, or both sides (default) of the simulated data distribution
 #' @param plot if T, the function will create an additional plot
 #' @details DHARMa residuals are created by simulating from the fitted model, and comparing the simulated values to the observed data. It can occur that all simulated values are higher or smaller than the observed data, in which case they get the residual value of 0 and 1, respectively. I refer to these values as simulation outliers, or simply outliers.
 #'
-#' Because no data was simulated in the range of the observed value, we actually don't know "how much" these values deviate from the model expecation, so the term "outlier" should be used with a grain of salt - it's not a judgement about the probability of a deviation from an expectation, but denotes that we are outside the simulated range. The number of outliers would usually decrease if the number of DHARMa simulations is increased.
+#' Because no data was simulated in the range of the observed value, we don't know "how strongly" these values deviate from the model expectation, so the term "outlier" should be used with a grain of salt - it's not a judgment about the magnitude of a deviation from an expectation, but simply that we are outside the simulated range, and thus cannot say anything more about the location of the residual.
 #'
-#' The probability of an outlier depends on the number of simulations (in fact, it is 1/(nSim +1) for each side), so whether the existence of outliers is a reason for concern depends also on the number of simulations. The expected number of outliers is therefore binomially distributed, and we can calculate a p-value from that
+#' Note also that the number of outliers will decrease as we increase the number of simulations. Under the null hypothesis that the model is correct, we expect nData /(nSim +1) outliers at each margin of the distribution. For a reason, consider that if the data and the model distribution are identical, the probability that a given observation is higher than all simulations is 1/(nSim +1).
+#'
+#' Based on this null expectation, we can test for an excess or lack of outliers. Per default, testOutliers() looks for both, so if you get a significant p-value, you have to check if you have to many or too few outliers. An excess of outliers is to be interpreted as too many values outside the simulation envelope. This could be caused by overdispersion, or by what we classically call outliers. A lack of outliers would be caused, for example, by underdispersion.
 #'
 #'
 #' @author Florian Hartig
 #' @seealso \code{\link{testResiduals}}, \code{\link{testUniformity}}, \code{\link{testDispersion}}, \code{\link{testZeroInflation}}, \code{\link{testGeneric}}, \code{\link{testTemporalAutocorrelation}}, \code{\link{testSpatialAutocorrelation}}, \code{\link{testQuantiles}}
-#' @example inst/examples/testsHelp.R
+#' @example inst/examples/testOutliersHelp.R
 #' @export
-testOutliers <- function(simulationOutput, alternative = c("two.sided", "greater", "less"), plot = T){
+testOutliers <- function(simulationOutput, alternative = c("two.sided", "greater", "less"), margin = c("both", "upper", "lower"), plot = T){
 
-  out = list()
-  out$data.name = deparse(substitute(simulationOutput))
-
+  # check inputs
+  alternative = match.arg(alternative)
+  margin = match.arg(margin)
+  data.name = deparse(substitute(simulationOutput)) # remember: needs to be called before ensureDHARMa
   simulationOutput = ensureDHARMa(simulationOutput, convert = "Model")
 
-  alternative <- match.arg(alternative)
+  # calculation of outliers
+  if(margin == "both")  outliers = sum(simulationOutput$scaledResiduals %in% c(0, 1))
+  if(margin == "upper") outliers = sum(simulationOutput$scaledResiduals == 1)
+  if(margin == "lower") outliers = sum(simulationOutput$scaledResiduals == 0)
 
-  out$alternative = alternative
+  # calculations of trials and H0
+  outFreqH0 = 1/(simulationOutput$nSim +1) * ifelse(margin == "both", 2, 1)
+  trials = simulationOutput$nObs
+
+  out = binom.test(outliers, trials, p = outFreqH0, alternative = alternative)
+
+  # overwrite information in binom.test
+
+  out$data.name = data.name
+  out$margin = margin
   out$method = "DHARMa outlier test based on exact binomial test"
 
-  outLow = sum(simulationOutput$scaledResiduals == 0)
-  outHigh = sum(simulationOutput$scaledResiduals == 1)
-  trials = simulationOutput$nObs
-  outFreqH0 = 1/(simulationOutput$nSim +1)
+  names(out$statistic) = paste("outliers at", margin, "margin(s)")
+  names(out$parameter) = "simulations"
+  names(out$estimate) = paste("frequency of outliers (expected:", out$null.value,")")
 
-  out$testlow = binom.test(outLow, trials, p = outFreqH0, alternative = "less")
-  out$testhigh = binom.test(outHigh, trials, p = outFreqH0, alternative = "greater")
+  out$interval = "tst"
 
-  out$statistic = c(outLow = outLow, outHigh = outHigh, nobs = trials, freqH0 = outFreqH0)
-
-  if(alternative == "greater") p = out$testlow$p.value
-  if(alternative == "less") p = out$testhigh$p.value
-  if(alternative == "two.sided") p = min(min(out$testlow$p.value, out$testhigh$p.value) * 2,1)
-
-  out$p.value = p
-  class(out) = "htest"
+  out$interval =
 
   if(plot == T) {
 
-    hist(simulationOutput, main = "", max(round(simulationOutput$nSim / 5), 20))
+    hist(simulationOutput, main = "")
 
     main = ifelse(out$p.value <= 0.05,
                   "Outlier test significant",
@@ -467,11 +474,11 @@ testTemporalAutocorrelation <- function(simulationOutput, time = NULL , alternat
 #' @export
 testSpatialAutocorrelation <- function(simulationOutput, x = NULL, y  = NULL, distMat = NULL, alternative = c("two.sided", "greater", "less"), plot = T){
 
+  alternative <- match.arg(alternative)
+  data.name = deparse(substitute(simulationOutput)) # needs to be before ensureDHARMa
   simulationOutput = ensureDHARMa(simulationOutput, convert = T)
 
   if(any(duplicated(cbind(x,y)))) stop("testing for spatial autocorrelation requires unique x,y values - if you have several observations per location, either use the recalculateResiduals function to aggregate residuals per location, or extract the residuals from the fitted object, and plot / test each of them independently for spatially repeated subgroups (a typical scenario would repeated spatial observation, in which case one could plot / test each time step separately for temporal autocorrelation). Note that the latter must be done by hand, outside testSpatialAutocorrelation.")
-
-  alternative <- match.arg(alternative)
 
   if( (!is.null(x) | !is.null(y)) & !is.null(distMat) ) message("both coordinates and distMat provided, calculations will be done based on the distance matrix, coordinates will only be used for plotting")
   # if not provided, fill x and y with random numbers (Null model)
@@ -498,7 +505,7 @@ testSpatialAutocorrelation <- function(simulationOutput, x = NULL, y  = NULL, di
   out$method = "DHARMa Moran's I test for spatial autocorrelation"
   out$alternative = "Spatial autocorrelation"
   out$p.value = MI$p.value
-  # out$data.name = deparse(substitute(simulationOutput))
+  out$data.name = data.name
 
   class(out) = "htest"
 
