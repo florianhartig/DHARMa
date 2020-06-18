@@ -1,3 +1,17 @@
+# Version 0.3.2
+
+## Submission 1
+
+## Submission 1, 16.6.20
+
+This is a minor update of DHARMa, with a few stability improvement and bugfixes. See NEWS for changes. 
+
+This release was tested without apparent problems under
+
+* local MAC OS 10.15.4 (Catalina), R 3.6.1
+* http://win-builder.r-project.org/ - oldrelease / devel / release
+* Linux (Travis CI) - oldrel / release / devel
+
 # Version 0.3.1
 
 ## Submission 1
