@@ -1,18 +1,18 @@
 #' DHARMa standard residual plots
 #'
 #' This function creates standard plots for the simulated residuals
-#' @param x an object with simualted residuals created by \code{\link{simulateResiduals}}
+#' @param x an object with simulated residuals created by \code{\link{simulateResiduals}}
 #' @param rank if T (default), the values of pred will be rank transformed. This will usually make patterns easier to spot visually, especially if the distribution of the predictor is skewed.
 #' @param ... further options for \code{\link{plotResiduals}}. Consider in particular parameters quantreg, rank and asFactor. xlab, ylab and main cannot be changed when using plotSimulatedResiduals, but can be changed when using plotResiduals.
-#' @details The function creates two plots. To the left, a qq-uniform plot to detect deviations from overall uniformity of the residuals (calling \code{\link{plotQQunif}}), and to the right, a plot of residuals against predicted values (calling \code{\link{plotResiduals}}). Outliers are highlighted in red (for more on oultiers, see \code{\link{testOutliers}}). For a correctly specified model, we would expect
+#' @details The function creates two plots. To the left, a qq-uniform plot to detect deviations from overall uniformity of the residuals (calling \code{\link{plotQQunif}}), and to the right, a plot of residuals against predicted values (calling \code{\link{plotResiduals}}). Outliers are highlighted in red (for more on outliers, see \code{\link{testOutliers}}). For a correctly specified model, we would expect
 #'
-#' a) a straight 1-1 line in the uniform qq-plot -> evidence for an overal uniform (flat) distribution of the residuals
+#' a) a straight 1-1 line in the uniform qq-plot -> evidence for an overall uniform (flat) distribution of the residuals
 #'
 #' b) uniformity of residuals in the vertical direction in the res against predictor plot
 #'
 #' Deviations of this can be interpreted as for a linear regression. See the vignette for detailed examples.
 #'
-#' To provide a visual aid in detecting deviations from uniformity in y-direction, the plot of the residuals against the predited values also performs an (optional) quantile regression, which provides 0.25, 0.5 and 0.75 quantile lines across the plots. These lines should be straight, horizontal, and at y-values of 0.25, 0.5 and 0.75. Note, however, that some deviations from this are to be expected by chance, even for a perfect model, especially if the sample size is small. See further comments on this plot, it's interpreation and options, in \code{\link{plotResiduals}}
+#' To provide a visual aid in detecting deviations from uniformity in y-direction, the plot of the residuals against the predicted values also performs an (optional) quantile regression, which provides 0.25, 0.5 and 0.75 quantile lines across the plots. These lines should be straight, horizontal, and at y-values of 0.25, 0.5 and 0.75. Note, however, that some deviations from this are to be expected by chance, even for a perfect model, especially if the sample size is small. See further comments on this plot, its interpretation and options, in \code{\link{plotResiduals}}
 #'
 #' The quantile regression can take some time to calculate, especially for larger datasets. For that reason, quantreg = F can be set to produce a smooth spline instead. This is default for n > 2000.
 #'
@@ -69,7 +69,7 @@ hist.DHARMa <- function(x,
 #'
 #' DEPRECATED, use plot() instead
 #'
-#' @param simulationOutput an object with simualted residuals created by \code{\link{simulateResiduals}}
+#' @param simulationOutput an object with simulated residuals created by \code{\link{simulateResiduals}}
 #' @param ... further options for \code{\link{plotResiduals}}. Consider in particular parameters quantreg, rank and asFactor. xlab, ylab and main cannot be changed when using plotSimulatedResiduals, but can be changed when using plotResiduals.
 #' @note This function is deprecated. Use \code{\link{plot.DHARMa}}
 #'
@@ -129,7 +129,7 @@ plotQQunif <- function(simulationOutput, testUniformity = T, testOutliers = T, t
 #' @param rank if T, the values provided in form will be rank transformed. This will usually make patterns easier to spot visually, especially if the distribution of the predictor is skewed. If form is a factor, this has no effect.
 #' @param asFactor should a numeric predictor provided in form be treated as a factor. Default is to choose this for < 10 unique values, as long as enough predictions are available to draw a boxplot.
 #' @param smoothScatter if T, a smooth scatter plot will plotted instead of a normal scatter plot. This makes sense when the number of residuals is very large. Default NULL chooses T for nObs < 10000, and F otherwise.
-#' @param quantiles for a quantile regression, which quanties should be plotted
+#' @param quantiles for a quantile regression, which quantiles should be plotted
 #' @param ... additional arguments to plot / boxplot.
 #' @details The function plots residuals against a predictor (by default against the fitted value, extracted from the DHARMa object, or any other predictor).
 #'
@@ -137,11 +137,11 @@ plotQQunif <- function(simulationOutput, testUniformity = T, testOutliers = T, t
 #'
 #' To provide a visual aid in detecting deviations from uniformity in y-direction, the plot function calculates an (optional) quantile regression, which compares the empirical 0.25, 0.5 and 0.75 quantiles (default) in y direction (red solid lines) with the theoretical 0.25, 0.5 and 0.75 quantiles (dashed black line).
 #'
-#' Assymptotically (i.e. for lots of data / residuals), if the model is correct, theoretical and the empirical quantiles should be identical (i.e. dashed and solid lines should match). A p-value for the deviation is calculated for each quantile line. Significant deviations are highlighted by red color.
+#' Asymptotically (i.e. for lots of data / residuals), if the model is correct, theoretical and the empirical quantiles should be identical (i.e. dashed and solid lines should match). A p-value for the deviation is calculated for each quantile line. Significant deviations are highlighted by red color.
 #'
-#' If form is a factor, a boxplot will be plotted instead of a scatter plot. The distribution for each factor level should be uniformly distributed, so the box should go from 0.25 to 0.75, with the median line at 0.5. Again, chance deviations from this will increases when the sample size is smaller. You can run null simulations to test if the deviations you see exceed what you would expect from random variation. If you want to create box plots for categorical predictors (e.g. because you only have a small number of unique numberic predictor values), you can convert your predictor with as.factor(pred)
+#' If form is a factor, a boxplot will be plotted instead of a scatter plot. The distribution for each factor level should be uniformly distributed, so the box should go from 0.25 to 0.75, with the median line at 0.5. Again, chance deviations from this will increases when the sample size is smaller. You can run null simulations to test if the deviations you see exceed what you would expect from random variation. If you want to create box plots for categorical predictors (e.g. because you only have a small number of unique numeric predictor values), you can convert your predictor with as.factor(pred)
 #' 
-#' @return if quantile tests are performed, the function returns them invible.
+#' @return if quantile tests are performed, the function returns them invisibly.
 #'
 #' @note The quantile regression can take some time to calculate, especially for larger datasets. For that reason, quantreg = F can be set to produce a smooth spline instead.
 #'
@@ -234,13 +234,13 @@ plotResiduals <- function(simulationOutput, form = NULL, quantreg = NULL, rank =
       if(any(out$pvals < 0.05, na.rm = TRUE)){
         main = paste(main, "Quantile deviations detected (red curves)", sep ="\n")
         if(out$p.value <= 0.05){
-          main = paste(main, "Combined adjusted quantile test signficant", sep ="\n")
+          main = paste(main, "Combined adjusted quantile test significant", sep ="\n")
         } else {
           main = paste(main, "Combined adjusted quantile test n.s.", sep ="\n")
         }
         maincol = "red"
       } else {
-        main = paste(main, "No signficiant problems detected", sep ="\n")
+        main = paste(main, "No significant problems detected", sep ="\n")
         maincol = "black"
       }
 
@@ -280,7 +280,7 @@ ensurePredictor <- function(simulationOutput,
                             predictor = NULL){
   if(!is.null(predictor)){
 
-    if(length(predictor) != length(simulationOutput$scaledResiduals)) stop("DHARMa: residuals an predictor do not have the same length. The issue is possibly that you have NAs in your predictor that were removed during the model fit. Remove the NA values from your predictor.")
+    if(length(predictor) != length(simulationOutput$scaledResiduals)) stop("DHARMa: residuals and predictor do not have the same length. The issue is possibly that you have NAs in your predictor that were removed during the model fit. Remove the NA values from your predictor.")
   } else {
 
     predictor = simulationOutput$fittedPredictedResponse
@@ -301,7 +301,7 @@ ensurePredictor <- function(simulationOutput,
 #plot(cumsum(sort(simulationOutput$scaledResiduals)))
 
 
-#plotConcentionalResiduals(fittedModel)
+#plotConventionalResiduals(fittedModel)
 
 
 #' Conventional residual plot
