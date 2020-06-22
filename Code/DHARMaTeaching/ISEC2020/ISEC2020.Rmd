@@ -1,0 +1,288 @@
+---
+title: A practical tutorial on residual diagnostics for hierarchical (multi-level/mixed) regression models with DHARMa
+author: "Florian Hartig"
+date: "6/19/2020"
+output: 
+  html_document: 
+    toc: yes
+    keep_md: yes
+abstract: "This document was prepared as a skills showcase for the virtual ISEC 2020 conference. For comments / questions during the skills showcase, please use the conference Slack, otherwise twitter @florianhartig."
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(DHARMa)
+library(lme4)
+library(glmmTMB)
+```
+
+# DHARMa function overview
+
+Let's fit a correctly a correctly specified model (we know it's correct because we simulated the data ourselves)
+
+```{r}
+set.seed(123)
+testData = createData(sampleSize = 200, family = poisson())
+fittedModel <- glmer(observedResponse ~ Environment1 + (1|group), 
+                     family = "poisson", data = testData)
+```
+
+## Calculating residuals with DHARMa
+
+```{r}
+res <- simulateResiduals(fittedModel)
+```
+
+Large number of options, see help and more comments later
+
+## The main DHARMa residual plot
+
+```{r}
+plot(res)
+```
+
+Interpretation of the left panel:
+
+* Uniform QQ plot (interpret like standard R plots)
+* KS-test for uniformity (essentially the same info as QQ)
+* Dispersion test: compares the variance in observations to the variance of the simulations
+* Outlier tests: tests if the number of outliers (i.e. observations outside the simulation envelope) is larger / smaller than one would expect under H0
+
+Interpretation of the right panel:
+
+* res ~ predicted (we would expect a completely uniform distribution in y direction, if rank-transformed also in x direction)
+* quantile GAMs fitted on the residuals at 0.25, 0.5, 0.75. If those GAMs deviate significantly from a straigt line at those values, they will be highlighted
+
+## Available tests
+
+We can also run these tests separately, including a few further test that I show below
+
+```{r}
+testDispersion(res)
+testUniformity(res)
+testOutliers(res)
+testQuantiles(res)
+testZeroInflation(res)
+testSpatialAutocorrelation(res)
+testTemporalAutocorrelation(res)
+```
+
+testDispersion and testZeroinflation are actually convenience wrappers derived from a more general function that allows testing an the simulated data, summarized by arbitrary summary statistics, against the observed data. 
+
+To test, for example, if the simulated mean observation deviates from the observed mean, use.
+
+```{r}
+testGeneric(res, summary = mean)
+```
+
+This function corresponds to what is traditionally discussed as the "Bayesian p-value" in the statistical literature, i.e. you create one p-value for the entire model-data comparison, as opposed to essentially a p-value per residual. 
+
+Something in between is offered by the recalculateResidual() function
+
+```{r}
+res2 = recalculateResiduals(res, group = testData$group)
+plot(res2)
+```
+
+where simulated and observed data a first summed by group before calculating the quantiles. It is useful for plotting residuals per site, location, individual etc., and in many case (in particular binomial, see example later), other patterns will occur after grouping. 
+
+## More S3 functions
+
+A few more useful functions, for complete list see help
+
+```{r}
+hist(res)
+residuals(res)
+plotResiduals(res, form = testData$Environment1)
+```
+
+## Examples of possible problems 
+
+Removing the RE will create overdispersion
+
+```{r}
+set.seed(123)
+testData = createData(sampleSize = 200, family = poisson())
+fittedModel <- glm(observedResponse ~ Environment1 , 
+                     family = "poisson", data = testData)
+
+res <- simulateResiduals(fittedModel = fittedModel)
+plot(res)
+```
+
+Missing an important predictor creates surprisingly few problems in the overall diagnostics 
+
+```{r}
+set.seed(123)
+testData = createData(sampleSize = 200, family = poisson())
+fittedModel <- glmer(observedResponse ~ 1 + (1|group), 
+                     family = "poisson", data = testData)
+
+res <- simulateResiduals(fittedModel = fittedModel)
+plot(res)
+```
+
+but if we plot residuals against the predictor, we see the problem clearly
+
+```{r}
+plotResiduals(res, form = testData$Environment1)
+```
+
+Conclusion: always additionally check residuals against all predictors!
+
+# Owl example
+
+The data is from Roulin, A. and L. Bersier (2007) Nestling barn owls beg more intensely in the presence of their mother than in the presence of their father. Animal Behaviour 74 1099–1106. https://doi.org/10.1016/j.anbehav.2007.01.027
+
+```{r}
+library(glmmTMB)
+plot(SiblingNegotiation ~ FoodTreatment, data=Owls)
+```
+
+Fitting the scientific hypothesis (offset corrects for BroodSize)
+
+```{r}
+m1 <- glm(SiblingNegotiation ~ FoodTreatment*SexParent + offset(log(BroodSize)), data=Owls , family = poisson)
+```
+
+Just as a bad example, let's look again at the standard residuals
+
+```{r}
+plot(m1)
+```
+
+Calculating DHARMa residuals
+
+```{r}
+res <- simulateResiduals(m1)
+plot(res)
+```
+
+Adding a random effect on Nest
+
+```{r}
+m2 <- glmer(SiblingNegotiation ~ FoodTreatment*SexParent + offset(log(BroodSize)) + (1|Nest), data=Owls , family = poisson)
+res <- simulateResiduals(m2)
+plot(res)
+```
+
+Switching to nbinom1 to account for overdispersion
+
+```{r}
+m3 <- glmmTMB(SiblingNegotiation ~ FoodTreatment*SexParent + offset(log(BroodSize)) + (1|Nest), data=Owls , family = nbinom1)
+
+res <- simulateResiduals(m3)
+plot(res)
+```
+
+Something still seems wrong. Let's see if further plots will help us to get an idea of what is going on
+
+```{r}
+plotResiduals(res, Owls$FoodTreatment)
+plotResiduals(res, Owls$SexParent)
+```
+
+Nothing to see. Let's check dispersion
+
+```{r}
+testDispersion(res)
+testZeroInflation(res)
+```
+
+It's a curious result that we have now underdispersion, despite fitting a model that corrects for dispersion. How can that be? Well, note taht we also seem to have a slight dendency to zero-inflation. What I have often observed in zero-inflated situations is that the model (if we fit a model with variable dispersion) will adjust for the zero-inflation by increasing the dispersion parameter, but now we have fewer larger observations than expected, thus the underdispersion. 
+
+```{r}
+set.seed(123)
+m4 <- glmmTMB(SiblingNegotiation ~ FoodTreatment*SexParent + offset(log(BroodSize)) + (1|Nest), ziformula = ~ FoodTreatment *SexParent, data=Owls , family = nbinom1 )
+res <- simulateResiduals(m4)
+plot(res)
+```
+
+# Salamander example
+
+```{r}
+data(Salamanders)
+Salamanders$pres = Salamanders$count > 0 
+```
+
+Binomial model
+
+```{r}
+mb1 = glm(pres ~ 0 + spp * cover, data = Salamanders, family = "binomial")
+par(mfrow = c(2,2))
+```
+
+Just as a bad example, let's look again at the standard residuals
+
+```{r}
+plot(mb1)
+```
+
+Calculating DHARMa residuals
+
+```{r}
+res <- simulateResiduals(mb1)
+plot(res)
+```
+
+Looks good, but careful - binomial 0/1 models always look good when plotted per data point, e.g. it is impossible to have overdispersion for 0/1 data when plotted per data point. That often changes if we aggregate data points
+
+```{r}
+res2 <- recalculateResiduals(res, group = Salamanders$site)
+plot(res2)
+```
+
+Aha, this looks much wose
+
+
+```{r}
+plotResiduals(res, Salamanders$mined)
+plotResiduals(res, Salamanders$cover)
+plotResiduals(res, Salamanders$Wtemp)
+```
+
+
+# Other options
+
+
+## Marginal vs. conditional simulations
+
+Per default, DHARMa re-simulates all fitted REs, i.e. it simulates the entire model structure. You can also calculate simulations conditional on the fitted REs, provided that the regression packages allows that. 
+
+In lme4, conditioning on the REs is done via the re.form argument
+
+```{r}
+set.seed(123)
+testData = createData(sampleSize = 200, family = poisson())
+fittedModel <- glmer(observedResponse ~ Environment1 + (1|group), 
+                     family = "poisson", data = testData)
+
+res <- simulateResiduals(fittedModel = fittedModel)
+plot(res)
+
+res <- simulateResiduals(fittedModel = fittedModel, re.form = NULL)
+plot(res)
+```
+
+Conditioning on REs has advantages and disadvantages. For some test (in particular dispersion), it seems to me that the power is higher when conditioning on REs. 
+
+## Refit option
+
+Re-fit calculates a parametric bootstrap, i.e. for each simulated dataset, the model is re-fit, and DHARMa calculates quantiles by using the distribution of simulates residuals. 
+
+```{r}
+res <- simulateResiduals(fittedModel = fittedModel, refit = T)
+plot(res)
+```
+
+
+
+
+
+
+
