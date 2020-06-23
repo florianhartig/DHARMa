@@ -85,7 +85,14 @@ plot(res)
 testDispersion(res)
 testZeroInflation(res)
 
+data(Salamanders)
+Salamanders$pres = Salamanders$count > 0
 
+mb1 = glm(pres ~ 0 + spp * cover, data = Salamanders, family = binomial)
 
+res<- simulateResiduals(mb1)
+plot(res)
 
+res2 <- recalculateResiduals(res, group = Salamanders$site)
+plot(res2)
 
