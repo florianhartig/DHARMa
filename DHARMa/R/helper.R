@@ -87,15 +87,17 @@ getQuantile <- function(simulations, observed, integerResponse, method = c("PIT"
 
     scaledResiduals = rep(NA, n)
     for (i in 1:n){
-      min <- sum(simulations[i,] < observed[i]) / length(simulations[i,])
-      max <- sum(simulations[i,] <= observed[i]) / length(simulations[i,])
-      if (min == max) scaledResiduals[i] = DHARMa.ecdf(simulations[i,])(observed[i])
+      if(length(unique(simulations[i,])) == 1) scaledResiduals[i] = runif(1, 0, 1)
       else{
-        scaledResiduals[i] = runif(1, min, max)
+        min <- sum(simulations[i,] < observed[i]) / length(simulations[i,])
+        max <- sum(simulations[i,] <= observed[i]) / length(simulations[i,])
+        if (min == max) scaledResiduals[i] = DHARMa.ecdf(simulations[i,])(observed[i])
+        else{
+          scaledResiduals[i] = runif(1, min, max)
+        }        
       }
     }
   }
-
   return(scaledResiduals)
 }
 
