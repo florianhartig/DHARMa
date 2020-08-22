@@ -1,7 +1,7 @@
 ---
 title: A practical tutorial on residual diagnostics for hierarchical (multi-level/mixed) regression models with DHARMa
 author: "Florian Hartig"
-date: "06-19-2020"
+date: "2020-06-19"
 output: 
   html_document: 
     toc: yes
