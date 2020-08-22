@@ -4,8 +4,9 @@
 \alias{simulateResiduals}
 \title{Create simulated residuals}
 \usage{
-simulateResiduals(fittedModel, n = 250, refit = F, integerResponse = NULL,
-  plot = F, seed = 123, method = c("PIT", "traditional"), ...)
+simulateResiduals(fittedModel, n = 250, refit = F,
+  integerResponse = NULL, plot = F, seed = 123, method = c("PIT",
+  "traditional"), ...)
 }
 \arguments{
 \item{fittedModel}{a fitted model  of a class supported by DHARMa}

@@ -4,8 +4,8 @@
 \alias{outliers}
 \title{Return outliers}
 \usage{
-outliers(object, lowerQuantile = 0, upperQuantile = 1, return = c("index",
-  "logical"))
+outliers(object, lowerQuantile = 0, upperQuantile = 1,
+  return = c("index", "logical"))
 }
 \arguments{
 \item{object}{an object with simulated residuals created by \code{\link{simulateResiduals}}}
