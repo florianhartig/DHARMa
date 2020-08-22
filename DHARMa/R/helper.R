@@ -85,23 +85,13 @@ getQuantile <- function(simulations, observed, integerResponse, method = c("PIT"
   } else {
 
     scaledResiduals = rep(NA, n)
-    
     for (i in 1:n){
-      # testing for the case that all simulations are the same
-      if(length(unique(simulations[i,])) == 1){
-        if (simulations[i,1] == observed[i]) scaledResiduals[i] = runif(1, 0, 1)
-        else if(simulations[i,1] > observed[i]) scaledResiduals[i] = 0
-        else scaledResiduals[i] = 1
-      } 
-      # else calculate PIT residuals
+      minSim <- sum(simulations[i,] < observed[i]) / length(simulations[i,])
+      maxSim <- sum(simulations[i,] <= observed[i]) / length(simulations[i,])
+      if (minSim == maxSim) scaledResiduals[i] = minSim
       else{
-        min <- sum(simulations[i,] < observed[i]) / length(simulations[i,])
-        max <- sum(simulations[i,] <= observed[i]) / length(simulations[i,])
-        if (min == max) scaledResiduals[i] = min
-        else{
-          scaledResiduals[i] = runif(1, min, max)
-        }        
-      }
+        scaledResiduals[i] = runif(1, minSim, maxSim)
+      }        
     }
   }
   return(scaledResiduals)
