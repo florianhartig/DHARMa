@@ -1,5 +1,13 @@
 NOTE: for more news about the package, see https://github.com/florianhartig/DHARMa/releases
 
+DHARMa 0.3.3
+============
+
+Bugfixes
+
+- bugfix in testOutliers, see https://github.com/florianhartig/DHARMa/issues/197
+- bugfix in the ecdf / PIT residual function, see https://github.com/florianhartig/DHARMa/issues/195
+
 DHARMa 0.3.2
 ============
 
