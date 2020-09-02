@@ -27,13 +27,13 @@ checkOutput <- function(simulationOutput){
 
 expectDispersion <- function(x, answer = T){
   res <- simulateResiduals(x)
-  if (answer) expect_lt(testDispersion(res, plot = doPlots)$p.value, 0.01)
-  else expect_gt(testDispersion(res, plot = doPlots)$p.value, 0.01)
+  if (answer) expect_lt(testDispersion(res, plot = doPlots)$p.value, 0.05)
+  else expect_gt(testDispersion(res, plot = doPlots)$p.value, 0.05)
 }
 
 
 
-runEverything = function(fittedModel, testData, DHARMaData = T){
+runEverything = function(fittedModel, testData, DHARMaData = T, expectOverdispersion = F){
 
   t = DHARMa:::getObservedResponse(fittedModel)
   expect_true(is.vector(t))
@@ -257,8 +257,8 @@ test_that("glm poisson works",
           {
             skip_on_cran()
 
-            testData = createData(sampleSize = 100, overdispersion = 0, randomEffectVariance = 0.000, family = poisson())
-            testData2 = createData(sampleSize = 100, overdispersion = 2, randomEffectVariance = 0.000, family = poisson())
+            testData = createData(sampleSize = 200, overdispersion = 0, randomEffectVariance = 0.000, family = poisson())
+            testData2 = createData(sampleSize = 200, overdispersion = 2, randomEffectVariance =0, family = poisson())
             #testData = createData(sampleSize = 200, randomEffectVariance = 1, family = negative.binomial(theta = 1.2, link = "log"))
 
             fittedModel <- glm(observedResponse ~ Environment1 , family = "poisson", data = testData)
@@ -268,10 +268,6 @@ test_that("glm poisson works",
 
 
             #testData = createData(sampleSize = 200, randomEffectVariance = 1, family = negative.binomial(theta = 1.2, link = "log"))
-
-
-
-
 
             fittedModel <- gam(observedResponse ~ Environment1 , family = "poisson", data = testData)
             runEverything(fittedModel, testData)

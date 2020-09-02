@@ -1,0 +1,53 @@
+---
+title: "BasicTests"
+author: "Florian Hartig"
+date: "9/2/2020"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Continous distributions 
+
+```{r}
+library(DHARMa)
+library(lme4)
+library(glmmTMB)
+```
+
+
+
+```{r}
+testData <- createData(sampleSize = 10000, family = gaussian(), randomEffectVariance = 0)
+
+fit <- lm(observedResponse ~ Environment1, data = testData)
+
+res <- simulateResiduals(fit)
+plot(res)
+
+testOutliers(res)
+testOutliers(res, type = "binomial")
+```
+
+
+# Binomial distributions 
+
+
+```{r}
+testData <- createData(sampleSize = 10000, family = binomial(), randomEffectVariance = 0)
+
+fit <- glm(observedResponse ~ Environment1, data = testData, family = "binomial")
+
+res <- simulateResiduals(fit)
+plot(res)
+
+testOutliers(res)
+testOutliers(res, type = "binomial")
+```
+
+
+
