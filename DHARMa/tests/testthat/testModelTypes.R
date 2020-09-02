@@ -281,13 +281,13 @@ test_that("glm poisson works",
 
             fittedModel <- glmer.nb(observedResponse ~ Environment1 + (1|group) , data = testData, control=glmerControl(optimizer = "bobyqa", optCtrl=list(maxfun=20000) ))
             runEverything(fittedModel, testData)
-            fittedModel2 <- glmer.nb(observedResponse ~ Environment1 + (1|group) , data = testData2, control=glmerControl(optimizer = "bobyqa", optCtrl=list(maxfun=20000) ))
-            #expectDispersion(fittedModel2, FALSE)
+            # fittedModel2 <- glmer.nb(observedResponse ~ Environment1 + (1|group) , data = testData2, control=glmerControl(optimizer = "bobyqa", optCtrl=list(maxfun=20000) ))
+            # expectDispersion(fittedModel2, FALSE)
 
             fittedModel <- glm.nb(observedResponse ~ Environment1,  data = testData)
             runEverything(fittedModel, testData)
-            fittedModel2 <- glm.nb(observedResponse ~ Environment1, data = testData2)
-            #expectDispersion(fittedModel2,FALSE)
+            # fittedModel2 <- glm.nb(observedResponse ~ Environment1, data = testData2)
+            # expectDispersion(fittedModel2,FALSE)
 
             fittedModel <- glmmTMB(observedResponse ~ Environment1 , family = "poisson", data = testData)
             runEverything(fittedModel, testData)
