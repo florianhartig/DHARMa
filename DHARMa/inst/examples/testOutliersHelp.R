@@ -9,7 +9,7 @@ testOutliers(simulationOutput)
 
 # note that default is to test outliers at both margins for both an excess and a lack
 # of outliers. Here we see that we mostly have an excess of outliers at the upper
-# margin. You see that it is an exces because the frequency of outliers is 0.055,
+# margin. You see that it is an excess because the frequency of outliers is 0.055,
 # while expected is 0.008
 
 # Let's see what would have happened if we would just have checked the lower margin

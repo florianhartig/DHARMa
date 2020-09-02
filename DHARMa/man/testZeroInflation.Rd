@@ -57,7 +57,8 @@ simulationOutput3 = recalculateResiduals(simulationOutput, group = testData$grou
 testDispersion(simulationOutput3)
 
 # Outlier test (number of observations outside simulation envelope)
-testOutliers(simulationOutput) 
+# Should set type = "boostrap" for exact values
+testOutliers(simulationOutput, type = "binomial") 
 
 # testing zero inflation
 testZeroInflation(simulationOutput)

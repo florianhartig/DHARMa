@@ -66,10 +66,8 @@ simulationOutput <- simulateResiduals(fittedModel = fittedModel)
 # standard plot 
 plot(simulationOutput)
 
-# one of the possible test, for other options see ?testResiduals 
-testOutliers(simulationOutput)
-
-# for various other plots and tests, see the help / vignette
+# one of the possible test, for other options see ?testResiduals / vignette
+testDispersion(simulationOutput)
 
 # the calculated residuals can be accessed via 
 residuals(simulationOutput)
