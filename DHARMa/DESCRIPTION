@@ -36,6 +36,7 @@ Imports:
 Suggests:
     knitr,
     testthat,
+    rmarkdown,
     KernSmooth,
     spaMM (>= 3.2.0)
 License: GPL (>= 3)
