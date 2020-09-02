@@ -606,7 +606,14 @@ The residuals look perfect now. That being said, we dont' have a lot of  data, a
 anova(mod2, mod3)
 ```
 
-We learn from that: increasing model complexity always improves the residuals, but according to standard statistical arguments (power, bias-variance trade-off) it's not always advisable to get them perfect, just good enough!
+Also AIC differences are small, although slightly in favor of model 3
+
+```{r}
+AIC(mod2) 
+AIC(mod3)
+```
+
+I guess you could use either Model 2 or 3 - the broader point is: increasing model complexity will nearly always improve the residuals, but according to standard statistical arguments (power, bias-variance trade-off) it's not always advisable to get them perfect, just good enough!
 
 ## Owl example (count data)
 
