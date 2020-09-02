@@ -62,6 +62,7 @@ simulateResiduals <- function(fittedModel, n = 250, refit = F, integerResponse =
   out$nObs = nobs(fittedModel)
   out$nSim = n
   out$refit = refit
+  out$methods = method
   out$observedResponse = getObservedResponse(fittedModel)
 
   if(is.null(integerResponse)){
@@ -245,6 +246,9 @@ recalculateResiduals <- function(simulationOutput, group = NULL, aggregateBy = s
 
   out = list()
   out$original = simulationOutput
+  out$group = group
+  out$method = method
+  out$aggregateBy = aggregateBy
 
   if(is.null(group)) return(simulationOutput)
   else group =as.factor(group)
