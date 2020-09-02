@@ -223,7 +223,7 @@ testOutliers <- function(simulationOutput, alternative = c("two.sided", "greater
     
     # Bootstrapping to compare to expected
     
-    nboot = min(res$nSim, nBoot)
+    nboot = min(simulationOutput$nSim, nBoot)
     
     frequBoot <- rep(NA, nboot)
     
