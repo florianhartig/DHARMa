@@ -4,7 +4,7 @@
 
 ## Submission 1, 22.8.20
 
-This is a minor update of DHARMa, with a bugfix for the testOutliers function. See NEWS for changes. 
+This is a minor update of DHARMa. See NEWS for changes. 
 
 This release was tested without apparent problems under
 
