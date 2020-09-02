@@ -150,6 +150,7 @@ testQuantiles <- function(simulationOutput, predictor = NULL, quantiles = c(0.25
 #' @param simulationOutput an object of class DHARMa with simulated quantile residuals, either created via \code{\link{simulateResiduals}} or by \code{\link{createDHARMa}} for simulations created outside DHARMa
 #' @param alternative a character string specifying whether the test should test if observations are "greater", "less" or "two.sided" (default) compared to the simulated null hypothesis
 #' @param margin whether to test for outliers only at the lower, only at the upper, or both sides (default) of the simulated data distribution
+#' @param type way to generate H0 for the test. See details
 #' @param plot if T, the function will create an additional plot
 #' @details DHARMa residuals are created by simulating from the fitted model, and comparing the simulated values to the observed data. It can occur that all simulated values are higher or smaller than the observed data, in which case they get the residual value of 0 and 1, respectively. I refer to these values as simulation outliers, or simply outliers.
 #'
@@ -157,8 +158,10 @@ testQuantiles <- function(simulationOutput, predictor = NULL, quantiles = c(0.25
 #'
 #' Note also that the number of outliers will decrease as we increase the number of simulations. Under the null hypothesis that the model is correct, and for continous distributions, we expect nData /(nSim +1) outliers at each margin of the distribution. For a reason, consider that if the data and the model distribution are identical, the probability that a given observation is higher than all simulations is 1/(nSim +1).
 #' 
-#' For integer-valued distributions, which are randomized via the PIT procedure (see \code{\link{simulateResiduals}}), the rate of "true" outliers is more difficult to calculate. For the test, DHARMa therefore calculates the rate of residuals that are closer than 1/(nSim+1) to the 0/1 border (note that, for continuous distributions, the outliers remain the same), which should occur at a rate of nData /(nSim +1). Note that those additional outliers are not displayed in the plots, i.e. plots highlight only "true" outliers that are outside the simulation envelope.  
-#'
+#' For integer-valued distributions, which are randomized via the PIT procedure (see \code{\link{simulateResiduals}}), the rate of "true" outliers is more difficult to calculate. For the approximate test, DHARMa calculates the rate of residuals that are closer than 1/(nSim+1) to the 0/1 border (note that, for continuous distributions, the outliers remain the same), which should occur at a rate of nData /(nSim +1). Note that those additional outliers are not displayed in the plots, i.e. plots highlight only "true" outliers that are outside the simulation envelope.  
+#' 
+#' This approximate value, however, is typically greater than the true value. For this reason, the default side to test with the approximate test is "greater". If you want a rea
+#' 
 #' Based on this null expectation, we can test for an excess or lack of outliers. Per default, testOutliers() looks for both, so if you get a significant p-value, you have to check if you have to many or too few outliers. An excess of outliers is to be interpreted as too many values outside the simulation envelope. This could be caused by overdispersion, or by what we classically call outliers. A lack of outliers would be caused, for example, by underdispersion.
 #'
 #'
@@ -166,53 +169,126 @@ testQuantiles <- function(simulationOutput, predictor = NULL, quantiles = c(0.25
 #' @seealso \code{\link{testResiduals}}, \code{\link{testUniformity}}, \code{\link{testDispersion}}, \code{\link{testZeroInflation}}, \code{\link{testGeneric}}, \code{\link{testTemporalAutocorrelation}}, \code{\link{testSpatialAutocorrelation}}, \code{\link{testQuantiles}}
 #' @example inst/examples/testOutliersHelp.R
 #' @export
-testOutliers <- function(simulationOutput, alternative = c("two.sided", "greater", "less"), margin = c("both", "upper", "lower"), plot = T){
+testOutliers <- function(simulationOutput, alternative = c("two.sided", "greater", "less"), margin = c("both", "upper", "lower"), type = c("bootstrap", "approximate"), nBoot = 100, plot = T){
 
   # check inputs
   alternative = match.arg(alternative)
   margin = match.arg(margin)
+  type = match.arg(type)
   data.name = deparse(substitute(simulationOutput)) # remember: needs to be called before ensureDHARMa
   simulationOutput = ensureDHARMa(simulationOutput, convert = "Model")
   
-  # calculation of outliers
-  if(margin == "both")  outliers = sum(simulationOutput$scaledResiduals < (1/(simulationOutput$nSim+1))) + sum(simulationOutput$scaledResiduals > (1-1/(simulationOutput$nSim+1)))
-  if(margin == "upper") outliers = sum(simulationOutput$scaledResiduals > (1-1/(simulationOutput$nSim+1)))
-  if(margin == "lower") outliers = sum(simulationOutput$scaledResiduals < (1/(simulationOutput$nSim+1)))
 
-  # calculations of trials and H0
-  outFreqH0 = 1/(simulationOutput$nSim +1) * ifelse(margin == "both", 2, 1)
-  trials = simulationOutput$nObs
 
-  out = binom.test(outliers, trials, p = outFreqH0, alternative = alternative)
-
-  # overwrite information in binom.test
-
-  out$data.name = data.name
-  out$margin = margin
-  out$method = "DHARMa outlier test based on exact binomial test"
-
-  names(out$statistic) = paste("outliers at", margin, "margin(s)")
-  names(out$parameter) = "simulations"
-  names(out$estimate) = paste("frequency of outliers (expected:", out$null.value,")")
-
-  out$interval = "tst"
-
-  out$interval =
-
-  if(plot == T) {
-
-    hist(simulationOutput, main = "")
-
-    main = ifelse(out$p.value <= 0.05,
-                  "Outlier test significant",
-                  "Outlier test n.s.")
-
-    title(main = main, cex.main = 1,
-          col.main = ifelse(out$p.value <= 0.05, "red", "black"))
-
-    # legend("center", c(paste("p=", round(out$p.value, digits = 5)), paste("Deviation ", ifelse(out$p.value < 0.05, "significant", "n.s."))), text.col = ifelse(out$p.value < 0.05, "red", "black" ))
-
+  if(type == "approximate"){
+    
+    # calculation of outliers
+    if(margin == "both")  outliers = sum(simulationOutput$scaledResiduals < (1/(simulationOutput$nSim+1))) + sum(simulationOutput$scaledResiduals > (1-1/(simulationOutput$nSim+1)))
+    if(margin == "upper") outliers = sum(simulationOutput$scaledResiduals > (1-1/(simulationOutput$nSim+1)))
+    if(margin == "lower") outliers = sum(simulationOutput$scaledResiduals < (1/(simulationOutput$nSim+1)))
+    
+    if(!(alternative == "greater")) message("DHARMa::testOutliers: note that using type = approximate with margin != greater may not have inflated Type I error rates in some situations. See ?testOutliers for details")
+    
+    # calculations of trials and H0
+    outFreqH0 = 1/(simulationOutput$nSim +1) * ifelse(margin == "both", 2, 1)
+    trials = simulationOutput$nObs
+    
+    out = binom.test(outliers, trials, p = outFreqH0, alternative = alternative)  
+    
+    
+    if(plot == T) {
+      
+      hist(simulationOutput, main = "")
+      
+      main = ifelse(out$p.value <= 0.05,
+                    "Outlier test significant",
+                    "Outlier test n.s.")
+      
+      title(main = main, cex.main = 1,
+            col.main = ifelse(out$p.value <= 0.05, "red", "black"))
+      
+      # legend("center", c(paste("p=", round(out$p.value, digits = 5)), paste("Deviation ", ifelse(out$p.value < 0.05, "significant", "n.s."))), text.col = ifelse(out$p.value < 0.05, "red", "black" ))
+      
+    }
+    
+    # overwrite information in binom.test
+    
+    out$method = "DHARMa outlier test based on boostrap"
+    
+    out$data.name = data.name
+    out$margin = margin
+    
+    names(out$statistic) = paste("outliers at", margin, "margin(s)")
+    names(out$parameter) = "simulations"
+    names(out$estimate) = paste("frequency of outliers (expected:", out$null.value,")")
+    
+  } else {
+    
+    if(margin == "both")  outliers = mean(simulationOutput$scaledResiduals == 0) + 
+        mean(simulationOutput$scaledResiduals ==1)
+    if(margin == "upper") outliers = mean(simulationOutput$scaledResiduals == 1)
+    if(margin == "lower") outliers = mean(simulationOutput$scaledResiduals ==0)
+    
+    
+    # Bootstrapping to compare to expected
+    
+    nboot = min(res$nSim, nBoot)
+    
+    frequBoot <- rep(NA, nboot)
+    
+    for (i in 1:nboot){
+      
+      residuals <- getQuantile(simulations = simulationOutput$simulatedResponse[,-i], observed = simulationOutput$simulatedResponse[,i], integerResponse = simulationOutput$integerResponse, method = simulationOutput$method)
+      
+      if(margin == "both")  frequBoot[i] = mean(residuals == 1) + mean(residuals ==0 )
+      if(margin == "upper") frequBoot[i] = mean(residuals == 1)
+      if(margin == "lower") frequBoot[i] = mean(residuals == 0)
+    }
+    
+    out = list()
+    class(out) = "htest"
+    out$alternative = alternative
+    out$p.value = getP(frequBoot, outliers, alternative = alternative)
+    out$data.name = data.name
+    out$margin = margin
+    
+    out$method = "DHARMa outlier test based on boostrap"
+    
+    out$statistic = paste(outliers, "freq outliers at", margin, "margin(s)")
+    #names(out$parameter) = "simulations"
+    out$estimate = paste("frequency of outliers (expected:", mean(frequBoot),")")
+    
+    
+    if(plot == T) {
+      
+      par(mfrow = c(1,2))
+      
+      hist(simulationOutput, main = "")
+      
+      main = ifelse(out$p.value <= 0.05,
+                    "Outlier test significant",
+                    "Outlier test n.s.")
+      
+      title(main = main, cex.main = 1,
+            col.main = ifelse(out$p.value <= 0.05, "red", "black"))
+      
+      # legend("center", c(paste("p=", round(out$p.value, digits = 5)), paste("Deviation ", ifelse(out$p.value < 0.05, "significant", "n.s."))), text.col = ifelse(out$p.value < 0.05, "red", "black" ))
+      
+      
+      
+      hist(frequBoot, xlim = range(outliers, frequBoot))
+      abline(v = outliers, col = "red", lwd = 2)
+      
+    }
+    
+    
+    
   }
+
+
+
+
+
   return(out)
 }
 
