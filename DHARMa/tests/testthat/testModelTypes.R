@@ -257,8 +257,8 @@ test_that("glm poisson works",
           {
             skip_on_cran()
 
-            testData = createData(sampleSize = 200, overdispersion = 0, randomEffectVariance = 0.000, family = poisson())
-            testData2 = createData(sampleSize = 200, overdispersion = 2, randomEffectVariance =0, family = poisson())
+            testData = createData(sampleSize = 500, overdispersion = 0, randomEffectVariance = 0.000, family = poisson())
+            testData2 = createData(sampleSize = 500, overdispersion = 2, randomEffectVariance =0, family = poisson())
             #testData = createData(sampleSize = 200, randomEffectVariance = 1, family = negative.binomial(theta = 1.2, link = "log"))
 
             fittedModel <- glm(observedResponse ~ Environment1 , family = "poisson", data = testData)
