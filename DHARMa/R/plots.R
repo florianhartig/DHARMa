@@ -107,7 +107,18 @@ plotQQunif <- function(simulationOutput, testUniformity = T, testOutliers = T, t
   }
 
   if(testOutliers == TRUE){
-    temp = testOutliers(simulationOutput, plot = F)
+    
+    check = FALSE
+    if(simulationOutput$integerResponse == FALSE) useMethod = "binomial"
+    else{
+      if(simulationOutput$nObs > 500){
+        useMethod = "binomial"
+        check = TRUE
+      } else useMethod = "bootstrap"
+    }
+    temp = testOutliers(simulationOutput, type =  useMethod, plot = F)
+    
+    if (temp$p.value < 0.05 & check == T) message("DHARMa:plot used testOutliers with type = binomial for computational reasons (nObs > 500). Note that this method may not have inflated Type I error rates for integer-valued distributions. To get a more exact result, it is recommended to re-run testOutliers with type = 'bootstrap'. See ?testOutliers for details")
     legend("bottomright", c(paste("Outlier test: p=", round(temp$p.value, digits = 5)), paste("Deviation ", ifelse(temp$p.value < 0.05, "significant", "n.s."))), text.col = ifelse(temp$p.value < 0.05, "red", "black" ), bty="n")
   }
 
@@ -117,6 +128,7 @@ plotQQunif <- function(simulationOutput, testUniformity = T, testOutliers = T, t
   }
 
 }
+
 
 
 #' Generic res ~ pred scatter plot with spline or quantile regression on top
