@@ -14,7 +14,7 @@ sudo: false
 # sudo: required
 
 # This only works if sudo = false.
-cache: packages
+# cache: packages
 
 r:
   - oldrel
