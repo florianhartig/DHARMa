@@ -1,6 +1,6 @@
 ---
 title: "DHARMa: residual diagnostics for hierarchical (multi-level/mixed) regression models"
-author: "Florian Hartig, Theoretical Ecology, University of Regensburg [website](http://www.uni-regensburg.de/biologie-vorklinische-medizin/theoretische-oekologie/mitarbeiter/hartig/)"
+author: "Florian Hartig, Theoretical Ecology, University of Regensburg [website](https://www.uni-regensburg.de/biologie-vorklinische-medizin/theoretische-oekologie/mitarbeiter/hartig/)"
 date: "`r Sys.Date()`"
 output: 
   rmarkdown::html_vignette:
@@ -340,7 +340,7 @@ Note: previous versions of DHARMa (< 0.2.0) discouraged the simulated overdisper
 
 2. It's not clear to if the refitted test is better ... but it's available.
 
-3. In my simulations, parametric tests, such as AER::dispersiontest didn't provide higher power. Because of that, and because of the higher generality of the simulated tests, I no longer provide parametric tests in DHARMa. However, you can see various implementions of the parametric tests in the DHARMa GitHub repo under [Code/DHARMaPerformance/Power](https://github.com/florianhartig/DHARMa/blob/master/Code/DHARMaPerformance/Power)). 
+3. In my simulations, parametric tests, such as AER::dispersiontest didn't provide higher power. Because of that, and because of the higher generality of the simulated tests, I no longer provide parametric tests in DHARMa. However, you can see various implementions of the parametric tests in the DHARMa GitHub repo under [Code/DHARMaPerformance/Power](https://github.com/florianhartig/DHARMa/tree/master/Code/DHARMaPerformance/Power)). 
 
 Below and example from there, which compares the four options to test for overdispersion (2 options to use DHARMa::testDispersoin, AER::dispersiontest, and DHARMa::testUniformity) for a Poisson glm
 
