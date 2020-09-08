@@ -225,17 +225,21 @@ testOutliers <- function(simulationOutput, alternative = c("two.sided", "greater
     
     # Bootstrapping to compare to expected
     
-    nboot = min(simulationOutput$nSim, nBoot)
-    
-    frequBoot <- rep(NA, nboot)
-    
     simIndices = 1:simulationOutput$nSim
     nSim = simulationOutput$nSim
     simResp = simulationOutput$simulatedResponse
     resMethod = simulationOutput$method
     resInteger = simulationOutput$integerResponse
     
-    for (i in 1:nboot){
+    
+    if (nBoot > nSim){
+      message("DHARMa::testOutliers: nBoot > nSim does not make much sense, thus changed to nBoot = nSim. If you want to increase nBoot, increase nSim in DHARMa::simulateResiduals as well.")
+      nBoot = nSim
+    }
+
+    frequBoot <- rep(NA, nBoot)
+    
+    for (i in 1:nBoot){
       
       #sel = -i
       sel = sample(simIndices[-i], size = nSim, replace = T)

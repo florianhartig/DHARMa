@@ -29,13 +29,13 @@ DHARMa.ecdf <- function (x)
 #' @param integerResponse is the response integer-valued. Only has an effect for method = "traditional"
 #' @param method the quantile randomization method used. See details
 #'
-#' @details The function calculates residual quantiles from the simulated data. For continous distributions, this will simply the the value of the ecdf.
+#' @details The function calculates residual quantiles from the simulated data. For continuous distributions, this will simply the the value of the ecdf.
 #'
 #' For discrete data, there are two options implemented.
 #'
 #' The current default (available since DHARMa 0.3.1) are probability integral transform (PIT-) residuals (Smith, 1985; Dunn & Smyth, 1996; see also see also Warton, et al., 2017).
 #'
-#' Before DHARMa 0.3.1, a different randomization procedure was used, in which the a U(-0.5, 0.5) distribution was added on observations and simualtions for discrete distributions. For a completely discrete distribution, the two procedures should deliver equivalent results, but the second method has the disadvantage that a) one has to know if the distribution is discrete (DHARMa tries to recognize this automatically), and b) that it leads to inefficiencies for some distributions such as the the Tweedie, which are partly continous, partly discrte (see e.g. https://github.com/florianhartig/DHARMa/issues/168).
+#' Before DHARMa 0.3.1, a different randomization procedure was used, in which the a U(-0.5, 0.5) distribution was added on observations and simulations for discrete distributions. For a completely discrete distribution, the two procedures should deliver equivalent results, but the second method has the disadvantage that a) one has to know if the distribution is discrete (DHARMa tries to recognize this automatically), and b) that it leads to inefficiencies for some distributions such as the the Tweedie, which are partly continuous, partly discrete (see e.g. https://github.com/florianhartig/DHARMa/issues/168).
 #'
 #' @references
 #'
@@ -86,8 +86,8 @@ getQuantile <- function(simulations, observed, integerResponse, method = c("PIT"
 
     scaledResiduals = rep(NA, n)
     for (i in 1:n){
-      minSim <- sum(simulations[i,] < observed[i]) / length(simulations[i,])
-      maxSim <- sum(simulations[i,] <= observed[i]) / length(simulations[i,])
+      minSim <- mean(simulations[i,] < observed[i]) 
+      maxSim <- mean(simulations[i,] <= observed[i]) 
       if (minSim == maxSim) scaledResiduals[i] = minSim
       else{
         scaledResiduals[i] = runif(1, minSim, maxSim)
