@@ -18,7 +18,7 @@ Calls both uniformity and dispersion test
 This function is a wrapper for the various test functions implemented in DHARMa. Currently, this function calls the \code{\link{testUniformity}} and the \code{\link{testDispersion}} functions. All other tests (see list below) have to be called by hand.
 }
 \examples{
-testData = createData(sampleSize = 200, overdispersion = 0.5, randomEffectVariance = 0)
+testData = createData(sampleSize = 100, overdispersion = 0.5, randomEffectVariance = 0)
 fittedModel <- glm(observedResponse ~ Environment1 , family = "poisson", data = testData)
 simulationOutput <- simulateResiduals(fittedModel = fittedModel)
 
@@ -27,7 +27,7 @@ simulationOutput <- simulateResiduals(fittedModel = fittedModel)
 plot(simulationOutput, quantreg = TRUE)
 
 # testResiduals tests distribution, dispersion and outliers
-testResiduals(simulationOutput)
+# testResiduals(simulationOutput)
 
 ####### Individual tests #######
 
@@ -36,7 +36,6 @@ testUniformity(simulationOutput)
 
 # Dispersion test
 testDispersion(simulationOutput) # tests under and overdispersion
-testDispersion(simulationOutput, alternative = "less") # only underdispersion
 testDispersion(simulationOutput, alternative = "less") # only underdispersion
 
 # if model is refitted, a different test will be called

@@ -29,7 +29,7 @@ This function tests if a user-defined summary differs when applied to simulated 
 The function that you supply is applied on the data as it is represented in your fitted model, which may not always correspond to how you think. This is important in particular when you use k/n binomial data, and want to test for 1-inflation. As an example, if have k/20 observations, and you provide your data via cbind (y, y-20), you have to test for 20-inflation (because this is how the data is represented in the model). However, if you provide data via y/20, and weights = 20, you should test for 1-inflation. In doubt, check how the data is internally represented in model.frame(model), or via simulate(model)
 }
 \examples{
-testData = createData(sampleSize = 200, overdispersion = 0.5, randomEffectVariance = 0)
+testData = createData(sampleSize = 100, overdispersion = 0.5, randomEffectVariance = 0)
 fittedModel <- glm(observedResponse ~ Environment1 , family = "poisson", data = testData)
 simulationOutput <- simulateResiduals(fittedModel = fittedModel)
 
@@ -38,7 +38,7 @@ simulationOutput <- simulateResiduals(fittedModel = fittedModel)
 plot(simulationOutput, quantreg = TRUE)
 
 # testResiduals tests distribution, dispersion and outliers
-testResiduals(simulationOutput)
+# testResiduals(simulationOutput)
 
 ####### Individual tests #######
 
@@ -47,7 +47,6 @@ testUniformity(simulationOutput)
 
 # Dispersion test
 testDispersion(simulationOutput) # tests under and overdispersion
-testDispersion(simulationOutput, alternative = "less") # only underdispersion
 testDispersion(simulationOutput, alternative = "less") # only underdispersion
 
 # if model is refitted, a different test will be called

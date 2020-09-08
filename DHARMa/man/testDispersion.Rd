@@ -30,7 +30,7 @@ If refit = T, the function compares the approximate deviance (via squared pearso
 The results of the dispersion test can can differ depending on whether it is evaluated on conditional (= conditional on fitted random effects) or unconditional (= REs are re-simulated) simulations. You can change between conditional or unconditional simulations in  \code{\link{simulateResiduals}} if this is supported by the regression package that you use. The default in DHARMa is to use unconditional simulations, but I have often found that conditional simulations are more sensitive to dispersion problems. I recommend trying both, as neither test should be positive if the dispersion is correct.
 }
 \examples{
-testData = createData(sampleSize = 200, overdispersion = 0.5, randomEffectVariance = 0)
+testData = createData(sampleSize = 100, overdispersion = 0.5, randomEffectVariance = 0)
 fittedModel <- glm(observedResponse ~ Environment1 , family = "poisson", data = testData)
 simulationOutput <- simulateResiduals(fittedModel = fittedModel)
 
@@ -39,7 +39,7 @@ simulationOutput <- simulateResiduals(fittedModel = fittedModel)
 plot(simulationOutput, quantreg = TRUE)
 
 # testResiduals tests distribution, dispersion and outliers
-testResiduals(simulationOutput)
+# testResiduals(simulationOutput)
 
 ####### Individual tests #######
 
@@ -48,7 +48,6 @@ testUniformity(simulationOutput)
 
 # Dispersion test
 testDispersion(simulationOutput) # tests under and overdispersion
-testDispersion(simulationOutput, alternative = "less") # only underdispersion
 testDispersion(simulationOutput, alternative = "less") # only underdispersion
 
 # if model is refitted, a different test will be called
