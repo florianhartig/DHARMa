@@ -89,9 +89,7 @@ getQuantile <- function(simulations, observed, integerResponse, method = c("PIT"
       minSim <- mean(simulations[i,] < observed[i]) 
       maxSim <- mean(simulations[i,] <= observed[i]) 
       if (minSim == maxSim) scaledResiduals[i] = minSim
-      else{
-        scaledResiduals[i] = runif(1, minSim, maxSim)
-      }        
+      else scaledResiduals[i] = runif(1, minSim, maxSim)
     }
   }
   return(scaledResiduals)
