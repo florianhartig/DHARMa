@@ -179,6 +179,8 @@ testOutliers <- function(simulationOutput, alternative = c("two.sided", "greater
   data.name = deparse(substitute(simulationOutput)) # remember: needs to be called before ensureDHARMa
   simulationOutput = ensureDHARMa(simulationOutput, convert = "Model")
 
+  
+  # using the binomial test, not exact
   if(type == "binomial"){
     
     # calculation of outliers
@@ -227,19 +229,25 @@ testOutliers <- function(simulationOutput, alternative = c("two.sided", "greater
     
     frequBoot <- rep(NA, nboot)
     
+    simIndices = 1:simulationOutput$nSim
+    nSim = simulationOutput$nSim
+    simResp = simulationOutput$simulatedResponse
+    resMethod = simulationOutput$method
+    resInteger = simulationOutput$integerResponse
+    
     for (i in 1:nboot){
-
-      sel = -i
-      #sel = sample((1:simulationOutput$nSim)[-i], size = nboot, replace = T)
       
-      residuals <- getQuantile(simulations = simulationOutput$simulatedResponse[,sel], 
-                               observed = simulationOutput$simulatedResponse[,i], 
-                               integerResponse = simulationOutput$integerResponse, 
-                               method = simulationOutput$method)
+      #sel = -i
+      sel = sample(simIndices[-i], size = nSim, replace = T)
+      
+      residuals <- getQuantile(simulations = simResp[,sel], 
+                               observed = simResp[,i], 
+                               integerResponse = resInteger, 
+                               method = resMethod)
       
       if(margin == "both")  frequBoot[i] = mean(residuals == 1) + mean(residuals == 0)
-      if(margin == "upper") frequBoot[i] = mean(residuals == 1)
-      if(margin == "lower") frequBoot[i] = mean(residuals == 0)
+      else if(margin == "upper") frequBoot[i] = mean(residuals == 1)
+      else if(margin == "lower") frequBoot[i] = mean(residuals == 0)
     }
     
     out = list()
