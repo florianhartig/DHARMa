@@ -1,4 +1,13 @@
 
+######### Generics #############
+
+#' get possible models
+#' 
+#' returns a list of supported model classes 
+#' 
+#' @keywords internal
+getPossibleModels<-function()c("lm", "glm", "negbin", "lmerMod", "glmerMod", "gam", "bam", "glmmTMB", "HLfit", "MixMod")
+
 # New S3 methods
 
 #' Get model response
@@ -170,7 +179,7 @@ getRefit.default <- function (object, newresp, ...){
 #'
 #' Wrapper to get the fitted value a fitted model
 #'
-#' The purpose of this wrapper is to standardize extract the fitted values
+#' The purpose of this wrapper is to standardize extract the fitted values. re-form should be set to ~0 to avoid spurious residual patterns, see https://github.com/florianhartig/DHARMa/issues/43
 #'
 #' @param object a fitted model
 #' @param ... additional parameters to be passed on, usually to the simulate function of the respective model class
@@ -185,10 +194,40 @@ getFitted <- function (object, ...) {
   UseMethod("getFitted", object)
 }
 
+# NOTE - a bit unclear if fitted or predict should be used
+
 #' @rdname getFitted
 #' @export
 getFitted.default <- function (object,...){
-  fitted(object, ...)
+  predict(object, type = "response", re.form = ~0)
+}
+
+
+#' Get model residuals
+#'
+#' Wrapper to get the residuals of a fitted model
+#'
+#' The purpose of this wrapper is to standardize extract the model residuals. Similar to some other functions, a key question is whether to calculate those conditional or unconditional on the fitted REs. 
+#'
+#' @param object a fitted model
+#' @param ... additional parameters to be passed on, usually to the residual function of the respective model class
+#'
+#' @example inst/examples/wrappersHelp.R
+#'
+#' @seealso \code{\link{getObservedResponse}}, \code{\link{getSimulations}}, \code{\link{getRefit}}, \code{\link{getFixedEffects}}, \code{\link{getFitted}}
+#'
+#' @author Florian Hartig
+#' @export
+getResiduals <- function (object, ...) {
+  UseMethod("getFitted", object)
+}
+
+# NOTE - a bit unclear if fitted or predict should be used
+
+#' @rdname getFitted
+#' @export
+getResiduals.default <- function (object,...){
+  residuals(fittedModel, type = "response")
 }
 
 #' has NA
@@ -200,7 +239,6 @@ getFitted.default <- function (object,...){
 #' @details Checks if the fitted model excluded NA values
 #'
 #' @export
-
 
 # hasNA <- function(object){
 #   x = rownames(model.frame(object))
@@ -402,4 +440,53 @@ getSimulations.HLfit <- function(object, nsim = 1, type = c("normal", "refit"), 
 getRefit.HLfit <- function(object, newresp, ...) {
   spaMM::update_resp(object, newresp, evaluate = TRUE)
 }
+
+#' @rdname getFitted
+#' @export
+getFitted.HLfit <- function (object,...){
+  predict(object, type = "response", re.form = ~0)[,1L]
+}
+
+####### GLMMadaptive #########
+
+# getObservedResponse - seems this is working
+
+# getSimulations
+
+#' @rdname getFixedEffects
+#' @export
+getFixedEffects.MixMod <- function(fittedModel){
+  out <- fixef(fittedModel, sub_model = "main")   
+  return(out)
+}
+
+# getRefit UNKLAR
+
+#' @rdname getFitted
+#' @export
+getFitted.MixMod <- function (object,...){
+  predict(object, type = "mean_subject")
+}
+
+#' @rdname getResiduals
+#' @export
+getResiduals.MixMod <- function (object,...){
+  residuals(fittedModel, type = "subject_specific")
+}
+
+####### New Class #########
+
+# getObservedResponse
+
+# getSimulations
+
+# getFixedEffects
+
+# getRefit
+
+# getFitted
+
+# getResiduals
+
+
 

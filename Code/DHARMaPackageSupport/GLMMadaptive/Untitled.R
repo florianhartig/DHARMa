@@ -26,8 +26,29 @@ DF$id <- factor(id)
 
 ################################################
 
-fm1 <- mixed_model(fixed = y ~ year + group, random = ~ year | id, data = DF,
+fm1 <- mixed_model(fixed = y ~ year * group, random = ~ 1 | id, data = DF,
                    family = binomial())
+
+res <- simulateResiduals(fm1)
+
+
+getFixedEffects(fm1)
+
+# fixed effects
+fixef(fm1, sub_model = "main")
+
+# random effects
+head(ranef(fm1))
+
+# detailed output
+summary(fm1)
+
+# fitted values for the 'mean subject', i.e., with
+# random effects values equal to 0
+head(fitted(fm1, type = "mean_subject"))
+
+# fitted values for the conditioning on the estimated random effects
+head(fitted(fm1, type = "subject_specific"))
 
 
 fixef(fm1)
