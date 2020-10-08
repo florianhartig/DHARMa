@@ -1,0 +1,152 @@
+---
+title: "Report"
+author: "Florian Hartig"
+date: "`r Sys.Date()`"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(DHARMa)
+library(lme4)
+library(glmmTMB)
+```
+
+# Basic  tests
+
+## Continous distributions 
+
+
+```{r}
+testData <- createData(sampleSize = 10000, family = gaussian(), randomEffectVariance = 0)
+
+fit <- lm(observedResponse ~ Environment1, data = testData)
+
+res <- simulateResiduals(fit)
+plot(res)
+
+testOutliers(res)
+testOutliers(res, type = "binomial")
+```
+
+
+## Binomial distributions 
+
+
+```{r}
+testData <- createData(sampleSize = 10000, family = binomial(), randomEffectVariance = 0)
+
+fit <- glm(observedResponse ~ Environment1, data = testData, family = "binomial")
+
+res <- simulateResiduals(fit)
+plot(res)
+
+testOutliers(res)
+testOutliers(res, type = "binomial")
+```
+
+
+# Calibration of tests
+
+
+```{r}
+  reps = 100
+
+  pVals = matrix(ncol = 4, nrow = reps)
+
+  for(i in 1:reps){
+    testData = createData(sampleSize = 50, randomEffectVariance = 0, family = gaussian())
+    fittedModel <- glm(observedResponse ~ Environment1 , data = testData, family = "gaussian")
+    simulationOutput <- simulateResiduals(fittedModel = fittedModel, n = 250, seed = i)
+    testDispersion(simulationOutput, plot = T, alternative = "greater")
+    
+    spread <- function(x) sd(x - simulationOutput$fittedPredictedResponse)
+    
+    testGeneric(simulationOutput, spread, plot = T)
+    
+    spread(simulationOutput$simulatedResponse[,3])
+    #plot(simulationOutput)
+
+    
+    pVals[i,1] = testOutliers(simulationOutput, plot = F, type = "binomial")$p.value
+    pVals[i,2] = testDispersion(simulationOutput, plot = F)$p.value
+    pVals[i,3] = testUniformity(simulationOutput, plot = F)$p.value
+    pVals[i,4] = testGeneric(simulationOutput, spread, plot = F)$p.value
+  }
+  
+  par(mfrow = c(2,2))
+  for(i in 1:4) DHARMa:::testPDistribution(pVals[,i])
+    
+```
+
+
+## Overdispersion test 
+
+
+
+library(sjstats) 
+library(performance)
+
+testData = createData(sampleSize = 1000, overdispersion = 0.5)
+
+fittedModel <- glmer(observedResponse ~ Environment1 + (1|group), 
+                    data = testData, family = poisson)
+summary(fittedModel)
+
+fittedModel <- glmer(observedResponse ~ Environment1 + (1|group) + (1|ID), 
+                     data = testData, family = poisson)
+summary(fittedModel)
+
+
+simulationOutput <- simulateResiduals(fittedModel = fittedModel, n = 2000)
+
+testDispersion(simulationOutput)
+performance::check_overdispersion(fittedModel)
+
+simulationOutput <- simulateResiduals(fittedModel = fittedModel, n = 2000, refit = T)
+testDispersion(simulationOutput)
+
+
+
+
+# Speed Benchmarks
+
+
+running simulations
+
+```{r}
+system.time(replicate(10, {
+  testData = createData(sampleSize = 10000, family = gaussian())
+  fittedModel <- lm(observedResponse ~ Environment1 , data = testData)
+  simulationOutput = simulateResiduals(fittedModel = fittedModel, n = 1000)
+}))
+```
+
+```{r}
+
+system.time(replicate(5, {
+  testData = createData(sampleSize = 1000, family = gaussian())
+  fittedModel <- lm(observedResponse ~ Environment1 , data = testData)
+  simulationOutput = simulateResiduals(fittedModel = fittedModel, n = 1000)
+  testOutliers(simulationOutput, plot = F) 
+}))
+```
+
+
+```{r}
+set.seed(123)
+x= matrix(rnorm(1000), ncol = 100)
+
+system.time(replicate(10000, {
+  getQuantile(x ,observed = rep(0,10))
+}))
+```
+
+
+
+
