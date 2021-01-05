@@ -160,7 +160,7 @@ simulateResiduals <- function(fittedModel, n = 250, refit = F, integerResponse =
   return(out)
 }
 
-getPossibleModels<-function()c("lm", "glm", "negbin", "lmerMod", "glmerMod", "gam", "bam", "glmmTMB", "HLfit")
+getPossibleModels<-function()c("lm", "glm", "negbin", "lmerMod", "lmerModLmerTest", "glmerMod", "gam", "bam", "glmmTMB", "HLfit")
 
 
 
