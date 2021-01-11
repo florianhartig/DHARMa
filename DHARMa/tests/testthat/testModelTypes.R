@@ -7,6 +7,7 @@ library(lme4)
 library(mgcv)
 library(glmmTMB)
 library(spaMM)
+library(GLMMadaptive)
 set.seed(123)
 
 doPlots = F
@@ -112,6 +113,9 @@ test_that("lm works",
 
             fittedModel <- HLfit(observedResponse ~ Environment1 + (1|group) , data = testData)
             runEverything(fittedModel, testData)
+            
+            # GLMMadaptive does not support gaussian
+            # fittedModel <- mixed_model(fixed = observedResponse ~ Environment1, random = ~ 1 | group, data = testData, family = gaussian())
 
           }
 )
@@ -153,6 +157,10 @@ test_that("binomial 1/0 works",
 
             fittedModel <- HLfit(observedResponse ~ Environment1 + (1|group) , family = "binomial",  data = testData)
             runEverything(fittedModel, testData)
+            
+            fittedModel <- mixed_model(fixed = observedResponse ~ Environment1, random = ~ 1 | group, data = testData, family = binomial())
+            runEverything(fittedModel, testData)
+            
           }
 )
 
@@ -182,6 +190,9 @@ test_that("binomial y/n (factor) works",
 
             fittedModel <- HLfit(observedResponse ~ Environment1 + (1|group) , family = "binomial",  data = testData)
             runEverything(fittedModel, testData)
+            
+            fittedModel <- mixed_model(fixed = observedResponse ~ Environment1, random = ~ 1 | group, data = testData, family = binomial())
+            runEverything(fittedModel, testData)
           }
 )
 
@@ -210,6 +221,9 @@ test_that("glm binomial n/k with matrix works",
             runEverything(fittedModel, testData)
 
             fittedModel <- HLfit(cbind(observedResponse1,observedResponse0) ~ Environment1 + (1|group) , family = "binomial",  data = testData)
+            runEverything(fittedModel, testData)
+            
+            fittedModel <- mixed_model(fixed = observedResponse ~ Environment1, random = ~ 1 | group, data = testData, family = binomial())
             runEverything(fittedModel, testData)
 
           }
@@ -245,6 +259,9 @@ test_that("glm binomial n/k with weights works",
             # spaMM doesn't support binomial k/n via weights
             #fittedModel <- HLfit(prop ~ Environment1 + (1|group) , family = "binomial",  data = testData, prior.weights = rep(20,200))
             #runEverything(fittedModel, testData)
+            
+            fittedModel <- mixed_model(fixed = observedResponse ~ Environment1, random = ~ 1 | group, data = testData, family = binomial())
+            runEverything(fittedModel, testData)
 
           }
 )
@@ -304,8 +321,13 @@ test_that("glm poisson works",
 
             fittedModel <- HLfit(observedResponse ~ Environment1 + (1|group) , family = "poisson",  data = testData)
             runEverything(fittedModel, testData)
+            
             fittedModel2 <- HLfit(observedResponse ~ Environment1 + (1|group) , family = "poisson",  data = testData2)
             expectDispersion(fittedModel2)
+            
+            fittedModel <- mixed_model(fixed = observedResponse ~ Environment1, random = ~ 1 | group, data = testData, family = poisson())
+            runEverything(fittedModel, testData)
+            
           }
 )
 
@@ -376,6 +398,10 @@ test_that("glm poisson weights throws warning",
                       #expect_error( fittedModel <- HLfit(observedResponse ~ Environment1 + (1|group) , family = "poisson",  data = testData, prior.weights = weights))
                       fittedModel <- HLfit(observedResponse ~ Environment1 + (1|group) , family = negbin(1),  data = testData, prior.weights = weights)
                       simulateResiduals(fittedModel)
+                      
+                      
+                      fittedModel <- mixed_model(fixed = observedResponse ~ Environment1, random = ~ 1 | group, data = testData, family = poisson(), prior.weights = weights)
+                      expect_warning(simulateResiduals(fittedModel))
                     }
           )
 
