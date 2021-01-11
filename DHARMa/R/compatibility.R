@@ -6,7 +6,7 @@
 #' returns a list of supported model classes 
 #' 
 #' @keywords internal
-getPossibleModels<-function()c("lm", "glm", "negbin", "lmerMod", "glmerMod", "gam", "bam", "glmmTMB", "HLfit", "MixMod")
+getPossibleModels<-function()c("lm", "glm", "negbin", "lmerMod", "lmerModLmerTest", "glmerMod", "gam", "bam", "glmmTMB", "HLfit", "MixMod")
 
 # New S3 methods
 
@@ -451,7 +451,21 @@ getFitted.HLfit <- function (object,...){
 
 # getObservedResponse - seems this is working
 
-# getSimulations
+#' @rdname getSimulations
+#' @export
+getSimulations.MixMod <- function(object, nsim = 1, type = c("normal", "refit"), ...){
+  
+  type <- match.arg(type)
+  
+  out = simulate(object, nsim = nsim , ...)
+  
+  if(type == "normal"){
+    if(!is.matrix(out)) out = data.matrix(out)
+  }else{
+    out = as.data.frame(out)
+  }
+  return(out)
+}
 
 #' @rdname getFixedEffects
 #' @export
