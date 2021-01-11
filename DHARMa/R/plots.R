@@ -202,16 +202,23 @@ plotResiduals <- function(simulationOutput, form = NULL, quantreg = NULL, rank =
 
   blackcol = rgb(0,0,0, alpha = max(0.1, 1 - 3 * length(res) / switchScatter))
 
+  # Note to self: why is this wrapped in do.call?
 
   # categorical plot
   if(is.factor(pred)){
     do.call(plot, append(list(res ~ pred, ylim = c(0,1), axes = FALSE), a))
+    
+    axis(1, at = 1:nlevels(pred), levels(pred))
+    axis(2, at=c(0, 0.25, 0.5, 0.75, 1))
   }
   # smooth scatter
   else if (smoothScatter == TRUE) {
     defaultCol = ifelse(res == 0 | res == 1, 2,blackcol)
     do.call(graphics::smoothScatter, append(list(x = pred, y = res , ylim = c(0,1), axes = FALSE, colramp = colorRampPalette(c("white", "darkgrey"))),a))
     points(pred[defaultCol == 2], res[defaultCol == 2], col = "red", cex = 0.5)
+    
+    axis(1)
+    axis(2, at=c(0, 0.25, 0.5, 0.75, 1))
   }
   # normal plot
   else{
@@ -220,10 +227,10 @@ plotResiduals <- function(simulationOutput, form = NULL, quantreg = NULL, rank =
     a$col = checkDots("col", defaultCol, ...)
     a$pch = checkDots("pch", defaultPch, ...)
     do.call(plot, append(list(res ~ pred, ylim = c(0,1), axes = FALSE), a))
+    
+    axis(1)
+    axis(2, at=c(0, 0.25, 0.5, 0.75, 1))
   }
-
-  axis(1)
-  axis(2, at=c(0, 0.25, 0.5, 0.75, 1))
 
   ##### Quantile regressions #####
 
@@ -293,6 +300,12 @@ ensurePredictor <- function(simulationOutput,
   if(!is.null(predictor)){
 
     if(length(predictor) != length(simulationOutput$scaledResiduals)) stop("DHARMa: residuals and predictor do not have the same length. The issue is possibly that you have NAs in your predictor that were removed during the model fit. Remove the NA values from your predictor.")
+    
+    if(is.character(predictor)) {
+      predictor = factor(predictor)
+      warning("DHARMa:::ensurePredictor: character string was provided as predictor. DHARMa has converted to factor automatically. To remove this warning, please convert to factor before attempting to plot with DHARMa.")
+    }
+    
   } else {
 
     predictor = simulationOutput$fittedPredictedResponse
