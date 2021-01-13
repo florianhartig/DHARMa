@@ -782,9 +782,9 @@ First of all, note that MLE and Bayesian quantile residuals are not identical. T
 
 From this we can directly conclude that Bayesian and MLE quantile residuals are asymptotically identical (and via the usual arguments uniformly distributed).
 
-The more interesting question is what happens in the low data situation. First of all, in the limit of low data, we will first get uncertainty around the estimates, i.e. the simulated distribution will get wider for the Bayesian than for the MLE quantile residuals. If we loose even more data, the posterior will shift to the prior. 
+The more interesting question is what happens in the low data situation. Starting from a "sharp" posterior that can be viewed as identical to the MLE, if we reduce the data, the first thing that will happen is that the simulated distribution will get wider for the Bayesian than for the MLE quantile residuals. Reducing the data even more, the posterior will shift to the prior. Thus, what we are doing approximately in these two idealized cases is either a) simulating data while sampling parameters from a normal distribution around the MLE b) simulation data while drawing parameters of the model from the prior. In either case, these situations will probably not create exactly uniform quantile residuals. 
 
-It is somewhat unclear how either of the residuals behave in this situation, but I would argue that MLE is usually only used anyway if the MLE is reasonably sharp. In practice, I have seldom experienced problems with MLE estimates. It's a bit different in the Bayesian case, where it is possible and often done to fit very complex models with limited data. In this case, many of the general issues in defining null distributions for Bayesian p-values (as, e.g., reviewed in 
+Of course, also the MLE distribution might get problems in low data situations, but I would argue that MLE is usually only used anyway if the MLE is reasonably sharp. In practice, I have seldom experienced problems with MLE estimates. It's a bit different in the Bayesian case, where it is possible and often done to fit very complex models with limited data. In this case, many of the general issues in defining null distributions for Bayesian p-values (as, e.g., reviewed in 
 [Conn et al., 2018](https://doi.org/10.1002/ecm.1314)) apply. 
 
 # Supported packages 
