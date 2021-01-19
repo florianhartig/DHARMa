@@ -1,8 +1,8 @@
 returnP <- function(counter=NULL){
-  testData = createData(sampleSize = 20, family = gaussian())
+  testData = DHARMa::createData(sampleSize = 20, family = gaussian())
   fittedModel <- lm(observedResponse ~ Environment1, data = testData)
-  res <- simulateResiduals(fittedModel = fittedModel, n = 250)
-  out <- c(testUniformity(res)$p.value, res$scaledResiduals)
+  res <- DHARMa::simulateResiduals(fittedModel = fittedModel, n = 250)
+  out <- c(DHARMa::testUniformity(res, plot = FALSE)$p.value, res$scaledResiduals)
   return(out)
 }
 
@@ -13,14 +13,14 @@ returnP()
 out = runBenchmarks(returnP, nRep = 20)
 
 # running benchmark parallel
-out = runBenchmarks(returnP, nRep = 500, parallel = T)
+out = runBenchmarks(returnP, nRep = 500, parallel = TRUE)
 
 
 returnP <- function(control = 0){
-  testData = createData(sampleSize = 20, family = poisson(), overdispersion = control)
+  testData = DHARMa::createData(sampleSize = 20, family = poisson(), overdispersion = control)
   fittedModel <- glm(observedResponse ~ Environment1, data = testData, family = poisson())
-  res <- simulateResiduals(fittedModel = fittedModel, n = 250)
-  out <- suppressWarnings(c(testUniformity(res)$p.value, res$scaledResiduals))
+  res <- DHARMa::simulateResiduals(fittedModel = fittedModel, n = 250)
+  out <- suppressWarnings(c(DHARMa::testUniformity(res, plot = FALSE)$p.value, res$scaledResiduals))
   return(out)
 }
 
@@ -31,5 +31,5 @@ returnP(control = 1)
 out = runBenchmarks(returnP, controlValues = c(0,0.5,1), nRep = 20)
 
 # running benchmark parallel
-out = runBenchmarks(returnP, controlValues = c(0,0.5,1), nRep = 500, parallel = T)
+out = runBenchmarks(returnP, controlValues = c(0,0.5,1), nRep = 500, parallel = TRUE)
 

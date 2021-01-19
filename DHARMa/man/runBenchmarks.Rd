@@ -8,7 +8,7 @@ runBenchmarks(calculateStatistics, controlValues = NULL, nRep = 10,
   alpha = 0.05, parallel = F, ...)
 }
 \arguments{
-\item{calculateStatistics}{the statistics to be benchmarked. Should return one value, or a vector of values. If controlValues are given, must accept a paramteter control}
+\item{calculateStatistics}{the statistics to be benchmarked. Should return one value, or a vector of values. If controlValues are given, must accept a paramteter called "control"}
 
 \item{controlValues}{a vector with a control parameter (e.g. to vary the strength of a problem the test should be specific to)}
 
@@ -25,4 +25,41 @@ This function runs statistical benchmarks, including Power / Type I error simula
 }
 \note{
 The benchmark function in DHARMa are intended for development purposes, and for users that want to test / confirm the properties of functions in DHARMa. If you are running an applied data analysis, they are probably of little use.
+}
+\examples{
+returnP <- function(counter=NULL){
+  testData = DHARMa::createData(sampleSize = 20, family = gaussian())
+  fittedModel <- lm(observedResponse ~ Environment1, data = testData)
+  res <- DHARMa::simulateResiduals(fittedModel = fittedModel, n = 250)
+  out <- c(DHARMa::testUniformity(res, plot = FALSE)$p.value, res$scaledResiduals)
+  return(out)
+}
+
+# testing a single return
+returnP()
+
+# running benchmark
+out = runBenchmarks(returnP, nRep = 20)
+
+# running benchmark parallel
+out = runBenchmarks(returnP, nRep = 500, parallel = TRUE)
+
+
+returnP <- function(control = 0){
+  testData = DHARMa::createData(sampleSize = 20, family = poisson(), overdispersion = control)
+  fittedModel <- glm(observedResponse ~ Environment1, data = testData, family = poisson())
+  res <- DHARMa::simulateResiduals(fittedModel = fittedModel, n = 250)
+  out <- suppressWarnings(c(DHARMa::testUniformity(res, plot = FALSE)$p.value, res$scaledResiduals))
+  return(out)
+}
+
+# testing a single return
+returnP(control = 1)
+
+# running benchmark
+out = runBenchmarks(returnP, controlValues = c(0,0.5,1), nRep = 20)
+
+# running benchmark parallel
+out = runBenchmarks(returnP, controlValues = c(0,0.5,1), nRep = 500, parallel = TRUE)
+
 }
