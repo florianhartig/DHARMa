@@ -14,14 +14,14 @@
 #' @importFrom foreach "%dopar%"
 #' @author Florian Hartig
 #' @example inst/examples/runBenchmarksHelp.R
-runBenchmarks <- function(calculateStatistics, controlValues = NULL, nRep = 10, alpha = 0.05, parallel = F, ...){
+runBenchmarks <- function(calculateStatistics, controlValues = NULL, nRep = 10, alpha = 0.05, parallel = FALSE, ...){
   
 
   # Sequential Simulations
   
   simulations = list()
   
-  if(parallel == F){
+  if(parallel == FALSE){
     if(is.null(controlValues)) simulations[[1]] = replicate(nRep, calculateStatistics(), simplify = "array")
     else for(j in 1:length(controlValues)){
       simulations[[j]] = replicate(nRep, calculateStatistics(controlValues[j]), simplify = "array")
@@ -31,7 +31,7 @@ runBenchmarks <- function(calculateStatistics, controlValues = NULL, nRep = 10, 
     
   }else{
     
-    if (parallel == T | parallel == "auto"){
+    if (parallel == TRUE | parallel == "auto"){
       cores <- parallel::detectCores() - 1
       message("parallel, set cores automatically to ", cores)
     } else if (is.numeric(parallel)){
@@ -76,12 +76,14 @@ runBenchmarks <- function(calculateStatistics, controlValues = NULL, nRep = 10, 
   sig <- function(x) mean(x < alpha)
   isUnif <- function(x) ks.test(x, "punif")$p.value
   
-  
   for (i in 1:nControl){
     summary[,1,i] = apply(simulations[[i]], 1, sig) 
     summary[,2,i] = apply(simulations[[i]], 1, mean) 
     summary[,3,i] = suppressWarnings(apply(simulations[[i]], 1, isUnif))
   }
+  
+  simulations = lapply(out$simulations, t)
+  
   
   out = list()
   out$simulations = simulations
