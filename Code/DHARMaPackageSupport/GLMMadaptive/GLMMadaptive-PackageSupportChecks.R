@@ -43,5 +43,18 @@ DF2 = testData = createData(sampleSize = 500, overdispersion = 0, randomEffectVa
 fm2 = update(fm1, data = DF2)
 fm3 <-  fittedModel <- mixed_model(fixed = observedResponse ~ Environment1, random = ~ 1 | group, data = DF2, family = poisson())
 
+DF3 = DF2 
+DF3$observedResponse = NULL
+DF3$observedResponse = DF2$observedResponse
+fm4 <-  fittedModel <- mixed_model(fixed = observedResponse ~ Environment1, random = ~ 1 | group, data = DF3, family = poisson())
+fm4$data
+
+# data argument is forced
+
+responsename = colnames(model.frame(fm4))[1]
+newDat = fm4$data
+newDat[, match(responsename,names(newDat))]
+
+
 
 
