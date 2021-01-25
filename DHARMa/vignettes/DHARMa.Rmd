@@ -782,7 +782,17 @@ First of all, note that MLE and Bayesian quantile residuals are not identical. T
 
 From this we can directly conclude that Bayesian and MLE quantile residuals are asymptotically identical (and via the usual arguments uniformly distributed).
 
-The more interesting question is what happens in the low data situation. Starting from a "sharp" posterior that can be viewed as identical to the MLE, if we reduce the data, the first thing that will happen is that the simulated distribution will get wider for the Bayesian than for the MLE quantile residuals. Reducing the data even more, the posterior will shift to the prior. Thus, what we are doing approximately in these two idealized cases is either a) simulating data while sampling parameters from a normal distribution around the MLE b) simulation data while drawing parameters of the model from the prior. In either case, these situations will probably not create exactly uniform quantile residuals. 
+The more interesting question is what happens in the low data situation. Let's imagine that we start with a situation of infinite data. In this case, we have a "sharp" posterior that can be viewed as identical to the MLE. 
+
+If we reduce the number of data, there are two things happening 
+
+1. The posterior gets wider, with the likelihood componet being normally distributed, at least initially
+
+2. The influence of the prior increases, the faster the stronger the prior is. 
+
+Thus, if we reduce the data, for weak / uninformative priors, we will simulate data while sampling parameters from a normal distribution around the MLE, while for strong priors, we will effectively sample data while drawing parameters of the model from the prior. 
+
+In particular in the latter case (prior dominates, which can be checked via prior sensitivity analysis), you may see residual patterns that are caused by the prior, even though the model structure is correct. In some sense, you could say that the residuals check if the combination of prior + structure is compatible with the data. It's a philosophical debate how to react on such a deviation, as the prior is not really negotiable in a Bayesian analysis.
 
 Of course, also the MLE distribution might get problems in low data situations, but I would argue that MLE is usually only used anyway if the MLE is reasonably sharp. In practice, I have seldom experienced problems with MLE estimates. It's a bit different in the Bayesian case, where it is possible and often done to fit very complex models with limited data. In this case, many of the general issues in defining null distributions for Bayesian p-values (as, e.g., reviewed in 
 [Conn et al., 2018](https://doi.org/10.1002/ecm.1314)) apply. 
