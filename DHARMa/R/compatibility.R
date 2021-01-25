@@ -474,10 +474,13 @@ getFixedEffects.MixMod <- function(fittedModel){
   return(out)
 }
 
+# TODO: this could go wrong if the DF has no column names, although I guess then one couldn't use formula
+# TODO: goes wrong for k/n binomial with c(s,f) ~ pred syntax
+
 #' @rdname getRefit
 #' @export
 getRefit.MixMod <- function(object, newresp, ...) {
-  responsename = colnames(model.frame(object))[1] # TODO: this could go wrong if the DF has no column names, although I guess then one couldn't use formula
+  responsename = colnames(model.frame(object))[1] 
   newDat = object$data
   newDat[, match(responsename,names(newDat))] = newresp
   update(object, data = newDat)
