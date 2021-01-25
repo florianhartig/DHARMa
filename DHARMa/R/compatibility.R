@@ -477,7 +477,10 @@ getFixedEffects.MixMod <- function(fittedModel){
 #' @rdname getRefit
 #' @export
 getRefit.MixMod <- function(object, newresp, ...) {
-  update(object, data = newresp)
+  responsename = colnames(model.frame(object))[1] # TODO: this could go wrong if the DF has no column names, although I guess then one couldn't use formula
+  newDat = object$data
+  newDat[, match(responsename,names(newDat))] = newresp
+  update(object, data = newDat)
 }
 
 #' @rdname getFitted

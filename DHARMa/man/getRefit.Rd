@@ -6,6 +6,7 @@
 \alias{getRefit.lm}
 \alias{getRefit.glmmTMB}
 \alias{getRefit.HLfit}
+\alias{getRefit.MixMod}
 \title{Get model refit}
 \usage{
 getRefit(object, newresp, ...)
@@ -17,6 +18,8 @@ getRefit(object, newresp, ...)
 \method{getRefit}{glmmTMB}(object, newresp, ...)
 
 \method{getRefit}{HLfit}(object, newresp, ...)
+
+\method{getRefit}{MixMod}(object, newresp, ...)
 }
 \arguments{
 \item{object}{a fitted model}
