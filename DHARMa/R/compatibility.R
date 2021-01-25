@@ -449,7 +449,7 @@ getFitted.HLfit <- function (object,...){
 
 ####### GLMMadaptive #########
 
-# getObservedResponse - seems this is working
+### getObservedResponse - seems getObservedResponse.default is working
 
 #' @rdname getSimulations
 #' @export
@@ -474,7 +474,11 @@ getFixedEffects.MixMod <- function(fittedModel){
   return(out)
 }
 
-# getRefit UNKLAR
+#' @rdname getRefit
+#' @export
+getRefit.MixMod <- function(object, newresp, ...) {
+  update(object, data = newresp)
+}
 
 #' @rdname getFitted
 #' @export
@@ -488,7 +492,7 @@ getResiduals.MixMod <- function (object,...){
   residuals(fittedModel, type = "subject_specific")
 }
 
-####### New Class #########
+####### New Class Template #########
 
 # getObservedResponse
 
