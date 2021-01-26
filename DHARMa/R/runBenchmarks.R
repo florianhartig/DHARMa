@@ -9,16 +9,19 @@
 #' @param parallel whether to use parallel computations. Possible values are F, T (sets the cores automatically to number of available cores -1), or an integer number for the number of cores that should be used for the cluster
 #' @param ... additional parameters to calculateStatistics 
 #' @note The benchmark function in DHARMa are intended for development purposes, and for users that want to test / confirm the properties of functions in DHARMa. If you are running an applied data analysis, they are probably of little use. 
+#' @return A list. First entry is a list with matrices with statistics (one for each control parameter), second entry is a list (one for each control parameter) of matrices with summary statistics: significant (T/F), mean, p-value for KS-test uniformity
 #' @export 
 #' @importFrom foreach "%dopar%"
-runBenchmarks <- function(calculateStatistics, controlValues = NULL, nRep = 10, alpha = 0.05, parallel = F, ...){
+#' @author Florian Hartig
+#' @example inst/examples/runBenchmarksHelp.R
+runBenchmarks <- function(calculateStatistics, controlValues = NULL, nRep = 10, alpha = 0.05, parallel = FALSE, ...){
   
 
   # Sequential Simulations
   
   simulations = list()
   
-  if(parallel == F){
+  if(parallel == FALSE){
     if(is.null(controlValues)) simulations[[1]] = replicate(nRep, calculateStatistics(), simplify = "array")
     else for(j in 1:length(controlValues)){
       simulations[[j]] = replicate(nRep, calculateStatistics(controlValues[j]), simplify = "array")
@@ -28,7 +31,7 @@ runBenchmarks <- function(calculateStatistics, controlValues = NULL, nRep = 10, 
     
   }else{
     
-    if (parallel == T | parallel == "auto"){
+    if (parallel == TRUE | parallel == "auto"){
       cores <- parallel::detectCores() - 1
       message("parallel, set cores automatically to ", cores)
     } else if (is.numeric(parallel)){
@@ -68,17 +71,19 @@ runBenchmarks <- function(calculateStatistics, controlValues = NULL, nRep = 10, 
 
   summary = array(dim = c(nOutputs, 3, nControl))
   
-  dimnames(summary) = list(1:nOutputs, c("sign", "mean", "unif"), controlValues)
+  dimnames(summary) = list(1:nOutputs, c("signif", "mean", "unif"), controlValues)
   
   sig <- function(x) mean(x < alpha)
   isUnif <- function(x) ks.test(x, "punif")$p.value
-  
   
   for (i in 1:nControl){
     summary[,1,i] = apply(simulations[[i]], 1, sig) 
     summary[,2,i] = apply(simulations[[i]], 1, mean) 
     summary[,3,i] = suppressWarnings(apply(simulations[[i]], 1, isUnif))
   }
+  
+  simulations = lapply(out$simulations, t)
+  
   
   out = list()
   out$simulations = simulations

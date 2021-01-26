@@ -1,0 +1,69 @@
+---
+title: "DHARMa for Bayesians"
+author: "Florian Hartig, Theoretical Ecology, University of Regensburg [website](https://www.uni-regensburg.de/biologie-vorklinische-medizin/theoretische-oekologie/mitarbeiter/hartig/)"
+date: "`r Sys.Date()`"
+output: 
+  rmarkdown::html_vignette:
+    toc: true
+vignette: >
+  %\VignetteIndexEntry{DHARMa for Bayesians}
+  \usepackage[utf8]{inputenc}
+  %\VignetteEngine{knitr::rmarkdown}
+abstract: "The 'DHARMa' package uses a simulation-based approach to create  readily interpretable scaled (quantile) residuals for fitted (generalized) linear mixed models. This Vignette describes how to user DHARMa vor checking Bayesian models. It is recommended to read this AFTER the general DHARMa vignette, as all comments made there (in pacticular regarding the interpretation of the residuals) also apply to Bayesian models. \n \n \n"
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r global_options, include=FALSE}
+knitr::opts_chunk$set(fig.width=8.5, fig.height=5.5, fig.align='center', warning=FALSE, message=FALSE, cache = T)
+```
+
+```{r, echo = F, message = F}
+library(DHARMa)
+set.seed(123)
+```
+
+# Basic workflow
+
+The basic workflow for Bayesians that work with BUGS, JAGS, STAN or similar is:
+
+1. Create posterior predictive simulations for your model
+2. Read these in with the createDHARMa function
+3. Interpret those as described in the main vignette
+
+An example 
+
+# Considerations about how to do the simulations
+
+
+
+
+# Statistical differences between Bayesian vs. MLE quantile residuals 
+
+A common question is if there are differences between Bayesian and MLE quantile residuals. 
+
+First of all, note that MLE and Bayesian quantile residuals are not identical. The main difference is in how the simulation of the data under the fitted model are performed:
+
+* For models fitted by MLE, simulations in DHARMa are done with H0 = the true model is the fitted model with the MLE (point estimate)
+
+* For models fitted with Bayes, simulations are practically always performed by additionally drawing from the posterior parameter uncertainty (as a point estimate is not available).
+
+From this we can directly conclude that Bayesian and MLE quantile residuals are asymptotically identical (and via the usual arguments uniformly distributed).
+
+The more interesting question is what happens in the low data situation. Let's imagine that we start with a situation of infinite data. In this case, we have a "sharp" posterior that can be viewed as identical to the MLE. 
+
+If we reduce the number of data, there are two things happening 
+
+1. The posterior gets wider, with the likelihood componet being normally distributed, at least initially
+
+2. The influence of the prior increases, the faster the stronger the prior is. 
+
+Thus, if we reduce the data, for weak / uninformative priors, we will simulate data while sampling parameters from a normal distribution around the MLE, while for strong priors, we will effectively sample data while drawing parameters of the model from the prior. 
+
+In particular in the latter case (prior dominates, which can be checked via prior sensitivity analysis), you may see residual patterns that are caused by the prior, even though the model structure is correct. In some sense, you could say that the residuals check if the combination of prior + structure is compatible with the data. It's a philosophical debate how to react on such a deviation, as the prior is not really negotiable in a Bayesian analysis.
+
+Of course, also the MLE distribution might get problems in low data situations, but I would argue that MLE is usually only used anyway if the MLE is reasonably sharp. In practice, I have seldom experienced problems with MLE estimates. It's a bit different in the Bayesian case, where it is possible and often done to fit very complex models with limited data. In this case, many of the general issues in defining null distributions for Bayesian p-values (as, e.g., reviewed in 
+[Conn et al., 2018](https://doi.org/10.1002/ecm.1314)) apply. 
+
+
+

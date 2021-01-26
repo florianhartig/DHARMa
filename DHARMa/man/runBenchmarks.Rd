@@ -5,7 +5,7 @@
 \title{Benchmark calculations}
 \usage{
 runBenchmarks(calculateStatistics, controlValues = NULL, nRep = 10,
-  alpha = 0.05, parallel = F, ...)
+  alpha = 0.05, parallel = FALSE, ...)
 }
 \arguments{
 \item{calculateStatistics}{the statistics to be benchmarked. Should return one value, or a vector of values. If controlValues are given, must accept a paramteter control}
@@ -20,9 +20,40 @@ runBenchmarks(calculateStatistics, controlValues = NULL, nRep = 10,
 
 \item{...}{additional parameters to calculateStatistics}
 }
+\value{
+A list. First entry is a list with matrices with statistics (one for each control parameter), second entry is a list (one for each control parameter) of matrices with summary statistics: significant (T/F), mean, p-value for KS-test uniformity
+}
 \description{
 This function runs statistical benchmarks, including Power / Type I error simulations for an arbitrary test with a control parameter
 }
 \note{
 The benchmark function in DHARMa are intended for development purposes, and for users that want to test / confirm the properties of functions in DHARMa. If you are running an applied data analysis, they are probably of little use.
+}
+\examples{
+returnStatistics <- function(control = 0){
+  testData = createData(sampleSize = 20, family = poisson(), overdispersion = control, 
+                        randomEffectVariance = 0)
+  fittedModel <- glm(observedResponse ~ Environment1, data = testData, family = poisson())
+  res <- simulateResiduals(fittedModel = fittedModel, n = 250)
+  out <- c(testUniformity(res, plot = FALSE)$p.value, testDispersion(res, plot = FALSE)$p.value)
+  return(out)
+}
+
+# testing a single return
+returnStatistics()
+
+# running benchmark
+out = runBenchmarks(returnStatistics, nRep = 20)
+
+# running benchmark parallel
+out = runBenchmarks(returnStatistics, nRep = 500, parallel = TRUE)
+
+# include control values
+out = runBenchmarks(returnStatistics, controlValues = c(0,0.5,1), nRep = 20)
+
+
+
+}
+\author{
+Florian Hartig
 }
