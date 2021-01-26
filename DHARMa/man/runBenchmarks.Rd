@@ -31,10 +31,11 @@ The benchmark function in DHARMa are intended for development purposes, and for 
 }
 \examples{
 returnStatistics <- function(control = 0){
-  testData = createData(sampleSize = 20, family = poisson(), overdispersion = control, randomEffectVariance = 0)
+  testData = createData(sampleSize = 20, family = poisson(), overdispersion = control, 
+                        randomEffectVariance = 0)
   fittedModel <- glm(observedResponse ~ Environment1, data = testData, family = poisson())
   res <- simulateResiduals(fittedModel = fittedModel, n = 250)
-  out <- c(testUniformity(res, plot = F)$p.value, testDispersion(res, plot = FALSE)$p.value)
+  out <- c(testUniformity(res, plot = FALSE)$p.value, testDispersion(res, plot = FALSE)$p.value)
   return(out)
 }
 
