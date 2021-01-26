@@ -455,6 +455,8 @@ getFitted.HLfit <- function (object,...){
 #' @export
 getSimulations.MixMod <- function(object, nsim = 1, type = c("normal", "refit"), ...){
   
+  if ("weights" %in% names(object)) warning(weightsWarning)
+  
   type <- match.arg(type)
   
   out = simulate(object, nsim = nsim , ...)
