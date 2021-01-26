@@ -82,11 +82,8 @@ runBenchmarks <- function(calculateStatistics, controlValues = NULL, nRep = 10, 
     summary[,3,i] = suppressWarnings(apply(simulations[[i]], 1, isUnif))
   }
   
-  simulations = lapply(out$simulations, t)
-  
-  
   out = list()
-  out$simulations = simulations
+  out$simulations = lapply(simulations, t)
   out$summaries = summary
 
 # 
