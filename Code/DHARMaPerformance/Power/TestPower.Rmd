@@ -5,6 +5,8 @@ date: "5/12/2018"
 output: 
   html_document: 
     keep_md: yes
+editor_options: 
+  chunk_output_type: console
 ---
 
 
@@ -25,13 +27,14 @@ library(DHARMa)
 
 ```{r}
 doCalculations <- function(control = 0){
+  
   testData = createData(sampleSize = 200, family = poisson(), overdispersion = control, randomEffectVariance = 0)
   fittedModel <- glm(observedResponse ~ Environment1, data = testData, family = poisson())
  
   out = list()
-  
+
   res <- simulateResiduals(fittedModel = fittedModel, n = 250)
-  out$uniformTest = testUniformity(res)$p.value  
+  out$uniformTest = testUniformity(res, plot = F)$p.value  
   out$Dispersion = testDispersion(res, plot = F)$p.value  
   out$DispersionAER = AER::dispersiontest(fittedModel)$p.value 
   
@@ -46,7 +49,7 @@ doCalculations(control = 0.3)
 dispValues = seq(0,1.2, len = 20)
 
 # running benchmark
-out = runBenchmarks(doCalculations, controlValues = dispValues , nRep = 100,  parallel = F)
+out = runBenchmarks(doCalculations, controlValues = dispValues , nRep = 2,  parallel = F)
 
 tests = c("uniformity", "DHARMa disp basic" , "AER dispersiontest", "DHARMa disp refit")
 
