@@ -72,17 +72,10 @@ simulateResiduals <- function(fittedModel, n = 250, refit = F, integerResponse =
   out$integerResponse = integerResponse
 
   out$problems = list()
-
-  # re-form should be set to ~0 to avoid spurious residual patterns, see https://github.com/florianhartig/DHARMa/issues/43
-
-  if(out$modelClass %in% c("HLfit")){
-    out$fittedPredictedResponse = predict(fittedModel, type = "response", re.form = ~0)[,1L]
-  }else{
-    out$fittedPredictedResponse = predict(fittedModel, type = "response", re.form = ~0)
-  }
-
+  
+  out$fittedPredictedResponse = getFitted(fittedModel)
   out$fittedFixedEffects = getFixedEffects(fittedModel)
-  out$fittedResiduals = residuals(fittedModel, type = "response")
+  out$fittedResiduals = getResiduals(fittedModel)
 
   ######## refit = F ##################
 
@@ -119,9 +112,9 @@ simulateResiduals <- function(fittedModel, n = 250, refit = F, integerResponse =
 
         refittedModel = getRefit(fittedModel, simObserved)
 
-        out$refittedPredictedResponse[,i] = predict(refittedModel, type = "response")
+        out$refittedPredictedResponse[,i] = getFitted(refittedModel)
         out$refittedFixedEffects[,i] = getFixedEffects(refittedModel)
-        out$refittedResiduals[,i] = residuals(refittedModel, type = "response")
+        out$refittedResiduals[,i] = getResiduals(refittedModel)
         out$refittedPearsonResiduals[,i] = residuals(refittedModel, type = "pearson")
         #out$refittedRandomEffects[,i]  = ranef(refittedModel)
       }, silent = TRUE)
@@ -159,9 +152,6 @@ simulateResiduals <- function(fittedModel, n = 250, refit = F, integerResponse =
 
   return(out)
 }
-
-getPossibleModels<-function()c("lm", "glm", "negbin", "lmerMod", "lmerModLmerTest", "glmerMod", "gam", "bam", "glmmTMB", "HLfit")
-
 
 
 #' Check if the fitted model is supported by DHARMa

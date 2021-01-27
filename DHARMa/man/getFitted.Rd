@@ -3,14 +3,23 @@
 \name{getFitted}
 \alias{getFitted}
 \alias{getFitted.default}
+\alias{getResiduals.default}
 \alias{getFitted.gam}
+\alias{getFitted.HLfit}
+\alias{getFitted.MixMod}
 \title{Get model fitted}
 \usage{
 getFitted(object, ...)
 
 \method{getFitted}{default}(object, ...)
 
+\method{getResiduals}{default}(object, ...)
+
 \method{getFitted}{gam}(object, ...)
+
+\method{getFitted}{HLfit}(object, ...)
+
+\method{getFitted}{MixMod}(object, ...)
 }
 \arguments{
 \item{object}{a fitted model}
@@ -21,7 +30,7 @@ getFitted(object, ...)
 Wrapper to get the fitted value a fitted model
 }
 \details{
-The purpose of this wrapper is to standardize extract the fitted values
+The purpose of this wrapper is to standardize extract the fitted values. re-form should be set to ~0 to avoid spurious residual patterns, see https://github.com/florianhartig/DHARMa/issues/43
 }
 \examples{
 testData = createData(sampleSize = 400, family = gaussian())
