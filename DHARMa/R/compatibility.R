@@ -227,7 +227,7 @@ getResiduals <- function (object, ...) {
 #' @rdname getFitted
 #' @export
 getResiduals.default <- function (object,...){
-  residuals(fittedModel, type = "response")
+  residuals(object, type = "response")
 }
 
 #' has NA
@@ -497,7 +497,7 @@ getFitted.MixMod <- function (object,...){
 #' @rdname getResiduals
 #' @export
 getResiduals.MixMod <- function (object,...){
-  residuals(fittedModel, type = "subject_specific")
+  residuals(object, type = "subject_specific")
 }
 
 ####### New Class Template #########
