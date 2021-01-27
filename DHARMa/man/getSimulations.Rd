@@ -7,6 +7,7 @@
 \alias{getSimulations.lmerMod}
 \alias{getSimulations.glmmTMB}
 \alias{getSimulations.HLfit}
+\alias{getSimulations.MixMod}
 \title{Get model simulations}
 \usage{
 getSimulations(object, nsim = 1, type = c("normal", "refit"), ...)
@@ -20,6 +21,8 @@ getSimulations(object, nsim = 1, type = c("normal", "refit"), ...)
 \method{getSimulations}{glmmTMB}(object, nsim = 1, type = c("normal", "refit"), ...)
 
 \method{getSimulations}{HLfit}(object, nsim = 1, type = c("normal", "refit"), ...)
+
+\method{getSimulations}{MixMod}(object, nsim = 1, type = c("normal", "refit"), ...)
 }
 \arguments{
 \item{object}{a fitted model}
