@@ -17,6 +17,8 @@
 runBenchmarks <- function(calculateStatistics, controlValues = NULL, nRep = 10, alpha = 0.05, parallel = FALSE, ...){
   
 
+  start_time <- Sys.time()
+  
   # Sequential Simulations
   
   simulations = list()
@@ -82,10 +84,12 @@ runBenchmarks <- function(calculateStatistics, controlValues = NULL, nRep = 10, 
     summary[,3,i] = suppressWarnings(apply(simulations[[i]], 1, isUnif))
   }
   
+
+  
   out = list()
   out$simulations = lapply(simulations, t)
   out$summaries = summary
-
+  out$time = Sys.time() - start_time
 # 
 #   if(plot == T){
 #     plot(controlValues, positive, type = "b", xlab = "Control", ylab = "Proportion significant", ylim = c(0,1))
