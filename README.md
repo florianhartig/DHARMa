@@ -54,7 +54,7 @@ dependencies = T, build_vignettes = T)
 ```
 Below the status of the automatic Travis CI tests on the master branch (if this doesn't load see [here](https://travis-ci.org/florianhartig/DHARMa))
 
-[![Build Status](https://travis-ci.org/florianhartig/DHARMa.svg?branch=master)](https://travis-ci.org/florianhartig/DHARMa)
+[![Build Status](https://travis-ci.com/florianhartig/DHARMa.svg?branch=master)](https://travis-ci.com/florianhartig/DHARMa)
 
 ### Development branches / older releases
 
