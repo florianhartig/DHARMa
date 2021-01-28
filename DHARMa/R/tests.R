@@ -513,8 +513,12 @@ testTemporalAutocorrelation <- function(simulationOutput, time = NULL , alternat
     on.exit(par(oldpar))
 
     plot(simulationOutput$scaledResiduals[order(time)] ~ time[order(time)],
-         type = "l", ylab = "Scaled residuals", xlab = "Time", main = "Residuals vs. time")
-    acf(simulationOutput$scaledResiduals[order(time)], main = "Autocorrelation")
+         type = "l", ylab = "Scaled residuals", xlab = "Time", main = "Residuals vs. time", ylim = c(0,1))
+    
+    abline(h=c(0.5))
+    abline(h=c(0,0.25,0.75,1), lty = 2 )
+    
+    acf(simulationOutput$scaledResiduals[order(time)], main = "Autocorrelation", ylim = c(-1,1))
     legend("topright",
            c(paste(out$method, " p=", round(out$p.value, digits = 5)),
              paste("Deviation ", ifelse(out$p.value < 0.05, "significant", "n.s."))),
@@ -605,10 +609,6 @@ testSpatialAutocorrelation <- function(simulationOutput, x = NULL, y  = NULL, di
     # TODO implement correlogram
   }
 
-  if(plot == T) {
-
-
-  }
   return(out)
 }
 
