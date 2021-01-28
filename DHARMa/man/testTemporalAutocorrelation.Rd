@@ -8,7 +8,7 @@ testTemporalAutocorrelation(simulationOutput, time = NULL,
   alternative = c("two.sided", "greater", "less"), plot = T)
 }
 \arguments{
-\item{simulationOutput}{an object with simulated residuals created by \code{\link{simulateResiduals}}}
+\item{simulationOutput}{an object of class DHARMa, either created via \code{\link{simulateResiduals}} for supported models or by \code{\link{createDHARMa}} for simulations created outside DHARMa, or a supported model. Providing a supported model directly is discouraged, because simulation settings cannot be changed in this case.}
 
 \item{time}{the time, in the same order as the data points. If not provided, random values will be created}
 

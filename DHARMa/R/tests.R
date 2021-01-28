@@ -4,7 +4,7 @@
 #'
 #' This function is a wrapper for the various test functions implemented in DHARMa. Currently, this function calls the \code{\link{testUniformity}} and the \code{\link{testDispersion}} functions. All other tests (see list below) have to be called by hand.
 #'
-#' @param simulationOutput an object of class DHARMa with simulated quantile residuals, either created via \code{\link{simulateResiduals}} or by \code{\link{createDHARMa}} for simulations created outside DHARMa
+#' @param simulationOutput an object of class DHARMa, either created via \code{\link{simulateResiduals}} for supported models or by \code{\link{createDHARMa}} for simulations created outside DHARMa, or a supported model. Providing a supported model directly is discouraged, because simulation settings cannot be changed in this case. 
 #' @param plot if T, plots functions of the tests are called
 #' @author Florian Hartig
 #' @seealso \code{\link{testUniformity}}, \code{\link{testOutliers}}, \code{\link{testDispersion}}, \code{\link{testZeroInflation}}, \code{\link{testGeneric}}, \code{\link{testTemporalAutocorrelation}}, \code{\link{testSpatialAutocorrelation}}, \code{\link{testQuantiles}}
@@ -27,7 +27,7 @@ testResiduals <- function(simulationOutput, plot = T){
 #'
 #' @details Deprecated, switch your code to using the \code{\link{testResiduals}} function
 #'
-#' @param simulationOutput an object of class DHARMa with simulated quantile residuals, either created via \code{\link{simulateResiduals}} or by \code{\link{createDHARMa}} for simulations created outside DHARMa
+#' @param simulationOutput an object of class DHARMa, either created via \code{\link{simulateResiduals}} for supported models or by \code{\link{createDHARMa}} for simulations created outside DHARMa, or a supported model. Providing a supported model directly is discouraged, because simulation settings cannot be changed in this case. 
 #' @author Florian Hartig
 #' @export
 testSimulatedResiduals <- function(simulationOutput){
@@ -40,7 +40,7 @@ testSimulatedResiduals <- function(simulationOutput){
 #'
 #' This function tests the overall uniformity of the simulated residuals in a DHARMa object
 #'
-#' @param simulationOutput an object of class DHARMa with simulated quantile residuals, either created via \code{\link{simulateResiduals}} or by \code{\link{createDHARMa}} for simulations created outside DHARMa
+#' @param simulationOutput an object of class DHARMa, either created via \code{\link{simulateResiduals}} for supported models or by \code{\link{createDHARMa}} for simulations created outside DHARMa, or a supported model. Providing a supported model directly is discouraged, because simulation settings cannot be changed in this case. 
 #' @param alternative a character string specifying whether the test should test if observations are "greater", "less" or "two.sided" compared to the simulated null hypothesis. See \code{\link[stats]{ks.test}} for details
 #' @param plot if T, plots calls \code{\link{plotQQunif}} as well
 #' @details The function applies a \code{\link[stats]{ks.test}} for uniformity on the simulated residuals.
@@ -75,7 +75,7 @@ testBivariateUniformity<- function(simulationOutput, alternative = c("two.sided"
 #'
 #' This function tests
 #'
-#' @param simulationOutput an object of class DHARMa with simulated quantile residuals, either created via \code{\link{simulateResiduals}} or by \code{\link{createDHARMa}} for simulations created outside DHARMa
+#' @param simulationOutput an object of class DHARMa, either created via \code{\link{simulateResiduals}} for supported models or by \code{\link{createDHARMa}} for simulations created outside DHARMa, or a supported model. Providing a supported model directly is discouraged, because simulation settings cannot be changed in this case. 
 #' @param predictor an optional predictor variable to be used, instead of the predicted response (default)
 #' @param quantiles the quantiles to be tested
 #' @param plot if T, the function will create an additional plot
@@ -147,7 +147,7 @@ testQuantiles <- function(simulationOutput, predictor = NULL, quantiles = c(0.25
 #'
 #' This function tests if the number of observations outside the simulatio envelope are larger or smaller than expected
 #'
-#' @param simulationOutput an object of class DHARMa with simulated quantile residuals, either created via \code{\link{simulateResiduals}} or by \code{\link{createDHARMa}} for simulations created outside DHARMa
+#' @param simulationOutput an object of class DHARMa, either created via \code{\link{simulateResiduals}} for supported models or by \code{\link{createDHARMa}} for simulations created outside DHARMa, or a supported model. Providing a supported model directly is discouraged, because simulation settings cannot be changed in this case. 
 #' @param alternative a character string specifying whether the test should test if observations are "greater", "less" or "two.sided" (default) compared to the simulated null hypothesis
 #' @param margin whether to test for outliers only at the lower, only at the upper, or both sides (default) of the simulated data distribution
 #' @param type way to generate H0 for the test. See details
@@ -301,17 +301,19 @@ testOutliers <- function(simulationOutput, alternative = c("two.sided", "greater
 
 #' DHARMa dispersion tests
 #'
-#' This function performs a simulation-based test for over/underdispersion
+#' This function performs simulation-based tests for over/underdispersion
 #'
-#' @param simulationOutput an object of class DHARMa with simulated quantile residuals, either created via \code{\link{simulateResiduals}} or by \code{\link{createDHARMa}} for simulations created outside DHARMa
-#' @param plot whether to plot output
-#' @param alternative a character string specifying whether the test should test if observations are "greater", "less" or "two.sided" compared to the simulated null hypothesis. Greater corresponds to overdispersion.
+#' @param simulationOutput an object of class DHARMa, either created via \code{\link{simulateResiduals}} for supported models or by \code{\link{createDHARMa}} for simulations created outside DHARMa, or a supported model. Providing a supported model directly is discouraged, because simulation settings cannot be changed in this case. 
+#' @param alternative a character string specifying whether the test should test if observations are "greater", "less" or "two.sided" compared to the simulated null hypothesis. Greater corresponds to testing only for overdispersion. It is recommended to keep the default setting (testing for both over and underdispersion)
+#' @param plot whether to provide a plot for the results
 #' @param ... arguments to pass on to \code{\link{testGeneric}}
 #' @details The function implements two tests, depending on whether it is applied on a simulation with refit = F, or refit = T.
 #'
-#' If refit = F, the function tests the sd of the data against the sd of the simulated data.
+#' If refit = F, the function uses the \code{\link{testGeneric}} to compare the sd of the observed data against the sd of the simulated data. The test provides the ratio of observed vs. mean simulated summary statistics, together with a p-value based on the distribution of the simulated sds. A significant ratio > 1 indicates overdispersion, a significant ratio < 1 underdispersion. 
 #'
 #' If refit = T, the function compares the approximate deviance (via squared pearson residuals) with the same quantity from the models refitted with simulated data. Applying this is much slower than the previous alternative. Given the computational cost, I would suggest that most users will be satisfied with the standard dispersion test.
+#' 
+#' Some background: over / underdispersion means that the observed data is more / less dispersed than expected under the fitted model. There are a number of common ways to test for dispersion problems, from the classical dispersion/df idea used for GLMs over other tests implemented in various R packages. In particular cases, these may be more powerful and thus preferable over the DHARMa test. The advantage of the DHARMa test is that it directly targets the spread of the data (unless other tests such as dispersion/df, which essentially measure fit and may thus be triggered by problems other than dispersion as well), and it makes practically no assumptions about the fitted model, other than the availability of simulations. 
 #'
 #' @note The results of the dispersion test can can differ depending on whether it is evaluated on conditional (= conditional on fitted random effects) or unconditional (= REs are re-simulated) simulations. You can change between conditional or unconditional simulations in  \code{\link{simulateResiduals}} if this is supported by the regression package that you use. The default in DHARMa is to use unconditional simulations, but I have often found that conditional simulations are more sensitive to dispersion problems. I recommend trying both, as neither test should be positive if the dispersion is correct.
 #'
@@ -396,7 +398,7 @@ testOverdispersionParametric <- function(...){
 #'
 #' This function compares the observed number of zeros with the zeros expected from simulations.
 #'
-#' @param simulationOutput an object of class DHARMa with simulated quantile residuals, either created via \code{\link{simulateResiduals}} or by \code{\link{createDHARMa}} for simulations created outside DHARMa
+#' @param simulationOutput an object of class DHARMa, either created via \code{\link{simulateResiduals}} for supported models or by \code{\link{createDHARMa}} for simulations created outside DHARMa, or a supported model. Providing a supported model directly is discouraged, because simulation settings cannot be changed in this case. 
 #' @param ... further arguments to \code{\link{testGeneric}}
 #' @details The plot shows the expected distribution of zeros against the observed values, the ratioObsSim shows observed vs. simulated zeros. A value < 1 means that the observed data has less zeros than expected, a value > 1 means that it has more zeros than expected (aka zero-inflation). Per default, the function tests both sides.
 #'
@@ -421,7 +423,7 @@ testZeroInflation <- function(simulationOutput, ...){
 #'
 #' This function tests if a user-defined summary differs when applied to simulated / observed data.
 #'
-#' @param simulationOutput an object of class DHARMa with simulated quantile residuals, either created via \code{\link{simulateResiduals}} or by \code{\link{createDHARMa}} for simulations created outside DHARMa
+#' @param simulationOutput an object of class DHARMa, either created via \code{\link{simulateResiduals}} for supported models or by \code{\link{createDHARMa}} for simulations created outside DHARMa, or a supported model. Providing a supported model directly is discouraged, because simulation settings cannot be changed in this case. 
 #' @param summary a function that can be applied to simulated / observed data. See examples below
 #' @param alternative a character string specifying whether the test should test if observations are "greater", "less" or "two.sided" compared to the simulated null hypothesis
 #' @param plot whether to plot the simulated summary
@@ -472,7 +474,7 @@ testGeneric <- function(simulationOutput, summary, alternative = c("two.sided", 
 #'
 #' This function performs a standard test for temporal autocorrelation on the simulated residuals
 #'
-#' @param simulationOutput an object with simulated residuals created by \code{\link{simulateResiduals}}
+#' @param simulationOutput an object of class DHARMa, either created via \code{\link{simulateResiduals}} for supported models or by \code{\link{createDHARMa}} for simulations created outside DHARMa, or a supported model. Providing a supported model directly is discouraged, because simulation settings cannot be changed in this case. 
 #' @param time the time, in the same order as the data points. If not provided, random values will be created
 #' @param alternative a character string specifying whether the test should test if observations are "greater", "less" or "two.sided" compared to the simulated null hypothesis
 #' @param plot whether to plot output
@@ -534,7 +536,7 @@ testTemporalAutocorrelation <- function(simulationOutput, time = NULL , alternat
 #'
 #' This function performs a standard test for spatial autocorrelation on the simulated residuals
 #'
-#' @param simulationOutput an object of class DHARMa with simulated quantile residuals, either created via \code{\link{simulateResiduals}} or by \code{\link{createDHARMa}} for simulations created outside DHARMa
+#' @param simulationOutput an object of class DHARMa, either created via \code{\link{simulateResiduals}} for supported models or by \code{\link{createDHARMa}} for simulations created outside DHARMa, or a supported model. Providing a supported model directly is discouraged, because simulation settings cannot be changed in this case. 
 #' @param x the x coordinate, in the same order as the data points. If not provided, random values will be created
 #' @param y the y coordinate, in the same order as the data points. If not provided, random values will be created
 #' @param distMat optional distance matrix. If not provided, a distance matrix will be calculated based on x and y. See details for explanation
@@ -543,7 +545,7 @@ testTemporalAutocorrelation <- function(simulationOutput, time = NULL , alternat
 #' @details The function performs Moran.I test from the package ape, based on the provided distance matrix of the data points.
 #'
 #' There are several ways to specify this distance. If a distance matrix (distMat) is provided, calculations will be based on this distance matrix, and x,y coordinates will only used for the plotting (if provided)
-#' If distMat is not provided, the function will calculate the euclidian distances between x,y coordinates, and test Moran.I based on these distances.
+#' If distMat is not provided, the function will calculate the euclidean distances between x,y coordinates, and test Moran.I based on these distances.
 #'
 #' If no x/y values are provided, random values will be created. The sense of being able to run the test with x/y = NULL (random values) is to test the rate of false positives under the current residual structure (random x/y corresponds to H0: no spatial autocorrelation), e.g. to check if the test has nominal error rates for particular residual structures.
 #'
@@ -551,7 +553,7 @@ testTemporalAutocorrelation <- function(simulationOutput, time = NULL , alternat
 #'
 #' @note Important to note for all autocorrelation tests (spatial / temporal): the autocorrelation tests are valid to check for residual autocorrelation in models that don't assume such a correlation (in this case, you can use conditional or unconditional simulations), or if there is remaining residual autocorrelation after accounting for it in a spatial/temporal model (in that case, you have to use conditional simulations), but if checking unconditional simulations from a model with an autocorrelation structure on data that corresponds to this model, they will be significant, even if the model fully accounts for this structure.
 #'
-#' This behavior is not really a bug, but rather originates from the definition of the quantile residuals: quantile residuals are calculated independently per data point, i.e. without consideratin of any correlation structure between data points that may exist in the simulations. As a result, the simulated distributions from a unconditional simulaton will typically not reflect the correlation structure that is present in each single simulation, and the same is true for the subsequently calculated quantile residuals.
+#' This behavior is not really a bug, but rather originates from the definition of the quantile residuals: quantile residuals are calculated independently per data point, i.e. without consideration of any correlation structure between data points that may exist in the simulations. As a result, the simulated distributions from a unconditional simulation will typically not reflect the correlation structure that is present in each single simulation, and the same is true for the subsequently calculated quantile residuals.
 #'
 #' The bottomline here is that spatial / temporal / other autoregressive models should either be tested based on conditional simulations, or (ideally) custom tests should be used that are not based on quantile residuals, but rather compare the correlation structure in the simulated data with the correlation structure in the observed data.
 #'
