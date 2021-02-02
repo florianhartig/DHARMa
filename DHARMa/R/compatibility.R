@@ -1,3 +1,32 @@
+####### Notes #########
+
+# This file contains the wrappers for the models supported by DHARMa. DHARMa is interaction with packages ONLY via the wrappers. Below are
+#
+# 1) supported models in getPossibleModels
+# 2) generic S3 wrapper functions (function names see "New Class Template"), including default functions. 
+# 3) package / class specific wrappers.
+
+# The general approach for integrating a package in DHARMa is
+# 
+# i) copy new class template
+# ii) test if S3 default functions work
+# iii) if not, define class-specific S3 functions
+
+####### New Class Template #########
+
+# getObservedResponse
+
+# getSimulations
+
+# getFixedEffects
+
+# getRefit
+
+# getFitted
+
+# getResiduals
+
+
 
 ######### Generics #############
 
@@ -500,19 +529,6 @@ getResiduals.MixMod <- function (object,...){
   residuals(object, type = "subject_specific")
 }
 
-####### New Class Template #########
-
-# getObservedResponse
-
-# getSimulations
-
-# getFixedEffects
-
-# getRefit
-
-# getFitted
-
-# getResiduals
 
 
 
