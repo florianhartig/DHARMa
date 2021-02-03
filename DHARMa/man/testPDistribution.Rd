@@ -10,7 +10,7 @@ testPDistribution(x, plot = T,
 \arguments{
 \item{x}{vector of p values}
 
-\item{plot}{should the values be plottet}
+\item{plot}{should the values be plotted}
 
 \item{main}{title for the plot}
 

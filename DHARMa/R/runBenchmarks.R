@@ -70,31 +70,37 @@ runBenchmarks <- function(calculateStatistics, controlValues = NULL, nRep = 10, 
   
   nOutputs = nrow(simulations[[1]])
   nControl = length(controlValues)
+  
+  # reducing the list of outputs to a data.frame
+  x = Reduce(rbind, lapply(simulations, t))
+  x = data.frame(x)
+  x$replicate = rep(1:nRep, length(controlValues))
+  x$controlValues = rep(controlValues, each = nRep)
 
-  summary = array(dim = c(nOutputs, 3, nControl))
+  summary = list()
   
-  dimnames(summary) = list(1:nOutputs, c("signif", "mean", "unif"), controlValues)
-  
+  # function for aggregation
+  aggreg <- function(f) {
+    ret <- aggregate(x[,- c(ncol(x) - 1, ncol(x))], by = list(x$controlValues), f)
+    colnames(ret)[1] = "controlValues"
+    return(ret)
+  }
+
   sig <- function(x) mean(x < alpha)
   isUnif <- function(x) ks.test(x, "punif")$p.value
   
-  for (i in 1:nControl){
-    summary[,1,i] = apply(simulations[[i]], 1, sig) 
-    summary[,2,i] = apply(simulations[[i]], 1, mean) 
-    summary[,3,i] = suppressWarnings(apply(simulations[[i]], 1, isUnif))
-  }
-  
+  summary$propSignificant = aggreg(sig)
+  summary$meanP = aggreg(mean)
+  summary$isUnifP = aggreg(mean)
 
-  
   out = list()
-  out$simulations = lapply(simulations, t)
+  out$simulations = x
   out$summaries = summary
   out$time = Sys.time() - start_time
-# 
-#   if(plot == T){
-#     plot(controlValues, positive, type = "b", xlab = "Control", ylab = "Proportion significant", ylim = c(0,1))
-#     abline(h=alpha)
-#   }
+
+    
+    
+
   
   return(out)
 }
@@ -102,7 +108,7 @@ runBenchmarks <- function(calculateStatistics, controlValues = NULL, nRep = 10, 
 
 #' Plot distribution of p-values
 #' @param x vector of p values
-#' @param plot should the values be plottet
+#' @param plot should the values be plotted
 #' @param main title for the plot
 #' @param ... additional arguments to hist
 #' @author Florian Hartig
