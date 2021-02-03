@@ -47,10 +47,10 @@ runBenchmarks <- function(calculateStatistics, controlValues = NULL, nRep = 10, 
     
     `%dopar%` <- foreach::`%dopar%`
     
-    if(is.null(controlValues)) simulations[[1]] =  foreach::foreach(i=1:nRep, .packages=c("lme4", "DHARMa"), .combine = rbind) %dopar% calculateStatistics() 
+    if(is.null(controlValues)) simulations[[1]] =  t(foreach::foreach(i=1:nRep, .packages=c("lme4", "DHARMa"), .combine = rbind) %dopar% calculateStatistics())
 
     else for(j in 1:length(controlValues)){
-      simulations[[j]] = foreach::foreach(i=1:nRep, .packages=c("lme4", "DHARMa"), .combine = rbind) %dopar% calculateStatistics(controlValues[j])
+      simulations[[j]] = t(foreach::foreach(i=1:nRep, .packages=c("lme4", "DHARMa"), .combine = rbind) %dopar% calculateStatistics(controlValues[j]))
     }
 
     # parallel::clusterExport(cl=cl,varlist = c("calculateStatistics"), envir=environment())
