@@ -28,6 +28,7 @@ Imports:
     lmtest,
     ape,
     qgam (>= 1.3.2),
+    lme4
 Suggests:
     knitr,
     testthat,
@@ -35,7 +36,6 @@ Suggests:
     KernSmooth,
     sfsmisc,
     MASS,
-    lme4,
     mgcv,    
     glmmTMB (>= 1.0.1),
     spaMM (>= 3.2.0),
