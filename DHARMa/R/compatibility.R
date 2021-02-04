@@ -12,6 +12,8 @@
 # ii) test if S3 default functions work
 # iii) if not, define class-specific S3 functions
 
+# See comments in the help of the generic S3 functions for guidance about how to implement each function
+
 ####### New Class Template #########
 
 # getObservedResponse
@@ -25,8 +27,6 @@
 # getFitted
 
 # getResiduals
-
-
 
 ######### Generics #############
 
@@ -43,7 +43,8 @@ getPossibleModels<-function()c("lm", "glm", "negbin", "lmerMod", "lmerModLmerTes
 #'
 #' Extract the response of a fitted model
 #'
-#' The purpose of this function is to savely extract the response (dependent variable) of the fitted model classes
+#' The purpose of this function is to safely extract the observed response (dependent variable) of the fitted model classes
+#' 
 #'
 #' @param object a fitted model
 #' @param ... additional parameters
@@ -204,11 +205,13 @@ getRefit.default <- function (object, newresp, ...){
   refit(object, newresp, ...)
 }
 
-#' Get model fitted
+#' Get fitted / predicted values
 #'
-#' Wrapper to get the fitted value a fitted model
+#' Wrapper to get the fitted / predicted response of model at the response scale
 #'
-#' The purpose of this wrapper is to standardize extract the fitted values. re-form should be set to ~0 to avoid spurious residual patterns, see https://github.com/florianhartig/DHARMa/issues/43
+#' The purpose of this wrapper is to standardize extract the fitted values, which is implemented via predict(model, type = "response") for most model classes.
+#' 
+#' If you implement this function for a new model class, you should include an option to modifying which REs are included in the predictions. If this option is not available, it is essential that predictions are provided marginally / unconditionally, i.e. without the random effect estimates (because of https://github.com/florianhartig/DHARMa/issues/43), which corresponds to re-form = ~0 in lme4
 #'
 #' @param object a fitted model
 #' @param ... additional parameters to be passed on, usually to the simulate function of the respective model class
