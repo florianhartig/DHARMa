@@ -36,9 +36,10 @@ doCalculations <- function(control = 0){
   res <- simulateResiduals(fittedModel = fittedModel, n = 250)
   out$uniformTest = testUniformity(res, plot = F)$p.value  
   out$Dispersion = testDispersion(res, plot = F)$p.value  
-  out$DispersionAER = AER::dispersiontest(fittedModel)$p.value 
+  out$DispersionAER = AER::dispersiontest(fittedModel)$p.value
+  out$DispPerformance = performance::check_overdispersion(fittedModel)$p_value
   
-  res <- simulateResiduals(fittedModel = fittedModel, n = 250, refit = T)  
+  res <- simulateResiduals(fittedModel = fittedModel, n = 250, refit = F)  
   out$DispersionRefitted = testDispersion(res, plot = F)$p.value  
   return(unlist(out))
 }
@@ -49,9 +50,9 @@ doCalculations(control = 0.3)
 dispValues = seq(0,1.2, len = 20)
 
 # running benchmark
-out = runBenchmarks(doCalculations, controlValues = dispValues , nRep = 2,  parallel = F)
+out = runBenchmarks(doCalculations, controlValues = dispValues , nRep = 1000,  parallel = F)
 
-tests = c("uniformity", "DHARMa disp basic" , "AER dispersiontest", "DHARMa disp refit")
+tests = c("uniformity", "DHARMa disp basic" , "AER dispersiontest","performanceDisp", "DHARMa disp refit")
 
 
 matplot(dispValues, t(out$summaries[,1,]), type = "l")
@@ -89,7 +90,7 @@ doCalculations <- function(control = 0){
   res <- simulateResiduals(fittedModel = fittedModel, n = 250)
   out$uniformTest = testUniformity(res)$p.value  
   out$Dispersion = testDispersion(res, plot = F)$p.value  
-  out$DispersionAER = overdisp_fun(fittedModel)$pval 
+  out$DispersionAER = overdisp_fun(fittedModel)$p.value
   
   res <- simulateResiduals(fittedModel = fittedModel, n = 250, refit = T)  
   out$DispersionRefitted = testDispersion(res, plot = F)$p.value  
@@ -102,7 +103,7 @@ doCalculations(control = 0.3)
 dispValues = seq(0,1.2, len = 5)
 
 # running benchmark
-out = runBenchmarks(doCalculations, controlValues = dispValues , nRep = 10,  parallel = F)
+out = runBenchmarks(doCalculations, controlValues = dispValues , nRep = 10,  parallel = T)
 
 tests = c("uniformity", "DHARMa disp basic" , "GLMER dispersiontest", "DHARMa disp refit")
 
