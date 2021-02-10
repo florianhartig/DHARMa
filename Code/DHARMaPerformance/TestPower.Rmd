@@ -56,7 +56,7 @@ tests = c("uniformity", "DHARMa disp basic" , "AER dispersiontest","performanceD
 
 
 matplot(dispValues, t(out$summaries[,1,]), type = "l")
-legend("bottomright", tests, col = 1:4, lty = 1:4)
+legend("bottomright", tests, col = 1:5, lty = 1:5)
 
 ```
 
