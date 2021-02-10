@@ -680,17 +680,17 @@ but that seems to make little difference. Both models would be acceptable in ter
 
 The main concern in Poisson data is dispersion. Poisson regression are nearly always overdispersed. If you address this problem with quasi-poisson models, you will not be able to test the model with DHARMa. It is anyway better to move to a negative Binomial, or an observation-level random effect. 
 
-Once that is done, you should check for heteroskedasticity (via standard plot, also against all predictors), and for zero-inflation. As noted, zero-inflation tests are often negative, and rather show up as underdispersion. Work through the owl example below. 
+Once that is done, you should check for heteroscedasticity (via standard plot, also against all predictors), and for zero-inflation. As noted, zero-inflation tests are often negative, and rather show up as underdispersion. Work through the owl example below. 
 
 ## Proportional data
 
-Proportional data is often modelled with beta regressions. Those can be tested with DHARMa. Note that beta regressions are often 0 or 1 inflated. Both should be tested with testZeroInflation or testGeneric. 
+Proportional data is often modeled with beta regressions. Those can be tested with DHARMa. Note that beta regressions are often 0 or 1 inflated. Both should be tested with testZeroInflation or testGeneric. 
 
-Note: discrete prportions, of the type k/n should NOT be modeled with the beta regression. Use the binomial (see below).
+Note: discrete proportions, of the type k/n should NOT be modeled with the beta regression. Use the binomial (see below).
 
 ## Binomial data
 
-There are a lot of rumors about that can and cannot be checked with binomial 0/1 data. Note that binomial data behaves slightly different when you have a 0/1 response than when you have a k/n response. 
+There are a lot of rumors about what can and cannot be checked with binomial 0/1 data. Note that binomial data behaves slightly different when you have a 0/1 response than when you have a k/n response. 
 
 Let's consider a clearly misspecified binomial model with 0/1 response data
 
