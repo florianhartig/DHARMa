@@ -49,7 +49,7 @@ One reason why GL(M)Ms residuals are harder to interpret is that the expected di
 
 But even experienced statistical analysts currently have few options to diagnose misspecification problems in GLMMs. In my experience, the current standard practice is to eyeball the residual plots for major misspecifications, potentially have a look at the random effect distribution, and then run a test for overdispersion, which is usually positive, after which the model is modified towards an overdispersed / zero-inflated distribution. This approach, however, has a number of drawbacks, notably:
 
-* Overdispersion is often the result of missing predictos or a misspecified model structure. Standard residual plots make it difficult to identify these probelms by examining residual correlations or patterns of residuals against predictors. 
+* Overdispersion is often the result of missing predictors or a misspecified model structure. Standard residual plots make it difficult to identify these problems by examining residual correlations or patterns of residuals against predictors. 
 
 * Not all overdispersion is the same. For count data, the negative binomial creates a different distribution than adding observation-level random effects to the Poisson. Once overdispersion is corrected for, such violations of distributional assumptions are not detectable with standard overdispersion tests (because the tests only looks at total dispersion), and nearly impossible to see visually from standard residual plots. 
 
@@ -267,7 +267,7 @@ In all plots / tests that were shown so far, the model was correctly specified, 
 
 1. The fact that none of the here-presented tests shows a misspecification problem doesn't proof that the model is correctly specified. There are likely a large number of structural problems that will not show a pattern in the standard residual plots. 
 
-2. Conversely, while a clear pattern in the residuals indicates with good reliability that the observed data would not be likely to originate from the fitted model, it doesn't necessarily  indicate that the model results are not useable. There are many cases where it is common practice to work "wrong models". For example, random effect estimates (in particular in GLMMs) are often slightly biased, especially if the model is fit with MLE. For that reason, DHARMa will often show a slight pattern in the residuals even if the model is correctly specified, and tests for this can get significant for large sample sizes. Another example is data that is missing at random (MAR) (see [here](https://github.com/florianhartig/DHARMa/issues/101)). It is known that this phenomenon does not createa bias on the fixed effect estimates, and it is therefore common practice to fit this data with mixed models. Nevertheless, DHARMa recognizes that the observed data looks different than what would be expected from the model assumptions, and flags the model as problematic
+2. Conversely, while a clear pattern in the residuals indicates with good reliability that the observed data would not be likely to originate from the fitted model, it doesn't necessarily  indicate that the model results are not useable. There are many cases where it is common practice to work "wrong models". For example, random effect estimates (in particular in GLMMs) are often slightly biased, especially if the model is fit with MLE. For that reason, DHARMa will often show a slight pattern in the residuals even if the model is correctly specified, and tests for this can get significant for large sample sizes. Another example is data that is missing at random (MAR) (see [here](https://github.com/florianhartig/DHARMa/issues/101)). It is known that this phenomenon does not create a bias on the fixed effect estimates, and it is therefore common practice to fit this data with mixed models. Nevertheless, DHARMa recognizes that the observed data looks different than what would be expected from the model assumptions, and flags the model as problematic
   
 **Important conclusion: DHARMa only flags a difference between the observed and expected data - the user has to decide whether this difference is actually a problem for the analysis!**
 
@@ -680,17 +680,17 @@ but that seems to make little difference. Both models would be acceptable in ter
 
 The main concern in Poisson data is dispersion. Poisson regression are nearly always overdispersed. If you address this problem with quasi-poisson models, you will not be able to test the model with DHARMa. It is anyway better to move to a negative Binomial, or an observation-level random effect. 
 
-Once that is done, you should check for heteroskedasticity (via standard plot, also against all predictors), and for zero-inflation. As noted, zero-inflation tests are often negative, and rather show up as underdispersion. Work through the owl example below. 
+Once that is done, you should check for heteroscedasticity (via standard plot, also against all predictors), and for zero-inflation. As noted, zero-inflation tests are often negative, and rather show up as underdispersion. Work through the owl example below. 
 
 ## Proportional data
 
-Proportional data is often modelled with beta regressions. Those can be tested with DHARMa. Note that beta regressions are often 0 or 1 inflated. Both should be tested with testZeroInflation or testGeneric. 
+Proportional data is often modeled with beta regressions. Those can be tested with DHARMa. Note that beta regressions are often 0 or 1 inflated. Both should be tested with testZeroInflation or testGeneric. 
 
-Note: discrete prportions, of the type k/n should NOT be modeled with the beta regression. Use the binomial (see below).
+Note: discrete proportions, of the type k/n should NOT be modeled with the beta regression. Use the binomial (see below).
 
 ## Binomial data
 
-There are a lot of rumors about that can and cannot be checked with binomial 0/1 data. Note that binomial data behaves slightly different when you have a 0/1 response than when you have a k/n response. 
+There are a lot of rumors about what can and cannot be checked with binomial 0/1 data. Note that binomial data behaves slightly different when you have a 0/1 response than when you have a k/n response. 
 
 Let's consider a clearly misspecified binomial model with 0/1 response data
 

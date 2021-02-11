@@ -21,7 +21,7 @@ getObservedResponse(object, ...)
 Extract the response of a fitted model
 }
 \details{
-The purpose of this function is to savely extract the response (dependent variable) of the fitted model classes
+The purpose of this function is to safely extract the observed response (dependent variable) of the fitted model classes
 }
 \examples{
 testData = createData(sampleSize = 400, family = gaussian())

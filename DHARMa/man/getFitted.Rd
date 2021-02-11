@@ -7,7 +7,7 @@
 \alias{getFitted.gam}
 \alias{getFitted.HLfit}
 \alias{getFitted.MixMod}
-\title{Get model fitted}
+\title{Get fitted / predicted values}
 \usage{
 getFitted(object, ...)
 
@@ -27,10 +27,12 @@ getFitted(object, ...)
 \item{...}{additional parameters to be passed on, usually to the simulate function of the respective model class}
 }
 \description{
-Wrapper to get the fitted value a fitted model
+Wrapper to get the fitted / predicted response of model at the response scale
 }
 \details{
-The purpose of this wrapper is to standardize extract the fitted values. re-form should be set to ~0 to avoid spurious residual patterns, see https://github.com/florianhartig/DHARMa/issues/43
+The purpose of this wrapper is to standardize extract the fitted values, which is implemented via predict(model, type = "response") for most model classes.
+
+If you implement this function for a new model class, you should include an option to modifying which REs are included in the predictions. If this option is not available, it is essential that predictions are provided marginally / unconditionally, i.e. without the random effect estimates (because of https://github.com/florianhartig/DHARMa/issues/43), which corresponds to re-form = ~0 in lme4
 }
 \examples{
 testData = createData(sampleSize = 400, family = gaussian())
