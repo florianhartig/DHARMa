@@ -321,52 +321,65 @@ testOutliers <- function(simulationOutput, alternative = c("two.sided", "greater
 #' @seealso \code{\link{testResiduals}}, \code{\link{testUniformity}},  \code{\link{testOutliers}}, \code{\link{testZeroInflation}}, \code{\link{testGeneric}}, \code{\link{testTemporalAutocorrelation}}, \code{\link{testSpatialAutocorrelation}}, \code{\link{testQuantiles}}
 #' @example inst/examples/testsHelp.R
 #' @export
-testDispersion <- function(simulationOutput, alternative = c("two.sided", "greater", "less"), plot = T, ...){
+testDispersion <- function(simulationOutput, alternative = c("two.sided", "greater", "less"), plot = T, type = "DHARMa", ...){
 
   out = list()
   out$data.name = deparse(substitute(simulationOutput))
 
   alternative <- match.arg(alternative)
-
   simulationOutput = ensureDHARMa(simulationOutput, convert = "Model")
+  
+  if(type == "DHARMa"){
 
   if(simulationOutput$refit == F){
-
-    spread <- function(x) sd(x - simulationOutput$fittedPredictedResponse)
-    out = testGeneric(simulationOutput, summary = spread, alternative = alternative, methodName = "DHARMa nonparametric dispersion test via sd of residuals fitted vs. simulated", plot = plot, ...)
-  } else {
-
-    observed = tryCatch(sum(residuals(simulationOutput$fittedModel, type = "pearson")^2), error = function(e) {
-      message(paste("DHARMa: the requested tests requires pearson residuals, but your model does not implement these calculations. Test will return NA. Error message:", e))
-      return(NA)
-    })
-    if(is.na(observed)) return(NA)
-    expected = apply(simulationOutput$refittedPearsonResiduals^2 , 2, sum)
-    out$statistic = c(dispersion = observed / mean(expected))
-    out$method = "DHARMa nonparametric dispersion test via mean deviance residual fitted vs. simulated-refitted"
-
-    p = getP(simulated = expected, observed = observed, alternative = alternative)
-
-    out$alternative = alternative
-    out$p.value = p
-    class(out) = "htest"
-
-    if(plot == T) {
-      #plotTitle = gsub('(.{1,50})(\\s|$)', '\\1\n', out$method)
-      xLabel = paste("Simulated values, red line = fitted model. p-value (",out$alternative, ") = ", out$p.value, sep ="")
-
-      hist(expected, xlim = range(expected, observed, na.rm=T ), col = "lightgrey", main = "", xlab = xLabel, breaks = 20, cex.main = 1)
-      abline(v = observed, lwd= 2, col = "red")
-
-      main = ifelse(out$p.value <= 0.05,
-                    "Dispersion test significant",
-                    "Dispersion test n.s.")
-
-      title(main = main, cex.main = 1,
-            col.main = ifelse(out$p.value <= 0.05, "red", "black"))
+    
+      expectedSD = sd(simulationOutput$simulatedResponse)
+      spread <- function(x) sd(x - simulationOutput$fittedPredictedResponse) /  expectedSD
+      out = testGeneric(simulationOutput, summary = spread, alternative = alternative, methodName = "DHARMa nonparametric dispersion test via sd of residuals fitted vs. simulated", plot = plot, ...)
+    } else {
+  
+      observed = tryCatch(sum(residuals(simulationOutput$fittedModel, type = "pearson")^2), error = function(e) {
+        message(paste("DHARMa: the requested tests requires pearson residuals, but your model does not implement these calculations. Test will return NA. Error message:", e))
+        return(NA)
+      })
+      if(is.na(observed)) return(NA)
+      expected = apply(simulationOutput$refittedPearsonResiduals^2 , 2, sum)
+      out$statistic = c(dispersion = observed / mean(expected))
+      out$method = "DHARMa nonparametric dispersion test via mean deviance residual fitted vs. simulated-refitted"
+  
+      p = getP(simulated = expected, observed = observed, alternative = alternative)
+  
+      out$alternative = alternative
+      out$p.value = p
+      class(out) = "htest"
+  
+      if(plot == T) {
+        #plotTitle = gsub('(.{1,50})(\\s|$)', '\\1\n', out$method)
+        xLabel = paste("Simulated values, red line = fitted model. p-value (",out$alternative, ") = ", out$p.value, sep ="")
+  
+        hist(expected, xlim = range(expected, observed, na.rm=T ), col = "lightgrey", main = "", xlab = xLabel, breaks = 20, cex.main = 1)
+        abline(v = observed, lwd= 2, col = "red")
+  
+        main = ifelse(out$p.value <= 0.05,
+                      "Dispersion test significant",
+                      "Dispersion test n.s.")
+  
+        title(main = main, cex.main = 1,
+              col.main = ifelse(out$p.value <= 0.05, "red", "black"))
+      }
     }
-  }
+    
+  } else if(type == "glmmWiki"){
+    
+      rdf <- df.residual(model)
+      rp <- residuals(model,type="pearson")
+      Pearson.chisq <- sum(rp^2)
+      prat <- Pearson.chisq/rdf
+      pval <- pchisq(Pearson.chisq, df=rdf, lower.tail=FALSE)
+      c(chisq=Pearson.chisq,ratio=prat,rdf=rdf,p=pval)
 
+  }
+  
   return(out)
 }
 
