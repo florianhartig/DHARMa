@@ -306,6 +306,7 @@ testOutliers <- function(simulationOutput, alternative = c("two.sided", "greater
 #' @param simulationOutput an object of class DHARMa, either created via \code{\link{simulateResiduals}} for supported models or by \code{\link{createDHARMa}} for simulations created outside DHARMa, or a supported model. Providing a supported model directly is discouraged, because simulation settings cannot be changed in this case. 
 #' @param alternative a character string specifying whether the test should test if observations are "greater", "less" or "two.sided" compared to the simulated null hypothesis. Greater corresponds to testing only for overdispersion. It is recommended to keep the default setting (testing for both over and underdispersion)
 #' @param plot whether to provide a plot for the results
+#' @param type which test to run. Default is DHARMa, other options are Pearson (details see below)
 #' @param ... arguments to pass on to \code{\link{testGeneric}}
 #' @details The function implements two tests, depending on whether it is applied on a simulation with refit = F, or refit = T.
 #'
@@ -369,15 +370,24 @@ testDispersion <- function(simulationOutput, alternative = c("two.sided", "great
       }
     }
     
-  } else if(type == "glmmWiki"){
+  } else if(type == "Pearson"){
     
-      rdf <- df.residual(model)
-      rp <- residuals(model,type="pearson")
+      rdf <- df.residual(simulationOutput$fittedModel)
+      rp <- residuals(simulationOutput$fittedModel,type="pearson")
       Pearson.chisq <- sum(rp^2)
       prat <- Pearson.chisq/rdf
-      pval <- pchisq(Pearson.chisq, df=rdf, lower.tail=FALSE)
-      c(chisq=Pearson.chisq,ratio=prat,rdf=rdf,p=pval)
-
+      if(alternative == "greater") pval <- pchisq(Pearson.chisq, df=rdf, lower.tail=FALSE)
+      else if (alternative == "less") pval <- pchisq(Pearson.chisq, df=rdf, lower.tail=TRUE)
+      else if (alternative == "two.sided") pval <- min(pchisq(Pearson.chisq, df=rdf, lower.tail=TRUE), pchisq(Pearson.chisq, df=rdf, lower.tail=FALSE)) * 2
+      
+      out$statistic = prat
+      out$parameter = rdf
+      out$method = "Chisq test on Pearson residuals"
+      out$alternative = alternative
+      out$p.value = pval
+      class(out) = "htest"
+      # c(chisq=Pearson.chisq,ratio=prat,rdf=rdf,p=pval)
+      return(out)
   }
   
   return(out)

@@ -5,7 +5,7 @@
 \title{DHARMa dispersion tests}
 \usage{
 testDispersion(simulationOutput, alternative = c("two.sided", "greater",
-  "less"), plot = T, ...)
+  "less"), plot = T, type = "DHARMa", ...)
 }
 \arguments{
 \item{simulationOutput}{an object of class DHARMa, either created via \code{\link{simulateResiduals}} for supported models or by \code{\link{createDHARMa}} for simulations created outside DHARMa, or a supported model. Providing a supported model directly is discouraged, because simulation settings cannot be changed in this case.}
@@ -13,6 +13,8 @@ testDispersion(simulationOutput, alternative = c("two.sided", "greater",
 \item{alternative}{a character string specifying whether the test should test if observations are "greater", "less" or "two.sided" compared to the simulated null hypothesis. Greater corresponds to testing only for overdispersion. It is recommended to keep the default setting (testing for both over and underdispersion)}
 
 \item{plot}{whether to provide a plot for the results}
+
+\item{type}{which test to run. Default is DHARMa, other options are Pearson (details see below)}
 
 \item{...}{arguments to pass on to \code{\link{testGeneric}}}
 }

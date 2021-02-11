@@ -1,8 +1,10 @@
-
-overdispersion = 0.0
-
 library(DHARMa)
-testData = createData(sampleSize = 2000, fixedEffects = 1, family = poisson(), randomEffectVariance = 1, overdispersion = overdispersion)
+library(lme4)
+
+overdispersion = 0.3
+
+
+testData = createData(sampleSize = 5000, fixedEffects = 1, family = poisson(), randomEffectVariance = 1, overdispersion = overdispersion, numGroups = 1000)
 
 # fittedModel <- glm(observedResponse ~ Environment1, family = "poisson", data = testData)
 fittedModel <- glmer(observedResponse ~ Environment1 + (1|group), family = "poisson", data = testData)
@@ -11,13 +13,24 @@ fittedModel <- glmer(observedResponse ~ Environment1 + (1|group), family = "pois
 # testDispersion(res)
 # side note: I could find no inflated type I error of any of the tests, even for very high sampleSize, as long as I moved n to 1000 or higher
 
-# Default simulations 
+###### Current default DHARMa tests ######
+
 res <- simulateResiduals(fittedModel = fittedModel, n = 1000)
 testDispersion(res)
 
 # Condition on random effects
 res <- simulateResiduals(fittedModel = fittedModel, re.form  = NULL)
 testDispersion(res)
+
+
+###### New parametric test (glmmWIKI) ######
+
+# weird, two-sided test is always significant, always tests for underdispersion under H0 ... maybe this is the reason why they all test only for overdispersion in the packages
+testDispersion(res, type = "Pearson")
+
+# one-sided test seems to behave OK
+testDispersion(res, type = "Pearson", alternative = "greater")
+
 
 ###### NEW OPTIONS ######
 
@@ -41,11 +54,6 @@ expectedSD = apply(res$simulatedResponse, 1, sd)
 spread <- function(x) sd((x - res$fittedPredictedResponse) / expectedSD) 
 testGeneric(res, summary = spread)
 
-# NEW Option 4 - global standardization
-
-# Refit, uses Pearson residuals
-res <- simulateResiduals(fittedModel = fittedModel, refit = T)
-testDispersion(res)
 
 
 
