@@ -12,18 +12,23 @@ testSpatialAutocorrelation(res)
 dM = as.matrix(dist(cbind(testData$x, testData$y)))
 testSpatialAutocorrelation(res, distMat = dM)
 
+# You could add a spatial variogram via 
+# library(gstat)
+# dat = data.frame(res = residuals(res), x = testData$x, y = testData$y)
+# coordinates(dat) = ~x+y
+# vario = variogram(res~1, data = dat, alpha=c(0,45,90,135))
+# plot(vario, ylim = c(-1,1))
+
 # if there are multiple observations with the same x values,
 # create first ar group with unique values for each location
 # then aggregate the residuals per location, and calculate
-# spatial autocorreation on the new group
+# spatial autocorrelation on the new group
 
 res2 = recalculateResiduals(res, group = testData$group)
 testSpatialAutocorrelation(res)
 
-
-# carefull when using REs to account for spatially clustered (but not grouped)
+# careful when using REs to account for spatially clustered (but not grouped)
 # data. this originates from https://github.com/florianhartig/DHARMa/issues/81
-
 
 # Assume our data is divided into clusters, where observations are close together
 # but not at te same point, and we suspect that observations in clusters are
