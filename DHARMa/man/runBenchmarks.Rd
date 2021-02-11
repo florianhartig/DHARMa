@@ -43,13 +43,13 @@ returnStatistics <- function(control = 0){
 returnStatistics()
 
 # running benchmark
-out = runBenchmarks(returnStatistics, nRep = 20)
+out = runBenchmarks(returnStatistics, nRep = 5)
 
 # running benchmark parallel
-# out = runBenchmarks(returnStatistics, nRep = 500, parallel = TRUE)
+# out = runBenchmarks(returnStatistics, nRep = 50, parallel = TRUE)
 
 # include control values
-# out = runBenchmarks(returnStatistics, controlValues = c(0,0.5,1), nRep = 20)
+# out = runBenchmarks(returnStatistics, controlValues = c(0,0.5,1), nRep = 5)
 
 
 
