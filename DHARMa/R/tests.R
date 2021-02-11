@@ -378,7 +378,7 @@ testDispersion <- function(simulationOutput, alternative = c("two.sided", "great
       prat <- Pearson.chisq/rdf
       if(alternative == "greater") pval <- pchisq(Pearson.chisq, df=rdf, lower.tail=FALSE)
       else if (alternative == "less") pval <- pchisq(Pearson.chisq, df=rdf, lower.tail=TRUE)
-      else if (alternative == "two.sided") pval <- min(pchisq(Pearson.chisq, df=rdf, lower.tail=TRUE), pchisq(Pearson.chisq, df=rdf, lower.tail=FALSE)) * 2
+      else if (alternative == "two.sided") pval <- min(min(pchisq(Pearson.chisq, df=rdf, lower.tail=TRUE), pchisq(Pearson.chisq, df=rdf, lower.tail=FALSE)) * 2,1)
       
       out$statistic = prat
       out$parameter = rdf
