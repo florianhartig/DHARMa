@@ -94,14 +94,14 @@ returnStatistics <- function(control = 0){
   spread <- function(x) sd((x - res$fittedPredictedResponse) / max(expectedSD, 0.001)) 
   out$PearsonSimu = testGeneric(res, summary = spread, plot = F)$p.value
 
-  return(as.vector(out))
+  return(unlist(out))
 }
 
 # testing a single return
 returnStatistics()
 
 # running benchmark
-out = runBenchmarks(returnStatistics, nRep = 100)
+out = runBenchmarks(returnStatistics, nRep = 10)
 
 par(mfrow = c(3,3))
 for(i in 1:7) {
@@ -111,7 +111,6 @@ for(i in 1:7) {
 
 control = seq(0,1.5,len = 20)
 out = runBenchmarks(returnStatistics, nRep = 100, controlValues = control)
-
 
 par(mfrow = c(1,1))
 
