@@ -314,7 +314,7 @@ testOutliers <- function(simulationOutput, alternative = c("two.sided", "greater
 #' 
 #' If type = "DHARMa" (default and recommended), simulation-based dispersion tests are performed. Their behavior differs depending on whether simulations are done with refit = F, or refit = T, and whether data is simulated conditional (e.g. re.form ~0 in lme4)    
 #' 
-#' If refit = F, the function uses the \code{\link{testGeneric}} to compare the sd of the observed residuals against the sd of the simulated residuals. The test provides the ratio of observed vs. mean simulated summary statistics, together with a p-value based on the distribution of the simulated sds. A significant ratio > 1 indicates overdispersion, a significant ratio < 1 underdispersion. 
+#' If refit = F, the function uses \code{\link{testGeneric}} to compare the variance of the observed residuals against the variance of the simulated residuals via their ratios. The test returns the ratio of observed vs. mean simulated variance, together with a p-value based on the distribution of the simulated sds. A significant ratio > 1 indicates overdispersion, a significant ratio < 1 underdispersion. 
 #'
 #' If refit = T, the function compares the approximate deviance (via squared pearson residuals) with the same quantity from the models refitted with simulated data. Applying this is much slower than the previous alternative. Given the computational cost, I would suggest that most users will be satisfied with the standard dispersion test.
 #' 
@@ -322,10 +322,11 @@ testOutliers <- function(simulationOutput, alternative = c("two.sided", "greater
 #' 
 #' type == "Pearson"
 #' 
-#' In particular cases, these may be more powerful and thus preferable over the DHARMa test. The advantage of the DHARMa test is that it directly targets the spread of the data (unless other tests such as dispersion/df, which essentially measure fit and may thus be triggered by problems other than dispersion as well), and it makes practically no assumptions about the fitted model, other than the availability of simulations. 
+#' This is the test described in https://bbolker.github.io/mixedmodels-misc/glmmFAQ.html#overdispersion, identical to performance::check_overdispersion. Works only if the fitted model provides df.residual and Pearson residuals. 
 #' 
+#' The test statistics is biased to lower values under quite general conditions, and will therefore tend to test significant for underdispersion. It is recommended to use this test only for overdispersion, i.e. use alternative == "greater"
 #'
-#' @note 
+#' @note For particular model classes / situations, there may be more powerful and thus preferable over the DHARMa test. The advantage of the DHARMa test is that it directly targets the spread of the data (unless other tests such as dispersion/df, which essentially measure fit and may thus be triggered by problems other than dispersion as well), and it makes practically no assumptions about the fitted model, other than the availability of simulations. 
 #'
 #' @author Florian Hartig
 #' @seealso \code{\link{testResiduals}}, \code{\link{testUniformity}},  \code{\link{testOutliers}}, \code{\link{testZeroInflation}}, \code{\link{testGeneric}}, \code{\link{testTemporalAutocorrelation}}, \code{\link{testSpatialAutocorrelation}}, \code{\link{testQuantiles}}
