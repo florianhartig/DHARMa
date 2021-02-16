@@ -94,7 +94,7 @@ returnStatistics <- function(control = 0){
   spread <- function(x) sd((x - res$fittedPredictedResponse) / max(expectedSD, 0.001)) 
   out$PearsonSimu = testGeneric(res, summary = spread, plot = F)$p.value
 
-  return(out)
+  return(as.vector(out))
 }
 
 # testing a single return
@@ -102,8 +102,6 @@ returnStatistics()
 
 # running benchmark
 out = runBenchmarks(returnStatistics, nRep = 100)
-
-names = c("DHARMa standard", "DHARMa var", "DHARMa conditional", "PearsonParametric",  "VarResSimuUni", "VarResSimuNorm", "PearsonSimu")
 
 par(mfrow = c(3,3))
 for(i in 1:7) {
