@@ -344,8 +344,8 @@ testDispersion <- function(simulationOutput, alternative = c("two.sided", "great
 
   if(simulationOutput$refit == F){
     
-      expectedSD = sd(simulationOutput$simulatedResponse)^2
-      spread <- function(x) sd(x - simulationOutput$fittedPredictedResponse) /  expectedSD
+      expectedVar = sd(simulationOutput$simulatedResponse)^2
+      spread <- function(x) var(x - simulationOutput$fittedPredictedResponse) / expectedVar
       out = testGeneric(simulationOutput, summary = spread, alternative = alternative, methodName = "DHARMa nonparametric dispersion test via sd of residuals fitted vs. simulated", plot = plot, ...)
     } else {
   
