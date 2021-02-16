@@ -94,13 +94,11 @@ runBenchmarks <- function(calculateStatistics, controlValues = NULL, nRep = 10, 
   summary$isUnifP = aggreg(mean)
 
   out = list()
+  out$controlValues = controlValues
   out$simulations = x
   out$summaries = summary
   out$time = Sys.time() - start_time
-
-    
-    
-
+  out$nSummaries = ncol(x) - 2
   
   return(out)
 }
