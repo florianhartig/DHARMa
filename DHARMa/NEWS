@@ -1,5 +1,26 @@
 NOTE: for more news about the package, see https://github.com/florianhartig/DHARMa/releases
 
+DHARMa 0.3.4
+============
+
+New features
+
+- added parametric dispersion test in testDispersion
+
+Major changes
+
+- 
+
+Minor changes
+
+- changed test statistics in standard dispersion test to standardized variance, to be more in line with standard dispersion parameters
+
+
+Bugfixes
+
+- bugfix in runBenchmarks
+
+
 DHARMa 0.3.3
 ============
 
