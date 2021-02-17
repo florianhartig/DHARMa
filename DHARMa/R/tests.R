@@ -587,8 +587,21 @@ testSpatialAutocorrelation <- function(simulationOutput, x = NULL, y  = NULL, di
 
   invDistMat <- 1/distMat
   diag(invDistMat) <- 0
-
-  MI = ape::Moran.I(simulationOutput$scaledResiduals, weight = invDistMat, alternative = alternative)
+  output <- tryCatch(
+    {
+      MI = ape::Moran.I(simulationOutput$scaledResiduals, weight = invDistMat, alternative = alternative)
+      
+    },
+    error = function(cond) {
+      message("testing for spatial autocorrelation requires unique x,y values - check the amount of Residuals in each SimulationOutput, or check the rows of each x and y, are there any dublicates in x or y ? / test each of them independently. Note that the latter must be done by hand, outside testSpatialAutocorrelation.")
+      
+    },
+    warning = function(cond){
+      message("testing for spatial autocorrelation requires unique x,y values - check the amount of Residuals in each SimulationOutput, or check the rows of each x and y, are there any dublicates in x or y ? / test each of them independently. Note that the latter must be done by hand, outside testSpatialAutocorrelation.")
+      
+    }
+  )
+  return(output)
 
   out = list()
   out$statistic = c(observed = MI$observed, expected = MI$expected, sd = MI$sd)

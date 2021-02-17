@@ -27,13 +27,13 @@ Imports:
     gap,
     lmtest,
     ape,
-    sfsmisc,
     MASS,
     qgam (>= 1.3.2),
     lme4,
     mgcv,    
     glmmTMB (>= 1.0.1),
 Suggests:
+    sfsmisc
     knitr,
     testthat,
     rmarkdown,
