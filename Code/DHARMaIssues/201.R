@@ -90,49 +90,16 @@ returnStatistics <- function(control = 0){
   return(unlist(out))
 }
 
-# testing a single return
-returnStatistics()
 
+outH0 = runBenchmarks(returnStatistics, nRep = 10)  
+outPower = runBenchmarks(returnStatistics, nRep = 3, controlValues = seq(0,2,len = 10))
+  
+omar <- par(mar = c(3,10,3,3), mfrow = c(1,2))
+plot(outH0)
+plot(outPower)
+par(omar)
 
-runAnalysis <- function(statistics, controlValues = seq(0,1.5,len = 20), nRepH0 = 500, nRepPower = 100, plot = F){
-  
-  outH0 = runBenchmarks(statistics, nRep = nRepH0)  
-  
-  outPower = runBenchmarks(statistics, nRep = nRepPower, controlValues = controlValues)
-  
-  out = list(H0 = outH0, 
-       Power = outPower
-  )
-  
-  class(out) = "DHARMaBenchmark"
-  
-  if(plot == T){
-    plotAnalysis(out)
-  }
-  return(out)
-}
-
-out = runAnalysis(returnStatistics)
-
-plot.DHARMaBenchmark <- function(x){
-  par(mfrow = c(1,2), oma = c(2,7,2,2))   
-  
-  vioplot::vioplot(x$H0$simulations[,x$H0$nSummaries:1], las = 2, horizontal = T, side = "right", 
-                   areaEqual = F,
-                   main = "p distribution under H0",
-                   ylim = c(-0.15,1))
-  abline(v = 1, lty = 2)
-  abline(v = c(0.05, 0), lty = 2, col = "red")
-  text(-0.1, x$H0$nSummaries:1, labels = x$H0$summaries$propSignificant[-1])
-  
-  res = x$Power$summaries$propSignificant
-  matplot(res$controlValues, res[,-1], type = "l", main = "Power analysis", ylab = "Power")
-  legend("bottomright", colnames(res[,-1]), col = 1:nStats, lty = 1:nStats, lwd = 2)
-}
-
-
-plot(out)
-
+outH0$controlValues
 
 
 

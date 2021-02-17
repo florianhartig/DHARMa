@@ -100,7 +100,34 @@ runBenchmarks <- function(calculateStatistics, controlValues = NULL, nRep = 10, 
   out$time = Sys.time() - start_time
   out$nSummaries = ncol(x) - 2
   
+  class(out) = "DHARMaBenchmark"
+  
   return(out)
+}
+
+
+#' Plots DHARMa benchmark
+#' 
+#' @param x object of class DHARMaBenchmark, created by \code{\link{runBenchmarks}}
+#' @param ... parameters to pass to the plot function
+#' @export
+plot.DHARMaBenchmark <- function(x, ...){
+  
+  if(length(x$controlValues)== 1){
+    vioplot::vioplot(x$simulations[,x$nSummaries:1], las = 2, horizontal = T, side = "right", 
+                     areaEqual = F,
+                     main = "p distribution under H0",
+                     ylim = c(-0.15,1), ...)
+    abline(v = 1, lty = 2)
+    abline(v = c(0.05, 0), lty = 2, col = "red")
+    text(-0.1, x$nSummaries:1, labels = x$summaries$propSignificant[-1])
+    
+  }else{
+    res = x$summaries$propSignificant
+    matplot(res$controlValues, res[,-1], type = "l", main = "Power analysis", ylab = "Power", ...)
+    legend("bottomright", colnames(res[,-1]), col = 1:x$nSummaries, lty = 1:x$nSummaries, lwd = 2)    
+    
+  }
 }
 
 
@@ -124,6 +151,9 @@ testPDistribution <- function(x, plot = T, main = "p distribution \n expected is
 #   for (i in 1:min(nSim, 15)) hist(out[i,], breaks = 50, freq = F, main = i)
 #   par(oldpar)    
 # }
+
+
+
 
 
 
