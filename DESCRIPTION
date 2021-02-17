@@ -30,7 +30,7 @@ Imports:
     MASS,
     qgam (>= 1.3.2),
     lme4,
-    mgcv,    
+    mgcv,
     glmmTMB (>= 1.0.1),
 Suggests:
     knitr,
