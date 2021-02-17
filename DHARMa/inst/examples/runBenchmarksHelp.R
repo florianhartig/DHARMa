@@ -13,6 +13,9 @@ returnStatistics()
 # running benchmark
 out = runBenchmarks(returnStatistics, nRep = 5)
 
+# plotting results depend on whether a vector or a single value is provided for control
+plot(out)
+
 # running benchmark parallel
 # out = runBenchmarks(returnStatistics, nRep = 50, parallel = TRUE)
 

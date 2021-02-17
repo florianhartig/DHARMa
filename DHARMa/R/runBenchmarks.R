@@ -9,7 +9,7 @@
 #' @param parallel whether to use parallel computations. Possible values are F, T (sets the cores automatically to number of available cores -1), or an integer number for the number of cores that should be used for the cluster
 #' @param ... additional parameters to calculateStatistics 
 #' @note The benchmark function in DHARMa are intended for development purposes, and for users that want to test / confirm the properties of functions in DHARMa. If you are running an applied data analysis, they are probably of little use. 
-#' @return A list. First entry is a list with matrices with statistics (one for each control parameter), second entry is a list (one for each control parameter) of matrices with summary statistics: significant (T/F), mean, p-value for KS-test uniformity
+#' @return A object with list structure of class DHARMaBenchmark. Contains an entry simulations with a matrix of simulations, and an entry summaries with an list of summaries (significant (T/F), mean, p-value for KS-test uniformity). Can be plotted with \code{\link{plot.DHARMaBenchmark}}
 #' @export 
 #' @importFrom foreach "%dopar%"
 #' @author Florian Hartig
@@ -151,9 +151,6 @@ testPDistribution <- function(x, plot = T, main = "p distribution \n expected is
 #   for (i in 1:min(nSim, 15)) hist(out[i,], breaks = 50, freq = F, main = i)
 #   par(oldpar)    
 # }
-
-
-
 
 
 
