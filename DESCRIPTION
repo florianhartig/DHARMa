@@ -33,7 +33,6 @@ Imports:
     mgcv,    
     glmmTMB (>= 1.0.1),
 Suggests:
-    sfsmisc
     knitr,
     testthat,
     rmarkdown,
