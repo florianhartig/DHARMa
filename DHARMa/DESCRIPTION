@@ -39,7 +39,8 @@ Suggests:
     mgcv,    
     glmmTMB (>= 1.0.1),
     spaMM (>= 3.2.0),
-    GLMMadaptive
+    GLMMadaptive,
+    vioplot
 License: GPL (>= 3)
 URL: http://florianhartig.github.io/DHARMa/
 BugReports: https://github.com/florianhartig/DHARMa/issues
