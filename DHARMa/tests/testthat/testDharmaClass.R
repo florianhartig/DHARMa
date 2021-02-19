@@ -34,8 +34,6 @@ test_that("createDHARMa works", {
   
 })
 
-
-
 test_that("RecalcuateResiduals works", {
   
   # set.seed(123)
@@ -67,8 +65,7 @@ test_that("RecalcuateResiduals works", {
   
   ##### selection and grouping #####
   
-  # only i data point and group, doesn't work
-  simulationOutput2 = recalculateResiduals(simulationOutput, group = testData$group, sel = 1)
+  #simulationOutput2 = recalculateResiduals(simulationOutput, group = testData$group, sel = 1)   # only i data point and group, doesn't work
   
 })
 
