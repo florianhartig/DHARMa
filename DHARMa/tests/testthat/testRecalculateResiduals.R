@@ -9,11 +9,11 @@ testData = createData(sampleSize = 200, family = poisson(), numGroups = 40,
 fittedModel <- glm(observedResponse ~ Environment1, family = "poisson", data = testData)
 
 simulationOutput = simulateResiduals(fittedModel)
-plot(simulationOutput)
+plot(simulationOutput, quantreg = F)
 dim(simulationOutput$simulatedResponse)
 
 simulationOutput = recalculateResiduals(simulationOutput, group = testData$group)
-plot(simulationOutput)
+plot(simulationOutput, quantreg = F)
 
 
 testData = createData(sampleSize = 200, family = gaussian())

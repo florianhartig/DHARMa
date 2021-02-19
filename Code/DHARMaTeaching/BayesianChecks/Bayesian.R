@@ -1,8 +1,9 @@
+# File available also at https://www.dropbox.com/s/llt7js63zo6nsw9/Bayesian.R?dl=0
+
 library(DHARMa)
 library(lme4)
 library(rjags) # note - requires to also install Jags via https://sourceforge.net/projects/mcmc-jags/files/
 library(BayesianTools)
-library(brms)
 
 ###### Prior predictive checks ######
 
@@ -32,16 +33,19 @@ hist(priorPredictiveSims, breaks = 50)
 
 set.seed(123)
 
-dat <- createData(200)
+dat <- DHARMa::createData(10000, overdispersion = 0.2)
 
 plot(observedResponse ~ Environment1, data = dat)
 plot(observedResponse ~ Environment1, data = dat, pch = as.numeric(dat$group))
 
 fit <- glm(observedResponse ~ Environment1, data = dat, family = "poisson")
-res <- simulateResiduals(fit, plot = T) # see that there is a model error, add RE
+res <- DHARMa::simulateResiduals(fit, plot = T) # see that there is a model error, add RE
 
 fit <- glmer(observedResponse ~ Environment1 + (1|group), data = dat, family = "poisson")
 res <- simulateResiduals(fit, plot = T) # now it looks fine
+
+residuals(res)
+plotResiduals(res, dat$Environment1)
 
 # other tests
 testZeroInflation(res)
