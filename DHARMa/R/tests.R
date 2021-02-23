@@ -589,10 +589,10 @@ testSpatialAutocorrelation <- function(simulationOutput, x = NULL, y  = NULL, di
   diag(invDistMat) <- 0
   
   # Should fix Issue #190 adding warning message  #('nrow()' is causing error)
-  if (length(x) != length(simulationOutput)) {
+  if (length(x) != (simulationOutput$nObs)) {
     warning("rows of x are unequal with simulationOutput$nObs \n Check if there are multiple observations with the same x values, \n create first ar group with unique values for each location then aggregate the residuals per location, and calculate spatial autocorrelation on the new group")
   }
-  if (length(y) != length(simulationOutput) ) {
+  if (length(y) != (simulationOutput$nObs) ) {
     warning("rows  y are unequal with simulationOutput$nObs \n Check if there are multiple observations with the same x values, \n create first ar group with unique values for each location then aggregate the residuals per location, and calculate spatial autocorrelation on the new group")
   }
   
