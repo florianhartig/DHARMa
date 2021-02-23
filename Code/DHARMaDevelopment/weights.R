@@ -1,7 +1,7 @@
 library(DHARMa)
 library(lme4)
 library(glmmTMB)
-library(spamMM)
+library(spaMM)
 
 testData = createData(sampleSize = 200, overdispersion = 0, family = gaussian())
 
