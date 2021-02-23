@@ -590,11 +590,12 @@ testSpatialAutocorrelation <- function(simulationOutput, x = NULL, y  = NULL, di
   
   # Should fix Issue #190 adding warning message  #('nrow()' is causing error)
   if (length(x) != length(simulationOutput)) {
-    message("rows of x are unequal with simulationOutput \n Check if there are multiple observations with the same x values, \n create first ar group with unique values for each location then aggregate the residuals per location, and calculate spatial autocorrelation on the new group")
+    warning("rows of x are unequal with simulationOutput$nObs \n Check if there are multiple observations with the same x values, \n create first ar group with unique values for each location then aggregate the residuals per location, and calculate spatial autocorrelation on the new group")
   }
   if (length(y) != length(simulationOutput) ) {
-    message("rows  y are unequal with simulationOutput \n Check if there are multiple observations with the same x values, \n create first ar group with unique values for each location then aggregate the residuals per location, and calculate spatial autocorrelation on the new group")
+    warning("rows  y are unequal with simulationOutput$nObs \n Check if there are multiple observations with the same x values, \n create first ar group with unique values for each location then aggregate the residuals per location, and calculate spatial autocorrelation on the new group")
   }
+  
   
   
   MI = ape::Moran.I(simulationOutput$scaledResiduals, weight = invDistMat, alternative = alternative)
