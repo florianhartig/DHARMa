@@ -507,6 +507,9 @@ testTemporalAutocorrelation <- function(simulationOutput, time = NULL , alternat
     time = sample.int(simulationOutput$nObs, simulationOutput$nObs)
     message("DHARMa::testTemporalAutocorrelation - no time argument provided, using random times for each data point")
   }
+  
+  # To avoid Issue #190 
+  if (length(time) != (simulationOutput$nObs)) stop("Dimensions of time don't match the dimension of the residuals")
 
   out = lmtest::dwtest(simulationOutput$scaledResiduals ~ 1, order.by = time, alternative = alternative)
 
@@ -588,15 +591,8 @@ testSpatialAutocorrelation <- function(simulationOutput, x = NULL, y  = NULL, di
   invDistMat <- 1/distMat
   diag(invDistMat) <- 0
   
-  # Should fix Issue #190 adding warning message  #('nrow()' is causing error)
-  if (length(x) != (simulationOutput$nObs)) {
-    warning("rows of x are unequal with simulationOutput$nObs \n Check if there are multiple observations with the same x values, \n create first ar group with unique values for each location then aggregate the residuals per location, and calculate spatial autocorrelation on the new group")
-  }
-  if (length(y) != (simulationOutput$nObs) ) {
-    warning("rows  y are unequal with simulationOutput$nObs \n Check if there are multiple observations with the same x values, \n create first ar group with unique values for each location then aggregate the residuals per location, and calculate spatial autocorrelation on the new group")
-  }
-  
-  
+  # To avoid Issue #190 
+  if (length(x) != (simulationOutput$nObs) | length(y) != (simulationOutput$nObs)) stop("Dimensions of x / y coordinates don't match the dimension of the residuals")
   
   MI = ape::Moran.I(simulationOutput$scaledResiduals, weight = invDistMat, alternative = alternative)
 
