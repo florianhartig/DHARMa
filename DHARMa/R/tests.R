@@ -569,31 +569,26 @@ testSpatialAutocorrelation <- function(simulationOutput, x = NULL, y  = NULL, di
   alternative <- match.arg(alternative)
   data.name = deparse(substitute(simulationOutput)) # needs to be before ensureDHARMa
   simulationOutput = ensureDHARMa(simulationOutput, convert = T)
+  
+  if(any(duplicated(cbind(x,y)))) stop("testing for spatial autocorrelation requires unique x,y values - if you have several observations per location, either use the recalculateResiduals function to aggregate residuals per location, or extract the residuals from the fitted object, and plot / test each of them independently for spatially repeated subgroups (a typical scenario would repeated spatial observation, in which case one could plot / test each time step separately for temporal autocorrelation). Note that the latter must be done by hand, outside testSpatialAutocorrelation.")
 
-  # working with coordinates and euclidean distances  
+  if(is.null(x)){
+    x = runif(simulationOutput$nObs, -1,1)
+    message("DHARMa::testSpatialAutocorrelation - no x coordinates provided, using random values for each data point")
+  }
+  
+  if(is.null(y)){
+    y = runif(simulationOutput$nObs, -1,1)
+    message("DHARMa::testSpatialAutocorrelation - no x coordinates provided, using random values for each data point")
+  }
+  
+  if (length(x) != simulationOutput$nObs | length(y) != simulationOutput$nObs) stop("Dimensions of x / y coordinates don't match the dimension of the residuals")
+  
   if(is.null(distMat)){
-    
-    if(any(duplicated(cbind(x,y)))) stop("testing for spatial autocorrelation requires unique x,y values - if you have several observations per location, either use the recalculateResiduals function to aggregate residuals per location, or extract the residuals from the fitted object, and plot / test each of them independently for spatially repeated subgroups (a typical scenario would repeated spatial observation, in which case one could plot / test each time step separately for temporal autocorrelation). Note that the latter must be done by hand, outside testSpatialAutocorrelation.")
-    
-    if(is.null(x)){
-      x = runif(simulationOutput$nObs, -1,1)
-      message("DHARMa::testSpatialAutocorrelation - no x coordinates provided, using random values for each data point")
-    }
-    
-    if(is.null(y)){
-      y = runif(simulationOutput$nObs, -1,1)
-      message("DHARMa::testSpatialAutocorrelation - no x coordinates provided, using random values for each data point")
-    }
-    
-    if (length(x) != simulationOutput$nObs | length(y) != simulationOutput$nObs) stop("Dimensions of x / y coordinates don't match the dimension of the residuals")
-    
+    # working with coordinates and euclidean distances  
     distMat <- as.matrix(dist(cbind(x, y)))
-
-  # else using distance matrix  
   } else {
-    
     if( (!is.null(x) | !is.null(y))) message("both coordinates and distMat provided, calculations will be done based on the distance matrix, coordinates will only be used for plotting")
-
   }
   
   # calculate Moran's I based on dist matrix
@@ -611,8 +606,6 @@ testSpatialAutocorrelation <- function(simulationOutput, x = NULL, y  = NULL, di
   out$data.name = data.name
 
   class(out) = "htest"
-
-
 
   if(plot == T) {
     opar <- par(mfrow = c(1,1))
