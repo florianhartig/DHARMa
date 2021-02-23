@@ -500,6 +500,8 @@ testTemporalAutocorrelation <- function(simulationOutput, time = NULL , alternat
 
   # actually not sure if this is neccessary for dwtest, but seems better to aggregate
   if(any(duplicated(time))) stop("testing for temporal autocorrelation requires unique time values - if you have several observations per time value, either use the recalculateResiduals function to aggregate residuals per time step, or extract the residuals from the fitted object, and plot / test each of them independently for temporally repeated subgroups (typical choices would be location / subject etc.). Note that the latter must be done by hand, outside testTemporalAutocorrelation.")
+  
+  if (length(time) != simulationOutput$nObs) stop("Dimensions of time variable doesn't match the dimesion of the residuals")
 
   alternative <- match.arg(alternative)
 
@@ -567,36 +569,37 @@ testSpatialAutocorrelation <- function(simulationOutput, x = NULL, y  = NULL, di
   alternative <- match.arg(alternative)
   data.name = deparse(substitute(simulationOutput)) # needs to be before ensureDHARMa
   simulationOutput = ensureDHARMa(simulationOutput, convert = T)
+
+  # working with coordinates and euclidean distances  
+  if(is.null(distMat)){
+    
+    if(any(duplicated(cbind(x,y)))) stop("testing for spatial autocorrelation requires unique x,y values - if you have several observations per location, either use the recalculateResiduals function to aggregate residuals per location, or extract the residuals from the fitted object, and plot / test each of them independently for spatially repeated subgroups (a typical scenario would repeated spatial observation, in which case one could plot / test each time step separately for temporal autocorrelation). Note that the latter must be done by hand, outside testSpatialAutocorrelation.")
+    
+    if(is.null(x)){
+      x = runif(simulationOutput$nObs, -1,1)
+      message("DHARMa::testSpatialAutocorrelation - no x coordinates provided, using random values for each data point")
+    }
+    
+    if(is.null(y)){
+      y = runif(simulationOutput$nObs, -1,1)
+      message("DHARMa::testSpatialAutocorrelation - no x coordinates provided, using random values for each data point")
+    }
+    
+    if (length(x) != simulationOutput$nObs | length(y) != simulationOutput$nObs) stop("Dimensions of x / y coordinates don't match the dimension of the residuals")
+    
+    distMat <- as.matrix(dist(cbind(x, y)))
+
+  # else using distance matrix  
+  } else {
+    
+    if( (!is.null(x) | !is.null(y))) message("both coordinates and distMat provided, calculations will be done based on the distance matrix, coordinates will only be used for plotting")
+
+  }
   
-  if(any(duplicated(cbind(x,y)))) stop("testing for spatial autocorrelation requires unique x,y values - if you have several observations per location, either use the recalculateResiduals function to aggregate residuals per location, or extract the residuals from the fitted object, and plot / test each of them independently for spatially repeated subgroups (a typical scenario would repeated spatial observation, in which case one could plot / test each time step separately for temporal autocorrelation). Note that the latter must be done by hand, outside testSpatialAutocorrelation.")
-
-  if( (!is.null(x) | !is.null(y)) & !is.null(distMat) ) message("both coordinates and distMat provided, calculations will be done based on the distance matrix, coordinates will only be used for plotting")
-  # if not provided, fill x and y with random numbers (Null model)
-  if(is.null(x)){
-    x = runif(simulationOutput$nObs, -1,1)
-    message("DHARMa::testSpatialAutocorrelation - no x coordinates provided, using random values for each data point")
-  }
-
-  if(is.null(y)){
-    y = runif(simulationOutput$nObs, -1,1)
-    message("DHARMa::testSpatialAutocorrelation - no x coordinates provided, using random values for each data point")
-  }
-
-  # if not provided, create distance matrix based on x and y
-  if(is.null(distMat)) distMat <- as.matrix(dist(cbind(x, y)))
+  # calculate Moran's I based on dist matrix
 
   invDistMat <- 1/distMat
   diag(invDistMat) <- 0
-  
-  # Should fix Issue #190 adding warning message  #('nrow()' is causing error)
-  if (length(x) != (simulationOutput$nObs)) {
-    warning("rows of x are unequal with simulationOutput$nObs \n Check if there are multiple observations with the same x values, \n create first ar group with unique values for each location then aggregate the residuals per location, and calculate spatial autocorrelation on the new group")
-  }
-  if (length(y) != (simulationOutput$nObs) ) {
-    warning("rows  y are unequal with simulationOutput$nObs \n Check if there are multiple observations with the same x values, \n create first ar group with unique values for each location then aggregate the residuals per location, and calculate spatial autocorrelation on the new group")
-  }
-  
-  
   
   MI = ape::Moran.I(simulationOutput$scaledResiduals, weight = invDistMat, alternative = alternative)
 
