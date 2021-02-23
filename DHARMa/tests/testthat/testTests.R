@@ -135,6 +135,22 @@ test_that("tests work", {
   # Alternatively, one can provide a distance matrix
   dM = as.matrix(dist(cbind(testData$x, testData$y)))
   testSpatialAutocorrelation(simulationOutput, distMat = dM)
+  testSpatialAutocorrelation(simulationOutput, distMat = dM , alternative = "two.sided")
+  
+  
+  # testting when x and y have different length
+  #testSpatialAutocorrelation(simulationOutput, x =  testData$x[1:10], y = testData$y[1:9] )      # Error different length  
+  #testSpatialAutocorrelation(simulationOutput[1:10], x =  testData$x[1:10], y = testData$y[1:10] ) # causing Error since x and y have equal length but unequal to simulationOutput
+  # see Issue #190  'https://github.com/florianhartig/DHARMa/issues/190' 
+  
+  # testing distance matrix and an extra x or y argument 
+  testSpatialAutocorrelation(simulationOutput, distMat = dM, x = testData$x)
+  testSpatialAutocorrelation(simulationOutput, distMat = dM, y = testData$y)
+  
+  
+  
+  
+  
 
 
   # Standard use
@@ -143,6 +159,8 @@ test_that("tests work", {
 
   # If no time is provided, random values will be created
   testTemporalAutocorrelation(simulationOutput)
+  testTemporalAutocorrelation(simulationOutput, alternative = "greater")
+  
 
   ##################################################################
 
@@ -158,7 +176,7 @@ test_that("tests work", {
   # Standard use
   testSpatialAutocorrelation(simulationOutput, x =  testData$x, y = testData$y)
   testSpatialAutocorrelation(simulationOutput, x =  testData$x, y = testData$y, alternative = "two.sided")
-
+  
   # If x and y is not provided, random values will be created
   testSpatialAutocorrelation(simulationOutput)
 
