@@ -1,20 +1,22 @@
 #' DHARMa standard residual plots
 #'
-#' This function creates standard plots for the simulated residuals
-#' @param x an object with simulated residuals created by \code{\link{simulateResiduals}}
-#' @param rank if T (default), the values of pred will be rank transformed. This will usually make patterns easier to spot visually, especially if the distribution of the predictor is skewed.
-#' @param ... further options for \code{\link{plotResiduals}}. Consider in particular parameters quantreg, rank and asFactor. xlab, ylab and main cannot be changed when using plotSimulatedResiduals, but can be changed when using plotResiduals.
-#' @details The function creates two plots. To the left, a qq-uniform plot to detect deviations from overall uniformity of the residuals (calling \code{\link{plotQQunif}}), and to the right, a plot of residuals against predicted values (calling \code{\link{plotResiduals}}). Outliers are highlighted in red (for more on outliers, see \code{\link{testOutliers}}). For a correctly specified model, we would expect
+#' This S3 function creates standard plots for the simulated residuals contained in an object of class DHARMa, using \code{\link{plotQQunif}} (left panel) and \code{\link{plotResiduals}} (right panel)
+#' 
+#' @param x an object of class DHARMa with simulated residuals created by \code{\link{simulateResiduals}}
+#' @param rank if T (default), the predicted values will be rank transformed when calling \code{\link{plotResiduals}}. This will usually make patterns in the residuals ~ predicted plot easier to spot visually, especially if the distribution of the predictor is skewed.
+#' @param ... further options for \code{\link{plotResiduals}}. Consider in particular parameters quantreg, rank and asFactor. xlab, ylab and main cannot be changed when using plot.DHARMa, but can be changed when using plotResiduals.
+#' 
+#' @details The function creates a plot with two panels. The left panel is a uniform qq plot (calling \code{\link{plotQQunif}}), and the right panel shows residuals against predicted values (calling \code{\link{plotResiduals}}), with outliers highlighted in red. 
+#' 
+#' Very briefly, we would expect that a correctly specified model shows:
 #'
-#' a) a straight 1-1 line in the uniform qq-plot -> evidence for an overall uniform (flat) distribution of the residuals
+#' a) a straight 1-1 line, as well as n.s. of the displayed tests in the qq-plot (left) -> evidence for an the correct overall residual distribution (for more details on the interpretation of this plot, see \code{\link{plotQQunif}})
 #'
-#' b) uniformity of residuals in the vertical direction in the res against predictor plot
+#' b) visual homogeneity of residuals in both vertical and horizontal direction, as well as n.s. of quantile tests in the res ~ predictor plot (for more details on the interpretation of this plot, see \code{\link{plotResiduals}})
 #'
-#' Deviations of this can be interpreted as for a linear regression. See the vignette for detailed examples.
-#'
-#' To provide a visual aid in detecting deviations from uniformity in y-direction, the plot of the residuals against the predicted values also performs an (optional) quantile regression, which provides 0.25, 0.5 and 0.75 quantile lines across the plots. These lines should be straight, horizontal, and at y-values of 0.25, 0.5 and 0.75. Note, however, that some deviations from this are to be expected by chance, even for a perfect model, especially if the sample size is small. See further comments on this plot, its interpretation and options, in \code{\link{plotResiduals}}
-#'
-#' The quantile regression can take some time to calculate, especially for larger datasets. For that reason, quantreg = F can be set to produce a smooth spline instead. This is default for n > 2000.
+#' Deviations from these expectations can be interpreted similar to a linear regression. See the vignette for detailed examples.
+#' 
+#' Note that, unlike \code{\link{plotResiduals}}, plot.DHARMa command uses the default rank = T.
 #'
 #' @seealso \code{\link{plotResiduals}}, \code{\link{plotQQunif}}
 #' @example inst/examples/plotsHelp.R
@@ -147,17 +149,17 @@ plotQQunif <- function(simulationOutput, testUniformity = T, testOutliers = T, t
 #'
 #' Outliers are highlighted in red (for information on definition and interpretation of outliers, see \code{\link{testOutliers}}).
 #'
-#' To provide a visual aid in detecting deviations from uniformity in y-direction, the plot function calculates an (optional) quantile regression, which compares the empirical 0.25, 0.5 and 0.75 quantiles (default) in y direction (red solid lines) with the theoretical 0.25, 0.5 and 0.75 quantiles (dashed black line).
-#'
-#' Asymptotically (i.e. for lots of data / residuals), if the model is correct, theoretical and the empirical quantiles should be identical (i.e. dashed and solid lines should match). A p-value for the deviation is calculated for each quantile line. Significant deviations are highlighted by red color.
-#'
+#' To provide a visual aid in detecting deviations from uniformity in y-direction, the plot function calculates an (optional) quantile regression of the residuals, by default for the 0.25, 0.5 and 0.75 quantiles. As the residuals should be uniformly distributed for a correctly specified model, the theoretical expectations for these regressions are straight lines at 0.25, 0.5 and 0.75, which are displayed as dashed black lines on the plot. Some deviations from these expectations are to be expected by chance, however, even for a perfect model, especially if the sample size is small. The function therefore tests if deviation of the fitted quantile regression from the expectation is significant, using  \code{\link{testQuantiles}}. If so, the significant quantile regression will be highlighted as red, and a warning will be displayed in the plot. 
+#' 
+#' The quantile regression can take some time to calculate, especially for larger datasets. For that reason, quantreg = F can be set to produce a smooth spline instead. This is default for n > 2000.
+#' 
 #' If form is a factor, a boxplot will be plotted instead of a scatter plot. The distribution for each factor level should be uniformly distributed, so the box should go from 0.25 to 0.75, with the median line at 0.5. Again, chance deviations from this will increases when the sample size is smaller. You can run null simulations to test if the deviations you see exceed what you would expect from random variation. If you want to create box plots for categorical predictors (e.g. because you only have a small number of unique numeric predictor values), you can convert your predictor with as.factor(pred)
+#' 
+#' @note if nObs > 10000, the scatter plot is replaced by graphics::smoothScatter
 #' 
 #' @return if quantile tests are performed, the function returns them invisibly.
 #'
-#' @note The quantile regression can take some time to calculate, especially for larger datasets. For that reason, quantreg = F can be set to produce a smooth spline instead.
-#'
-#' @seealso \code{\link{plotQQunif}}
+#' @seealso \code{\link{plotQQunif}}, \code{\link{testQuantiles}}, \code{\link{testOutliers}}
 #' @example inst/examples/plotsHelp.R
 #' @export
 plotResiduals <- function(simulationOutput, form = NULL, quantreg = NULL, rank = F, asFactor = NULL, smoothScatter = NULL, quantiles = c(0.25, 0.5, 0.75), ...){
@@ -209,7 +211,7 @@ plotResiduals <- function(simulationOutput, form = NULL, quantreg = NULL, rank =
     do.call(plot, append(list(res ~ pred, ylim = c(0,1), axes = FALSE), a))
     
     axis(1, at = 1:nlevels(pred), levels(pred))
-    axis(2, at=c(0, 0.25, 0.5, 0.75, 1))
+    axis(2, at=c(0, quantiles, 1))
   }
   # smooth scatter
   else if (smoothScatter == TRUE) {
@@ -218,7 +220,7 @@ plotResiduals <- function(simulationOutput, form = NULL, quantreg = NULL, rank =
     points(pred[defaultCol == 2], res[defaultCol == 2], col = "red", cex = 0.5)
     
     axis(1)
-    axis(2, at=c(0, 0.25, 0.5, 0.75, 1))
+    axis(2, at=c(0, quantiles, 1))
   }
   # normal plot
   else{
@@ -229,7 +231,7 @@ plotResiduals <- function(simulationOutput, form = NULL, quantreg = NULL, rank =
     do.call(plot, append(list(res ~ pred, ylim = c(0,1), axes = FALSE), a))
     
     axis(1)
-    axis(2, at=c(0, 0.25, 0.5, 0.75, 1))
+    axis(2, at=c(0, quantiles, 1))
   }
 
   ##### Quantile regressions #####
@@ -240,7 +242,7 @@ plotResiduals <- function(simulationOutput, form = NULL, quantreg = NULL, rank =
   if(is.numeric(pred)){
     if(quantreg == F){
       title(main = main, cex.main = 1)
-      abline(h = c(0.25, 0.5, 0.75), col = "black", lwd = 0.5, lty = 2)
+      abline(h = quantiles, col = "black", lwd = 0.5, lty = 2)
       try({
         lines(smooth.spline(pred, res, df = 10), lty = 2, lwd = 2, col = "red")
         abline(h = 0.5, col = "red", lwd = 2)

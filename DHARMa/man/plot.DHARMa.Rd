@@ -7,27 +7,27 @@
 \method{plot}{DHARMa}(x, rank = TRUE, ...)
 }
 \arguments{
-\item{x}{an object with simulated residuals created by \code{\link{simulateResiduals}}}
+\item{x}{an object of class DHARMa with simulated residuals created by \code{\link{simulateResiduals}}}
 
-\item{rank}{if T (default), the values of pred will be rank transformed. This will usually make patterns easier to spot visually, especially if the distribution of the predictor is skewed.}
+\item{rank}{if T (default), the predicted values will be rank transformed when calling \code{\link{plotResiduals}}. This will usually make patterns in the residuals ~ predicted plot easier to spot visually, especially if the distribution of the predictor is skewed.}
 
-\item{...}{further options for \code{\link{plotResiduals}}. Consider in particular parameters quantreg, rank and asFactor. xlab, ylab and main cannot be changed when using plotSimulatedResiduals, but can be changed when using plotResiduals.}
+\item{...}{further options for \code{\link{plotResiduals}}. Consider in particular parameters quantreg, rank and asFactor. xlab, ylab and main cannot be changed when using plot.DHARMa, but can be changed when using plotResiduals.}
 }
 \description{
-This function creates standard plots for the simulated residuals
+This S3 function creates standard plots for the simulated residuals contained in an object of class DHARMa, using \code{\link{plotQQunif}} (left panel) and \code{\link{plotResiduals}} (right panel)
 }
 \details{
-The function creates two plots. To the left, a qq-uniform plot to detect deviations from overall uniformity of the residuals (calling \code{\link{plotQQunif}}), and to the right, a plot of residuals against predicted values (calling \code{\link{plotResiduals}}). Outliers are highlighted in red (for more on outliers, see \code{\link{testOutliers}}). For a correctly specified model, we would expect
+The function creates a plot with two panels. The left panel is a uniform qq plot (calling \code{\link{plotQQunif}}), and the right panel shows residuals against predicted values (calling \code{\link{plotResiduals}}), with outliers highlighted in red. 
 
-a) a straight 1-1 line in the uniform qq-plot -> evidence for an overall uniform (flat) distribution of the residuals
+Very briefly, we would expect that a correctly specified model shows:
 
-b) uniformity of residuals in the vertical direction in the res against predictor plot
+a) a straight 1-1 line, as well as n.s. of the displayed tests in the qq-plot (left) -> evidence for an the correct overall residual distribution (for more details on the interpretation of this plot, see \code{\link{plotQQunif}})
 
-Deviations of this can be interpreted as for a linear regression. See the vignette for detailed examples.
+b) visual homogeneity of residuals in both vertical and horizontal direction, as well as n.s. of quantile tests in the res ~ predictor plot (for more details on the interpretation of this plot, see \code{\link{plotResiduals}})
 
-To provide a visual aid in detecting deviations from uniformity in y-direction, the plot of the residuals against the predicted values also performs an (optional) quantile regression, which provides 0.25, 0.5 and 0.75 quantile lines across the plots. These lines should be straight, horizontal, and at y-values of 0.25, 0.5 and 0.75. Note, however, that some deviations from this are to be expected by chance, even for a perfect model, especially if the sample size is small. See further comments on this plot, its interpretation and options, in \code{\link{plotResiduals}}
+Deviations from these expectations can be interpreted similar to a linear regression. See the vignette for detailed examples.
 
-The quantile regression can take some time to calculate, especially for larger datasets. For that reason, quantreg = F can be set to produce a smooth spline instead. This is default for n > 2000.
+Note that, unlike \code{\link{plotResiduals}}, plot.DHARMa command uses the default rank = T.
 }
 \examples{
 testData = createData(sampleSize = 200, family = poisson(), 
