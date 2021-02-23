@@ -3,7 +3,6 @@
 #' This S3 function creates standard plots for the simulated residuals contained in an object of class DHARMa, using \code{\link{plotQQunif}} (left panel) and \code{\link{plotResiduals}} (right panel)
 #' 
 #' @param x an object of class DHARMa with simulated residuals created by \code{\link{simulateResiduals}}
-#' @param rank if T (default), the predicted values will be rank transformed when calling \code{\link{plotResiduals}}. This will usually make patterns in the residuals ~ predicted plot easier to spot visually, especially if the distribution of the predictor is skewed.
 #' @param ... further options for \code{\link{plotResiduals}}. Consider in particular parameters quantreg, rank and asFactor. xlab, ylab and main cannot be changed when using plot.DHARMa, but can be changed when using plotResiduals.
 #' 
 #' @details The function creates a plot with two panels. The left panel is a uniform qq plot (calling \code{\link{plotQQunif}}), and the right panel shows residuals against predicted values (calling \code{\link{plotResiduals}}), with outliers highlighted in red. 
@@ -23,13 +22,13 @@
 #' @import graphics
 #' @import utils
 #' @export
-plot.DHARMa <- function(x, rank = TRUE, ...){
+plot.DHARMa <- function(x, ...){
 
   oldpar <- par(mfrow = c(1,2), oma = c(0,1,2,1))
   on.exit(par(oldpar))
 
   plotQQunif(x)
-  plotResiduals(x, rank = rank, ...)
+  plotResiduals(x, ...)
 
   mtext("DHARMa residual diagnostics", outer = T)
 }
@@ -105,28 +104,28 @@ plotQQunif <- function(simulationOutput, testUniformity = T, testOutliers = T, t
 
   if(testUniformity == TRUE){
     temp = testUniformity(simulationOutput, plot = F)
-    legend("topleft", c(paste("KS test: p=", round(temp$p.value, digits = 5)), paste("Deviation ", ifelse(temp$p.value < 0.05, "significant", "n.s."))), text.col = ifelse(temp$p.value < 0.05, "red", "black" ), bty="n")
+    legend("topleft", 
+           c(paste("KS test: p=", round(temp$p.value, digits = 5)), 
+             paste("Deviation ", ifelse(temp$p.value < 0.05, "significant", "n.s."))), 
+           text.col = ifelse(temp$p.value < 0.05, "red", "black" ), bty="n")
+    
   }
 
   if(testOutliers == TRUE){
-    
-    check = FALSE
-    if(simulationOutput$integerResponse == FALSE) useMethod = "binomial"
-    else{
-      if(simulationOutput$nObs > 500){
-        useMethod = "binomial"
-        check = TRUE
-      } else useMethod = "bootstrap"
-    }
     temp = testOutliers(simulationOutput, type =  useMethod, plot = F)
+    legend("bottomright", 
+           c(paste("Outlier test: p=", round(temp$p.value, digits = 5)), 
+             paste("Deviation ", ifelse(temp$p.value < 0.05, "significant", "n.s."))),
+           text.col = ifelse(temp$p.value < 0.05, "red", "black" ), bty="n")
     
-    if (temp$p.value < 0.05 & check == T) message("DHARMa:plot switched to type = binomial when running testOutliers for computational reasons (nObs > 500). Note that this method may have inflated Type I error rates for integer-valued distributions. To get a more exact result, it is recommended to re-run testOutliers with type = 'bootstrap'. See ?testOutliers for details")
-    legend("bottomright", c(paste("Outlier test: p=", round(temp$p.value, digits = 5)), paste("Deviation ", ifelse(temp$p.value < 0.05, "significant", "n.s."))), text.col = ifelse(temp$p.value < 0.05, "red", "black" ), bty="n")
   }
 
   if(testDispersion == TRUE){
     temp = testDispersion(simulationOutput, plot = F)
-    legend("center", c(paste("Dispersion test: p=", round(temp$p.value, digits = 5)), paste("Deviation ", ifelse(temp$p.value < 0.05, "significant", "n.s."))), text.col = ifelse(temp$p.value < 0.05, "red", "black" ), bty="n")
+    legend("center", 
+           c(paste("Dispersion test: p=", round(temp$p.value, digits = 5)), 
+             paste("Deviation ", ifelse(temp$p.value < 0.05, "significant", "n.s."))), 
+           text.col = ifelse(temp$p.value < 0.05, "red", "black" ), bty="n")
   }
 
 }
@@ -139,7 +138,7 @@ plotQQunif <- function(simulationOutput, testUniformity = T, testOutliers = T, t
 #'
 #' @param simulationOutput on object, usually a DHARMa object, from which residual values can be extracted. Alternatively, a vector with residuals or a fitted model can be provided, which will then be transformed into a DHARMa object.
 #' @param form optional predictor against which the residuals should be plotted. Default is to used the predicted(simulationOutput)
-#' @param quantreg whether to perform a quantile regression on 0.25, 0.5, 0.75 on the residuals. If F, a spline will be created instead. Default NULL chooses T for nObs < 2000, and F otherwise.
+#' @param quantreg whether to perform a quantile regression based on \code{\link{testQuantiles}} or a smooth spline around the mean. Default NULL chooses T for nObs < 2000, and F otherwise.
 #' @param rank if T, the values provided in form will be rank transformed. This will usually make patterns easier to spot visually, especially if the distribution of the predictor is skewed. If form is a factor, this has no effect.
 #' @param asFactor should a numeric predictor provided in form be treated as a factor. Default is to choose this for < 10 unique values, as long as enough predictions are available to draw a boxplot.
 #' @param smoothScatter if T, a smooth scatter plot will plotted instead of a normal scatter plot. This makes sense when the number of residuals is very large. Default NULL chooses T for nObs < 10000, and F otherwise.
@@ -162,11 +161,10 @@ plotQQunif <- function(simulationOutput, testUniformity = T, testOutliers = T, t
 #' @seealso \code{\link{plotQQunif}}, \code{\link{testQuantiles}}, \code{\link{testOutliers}}
 #' @example inst/examples/plotsHelp.R
 #' @export
-plotResiduals <- function(simulationOutput, form = NULL, quantreg = NULL, rank = F, asFactor = NULL, smoothScatter = NULL, quantiles = c(0.25, 0.5, 0.75), ...){
+plotResiduals <- function(simulationOutput, form = NULL, quantreg = NULL, rank = T, asFactor = NULL, smoothScatter = NULL, quantiles = c(0.25, 0.5, 0.75), ...){
 
 
   ##### Checks #####
-
 
   a <- list(...)
   a$ylab = checkDots("ylab", "Standardized residual", ...)

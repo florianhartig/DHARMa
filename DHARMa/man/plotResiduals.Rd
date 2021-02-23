@@ -4,7 +4,7 @@
 \alias{plotResiduals}
 \title{Generic res ~ pred scatter plot with spline or quantile regression on top}
 \usage{
-plotResiduals(simulationOutput, form = NULL, quantreg = NULL, rank = F,
+plotResiduals(simulationOutput, form = NULL, quantreg = NULL, rank = T,
   asFactor = NULL, smoothScatter = NULL, quantiles = c(0.25, 0.5, 0.75),
   ...)
 }
@@ -13,7 +13,7 @@ plotResiduals(simulationOutput, form = NULL, quantreg = NULL, rank = F,
 
 \item{form}{optional predictor against which the residuals should be plotted. Default is to used the predicted(simulationOutput)}
 
-\item{quantreg}{whether to perform a quantile regression on 0.25, 0.5, 0.75 on the residuals. If F, a spline will be created instead. Default NULL chooses T for nObs < 2000, and F otherwise.}
+\item{quantreg}{whether to perform a quantile regression based on \code{\link{testQuantiles}} or a smooth spline around the mean. Default NULL chooses T for nObs < 2000, and F otherwise.}
 
 \item{rank}{if T, the values provided in form will be rank transformed. This will usually make patterns easier to spot visually, especially if the distribution of the predictor is skewed. If form is a factor, this has no effect.}
 
