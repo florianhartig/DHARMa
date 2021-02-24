@@ -46,8 +46,43 @@ test_that("ensureDHARMa", {
   testOutliers(simulationOutput)
   
   expect_error(testQuantiles(simulationOutput$scaledResiduals))  
+  
+})
 
+
+
+test_that("randomSeed", {
   
+  runif(1)
+  # testing the function in standard settings
+  currentSeed = .Random.seed
+  x = getRandomState(123)
+  runif(1)
+  x$restoreCurrent()
+  expect_true(all(.Random.seed == currentSeed))
   
+  # if no seed was set in env, this will also be restored
+  
+  rm(.Random.seed, envir = globalenv()) # now, there is no random seed
+  x = getRandomState(123)
+  expect_true(exists(".Random.seed"))  # TRUE
+  runif(1)
+  x$restoreCurrent()
+  expect_false(exists(".Random.seed")) # False
+  runif(1) # re-create a seed
+  
+  # with seed = false 
+  currentSeed = .Random.seed
+  x = getRandomState(FALSE)
+  runif(1)
+  x$restoreCurrent()
+  expect_false(all(.Random.seed == currentSeed))
+  
+  # with seed = NULL 
+  currentSeed = .Random.seed
+  x = getRandomState(NULL)
+  runif(1)
+  x$restoreCurrent()
+  expect_true(all(.Random.seed == currentSeed))
   
 })
