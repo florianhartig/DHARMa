@@ -180,15 +180,13 @@ testOutliers <- function(simulationOutput, alternative = c("two.sided", "greater
   simulationOutput = ensureDHARMa(simulationOutput, convert = "Model")
   
   if(type == "default"){
-    if(simulationOutput$integerResponse == FALSE) useMethod = "binomial"
+    if(simulationOutput$integerResponse == FALSE) type = "binomial"
     else{
-      if(simulationOutput$nObs > 500) useMethod = "binomial"
-      else useMethod = "bootstrap"
+      if(simulationOutput$nObs > 500) type = "binomial"
+      else type = "bootstrap"
     }    
   }
 
-  temp = testOutliers(simulationOutput, type =  useMethod, plot = F)
-  
   # using the binomial test, not exact
   if(type == "binomial"){
     
