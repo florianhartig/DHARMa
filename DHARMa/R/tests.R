@@ -509,7 +509,7 @@ testTemporalAutocorrelation <- function(simulationOutput, time = NULL , alternat
   }
   
   # To avoid Issue #190 
-  if (length(time) != (simulationOutput$nObs)) stop("Dimensions of time don't match the dimension of the residuals")
+  if (length(time) != length(residuals(simulationOutput))) stop("Dimensions of time don't match the dimension of the residuals")
 
   out = lmtest::dwtest(simulationOutput$scaledResiduals ~ 1, order.by = time, alternative = alternative)
 
@@ -592,7 +592,7 @@ testSpatialAutocorrelation <- function(simulationOutput, x = NULL, y  = NULL, di
   diag(invDistMat) <- 0
   
   # To avoid Issue #190 
-  if (length(x) != (simulationOutput$nObs) | length(y) != (simulationOutput$nObs)) stop("Dimensions of x / y coordinates don't match the dimension of the residuals")
+  if (length(x) != length(residuals(simulationOutput)) | length(y) != length(residuals(simulationOutput))) stop("Dimensions of x / y coordinates don't match the dimension of the residuals")
   
   MI = ape::Moran.I(simulationOutput$scaledResiduals, weight = invDistMat, alternative = alternative)
 
