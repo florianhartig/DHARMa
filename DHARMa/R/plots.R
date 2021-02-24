@@ -92,7 +92,7 @@ plotSimulatedResiduals <- function(simulationOutput, ...){
 #' @param testDispersion if T, the function \code{\link{testDispersion}} will be called and the result will be added to the plot
 #' @param ... arguments to be passed on to \code{\link[gap]{qqunif}}
 #'
-#' @details the function calls qqunif from the R package gap to create a quantile-quantile plot for a uniform distribution.
+#' @details the function calls qqunif from the R package gap to create a quantile-quantile plot for a uniform distribution, and overlays tests for particular distributional problems as specified.
 #' @seealso \code{\link{plotSimulatedResiduals}}, \code{\link{plotResiduals}}
 #' @example inst/examples/plotsHelp.R
 #' @export
@@ -112,7 +112,7 @@ plotQQunif <- function(simulationOutput, testUniformity = T, testOutliers = T, t
   }
 
   if(testOutliers == TRUE){
-    temp = testOutliers(simulationOutput, type =  useMethod, plot = F)
+    temp = testOutliers(simulationOutput, plot = F)
     legend("bottomright", 
            c(paste("Outlier test: p=", round(temp$p.value, digits = 5)), 
              paste("Deviation ", ifelse(temp$p.value < 0.05, "significant", "n.s."))),

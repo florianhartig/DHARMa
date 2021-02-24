@@ -22,7 +22,7 @@ plotQQunif(simulationOutput, testUniformity = T, testOutliers = T,
 The function produces a uniform quantile-quantile plot from a DHARMa output
 }
 \details{
-the function calls qqunif from the R package gap to create a quantile-quantile plot for a uniform distribution.
+the function calls qqunif from the R package gap to create a quantile-quantile plot for a uniform distribution, and overlays tests for particular distributional problems as specified.
 }
 \examples{
 testData = createData(sampleSize = 200, family = poisson(), 
