@@ -1,18 +1,15 @@
-# testing the function in standard settings
 
 set.seed(13)
 runif(1)
+
+# testing the function in standard settings
+currentSeed = .Random.seed
 x = getRandomState(123)
 runif(1)
 x$restoreCurrent()
-runif(1)
+all(.Random.seed == currentSeed)
 
-# values outside set /restore are identical to
-
-set.seed(13)
-runif(2)
-
-# if no seed is set, this will also be restored
+# if no seed was set in env, this will also be restored
 
 rm(.Random.seed) # now, there is no random seed
 x = getRandomState(123)
@@ -20,11 +17,18 @@ exists(".Random.seed")  # TRUE
 runif(1)
 x$restoreCurrent()
 exists(".Random.seed") # False
+runif(1) # re-create a seed
 
 # with seed = false 
-
-x = getRandomState(seed = FALSE)
-exists(".Random.seed")
+currentSeed = .Random.seed
+x = getRandomState(FALSE)
 runif(1)
 x$restoreCurrent()
-exists(".Random.seed")
+all(.Random.seed == currentSeed)
+
+# with seed = NULL 
+currentSeed = .Random.seed
+x = getRandomState(NULL)
+runif(1)
+x$restoreCurrent()
+all(.Random.seed == currentSeed)

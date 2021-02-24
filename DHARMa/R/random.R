@@ -1,6 +1,8 @@
 #' Record and restore a random state
 #' 
-#' The aim of this function is to record, manipualate and restor a random state
+#' The aim of this function is to record, manipulate and restore a random state
+#' 
+#' @param seed seed argument to set.seed(), typically a number. Additional options: NULL = no seed is set, but return includes function for restoring random seed. F = function does nothing, i.e. neither seed is changed, nor does the returned function do anything 
 #' 
 #' @details This function is intended for two (not mutually exclusive tasks)
 #' 
@@ -9,8 +11,6 @@
 #' b) change the current random state in a way that the previous state can be restored
 #' 
 #' @return a list with various infos about the random state that after function execution, as well as a function to restore the previous state before the function execution
-#' 
-#' @param seed seed argument to set.seed(). NULL = no seed, but random state will be restored. F = random state will not be restored
 #' @export
 #' @example inst/examples/getRandomStateHelp.R
 #' @author Florian Hartig
@@ -22,7 +22,7 @@ getRandomState <- function(seed = NULL){
   
   current = mget(".Random.seed", envir = .GlobalEnv, ifnotfound = list(NULL))[[1]]
   
-  if(is.logical(seed) & seed == F){
+  if(!is.null(seed) && is.logical(seed) && seed == F){
     restoreCurrent <- function(){}    
   }else{
     restoreCurrent <- function(){
