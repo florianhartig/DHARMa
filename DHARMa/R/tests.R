@@ -342,7 +342,11 @@ testDispersion <- function(simulationOutput, alternative = c("two.sided", "great
   simulationOutput = ensureDHARMa(simulationOutput, convert = "Model")
   
   if(type == "DHARMa"){
-
+    
+  # if(class(simulationOutput$fittedModel) %in% c("glmerMod", "lmerMod"){
+  #   if(!"re.form" %in% names(simulationOutput$additionalParameters) & is.null(simulationOutput$additionalParameters$re.form)) message("recommended to run conditional simulations for dispersion test, see help") 
+  #}
+     
   if(simulationOutput$refit == F){
     
       expectedVar = sd(simulationOutput$simulatedResponse)^2
@@ -383,6 +387,8 @@ testDispersion <- function(simulationOutput, alternative = c("two.sided", "great
     
   } else if(type == "Pearson"){
     
+      if(! alternative == "greater") message("Note that the chi2 test on Pearson residuals is biased for mixed models towards underdispersion. Tests with alternative = two.sided or less are therefore not reliable. I recommend to test only with alternative = 'greater', i.e. test for overdispersion")
+    
       rdf <- df.residual(simulationOutput$fittedModel)
       rp <- residuals(simulationOutput$fittedModel,type="pearson")
       Pearson.chisq <- sum(rp^2)
@@ -418,12 +424,12 @@ testOverdispersion <- function(simulationOutput, ...){
 
 #' Parametric overdisperstion tests
 #'
-#' @details Deprecated, switch your code to using the \code{\link{testDispersion}} function. The function will do nothing, arguments will be ignored, the parametric tests is no longer recommend
+#' @details Deprecated, switch your code to using the \code{\link{testDispersion}} function. 
 #'
 #' @param ... arguments will be ignored, the parametric tests is no longer recommend
 #' @export
 testOverdispersionParametric <- function(...){
-  message("testOverdispersionParametric is deprecated and no longer recommended, see release notes in DHARMA 0.2.0 - switch your code to using the testDispersion function")
+  message("testOverdispersionParametric is deprecated - switch your code to using the testDispersion function")
   return(0)
 }
 
