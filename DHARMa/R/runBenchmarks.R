@@ -114,13 +114,8 @@ runBenchmarks <- function(calculateStatistics, controlValues = NULL, nRep = 10, 
 plot.DHARMaBenchmark <- function(x, ...){
   
   if(length(x$controlValues)== 1){
-    vioplot::vioplot(x$simulations[,x$nSummaries:1], las = 2, horizontal = T, side = "right", 
-                     areaEqual = F,
-                     main = "p distribution under H0",
-                     ylim = c(-0.15,1), ...)
-    abline(v = 1, lty = 2)
-    abline(v = c(0.05, 0), lty = 2, col = "red")
-    text(-0.1, x$nSummaries:1, labels = x$summaries$propSignificant[-1])
+    plotMultipleHist(x$simulations[,1:x$nSummaries])
+    text(0, x$nSummaries:1, labels = x$summaries$propSignificant[-1])
     
   }else{
     res = x$summaries$propSignificant
@@ -129,6 +124,31 @@ plot.DHARMaBenchmark <- function(x, ...){
     
   }
 }
+
+
+plotMultipleHist <- function(x){
+  
+  lin = ncol(x)
+  histList <- lapply(x, hist, breaks = seq(0,1,0.02), plot = F)
+  
+  plot(NULL, xlim = c(0,1), ylim = c(0, lin), yaxt = 'n', ylab = NULL, xlab = "p-value")
+  abline(h= 0)
+  
+  for(i in 1:lin){
+    maxD = max(histList[[i]]$density)
+    
+    lines(histList[[i]]$mids, i - 1 + histList[[i]]$density/maxD, type = "l")
+    abline(h= i)
+    abline(h= 1/maxD + i - 1, , col = "red", lty = 2)
+  } 
+  
+  abline(v = 1, lty = 2)
+  abline(v = c(0.05, 0), lty = 2, col = "red")
+}
+
+
+
+
 
 
 #' Plot distribution of p-values
