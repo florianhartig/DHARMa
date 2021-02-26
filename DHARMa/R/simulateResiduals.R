@@ -3,13 +3,14 @@
 #' The function creates scaled residuals by simulating from the fitted model. Residuals can be extracted with \code{\link{residuals.DHARMa}}. See \code{\link{testResiduals}} for an overview of residual tests, \code{\link{plot.DHARMa}} for an overview of available plots.
 #'
 #' @param fittedModel a fitted model  of a class supported by DHARMa
-#' @param n number of simulations. The smaller the number, the higher the stochastic error on the residuals. Also, for very small n, discretization artefacts can influence the tests. Default is 250, which is a relatively safe value. You can consider increasing to 1000 to stabilize the simulated values. 
+#' @param n number of simulations. The smaller the number, the higher the stochastic error on the residuals. Also, for very small n, discretization artefacts can influence the tests. Default is 250, which is a relatively safe value. You can consider increasing to 1000 to stabilize the simulated values.
 #' @param refit if FALSE, new data will be simulated and scaled residuals will be created by comparing observed data with new data. If TRUE, the model will be refit on the simulated data (parametric bootstrap), and scaled residuals will be created by comparing observed with refitted residuals.
 #' @param integerResponse if TRUE, noise will be added at to the residuals to maintain a uniform expectations for integer responses (such as Poisson or Binomial). Usually, the model will automatically detect the appropriate setting, so there is no need to adjust this setting.
 #' @param plot if TRUE, \code{\link{plotResiduals}} will be directly run after the residuals have been calculated
 #' @param ... parameters to pass to the simulate function of the model object. An important use of this is to specify whether simulations should be conditional on the current random effect estimates, e.g. via re.form. Note that not all models support syntax to specify conditionao or unconditional simulations. See also details
 #' @param seed the random seed to be used within DHARMa. The default setting, recommended for most users, is keep the random seed on a fixed value 123. This means that you will always get the same randomization and thus teh same result when running the same code. NULL = no new seed is set, but previous random state will be restored after simulation. FALSE = no seed is set, and random state will not be restored. The latter two options are only recommended for simulation experiments. See vignette for details.
 #' @param method the quantile randomization method used. The two options implemented at the moment are probability integral transform (PIT-) residuals (current default), and the "traditional" randomization procedure, that was used in DHARMa until version 0.3.0. For details, see \code{\link{getQuantile}}
+#' @param bigData if TRUE, simulations will be stored on disk rather than in memory. The number of simulations will then not be limited by available RAM, but computations will be slower. This allows to increase the number of simulations and to work with models that contain many observations. Defaults to FALSE.
 #' @return An S3 class of type "DHARMa", essentially a list with various elements. Implemented S3 functions include plot, print and \code{\link{residuals.DHARMa}}. Residuals returns the calculated scaled residuals.
 #'
 #' @details There are a number of important considerations when simulating from a more complex (hierarchical) model:
@@ -39,8 +40,9 @@
 #'
 #' @example inst/examples/simulateResidualsHelp.R
 #' @import stats
+#' @rawNamespace import(ff, except = c(write.csv, write.csv2))
 #' @export
-simulateResiduals <- function(fittedModel, n = 250, refit = F, integerResponse = NULL, plot = F, seed = 123, method = c("PIT", "traditional"), ...){
+simulateResiduals <- function(fittedModel, n = 250, refit = F, integerResponse = NULL, plot = F, seed = 123, method = c("PIT", "traditional"), bigData = FALSE, ...){
 
   ######## general assertions and startup calculations ##########
 
@@ -63,6 +65,7 @@ simulateResiduals <- function(fittedModel, n = 250, refit = F, integerResponse =
   out$nSim = n
   out$refit = refit
   out$methods = method
+  out$bigData = bigData
   out$observedResponse = getObservedResponse(fittedModel)
 
   if(is.null(integerResponse)){
@@ -72,20 +75,50 @@ simulateResiduals <- function(fittedModel, n = 250, refit = F, integerResponse =
   out$integerResponse = integerResponse
 
   out$problems = list()
-  
+
   out$fittedPredictedResponse = getFitted(fittedModel)
   out$fittedFixedEffects = getFixedEffects(fittedModel)
   out$fittedResiduals = getResiduals(fittedModel)
+
+  if (bigData == TRUE) {
+    # Check whether matrix can be created
+    if (prod(n, out$nObs) > .Machine$integer.max) {
+      possibleMax <- as.integer(.Machine$integer.max / out$nObs)
+      stop(paste0("The requested number of simulations cannot be accomodated because R cannot handle objects containing more than ", .Machine$integer.max, " elements. For your model, the maximum number of simulations is n = ", possibleMax, "."))
+    }
+    if (refit == TRUE){
+      message("Refitting is not supported if you choose bigData = TRUE. Residuals will be simulated with refit = FALSE.")
+      refit <- FALSE
+    }
+  }
+
+
 
   ######## refit = F ##################
 
   if (refit == FALSE){
 
-    out$simulatedResponse = getSimulations(fittedModel, nsim = n, type = "normal", ...)
 
-    checkSimulations(out$simulatedResponse, out$nObs, out$nSim)
+    if (bigData == FALSE) {
 
-    out$scaledResiduals = getQuantile(simulations = out$simulatedResponse , observed = out$observedResponse , integerResponse = integerResponse, method = method)
+      out$simulatedResponse = getSimulations(fittedModel, nsim = n, type = "normal", ...)
+
+    } else {
+
+      # Create on-disk object to hold simulated response
+      out$simulatedResponse = ff(dim = c(nobs(fittedModel), n), vmode = vmode(fitted(fittedModel)),
+                                 pattern = paste0(tempdir(), "dharma"), finalizer = "delete")
+
+      # Fill matrix one column at a time (minimal memory footprint)
+      for(i in 1:n){
+        out$simulatedResponse[,i] <- getSimulations(fittedModel, nsim = 1, type = "normal", ...)
+      }
+    }
+
+    checkSimulations(out$simulatedResponse, out$nObs, out$nSim, bigData = bigData)
+
+    out$scaledResiduals = getQuantile(simulations = out$simulatedResponse , observed = out$observedResponse , integerResponse = integerResponse, method = method, bigData = bigData)
+
 
   ######## refit = T ##################
   } else {
@@ -197,16 +230,27 @@ checkModel <- function(fittedModel, stop = F){
 #' @param nSim number of simulations
 #'
 #' @keywords internal
-checkSimulations <- function(simulatedResponse, nObs, nSim){
+checkSimulations <- function(simulatedResponse, nObs, nSim, bigData = FALSE){
 
-  if(!inherits(simulatedResponse, "matrix")) securityAssertion("Simulation from the model produced wrong class", stop = T)
+  if(bigData == FALSE){
 
-  if(any(dim(simulatedResponse) != c(nObs, nSim) )) securityAssertion("Simulation from the model produced wrong dimension", stop = T)
+    if(any(dim(simulatedResponse) != c(nObs, nSim) )) securityAssertion("Simulation from the model produced wrong dimension", stop = T)
 
-  if(any(!is.finite(simulatedResponse))) message("Simulations from your fitted model produce infinite values. Consider if this is sensible")
+    if(any(!is.finite(simulatedResponse))) message("Simulations from your fitted model produce infinite values. Consider if this is sensible")
 
-  if(any(is.nan(simulatedResponse))) securityAssertion("Simulations from your fitted model produce NaN values. DHARMa cannot calculated residuals for this. This is nearly certainly an error of the regression package you are using", stop = T)
-  if(any(is.na(simulatedResponse))) securityAssertion("Simulations from your fitted model produce NA values. DHARMa cannot calculated residuals for this. This is nearly certainly an error of the regression package you are using", stop = T)
+    if(any(is.nan(simulatedResponse))) securityAssertion("Simulations from your fitted model produce NaN values. DHARMa cannot calculated residuals for this. This is nearly certainly an error of the regression package you are using", stop = T)
+    if(any(is.na(simulatedResponse))) securityAssertion("Simulations from your fitted model produce NA values. DHARMa cannot calculated residuals for this. This is nearly certainly an error of the regression package you are using", stop = T)
+
+  } else {
+
+    for (i in 1:ncol(simulatedResponse)){
+      if(any(!is.finite(simulatedResponse[, i]))) message("Simulations from your fitted model produce infinite values. Consider if this is sensible")
+      if(any(is.nan(simulatedResponse[, i]))) securityAssertion("Simulations from your fitted model produce NaN values. DHARMa cannot calculated residuals for this. This is nearly certainly an error of the regression package you are using", stop = T)
+      if(any(is.na(simulatedResponse[, i]))) securityAssertion("Simulations from your fitted model produce NA values. DHARMa cannot calculated residuals for this. This is nearly certainly an error of the regression package you are using", stop = T)
+    }
+
+  }
+
 
 }
 

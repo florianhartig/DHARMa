@@ -28,6 +28,7 @@ DHARMa.ecdf <- function (x)
 #' @param observed a vector with the observed data
 #' @param integerResponse is the response integer-valued. Only has an effect for method = "traditional"
 #' @param method the quantile randomization method used. See details
+#' @param bigData indicates whether to use optimized calculations for `simulations` objects that are stored on disk as an `ff_matrix`. Defaults to `FALSE`.
 #'
 #' @details The function calculates residual quantiles from the simulated data. For continuous distributions, this will simply the the value of the ecdf.
 #'
@@ -45,10 +46,17 @@ DHARMa.ecdf <- function (x)
 #'
 #' Warton, David I., Loïc Thibaut, and Yi Alice Wang. "The PIT-trap—A “model-free” bootstrap procedure for inference about regression models with discrete, multivariate responses." PloS one 12.7 (2017)
 #'
+#' @rawNamespace import(ff, except = c(write.csv, write.csv2))
 #' @export
-getQuantile <- function(simulations, observed, integerResponse, method = c("PIT", "traditional")){
+getQuantile <- function(simulations, observed, integerResponse, method = c("PIT", "traditional"), bigData = FALSE){
 
   method = match.arg(method)
+  if (bigData == TRUE) {
+    if (method == "traditional") {
+      message("For large datasets probability integral transform (PIT) residuals are recommended to improve performance. Use method = 'PIT' to achieve this.")
+    }
+    method = "PIT"
+  }
 
   n = length(observed)
   if (nrow(simulations) != n) stop("DHARMa::getquantile: wrong dimension of simulations")
@@ -61,9 +69,32 @@ getQuantile <- function(simulations, observed, integerResponse, method = c("PIT"
 
       if(any(duplicated(observed))) message("Model family was recognized or set as continuous, but duplicate values were detected in the response. Consider if you are fitting an appropriate model.")
 
-      values = as.vector(simulations)[duplicated(as.vector(simulations))]
-      if(length(values) > 0){
-        if (all(values%%1==0)){
+      if (bigData == FALSE){
+        # Check for duplicates across all simulations
+        duplicatesDetected = FALSE
+        integerDetected = FALSE
+
+        values = as.vector(simulations)[duplicated(as.vector(simulations))]
+        if (length(values) > 0) duplicatesDetected <- TRUE
+        if (all(values%%1==0)) integerDetected <- TRUE
+
+      } else {
+        # Check for duplicates in each simulation independently (i.e. column-wise)
+
+        # Hold results for each column
+        duplicatesDetected = rep(FALSE, nSim)
+        integerDetected = rep(FALSE, nSim)
+
+        for (i in 1:nSim) {
+          values = as.vector(simulations)[duplicated(as.vector(simulations[, i]))]
+          if (length(values) > 0) duplicatesDetected[i] = TRUE
+          if (duplicatesDetected[i] == TRUE & all(values%%1==0)) integerDetected[i] = TRUE
+        }
+      }
+
+
+      if (any(duplicatesDetected) == TRUE){
+        if (any(integerDetected == TRUE)){
           integerResponse = T
           message("Model family was recognized or set as continuous, but duplicate values were detected in the simulation - changing to integer residuals (see ?simulateResiduals for details)")
         } else {
@@ -85,12 +116,49 @@ getQuantile <- function(simulations, observed, integerResponse, method = c("PIT"
   } else {
 
     scaledResiduals = rep(NA, n)
-    for (i in 1:n){
-      minSim <- mean(simulations[i,] < observed[i]) 
-      maxSim <- mean(simulations[i,] <= observed[i]) 
-      if (minSim == maxSim) scaledResiduals[i] = minSim
-      else scaledResiduals[i] = runif(1, minSim, maxSim)
+
+    if (bigData == FALSE){
+
+      # This is only a small performance gain (~ 20%) over putting these
+      # calculations into the for loop, as in the original implementation.
+      minSim <- rowSums(apply(simulations, MARGIN = 2, function(x) x < observed)) / nSim
+      maxSim <- rowSums(apply(simulations, MARGIN = 2, function(x) x <= observed)) / nSim
+
+    } else {
+
+      # TODO: Memory footprint is controlled by BATCHBYTES. Should be set large
+      # enough to hold at least two columns of the simulation matrix (if
+      # BATCHSIZE = 2, which is the minimum). Use heuristics to set BATCHBYTES
+      # based on nObs? Expose as package option?
+      minSim <- ffcolapply(rowSums(simulations[,i1:i2] < observed),
+                           X=simulations, RETURN = TRUE, CFUN = "csum", BATCHBYTES = 2^30, BATCHSIZE = 2) / nSim
+      maxSim <- ffcolapply(rowSums(simulations[,i1:i2] <= observed),
+                           X=simulations, RETURN = TRUE, CFUN = "csum", BATCHBYTES = 2^30, BATCHSIZE = 2) / nSim
+
     }
+
+
+    for (i in 1:n){
+      if (minSim[i] == maxSim[i]) scaledResiduals[i] = minSim[i]
+      else scaledResiduals[i] = runif(1, minSim[i], maxSim[i])
+    }
+
+    # # Alternative to for-loop with mapply (no apparent improvements in terms
+    # # of memory use or processing time):
+    #
+    # scaledResiduals <-
+    #   mapply(function(min, max) if (min == max) min else runif(1, min, max),
+    #          minSim, maxSim, SIMPLIFY = TRUE, USE.NAMES = FALSE)
+
+
+    # # Previous implementation without apply functions:
+    #
+    # for (i in 1:n){
+    #   minSim <- mean(simulations[i,] < observed[i])
+    #   maxSim <- mean(simulations[i,] <= observed[i])
+    #   else scaledResiduals[i] = runif(1, minSim, maxSim)
+    # }
+
   }
   return(scaledResiduals)
 }
