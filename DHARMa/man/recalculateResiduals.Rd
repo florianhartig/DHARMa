@@ -5,7 +5,7 @@
 \title{Recalculate residuals with grouping}
 \usage{
 recalculateResiduals(simulationOutput, group = NULL, aggregateBy = sum,
-  seed = 123, method = c("PIT", "traditional"))
+  sel = NULL, seed = 123, method = c("PIT", "traditional"))
 }
 \arguments{
 \item{simulationOutput}{an object with simulated residuals created by \code{\link{simulateResiduals}}}
@@ -13,6 +13,8 @@ recalculateResiduals(simulationOutput, group = NULL, aggregateBy = sum,
 \item{group}{group of each data point}
 
 \item{aggregateBy}{function for the aggregation. Default is sum. This should only be changed if you know what you are doing. Note in particular that the expected residual distribution might not be flat any more if you choose general functions, such as sd etc.}
+
+\item{sel}{an optional vector for selecting the data to be aggregated}
 
 \item{seed}{the random seed to be used within DHARMa. The default setting, recommended for most users, is keep the random seed on a fixed value 123. This means that you will always get the same randomization and thus teh same result when running the same code. NULL = no new seed is set, but previous random state will be restored after simulation. FALSE = no seed is set, and random state will not be restored. The latter two options are only recommended for simulation experiments. See vignette for details.}
 
@@ -46,9 +48,10 @@ residuals(simulationOutput)
 residuals(simulationOutput, quantileFunction = qnorm, outlierValues = c(-7,7))
 
 # calculating residuals per group
-simulationOutput = recalculateResiduals(simulationOutput, group = testData$group)
-plot(simulationOutput, quantreg = FALSE)
+simulationOutput2 = recalculateResiduals(simulationOutput, group = testData$group)
+plot(simulationOutput2, quantreg = FALSE)
 
-
-
+# calculating residuals for only one group
+simulationOutput3 = recalculateResiduals(simulationOutput, sel = testData$group == 1 )
+plot(simulationOutput3, quantreg = FALSE)
 }

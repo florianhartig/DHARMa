@@ -77,13 +77,15 @@ runEverything = function(fittedModel, testData, DHARMaData = T, expectOverdisper
   simulationOutput2 <- simulateResiduals(fittedModel = fittedModel, refit = T, n = 5) # n=10 is very low, set higher for serious tests
 
   checkOutput(simulationOutput2)
-
   if(doPlots) plot(simulationOutput2, quantreg = F)
 
-  testDispersion(simulationOutput2, plot = doPlots)
-
-  simulationOutput2 <- recalculateResiduals(simulationOutput2, group = testData$group)
-  testDispersion(simulationOutput2, plot = doPlots)
+  # note that the pearson test is biased, therefore have to test greater
+  #expect_gt(testDispersion(simulationOutput2, plot = doPlots, alternative = "greater")$p.value, 0.001)
+  x = testDispersion(simulationOutput2, plot = doPlots)
+  
+  simulationOutput3 <- recalculateResiduals(simulationOutput2, group = testData$group)
+  #expect_gt(testDispersion(simulationOutput3, plot = doPlots, alternative = "greater")$p.value, 0.001)
+  x = testDispersion(simulationOutput3, plot = doPlots)
 
 }
 
@@ -357,11 +359,11 @@ test_that("glm poisson weights throws warning",
 
                       # lm weights are considered in simulate(), should not throw warning
                       fittedModel <- lm(observedResponse ~ Environment1 , data = testData, weights = weights)
-                      simulateResiduals(fittedModel)
+                      expect_s3_class(simulateResiduals(fittedModel), "DHARMa")
 
                       # glm gaussian still the same
                       fittedModel <- glm(observedResponse ~ Environment1 , data = testData, weights = weights)
-                      simulateResiduals(fittedModel)
+                      expect_s3_class(simulateResiduals(fittedModel), "DHARMa")
 
                       # glm behaves nice, throws a warning that simulate ignores weights for poisson
                       fittedModel <- glm(observedResponse ~ Environment1 , weights = weights, data = testData, family = "poisson")
@@ -399,7 +401,7 @@ test_that("glm poisson weights throws warning",
                       #expect_error( fittedModel <- HLfit(observedResponse ~ Environment1 + (1|group) , family = "poisson",  data = testData, prior.weights = weights))
                       
                       fittedModel <- HLfit(observedResponse ~ Environment1 + (1|group) , family = negbin(1),  data = testData, prior.weights = weights)
-                      simulateResiduals(fittedModel)
+                      expect_s3_class(simulateResiduals(fittedModel), "DHARMa")
                       
                       
                       # GLMMadaptive requires weights according to groups

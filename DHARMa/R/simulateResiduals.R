@@ -220,18 +220,20 @@ checkSimulations <- function(simulatedResponse, nObs, nSim){
 #' @param simulationOutput an object with simulated residuals created by \code{\link{simulateResiduals}}
 #' @param group group of each data point
 #' @param aggregateBy function for the aggregation. Default is sum. This should only be changed if you know what you are doing. Note in particular that the expected residual distribution might not be flat any more if you choose general functions, such as sd etc.
+#' @param sel an optional vector for selecting the data to be aggregated
 #' @param seed the random seed to be used within DHARMa. The default setting, recommended for most users, is keep the random seed on a fixed value 123. This means that you will always get the same randomization and thus teh same result when running the same code. NULL = no new seed is set, but previous random state will be restored after simulation. FALSE = no seed is set, and random state will not be restored. The latter two options are only recommended for simulation experiments. See vignette for details.
 #' @param method the quantile randomization method used. The two options implemented at the moment are probability integral transform (PIT-) residuals (current default), and the "traditional" randomization procedure, that was used in DHARMa until version 0.3.0. For details, see \code{\link{getQuantile}}
 #' @return an object of class DHARMa, similar to what is returned by \code{\link{simulateResiduals}}, but with additional outputs for the new grouped calculations. Note that the relevant outputs are 2x in the object, the first is the grouped calculations (which is returned by $name access), and later another time, under identical name, the original output. Moreover, there is a function 'aggregateByGroup', which can be used to aggregate predictor variables in the same way as the variables calculated here
 #'
 #' @example inst/examples/simulateResidualsHelp.R
 #' @export
-recalculateResiduals <- function(simulationOutput, group = NULL, aggregateBy = sum, seed = 123, method = c("PIT", "traditional")){
+recalculateResiduals <- function(simulationOutput, group = NULL, aggregateBy = sum, sel = NULL, seed = 123, method = c("PIT", "traditional")){
 
   randomState <-getRandomState(seed)
   on.exit({randomState$restoreCurrent()})
   match.arg(method)
 
+  # ensures that the base simulation is always used for recalculate
   if(!is.null(simulationOutput$original)) simulationOutput = simulationOutput$original
 
   out = list()
@@ -239,39 +241,42 @@ recalculateResiduals <- function(simulationOutput, group = NULL, aggregateBy = s
   out$group = group
   out$method = method
   out$aggregateBy = aggregateBy
-
-  if(is.null(group)) return(simulationOutput)
-  else group =as.factor(group)
-  out$nGroups = nlevels(group)
-
-  aggregateByGroup <- function(x) aggregate(x, by=list(group), FUN=aggregateBy)[,2]
-
-  out$observedResponse = aggregateByGroup(simulationOutput$observedResponse)
-  out$fittedPredictedResponse = aggregateByGroup(simulationOutput$fittedPredictedResponse)
-
-  if (simulationOutput$refit == F){
-
-    out$simulatedResponse = apply(simulationOutput$simulatedResponse, 2, aggregateByGroup)
-    out$scaledResiduals = getQuantile(simulations = out$simulatedResponse , observed = out$observedResponse , integerResponse = simulationOutput$integerResponse, method = method)
-
-  ######## refit = T ##################
-  } else {
-
-    out$refittedPredictedResponse <- apply(simulationOutput$refittedPredictedResponse, 2, aggregateByGroup)
-    out$fittedResiduals = aggregateByGroup(simulationOutput$fittedResiduals)
-    out$refittedResiduals = apply(simulationOutput$refittedResiduals, 2, aggregateByGroup)
-    out$refittedPearsonResiduals = apply(simulationOutput$refittedPearsonResiduals, 2, aggregateByGroup)
-
-    out$scaledResiduals = getQuantile(simulations = out$refittedResiduals , observed = out$fittedResiduals , integerResponse = simulationOutput$integerResponse, method = method)
-
+  
+  if(is.null(group) & is.null(sel)) return(simulationOutput)
+  else {
+    if(is.null(group)) group = 1:simulationOutput$nObs
+    group =as.factor(group)
+    out$nGroups = nlevels(group)
+    if(is.null(sel)) sel = 1:simulationOutput$nObs
+    out$sel = sel
+  
+    aggregateByGroup <- function(x) aggregate(x[sel], by=list(group[sel]), FUN=aggregateBy)[,2]
+  
+    out$observedResponse = aggregateByGroup(simulationOutput$observedResponse)
+    out$fittedPredictedResponse = aggregateByGroup(simulationOutput$fittedPredictedResponse)
+  
+    if (simulationOutput$refit == F){
+  
+      out$simulatedResponse = apply(simulationOutput$simulatedResponse, 2, aggregateByGroup)
+      out$scaledResiduals = getQuantile(simulations = out$simulatedResponse , observed = out$observedResponse, integerResponse = simulationOutput$integerResponse, method = method)
+  
+    ######## refit = T ##################
+    } else {
+  
+      out$refittedPredictedResponse <- apply(simulationOutput$refittedPredictedResponse, 2, aggregateByGroup)
+      out$fittedResiduals = aggregateByGroup(simulationOutput$fittedResiduals)
+      out$refittedResiduals = apply(simulationOutput$refittedResiduals, 2, aggregateByGroup)
+      out$refittedPearsonResiduals = apply(simulationOutput$refittedPearsonResiduals, 2, aggregateByGroup)
+  
+      out$scaledResiduals = getQuantile(simulations = out$refittedResiduals , observed = out$fittedResiduals , integerResponse = simulationOutput$integerResponse, method = method)
+    }
+    # hack - the c here will result in both old and new outputs to be present resulting output, but a named access should refer to the new, grouped calculations
+    # question to myself - what's the use of that, why not erase the old outputs? they are anyway saved in the old object
+  
+    out$aggregateByGroup = aggregateByGroup
+    out = c(out, simulationOutput)
+    out$randomState = randomState
+    class(out) = "DHARMa"
+    return(out)
   }
-
-  # hack - the c here will result in both old and new outputs to be present resulting output, but a named access should refer to the new, grouped calculations
-  # question to myself - what's the use of that, why not erase the old outputs? they are anyway saved in the old object
-
-  out$aggregateByGroup = aggregateByGroup
-  out = c(out, simulationOutput)
-  out$randomState = randomState
-  class(out) = "DHARMa"
-  return(out)
 }
