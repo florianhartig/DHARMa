@@ -46,9 +46,10 @@ residuals(simulationOutput)
 residuals(simulationOutput, quantileFunction = qnorm, outlierValues = c(-7,7))
 
 # calculating residuals per group
-simulationOutput = recalculateResiduals(simulationOutput, group = testData$group)
-plot(simulationOutput, quantreg = FALSE)
+simulationOutput2 = recalculateResiduals(simulationOutput, group = testData$group)
+plot(simulationOutput2, quantreg = FALSE)
 
-
-
+# calculating residuals for only one group
+simulationOutput3 = recalculateResiduals(simulationOutput, sel = testData$group == 1 )
+plot(simulationOutput3, quantreg = FALSE)
 }
