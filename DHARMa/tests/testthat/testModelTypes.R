@@ -104,7 +104,7 @@ test_that("lm works",
             fittedModel <- glm(observedResponse ~ Environment1 , data = testData)
             runEverything(fittedModel, testData)
 
-            fittedModel <- gam(observedResponse ~ s(Environment1) , data = testData)
+            fittedModel <- gam(observedResponse ~ Environment1 , data = testData)
             runEverything(fittedModel, testData)
 
             fittedModel <- lmer(observedResponse ~ Environment1 + (1|group) , data = testData)
@@ -145,7 +145,7 @@ test_that("binomial 1/0 works",
             fittedModel <- glm(observedResponse ~ Environment1  , family = "binomial", data = testData)
             runEverything(fittedModel, testData)
 
-            fittedModel <- gam(observedResponse ~ s(Environment1) ,family = "binomial", data = testData)
+            fittedModel <- gam(observedResponse ~ Environment1 ,family = "binomial", data = testData)
             runEverything(fittedModel, testData)
 
             fittedModel <- glm(observedResponse ~ Environment1 , family = "binomial", data = testData)
@@ -209,8 +209,7 @@ test_that("glm binomial n/k with matrix works",
             fittedModel <- glm(cbind(observedResponse1,observedResponse0)  ~ Environment1 , family = "binomial", data = testData)
             runEverything(fittedModel, testData)
 
-            fittedModel <- gam(cbind(observedResponse1,observedResponse0) ~ s(Environment1) ,family = "binomial", data = testData)
-
+            fittedModel <- gam(cbind(observedResponse1,observedResponse0) ~ Environment1 ,family = "binomial", data = testData)
             # gam doesn't work, check
             #runEverything(fittedModel, testData)
 
@@ -247,7 +246,7 @@ test_that("glm binomial n/k with weights works",
             fittedModel <- glm(prop  ~ Environment1 , family = "binomial", data = testData, weights = rep(20,200))
             runEverything(fittedModel, testData)
 
-            fittedModel <- gam(prop ~ s(Environment1) ,family = "binomial", data = testData, weights = rep(20,200))
+            fittedModel <- gam(prop ~ Environment1 ,family = "binomial", data = testData, weights = rep(20,200))
             runEverything(fittedModel, testData)
 
             fittedModel <- glmer(prop ~ Environment1 + (1|group) , family = "binomial", data = testData, weights = rep(20,200))
@@ -476,3 +475,15 @@ test_that("glm poisson weights throws warning",
 #           }
 # )
 #
+
+
+# special tests --------------------------------------------------------------
+
+test_that("special tests",
+          {
+            testData = createData(sampleSize = 100, fixedEffects = c(1,0), overdispersion = 0, randomEffectVariance = 0, family = gaussian())
+            fittedModel <- gam(observedResponse ~ s(Environment1) , data = testData)
+            simulateResiduals(fittedModel)
+            
+          })
+
