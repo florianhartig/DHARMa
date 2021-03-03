@@ -56,7 +56,7 @@ testOutliers(simulationOutput, type = "bootstrap")
 # of outliers. In the case above, the test reported an excess of outliers (you)
 # can see this because expected frequency < observed. Moreover, if we plot the residuals
 
-plotResiduals(simulationOutput, quantreg = F)
+plotResiduals(simulationOutput, quantreg = FALSE)
 
 # we see that we mostly have an excess of outliers at the upper margin. 
 # Let's see what would have happened if we would just have checked the lower margin
