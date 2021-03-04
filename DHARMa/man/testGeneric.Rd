@@ -45,6 +45,9 @@ plot(simulationOutput, quantreg = TRUE)
 # KS test for correct distribution of residuals
 testUniformity(simulationOutput)
 
+# KS test for correct distribution within and between groups
+testCategorical(simulationOutput, testData$group)
+
 # Dispersion test
 testDispersion(simulationOutput) # tests under and overdispersion
 testDispersion(simulationOutput, alternative = "less") # only underdispersion
@@ -80,7 +83,7 @@ testGeneric(simulationOutput, summary = spread)
 
 }
 \seealso{
-\code{\link{testResiduals}}, \code{\link{testUniformity}}, \code{\link{testOutliers}}, \code{\link{testDispersion}}, \code{\link{testZeroInflation}}, \code{\link{testTemporalAutocorrelation}}, \code{\link{testSpatialAutocorrelation}}, \code{\link{testQuantiles}}
+\code{\link{testResiduals}}, \code{\link{testUniformity}}, \code{\link{testOutliers}}, \code{\link{testDispersion}}, \code{\link{testZeroInflation}}, \code{\link{testGeneric}}, \code{\link{testTemporalAutocorrelation}}, \code{\link{testSpatialAutocorrelation}}, \code{\link{testQuantiles}}, \code{\link{testCategorical}}
 }
 \author{
 Florian Hartig

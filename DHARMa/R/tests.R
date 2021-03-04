@@ -7,7 +7,7 @@
 #' @param simulationOutput an object of class DHARMa, either created via \code{\link{simulateResiduals}} for supported models or by \code{\link{createDHARMa}} for simulations created outside DHARMa, or a supported model. Providing a supported model directly is discouraged, because simulation settings cannot be changed in this case. 
 #' @param plot if T, plots functions of the tests are called
 #' @author Florian Hartig
-#' @seealso \code{\link{testUniformity}}, \code{\link{testOutliers}}, \code{\link{testDispersion}}, \code{\link{testZeroInflation}}, \code{\link{testGeneric}}, \code{\link{testTemporalAutocorrelation}}, \code{\link{testSpatialAutocorrelation}}, \code{\link{testQuantiles}}
+#' @seealso \code{\link{testResiduals}}, \code{\link{testUniformity}}, \code{\link{testOutliers}}, \code{\link{testDispersion}}, \code{\link{testZeroInflation}}, \code{\link{testGeneric}}, \code{\link{testTemporalAutocorrelation}}, \code{\link{testSpatialAutocorrelation}}, \code{\link{testQuantiles}}, \code{\link{testCategorical}}
 #' @example inst/examples/testsHelp.R
 #' @export
 testResiduals <- function(simulationOutput, plot = T){
@@ -45,7 +45,7 @@ testSimulatedResiduals <- function(simulationOutput){
 #' @param plot if T, plots calls \code{\link{plotQQunif}} as well
 #' @details The function applies a \code{\link[stats]{ks.test}} for uniformity on the simulated residuals.
 #' @author Florian Hartig
-#' @seealso \code{\link{testResiduals}}, \code{\link{testOutliers}}, \code{\link{testDispersion}}, \code{\link{testZeroInflation}}, \code{\link{testGeneric}}, \code{\link{testTemporalAutocorrelation}}, \code{\link{testSpatialAutocorrelation}}, \code{\link{testQuantiles}}
+#' @seealso \code{\link{testResiduals}}, \code{\link{testUniformity}}, \code{\link{testOutliers}}, \code{\link{testDispersion}}, \code{\link{testZeroInflation}}, \code{\link{testGeneric}}, \code{\link{testTemporalAutocorrelation}}, \code{\link{testSpatialAutocorrelation}}, \code{\link{testQuantiles}}, \code{\link{testCategorical}}
 #' @example inst/examples/testsHelp.R
 #' @export
 testUniformity<- function(simulationOutput, alternative = c("two.sided", "less", "greater"), plot = T){
@@ -87,7 +87,7 @@ testBivariateUniformity<- function(simulationOutput, alternative = c("two.sided"
 #'
 #' @author Florian Hartig
 #' @example inst/examples/testQuantilesHelp.R
-#' @seealso \code{\link{testResiduals}}, \code{\link{testUniformity}}, \code{\link{testDispersion}}, \code{\link{testZeroInflation}}, \code{\link{testGeneric}}, \code{\link{testTemporalAutocorrelation}}, \code{\link{testSpatialAutocorrelation}}, \code{\link{testOutliers}}
+#' @seealso \code{\link{testResiduals}}, \code{\link{testUniformity}}, \code{\link{testOutliers}}, \code{\link{testDispersion}}, \code{\link{testZeroInflation}}, \code{\link{testGeneric}}, \code{\link{testTemporalAutocorrelation}}, \code{\link{testSpatialAutocorrelation}}, \code{\link{testQuantiles}}, \code{\link{testCategorical}}
 #' @export
 testQuantiles <- function(simulationOutput, predictor = NULL, quantiles = c(0.25,0.5,0.75), plot = T){
 
@@ -167,8 +167,7 @@ testQuantiles <- function(simulationOutput, predictor = NULL, quantiles = c(0.25
 #'
 #'
 #' @author Florian Hartig
-#' @seealso \code{\link{testResiduals}}, \code{\link{testUniformity}}, \code{\link{testDispersion}}, \code{\link{testZeroInflation}}, \code{\link{testGeneric}}, \code{\link{testTemporalAutocorrelation}}, \code{\link{testSpatialAutocorrelation}}, \code{\link{testQuantiles}}
-#' @example inst/examples/testOutliersHelp.R
+#' @seealso \code{\link{testResiduals}}, \code{\link{testUniformity}}, \code{\link{testOutliers}}, \code{\link{testDispersion}}, \code{\link{testZeroInflation}}, \code{\link{testGeneric}}, \code{\link{testTemporalAutocorrelation}}, \code{\link{testSpatialAutocorrelation}}, \code{\link{testQuantiles}}, \code{\link{testCategorical}}
 #' @export
 testOutliers <- function(simulationOutput, alternative = c("two.sided", "greater", "less"), margin = c("both", "upper", "lower"), type = c("default","bootstrap", "binomial"), nBoot = 100, plot = T){
 
@@ -308,6 +307,61 @@ testOutliers <- function(simulationOutput, alternative = c("two.sided", "greater
 }
 
 
+
+#' Test for categorical dependencies
+#'
+#' This function tests if there are probles in a res ~ group structure. It performs two tests: test for within-group uniformity, and test for between-group homongeity of variances
+#'
+#' @param simulationOutput an object of class DHARMa, either created via \code{\link{simulateResiduals}} for supported models or by \code{\link{createDHARMa}} for simulations created outside DHARMa, or a supported model. Providing a supported model directly is discouraged, because simulation settings cannot be changed in this case. 
+#' @param catPred a categorical predictor with the same dimensions as the residuals in simulationOutput
+#' @param quantiles whether to draw the quantile lines. 
+#' @param plot if T, the function will create an additional plot
+#' @details The function tests for two common problems: are residuals within each group distributed according to model assumptions, and is the variance between group heterogeneous.
+#' 
+#'  The test for within-group uniformity is performed via multipe KS-tests, with adjustment of p-values for multiple testing. If the plot is drawn, problematic groups are highlighted in red, and a corresponding message is displayed in the plot.
+#'  
+#'  The test for homogeneity of variances is done with a Levene test. A significant p-value means that group variances are not constant. In this case, you should consider modelling variances, e.g. via ~dispformula in glmmTMB. 
+#'
+#' @author Florian Hartig
+#' @seealso \code{\link{testResiduals}}, \code{\link{testUniformity}}, \code{\link{testOutliers}}, \code{\link{testDispersion}}, \code{\link{testZeroInflation}}, \code{\link{testGeneric}}, \code{\link{testTemporalAutocorrelation}}, \code{\link{testSpatialAutocorrelation}}, \code{\link{testQuantiles}}, \code{\link{testCategorical}}
+#' @example inst/examples/testsHelp.R
+#' @export
+testCategorical <- function(simulationOutput, catPred, quantiles = c(0.25, 0.5, 0.75), plot = T){
+  
+  simulationOutput = ensureDHARMa(simulationOutput, convert = T)
+  
+  catPred = as.factor(catPred)
+  out = list()
+  
+  out$uniformity$details = suppressWarnings(by(simulationOutput$scaledResiduals, catPred, ks.test, 'punif', simplify = TRUE))
+  out$uniformity$p.value = rep(NA, nlevels(catPred))
+  for(i in 1:nlevels(catPred)) out$uniformity$p.value[i] = out$uniformity$details[[i]]$p.value
+  out$uniformity$p.value.cor = p.adjust(out$uniformity$p.value)
+  
+  if(nlevels(catPred) > 1) out$homogeneity = leveneTest(simulationOutput$scaledResiduals ~ catPred)
+
+  if(plot == T){
+    boxplot(simulationOutput$scaledResiduals ~ catPred, ylim = c(0,1), axes = FALSE, col = ifelse(out$uniformity$p.value < 0.05, "red", "lightgrey"))
+    axis(1, at = 1:nlevels(catPred), levels(catPred))
+    axis(2, at=c(0, quantiles, 1))
+    abline(h = quantiles, lty = 2)
+  }
+  
+  mainText = ifelse(any(out$uniformity$p.value < 0.05), "Significant within-group deviations from uniformity (red) \n", "No significant within-group deviation from uniformity \n")
+  anySig = any(out$uniformity$p.value < 0.05)
+  
+  if(length(out) > 1) {
+    mainText = paste(mainText, ifelse(out$homogeneity$`Pr(>F)`[1] < 0.05, "Levene Test for homongeneity of variance significant", "Levene Test for homongeneity of variance n.s."))
+    anySig = anySig | out$homogeneity$`Pr(>F)`[1] < 0.05
+  }
+  
+  title(mainText, col.main = ifelse(anySig, "red", "black"))
+  
+  return(out)
+  
+}
+
+
 #' DHARMa dispersion tests
 #'
 #' This function performs simulation-based tests for over/underdispersion
@@ -327,7 +381,7 @@ testOutliers <- function(simulationOutput, alternative = c("two.sided", "greater
 #' @note The results of the dispersion test can can differ depending on whether it is evaluated on conditional (= conditional on fitted random effects) or unconditional (= REs are re-simulated) simulations. You can change between conditional or unconditional simulations in  \code{\link{simulateResiduals}} if this is supported by the regression package that you use. The default in DHARMa is to use unconditional simulations, but I have often found that conditional simulations are more sensitive to dispersion problems. I recommend trying both, as neither test should be positive if the dispersion is correct.
 #'
 #' @author Florian Hartig
-#' @seealso \code{\link{testResiduals}}, \code{\link{testUniformity}},  \code{\link{testOutliers}}, \code{\link{testZeroInflation}}, \code{\link{testGeneric}}, \code{\link{testTemporalAutocorrelation}}, \code{\link{testSpatialAutocorrelation}}, \code{\link{testQuantiles}}
+#' @seealso \code{\link{testResiduals}}, \code{\link{testUniformity}}, \code{\link{testOutliers}}, \code{\link{testDispersion}}, \code{\link{testZeroInflation}}, \code{\link{testGeneric}}, \code{\link{testTemporalAutocorrelation}}, \code{\link{testSpatialAutocorrelation}}, \code{\link{testQuantiles}}, \code{\link{testCategorical}}
 #' @example inst/examples/testsHelp.R
 #' @export
 testDispersion <- function(simulationOutput, alternative = c("two.sided", "greater", "less"), plot = T, ...){
@@ -403,6 +457,8 @@ testOverdispersionParametric <- function(...){
 }
 
 
+
+
 #' Tests for zero-inflation
 #'
 #' This function compares the observed number of zeros with the zeros expected from simulations.
@@ -420,7 +476,7 @@ testOverdispersionParametric <- function(...){
 #' @note This function is a wrapper for \code{\link{testGeneric}}, where the summary argument is set to function(x) sum(x == 0)
 #' @author Florian Hartig
 #' @example inst/examples/testsHelp.R
-#' @seealso \code{\link{testResiduals}}, \code{\link{testUniformity}}, \code{\link{testOutliers}}, \code{\link{testDispersion}}, \code{\link{testGeneric}}, \code{\link{testTemporalAutocorrelation}}, \code{\link{testSpatialAutocorrelation}}, \code{\link{testQuantiles}}
+#' @seealso \code{\link{testResiduals}}, \code{\link{testUniformity}}, \code{\link{testOutliers}}, \code{\link{testDispersion}}, \code{\link{testZeroInflation}}, \code{\link{testGeneric}}, \code{\link{testTemporalAutocorrelation}}, \code{\link{testSpatialAutocorrelation}}, \code{\link{testQuantiles}}, \code{\link{testCategorical}}
 #' @export
 testZeroInflation <- function(simulationOutput, ...){
   countZeros <- function(x) sum( x == 0)
@@ -445,7 +501,7 @@ testZeroInflation <- function(simulationOutput, ...){
 #' @export
 #' @author Florian Hartig
 #' @example inst/examples/testsHelp.R
-#' @seealso \code{\link{testResiduals}}, \code{\link{testUniformity}}, \code{\link{testOutliers}}, \code{\link{testDispersion}}, \code{\link{testZeroInflation}}, \code{\link{testTemporalAutocorrelation}}, \code{\link{testSpatialAutocorrelation}}, \code{\link{testQuantiles}}
+#' @seealso \code{\link{testResiduals}}, \code{\link{testUniformity}}, \code{\link{testOutliers}}, \code{\link{testDispersion}}, \code{\link{testZeroInflation}}, \code{\link{testGeneric}}, \code{\link{testTemporalAutocorrelation}}, \code{\link{testSpatialAutocorrelation}}, \code{\link{testQuantiles}}, \code{\link{testCategorical}}
 testGeneric <- function(simulationOutput, summary, alternative = c("two.sided", "greater", "less"), plot = T, methodName = "DHARMa generic simulation test"){
 
   out = list()
@@ -500,7 +556,7 @@ testGeneric <- function(simulationOutput, summary, alternative = c("two.sided", 
 #' The bottomline here is that spatial / temporal / other autoregressive models should either be tested based on conditional simulations, or (ideally) custom tests should be used that are not based on quantile residuals, but rather compare the correlation structure in the simulated data with the correlation structure in the observed data.
 #'
 #' @author Florian Hartig
-#' @seealso \code{\link{testResiduals}}, \code{\link{testUniformity}}, \code{\link{testOutliers}}, \code{\link{testDispersion}}, \code{\link{testZeroInflation}}, \code{\link{testGeneric}}, \code{\link{testSpatialAutocorrelation}}, \code{\link{testQuantiles}}
+#' @seealso \code{\link{testResiduals}}, \code{\link{testUniformity}}, \code{\link{testOutliers}}, \code{\link{testDispersion}}, \code{\link{testZeroInflation}}, \code{\link{testGeneric}}, \code{\link{testTemporalAutocorrelation}}, \code{\link{testSpatialAutocorrelation}}, \code{\link{testQuantiles}}, \code{\link{testCategorical}}
 #' @example inst/examples/testTemporalAutocorrelationHelp.R
 #' @export
 testTemporalAutocorrelation <- function(simulationOutput, time = NULL , alternative = c("two.sided", "greater", "less"), plot = T){
@@ -570,7 +626,7 @@ testTemporalAutocorrelation <- function(simulationOutput, time = NULL , alternat
 #' The bottomline here is that spatial / temporal / other autoregressive models should either be tested based on conditional simulations, or (ideally) custom tests should be used that are not based on quantile residuals, but rather compare the correlation structure in the simulated data with the correlation structure in the observed data.
 #'
 #' @author Florian Hartig
-#' @seealso \code{\link{testResiduals}}, \code{\link{testUniformity}}, \code{\link{testOutliers}}, \code{\link{testDispersion}}, \code{\link{testZeroInflation}}, \code{\link{testGeneric}}, \code{\link{testTemporalAutocorrelation}}, \code{\link{testQuantiles}}
+#' @seealso \code{\link{testResiduals}}, \code{\link{testUniformity}}, \code{\link{testOutliers}}, \code{\link{testDispersion}}, \code{\link{testZeroInflation}}, \code{\link{testGeneric}}, \code{\link{testTemporalAutocorrelation}}, \code{\link{testSpatialAutocorrelation}}, \code{\link{testQuantiles}}, \code{\link{testCategorical}}
 #' @import grDevices
 #' @example inst/examples/testSpatialAutocorrelationHelp.R
 #' @export

@@ -14,6 +14,9 @@ plot(simulationOutput, quantreg = TRUE)
 # KS test for correct distribution of residuals
 testUniformity(simulationOutput)
 
+# KS test for correct distribution within and between groups
+testCategorical(simulationOutput, testData$group)
+
 # Dispersion test
 testDispersion(simulationOutput) # tests under and overdispersion
 testDispersion(simulationOutput, alternative = "less") # only underdispersion
