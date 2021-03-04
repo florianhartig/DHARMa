@@ -46,11 +46,13 @@ If form is a factor, a boxplot will be plotted instead of a scatter plot. The di
 if nObs > 10000, the scatter plot is replaced by graphics::smoothScatter
 }
 \examples{
-testData = createData(sampleSize = 200, family = poisson(), 
-                      randomEffectVariance = 1, numGroups = 10)
+testData = createData(sampleSize = 1000, family = poisson(), 
+                      randomEffectVariance = 0, numGroups = 10)
 fittedModel <- glm(observedResponse ~ Environment1, 
                    family = "poisson", data = testData)
 simulationOutput <- simulateResiduals(fittedModel = fittedModel)
+
+plotResiduals(simulationOutput, form = testData$group)
 
 ######### main plotting function #############
 

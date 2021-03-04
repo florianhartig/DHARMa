@@ -341,22 +341,21 @@ testCategorical <- function(simulationOutput, catPred, quantiles = c(0.25, 0.5, 
   if(nlevels(catPred) > 1) out$homogeneity = leveneTest(simulationOutput$scaledResiduals ~ catPred)
 
   if(plot == T){
-    boxplot(simulationOutput$scaledResiduals ~ catPred, ylim = c(0,1), axes = FALSE, col = ifelse(out$uniformity$p.value < 0.05, "red", "lightgrey"))
+    boxplot(simulationOutput$scaledResiduals ~ catPred, ylim = c(0,1), axes = FALSE, col = ifelse(out$uniformity$p.value.cor < 0.05, "red", "lightgrey"))
     axis(1, at = 1:nlevels(catPred), levels(catPred))
     axis(2, at=c(0, quantiles, 1))
     abline(h = quantiles, lty = 2)
   }
   
-  mainText = ifelse(any(out$uniformity$p.value < 0.05), "Significant within-group deviations from uniformity (red) \n", "No significant within-group deviation from uniformity \n")
-  anySig = any(out$uniformity$p.value < 0.05)
-  
+  mtext(ifelse(any(out$uniformity$p.value.cor < 0.05), "Within-group deviations from uniformity significant (red)", "Within-group deviation from uniformity n.s."),
+        col = ifelse(any(out$uniformity$p.value.cor < 0.05), "red", "black"), 
+        line = 1)
+
   if(length(out) > 1) {
-    mainText = paste(mainText, ifelse(out$homogeneity$`Pr(>F)`[1] < 0.05, "Levene Test for homongeneity of variance significant", "Levene Test for homongeneity of variance n.s."))
-    anySig = anySig | out$homogeneity$`Pr(>F)`[1] < 0.05
+    mtext(ifelse(out$homogeneity$`Pr(>F)`[1] < 0.05, "Levene Test for homongeneity of variance significant", "Levene Test for homongeneity of variance n.s."), 
+          col = ifelse(out$homogeneity$`Pr(>F)`[1] < 0.05, "red", "black"))    
   }
-  
-  title(mainText, col.main = ifelse(anySig, "red", "black"))
-  
+
   return(out)
   
 }

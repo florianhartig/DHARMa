@@ -28,11 +28,13 @@ Deviations from these expectations can be interpreted similar to a linear regres
 Note that, unlike \code{\link{plotResiduals}}, plot.DHARMa command uses the default rank = T.
 }
 \examples{
-testData = createData(sampleSize = 200, family = poisson(), 
-                      randomEffectVariance = 1, numGroups = 10)
+testData = createData(sampleSize = 1000, family = poisson(), 
+                      randomEffectVariance = 0, numGroups = 10)
 fittedModel <- glm(observedResponse ~ Environment1, 
                    family = "poisson", data = testData)
 simulationOutput <- simulateResiduals(fittedModel = fittedModel)
+
+plotResiduals(simulationOutput, form = testData$group)
 
 ######### main plotting function #############
 

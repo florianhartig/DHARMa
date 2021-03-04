@@ -25,11 +25,13 @@ The function produces a uniform quantile-quantile plot from a DHARMa output
 the function calls qqunif from the R package gap to create a quantile-quantile plot for a uniform distribution, and overlays tests for particular distributional problems as specified.
 }
 \examples{
-testData = createData(sampleSize = 200, family = poisson(), 
-                      randomEffectVariance = 1, numGroups = 10)
+testData = createData(sampleSize = 1000, family = poisson(), 
+                      randomEffectVariance = 0, numGroups = 10)
 fittedModel <- glm(observedResponse ~ Environment1, 
                    family = "poisson", data = testData)
 simulationOutput <- simulateResiduals(fittedModel = fittedModel)
+
+plotResiduals(simulationOutput, form = testData$group)
 
 ######### main plotting function #############
 
