@@ -34,17 +34,8 @@ plot(simulationOutput, quantreg = TRUE)
 # KS test for correct distribution of residuals
 testUniformity(simulationOutput)
 
-# Dispersion test
+# Dispersion test - for details see ?testDispersion
 testDispersion(simulationOutput) # tests under and overdispersion
-testDispersion(simulationOutput, alternative = "less") # only underdispersion
-
-# if model is refitted, a different test will be called
-simulationOutput2 <- simulateResiduals(fittedModel = fittedModel, refit = TRUE, seed = 12)
-testDispersion(simulationOutput2)
-
-# often useful to test dispersion per group (e.g. binomial data, see vignette)
-simulationOutput3 = recalculateResiduals(simulationOutput, group = testData$group)
-testDispersion(simulationOutput3)
 
 # Outlier test (number of observations outside simulation envelope)
 # Use type = "boostrap" for exact values, see ?testOutliers

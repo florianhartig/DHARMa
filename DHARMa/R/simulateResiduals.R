@@ -58,6 +58,8 @@ simulateResiduals <- function(fittedModel, n = 250, refit = F, integerResponse =
   family = family(fittedModel)
   out$fittedModel = fittedModel
   out$modelClass = class(fittedModel)[1]
+  
+  out$additionalParameters = list(...)
 
   out$nObs = nobs(fittedModel)
   out$nSim = n

@@ -9,7 +9,7 @@
 #' @param parallel whether to use parallel computations. Possible values are F, T (sets the cores automatically to number of available cores -1), or an integer number for the number of cores that should be used for the cluster
 #' @param ... additional parameters to calculateStatistics 
 #' @note The benchmark function in DHARMa are intended for development purposes, and for users that want to test / confirm the properties of functions in DHARMa. If you are running an applied data analysis, they are probably of little use. 
-#' @return A list. First entry is a list with matrices with statistics (one for each control parameter), second entry is a list (one for each control parameter) of matrices with summary statistics: significant (T/F), mean, p-value for KS-test uniformity
+#' @return A object with list structure of class DHARMaBenchmark. Contains an entry simulations with a matrix of simulations, and an entry summaries with an list of summaries (significant (T/F), mean, p-value for KS-test uniformity). Can be plotted with \code{\link{plot.DHARMaBenchmark}}
 #' @export 
 #' @importFrom foreach "%dopar%"
 #' @author Florian Hartig
@@ -94,16 +94,61 @@ runBenchmarks <- function(calculateStatistics, controlValues = NULL, nRep = 10, 
   summary$isUnifP = aggreg(mean)
 
   out = list()
+  out$controlValues = controlValues
   out$simulations = x
   out$summaries = summary
   out$time = Sys.time() - start_time
-
-    
-    
-
+  out$nSummaries = ncol(x) - 2
+  
+  class(out) = "DHARMaBenchmark"
   
   return(out)
 }
+
+
+#' Plots DHARMa benchmark
+#' 
+#' @param x object of class DHARMaBenchmark, created by \code{\link{runBenchmarks}}
+#' @param ... parameters to pass to the plot function
+#' @export
+plot.DHARMaBenchmark <- function(x, ...){
+  
+  if(length(x$controlValues)== 1){
+    plotMultipleHist(x$simulations[,1:x$nSummaries])
+    text(0, x$nSummaries:1, labels = x$summaries$propSignificant[-1])
+    
+  }else{
+    res = x$summaries$propSignificant
+    matplot(res$controlValues, res[,-1], type = "l", main = "Power analysis", ylab = "Power", ...)
+    legend("bottomright", colnames(res[,-1]), col = 1:x$nSummaries, lty = 1:x$nSummaries, lwd = 2)    
+    
+  }
+}
+
+
+plotMultipleHist <- function(x){
+  
+  lin = ncol(x)
+  histList <- lapply(x, hist, breaks = seq(0,1,0.02), plot = F)
+  
+  plot(NULL, xlim = c(0,1), ylim = c(0, lin), yaxt = 'n', ylab = NULL, xlab = "p-value")
+  abline(h= 0)
+  
+  for(i in 1:lin){
+    maxD = max(histList[[i]]$density)
+    
+    lines(histList[[i]]$mids, i - 1 + histList[[i]]$density/maxD, type = "l")
+    abline(h= i)
+    abline(h= 1/maxD + i - 1, , col = "red", lty = 2)
+  } 
+  
+  abline(v = 1, lty = 2)
+  abline(v = c(0.05, 0), lty = 2, col = "red")
+}
+
+
+
+
 
 
 #' Plot distribution of p-values
