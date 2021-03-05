@@ -28,13 +28,11 @@
 The function produces a histogram from a DHARMa output
 }
 \examples{
-testData = createData(sampleSize = 1000, family = poisson(), 
-                      randomEffectVariance = 0, numGroups = 10)
+testData = createData(sampleSize = 200, family = poisson(), 
+                      randomEffectVariance = 1, numGroups = 10)
 fittedModel <- glm(observedResponse ~ Environment1, 
                    family = "poisson", data = testData)
 simulationOutput <- simulateResiduals(fittedModel = fittedModel)
-
-plotResiduals(simulationOutput, form = testData$group)
 
 ######### main plotting function #############
 

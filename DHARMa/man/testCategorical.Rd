@@ -23,7 +23,7 @@ This function tests if there are probles in a res ~ group structure. It performs
 The function tests for two common problems: are residuals within each group distributed according to model assumptions, and is the variance between group heterogeneous.
 
  The test for within-group uniformity is performed via multipe KS-tests, with adjustment of p-values for multiple testing. If the plot is drawn, problematic groups are highlighted in red, and a corresponding message is displayed in the plot.
- 
+
  The test for homogeneity of variances is done with a Levene test. A significant p-value means that group variances are not constant. In this case, you should consider modelling variances, e.g. via ~dispformula in glmmTMB.
 }
 \examples{
@@ -46,21 +46,12 @@ testUniformity(simulationOutput)
 # KS test for correct distribution within and between groups
 testCategorical(simulationOutput, testData$group)
 
-# Dispersion test
+# Dispersion test - for details see ?testDispersion
 testDispersion(simulationOutput) # tests under and overdispersion
-testDispersion(simulationOutput, alternative = "less") # only underdispersion
-
-# if model is refitted, a different test will be called
-simulationOutput2 <- simulateResiduals(fittedModel = fittedModel, refit = TRUE, seed = 12)
-testDispersion(simulationOutput2)
-
-# often useful to test dispersion per group (e.g. binomial data, see vignette)
-simulationOutput3 = recalculateResiduals(simulationOutput, group = testData$group)
-testDispersion(simulationOutput3)
 
 # Outlier test (number of observations outside simulation envelope)
 # Use type = "boostrap" for exact values, see ?testOutliers
-testOutliers(simulationOutput, type = "binomial") 
+testOutliers(simulationOutput, type = "binomial")
 
 # testing zero inflation
 testZeroInflation(simulationOutput)
@@ -71,14 +62,10 @@ testGeneric(simulationOutput, summary = countOnes) # 1-inflation
 testGeneric(simulationOutput, summary = countOnes, alternative = "less") # 1-deficit
 
 means <- function(x) mean(x) # testing if mean prediction fits
-testGeneric(simulationOutput, summary = means) 
+testGeneric(simulationOutput, summary = means)
 
 spread <- function(x) sd(x) # testing if mean sd fits
-testGeneric(simulationOutput, summary = spread) 
-
-
-
-
+testGeneric(simulationOutput, summary = spread)
 }
 \seealso{
 \code{\link{testResiduals}}, \code{\link{testUniformity}}, \code{\link{testOutliers}}, \code{\link{testDispersion}}, \code{\link{testZeroInflation}}, \code{\link{testGeneric}}, \code{\link{testTemporalAutocorrelation}}, \code{\link{testSpatialAutocorrelation}}, \code{\link{testQuantiles}}, \code{\link{testCategorical}}
