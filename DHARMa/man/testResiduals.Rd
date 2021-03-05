@@ -34,12 +34,15 @@ plot(simulationOutput, quantreg = TRUE)
 # KS test for correct distribution of residuals
 testUniformity(simulationOutput)
 
+# KS test for correct distribution within and between groups
+testCategorical(simulationOutput, testData$group)
+
 # Dispersion test - for details see ?testDispersion
 testDispersion(simulationOutput) # tests under and overdispersion
 
 # Outlier test (number of observations outside simulation envelope)
 # Use type = "boostrap" for exact values, see ?testOutliers
-testOutliers(simulationOutput, type = "binomial") 
+testOutliers(simulationOutput, type = "binomial")
 
 # testing zero inflation
 testZeroInflation(simulationOutput)
@@ -50,17 +53,13 @@ testGeneric(simulationOutput, summary = countOnes) # 1-inflation
 testGeneric(simulationOutput, summary = countOnes, alternative = "less") # 1-deficit
 
 means <- function(x) mean(x) # testing if mean prediction fits
-testGeneric(simulationOutput, summary = means) 
+testGeneric(simulationOutput, summary = means)
 
 spread <- function(x) sd(x) # testing if mean sd fits
-testGeneric(simulationOutput, summary = spread) 
-
-
-
-
+testGeneric(simulationOutput, summary = spread)
 }
 \seealso{
-\code{\link{testUniformity}}, \code{\link{testOutliers}}, \code{\link{testDispersion}}, \code{\link{testZeroInflation}}, \code{\link{testGeneric}}, \code{\link{testTemporalAutocorrelation}}, \code{\link{testSpatialAutocorrelation}}, \code{\link{testQuantiles}}
+\code{\link{testResiduals}}, \code{\link{testUniformity}}, \code{\link{testOutliers}}, \code{\link{testDispersion}}, \code{\link{testZeroInflation}}, \code{\link{testGeneric}}, \code{\link{testTemporalAutocorrelation}}, \code{\link{testSpatialAutocorrelation}}, \code{\link{testQuantiles}}, \code{\link{testCategorical}}
 }
 \author{
 Florian Hartig

@@ -40,14 +40,14 @@ To provide a visual aid in detecting deviations from uniformity in y-direction, 
 
 The quantile regression can take some time to calculate, especially for larger datasets. For that reason, quantreg = F can be set to produce a smooth spline instead. This is default for n > 2000.
 
-If form is a factor, a boxplot will be plotted instead of a scatter plot. The distribution for each factor level should be uniformly distributed, so the box should go from 0.25 to 0.75, with the median line at 0.5. Again, chance deviations from this will increases when the sample size is smaller. You can run null simulations to test if the deviations you see exceed what you would expect from random variation. If you want to create box plots for categorical predictors (e.g. because you only have a small number of unique numeric predictor values), you can convert your predictor with as.factor(pred)
+If form is a factor, a boxplot will be plotted instead of a scatter plot. The distribution for each factor level should be uniformly distributed, so the box should go from 0.25 to 0.75, with the median line at 0.5 (within-group ). To test if deviations from those expecations are significant, KS-tests per group and a Levene test for homogeneity of variances is performed. See \code{\link{testCategorical}} for details.
 }
 \note{
 if nObs > 10000, the scatter plot is replaced by graphics::smoothScatter
 }
 \examples{
 testData = createData(sampleSize = 200, family = poisson(), 
-                      randomEffectVariance = 1, numGroups = 5)
+                      randomEffectVariance = 1, numGroups = 10)
 fittedModel <- glm(observedResponse ~ Environment1, 
                    family = "poisson", data = testData)
 simulationOutput <- simulateResiduals(fittedModel = fittedModel)
@@ -77,16 +77,15 @@ plotResiduals(simulationOutput, rank = TRUE, quantreg = FALSE, smoothScatter = T
 plotResiduals(simulationOutput, form = testData$Environment1, 
               quantreg = FALSE)
 
-# if pred is a factor, or asFactor = T, will produce a boxplot
-plotResiduals(simulationOutput, form = testData$group,
-              quantreg = FALSE, asFactor = TRUE)
+# if pred is a factor, or if asFactor = T, will produce a boxplot
+plotResiduals(simulationOutput, form = testData$group)
 
 # All these options can also be provided to the main plotting function
 plot(simulationOutput, quantreg = FALSE, rank = FALSE)
 
 # If you want to plot summaries per group, use
 simulationOutput = recalculateResiduals(simulationOutput, group = testData$group)
-plot(simulationOutput, asFactor = TRUE) # we see one residual point per RE
+plot(simulationOutput) # we see one residual point per RE
 
 
 }

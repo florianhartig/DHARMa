@@ -1,5 +1,5 @@
 testData = createData(sampleSize = 200, family = poisson(), 
-                      randomEffectVariance = 1, numGroups = 5)
+                      randomEffectVariance = 1, numGroups = 10)
 fittedModel <- glm(observedResponse ~ Environment1, 
                    family = "poisson", data = testData)
 simulationOutput <- simulateResiduals(fittedModel = fittedModel)
@@ -29,15 +29,14 @@ plotResiduals(simulationOutput, rank = TRUE, quantreg = FALSE, smoothScatter = T
 plotResiduals(simulationOutput, form = testData$Environment1, 
               quantreg = FALSE)
 
-# if pred is a factor, or asFactor = T, will produce a boxplot
-plotResiduals(simulationOutput, form = testData$group,
-              quantreg = FALSE, asFactor = TRUE)
+# if pred is a factor, or if asFactor = T, will produce a boxplot
+plotResiduals(simulationOutput, form = testData$group)
 
 # All these options can also be provided to the main plotting function
 plot(simulationOutput, quantreg = FALSE, rank = FALSE)
 
 # If you want to plot summaries per group, use
 simulationOutput = recalculateResiduals(simulationOutput, group = testData$group)
-plot(simulationOutput, asFactor = TRUE) # we see one residual point per RE
+plot(simulationOutput) # we see one residual point per RE
 
 
