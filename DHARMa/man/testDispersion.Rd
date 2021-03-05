@@ -5,7 +5,7 @@
 \title{DHARMa dispersion tests}
 \usage{
 testDispersion(simulationOutput, alternative = c("two.sided", "greater",
-  "less"), plot = T, type = c("DHARMa", "Pearson"), ...)
+  "less"), plot = T, type = c("DHARMa", "PearsonChisq"), ...)
 }
 \arguments{
 \item{simulationOutput}{an object of class DHARMa, either created via \code{\link{simulateResiduals}} for supported models or by \code{\link{createDHARMa}} for simulations created outside DHARMa, or a supported model. Providing a supported model directly is discouraged, because simulation settings cannot be changed in this case.}
@@ -14,7 +14,7 @@ testDispersion(simulationOutput, alternative = c("two.sided", "greater",
 
 \item{plot}{whether to provide a plot for the results}
 
-\item{type}{which test to run. Default is DHARMa, other options are Pearson (see details)}
+\item{type}{which test to run. Default is DHARMa, other options are PearsonChisq (see details)}
 
 \item{...}{arguments to pass on to \code{\link{testGeneric}}}
 }
@@ -34,7 +34,7 @@ If refit = T, the function compares the approximate deviance (via squared pearso
 
 Moreover, for either refit = T or F, the results of the DHARMa dispersion test will differ depending on whether simulations are done conditional (= conditional on fitted random effects) or unconditional (= REs are re-simulated). You can change between conditional or unconditional simulations in  \code{\link{simulateResiduals}} if this is supported by the regression package that you use (depends on the package). The default in DHARMa is to use unconditional simulations (for other reasons), but conditional simulations are often more sensitive to dispersion problems in the presence of substantial RE variance, and I recommend checking dispersion with conditional simulations if supported by the used regression package. 
 
-type == "Pearson"
+type == "PearsonChisq"
 
 This is the test described in https://bbolker.github.io/mixedmodels-misc/glmmFAQ.html#overdispersion, identical to performance::check_overdispersion. Works only if the fitted model provides df.residual and Pearson residuals. 
 
@@ -44,51 +44,35 @@ The test statistics is biased to lower values under quite general conditions, an
 For particular model classes / situations, there may be more powerful and thus preferable over the DHARMa test. The advantage of the DHARMa test is that it directly targets the spread of the data (unless other tests such as dispersion/df, which essentially measure fit and may thus be triggered by problems other than dispersion as well), and it makes practically no assumptions about the fitted model, other than the availability of simulations.
 }
 \examples{
-testData = createData(sampleSize = 100, overdispersion = 0.5, randomEffectVariance = 0)
-fittedModel <- glm(observedResponse ~ Environment1 , family = "poisson", data = testData)
+library(lme4)
+set.seed(123)
+
+testData = createData(sampleSize = 100, overdispersion = 0.5, randomEffectVariance = 1)
+fittedModel <- glmer(observedResponse ~ Environment1 + (1|group), family = "poisson", data = testData)
 simulationOutput <- simulateResiduals(fittedModel = fittedModel)
 
-# the plot function runs 4 tests
-# i) KS test i) Dispersion test iii) Outlier test iv) quantile test
-plot(simulationOutput, quantreg = TRUE)
+# default DHARMa dispersion test - simulation-based 
+testDispersion(simulationOutput) 
+testDispersion(simulationOutput, alternative = "less", plot = FALSE) # only underdispersion
+testDispersion(simulationOutput, alternative = "greater", plot = FALSE) # only oversispersion
 
-# testResiduals tests distribution, dispersion and outliers
-# testResiduals(simulationOutput)
+# for mixed models, the test is usually more powerful if residuals are calculated conditional on fitted REs
+simulationOutput <- simulateResiduals(fittedModel = fittedModel, re.form = NULL)
+testDispersion(simulationOutput)
 
-####### Individual tests #######
+# DHARMa also implements the popular Pearson-chisq test that is also on the glmmWiki by Ben Bolker
+# The issue with this test is that it requires the df of the model, which are not well defined
+# for GLMMs. It is biased towards underdispersion, with bias getting larger with the number 
+# of RE groups. In doubt, only test for overdispersion
+testDispersion(simulationOutput, type = "PearsonChisq", alternative = "greater")
 
-# KS test for correct distribution of residuals
-testUniformity(simulationOutput)
-
-# Dispersion test
-testDispersion(simulationOutput) # tests under and overdispersion
-testDispersion(simulationOutput, alternative = "less") # only underdispersion
-
-# if model is refitted, a different test will be called
-simulationOutput2 <- simulateResiduals(fittedModel = fittedModel, refit = TRUE, seed = 12)
+# if refit = T, a different test on simulated Pearson residuals will calculated (see help)
+simulationOutput2 <- simulateResiduals(fittedModel = fittedModel, refit = TRUE, seed = 12, n = 20)
 testDispersion(simulationOutput2)
 
-# often useful to test dispersion per group (e.g. binomial data, see vignette)
-simulationOutput3 = recalculateResiduals(simulationOutput, group = testData$group)
-testDispersion(simulationOutput3)
-
-# Outlier test (number of observations outside simulation envelope)
-# Use type = "boostrap" for exact values, see ?testOutliers
-testOutliers(simulationOutput, type = "binomial") 
-
-# testing zero inflation
-testZeroInflation(simulationOutput)
-
-# testing generic summaries
-countOnes <- function(x) sum(x == 1)  # testing for number of 1s
-testGeneric(simulationOutput, summary = countOnes) # 1-inflation
-testGeneric(simulationOutput, summary = countOnes, alternative = "less") # 1-deficit
-
-means <- function(x) mean(x) # testing if mean prediction fits
-testGeneric(simulationOutput, summary = means) 
-
-spread <- function(x) sd(x) # testing if mean sd fits
-testGeneric(simulationOutput, summary = spread) 
+# often useful to test dispersion per group (in particular for binomial data, see vignette)
+simulationOutputAggregated = recalculateResiduals(simulationOutput2, group = testData$group)
+testDispersion(simulationOutputAggregated)
 
 
 

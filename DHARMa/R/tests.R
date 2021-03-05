@@ -315,7 +315,7 @@ testOutliers <- function(simulationOutput, alternative = c("two.sided", "greater
 #' @param simulationOutput an object of class DHARMa, either created via \code{\link{simulateResiduals}} for supported models or by \code{\link{createDHARMa}} for simulations created outside DHARMa, or a supported model. Providing a supported model directly is discouraged, because simulation settings cannot be changed in this case. 
 #' @param alternative a character string specifying whether the test should test if observations are "greater", "less" or "two.sided" compared to the simulated null hypothesis. Greater corresponds to testing only for overdispersion. It is recommended to keep the default setting (testing for both over and underdispersion)
 #' @param plot whether to provide a plot for the results
-#' @param type which test to run. Default is DHARMa, other options are Pearson (see details)
+#' @param type which test to run. Default is DHARMa, other options are PearsonChisq (see details)
 #' @param ... arguments to pass on to \code{\link{testGeneric}}
 #' @details Over / underdispersion means that the observed data is more / less dispersed than expected under the fitted model. There are a number of common ways to test for dispersion problems, from the classical dispersion/df idea used for GLMs over other tests implemented in various R packages. This function implements several dispersion tests.  
 #' 
@@ -329,7 +329,7 @@ testOutliers <- function(simulationOutput, alternative = c("two.sided", "greater
 #' 
 #' Moreover, for either refit = T or F, the results of the DHARMa dispersion test will differ depending on whether simulations are done conditional (= conditional on fitted random effects) or unconditional (= REs are re-simulated). You can change between conditional or unconditional simulations in  \code{\link{simulateResiduals}} if this is supported by the regression package that you use (depends on the package). The default in DHARMa is to use unconditional simulations (for other reasons), but conditional simulations are often more sensitive to dispersion problems in the presence of substantial RE variance, and I recommend checking dispersion with conditional simulations if supported by the used regression package. 
 #' 
-#' type == "Pearson"
+#' type == "PearsonChisq"
 #' 
 #' This is the test described in https://bbolker.github.io/mixedmodels-misc/glmmFAQ.html#overdispersion, identical to performance::check_overdispersion. Works only if the fitted model provides df.residual and Pearson residuals. 
 #' 
@@ -339,9 +339,9 @@ testOutliers <- function(simulationOutput, alternative = c("two.sided", "greater
 #'
 #' @author Florian Hartig
 #' @seealso \code{\link{testResiduals}}, \code{\link{testUniformity}},  \code{\link{testOutliers}}, \code{\link{testZeroInflation}}, \code{\link{testGeneric}}, \code{\link{testTemporalAutocorrelation}}, \code{\link{testSpatialAutocorrelation}}, \code{\link{testQuantiles}}
-#' @example inst/examples/testsHelp.R
+#' @example inst/examples/testDispersionHelp.R
 #' @export
-testDispersion <- function(simulationOutput, alternative = c("two.sided", "greater", "less"), plot = T, type = c("DHARMa", "Pearson"), ...){
+testDispersion <- function(simulationOutput, alternative = c("two.sided", "greater", "less"), plot = T, type = c("DHARMa", "PearsonChisq"), ...){
 
   alternative <- match.arg(alternative)
   type <- match.arg(type)
@@ -361,6 +361,7 @@ testDispersion <- function(simulationOutput, alternative = c("two.sided", "great
       expectedVar = sd(simulationOutput$simulatedResponse)^2
       spread <- function(x) var(x - simulationOutput$fittedPredictedResponse) / expectedVar
       out = testGeneric(simulationOutput, summary = spread, alternative = alternative, methodName = "DHARMa nonparametric dispersion test via sd of residuals fitted vs. simulated", plot = plot, ...)
+      names(out$statistic) = "dispersion"
     } else {
   
       observed = tryCatch(sum(residuals(simulationOutput$fittedModel, type = "pearson")^2), error = function(e) {
@@ -370,6 +371,7 @@ testDispersion <- function(simulationOutput, alternative = c("two.sided", "great
       if(is.na(observed)) return(NA)
       expected = apply(simulationOutput$refittedPearsonResiduals^2 , 2, sum)
       out$statistic = c(dispersion = observed / mean(expected))
+      names(out$statistic) = "dispersion"
       out$method = "DHARMa nonparametric dispersion test via mean deviance residual fitted vs. simulated-refitted"
   
       p = getP(simulated = expected, observed = observed, alternative = alternative)
@@ -394,7 +396,7 @@ testDispersion <- function(simulationOutput, alternative = c("two.sided", "great
       }
     }
     
-  } else if(type == "Pearson"){
+  } else if(type == "PearsonChisq"){
     
       if(! alternative == "greater") message("Note that the chi2 test on Pearson residuals is biased for mixed models towards underdispersion. Tests with alternative = two.sided or less are therefore not reliable. I recommend to test only with alternative = 'greater', i.e. test for overdispersion")
     
@@ -407,8 +409,10 @@ testDispersion <- function(simulationOutput, alternative = c("two.sided", "great
       else if (alternative == "two.sided") pval <- min(min(pchisq(Pearson.chisq, df=rdf, lower.tail=TRUE), pchisq(Pearson.chisq, df=rdf, lower.tail=FALSE)) * 2,1)
       
       out$statistic = prat
+      names(out$statistic) = "dispersion"
       out$parameter = rdf
-      out$method = "Chisq test on Pearson residuals"
+      names(out$parameter) = "df"
+      out$method = "Parametric dispersion test via mean Pearson-chisq statistic"
       out$alternative = alternative
       out$p.value = pval
       class(out) = "htest"
