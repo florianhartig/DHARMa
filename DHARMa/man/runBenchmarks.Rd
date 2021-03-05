@@ -21,7 +21,7 @@ runBenchmarks(calculateStatistics, controlValues = NULL, nRep = 10,
 \item{...}{additional parameters to calculateStatistics}
 }
 \value{
-A list. First entry is a list with matrices with statistics (one for each control parameter), second entry is a list (one for each control parameter) of matrices with summary statistics: significant (T/F), mean, p-value for KS-test uniformity
+A object with list structure of class DHARMaBenchmark. Contains an entry simulations with a matrix of simulations, and an entry summaries with an list of summaries (significant (T/F), mean, p-value for KS-test uniformity). Can be plotted with \code{\link{plot.DHARMaBenchmark}}
 }
 \description{
 This function runs statistical benchmarks, including Power / Type I error simulations for an arbitrary test with a control parameter
@@ -45,6 +45,9 @@ returnStatistics()
 # running benchmark
 out = runBenchmarks(returnStatistics, nRep = 5)
 
+# plotting results depend on whether a vector or a single value is provided for control
+plot(out)
+
 # running benchmark parallel
 # out = runBenchmarks(returnStatistics, nRep = 50, parallel = TRUE)
 
@@ -52,7 +55,26 @@ out = runBenchmarks(returnStatistics, nRep = 5)
 # out = runBenchmarks(returnStatistics, controlValues = c(0,0.5,1), nRep = 5)
 
 
+# Alternative plot function using vioplot, provides nicer pictures 
 
+# plot.DHARMaBenchmark <- function(x, ...){
+#   
+#   if(length(x$controlValues)== 1){
+#     vioplot::vioplot(x$simulations[,x$nSummaries:1], las = 2, horizontal = T, side = "right", 
+#                      areaEqual = F,
+#                      main = "p distribution under H0",
+#                      ylim = c(-0.15,1), ...)
+#     abline(v = 1, lty = 2)
+#     abline(v = c(0.05, 0), lty = 2, col = "red")
+#     text(-0.1, x$nSummaries:1, labels = x$summaries$propSignificant[-1])
+#     
+#   }else{
+#     res = x$summaries$propSignificant
+#     matplot(res$controlValues, res[,-1], type = "l", main = "Power analysis", ylab = "Power", ...)
+#     legend("bottomright", colnames(res[,-1]), col = 1:x$nSummaries, lty = 1:x$nSummaries, lwd = 2)    
+#     
+#   }
+# }
 }
 \author{
 Florian Hartig

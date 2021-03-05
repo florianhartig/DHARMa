@@ -13,5 +13,5 @@ testOverdispersionParametric(...)
 Parametric overdisperstion tests
 }
 \details{
-Deprecated, switch your code to using the \code{\link{testDispersion}} function. The function will do nothing, arguments will be ignored, the parametric tests is no longer recommend
+Deprecated, switch your code to using the \code{\link{testDispersion}} function.
 }
