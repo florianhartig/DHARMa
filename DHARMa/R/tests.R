@@ -135,7 +135,7 @@ testQuantiles <- function(simulationOutput, predictor = NULL, quantiles = c(0.25
     class(out) = "htest"
 
   } else if(plot == T) {
-    out <- plotResiduals(simulationOutput = simulationOutput, predictor = predictor, quantiles = quantiles, quantreg = TRUE)
+    out <- plotResiduals(simulationOutput = simulationOutput, form = predictor, quantiles = quantiles, quantreg = TRUE)
   }
   return(out)
 }
