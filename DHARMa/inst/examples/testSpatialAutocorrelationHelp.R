@@ -5,9 +5,6 @@ res = simulateResiduals(fittedModel)
 # Standard use
 testSpatialAutocorrelation(res, x =  testData$x, y = testData$y)
 
-# If x and y is not provided, random values will be created
-testSpatialAutocorrelation(res)
-
 # Alternatively, one can provide a distance matrix
 dM = as.matrix(dist(cbind(testData$x, testData$y)))
 testSpatialAutocorrelation(res, distMat = dM)
@@ -24,14 +21,25 @@ testSpatialAutocorrelation(res, distMat = dM)
 # then aggregate the residuals per location, and calculate
 # spatial autocorrelation on the new group
 
+# modifying x, y, so that we have the same location per group
+# just for completeness
+testData$x = as.numeric(testData$group)
+testData$y = as.numeric(testData$group)
+
+# calculating x, y positions per group
+groupLocations = aggregate(testData[, 6:7], list(testData$group), mean)
+
+# calculating residuals per group
 res2 = recalculateResiduals(res, group = testData$group)
-testSpatialAutocorrelation(res)
+
+# running the spatial test on grouped residuals
+testSpatialAutocorrelation(res2, groupLocations$x, groupLocations$y)
 
 # careful when using REs to account for spatially clustered (but not grouped)
 # data. this originates from https://github.com/florianhartig/DHARMa/issues/81
 
 # Assume our data is divided into clusters, where observations are close together
-# but not at te same point, and we suspect that observations in clusters are
+# but not at the same point, and we suspect that observations in clusters are
 # autocorrelated
 
 clusters = 100
@@ -55,7 +63,7 @@ res = simulateResiduals(fittedModel)
 testSpatialAutocorrelation(res, x =  testData$x, y = testData$y)
 
 # However, it should disappear if you just calculate an aggregate residuals per cluster
-# Because at least how the data are simualted, cluster are spatially independent
+# Because at least how the data are simulated, cluster are spatially independent
 
 res2 = recalculateResiduals(res, group = testData$group)
 testSpatialAutocorrelation(res2, 
@@ -69,3 +77,5 @@ testSpatialAutocorrelation(res2,
 
 res = simulateResiduals(fittedModel, re.form = NULL)
 testSpatialAutocorrelation(res, x =  testData$x, y = testData$y)
+
+

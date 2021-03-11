@@ -583,12 +583,10 @@ testGeneric <- function(simulationOutput, summary, alternative = c("two.sided", 
 #' This function performs a standard test for temporal autocorrelation on the simulated residuals
 #'
 #' @param simulationOutput an object of class DHARMa, either created via \code{\link{simulateResiduals}} for supported models or by \code{\link{createDHARMa}} for simulations created outside DHARMa, or a supported model. Providing a supported model directly is discouraged, because simulation settings cannot be changed in this case.
-#' @param time the time, in the same order as the data points. If not provided, random values will be created
+#' @param time the time, in the same order as the data points. 
 #' @param alternative a character string specifying whether the test should test if observations are "greater", "less" or "two.sided" compared to the simulated null hypothesis
 #' @param plot whether to plot output
 #' @details The function performs a Durbin-Watson test on the uniformly scaled residuals, and plots the residuals against time. The DB test was originally be designed for normal residuals. In simulations, I didn't see a problem with this setting though. The alternative is to transform the uniform residuals to normal residuals and perform the DB test on those.
-#'
-#' If no time values are provided, random values will be created. The sense of being able to run the test with time = NULL (random values) is to test the rate of false positives under the current residual structure (random time corresponds to H0: no spatial autocorrelation), e.g. to check if the test has noninal error rates for particular residual structures (note that Durbin-Watson originally assumes normal residuals, error rates seem correct for uniform residuals, but may not be correct if there are still other residual problems).
 #'
 #' Testing for temporal autocorrelation requires unique time values - if you have several observations per time value, either use the recalculateResiduals function to aggregate residuals per time step, or extract the residuals from the fitted object, and plot / test each of them independently for temporally repeated subgroups (typical choices would be location / subject etc.). Note that the latter must be done by hand, outside testTemporalAutocorrelation.
 #'
@@ -602,7 +600,7 @@ testGeneric <- function(simulationOutput, summary, alternative = c("two.sided", 
 #' @seealso \code{\link{testResiduals}}, \code{\link{testUniformity}}, \code{\link{testOutliers}}, \code{\link{testDispersion}}, \code{\link{testZeroInflation}}, \code{\link{testGeneric}}, \code{\link{testTemporalAutocorrelation}}, \code{\link{testSpatialAutocorrelation}}, \code{\link{testQuantiles}}, \code{\link{testCategorical}}
 #' @example inst/examples/testTemporalAutocorrelationHelp.R
 #' @export
-testTemporalAutocorrelation <- function(simulationOutput, time = NULL , alternative = c("two.sided", "greater", "less"), plot = T){
+testTemporalAutocorrelation <- function(simulationOutput, time, alternative = c("two.sided", "greater", "less"), plot = T){
 
   simulationOutput = ensureDHARMa(simulationOutput, convert = T)
 
@@ -643,22 +641,20 @@ testTemporalAutocorrelation <- function(simulationOutput, time = NULL , alternat
 }
 
 
-#' Test for spatial autocorrelation
+#' Test for distance-based (spatial, phylogenetic or similar) autocorrelation
 #'
-#' This function performs a standard test for spatial autocorrelation on the simulated residuals
+#' This function performs a Moran's I test for distance-based (spatial, phylogenetic or similar) autocorrelation on the calculated quantile residuals
 #'
 #' @param simulationOutput an object of class DHARMa, either created via \code{\link{simulateResiduals}} for supported models or by \code{\link{createDHARMa}} for simulations created outside DHARMa, or a supported model. Providing a supported model directly is discouraged, because simulation settings cannot be changed in this case.
-#' @param x the x coordinate, in the same order as the data points. If not provided, random values will be created
-#' @param y the y coordinate, in the same order as the data points. If not provided, random values will be created
-#' @param distMat optional distance matrix. If not provided, a distance matrix will be calculated based on x and y. See details for explanation
+#' @param x the x coordinate, in the same order as the data points. Must be specified unless distMat is provided. 
+#' @param y the y coordinate, in the same order as the data points. Must be specified unless distMat is provided. 
+#' @param distMat optional distance matrix. If not provided, euclidean distances based on x and y will be calculated. See details for explanation
 #' @param alternative a character string specifying whether the test should test if observations are "greater", "less" or "two.sided" compared to the simulated null hypothesis
 #' @param plot whether to plot output
 #' @details The function performs Moran.I test from the package ape, based on the provided distance matrix of the data points.
 #'
 #' There are several ways to specify this distance. If a distance matrix (distMat) is provided, calculations will be based on this distance matrix, and x,y coordinates will only used for the plotting (if provided)
 #' If distMat is not provided, the function will calculate the euclidean distances between x,y coordinates, and test Moran.I based on these distances.
-#'
-#' If no x/y values are provided, random values will be created. The sense of being able to run the test with x/y = NULL (random values) is to test the rate of false positives under the current residual structure (random x/y corresponds to H0: no spatial autocorrelation), e.g. to check if the test has nominal error rates for particular residual structures.
 #'
 #' Testing for spatial autocorrelation requires unique x,y values - if you have several observations per location, either use the recalculateResiduals function to aggregate residuals per location, or extract the residuals from the fitted object, and plot / test each of them independently for spatially repeated subgroups (a typical scenario would repeated spatial observation, in which case one could plot / test each time step separately for temporal autocorrelation). Note that the latter must be done by hand, outside testSpatialAutocorrelation.
 #'
@@ -679,43 +675,37 @@ testSpatialAutocorrelation <- function(simulationOutput, x = NULL, y  = NULL, di
   data.name = deparse(substitute(simulationOutput)) # needs to be before ensureDHARMa
   simulationOutput = ensureDHARMa(simulationOutput, convert = T)
 
+  # Assertions 
+  
   if(any(duplicated(cbind(x,y)))) stop("testing for spatial autocorrelation requires unique x,y values - if you have several observations per location, either use the recalculateResiduals function to aggregate residuals per location, or extract the residuals from the fitted object, and plot / test each of them independently for spatially repeated subgroups (a typical scenario would repeated spatial observation, in which case one could plot / test each time step separately for temporal autocorrelation). Note that the latter must be done by hand, outside testSpatialAutocorrelation.")
 
   if( (!is.null(x) | !is.null(y)) & !is.null(distMat) ) message("both coordinates and distMat provided, calculations will be done based on the distance matrix, coordinates will only be used for plotting")
-  # if not provided, fill x and y with random numbers (Null model)
-  if(is.null(x)){
-    x = runif(simulationOutput$nObs, -1,1)
-    message("DHARMa::testSpatialAutocorrelation - no x coordinates provided, using random values for each data point")
-  }
-
-  if(is.null(y)){
-    y = runif(simulationOutput$nObs, -1,1)
-    message("DHARMa::testSpatialAutocorrelation - no x coordinates provided, using random values for each data point")
-  }
-
+  
+  if( (is.null(x) | is.null(y)) & is.null(distMat) ) stop("You need to provide either x,y, coordinates, or a distMatrix")
+  
+  if(is.null(distMat) & (length(x) != length(residuals(simulationOutput)) | length(y) != length(residuals(simulationOutput))))
+    
+  # To avoid Issue #190
+  if (!is.null(x) & length(x) != length(residuals(simulationOutput)) | !is.null(y) & length(y) != length(residuals(simulationOutput))) stop("Dimensions of x / y coordinates don't match the dimension of the residuals")  
+  
   # if not provided, create distance matrix based on x and y
   if(is.null(distMat)) distMat <- as.matrix(dist(cbind(x, y)))
 
   invDistMat <- 1/distMat
   diag(invDistMat) <- 0
 
-  # To avoid Issue #190
-  if (length(x) != length(residuals(simulationOutput)) | length(y) != length(residuals(simulationOutput))) stop("Dimensions of x / y coordinates don't match the dimension of the residuals")
-
   MI = ape::Moran.I(simulationOutput$scaledResiduals, weight = invDistMat, alternative = alternative)
 
   out = list()
   out$statistic = c(observed = MI$observed, expected = MI$expected, sd = MI$sd)
-  out$method = "DHARMa Moran's I test for spatial autocorrelation"
-  out$alternative = "Spatial autocorrelation"
+  out$method = "DHARMa Moran's I test for distance-based autocorrelation"
+  out$alternative = "Distance-based autocorrelation"
   out$p.value = MI$p.value
   out$data.name = data.name
 
   class(out) = "htest"
 
-
-
-  if(plot == T) {
+  if(plot == T & !is.null(x) & !is.null(y)) {
     opar <- par(mfrow = c(1,1))
     on.exit(par(opar))
 

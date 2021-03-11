@@ -114,9 +114,6 @@ test_that("tests work", {
   testGeneric(simulationOutput, summary = spread)
 
 
-
-  ################################################################
-
   ###### Refited ##############
 
   # if model is refitted, a different test will be called
@@ -125,18 +122,35 @@ test_that("tests work", {
   testDispersion(simulationOutput)
 
 
+
+})
+
+
+
+###### Correlation tests #####
+
+test_that("correlation tests work", {
+  
+  testData = createData(sampleSize = 200, overdispersion = 0.5, pZeroInflation = 0, randomEffectVariance = 0)
+  fittedModel <- glm(observedResponse ~ Environment1 , family = "poisson", data = testData)
+  simulationOutput <- simulateResiduals(fittedModel = fittedModel)
+  
+  # grouped
+  simulationOutputGrouped <- recalculateResiduals(simulationOutput, group = testData$group)
+    
+  ###### testSpatialAutocorrelation #####
+
   # Standard use
   testSpatialAutocorrelation(simulationOutput, x =  testData$x, y = testData$y)
   testSpatialAutocorrelation(simulationOutput, x =  testData$x, y = testData$y, alternative = "two.sided")
-
+  
   # If x and y is not provided, random values will be created
-  testSpatialAutocorrelation(simulationOutput)
-
+  expect_error(testSpatialAutocorrelation(simulationOutput))
+  
   # Alternatively, one can provide a distance matrix
   dM = as.matrix(dist(cbind(testData$x, testData$y)))
   testSpatialAutocorrelation(simulationOutput, distMat = dM)
   testSpatialAutocorrelation(simulationOutput, distMat = dM , alternative = "two.sided")
-  
   
   # testting when x and y have different length
   #testSpatialAutocorrelation(simulationOutput, x =  testData$x[1:10], y = testData$y[1:9] )      # Error different length  
@@ -148,53 +162,17 @@ test_that("tests work", {
   testSpatialAutocorrelation(simulationOutput, distMat = dM, y = testData$y)
   
   
+  ###### testTemporalAutocorrelation #####
   
-  
-  
-
-
   # Standard use
   testTemporalAutocorrelation(simulationOutput, time =  testData$time)
   testTemporalAutocorrelation(simulationOutput, time =  testData$time, alternative = "greater")
-
-  # If no time is provided, random values will be created
-  testTemporalAutocorrelation(simulationOutput)
-  testTemporalAutocorrelation(simulationOutput, alternative = "greater")
   
-
-  ##################################################################
-
-  # grouped
-  simulationOutput <- recalculateResiduals(simulationOutput, group = testData$group)
-
-  # if model is refitted, a different test will be called
-
-  simulationOutput <- simulateResiduals(fittedModel = fittedModel, refit = T)
-  testDispersion(simulationOutput)
-
-
-  # Standard use
-  testSpatialAutocorrelation(simulationOutput, x =  testData$x, y = testData$y)
-  testSpatialAutocorrelation(simulationOutput, x =  testData$x, y = testData$y, alternative = "two.sided")
-  
-  # If x and y is not provided, random values will be created
-  testSpatialAutocorrelation(simulationOutput)
-
-  # Alternatively, one can provide a distance matrix
-  dM = as.matrix(dist(cbind(testData$x, testData$y)))
-  testSpatialAutocorrelation(simulationOutput, distMat = dM)
-
-
-  # Standard use
-  testTemporalAutocorrelation(simulationOutput, time =  testData$time)
-  testTemporalAutocorrelation(simulationOutput, time =  testData$time, alternative = "two.sided")
-
-  # If no time is provided, random values will be created
-  testTemporalAutocorrelation(simulationOutput)
+  # error if time is forgotten
+  expect_error(testTemporalAutocorrelation(simulationOutput))
 
 })
-
-
+  
 # Test Outliers
 test_that("testOutliers", {
 
