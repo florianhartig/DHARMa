@@ -70,8 +70,10 @@ plot(out)
 #     
 #   }else{
 #     res = x$summaries$propSignificant
-#     matplot(res$controlValues, res[,-1], type = "l", main = "Power analysis", ylab = "Power", ...)
-#     legend("bottomright", colnames(res[,-1]), col = 1:x$nSummaries, lty = 1:x$nSummaries, lwd = 2)    
+#     matplot(res$controlValues, res[,-1], type = "l", 
+#             main = "Power analysis", ylab = "Power", ...)
+#     legend("bottomright", colnames(res[,-1]), 
+#             col = 1:x$nSummaries, lty = 1:x$nSummaries, lwd = 2)    
 #     
 #   }
 # }

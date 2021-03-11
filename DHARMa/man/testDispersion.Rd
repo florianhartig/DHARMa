@@ -48,7 +48,8 @@ library(lme4)
 set.seed(123)
 
 testData = createData(sampleSize = 100, overdispersion = 0.5, randomEffectVariance = 1)
-fittedModel <- glmer(observedResponse ~ Environment1 + (1|group), family = "poisson", data = testData)
+fittedModel <- glmer(observedResponse ~ Environment1 + (1|group), 
+                     family = "poisson", data = testData)
 simulationOutput <- simulateResiduals(fittedModel = fittedModel)
 
 # default DHARMa dispersion test - simulation-based 
@@ -56,7 +57,8 @@ testDispersion(simulationOutput)
 testDispersion(simulationOutput, alternative = "less", plot = FALSE) # only underdispersion
 testDispersion(simulationOutput, alternative = "greater", plot = FALSE) # only oversispersion
 
-# for mixed models, the test is usually more powerful if residuals are calculated conditional on fitted REs
+# for mixed models, the test is usually more powerful if residuals are calculated 
+# conditional on fitted REs
 simulationOutput <- simulateResiduals(fittedModel = fittedModel, re.form = NULL)
 testDispersion(simulationOutput)
 
