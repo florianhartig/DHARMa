@@ -5,7 +5,9 @@ DHARMa 0.3.4
 
 New features
 
-- added parametric dispersion test in testDispersion
+- added parametric dispersion test in testDispersion (0.3.3.2)
+- support for glmmAdaptive (0.3.3.1)
+- new plot for categorical predictors
 
 Major changes
 
@@ -14,11 +16,13 @@ Major changes
 Minor changes
 
 - changed test statistics in standard dispersion test to standardized variance, to be more in line with standard dispersion parameters
-
+- defaults for plot function unified
+- removed option to provide no x,y / time in the correlation tests
 
 Bugfixes
 
 - bugfix in runBenchmarks
+- bugfix in testQuantiles https://github.com/florianhartig/DHARMa/pull/261
 
 
 DHARMa 0.3.3
