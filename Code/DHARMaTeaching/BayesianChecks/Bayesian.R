@@ -33,7 +33,7 @@ hist(priorPredictiveSims, breaks = 50)
 
 set.seed(123)
 
-dat <- DHARMa::createData(10000, overdispersion = 0.2)
+dat <- DHARMa::createData(200, overdispersion = 0.2)
 
 plot(observedResponse ~ Environment1, data = dat)
 plot(observedResponse ~ Environment1, data = dat, pch = as.numeric(dat$group))

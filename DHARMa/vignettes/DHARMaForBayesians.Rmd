@@ -15,7 +15,7 @@ editor_options:
 ---
 
 ```{r global_options, include=FALSE}
-knitr::opts_chunk$set(fig.width=8.5, fig.height=5.5, fig.align='center', warning=FALSE, message=FALSE, cache = T)
+knitr::opts_chunk$set(fig.width=8.5, fig.height=5.5, fig.align='center', warning=FALSE, message=FALSE)
 ```
 
 ```{r, echo = F, message = F}
@@ -25,36 +25,137 @@ set.seed(123)
 
 # Basic workflow
 
-The basic workflow for Bayesians that work with BUGS, JAGS, STAN or similar is:
+In principle, DHARMa residuals can be calculated and interpreted for Bayesian models in very much the same way as for frequentist models. Therefore, all comments regarding tests, residual interpretation etc. from teh main vignette are equally valid for Bayesian model checks. There are some minor differences regarding the expected null distribution of the residuals, in particular in the low data limit, but I believe that for most people, these are of lesser concern. 
+
+The main difference for a Bayesian user is that, unlike for users of directly supported regression packages such as lme4 or glmmTMB, most Bayesian users will have to create the simulations for the fitted model thenselves and then feed them into DHARMa by hand. The basic workflow for Bayesians that work with BUGS, JAGS, STAN or similar is:
 
 1. Create posterior predictive simulations for your model
 2. Read these in with the createDHARMa function
 3. Interpret those as described in the main vignette
 
-An example 
+This is more easy as it sounds. For the major Bayesian samplers (e.g. BUGS, JAGS, STAN), it amounts to adding a block with data simulations to the model, and observing those during the MCMC sampling. Then, feed the simulations into DHARMa via createDHARMa, and all else will work pretty much the same as in the main vignette. 
 
-# Considerations about how to do the simulations
+## Example in Jags
 
+Here is an example, with JAGS
 
+```{r, eval = F}
+library(rjags)
+library(BayesianTools)
 
+set.seed(123)
+
+dat <- DHARMa::createData(200, overdispersion = 0.2)
+
+Data = as.list(dat)
+Data$nobs = nrow(dat)
+Data$nGroups = length(unique(dat$group))
+
+modelCode = "model{
+
+  for(i in 1:nobs){
+    observedResponse[i] ~ dpois(lambda[i])  # poisson error distribution
+    lambda[i] <- exp(eta[i]) # inverse link function
+    eta[i] <- intercept + env*Environment1[i]  # linear predictor
+  }
+  
+  intercept ~ dnorm(0,0.0001)
+  env ~ dnorm(0,0.0001)
+
+  # Posterior predictive simulations 
+  for (i in 1:nobs) {
+    observedResponseSim[i]~dpois(lambda[i])
+  }
+
+}"
+
+jagsModel <- jags.model(file= textConnection(modelCode), data=Data, n.chains = 3)
+para.names <- c("intercept","env", "lambda", "observedResponseSim")
+Samples <- coda.samples(jagsModel, variable.names = para.names, n.iter = 5000)
+
+x = BayesianTools::getSample(Samples)
+
+colnames(x) # problem: all the variables are in one array - this is better in STAN, where this is a list - have to extract the right columns by hand
+posteriorPredDistr = x[,3:202] # this is the uncertainty of the mean prediction (lambda)
+posteriorPredSim = x[,203:402] # these are the simulations 
+
+sim = createDHARMa(simulatedResponse = t(posteriorPredSim), observedResponse = dat$observedResponse, fittedPredictedResponse = apply(posteriorPredDistr, 2, median), integerResponse = T)
+plot(sim)
+```
+
+In the created plots, you will see overdispersion, which is completely expected, as the simulated data has overdispersion and a RE, which is not accounted for by the Jags model. 
+
+## Exercise
+
+As an exercise, you could now:
+
+* Add a RE
+* Account for overdispersion, e.g. via an OLRE or a negative Binomial
+
+And check how the residuals improve. 
+
+# Conditional vs. unconditional simulations in hierarchical models
+
+The most important consideration in using DHARMa with Bayesian models is how to create the simulations. You can see in my jags code that the block
+
+```{r, eval=F}
+  # Posterior predictive simulations 
+  for (i in 1:nobs) {
+    observedResponseSim[i]~dpois(lambda[i])
+  }
+```
+
+performs the posterior predictive simulations. Here, we just take the predicted lambda (mean perdictions) during the MCMC simulations and sample from the assumed distribution. This will works for any non-hierarchical model. 
+
+When we move to hierarchical or multi-level models, including GLMMs, the issue of simulation becomes a bit more complicated. In a hierarchical model, there are several random processes that sit on top of each other. In the same way as explained in the man vignette at the point conditional / unconditional simulations, we will have to decide which of these random processes should be included in the posterior predictive simulations. 
+
+As an example, imagine we add a RE in the likelihood of the previous model, to account for the group structure in the data. 
+
+```{r, eval = F}
+  for(i in 1:nobs){
+    observedResponse[i] ~ dpois(lambda[i])  # poisson error distribution
+    lambda[i] <- exp(eta[i]) # inverse link function
+    eta[i] <- intercept + env*Environment1[i] + RE[group[i]] # linear predictor
+  }
+  
+  for(j in 1:nGroups){
+   RE[j] ~ dnorm(0,tauRE)  
+  }
+```
+
+The predictions lambda[i] now depend on a lower-level stochastic effect, which is described by RE[j] ~ dnorm(0,tauRE). We can now decide to create posterior predictive simulations conditional on posterior estimates RE[j] (conditional simulations), which which case we would have to change nothing in the block for the posterior predictive simulations. Alternatively, we can decide that we want to re-simulate the RE (unconditional simulations), in which case we have to copy the entire structure of the likelihood in the predictions
+
+```{r, eval=F}
+  for(j in 1:nGroups){
+   RESim[j] ~ dnorm(0,tauRE)  
+  }
+
+  for (i in 1:nobs) {
+    observedResponseSim[i] ~ dpois(lambdaSim[i]) 
+    lambdaSim[i] <- exp(etaSim[i]) 
+    etaSim[i] <- intercept + env*Environment1[i] + RESim[group[i]] 
+  }
+```
+
+Essentially, you can remember that if you want full (uncoditional) simulations, you basically have to copy the entire likelihood of the hierarchical model, minus the priors, and sample along the hierarchical model structure. If you want to condition on a part of this structure, just cut the DAG at the point on which you want to condition on. 
 
 # Statistical differences between Bayesian vs. MLE quantile residuals 
 
 A common question is if there are differences between Bayesian and MLE quantile residuals. 
 
-First of all, note that MLE and Bayesian quantile residuals are not identical. The main difference is in how the simulation of the data under the fitted model are performed:
+First of all, note that MLE and Bayesian quantile residuals are not exactly identical. The main difference is in how the simulation of the data under the fitted model are performed:
 
-* For models fitted by MLE, simulations in DHARMa are done with H0 = the true model is the fitted model with the MLE (point estimate)
+* For models fitted by MLE, simulations in DHARMa are with the MLE (point estimate)
 
-* For models fitted with Bayes, simulations are practically always performed by additionally drawing from the posterior parameter uncertainty (as a point estimate is not available).
+* For models fitted with Bayes, simulations are practically always performed while also drawing from the posterior parameter uncertainty (as a point estimate is not available).
 
-From this we can directly conclude that Bayesian and MLE quantile residuals are asymptotically identical (and via the usual arguments uniformly distributed).
+Thus, Bayesian posterior predictive simulations include the parametric uncertainty of the model, additionally to the sampling uncertainty. From this we can directly conclude that Bayesian and MLE quantile residuals are asymptotically identical (and via the usual arguments uniformly distributed), but become more different the smaller n becomes.
 
-The more interesting question is what happens in the low data situation. Let's imagine that we start with a situation of infinite data. In this case, we have a "sharp" posterior that can be viewed as identical to the MLE. 
+To examine what those differences are, let's imagine that we start with a situation of infinite data. In this case, we have a "sharp" posterior that can be viewed as identical to the MLE. 
 
 If we reduce the number of data, there are two things happening 
 
-1. The posterior gets wider, with the likelihood componet being normally distributed, at least initially
+1. The posterior gets wider, with the likelihood component being normally distributed, at least initially
 
 2. The influence of the prior increases, the faster the stronger the prior is. 
 
@@ -65,5 +166,6 @@ In particular in the latter case (prior dominates, which can be checked via prio
 Of course, also the MLE distribution might get problems in low data situations, but I would argue that MLE is usually only used anyway if the MLE is reasonably sharp. In practice, I have seldom experienced problems with MLE estimates. It's a bit different in the Bayesian case, where it is possible and often done to fit very complex models with limited data. In this case, many of the general issues in defining null distributions for Bayesian p-values (as, e.g., reviewed in 
 [Conn et al., 2018](https://doi.org/10.1002/ecm.1314)) apply. 
 
+I would add though that while I find it important that users are aware of those differences, I have found that in practice these issues are small, and usually overruled by the much stronger effects of model error. 
 
 
