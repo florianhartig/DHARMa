@@ -160,7 +160,7 @@ plotResiduals(simulationOutput) # right plot in plot.DHARMa()
 
 To provide a visual aid in detecting deviations from uniformity in y-direction, the plot function calculates an (optional) quantile regression, which compares the empirical 0.25, 0.5 and 0.75 quantiles in y direction (red solid lines) with the theoretical 0.25, 0.5 and 0.75 quantiles (dashed black line), and provides a p-value for the deviation from the expected quantile. The significance of the deviation to the expected quantiles is tested and displayed visually, and can be additionally extracted with the testQuantiles function. 
 
-By default, plotResiduals plots against predicted values. However, if you can also use it to plot residuals against a specific other predictors (highly recommend) by using
+By default, plotResiduals plots against predicted values. However, you can also use it to plot residuals against a specific other predictors (highly recommend).
 
 ```{r, eval = F}
 plotResiduals(simulationOutput, form = YOURPREDICTOR)
@@ -172,7 +172,7 @@ If the predictor is a factor, or if there is just a small number of observations
 plotResiduals(simulationOutput, form = testData$group)
 ```
 
-See ?plotResiduas for details, but very shortly: under H0 (perfect model), we would expect those boxes to range homogenously from 0.25-0.75. To see whether there are deviations from this expecation, the plot calculates a test for uniformity per box, and a test for homgeneity of variances between boxes. A positive test will be higlighted in red. 
+See ?plotResiduas for details, but very shortly: under H0 (perfect model), we would expect those boxes to range homogenously from 0.25-0.75. To see whether there are deviations from this expecation, the plot calculates a test for uniformity per box, and a test for homgeneity of variances between boxes. A positive test will be highlighted in red. 
 
 ## Goodness-of-fit tests on the scaled residuals
 
@@ -230,17 +230,17 @@ A third option is the treatment of integer responses. The background of this opt
 
 * Dunn, K. P., and Smyth, G. K. (1996). Randomized quantile residuals. Journal of Computational and Graphical Statistics 5, 1-10. 
 
-DHARMa curently implements two procedures for randomization. The default procedure will randomize automatically. The second option requires knowledge about whether the model is integer-valued, which is usually implemented automatically. See ?simulateResiduals for details. Usually, these options should simply be kept at their defaults.
+DHARMa currently implements two procedures for randomization. The default procedure will randomize automatically. The second option requires knowledge about whether the model is integer-valued, which is usually implemented automatically. See ?simulateResiduals for details. Usually, these options should simply be kept at their defaults.
 
 #### Calculating residuals for groups or subsets
 
-In many situations, it can be useful to look at residuals per group, e.g. to see how much the model over / underpredicts per plot, year or subject. To do this, use the recalculateResiduals() function, together with a grouping variable (group) or a subsetting variable (sel), which can also be used in combination
+In many situations, it can be useful to look at residuals per group, e.g. to see how much the model over / underpredicts per plot, year or subject. To do this, use the recalculateResiduals() function, together with a grouping variable (group) or a subsetting variable (sel), which can also be used in combination.
 
 ```{r, eval= F}
 simulationOutput = recalculateResiduals(simulationOutput, group = testData$group)
 ```
 
-Note, hover, that you will have to change the selection of variables that you provide to plots and tests (e.g. in plotResiduals or testSpatialAutocorrelation) accordingly when you group or subset residuals. 
+Note, however, that you will have to change the selection of variables that you provide to plots and tests (e.g. in plotResiduals or testSpatialAutocorrelation) accordingly when you group or subset residuals. 
 
 #### Reproducibility notes, random seed and random state
 
@@ -320,7 +320,7 @@ All of these tests are included in the testDispersion function, see help for det
 testDispersion(simulationOutput)
 ```
 
-IMPORTANT: we have made extensive simulations, which have show that the various tests have certain advantages and disadvantages. The basic results are that: 
+IMPORTANT: we have made extensive simulations, which have shown that the various tests have certain advantages and disadvantages. The basic results are that: 
 
 * The most powerful and reliable test is option 3, but this costs a lot of time and is not available for all regression packages, as it requires that Pearson residuals are available
 * The parametric Pearson-chi2 is fast, but based on a naive expectation of df and thus biased to underdispersion for mixed models, bias increasing with the number of RE levels. When testing only for overdispersion, this makes the bias conservative, but it also costs power. Overall, we do not see an advantage over option 1
@@ -468,9 +468,9 @@ plotResiduals(simulationOutput, testData$Environment2)
 
 ## Residual correlation structures (temporal, spatial, phylogenetic)
 
-If a distance between residuals can be defined (temporal, spatial, phylogenetic), you should check if ther is a distance-dependence in the residuals, which would suggest to move to a gls structure for analysis. 
+If a distance between residuals can be defined (temporal, spatial, phylogenetic), you should check if there is a distance-dependence in the residuals, which would suggest to move to a gls structure for analysis. 
 
-Two two functions to test for this in DHARMa are 
+The two functions to test for this in DHARMa are 
 
 * testTemporalAutocrrelation based on the Durbin-Watson test
 * testSpatialAutocorrelation, based on Moran's I, can also be used for phylogenetic tests
@@ -781,7 +781,7 @@ spaMM is supported by DHARMa since 0.2.1
 
 GLMMadaptive is supported by DHARMa since 0.3.4. 
 
-## Unsupprted packages
+## Unsupported packages
 
 If confronted with an unsupported package, DHARMa will try to use standard S3 functions such as coef(), simulate() etc. to perform simulations. If no error occurs, a residual object will be calculated, and a warning will be provided that this package has not been checked for full functionality. In many cases, the results can be used though (but no guarantee, maybe check with null simulations if the results are OK). Other than that, see my general comments about [adding new R packages to DHARMa](https://github.com/florianhartig/DHARMa/wiki/Adding-new-R-packages-to-DHARMA)
 

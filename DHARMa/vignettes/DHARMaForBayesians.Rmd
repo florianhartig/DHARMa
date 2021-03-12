@@ -25,9 +25,9 @@ set.seed(123)
 
 # Basic workflow
 
-In principle, DHARMa residuals can be calculated and interpreted for Bayesian models in very much the same way as for frequentist models. Therefore, all comments regarding tests, residual interpretation etc. from teh main vignette are equally valid for Bayesian model checks. There are some minor differences regarding the expected null distribution of the residuals, in particular in the low data limit, but I believe that for most people, these are of lesser concern. 
+In principle, DHARMa residuals can be calculated and interpreted for Bayesian models in very much the same way as for frequentist models. Therefore, all comments regarding tests, residual interpretation etc. from the main vignette are equally valid for Bayesian model checks. There are some minor differences regarding the expected null distribution of the residuals, in particular in the low data limit, but I believe that for most people, these are of less concern. 
 
-The main difference for a Bayesian user is that, unlike for users of directly supported regression packages such as lme4 or glmmTMB, most Bayesian users will have to create the simulations for the fitted model thenselves and then feed them into DHARMa by hand. The basic workflow for Bayesians that work with BUGS, JAGS, STAN or similar is:
+The main difference for a Bayesian user is that, unlike for users of directly supported regression packages such as lme4 or glmmTMB, most Bayesian users will have to create the simulations for the fitted model themselves and then feed them into DHARMa by hand. The basic workflow for Bayesians that work with BUGS, JAGS, STAN or similar is:
 
 1. Create posterior predictive simulations for your model
 2. Read these in with the createDHARMa function
@@ -107,7 +107,7 @@ The most important consideration in using DHARMa with Bayesian models is how to 
 
 performs the posterior predictive simulations. Here, we just take the predicted lambda (mean perdictions) during the MCMC simulations and sample from the assumed distribution. This will works for any non-hierarchical model. 
 
-When we move to hierarchical or multi-level models, including GLMMs, the issue of simulation becomes a bit more complicated. In a hierarchical model, there are several random processes that sit on top of each other. In the same way as explained in the man vignette at the point conditional / unconditional simulations, we will have to decide which of these random processes should be included in the posterior predictive simulations. 
+When we move to hierarchical or multi-level models, including GLMMs, the issue of simulation becomes a bit more complicated. In a hierarchical model, there are several random processes that sit on top of each other. In the same way as explained in the main vignette at the point conditional / unconditional simulations, we will have to decide which of these random processes should be included in the posterior predictive simulations. 
 
 As an example, imagine we add a RE in the likelihood of the previous model, to account for the group structure in the data. 
 
@@ -123,7 +123,7 @@ As an example, imagine we add a RE in the likelihood of the previous model, to a
   }
 ```
 
-The predictions lambda[i] now depend on a lower-level stochastic effect, which is described by RE[j] ~ dnorm(0,tauRE). We can now decide to create posterior predictive simulations conditional on posterior estimates RE[j] (conditional simulations), which which case we would have to change nothing in the block for the posterior predictive simulations. Alternatively, we can decide that we want to re-simulate the RE (unconditional simulations), in which case we have to copy the entire structure of the likelihood in the predictions
+The predictions lambda[i] now depend on a lower-level stochastic effect, which is described by RE[j] ~ dnorm(0,tauRE). We can now decide to create posterior predictive simulations conditional on posterior estimates RE[j] (conditional simulations), in which case we would have to change nothing in the block for the posterior predictive simulations. Alternatively, we can decide that we want to re-simulate the RE (unconditional simulations), in which case we have to copy the entire structure of the likelihood in the predictions
 
 ```{r, eval=F}
   for(j in 1:nGroups){
@@ -163,7 +163,7 @@ Thus, if we reduce the data, for weak / uninformative priors, we will simulate d
 
 In particular in the latter case (prior dominates, which can be checked via prior sensitivity analysis), you may see residual patterns that are caused by the prior, even though the model structure is correct. In some sense, you could say that the residuals check if the combination of prior + structure is compatible with the data. It's a philosophical debate how to react on such a deviation, as the prior is not really negotiable in a Bayesian analysis.
 
-Of course, also the MLE distribution might get problems in low data situations, but I would argue that MLE is usually only used anyway if the MLE is reasonably sharp. In practice, I have seldom experienced problems with MLE estimates. It's a bit different in the Bayesian case, where it is possible and often done to fit very complex models with limited data. In this case, many of the general issues in defining null distributions for Bayesian p-values (as, e.g., reviewed in 
+Of course, also the MLE distribution might get problems in low data situations, but I would argue that MLE is usually only used anyway if the MLE is reasonably sharp. In practice, I have self experienced problems with MLE estimates. It's a bit different in the Bayesian case, where it is possible and often done to fit very complex models with limited data. In this case, many of the general issues in defining null distributions for Bayesian p-values (as, e.g., reviewed in 
 [Conn et al., 2018](https://doi.org/10.1002/ecm.1314)) apply. 
 
 I would add though that while I find it important that users are aware of those differences, I have found that in practice these issues are small, and usually overruled by the much stronger effects of model error. 
