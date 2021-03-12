@@ -72,7 +72,7 @@ with the appropriate version number / branch as argument to ref.
 
 # Acknowledgements
 
-A question by Catalina Gutiérrez Chacón provided me with the motivation write the first version of DHARMa. Thanks for useful suggestions to improve DHARMa by Jochen Fründ, Tomer J. Czaczkes, Luis Cayuela Delgado, Alexandre Courtiol, Jim Thorson, Lukas Lohse and many other people that made comments on GitHub, Crossvalidated or via email. 
+A question by Catalina Gutiérrez Chacón provided me with the motivation write the first version of DHARMa. Thanks for useful suggestions to improve DHARMa by Jochen Fründ, Tomer J. Czaczkes, Luis Cayuela Delgado, Alexandre Courtiol, Jim Thorson, Lukas Lohse, jmniehaus, justintimm and many other people that made comments on GitHub, Crossvalidated or via email. 
 
 
 
