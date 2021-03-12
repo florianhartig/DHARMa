@@ -18,11 +18,14 @@ Minor changes
 - changed test statistics in standard dispersion test to standardized variance, to be more in line with standard dispersion parameters
 - defaults for plot function unified
 - removed option to provide no x,y / time in the correlation tests
+- recalculateResiduals now allows subsetting #246
+- better input checking in correlation tests #190
 
 Bugfixes
 
-- bugfix in runBenchmarks
+- bugfix in runBenchmarks included in https://github.com/florianhartig/DHARMa/pull/247
 - bugfix in testQuantiles https://github.com/florianhartig/DHARMa/pull/261
+- bugfix in getRandomState https://github.com/florianhartig/DHARMa/issues/254
 
 
 DHARMa 0.3.3
