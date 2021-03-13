@@ -57,3 +57,42 @@ plot(res)
 res = simulateResiduals(g.test, refit = T)
 plot(res)
 
+
+
+###### Tweedie ######
+
+# 265
+
+library(lme4)
+library(statmod)
+
+#create toy dataset
+df1 <- data.frame(production=c(15,12,10,9,6,8,9,5,3,3,2,1,0,0,0,0), Treatment_Num=c(1,1,1,1,2,2,2,2,3,3,3,3,4,4,4,4), Genotype=c(1,1,2,2,1,1,2,2,1,1,2,2,1,1,2,2))
+
+#run tweedie model
+df1_tweedie <- glmer(production ~ Treatment_Num +(1|Genotype),
+                     data = df1, family=tweedie(var.power=1.9,link.power=0))
+
+#load DHARMa
+require(DHARMa)
+#I get an error when I try running this line:
+df1_tweedie_res <- simulateResiduals(df1_tweedie)
+
+
+
+tweedie <- function (var.power = 0, link.power = 1 - var.power) {
+  out = statmod::tweedie(var.power = var.power, link.power = link.power)
+  
+  simfun <- function(object, nsim) {
+    # my implementation
+  }
+  
+  out$simulate = simfun
+  return(out)
+}
+
+
+
+
+
+

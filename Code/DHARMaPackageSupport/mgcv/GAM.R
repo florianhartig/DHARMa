@@ -69,3 +69,26 @@ plot(br$gam,pages=1)
 simulate(br$mer, use.u = T)
 
 
+
+# issue 12 
+
+# modivied from example provided by a user
+
+library(MASS)
+library(mgcv)
+library(DHARMa)
+
+snails_gam1 <- gam(cbind(Deaths, N - Deaths) ~ Exposure, data = snails, family = binomial)
+plot(simulateResiduals(snails_gam1)) # index out of bounds error
+
+snails_gam2 <- gam(Deaths/N~ Exposure, data = snails, family = binomial, weights = N)
+plot(simulateResiduals(snails_gam2)) # works
+
+simulate(snails_gam1) # doesn't work 
+simulate(snails_gam2) # works
+
+
+
+
+
+
