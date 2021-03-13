@@ -2,7 +2,7 @@
 % Please edit documentation in R/runBenchmarks.R
 \name{plot.DHARMaBenchmark}
 \alias{plot.DHARMaBenchmark}
-\title{Plots DHARMa benchmark}
+\title{Plots DHARMa benchmarks}
 \usage{
 \method{plot}{DHARMaBenchmark}(x, ...)
 }
@@ -12,5 +12,15 @@
 \item{...}{parameters to pass to the plot function}
 }
 \description{
-Plots DHARMa benchmark
+The function plots the result of an object of class DHARMaBenchmark, created by \code{\link{runBenchmarks}}
+}
+\details{
+The function will create two types of plots, depending on whether the run contains only a single value (or no value) of the control parameter, or whether a vector of control values was provided.
+
+If a single or no value of the control parameter was provided, the function will create box plots of the estimated p-values, with the number of significant p-values plotted to the left
+
+If a control parameter was provided, the function will plot the proportion of significant p-values against the control parameter, with 95% CIs based based on the performed replicates displayed as confidence bands
+}
+\seealso{
+\code{\link{runBenchmarks}}
 }

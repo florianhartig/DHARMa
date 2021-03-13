@@ -2,8 +2,8 @@
 #' 
 #' This function runs statistical benchmarks, including Power / Type I error simulations for an arbitrary test with a control parameter
 #' 
-#' @param controlValues a vector with a control parameter (e.g. to vary the strength of a problem the test should be specific to)
-#' @param calculateStatistics the statistics to be benchmarked. Should return one value, or a vector of values. If controlValues are given, must accept a paramteter control
+#' @param controlValues optionally, a vector with a control parameter (e.g. to vary the strength of a problem the test should be specific to). See help for an example
+#' @param calculateStatistics the statistics to be benchmarked. Should return one value, or a vector of values. If controlValues are given, must accept a parameter control
 #' @param nRep number of replicates per level of the controlValues
 #' @param alpha significance level
 #' @param parallel whether to use parallel computations. Possible values are F, T (sets the cores automatically to number of available cores -1), or an integer number for the number of cores that should be used for the cluster
@@ -13,6 +13,7 @@
 #' @export 
 #' @importFrom foreach "%dopar%"
 #' @author Florian Hartig
+#' @seealso \code{\link{plot.DHARMaBenchmark}}
 #' @example inst/examples/runBenchmarksHelp.R
 runBenchmarks <- function(calculateStatistics, controlValues = NULL, nRep = 10, alpha = 0.05, parallel = FALSE, ...){
   
@@ -107,10 +108,20 @@ runBenchmarks <- function(calculateStatistics, controlValues = NULL, nRep = 10, 
 }
 
 
-#' Plots DHARMa benchmark
+#' Plots DHARMa benchmarks
+#' 
+#' The function plots the result of an object of class DHARMaBenchmark, created by \code{\link{runBenchmarks}}
 #' 
 #' @param x object of class DHARMaBenchmark, created by \code{\link{runBenchmarks}}
 #' @param ... parameters to pass to the plot function
+#' 
+#' @details The function will create two types of plots, depending on whether the run contains only a single value (or no value) of the control parameter, or whether a vector of control values was provided.
+#' 
+#' If a single or no value of the control parameter was provided, the function will create box plots of the estimated p-values, with the number of significant p-values plotted to the left
+#' 
+#' If a control parameter was provided, the function will plot the proportion of significant p-values against the control parameter, with 95% CIs based based on the performed replicates displayed as confidence bands
+#' 
+#' @seealso \code{\link{runBenchmarks}}
 #' @export
 plot.DHARMaBenchmark <- function(x, ...){
   

@@ -8,9 +8,9 @@ runBenchmarks(calculateStatistics, controlValues = NULL, nRep = 10,
   alpha = 0.05, parallel = FALSE, ...)
 }
 \arguments{
-\item{calculateStatistics}{the statistics to be benchmarked. Should return one value, or a vector of values. If controlValues are given, must accept a paramteter control}
+\item{calculateStatistics}{the statistics to be benchmarked. Should return one value, or a vector of values. If controlValues are given, must accept a parameter control}
 
-\item{controlValues}{a vector with a control parameter (e.g. to vary the strength of a problem the test should be specific to)}
+\item{controlValues}{optionally, a vector with a control parameter (e.g. to vary the strength of a problem the test should be specific to). See help for an example}
 
 \item{nRep}{number of replicates per level of the controlValues}
 
@@ -30,6 +30,7 @@ This function runs statistical benchmarks, including Power / Type I error simula
 The benchmark function in DHARMa are intended for development purposes, and for users that want to test / confirm the properties of functions in DHARMa. If you are running an applied data analysis, they are probably of little use.
 }
 \examples{
+# define a function that will run a simulation and return a number of statistics, typically p-values
 returnStatistics <- function(control = 0){
   testData = createData(sampleSize = 20, family = poisson(), overdispersion = control, 
                         randomEffectVariance = 0)
@@ -77,6 +78,9 @@ plot(out)
 #     
 #   }
 # }
+}
+\seealso{
+\code{\link{plot.DHARMaBenchmark}}
 }
 \author{
 Florian Hartig

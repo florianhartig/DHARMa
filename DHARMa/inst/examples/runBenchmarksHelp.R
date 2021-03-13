@@ -1,3 +1,4 @@
+# define a function that will run a simulation and return a number of statistics, typically p-values
 returnStatistics <- function(control = 0){
   testData = createData(sampleSize = 20, family = poisson(), overdispersion = control, 
                         randomEffectVariance = 0)
