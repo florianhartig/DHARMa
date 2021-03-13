@@ -99,6 +99,7 @@ runBenchmarks <- function(calculateStatistics, controlValues = NULL, nRep = 10, 
   out$summaries = summary
   out$time = Sys.time() - start_time
   out$nSummaries = ncol(x) - 2
+  out$nReplicates = nRep
   
   class(out) = "DHARMaBenchmark"
   
@@ -114,17 +115,31 @@ runBenchmarks <- function(calculateStatistics, controlValues = NULL, nRep = 10, 
 plot.DHARMaBenchmark <- function(x, ...){
   
   if(length(x$controlValues)== 1){
-    plotMultipleHist(x$simulations[,1:x$nSummaries])
-    text(0, x$nSummaries:1, labels = x$summaries$propSignificant[-1])
-    
+    boxplot(x$simulations[,1:x$nSummaries], col = "grey", ylim = c(-0.3,1), horizontal = T, las = 2,  xaxt='n', main = "p distribution")
+    abline(v = 0)
+    abline(v = c(0.25, 0.5, 0.75), lty = 2)
+    text(-0.2, x$nSummaries:1, labels = x$summaries$propSignificant[-1])
+    # barplot(as.matrix(x$summaries$propSignificant[-1]), horiz = T, add = T, offset = -0.2, names.arg = "test", width = 0.5, space = 1.4)
   }else{
     res = x$summaries$propSignificant
-    matplot(res$controlValues, res[,-1], type = "l", main = "Power analysis", ylab = "Power", ...)
+    
+    plot(NULL, xlim = range(res$controlValues), ylim = c(0,1))
+    for(i in 1:x$nSummaries){
+      
+      getCI = function(k) as.vector(binom.test(k*x$nReplicates,x$nReplicates)$conf.int)
+      CIs = sapply(res[,i+1], getCI)
+      
+      polygon(c(res$controlValues, rev(res$controlValues)),
+              c(res[,i+1] - CIs[1,], rev(res[,i+1] + CIs[2,])),
+              col = "#00000020", border = F)
+      lines(res$controlValues, res[,i+1], col = i, lty = i, lwd = 2)
+    }
     legend("bottomright", colnames(res[,-1]), col = 1:x$nSummaries, lty = 1:x$nSummaries, lwd = 2)    
     
   }
 }
 
+# this used to be an alternative to the boxplot for control = N
 
 plotMultipleHist <- function(x){
   

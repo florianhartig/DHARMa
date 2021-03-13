@@ -3,11 +3,14 @@ NOTE: for more news about the package, see https://github.com/florianhartig/DHAR
 DHARMa 0.3.4
 ============
 
+0.3.4 is a relatively importatn release with various minor improvements a smaller new features, most noteworthy the support of glmmAdaptive
+
 New features
 
 - added parametric dispersion test in testDispersion (0.3.3.2)
 - support for glmmAdaptive (0.3.3.1)
 - new plot for categorical predictors
+- new plots for result of runBenchmarks
 
 Major changes
 
