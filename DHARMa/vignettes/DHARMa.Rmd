@@ -488,7 +488,7 @@ Note that all these tests are most sensitive against homogeneous residual struct
 
 # Case studies and examples
 
-**Note:** More real-world examples on the DHARMa GitHub repository [here](https://github.com/florianhartig/DHARMa/tree/master/Code/Examples) 
+**Note:** More real-world examples can be found on the DHARMa GitHub repository 
 
 ## Budworm example (count-proportion n/k binomial)
 
