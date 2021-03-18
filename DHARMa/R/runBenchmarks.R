@@ -137,11 +137,11 @@ plot.DHARMaBenchmark <- function(x, ...){
     plot(NULL, xlim = range(res$controlValues), ylim = c(0,1))
     for(i in 1:x$nSummaries){
       
-      getCI = function(k) as.vector(binom.test(k*x$nReplicates,x$nReplicates)$conf.int)
-      CIs = sapply(res[,i+1], getCI)
+      getCI = function(k) as.vector(binom.test(k,x$nReplicates)$conf.int)
+      CIs = sapply(res[,i+1]*x$nReplicates, getCI)
       
       polygon(c(res$controlValues, rev(res$controlValues)),
-              c(res[,i+1] - CIs[1,], rev(res[,i+1] + CIs[2,])),
+              c(CIs[1,], rev(CIs[2,])),
               col = "#00000020", border = F)
       lines(res$controlValues, res[,i+1], col = i, lty = i, lwd = 2)
     }
