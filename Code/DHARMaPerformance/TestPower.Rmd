@@ -23,6 +23,30 @@ library(DHARMa)
 
 # Dispersion Tests
 
+Importance of overdispersion 
+
+```{r}
+returnStatistics <- function(control = 1){
+  testData = createData(sampleSize = 200, family = poisson(), overdispersion = control, fixedEffects = 0,
+                        randomEffectVariance = 0)
+  fittedModel <- glm(observedResponse ~ Environment1, data = testData, family = poisson())
+  x = summary(fittedModel)
+  res <- simulateResiduals(fittedModel = fittedModel, n = 250)
+  out <- c("Type I error GLM slope" = x$coefficients[2,4], "DHARMa testDispersion" = testDispersion(res, plot = FALSE)$p.value)
+  return(out)
+}
+
+# running benchmark for a fixed simulation, increase nRep for sensible results
+# out = runBenchmarks(returnStatistics, nRep = 100)
+# plot(out)
+
+out = runBenchmarks(returnStatistics, controlValues = seq(0, 1.5, 0.1), nRep = 100)
+plot(out, xlab = "Overdispersion", xlab = "True overdispersion")
+```
+
+
+
+
 ## Benchmarking DHARMa dispersiontests against AER dispersiontest for Poisson GLM
 
 ```{r}

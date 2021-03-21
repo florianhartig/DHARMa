@@ -126,15 +126,15 @@ runBenchmarks <- function(calculateStatistics, controlValues = NULL, nRep = 10, 
 plot.DHARMaBenchmark <- function(x, ...){
   
   if(length(x$controlValues)== 1){
-    boxplot(x$simulations[,1:x$nSummaries], col = "grey", ylim = c(-0.3,1), horizontal = T, las = 2,  xaxt='n', main = "p distribution")
+    boxplot(x$simulations[,1:x$nSummaries], col = "grey", ylim = c(-0.3,1), horizontal = T, las = 2,  xaxt='n', main = "p distribution", ...)
     abline(v = 0)
     abline(v = c(0.25, 0.5, 0.75), lty = 2)
-    text(-0.2, x$nSummaries:1, labels = x$summaries$propSignificant[-1])
+    text(-0.2, 1:x$nSummaries, labels = x$summaries$propSignificant[-1])
     # barplot(as.matrix(x$summaries$propSignificant[-1]), horiz = T, add = T, offset = -0.2, names.arg = "test", width = 0.5, space = 1.4)
   }else{
     res = x$summaries$propSignificant
     
-    plot(NULL, xlim = range(res$controlValues), ylim = c(0,1))
+    plot(NULL, xlim = range(res$controlValues), ylim = c(0,1), ...)
     for(i in 1:x$nSummaries){
       
       getCI = function(k) as.vector(binom.test(k,x$nReplicates)$conf.int)
