@@ -43,18 +43,18 @@ returnStatistics <- function(control = 0){
 # testing a single return
 returnStatistics()
 
-# running benchmark for a fixed simulation
-out = runBenchmarks(returnStatistics, nRep = 500)
+# running benchmark for a fixed simulation, increase nRep for sensible results
+out = runBenchmarks(returnStatistics, nRep = 5)
 
 # plotting results depend on whether a vector or a single value is provided for control
 plot(out) 
 
 # running benchmark with varying control values
-# out = runBenchmarks(returnStatistics, controlValues = c(0,0.5,1), nRep = 5)
+# out = runBenchmarks(returnStatistics, controlValues = c(0,0.5,1), nRep = 100)
 # plot(out)
 
 # running benchmark can be done using parallel cores
-# out = runBenchmarks(returnStatistics, nRep = 50, parallel = TRUE)
+# out = runBenchmarks(returnStatistics, nRep = 100, parallel = TRUE)
 
 # Alternative plot function using vioplot, provides nicer pictures 
 
