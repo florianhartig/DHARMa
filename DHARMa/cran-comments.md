@@ -2,7 +2,7 @@
 
 ## Submission 1
 
-## Submission 1, 14.3.2021
+## Submission 1, 23.3.2021
 
 This is a relatively substantial update of DHARMa, with various smaller new features and bugfixes. See NEWS for changes. 
 
@@ -11,6 +11,41 @@ This release was tested without apparent problems under
 * local MAC OS 10.16 (Big Sur), R 3.6.1
 * http://win-builder.r-project.org/ - oldrelease / devel / release
 * Linux (Travis CI) - oldrel / release / devel
+
+Issues:
+
+Flavor: r-devel-linux-x86_64-debian-gcc, r-devel-windows-ix86+x86_64
+Check: CRAN incoming feasibility, Result: Note_to_CRAN_maintainers
+  Maintainer: 'Florian Hartig <florian.hartig@biologie.uni-regensburg.de>'
+
+Flavor: r-devel-windows-ix86+x86_64
+Check: running examples for arch 'i386', Result: NOTE
+  Examples with CPU (user + system) or elapsed time > 10s
+                user system elapsed
+  hist.DHARMa   8.86   0.20   10.42
+  plotResiduals 8.48   0.08   10.84
+
+Flavor: r-devel-windows-ix86+x86_64
+Check: running examples for arch 'x64', Result: NOTE
+  Examples with CPU (user + system) or elapsed time > 10s
+                 user system elapsed
+  hist.DHARMa   10.94   0.12   11.73
+  plotResiduals  9.64   0.00   10.17
+  
+## Submission 2, 23.3.2021
+
+This is a relatively substantial update of DHARMa, with various smaller new features and bugfixes. See NEWS for changes. 
+
+This release was tested without apparent problems under
+
+* local MAC OS 10.16 (Big Sur), R 3.6.1
+* http://win-builder.r-project.org/ - oldrelease / devel / release
+* Linux (Travis CI) - oldrel / release / devel
+
+Notes: this is the second submission, pre-submission checks from earlier version complained about slow help files, I have reduced some of the help calculations in response
+
+
+
 
 # Version 0.3.3
 

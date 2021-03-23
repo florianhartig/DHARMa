@@ -40,7 +40,10 @@ plot(simulationOutput, quantreg = FALSE)
 
 #############  Distribution  ######################
 
-plotQQunif(simulationOutput = simulationOutput)
+plotQQunif(simulationOutput = simulationOutput, 
+           testDispersion = FALSE,
+           testUniformity = FALSE,
+           testOutliers = FALSE)
 
 hist(simulationOutput )
 
@@ -60,11 +63,11 @@ plotResiduals(simulationOutput, form = testData$Environment1,
 plotResiduals(simulationOutput, form = testData$group)
 
 # All these options can also be provided to the main plotting function
-plot(simulationOutput, quantreg = FALSE, rank = FALSE)
 
 # If you want to plot summaries per group, use
 simulationOutput = recalculateResiduals(simulationOutput, group = testData$group)
-plot(simulationOutput) # we see one residual point per RE
+plot(simulationOutput, quantreg = FALSE) 
+# we see one residual point per RE
 
 
 }

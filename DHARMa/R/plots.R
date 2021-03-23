@@ -203,6 +203,7 @@ plotResiduals <- function(simulationOutput, form = NULL, quantreg = NULL, rank =
   blackcol = rgb(0,0,0, alpha = max(0.1, 1 - 3 * length(res) / switchScatter))
 
   # Note to self: why is this wrapped in do.call?
+  # Answer: because of the check dots, needs to be consolidate, e.g. for testCategorical
 
   # categorical plot
   if(is.factor(pred)){
