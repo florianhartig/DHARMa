@@ -310,9 +310,9 @@ Here, we get too many residuals around 0.5, which means that we are not getting 
 
 Although, as discussed above, over/underdispersion will show up in the residuals, and it's possible to detect it with the testUniformity function, simulations show that this test is less powerful than more targeted tests. DHARMa therefore contains several overdispersion tests that compare the dispersion of simulated residuals to the observed residuals. 
 
-1. A non-parametric test on the simulated residuals (default)
-2. The parametric Pearson-chi2 test that is popular in the literature, suggested in the glmm Wiki, and implemented in some other R packages
-3. A non-parametric overdispersion test based on the Pearson residuals of the re-fitted simulations, essentially a nonparametric version of test 2 
+1. *default:* a non-parametric test that compares the variance of the simulated residuals to the observed residuals (default), which has some analogy to the variance test implemented in R package aer
+2. *PearsonChisq:* alternatively, DHARMa implements the parametric Pearson-chi2 test that is popular in the literature, suggested in the glmm Wiki, and implemented in some other R packages such as performance.
+3. *refit* if residual simulations are done via refit, DHARMa will compare the the Pearson residuals of the re-fitted simulations to the original Pearson residuals. This is essentially a nonparametric version of test 2.
 
 All of these tests are included in the testDispersion function, see help for details. 
 
@@ -323,8 +323,12 @@ testDispersion(simulationOutput)
 IMPORTANT: we have made extensive simulations, which have shown that the various tests have certain advantages and disadvantages. The basic results are that: 
 
 * The most powerful and reliable test is option 3, but this costs a lot of time and is not available for all regression packages, as it requires that Pearson residuals are available
-* The parametric Pearson-chi2 is fast, but based on a naive expectation of df and thus biased to underdispersion for mixed models, bias increasing with the number of RE levels. When testing only for overdispersion, this makes the bias conservative, but it also costs power. Overall, we do not see an advantage over option 1
-* The DHARMa default option 1 is fast, nearly unbiased (i.e. you can test under and overdispersion), and only slightly less powerful as test 3, PROVIDED that simulations are made conditional on the fitted REs. Note that this is not the DHARMa default. 
+* The parametric Pearson-chi2 is fast if Pearson residuals are available, but based on a naive expectation of df and thus biased to underdispersion for mixed models, bias increasing with the number of RE levels. When testing only for overdispersion, this makes the bias conservative, but it also costs power. Overall, we do not see an advantage over option 1
+* The DHARMa default option 1 is fast, nearly unbiased (i.e. you can test under and overdispersion), and only slightly less powerful as test 3, PROVIDED that simulations are made conditional on the fitted REs. Note that the latter is not the DHARMa default, so you have to actively request conditional simulations, e.g. for lme4 by specifying re.form = NULL. 
+
+As support for these statements, here results of the simulation, which compares the uniform (KS) test with the standard simuation-based test (conditional and unconditional) and the Pearson-chi2 test (two-sided and greater) for a Poisson GLMM with 30 group levels.  
+
+<img src="dispersion.png" width="400">
 
 Thus, the current recommendation is: for most users, use the default DHARMa test, but create simulations conditionally. See ?testDispersion for details. 
 
