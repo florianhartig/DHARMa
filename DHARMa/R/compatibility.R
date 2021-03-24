@@ -251,7 +251,7 @@ getFitted.default <- function (object,...){
 #' @author Florian Hartig
 #' @export
 getResiduals <- function (object, ...) {
-  UseMethod("getFitted", object)
+  UseMethod("getResiduals", object)
 }
 
 # NOTE - a bit unclear if fitted or predict should be used
