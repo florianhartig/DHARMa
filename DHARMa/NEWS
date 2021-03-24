@@ -1,9 +1,19 @@
 NOTE: for more news about the package, see https://github.com/florianhartig/DHARMa/releases
 
+DHARMa 0.4.0
+============
+
+This is actually a bugfix release for 0.3.4, but on reflection I decided that 0.4.0 should have been a minor release, so I pushed the version number up to 0.4.0
+
+Bugfixes
+
+- bugfix in getResiduals, which had consequences for quantile residual calculations with refit = T
+
+
 DHARMa 0.3.4
 ============
 
-0.3.4 is a relatively importatn release with various minor improvements a smaller new features, most noteworthy the support of glmmAdaptive
+0.3.4 is a relatively important release with various minor improvements a smaller new features, most noteworthy the support of glmmAdaptive
 
 New features
 

@@ -1,6 +1,17 @@
-# Version 0.3.4
+# Version 0.4.0
 
-## Submission 1
+## Submission 1, 24.3.2021
+
+This is a bugfix release for 0.3.4, but on reflection I decided that 0.4.0 should have been a minor release, so I pushed the version number up to 0.4.0
+
+This release was tested without apparent problems under
+
+* local MAC OS 10.16 (Big Sur), R 3.6.1
+* http://win-builder.r-project.org/ - oldrelease / devel / release
+* Linux (Travis CI) - oldrel / release / devel
+
+
+# Version 0.3.4
 
 ## Submission 1, 23.3.2021
 
