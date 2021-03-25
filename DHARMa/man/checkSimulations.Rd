@@ -4,7 +4,7 @@
 \alias{checkSimulations}
 \title{Check simulated data}
 \usage{
-checkSimulations(simulatedResponse, nObs, nSim)
+checkSimulations(simulatedResponse, nObs, nSim, bigData = FALSE)
 }
 \arguments{
 \item{simulatedResponse}{the simulated response}

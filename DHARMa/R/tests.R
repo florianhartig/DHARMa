@@ -540,7 +540,7 @@ testZeroInflation <- function(simulationOutput, ...){
 #' @details This function tests if a user-defined summary differs when applied to simulated / observed data. the function can easily be remodeled to apply summaries on the residuals, by simply defining f = function(x) summary (x - predictions), as done in \code{\link{testDispersion}}
 #'
 #' @note The function that you supply is applied on the data as it is represented in your fitted model, which may not always correspond to how you think. This is important in particular when you use k/n binomial data, and want to test for 1-inflation. As an example, if have k/20 observations, and you provide your data via cbind (y, y-20), you have to test for 20-inflation (because this is how the data is represented in the model). However, if you provide data via y/20, and weights = 20, you should test for 1-inflation. In doubt, check how the data is internally represented in model.frame(model), or via simulate(model)
-#'
+#' @rawNamespace import(ff, except = c(write.csv, write.csv2))
 #' @export
 #' @author Florian Hartig
 #' @example inst/examples/testsHelp.R
@@ -556,7 +556,12 @@ testGeneric <- function(simulationOutput, summary, alternative = c("two.sided", 
 
   observed = summary(simulationOutput$observedResponse)
 
-  simulated = apply(simulationOutput$simulatedResponse, 2, summary)
+  if (simulationOutput$bigData == FALSE) {
+    simulated = apply(simulationOutput$simulatedResponse[], 2, summary)
+  } else {
+    simulated <- ffapply(X = simulationOutput$simulatedResponse, MARGIN = 2, AFUN = summary, RETURN = TRUE, CFUN = "ccbind")[]
+  }
+
 
   p = getP(simulated = simulated, observed = observed, alternative = alternative)
 

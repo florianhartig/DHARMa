@@ -103,6 +103,11 @@ createDHARMa <- function(simulatedResponse , observedResponse , fittedPredictedR
   out = list()
   out$simulatedResponse = simulatedResponse
   out$refit = F
+  if(inherits(simulatedResponse, "ff_matrix")) {
+    out$bigData = TRUE
+  } else {
+    out$bigData = FALSE
+  }
   out$integerResponse = integerResponse
   out$observedResponse = observedResponse
 
