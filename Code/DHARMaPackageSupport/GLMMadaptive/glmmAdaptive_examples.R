@@ -11,12 +11,12 @@ library(DHARMa)
 #' first running BINOMIAL  # Line 27
 #' secound running POISSON # Line 171
 #' third running  glmmAdaptive exaplme binomial  # Line 348
+#' fourth running glmmAdaptive examples with Zero-Inflated Negative Binomial # Line 488
 set.seed(123L)
 
 data = createData(sampleSize = 500, overdispersion = 0.0, randomEffectVariance = 0.000, family = binomial())
 
 testmodel_binomial <- mixed_model(fixed = observedResponse ~ Environment1 , random = ~ 1 | ID, data = data, family = binomial())
-
 
 
 
@@ -374,43 +374,43 @@ DF
 
 
 ### fitting the mixed effect model
-fm1 <- mixed_model(fixed = y ~ sex * time, random = ~ 1 | id, data = DF,family = binomial())
+fm2 <- mixed_model(fixed = y ~ sex * time, random = ~ 1 | id, data = DF,family = binomial())
 
 
 ### testing with DHARMa
 # predictions of the model for these points
-getFitted(fm1)
+getFitted(fm2)
 
 # extract simulations from the model as matrix
-getSimulations(fm1, nsim = 2)
+getSimulations(fm2, nsim = 2)
 
 # extract simulations from the model for refit (often requires different structure)
-x = getSimulations(fm1, nsim = 2, type = "refit")
+x = getSimulations(fm2, nsim = 2, type = "refit")
 
-getRefit(fm1, x[[1]])
-getRefit(fm1, getObservedResponse(fm1))
+getRefit(fm2, x[[1]])
+getRefit(fm2, getObservedResponse(fm2))
 
 
 
 
 ###### testing outliers
 # testing for outliers  (reports the outlier of an object)
-outliers(fm1)
+outliers(fm2)
 
 
 ###### testing for simulateResiduals
 # 
-residuals.DHARMa(fm1)
+residuals.DHARMa(fm2)
 
-simulateResiduals(fm1) 
+simulateResiduals(fm2) 
 
 
-residuals.DHARMa( simulateResiduals(fm1, arg="mean_subject", method = "PIT")   ) # PIT as dafault
-residuals.DHARMa( simulateResiduals(fm1, arg="mean_subject", method = "traditional")  )
+residuals.DHARMa( simulateResiduals(fm2, arg="mean_subject", method = "PIT")   ) # PIT as dafault
+residuals.DHARMa( simulateResiduals(fm2, arg="mean_subject", method = "traditional")  )
 
 
 #######generation the simulation Output
-simulationOutput <-  simulateResiduals(fittedModel = fm1) 
+simulationOutput <-  simulateResiduals(fittedModel = fm2) 
 
 
 ###### testing plotQQunif  
@@ -426,8 +426,8 @@ plotResiduals(simulationOutput , form = NULL, quantreg = NULL, rank = F,  smooth
 
 
 # recalculate Residuals of the model
-residuals(fm1)
-residuals( recalculateResiduals(fm1) )  # 100% equal
+residuals(fm2)
+residuals( recalculateResiduals(fm2) )  # 100% equal
 
 
 
@@ -450,28 +450,130 @@ testGeneric(simulationOutput, summary = countOnes , alternative = "less")
 
 
 ###### testing for outliers 
-DHARMa::testOutliers(fm1)
+DHARMa::testOutliers(fm2)
 
 ###### testQuantiles 
-DHARMa::testQuantiles(fm1)
+DHARMa::testQuantiles(fm2)
 
 ###### testResiduals 
-DHARMa::testResiduals(fm1)
+DHARMa::testResiduals(fm2)
 
 ###### testUniformity
-DHARMa::testUniformity(fm1)
+DHARMa::testUniformity(fm2)
 
 ###### testDispersion
-DHARMa::testDispersion(fm1)
+DHARMa::testDispersion(fm2)
 
 ###### testOutlier
-DHARMa::testOutliers(fm1)
+DHARMa::testOutliers(fm2)
 
 ###### testSimulatedResiduals 
-DHARMa::testSimulatedResiduals(fm1)
+DHARMa::testSimulatedResiduals(fm2)
 
 ###### testZeroInflation 
-DHARMa::testZeroInflation(fm1)
+DHARMa::testZeroInflation(fm2)
 
+
+
+
+
+
+#'
+#'
+#'
+#'
+#'
+##### Running glmmAdaptive examples with Zero-Inflated Negative Binomial data
+
+n <- 300 # number of subjects
+K <- 8 # number of measurements per subject
+t_max <- 5 # maximum follow-up time
+
+# we construct a data frame with the design: 
+# everyone has a baseline measurement, and then measurements at random follow-up times
+DF <- data.frame(id = rep(seq_len(n), each = K),
+                 time = c(replicate(n, c(0, sort(runif(K - 1, 0, t_max))))),
+                 sex = rep(gl(2, n/2, labels = c("male", "female")), each = K))
+
+# design matrices for the fixed and random effects non-zero part
+X <- model.matrix(~ sex * time, data = DF)
+Z <- model.matrix(~ 1, data = DF)
+# design matrices for the fixed and random effects zero part
+X_zi <- model.matrix(~ sex, data = DF)
+Z_zi <- model.matrix(~ 1, data = DF)
+
+betas <- c(1.5, 0.05, 0.05, -0.03) # fixed effects coefficients non-zero part
+shape <- 2 # shape/size parameter of the negative binomial distribution
+gammas <- c(-1.5, 0.5) # fixed effects coefficients zero part
+D11 <- 0.5 # variance of random intercepts non-zero part
+D22 <- 0.4 # variance of random intercepts zero part
+
+# we simulate random effects
+b <- cbind(rnorm(n, sd = sqrt(D11)), rnorm(n, sd = sqrt(D22)))
+# linear predictor non-zero part
+eta_y <- as.vector(X %*% betas + rowSums(Z * b[DF$id, 1, drop = FALSE]))
+# linear predictor zero part
+eta_zi <- as.vector(X_zi %*% gammas + rowSums(Z_zi * b[DF$id, 2, drop = FALSE]))
+# we simulate negative binomial longitudinal data
+DF$y <- rnbinom(n * K, size = shape, mu = exp(eta_y))
+# we set the extra zeros
+DF$y[as.logical(rbinom(n * K, size = 1, prob = plogis(eta_zi)))] <- 0
+
+
+
+
+#### running DHARMa functions
+fm2 <- mixed_model(y ~ sex * time, random = ~ 1 | id, data = DF,
+                   family = poisson())
+
+
+
+#####
+#######generation the simulation Output
+simulationOutput4 <-  simulateResiduals(fittedModel = fm2) 
+
+
+###### testing plotQQunif  
+plotQQunif(  simulationOutput4 )
+
+
+# testing plotResiduals function     
+plotResiduals(simulationOutput4 , rank = TRUE, quantreg = FALSE)
+
+plotResiduals(simulationOutput4 , quantreg = NULL)
+
+
+####### testDispersion 
+DHARMa::testDispersion(simulationOutput4)
+
+###### testGeneric
+countOnes <- function(x) sum(x == 1)
+testGeneric(simulationOutput4, summary = countOnes )
+
+
+
+###### testing for outliers 
+DHARMa::testOutliers(fm2)
+
+###### testQuantiles 
+DHARMa::testQuantiles(fm2)
+
+###### testResiduals 
+DHARMa::testResiduals(fm2)
+
+###### testUniformity
+DHARMa::testUniformity(fm2)
+
+###### testDispersion
+DHARMa::testDispersion(fm2)
+
+###### testOutlier
+DHARMa::testOutliers(fm2)
+
+###### testSimulatedResiduals 
+DHARMa::testSimulatedResiduals(fm2)
+
+###### testZeroInflation 
+DHARMa::testZeroInflation(fm2)
 
 
