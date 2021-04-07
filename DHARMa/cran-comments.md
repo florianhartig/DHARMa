@@ -10,6 +10,29 @@ This release was tested without apparent problems under
 * http://win-builder.r-project.org/ - oldrelease / devel / release
 * Linux (Travis CI) - oldrel / release / devel
 
+## Submission 2, 27.3.2021
+
+This is a bugfix release for 0.3.4, but on reflection I decided that 0.4.0 should have been a minor release, so I pushed the version number up to 0.4.0
+
+This release was tested without apparent problems under
+
+* local MAC OS 10.16 (Big Sur), R 3.6.1
+* http://win-builder.r-project.org/ - oldrelease / devel / release
+* Linux (Travis CI) - oldrel / release / devel
+
+Notes: this is the second submission, pre-submission checks from earlier version complained about lazy data in the descriptin, which I have removed, although I don't see the problem to set lazy data even if there is no data in the package, it's just my default description setting for packages.  
+
+## Submission 3, 27.3.2021
+
+This is a bugfix release for 0.3.4, but on reflection I decided that 0.4.0 should have been a minor release, so I pushed the version number up to 0.4.0
+
+This release was tested without apparent problems under
+
+* local MAC OS 10.16 (Big Sur), R 3.6.1
+* http://win-builder.r-project.org/ - oldrelease / devel / release
+* Linux (Travis CI) - oldrel / release / devel
+
+Notes: this is the third submission, pre-submission checks from earlier version complained about lazy data in the descriptin, which I have now really removed. 
 
 # Version 0.3.4
 
