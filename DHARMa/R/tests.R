@@ -235,7 +235,11 @@ testOutliers <- function(simulationOutput, alternative = c("two.sided", "greater
 
     simIndices = 1:simulationOutput$nSim
     nSim = simulationOutput$nSim
-    simResp = simulationOutput$simulatedResponse
+    if(simulationOutput$refit == T){
+      simResp = simulationOutput$refittedResiduals
+    } else {
+      simResp = simulationOutput$simulatedResponse
+    }
     resMethod = simulationOutput$method
     resInteger = simulationOutput$integerResponse
 
