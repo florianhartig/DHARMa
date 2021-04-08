@@ -9,7 +9,7 @@
 #' @param plot if TRUE, \code{\link{plotResiduals}} will be directly run after the residuals have been calculated
 #' @param ... parameters to pass to the simulate function of the model object. An important use of this is to specify whether simulations should be conditional on the current random effect estimates, e.g. via re.form. Note that not all models support syntax to specify conditionao or unconditional simulations. See also details
 #' @param seed the random seed to be used within DHARMa. The default setting, recommended for most users, is keep the random seed on a fixed value 123. This means that you will always get the same randomization and thus teh same result when running the same code. NULL = no new seed is set, but previous random state will be restored after simulation. FALSE = no seed is set, and random state will not be restored. The latter two options are only recommended for simulation experiments. See vignette for details.
-#' @param method the quantile randomization method used. The two options implemented at the moment are probability integral transform (PIT-) residuals (current default), and the "traditional" randomization procedure, that was used in DHARMa until version 0.3.0. For details, see \code{\link{getQuantile}}
+#' @param method for refit = F, the quantile randomization method used. The two options implemented at the moment are probability integral transform (PIT-) residuals (current default), and the "traditional" randomization procedure, that was used in DHARMa until version 0.3.0. Refit = T will always use "traditional", respectively of the value of method. For details, see \code{\link{getQuantile}}
 #' @return An S3 class of type "DHARMa", essentially a list with various elements. Implemented S3 functions include plot, print and \code{\link{residuals.DHARMa}}. Residuals returns the calculated scaled residuals.
 #'
 #' @details There are a number of important considerations when simulating from a more complex (hierarchical) model:
@@ -64,7 +64,6 @@ simulateResiduals <- function(fittedModel, n = 250, refit = F, integerResponse =
   out$nObs = nobs(fittedModel)
   out$nSim = n
   out$refit = refit
-  out$methods = method
   out$observedResponse = getObservedResponse(fittedModel)
 
   if(is.null(integerResponse)){
@@ -82,6 +81,8 @@ simulateResiduals <- function(fittedModel, n = 250, refit = F, integerResponse =
   ######## refit = F ##################
 
   if (refit == FALSE){
+    
+    out$method = method
 
     out$simulatedResponse = getSimulations(fittedModel, nsim = n, type = "normal", ...)
 
@@ -92,6 +93,8 @@ simulateResiduals <- function(fittedModel, n = 250, refit = F, integerResponse =
   ######## refit = T ##################
   } else {
 
+    out$method = "traditional"
+    
     # Adding new outputs
 
     out$refittedPredictedResponse <- matrix(nrow = out$nObs, ncol = n )
@@ -140,7 +143,7 @@ simulateResiduals <- function(fittedModel, n = 250, refit = F, integerResponse =
 
     ######### residual calculations ###########
 
-    out$scaledResiduals = getQuantile(simulations = out$refittedResiduals, observed = out$fittedResiduals, integerResponse = integerResponse, method = method)
+    out$scaledResiduals = getQuantile(simulations = out$refittedResiduals, observed = out$fittedResiduals, integerResponse = integerResponse, method = "traditional")
   }
 
   ########### Wrapup ############
