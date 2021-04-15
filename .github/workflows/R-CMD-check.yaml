@@ -5,10 +5,12 @@ on:
     branches:
       - main
       - master
+      - GitAction
   pull_request:
     branches:
       - main
       - master
+      - GitAction
 
 name: R-CMD-check
 
@@ -80,6 +82,15 @@ jobs:
           options(crayon.enabled = TRUE)
           rcmdcheck::rcmdcheck("DHARMa", args = c("--no-manual", "--as-cran"), error_on = "warning", check_dir = "check")
         shell: Rscript {0}
+        
+      - name: Check_II
+        env:
+          _R_CHECK_CRAN_INCOMING_REMOTE_: false
+          CI: true
+        run: |
+          rcmdcheck::rcmdcheck("DHARMa", args = c("--no-multiarch", "--no-manual"), error_on = "warning", check_dir = "check")
+        shell: Rscript {0}
+        
 
       - name: Upload check results
         if: failure()
