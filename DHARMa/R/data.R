@@ -2,6 +2,7 @@
 #'
 #' This dataset contains hurricanes in the USA between 1950 and 2012 their strength, names ..., see parameter for more information
 #' @name hurricanes
+#' @aliases {hurricanes}
 #' @docType data
 #' @keywords hurricanes, DHARMa, simulateResiduals,
 #'
@@ -21,8 +22,8 @@
 #' @param ZNDAM. scaled (NDAM)
 #'
 #' @return a dataset
-#' @usage [data(hurricanes)]
-#' @references \link{https://theoreticalecology.wordpress.com/2021/04/17/hurricanes-and-himmicanes-revisited-with-dharma/}
+#' @usage data(hurricanes)
+#' @references \link{"https://theoreticalecology.wordpress.com/2021/04/17/hurricanes-and-himmicanes-revisited-with-dharma/"}
 #' @seealso Jung et al., PNAS, 2014
 #' @format A data frame with 93 rows and 14 variables
 #'
@@ -35,7 +36,7 @@
 #'
 #' library(glmmTMB)
 #' originalModelGAM = glmmTMB(alldeaths ~ scale(MasFem) *
-#'                             (scale(Minpressure_Updated.2014) + scale(NDAM)),
+#'                             (scale(`Minpressure_Updated 2014`) + scale(NDAM)),
 #'                           data = hurricanes, family = nbinom2)
 #'
 #' # Residual checks with DHARMa
