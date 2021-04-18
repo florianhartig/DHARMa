@@ -46,5 +46,4 @@ BugReports: https://github.com/florianhartig/DHARMa/issues
 RoxygenNote: 7.1.1
 Roxygen: list(old_usage = TRUE)
 VignetteBuilder: knitr
-LazyData: true
 Encoding: UTF-8
