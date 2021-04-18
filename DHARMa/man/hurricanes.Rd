@@ -23,7 +23,7 @@ data(hurricanes)
 
 \item{MinPressure_before.}{Minimum air-pressure (909-1002)}
 
-\item{`Minpressure_Updated}{2014`. Minimum airpressure (909-1003)}
+\item{Minpressure_Updated_2014.}{Minimum airpressure (909-1003)}
 
 \item{Gender_MF.}{Gender rating binary (male/female). Male = 0, female = 1)}
 
@@ -33,7 +33,7 @@ data(hurricanes)
 
 \item{NDAM.}{normalized damage in millions (1:75.000). The raw (dollar) amounts of property damage caused by hurricanes were obtained, and the unadjusted dollar amounts were normalized to 2013 monetary values by adjusting them to inflation, wealth and population density}
 
-\item{`Elapsed}{Yrs`. elapsed since the occurrence of hurricanes (1:63)}
+\item{Elapsed_Yrs.}{elapsed since the occurrence of hurricanes (1:63)}
 
 \item{Source.}{MWR/wikipedia ()}
 
