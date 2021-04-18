@@ -4,12 +4,12 @@
 \name{hurricanes}
 \alias{hurricanes}
 \alias{{hurricanes}}
-\title{hurricanes}
+\title{hurricanes dataset residual analysis}
 \format{
 A data frame with 93 rows and 14 variables
 }
 \usage{
-data(hurricanes)
+{data(hurricanes)} Jung et al., PNAS, 2014
 }
 \arguments{
 \item{Year.}{Year the hurricanes appeared (1950-2012)}
@@ -20,7 +20,7 @@ data(hurricanes)
 
 \item{MinPressure_before.}{Minimum air-pressure (909-1002)}
 
-\item{Minpressure_Updated.2014.}{Minimum airpressure (909-1003)}
+\item{`Minpressure_Updated}{2014`. Minimum airpressure (909-1003)}
 
 \item{Gender_MF.}{Gender rating binary (male/female). Male = 0, female = 1)}
 
@@ -30,7 +30,7 @@ data(hurricanes)
 
 \item{NDAM.}{normalized damage in millions (1:75.000). The raw (dollar) amounts of property damage caused by hurricanes were obtained, and the unadjusted dollar amounts were normalized to 2013 monetary values by adjusting them to inflation, wealth and population density}
 
-\item{Elapsed}{Years elapsed since the occurrence of hurricanes (1:63)}
+\item{`Elapsed}{Yrs`. elapsed since the occurrence of hurricanes (1:63)}
 
 \item{Source.}{MWR/wikipedia ()}
 
@@ -44,6 +44,9 @@ data(hurricanes)
 a dataset
 }
 \description{
+hurricanes
+}
+\details{
 This dataset contains hurricanes in the USA between 1950 and 2012 their strength, names ..., see parameter for more information
 }
 \examples{
@@ -55,8 +58,8 @@ data(hurricanes)
 
 library(glmmTMB)
 originalModelGAM = glmmTMB(alldeaths ~ scale(MasFem) *
-                            (scale(`Minpressure_Updated 2014`) + scale(NDAM)),
-                          data = hurricanes, family = nbinom2)
+                             (scale(Minpressure_Updated.2014) + scale(NDAM)),
+                           data = hurricanes, family = nbinom2)
 
 # Residual checks with DHARMa
 res <- simulateResiduals(originalModelGAM)
@@ -69,13 +72,12 @@ plotResiduals(res, hurricanes$NDAM)
 # we also find temporal autocorrelation
 res2 = recalculateResiduals(res, group = hurricanes$Year)
 testTemporalAutocorrelation(res2, time = unique(hurricanes$Year))
-
 }
 \references{
-\link{"https://theoreticalecology.wordpress.com/2021/04/17/hurricanes-and-himmicanes-revisited-with-dharma/"}
+\link{Jung et al., PNAS, 2014}
 }
 \seealso{
-Jung et al., PNAS, 2014
+\code{\link{https://theoreticalecology.wordpress.com/2021/04/17/hurricanes-and-himmicanes-revisited-with-dharma/}}
 }
 \keyword{DHARMa,}
 \keyword{hurricanes,}
