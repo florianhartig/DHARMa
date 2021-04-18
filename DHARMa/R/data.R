@@ -2,6 +2,7 @@
 #'
 #' This dataset contains hurricanes in the USA between 1950 and 2012 their strength, names ..., see parameter for more information
 #' @name hurricanes
+#' @docType data
 #' @keywords hurricanes, DHARMa, simulateResiduals,
 #'
 #' @param Year. Year the hurricanes appeared (1950-2012)
@@ -20,12 +21,19 @@
 #' @param ZNDAM. scaled (NDAM)
 #'
 #' @return a dataset
-#' @docType data
-#'
-#' @seealso \code{\link{https://theoreticalecology.wordpress.com/2021/04/17/hurricanes-and-himmicanes-revisited-with-dharma/,  Jung et al., PNAS, 2014}}
+#' @usage [data(hurricanes)]
+#' @references \link{https://theoreticalecology.wordpress.com/2021/04/17/hurricanes-and-himmicanes-revisited-with-dharma/}
+#' @seealso Jung et al., PNAS, 2014
 #' @format A data frame with 93 rows and 14 variables
 #'
 #' @examples
+#'
+#' hurricanes <- readxl::read_excel('data-raw/Hurricane.xlsx',
+#'               range = "A1:N93",
+#'               col_names = TRUE,
+#'               na = "(NA)")
+#'
+#'
 #' Data <- hurricanes
 #'
 #' library(glmmTMB)
