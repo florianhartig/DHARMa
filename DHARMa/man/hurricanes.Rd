@@ -8,8 +8,11 @@
 \format{
 A data frame with 93 rows and 14 variables
 }
+\source{
+https://theoreticalecology.wordpress.com/2021/04/17/hurricanes-and-himmicanes-revisited-with-dharma/
+}
 \usage{
-{data(hurricanes)} Jung et al., PNAS, 2014
+data(hurricanes)
 }
 \arguments{
 \item{Year.}{Year the hurricanes appeared (1950-2012)}
@@ -40,14 +43,11 @@ A data frame with 93 rows and 14 variables
 
 \item{ZNDAM.}{scaled (NDAM)}
 }
-\value{
-a dataset
-}
 \description{
 hurricanes
 }
 \details{
-This dataset contains hurricanes in the USA between 1950 and 2012 their strength, names ..., see parameter for more information
+This dataset contains hurricanes in the USA between 1950 and 2012 their strength, names ..., see parameter for more informations.
 }
 \examples{
 # Loading hurricanes dataset
@@ -74,10 +74,10 @@ res2 = recalculateResiduals(res, group = hurricanes$Year)
 testTemporalAutocorrelation(res2, time = unique(hurricanes$Year))
 }
 \references{
-\link{Jung et al., PNAS, 2014}
+Jung et al., PNAS, 2014
 }
 \seealso{
-\code{\link{https://theoreticalecology.wordpress.com/2021/04/17/hurricanes-and-himmicanes-revisited-with-dharma/}}
+\code{\link{simulateResiduals}}
 }
 \keyword{DHARMa,}
 \keyword{hurricanes,}
