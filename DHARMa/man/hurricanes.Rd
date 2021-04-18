@@ -46,35 +46,28 @@ a dataset
 This dataset contains hurricanes in the USA between 1950 and 2012 their strength, names ..., see parameter for more information
 }
 \examples{
+# Loading hurricanes dataset
 
-hurricanes <- readxl::read_excel('data-raw/Hurricane.xlsx',
-              range = "A1:N93",
-              col_names = TRUE,
-              na = "(NA)")
+library(DHARMa)
+data(hurricanes)
 
-
-Data <- hurricanes
 
 library(glmmTMB)
-
-Data <- hurricanes
 originalModelGAM = glmmTMB(alldeaths ~ scale(MasFem) *
                             (scale(Minpressure_Updated.2014) + scale(NDAM)),
-                          data = Data, family = nbinom2)
-
+                          data = hurricanes, family = nbinom2)
 
 # Residual checks with DHARMa
-library(DHARMa)
 res <- simulateResiduals(originalModelGAM)
 plot(res)
 
 # no significant deviation in the general plot, but try this
 # which was highlighted by https://www.theguardian.com/science/grrlscientist/2014/jun/04/hurricane-gender-name-bias-sexism-statistics
-plotResiduals(res, Data$NDAM)
+plotResiduals(res, hurricanes$NDAM)
 
 # we also find temporal autocorrelation
-res2 = recalculateResiduals(res, group = Data$Year)
-testTemporalAutocorrelation(res2, time = unique(Data$Year))
+res2 = recalculateResiduals(res, group = hurricanes$Year)
+testTemporalAutocorrelation(res2, time = unique(hurricanes$Year))
 
 }
 \references{
