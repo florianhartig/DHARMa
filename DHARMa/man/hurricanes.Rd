@@ -3,7 +3,6 @@
 \docType{data}
 \name{hurricanes}
 \alias{hurricanes}
-\alias{{hurricanes}}
 \title{hurricanes dataset residual analysis}
 \format{
 A data frame with 93 rows and 14 variables
@@ -12,7 +11,7 @@ A data frame with 93 rows and 14 variables
 https://theoreticalecology.wordpress.com/2021/04/17/hurricanes-and-himmicanes-revisited-with-dharma/
 }
 \usage{
-data(hurricanes)
+{data(hurricanes)}
 }
 \arguments{
 \item{Year.}{Year the hurricanes appeared (1950-2012)}
@@ -43,6 +42,9 @@ data(hurricanes)
 
 \item{ZNDAM.}{scaled (NDAM)}
 }
+\value{
+a dataframe
+}
 \description{
 hurricanes
 }
@@ -55,10 +57,10 @@ This dataset contains hurricanes in the USA between 1950 and 2012 their strength
 library(DHARMa)
 data(hurricanes)
 
-
+str(hurricanes)
 library(glmmTMB)
 originalModelGAM = glmmTMB(alldeaths ~ scale(MasFem) *
-                             (scale(Minpressure_Updated.2014) + scale(NDAM)),
+                             (scale(Minpressure_Updated_2014) + scale(NDAM)),
                            data = hurricanes, family = nbinom2)
 
 # Residual checks with DHARMa
