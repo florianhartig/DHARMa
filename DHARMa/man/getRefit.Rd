@@ -30,13 +30,9 @@ getRefit(object, newresp, ...)
 }
 \description{
 Wrapper to refit a fitted model
-
-checks if the fitted model excluded NA values
 }
 \details{
 The purpose of this wrapper is to standardize the refit of a model. The behavior of this function depends on the supplied model. When available, it uses the refit method, otherwise it will use update. For glmmTMB: since version 1.0, glmmTMB has a refit function, but this didn't work, so I switched back to this implementation, which is a hack based on the update function.
-
-Checks if the fitted model excluded NA values
 }
 \examples{
 testData = createData(sampleSize = 400, family = gaussian())

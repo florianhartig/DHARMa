@@ -4,7 +4,6 @@
 \alias{getFitted}
 \alias{getFitted.default}
 \alias{getResiduals.default}
-\alias{getFitted.gam}
 \alias{getFitted.HLfit}
 \alias{getFitted.MixMod}
 \title{Get fitted / predicted values}
@@ -14,8 +13,6 @@ getFitted(object, ...)
 \method{getFitted}{default}(object, ...)
 
 \method{getResiduals}{default}(object, ...)
-
-\method{getFitted}{gam}(object, ...)
 
 \method{getFitted}{HLfit}(object, ...)
 

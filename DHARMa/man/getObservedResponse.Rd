@@ -19,9 +19,13 @@ getObservedResponse(object, ...)
 }
 \description{
 Extract the response of a fitted model
+
+checks if the fitted model excluded NA values
 }
 \details{
 The purpose of this function is to safely extract the observed response (dependent variable) of the fitted model classes
+
+Checks if the fitted model excluded NA values
 }
 \examples{
 testData = createData(sampleSize = 400, family = gaussian())
