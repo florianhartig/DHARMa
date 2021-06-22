@@ -45,11 +45,14 @@ residuals(simulationOutput)
 # transform residuals to other pdf, see ?residuals.DHARMa for details
 residuals(simulationOutput, quantileFunction = qnorm, outlierValues = c(-7,7))
 
-# calculating residuals per group
+# get residuals that are outside the simulation envelope
+outliers(simulationOutput)
+
+# calculating aggregated residuals per group
 simulationOutput2 = recalculateResiduals(simulationOutput, group = testData$group)
 plot(simulationOutput2, quantreg = FALSE)
 
-# calculating residuals for only one group
+# calculating residuals only for subset of the data
 simulationOutput3 = recalculateResiduals(simulationOutput, sel = testData$group == 1 )
 plot(simulationOutput3, quantreg = FALSE)
 }

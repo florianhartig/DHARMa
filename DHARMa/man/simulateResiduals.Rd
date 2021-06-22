@@ -19,14 +19,14 @@ simulateResiduals(fittedModel, n = 250, refit = F,
 
 \item{plot}{if TRUE, \code{\link{plotResiduals}} will be directly run after the residuals have been calculated}
 
-\item{seed}{the random seed to be used within DHARMa. The default setting, recommended for most users, is keep the random seed on a fixed value 123. This means that you will always get the same randomization and thus teh same result when running the same code. NULL = no new seed is set, but previous random state will be restored after simulation. FALSE = no seed is set, and random state will not be restored. The latter two options are only recommended for simulation experiments. See vignette for details.}
+\item{seed}{the random seed to be used within DHARMa. The default setting, recommended for most users, is keep the random seed on a fixed value 123. This means that you will always get the same randomization and thus the same result when running the same code. NULL = no new seed is set, but previous random state will be restored after simulation. FALSE = no seed is set, and random state will not be restored. The latter two options are only recommended for simulation experiments. See vignette for details.}
 
 \item{method}{for refit = F, the quantile randomization method used. The two options implemented at the moment are probability integral transform (PIT-) residuals (current default), and the "traditional" randomization procedure, that was used in DHARMa until version 0.3.0. Refit = T will always use "traditional", respectively of the value of method. For details, see \code{\link{getQuantile}}}
 
-\item{...}{parameters to pass to the simulate function of the model object. An important use of this is to specify whether simulations should be conditional on the current random effect estimates, e.g. via re.form. Note that not all models support syntax to specify conditionao or unconditional simulations. See also details}
+\item{...}{parameters to pass to the simulate function of the model object. An important use of this is to specify whether simulations should be conditional on the current random effect estimates, e.g. via re.form. Note that not all models support syntax to specify conditional or unconditional simulations. See also details}
 }
 \value{
-An S3 class of type "DHARMa", essentially a list with various elements. Implemented S3 functions include plot, print and \code{\link{residuals.DHARMa}}. Residuals returns the calculated scaled residuals.
+An S3 class of type "DHARMa". Implemented S3 functions include \code{\link{plot.DHARMa}}, \code{\link{print.DHARMa}} and \code{\link{residuals.DHARMa}}. For other functions that can be used on a DHARMa object, see section "See Also" below.
 }
 \description{
 The function creates scaled residuals by simulating from the fitted model. Residuals can be extracted with \code{\link{residuals.DHARMa}}. See \code{\link{testResiduals}} for an overview of residual tests, \code{\link{plot.DHARMa}} for an overview of available plots.
@@ -40,10 +40,6 @@ In such a situation, we have to decide if we want to re-simulate all stochastic 
 
 If the model is correctly specified, the simulated residuals should be flat regardless how many hierarchical levels we re-simulate. The most thorough procedure would therefore be to test all possible options. If testing only one option, I would recommend to re-simulate all levels, because this essentially tests the model structure as a whole. This is the default setting in the DHARMa package. A potential drawback is that re-simulating the lower-level random effects creates more variability, which may reduce power for detecting problems in the upper-level stochastic processes. In particular dispersion tests may produce different results when switching from conditional to unconditional simulations, and often the conditional simulation is more sensitive.
 
-\strong{Integer responses}: a second complication is the treatment of inter responses. Imaging we have observed a 0, and we predict 30\% zeros - what is the quantile that we should display for the residual? To deal with this problem and maintain a uniform response, the option integerResponse adds a uniform noise from -0.5 to 0.5 on the simulated and observed response, which creates a uniform distribution - you can see this via hist(ecdf(runif(10000))(runif(10000))).
-
- DHARMa will try to automatically if the fitted model has an integer or discrete distribution via the family argument. However, in some cases the family does not allow to uniquely identify the distribution type. For example, a tweedie distribution can be inter or continuous. Therefore, DHARMa will additionally check the simulation results for repeated values, and will change the distribution type if repeated values are found (a message is displayed in this case).
-
 \strong{Refitting or not}: a third issue is how residuals are calculated. simulateResiduals has two options that are controlled by the refit parameter:
 
 1. if refit = FALSE (default), new data is simulated from the fitted model, and residuals are calculated by comparing the observed data to the new data
@@ -53,6 +49,8 @@ If the model is correctly specified, the simulated residuals should be flat rega
 \strong{Residuals per group}: In many situations, it can be useful to look at residuals per group, e.g. to see how much the model over / underpredicts per plot, year or subject. To do this, use \code{\link{recalculateResiduals}}, together with a grouping variable (see also help)
 
 \strong{Transformation to other distributions}: DHARMa calculates residuals for which the theoretical expectation (assuming a correctly specified model) is uniform. To transfor this residuals to another distribution (e.g. so that a correctly specified model will have normal residuals) see \code{\link{residuals.DHARMa}}.
+
+\strong{Integer responses}: this is only relevant if method = "traditional", in which case it activates the randomization of the residuals. Usually, this does not need to be changed, as DHARMa will try to automatically if the fitted model has an integer or discrete distribution via the family argument. However, in some cases the family does not allow to uniquely identify the distribution type. For example, a tweedie distribution can be inter or continuous. Therefore, DHARMa will additionally check the simulation results for repeated values, and will change the distribution type if repeated values are found (a message is displayed in this case).
 }
 \examples{
 library(lme4)
@@ -75,14 +73,17 @@ residuals(simulationOutput)
 # transform residuals to other pdf, see ?residuals.DHARMa for details
 residuals(simulationOutput, quantileFunction = qnorm, outlierValues = c(-7,7))
 
-# calculating residuals per group
+# get residuals that are outside the simulation envelope
+outliers(simulationOutput)
+
+# calculating aggregated residuals per group
 simulationOutput2 = recalculateResiduals(simulationOutput, group = testData$group)
 plot(simulationOutput2, quantreg = FALSE)
 
-# calculating residuals for only one group
+# calculating residuals only for subset of the data
 simulationOutput3 = recalculateResiduals(simulationOutput, sel = testData$group == 1 )
 plot(simulationOutput3, quantreg = FALSE)
 }
 \seealso{
-\code{\link{testResiduals}}, \code{\link{plot.DHARMa}}, \code{\link{plotResiduals}}, \code{\link{print.DHARMa}}, \code{\link{residuals.DHARMa}}, \code{\link{recalculateResiduals}}
+\code{\link{testResiduals}}, \code{\link{plotResiduals}}, \code{\link{recalculateResiduals}}, \code{\link{outliers}}
 }
