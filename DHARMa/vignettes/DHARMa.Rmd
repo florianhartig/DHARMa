@@ -57,7 +57,7 @@ But even experienced statistical analysts currently have few options to diagnose
 
 DHARMa aims at solving these problems by creating readily interpretable residuals for generalized linear (mixed) models that are standardized to values between 0 and 1, and that can be interpreted as intuitively as residuals for the linear model. This is achieved by a simulation-based approach, similar to the Bayesian p-value or the parametric bootstrap, that transforms the residuals to a standardized scale. The basic steps are:
 
-1. Simulate new data from the fitted model for each observation.
+1. Simulate new response data from the fitted model for each observation.
 
 2. For each observation, calculate the empirical cumulative density function for the simulated observations, which describes the possible values (and their probability) at the predictor combination of the observed value, assuming the fitted model is correct.
 
@@ -626,9 +626,9 @@ but that seems to make little difference. Both models would be acceptable in ter
 
 ## Poisson data
 
-The main concern in Poisson data is dispersion. Poisson regression are nearly always overdispersed. If you address this problem with quasi-poisson models, you will not be able to test the model with DHARMa. It is anyway better to move to a negative Binomial, or an observation-level random effect. 
+The main concern in Poisson data is dispersion. See comments in the section on the dispersion test, in particulr regarding the advantage of conditional simulations in this case. To address overdispersion, I would recommend to prefer the negative binomial model over observation-level random effects, because this mode will be easier to test in DHARMa and its dispersion can be easier modelled, e.g. with glmmTMB. The third option would be quasi models, but there are few advantages, except runtime. Note also that quasi models cannot be tested with DHARMa. 
 
-Once that is done, you should check for heteroscedasticity (via standard plot, also against all predictors), and for zero-inflation. As noted, zero-inflation tests are often negative, and rather show up as underdispersion. Work through the owl example below. 
+Once dispersion is adjusted, you should check for heteroscedasticity (via standard plot, also against all predictors), and for zero-inflation. As noted, zero-inflation tests are often negative, and rather show up as underdispersion. Work through the owl example below. 
 
 ## Proportional data
 
@@ -801,6 +801,16 @@ spaMM is supported by DHARMa since 0.2.1
 ## GLMMadaptive
 
 GLMMadaptive is supported by DHARMa since 0.3.4. 
+
+## phyr
+
+DHARMa residuals work with phyr, but the correct implementation is not fully tested as of DHARMa 0.4.2. See also [https://github.com/florianhartig/DHARMa/issues/235](https://github.com/florianhartig/DHARMa/issues/235)
+
+## brms
+
+brms can be made to work together with DHARMa, see [https://github.com/florianhartig/DHARMa/issues/33](https://github.com/florianhartig/DHARMa/issues/33)
+
+
 
 ## Unsupported packages
 
