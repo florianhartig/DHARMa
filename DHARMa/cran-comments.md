@@ -1,4 +1,17 @@
-# Version 0.4.1
+# Version 0.4.3
+
+## Submission 1, 5.7.2021
+
+This is a bugfix release. See NEWS for details. 
+
+This release was tested without apparent problems under
+
+* local MAC OS 11.4 (Big Sur), R 4.1.0
+* http://win-builder.r-project.org/ - oldrelease / devel / release
+* Linux (Travis CI) - oldrel / release / devel
+* GitHub Actions - Windows / Mac / Ubuntu (release), Ubuntu (devel)
+
+# Version 0.4.2
 
 ## Submission 1, 5.7.2021
 

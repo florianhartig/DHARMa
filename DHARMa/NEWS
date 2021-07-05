@@ -1,5 +1,13 @@
 NOTE: for more news about the package, see https://github.com/florianhartig/DHARMa/releases
 
+DHARMa 0.4.3
+============
+
+Bugfixes
+
+- Removed glmmTMB completely, see #289
+
+
 DHARMa 0.4.2
 ============
 
