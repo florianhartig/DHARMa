@@ -231,7 +231,8 @@ getFitted <- function (object, ...) {
 #' @rdname getFitted
 #' @export
 getFitted.default <- function (object,...){
-  predict(object, type = "response", re.form = ~0)
+  out = predict(object, type = "response", re.form = ~0)
+  out = as.vector(out)
 }
 
 
