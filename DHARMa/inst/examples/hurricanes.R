@@ -1,8 +1,9 @@
+\dontrun{
 # Loading hurricanes dataset
 
 library(DHARMa)
-data(hurricanes)
 
+data(hurricanes)
 str(hurricanes)
 
 # this is the model fit by Jung et al.
@@ -25,3 +26,4 @@ testTemporalAutocorrelation(res2, time = unique(hurricanes$Year))
 
 # task: try to address these issues - in many instances, this will 
 # make the MasFem predictor n.s.
+}
