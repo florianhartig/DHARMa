@@ -1,5 +1,18 @@
 NOTE: for more news about the package, see https://github.com/florianhartig/DHARMa/releases
 
+DHARMa 0.4.2
+============
+
+Bugfixes
+
+- Moved glmmTMB from suggest to import because this package is used in the vignette, see #289
+
+Minor changes
+
+- Added hurricane dataset
+- Help and vignette updates
+
+
 DHARMa 0.4.1
 ============
 
