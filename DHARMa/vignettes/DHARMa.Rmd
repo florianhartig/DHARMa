@@ -565,12 +565,10 @@ I guess you could use either Model 2 or 3 - the broader point is: increasing mod
 
 ## Owl example (count data)
 
-The next examples uses the fairly well known Owl dataset which is provided in glmmTMB (see ?Owls for more info about the data).
-
-The following shows a sequence of models, all checked with DHARMa. The example is discussed in a talk at ISEC 2018, see slides [here](https://www.slideshare.net/florianhartig/mon-c5hartig2493). 
+The next examples uses the fairly well known Owl dataset which is provided in glmmTMB (see ?Owls for more info about the data). The following shows a sequence of models, all checked with DHARMa. The example is discussed in a talk at ISEC 2018, see slides [here](https://www.slideshare.net/florianhartig/mon-c5hartig2493). 
 
 
-```{r}
+```{r, eval = F}
 m1 <- glm(SiblingNegotiation ~ FoodTreatment*SexParent + offset(log(BroodSize)), data=Owls , family = poisson)
 res <- simulateResiduals(m1)
 plot(res)
@@ -578,7 +576,7 @@ plot(res)
 
 OK, this is highly overdispersed. Let's add a RE on nest
 
-```{r}
+```{r, eval = F}
 m2 <- glmer(SiblingNegotiation ~ FoodTreatment*SexParent + offset(log(BroodSize)) + (1|Nest), data=Owls , family = poisson)
 res <- simulateResiduals(m2)
 plot(res)
