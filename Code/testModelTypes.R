@@ -310,13 +310,13 @@ test_that("glm poisson works",
             # fittedModel2 <- glm.nb(observedResponse ~ Environment1, data = testData2)
             # expectDispersion(fittedModel2,FALSE)
 
-            fittedModel <- glmmTMB(observedResponse ~ Environment1 , family = "poisson", data = testData)
-            runEverything(fittedModel, testData)
-            fittedModel2 <- glmmTMB(observedResponse ~ Environment1 , family = "poisson", data = testData2)
-            expectDispersion(fittedModel2)
+            #fittedModel <- glmmTMB(observedResponse ~ Environment1 , family = "poisson", data = testData)
+            #runEverything(fittedModel, testData)
+            #fittedModel2 <- glmmTMB(observedResponse ~ Environment1 , family = "poisson", data = testData2)
+            #expectDispersion(fittedModel2)
 
-            fittedModel <- glmmTMB(observedResponse ~ Environment1 + (1|group), zi=~1 , family = nbinom2, data = testData)
-            fittedModel2 <- glmmTMB(observedResponse ~ Environment1 + (1|group), zi=~1 , family = nbinom2, data = testData2)
+            #fittedModel <- glmmTMB(observedResponse ~ Environment1 + (1|group), zi=~1 , family = nbinom2, data = testData)
+            #fittedModel2 <- glmmTMB(observedResponse ~ Environment1 + (1|group), zi=~1 , family = nbinom2, data = testData2)
             # does not fully work
             # runEverything(fittedModel, testData)
             # expectDispersion(fittedModel2, F)
@@ -389,8 +389,8 @@ test_that("glm poisson weights throws warning",
                       expect_warning(simulateResiduals(fittedModel))
 
                       # glmmTMB does not warn, implemented warning in DHARMa
-                      fittedModel <- glmmTMB(observedResponse ~ Environment1 , family = "poisson", data = testData, weights = weights)
-                      expect_warning(simulateResiduals(fittedModel))
+                      # fittedModel <- glmmTMB(observedResponse ~ Environment1 , family = "poisson", data = testData, weights = weights)
+                      # expect_warning(simulateResiduals(fittedModel))
 
                       # spaMM does not warn, but seems to be simulating with correct (heteroskedastic) variance.
                       # weights cannot be fit with poisson, because spaMM directly interpretes weights as variance

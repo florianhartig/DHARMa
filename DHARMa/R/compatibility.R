@@ -168,7 +168,7 @@ getFixedEffects <- function(fittedModel){
   } else if(class(fittedModel)[1] %in% c("glmerMod", "lmerMod", "HLfit")){
     out = fixef(fittedModel)
   } else if(class(fittedModel)[1] %in% c("glmmTMB")){
-    out = glmmTMB::fixef(fittedModel)
+    out = fixef(fittedModel)
     out = out$cond
   } else {
     out = coef(fittedModel)
@@ -232,7 +232,7 @@ getFitted <- function (object, ...) {
 #' @export
 getFitted.default <- function (object,...){
   out = predict(object, type = "response", re.form = ~0)
-  out = as.vector(out)
+  out = as.vector(out) # introduced because of phyr error
 }
 
 
