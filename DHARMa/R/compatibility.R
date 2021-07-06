@@ -168,7 +168,7 @@ getFixedEffects <- function(fittedModel){
   } else if(class(fittedModel)[1] %in% c("glmerMod", "lmerMod", "HLfit")){
     out = fixef(fittedModel)
   } else if(class(fittedModel)[1] %in% c("glmmTMB")){
-    out = glmmTMB::fixef(fittedModel)
+    out = fixef(fittedModel)
     out = out$cond
   } else {
     out = coef(fittedModel)
