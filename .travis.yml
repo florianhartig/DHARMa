@@ -17,10 +17,8 @@ sudo: false
 # cache: packages
 
 r:
-  - oldrel
   - release
-  - devel
-  
+
 # Install nlopt package to help nloptr install
 # glpk-utils and libglpk-dev are needed because of DHARMa #166
 addons:
