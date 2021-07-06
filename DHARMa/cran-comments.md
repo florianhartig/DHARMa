@@ -4,7 +4,7 @@
 
 This is a bugfix release, attempting to fix the issue with the dependency on glmmTMB, which was apparently exacerbated by the 0.4.2 update yesterday.
 
-I have for the moment (hopefully) removed glmmTMB from DHARMa, and will re-introduce it once glmmTMB is fixed. 
+I have for the moment (hopefully) removed glmmTMB from DHARMa, and will re-introduce it once glmmTMB is fixed.
 
 This release was tested without apparent problems under
 
@@ -17,7 +17,7 @@ This release was tested without apparent problems under
 
 ## Submission 1, 5.7.2021
 
-This is a bugfix release. See NEWS for details. 
+This is a bugfix release. See NEWS for details.
 
 This release was tested without apparent problems under
 
@@ -30,7 +30,7 @@ This release was tested without apparent problems under
 
 ## Submission 1, 24.3.2021
 
-This is a bugfix release. See NEWS for details. 
+This is a bugfix release. See NEWS for details.
 
 This release was tested without apparent problems under
 
@@ -73,13 +73,13 @@ This release was tested without apparent problems under
 * http://win-builder.r-project.org/ - oldrelease / devel / release
 * Linux (Travis CI) - oldrel / release / devel
 
-Notes: this is the third submission, pre-submission checks from earlier version complained about lazy data in the descriptin, which I have now really removed. 
+Notes: this is the third submission, pre-submission checks from earlier version complained about lazy data in the descriptin, which I have now really removed.
 
 # Version 0.3.4
 
 ## Submission 1, 23.3.2021
 
-This is a relatively substantial update of DHARMa, with various smaller new features and bugfixes. See NEWS for changes. 
+This is a relatively substantial update of DHARMa, with various smaller new features and bugfixes. See NEWS for changes.
 
 This release was tested without apparent problems under
 
@@ -106,10 +106,10 @@ Check: running examples for arch 'x64', Result: NOTE
                  user system elapsed
   hist.DHARMa   10.94   0.12   11.73
   plotResiduals  9.64   0.00   10.17
-  
+
 ## Submission 2, 23.3.2021
 
-This is a relatively substantial update of DHARMa, with various smaller new features and bugfixes. See NEWS for changes. 
+This is a relatively substantial update of DHARMa, with various smaller new features and bugfixes. See NEWS for changes.
 
 This release was tested without apparent problems under
 
@@ -128,7 +128,7 @@ Notes: this is the second submission, pre-submission checks from earlier version
 
 ## Submission 1, 22.8.20
 
-This is a minor update of DHARMa. See NEWS for changes. 
+This is a minor update of DHARMa. See NEWS for changes.
 
 This release was tested without apparent problems under
 
@@ -143,7 +143,7 @@ This release was tested without apparent problems under
 
 ## Submission 1, 16.6.20
 
-This is a minor update of DHARMa, with a few stability improvement and bugfixes. See NEWS for changes. 
+This is a minor update of DHARMa, with a few stability improvement and bugfixes. See NEWS for changes.
 
 This release was tested without apparent problems under
 
@@ -157,7 +157,7 @@ This release was tested without apparent problems under
 
 ## Submission 1, 11.5.20
 
-This is a minor update of DHARMa, with a few stability improvement and bugfixes. See NEWS for changes. 
+This is a minor update of DHARMa, with a few stability improvement and bugfixes. See NEWS for changes.
 
 This release was tested without apparent problems under
 
@@ -171,7 +171,7 @@ This release was tested without apparent problems under
 
 ## Submission 1, 20.4.20
 
-This is a substantial update of DHARMa, introducing various new functions and bugfixes. See NEWS for changes. 
+This is a substantial update of DHARMa, introducing various new functions and bugfixes. See NEWS for changes.
 
 This release was tested without apparent problems under
 
@@ -184,7 +184,7 @@ This release was tested without apparent problems under
 
 ## Submission 1, 4.2.20
 
-This is a minor update of DHARMa, mainly enhancing compatibility with glmmTMB. See NEWS for changes. 
+This is a minor update of DHARMa, mainly enhancing compatibility with glmmTMB. See NEWS for changes.
 
 This release was tested without apparent problems under
 
@@ -196,7 +196,7 @@ This release was tested without apparent problems under
 
 ## Submission 1, 26.11.19
 
-This release fixes a bug in the vignette that appeared after last release last week. See NEWS for changes. 
+This release fixes a bug in the vignette that appeared after last release last week. See NEWS for changes.
 
 This release was tested without apparent problems under
 
@@ -209,7 +209,7 @@ This release was tested without apparent problems under
 
 ## Submission 1
 
-This is a minor bugfix release. See NEWS for changes. 
+This is a minor bugfix release. See NEWS for changes.
 
 This release was tested without apparent problems under
 
@@ -221,7 +221,7 @@ This release was tested without apparent problems under
 
 ## Submission 1
 
-This is a bugfix release, responding to an email from CRAN about a problem building the vignette. See NEWS for changes. 
+This is a bugfix release, responding to an email from CRAN about a problem building the vignette. See NEWS for changes.
 
 This release was tested without apparent problems under
 
@@ -233,7 +233,7 @@ This release was tested without apparent problems under
 
 ## Submission 1
 
-This is a maintenance release with a few smaller bug fixes and a few improvements to the package. See NEWS for changes. 
+This is a maintenance release with a few smaller bug fixes and a few improvements to the package. See NEWS for changes.
 
 This release was tested without apparent problems under
 
@@ -246,7 +246,7 @@ This release was tested without apparent problems under
 
 ## Submission 1
 
-This is bugfix release for version 0.2.1, which was published on CRAN a few days ago. This new release 0.2.2 fixes an issue in the vignette (due to some old header command, title, abstract and TOC were not shown). Apologies for the oversight. 
+This is bugfix release for version 0.2.1, which was published on CRAN a few days ago. This new release 0.2.2 fixes an issue in the vignette (due to some old header command, title, abstract and TOC were not shown). Apologies for the oversight.
 
 This release was tested without apparent problems under
 
@@ -272,32 +272,32 @@ This release was tested without apparent problems under
 
 ## Submission 1
 
-This is major release with a number of important changes to the package. See DHARMa NEWS for changes. 
+This is major release with a number of important changes to the package. See DHARMa NEWS for changes.
 
 This release was tested without apparent problems under
 
 * local MAC OS 10.13.4 (High Sierra), R 3.3.2
 * http://win-builder.r-project.org/ - oldrelease / devel / realease
 * Linux (Travis CI) - oldrel / release / devel
- 
+
 
 # Version 0.1.6
 
 ## Submission 1
 
-This is a maintenance release with a few smaller bug fixes and a few improvements to the package. See NEWS for changes. 
+This is a maintenance release with a few smaller bug fixes and a few improvements to the package. See NEWS for changes.
 
 This release was tested without apparent problems under
 
 * local MAC OS 10.13.3, R 3.3.2
 * http://win-builder.r-project.org/ - oldrelease / devel / realease
 * Linux (Travis CI) - oldrel / release / devel
- 
+
 # Version 0.1.5
 
 ## Submission 1
 
-This release fixes a bug in version 0.1.4 that occurred when running simulateResiduals with refit = T. Apologies for any inconvenience. 
+This release fixes a bug in version 0.1.4 that occurred when running simulateResiduals with refit = T. Apologies for any inconvenience.
 
 This release was tested without apparent problems under
 
@@ -305,12 +305,12 @@ This release was tested without apparent problems under
 * http://win-builder.r-project.org/, current settings
 * Linux (Travis CI)
  * oldrel / release / devel
- 
+
 # Version 0.1.4
 
 ## Submission 1
 
-This is a minor update. See NEWS for changes. 
+This is a minor update. See NEWS for changes.
 
 This release was tested without apparent problems under
 
@@ -327,15 +327,15 @@ This is a minor update. Important changes
 
 - includes support for model class 'gam' from package 'mgcv'. Required overwriting the 'fitted' function for gam, see https://github.com/florianhartig/DHARMa/issues/12
 
-- plotResiduals includes support for factors 
+- plotResiduals includes support for factors
 
-- updates to the help 
+- updates to the help
 
 This release was tested without apparent problems under
 
 * local MAC OS 10.10.5, R 3.3.1
 * http://win-builder.r-project.org/
- * R-release: R-3.3.1 
+ * R-release: R-3.3.1
  * R-devel: 2016-11-14 r71659
 * Linux (Travis CI)
  * oldrel / release / devel
@@ -350,7 +350,7 @@ This release was tested without apparent problems under
 
 * local MAC OS 10.10.5, R 3.3.1
 * http://win-builder.r-project.org/
- * R-release: R-3.3.1 
+ * R-release: R-3.3.1
  * R-devel: 2016-11-14 r71659
 * Linux (Travis CI)
 
@@ -368,7 +368,7 @@ This is a minor update of the DHARMa package
 
 * local MAC OS 10.10.5, R 3.3.1
 * http://win-builder.r-project.org/
- * R-release: R-3.3.1 
+ * R-release: R-3.3.1
  * R-devel: 2016-11-14 r71659
 
 ### R CMD check results
@@ -382,14 +382,14 @@ R CMD check succeeded
 
 #### win-builder
 
-only some spelling problems that seem fine to me. 
+only some spelling problems that seem fine to me.
 
 
 
 # Version 0.1.0
 
 
-## Submission 2 
+## Submission 2
 
 Hi,
 
@@ -435,11 +435,11 @@ Please fix.
 
 Please shorten the example code so it runs in 5 sec.
 
-* changed the settings in the help of simulateResiduals() - I hope it is below 5 second now. 
+* changed the settings in the help of simulateResiduals() - I hope it is below 5 second now.
 
 Resubmit when you have made these changes and passed checks without these notes.
 
-Duncan Murdoch 
+Duncan Murdoch
 
 ## Submission 1
 
@@ -448,7 +448,7 @@ Duncan Murdoch
 * local MAC OS 10.10.5, R 3.3.1
 * local Windows 2012 Server, R 3.3.0
 * http://win-builder.r-project.org/
- * R-release: R-release, currently R-3.3.1 
+ * R-release: R-release, currently R-3.3.1
  * R-devel: R-devel, to be R-3.4.0
 
 ### R CMD check results

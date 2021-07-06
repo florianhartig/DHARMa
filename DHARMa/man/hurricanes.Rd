@@ -28,11 +28,12 @@ A 'data.frame': 93 obs. of  14 variables
 A data set on hurricane strength and fatalities in the US between 1950 and 2012. The data originates from the study by Jung et al., PNAS, 2014, who claim that the masculinity / femininity of a hurricane name has a causal effect on fatalities, presumably through a different perception of danger caused by the names.
 }
 \examples{
+\dontrun{
 # Loading hurricanes dataset
 
 library(DHARMa)
-data(hurricanes)
 
+data(hurricanes)
 str(hurricanes)
 
 # this is the model fit by Jung et al.
@@ -55,6 +56,7 @@ testTemporalAutocorrelation(res2, time = unique(hurricanes$Year))
 
 # task: try to address these issues - in many instances, this will 
 # make the MasFem predictor n.s.
+}
 }
 \references{
 Jung, K., Shavitt, S., Viswanathan, M., & Hilbe, J. M. (2014). Female hurricanes are deadlier than male hurricanes. Proceedings of the National Academy of Sciences, 111(24), 8782-8787.

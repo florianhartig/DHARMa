@@ -367,8 +367,8 @@ testZeroInflation(simulationOutput)
 
 This test is likely better suited for detecting zero-inflation than the standard plot, but note that also overdispersion will lead to excess zeros, so only seeing too many zeros is not a reliable diagnostics for moving towards a zero-inflated model. A reliable differentiation between overdispersion and zero-inflation will usually only be possible when directly comparing alternative models, e.g. through residual comparison / model selection of a model with / without zero-inflation, or by simply fitting a model with zero-inflation and looking at the parameter estimate for the zero-inflation. A good option is the R package glmmTMB, which is also supported by DHARMa. We can use this to fit
 
-```{r}
-library(glmmTMB)
+```{r, eval= F}
+# requires glmmTMB
 fittedModel <- glmmTMB(observedResponse ~ Environment1 + I(Environment1^2) + (1|group), ziformula = ~1 , family = "poisson", data = testData)
 summary(fittedModel)
 
@@ -565,12 +565,10 @@ I guess you could use either Model 2 or 3 - the broader point is: increasing mod
 
 ## Owl example (count data)
 
-The next examples uses the fairly well known Owl dataset which is provided in glmmTMB (see ?Owls for more info about the data).
-
-The following shows a sequence of models, all checked with DHARMa. The example is discussed in a talk at ISEC 2018, see slides [here](https://www.slideshare.net/florianhartig/mon-c5hartig2493). 
+The next examples uses the fairly well known Owl dataset which is provided in glmmTMB (see ?Owls for more info about the data). The following shows a sequence of models, all checked with DHARMa. The example is discussed in a talk at ISEC 2018, see slides [here](https://www.slideshare.net/florianhartig/mon-c5hartig2493). 
 
 
-```{r}
+```{r, eval = F}
 m1 <- glm(SiblingNegotiation ~ FoodTreatment*SexParent + offset(log(BroodSize)), data=Owls , family = poisson)
 res <- simulateResiduals(m1)
 plot(res)
@@ -578,7 +576,7 @@ plot(res)
 
 OK, this is highly overdispersed. Let's add a RE on nest
 
-```{r}
+```{r, eval = F}
 m2 <- glmer(SiblingNegotiation ~ FoodTreatment*SexParent + offset(log(BroodSize)) + (1|Nest), data=Owls , family = poisson)
 res <- simulateResiduals(m2)
 plot(res)
@@ -586,7 +584,7 @@ plot(res)
 
 Somewhat better, but not good. Move to neg binom, to adjust dispersion
 
-```{r}
+```{r, eval= F}
 m3 <- glmmTMB(SiblingNegotiation ~ FoodTreatment*SexParent + offset(log(BroodSize)) + (1|Nest), data=Owls , family = nbinom1)
 
 res <- simulateResiduals(m3, plot = T)
@@ -598,7 +596,7 @@ testZeroInflation(res)
 
 We see underdispersion now. In a model with variable dispersion, this is often the signal that some other distributional assumptions are violated, that is why I checked for zero-inflation, and it looks as if there is some. Therefore fitting a zero-inflated model
 
-```{r}
+```{r, eval= F}
 m4 <- glmmTMB(SiblingNegotiation ~ FoodTreatment*SexParent + offset(log(BroodSize)) + (1|Nest), ziformula = ~ FoodTreatment + SexParent,  data=Owls , family = nbinom1)
 
 res <- simulateResiduals(m4, plot = T)
@@ -610,7 +608,7 @@ testZeroInflation(res)
 
 This looks a lot better. Trying a slightly different model specification 
 
-```{r}
+```{r, eval= F}
 m5 <- glmmTMB(SiblingNegotiation ~ FoodTreatment*SexParent + offset(log(BroodSize)) + (1|Nest), dispformula = ~ FoodTreatment , ziformula = ~ FoodTreatment + SexParent,  data=Owls , family = nbinom1)
 
 res <- simulateResiduals(m4, plot = T)
