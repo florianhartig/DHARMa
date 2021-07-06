@@ -1,4 +1,19 @@
-# Version 0.4.1
+# Version 0.4.3
+
+## Submission 1, 6.7.2021
+
+This is a bugfix release, attempting to fix the issue with the dependency on glmmTMB, which was apparently exacerbated by the 0.4.2 update yesterday.
+
+I have for the moment (hopefully) removed glmmTMB from DHARMa, and will re-introduce it once glmmTMB is fixed. 
+
+This release was tested without apparent problems under
+
+* local MAC OS 11.4 (Big Sur), R 4.1.0
+* http://win-builder.r-project.org/ - oldrelease / devel / release
+* Linux (Travis CI) - release
+* GitHub Actions - Windows / Mac / Ubuntu (release), Ubuntu (devel)
+
+# Version 0.4.2
 
 ## Submission 1, 5.7.2021
 
