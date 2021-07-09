@@ -1,12 +1,20 @@
 NOTE: for more news about the package, see https://github.com/florianhartig/DHARMa/releases
 
+
+DHARMa 0.4.4
+============
+
+Minor changes
+
+- glmmTMB added again to suggests
+- phyr removed in suggests as it is currently not (yet) tested, to remove dependency problems
+
 DHARMa 0.4.3
 ============
 
 Bugfixes
 
 - Removed glmmTMB completely, see #289
-
 
 DHARMa 0.4.2
 ============
@@ -19,6 +27,7 @@ Minor changes
 
 - Added hurricane dataset
 - Help and vignette updates
+- phyr added in suggests
 
 
 DHARMa 0.4.1
