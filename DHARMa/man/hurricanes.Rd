@@ -7,21 +7,21 @@
 \format{
 A 'data.frame': 93 obs. of  14 variables
 \describe{
-  \item{Year}{Year of the hurricane (1950-2012)}
-  \item{Name}{Name of the hurricane}
-  \item{MasFem}{Masculinity-femininity rating of the hurricane's name in the range 1 = very masculine, 11 = very feminine}
-  \item{MinPressure_before}{Minimum air pressure (909-1002)}
-  \item{Minpressure_Updated_2014}{Updated minimum air pressure (909-1003)}
-  \item{Gender_MF}{Binary gender (male/female) based on MasFem (male = 0, female = 1)}
-  \item{Category}{Strength of the hurricane in categories (1:7). (1 = not at all, 7 = very intense)}
-  \item{alldeaths}{Deaths occured (1:256)}
-  \item{NDAM}{normalized damage in millions (1:75.000). The raw (dollar) amounts of property damage caused by hurricanes were obtained, and the unadjusted dollar amounts were normalized to 2013 monetary values by adjusting them to inflation, wealth and population density}
-  \item{Elapsed_Yrs}{elapsed since the occurrence of hurricanes (1:63)}
-  \item{Source}{MWR/wikipedia ()}
-  \item{ZMasFem}{scaled (MasFem)}
-  \item{ZMinPressure_A}{scaled (Minpressure_Updated_2014)}
-  \item{ZNDAM}{scaled (NDAM)}
-  ...
+\item{Year}{Year of the hurricane (1950-2012)}
+\item{Name}{Name of the hurricane}
+\item{MasFem}{Masculinity-femininity rating of the hurricane's name in the range 1 = very masculine, 11 = very feminine}
+\item{MinPressure_before}{Minimum air pressure (909-1002)}
+\item{Minpressure_Updated_2014}{Updated minimum air pressure (909-1003)}
+\item{Gender_MF}{Binary gender (male/female) based on MasFem (male = 0, female = 1)}
+\item{Category}{Strength of the hurricane in categories (1:7). (1 = not at all, 7 = very intense)}
+\item{alldeaths}{Deaths occured (1:256)}
+\item{NDAM}{normalized damage in millions (1:75.000). The raw (dollar) amounts of property damage caused by hurricanes were obtained, and the unadjusted dollar amounts were normalized to 2013 monetary values by adjusting them to inflation, wealth and population density}
+\item{Elapsed_Yrs}{elapsed since the occurrence of hurricanes (1:63)}
+\item{Source}{MWR/wikipedia ()}
+\item{ZMasFem}{scaled (MasFem)}
+\item{ZMinPressure_A}{scaled (Minpressure_Updated_2014)}
+\item{ZNDAM}{scaled (NDAM)}
+...
 }
 }
 \description{

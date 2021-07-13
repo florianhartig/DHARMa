@@ -22,9 +22,9 @@ This function tests if there are probles in a res ~ group structure. It performs
 \details{
 The function tests for two common problems: are residuals within each group distributed according to model assumptions, and is the variance between group heterogeneous.
 
- The test for within-group uniformity is performed via multipe KS-tests, with adjustment of p-values for multiple testing. If the plot is drawn, problematic groups are highlighted in red, and a corresponding message is displayed in the plot.
+The test for within-group uniformity is performed via multipe KS-tests, with adjustment of p-values for multiple testing. If the plot is drawn, problematic groups are highlighted in red, and a corresponding message is displayed in the plot.
 
- The test for homogeneity of variances is done with a Levene test. A significant p-value means that group variances are not constant. In this case, you should consider modelling variances, e.g. via ~dispformula in glmmTMB.
+The test for homogeneity of variances is done with a Levene test. A significant p-value means that group variances are not constant. In this case, you should consider modelling variances, e.g. via ~dispformula in glmmTMB.
 }
 \examples{
 testData = createData(sampleSize = 100, overdispersion = 0.5, randomEffectVariance = 0)
