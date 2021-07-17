@@ -24,7 +24,7 @@ First of all, note that the standard definition of outlier in the DHARMa plots a
 
 Thus, keep in mind that for a small number of simulations, outliers are mostly a technical term: these are points that are outside our simulations, but we don't know how far away they are.
 
-If you are seriously interested in HOW FAR outside the expected distribution a data point is, you should increase the number of simulations in \code{\link{simulateResiduals}} to be sure to get the tail of the data distribution correctly. In this case, it may make sense to adjust lowerQuantile and upperQuantile, e.g. to 0.025, 0.975, which would define outliers as values outside the central 95% of the distribution.
+If you are seriously interested in HOW FAR outside the expected distribution a data point is, you should increase the number of simulations in \code{\link{simulateResiduals}} to be sure to get the tail of the data distribution correctly. In this case, it may make sense to adjust lowerQuantile and upperQuantile, e.g. to 0.025, 0.975, which would define outliers as values outside the central 95\% of the distribution.
 
 Also, note that outliers are particularly concerning if they have a strong influence on the model fit. One could test the influence, for example, by removing them from the data, or by some meausures of leverage, e.g. generalisations for Cook's distance as in Pinho, L. G. B., Nobre, J. S., & Singer, J. M. (2015). Cook’s distance for generalized linear mixed models. Computational Statistics & Data Analysis, 82, 126–136. doi:10.1016/j.csda.2014.08.008. At the moment, however, no such function is provided in DHARMa.
 }
