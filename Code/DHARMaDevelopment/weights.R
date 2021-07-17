@@ -3,7 +3,7 @@ library(lme4)
 library(glmmTMB)
 library(spaMM)
 
-testData = createData(sampleSize = 200, overdispersion = 0, family = gaussian())
+testData = createData(sampleSize = 200, overdispersion = 0, family = poisson())
 
 # lm weights are considered in simulate()
 fit <- lm(observedResponse ~ Environment1 , weights = Environment1 +1, 
@@ -38,7 +38,7 @@ simulateResiduals(fittedModel = fit, plot = T)
 
 # glmmTMB does not warn
 
-fit <- glmmTMB(ceiling(exp(observedResponse)) ~ Environment1 + (1|group), weights = Environment1 +1, 
+fit <- glmmTMB(observedResponse ~ Environment1 + (1|group), weights = (testData$Environment1 +1)*1, 
              data = testData, family = "poisson")
 simulateResiduals(fittedModel = fit, plot = T)
 
