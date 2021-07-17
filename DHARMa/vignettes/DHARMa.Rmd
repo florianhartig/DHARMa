@@ -568,7 +568,7 @@ I guess you could use either Model 2 or 3 - the broader point is: increasing mod
 The next examples uses the fairly well known Owl dataset which is provided in glmmTMB (see ?Owls for more info about the data). The following shows a sequence of models, all checked with DHARMa. The example is discussed in a talk at ISEC 2018, see slides [here](https://www.slideshare.net/florianhartig/mon-c5hartig2493). 
 
 
-```{r, eval = F}
+```{r}
 m1 <- glm(SiblingNegotiation ~ FoodTreatment*SexParent + offset(log(BroodSize)), data=Owls , family = poisson)
 res <- simulateResiduals(m1)
 plot(res)
@@ -576,7 +576,7 @@ plot(res)
 
 OK, this is highly overdispersed. Let's add a RE on nest
 
-```{r, eval = F}
+```{r}
 m2 <- glmer(SiblingNegotiation ~ FoodTreatment*SexParent + offset(log(BroodSize)) + (1|Nest), data=Owls , family = poisson)
 res <- simulateResiduals(m2)
 plot(res)
@@ -584,7 +584,7 @@ plot(res)
 
 Somewhat better, but not good. Move to neg binom, to adjust dispersion
 
-```{r, eval= F}
+```{r}
 m3 <- glmmTMB(SiblingNegotiation ~ FoodTreatment*SexParent + offset(log(BroodSize)) + (1|Nest), data=Owls , family = nbinom1)
 
 res <- simulateResiduals(m3, plot = T)
@@ -596,7 +596,7 @@ testZeroInflation(res)
 
 We see underdispersion now. In a model with variable dispersion, this is often the signal that some other distributional assumptions are violated, that is why I checked for zero-inflation, and it looks as if there is some. Therefore fitting a zero-inflated model
 
-```{r, eval= F}
+```{r}
 m4 <- glmmTMB(SiblingNegotiation ~ FoodTreatment*SexParent + offset(log(BroodSize)) + (1|Nest), ziformula = ~ FoodTreatment + SexParent,  data=Owls , family = nbinom1)
 
 res <- simulateResiduals(m4, plot = T)
@@ -608,7 +608,7 @@ testZeroInflation(res)
 
 This looks a lot better. Trying a slightly different model specification 
 
-```{r, eval= F}
+```{r}
 m5 <- glmmTMB(SiblingNegotiation ~ FoodTreatment*SexParent + offset(log(BroodSize)) + (1|Nest), dispformula = ~ FoodTreatment , ziformula = ~ FoodTreatment + SexParent,  data=Owls , family = nbinom1)
 
 res <- simulateResiduals(m4, plot = T)
@@ -624,7 +624,7 @@ but that seems to make little difference. Both models would be acceptable in ter
 
 ## Poisson data
 
-The main concern in Poisson data is dispersion. See comments in the section on the dispersion test, in particulr regarding the advantage of conditional simulations in this case. To address overdispersion, I would recommend to prefer the negative binomial model over observation-level random effects, because this mode will be easier to test in DHARMa and its dispersion can be easier modelled, e.g. with glmmTMB. The third option would be quasi models, but there are few advantages, except runtime. Note also that quasi models cannot be tested with DHARMa. 
+The main concern in Poisson data is dispersion. See comments in the section on the dispersion test, in particulr regarding the advantage of conditional simulations in this case. To address overdispersion, I would recommend to prefer the negative binomial model over observation-level random effects, because this mode will be easier to test in DHARMa and its dispersion can be easier modeled, e.g. with glmmTMB. The third option would be quasi models, but there are few advantages, except runtime. Note also that quasi models cannot be tested with DHARMa. 
 
 Once dispersion is adjusted, you should check for heteroscedasticity (via standard plot, also against all predictors), and for zero-inflation. As noted, zero-inflation tests are often negative, and rather show up as underdispersion. Work through the owl example below. 
 
