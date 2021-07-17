@@ -569,6 +569,7 @@ The next examples uses the fairly well known Owl dataset which is provided in gl
 
 
 ```{r}
+library(glmmTMB)
 m1 <- glm(SiblingNegotiation ~ FoodTreatment*SexParent + offset(log(BroodSize)), data=Owls , family = poisson)
 res <- simulateResiduals(m1)
 plot(res)
