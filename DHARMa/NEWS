@@ -6,7 +6,7 @@ DHARMa 0.4.4
 
 Minor changes
 
-- glmmTMB added again to suggests
+- re-introduced glmmTMB to suggests
 - phyr removed in suggests as it is currently not (yet) tested, to remove dependency problems
 
 DHARMa 0.4.3
