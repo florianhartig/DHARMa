@@ -42,8 +42,8 @@ Suggests:
     glmmTMB (>= 1.0.1)
 Enhances:
     phyr,
-    RStan,
-    CmdStanR,
+    rstan,
+    cmdstanr,
     rjags,
     BayesianTools
 License: GPL (>= 3)

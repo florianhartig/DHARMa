@@ -119,7 +119,7 @@ testData$poisson2 = createData(sampleSize = 200, overdispersion = 2,
 testData$poisson_weights = createData(sampleSize = 200, overdispersion = 0.5, 
                                       randomEffectVariance = 0.5, family = poisson())
 testData$weights = rep(c(1,1.1), each = 100)
-
+testData$poisson_weights$weights = testData$weights 
 
 
 # stats::lm ----------------------------------------------------------------------
@@ -272,7 +272,7 @@ test_that("lme4:glmer works",
             expect_warning(simulateResiduals(fittedModel))
             
             # glmer.nb warns
-            fittedModel <- glmer.nb(observedResponse ~ Environment1 + (1|group) , data = testData$poisson2, weights = testData$weights)
+            fittedModel <- glmer.nb(observedResponse ~ Environment1 + (1|group) , data = testData$poisson_weights, weights = testData$weights)
             expect_warning(simulateResiduals(fittedModel))
           }
 )
@@ -317,15 +317,15 @@ test_that("glmmTMB works",
             
             
             # glmmTMB does not warn, implemented warning in DHARMa
-            fittedModel <- glmmTMB(observedResponse ~ Environment1 , family = "poisson", data = testData$poisson2, weights = testData$weights)
+            fittedModel <- glmmTMB(observedResponse ~ Environment1 , family = "poisson", data = testData$poisson_weights, weights = testData$weights)
             expect_warning(simulateResiduals(fittedModel))
           }
 )
 
 
-# spaMM works  --------------------------------------------------------------
+# spaMM::HLfit works  --------------------------------------------------------------
 
-test_that("spaMM works",
+test_that("spaMM::HLfit works",
           {
             
             fittedModel <- HLfit(observedResponse ~ Environment1 + (1|group) , data = testData$lm)
@@ -358,7 +358,7 @@ test_that("spaMM works",
             # TODO 
             # expect_error( fittedModel <- HLfit(observedResponse ~ Environment1 + (1|group) , family = "poisson",  data = testData$poisson2, prior.weights = testData$weights))
             
-            fittedModel <- HLfit(observedResponse ~ Environment1 + (1|group) , family = negbin(1),  data = testData$poisson2, prior.weights = testData$weights)
+            fittedModel <- HLfit(observedResponse ~ Environment1 + (1|group) , family = negbin(1),  data = testData$poisson_weights, prior.weights = weights)
             expect_s3_class(simulateResiduals(fittedModel), "DHARMa")
             
           }
@@ -391,7 +391,7 @@ test_that("GLMMadaptive works",
             # runEverything(fittedModel, testData)
             
             fittedModel <- GLMMadaptive::mixed_model(fixed = observedResponse ~ Environment1, random = ~ 1 | group, data = testData$poisson1, family = poisson())
-            runEverything(fittedModel, testData)
+            runEverything(fittedModel, testData$poisson1)
             
             
             # GLMMadaptive requires weights according to groups
