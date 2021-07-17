@@ -268,7 +268,7 @@ test_that("lme4:glmer works",
             # expectDispersion(fittedModel2, FALSE)
             
             # glmer warns, OK
-            fittedModel <- glmer(observedResponse ~ Environment1 + (1|group) , family = "poisson", data = testData, weights = weights)
+            fittedModel <- glmer(observedResponse ~ Environment1 + (1|group) , family = "poisson", data = testData$poisson_weights, weights = testData$weights)
             expect_warning(simulateResiduals(fittedModel))
             
             # glmer.nb warns
