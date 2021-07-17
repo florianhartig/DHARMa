@@ -36,7 +36,6 @@ Suggests:
     KernSmooth,
     sfsmisc,
     MASS,
-    glmmTMB (>= 1.0.1),
     mgcv,
     spaMM (>= 3.2.0),
     GLMMadaptive,
