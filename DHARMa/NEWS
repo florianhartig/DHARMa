@@ -7,7 +7,8 @@ DHARMa 0.4.4
 Minor changes
 
 - re-introduced glmmTMB to suggests
-- phyr removed in suggests as it is currently not (yet) tested, to remove dependency problems
+- phyr moved to enhances
+- added RStan, CmdStanR, rjags, BayesianTools to enhances, as they coudld be used with DHARMa
 
 DHARMa 0.4.3
 ============
