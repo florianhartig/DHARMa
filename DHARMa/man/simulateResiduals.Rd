@@ -6,7 +6,7 @@
 \usage{
 simulateResiduals(fittedModel, n = 250, refit = F,
   integerResponse = NULL, plot = F, seed = 123, method = c("PIT",
-  "traditional"), ...)
+  "traditional"), rotation = NULL, ...)
 }
 \arguments{
 \item{fittedModel}{a fitted model  of a class supported by DHARMa}
@@ -22,6 +22,8 @@ simulateResiduals(fittedModel, n = 250, refit = F,
 \item{seed}{the random seed to be used within DHARMa. The default setting, recommended for most users, is keep the random seed on a fixed value 123. This means that you will always get the same randomization and thus the same result when running the same code. NULL = no new seed is set, but previous random state will be restored after simulation. FALSE = no seed is set, and random state will not be restored. The latter two options are only recommended for simulation experiments. See vignette for details.}
 
 \item{method}{for refit = F, the quantile randomization method used. The two options implemented at the moment are probability integral transform (PIT-) residuals (current default), and the "traditional" randomization procedure, that was used in DHARMa until version 0.3.0. Refit = T will always use "traditional", respectively of the value of method. For details, see \code{\link{getQuantile}}}
+
+\item{rotation}{an optional rotation that is applied after calculating the randomized quantile residuals. The purpose of this rotation is to de-correlated residuals if their correlation is known. See details.}
 
 \item{...}{parameters to pass to the simulate function of the model object. An important use of this is to specify whether simulations should be conditional on the current random effect estimates, e.g. via re.form. Note that not all models support syntax to specify conditional or unconditional simulations. See also details}
 }
@@ -51,6 +53,8 @@ If the model is correctly specified, the simulated residuals should be flat rega
 \strong{Transformation to other distributions}: DHARMa calculates residuals for which the theoretical expectation (assuming a correctly specified model) is uniform. To transfor this residuals to another distribution (e.g. so that a correctly specified model will have normal residuals) see \code{\link{residuals.DHARMa}}.
 
 \strong{Integer responses}: this is only relevant if method = "traditional", in which case it activates the randomization of the residuals. Usually, this does not need to be changed, as DHARMa will try to automatically if the fitted model has an integer or discrete distribution via the family argument. However, in some cases the family does not allow to uniquely identify the distribution type. For example, a tweedie distribution can be inter or continuous. Therefore, DHARMa will additionally check the simulation results for repeated values, and will change the distribution type if repeated values are found (a message is displayed in this case).
+
+\strong{Residual auto-correlation}: a common problem is residual autocorrelation. Spatial, temporal and phylogenetic autocorrelation can be tested with \link{testSpatialAutocorrelation} and \link{testTemporalAutocorrelation}. If simulations are unconditional, residual correlations will be maintained, even if the autocorrelation is addressed by an appropriate CAR structure. This may be a problem, because autocorrelation may create apparently systematic patterns in plots or tests such as \code{\link[=testUniformity]{testUniformity()}}. To reduce this problem, either simulate conditional on fitted correlated REs, or you could try to rotate residuals via the rotation parameter (the latter will likely only work in approximately linear models).
 }
 \examples{
 library(lme4)

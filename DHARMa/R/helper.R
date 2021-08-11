@@ -28,6 +28,7 @@ DHARMa.ecdf <- function (x)
 #' @param observed a vector with the observed data
 #' @param integerResponse is the response integer-valued. Only has an effect for method = "traditional"
 #' @param method the quantile randomization method used. See details
+#' @param rotation rotation of the residuals, see [simulateResiduals]
 #'
 #' @details The function calculates residual quantiles from the simulated data. For continuous distributions, this will simply the the value of the ecdf.
 #'
@@ -46,7 +47,7 @@ DHARMa.ecdf <- function (x)
 #' Warton, David I., Loïc Thibaut, and Yi Alice Wang. "The PIT-trap—A “model-free” bootstrap procedure for inference about regression models with discrete, multivariate responses." PloS one 12.7 (2017)
 #'
 #' @export
-getQuantile <- function(simulations, observed, integerResponse, method = c("PIT", "traditional")){
+getQuantile <- function(simulations, observed, integerResponse, method = c("PIT", "traditional"), rotation = NULL){
 
   method = match.arg(method)
 
@@ -56,6 +57,8 @@ getQuantile <- function(simulations, observed, integerResponse, method = c("PIT"
 
 
   if(method == "traditional"){
+    
+    if(!is.null(rotation)) stop("rotation can only be used with PIT residuals")
 
     if(integerResponse == F){
 
@@ -83,6 +86,13 @@ getQuantile <- function(simulations, observed, integerResponse, method = c("PIT"
     }
 
   } else {
+    
+    # optional rotation before PIT 
+    if(!is.null(rotation)){
+      L <- t(chol(rotation))
+      observed <- solve(L, observed)
+      simulations = apply(simulations, 2, function(a) solve(L, a))
+    }
 
     scaledResiduals = rep(NA, n)
     for (i in 1:n){
@@ -92,6 +102,7 @@ getQuantile <- function(simulations, observed, integerResponse, method = c("PIT"
       else scaledResiduals[i] = runif(1, minSim, maxSim)
     }
   }
+  
   return(scaledResiduals)
 }
 

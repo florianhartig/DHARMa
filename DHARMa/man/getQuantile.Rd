@@ -5,7 +5,7 @@
 \title{calculate quantiles}
 \usage{
 getQuantile(simulations, observed, integerResponse, method = c("PIT",
-  "traditional"))
+  "traditional"), rotation = NULL)
 }
 \arguments{
 \item{simulations}{a matrix with simulations from a fitted model. Rows = observations, columns = replicate simulations}
@@ -15,6 +15,8 @@ getQuantile(simulations, observed, integerResponse, method = c("PIT",
 \item{integerResponse}{is the response integer-valued. Only has an effect for method = "traditional"}
 
 \item{method}{the quantile randomization method used. See details}
+
+\item{rotation}{rotation of the residuals, see \link{simulateResiduals}}
 }
 \description{
 calculates residual quantiles from a given simulation
