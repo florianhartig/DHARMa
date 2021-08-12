@@ -21,7 +21,7 @@ createDHARMa(simulatedResponse, observedResponse,
 
 \item{method}{the quantile randomization method used. The two options implemented at the moment are probability integral transform (PIT-) residuals (current default), and the "traditional" randomization procedure, that was used in DHARMa until version 0.3.0. For details, see \code{\link{getQuantile}}}
 
-\item{rotation}{rotation of the residuals, see \link{simulateResiduals}}
+\item{rotation}{optional rotation of the residual space to remove residual autocorrelation. See details in \link{simulateResiduals}, section \emph{residual auto-correlation} for an extended explanation, and \link{getQuantile} for syntax.}
 }
 \description{
 Create a DHARMa object from hand-coded simulations or Bayesian posterior predictive simulations

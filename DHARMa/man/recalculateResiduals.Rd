@@ -21,7 +21,7 @@ recalculateResiduals(simulationOutput, group = NULL, aggregateBy = sum,
 
 \item{method}{the quantile randomization method used. The two options implemented at the moment are probability integral transform (PIT-) residuals (current default), and the "traditional" randomization procedure, that was used in DHARMa until version 0.3.0. For details, see \code{\link{getQuantile}}}
 
-\item{rotation}{optional residual rotation, see \link{simulateResiduals}}
+\item{rotation}{optional rotation of the residual space to remove residual autocorrelation. See details in \link{simulateResiduals}, section \emph{residual auto-correlation} for an extended explanation, and \link{getQuantile} for syntax.}
 }
 \value{
 an object of class DHARMa, similar to what is returned by \code{\link{simulateResiduals}}, but with additional outputs for the new grouped calculations. Note that the relevant outputs are 2x in the object, the first is the grouped calculations (which is returned by $name access), and later another time, under identical name, the original output. Moreover, there is a function 'aggregateByGroup', which can be used to aggregate predictor variables in the same way as the variables calculated here
