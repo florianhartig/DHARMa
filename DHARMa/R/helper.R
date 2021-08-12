@@ -28,7 +28,7 @@ DHARMa.ecdf <- function (x)
 #' @param observed a vector with the observed data
 #' @param integerResponse is the response integer-valued. Only has an effect for method = "traditional"
 #' @param method the quantile randomization method used. See details
-#' @param rotation rotation of the residuals, see [simulateResiduals]
+#' @param rotation optional rotation of the residuals, either provided as a covariance matrix, or as "approximate", in which case the residual covariance will be approximated by simulations. See comments in details
 #'
 #' @details The function calculates residual quantiles from the simulated data. For continuous distributions, this will simply the the value of the ecdf.
 #'
@@ -37,6 +37,8 @@ DHARMa.ecdf <- function (x)
 #' The current default (available since DHARMa 0.3.1) are probability integral transform (PIT-) residuals (Smith, 1985; Dunn & Smyth, 1996; see also see also Warton, et al., 2017).
 #'
 #' Before DHARMa 0.3.1, a different randomization procedure was used, in which the a U(-0.5, 0.5) distribution was added on observations and simulations for discrete distributions. For a completely discrete distribution, the two procedures should deliver equivalent results, but the second method has the disadvantage that a) one has to know if the distribution is discrete (DHARMa tries to recognize this automatically), and b) that it leads to inefficiencies for some distributions such as the the Tweedie, which are partly continuous, partly discrete (see e.g. https://github.com/florianhartig/DHARMa/issues/168).
+#' 
+#' The getQuantile function includes an additional option to rotate residuals. The purpose is to de-correlated residuals in case of residual autocorrelation. If the expected residual autocorrelation is known (e.h. when fitting gls type models), it can be provided as a covariance matrix. If that is note the case, the option "approximate" will try to estimate the covariance from the data simulated by the model. Note, however, that this approximation will tend to have considerable error and may be slow to compute for high-dimensional data. 
 #'
 #' @references
 #'
@@ -89,7 +91,12 @@ getQuantile <- function(simulations, observed, integerResponse, method = c("PIT"
     
     # optional rotation before PIT 
     if(!is.null(rotation)){
-      L <- t(chol(rotation))
+      if(rotation == "approximated"){
+        covar = Matrix::nearPD(cov(t(simulations)))$mat
+        L = t(as.matrix(Matrix::chol(covar)))
+      } 
+      else if(is.matrix(rotation)) L <- t(chol(rotation))
+      else stop("DHARMa::getQuantile - wrong argument to rotation parameter")
       observed <- solve(L, observed)
       simulations = apply(simulations, 2, function(a) solve(L, a))
     }

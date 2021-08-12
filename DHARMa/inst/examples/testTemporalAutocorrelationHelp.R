@@ -47,6 +47,10 @@ plot(obs, type = "l", main = "Time series")
 par(opar)
 
 # calculate standard DHARMa residuals
+
+## simulations from the model:
+x = replicate(1000, as.numeric(mvtnorm::rmvnorm(1,sigma=C)))
+
 res <- createDHARMa(x, obs, integerResponse = F)
 testUniformity(res)
 testTemporalAutocorrelation(res, time = 1:length(res$scaledResiduals))
@@ -56,5 +60,11 @@ testTemporalAutocorrelation(res, time = 1:length(res$scaledResiduals))
 res <- createDHARMa(x, obs, integerResponse = F, rotation = C)
 testUniformity(res)
 testTemporalAutocorrelation(res, time = 1:length(res$scaledResiduals))
+
+# the same, but with a covariance based on simulations
+res <- createDHARMa(x, obs, integerResponse = F, rotation = "approximated")
+testUniformity(res)
+testTemporalAutocorrelation(res, time = 1:length(res$scaledResiduals))
+
 
 }
