@@ -393,7 +393,6 @@ test_that("GLMMadaptive works",
             fittedModel <- GLMMadaptive::mixed_model(fixed = observedResponse ~ Environment1, random = ~ 1 | group, data = testData$poisson1, family = poisson())
             runEverything(fittedModel, testData$poisson1)
             
-            
             # GLMMadaptive requires weights according to groups
             weights = rep(c(1,1.1), each = 5)
             fittedModel <- GLMMadaptive::mixed_model(fixed = observedResponse ~ Environment1, random = ~ 1 | group, data = testData$poisson_weights, family = poisson(), weights = weights)

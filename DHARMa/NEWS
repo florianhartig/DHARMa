@@ -8,6 +8,7 @@ Minor changes
 
 - re-introduced glmmTMB to suggests
 - phyr moved to enhances
+- re-modelled package unit tests
 - added RStan, CmdStanR, rjags, BayesianTools to enhances, as they coudld be used with DHARMa
 
 DHARMa 0.4.3
