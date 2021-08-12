@@ -62,7 +62,7 @@ testUniformity(res)
 testTemporalAutocorrelation(res, time = 1:length(res$scaledResiduals))
 
 # the same, but with a covariance based on simulations
-res <- createDHARMa(x, obs, integerResponse = F, rotation = "approximated")
+res <- createDHARMa(x, obs, integerResponse = F, rotation = "estimated")
 testUniformity(res)
 testTemporalAutocorrelation(res, time = 1:length(res$scaledResiduals))
 

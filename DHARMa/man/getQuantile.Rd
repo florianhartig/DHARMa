@@ -16,7 +16,7 @@ getQuantile(simulations, observed, integerResponse, method = c("PIT",
 
 \item{method}{the quantile randomization method used. See details}
 
-\item{rotation}{optional rotation of the residuals, either provided as a covariance matrix, or as "approximate", in which case the residual covariance will be approximated by simulations. See comments in details}
+\item{rotation}{optional rotation of the residuals, either provided as a covariance matrix, or specify "estimated", in which case the residual covariance will be approximated by simulations. See comments in details}
 }
 \description{
 calculates residual quantiles from a given simulation
@@ -30,7 +30,7 @@ The current default (available since DHARMa 0.3.1) are probability integral tran
 
 Before DHARMa 0.3.1, a different randomization procedure was used, in which the a U(-0.5, 0.5) distribution was added on observations and simulations for discrete distributions. For a completely discrete distribution, the two procedures should deliver equivalent results, but the second method has the disadvantage that a) one has to know if the distribution is discrete (DHARMa tries to recognize this automatically), and b) that it leads to inefficiencies for some distributions such as the the Tweedie, which are partly continuous, partly discrete (see e.g. https://github.com/florianhartig/DHARMa/issues/168).
 
-The getQuantile function includes an additional option to rotate residuals. The purpose is to de-correlated residuals in case of residual autocorrelation. If the expected residual autocorrelation is known (e.h. when fitting gls type models), it can be provided as a covariance matrix. If that is note the case, the option "approximate" will try to estimate the covariance from the data simulated by the model. Note, however, that this approximation will tend to have considerable error and may be slow to compute for high-dimensional data.
+The getQuantile function includes an additional option to rotate residuals. The purpose is to de-correlated residuals in case of residual autocorrelation. If the expected residual autocorrelation is known (e.h. when fitting gls type models), it can be provided as a covariance matrix. If that is note the case, the option "estimated" will try to estimate the covariance from the data simulated by the model. Note, however, that this approximation will tend to have considerable error and may be slow to compute for high-dimensional data.
 }
 \references{
 Smith, J. Q. "Diagnostic checks of non-standard time series models." Journal of Forecasting 4.3 (1985): 283-291.
