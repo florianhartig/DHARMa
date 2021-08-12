@@ -1,6 +1,9 @@
+library(testthat)
+
 context("Tests DHARMa functions on all implemented model types")
 
 skip_on_cran()
+skip_on_ci()
 
 library(testthat)
 library(DHARMa)
