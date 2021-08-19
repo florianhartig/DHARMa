@@ -25,3 +25,19 @@ res <- simulateResiduals(fit2) # error
 
 # reasons seems to be the predict function, which doesn't allow re.form = ~0 in this case
 predict(fit2, re.form = ~0)
+
+
+fit2B <- glmmTMB(observedResponse ~ Environment1 + (1|group) + (1|ID), family=binomial(), data=testData,
+                 start = list(theta = c(log(1e3),0)),
+                 map = list(theta = factor(c(NA,1))))
+predict(fit2B, re.form = ~0)  
+
+res<- simulateResiduals(fit2B)
+plot(res)
+
+
+
+fit2C <- glmmTMB(observedResponse ~ Environment1 + (1|group) + (1|ID), family=binomial(), data=testData)
+res<- simulateResiduals(fit2C)
+plot(res)
+
