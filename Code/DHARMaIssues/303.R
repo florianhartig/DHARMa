@@ -27,15 +27,24 @@ res <- simulateResiduals(fit2) # error
 predict(fit2, re.form = ~0)
 
 
+# solution - specify fixed parameters differently.
+# Problem however is that this still creates a pattern, as glmmTMB simulates new REs
+# based on the large fixed variance
+
+testData = createData(sampleSize = 200, overdispersion = 0, family = binomial())
+
+
 fit2B <- glmmTMB(observedResponse ~ Environment1 + (1|group) + (1|ID), family=binomial(), data=testData,
                  start = list(theta = c(log(1e3),0)),
                  map = list(theta = factor(c(NA,1))))
+summary(fit2B)
+
 predict(fit2B, re.form = ~0)  
 
-res<- simulateResiduals(fit2B)
+res<- simulateResiduals(fit2B, re.form = )
 plot(res)
 
-
+# estimating the variance instead works fine
 
 fit2C <- glmmTMB(observedResponse ~ Environment1 + (1|group) + (1|ID), family=binomial(), data=testData)
 res<- simulateResiduals(fit2C)
