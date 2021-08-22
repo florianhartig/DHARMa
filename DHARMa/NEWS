@@ -6,9 +6,10 @@ DHARMa 0.4.4
 
 Minor changes
 
-- glmmTMB added again to suggests
-- phyr removed in suggests as it is currently not (yet) tested, to remove dependency problems
-
+- re-introduced glmmTMB to suggests
+- phyr moved to enhances
+- re-modelled package unit tests
+- added RStan, CmdStanR, rjags, BayesianTools to enhances, as they coudld be used with DHARMa
 
 New features
 
@@ -18,6 +19,7 @@ Documentation
 
 - Added help comments about autocorrelation structures, in particular in simulateResiduals, testSpatialAutocorrelation, testTemporalAutocorrelation
 - Added example about the use of rotation in testTemporalAutocorrelation
+- Improved help of dispersion test
 
 DHARMa 0.4.3
 ============
