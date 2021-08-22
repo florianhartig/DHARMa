@@ -38,7 +38,7 @@ testTemporalAutocorrelation(res, time = unique(testData$time))
 \dontrun{
 
 set.seed(1)
-C <- exp(-as.matrix(dist(seq(0,50,by=.1))))
+C <- exp(-as.matrix(dist(seq(0,50,by=.5))))
 obs <- as.numeric(mvtnorm::rmvnorm(1,sigma=C))
 
 opar <- par(mfrow = c(1,2))
@@ -52,7 +52,7 @@ par(opar)
 x = replicate(1000, as.numeric(mvtnorm::rmvnorm(1,sigma=C)))
 
 res <- createDHARMa(x, obs, integerResponse = F)
-testUniformity(res)
+plot(res)
 testTemporalAutocorrelation(res, time = 1:length(res$scaledResiduals))
 
 # calculated rotated DHARMa residuals to remove temporal correlation
