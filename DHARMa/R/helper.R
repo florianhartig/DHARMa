@@ -28,14 +28,21 @@ DHARMa.ecdf <- function (x)
 #' @param observed a vector with the observed data
 #' @param integerResponse is the response integer-valued. Only has an effect for method = "traditional"
 #' @param method the quantile randomization method used. See details
+#' @param rotation optional rotation of the residuals, either provided as a covariance matrix, or specify "estimated", in which case the residual covariance will be approximated by simulations. See comments in details
 #'
 #' @details The function calculates residual quantiles from the simulated data. For continuous distributions, this will simply the the value of the ecdf.
+#'
+#' **Randomization procedure for discrete data**
 #'
 #' For discrete data, there are two options implemented.
 #'
 #' The current default (available since DHARMa 0.3.1) are probability integral transform (PIT-) residuals (Smith, 1985; Dunn & Smyth, 1996; see also see also Warton, et al., 2017).
 #'
 #' Before DHARMa 0.3.1, a different randomization procedure was used, in which the a U(-0.5, 0.5) distribution was added on observations and simulations for discrete distributions. For a completely discrete distribution, the two procedures should deliver equivalent results, but the second method has the disadvantage that a) one has to know if the distribution is discrete (DHARMa tries to recognize this automatically), and b) that it leads to inefficiencies for some distributions such as the the Tweedie, which are partly continuous, partly discrete (see e.g. https://github.com/florianhartig/DHARMa/issues/168).
+#' 
+#' **Rotation (optional)**
+#' 
+#' The getQuantile function includes an additional option to rotate residuals. The purpose is to de-correlated residuals in case of residual autocorrelation. If the expected residual autocorrelation is known (e.h. when fitting gls type models), it can be provided as a covariance matrix. If that is note the case, the option "estimated" will try to estimate the covariance from the data simulated by the model. Note, however, that this approximation will tend to have considerable error and may be slow to compute for high-dimensional data. 
 #'
 #' @references
 #'
@@ -46,7 +53,7 @@ DHARMa.ecdf <- function (x)
 #' Warton, David I., Loïc Thibaut, and Yi Alice Wang. "The PIT-trap—A “model-free” bootstrap procedure for inference about regression models with discrete, multivariate responses." PloS one 12.7 (2017)
 #'
 #' @export
-getQuantile <- function(simulations, observed, integerResponse, method = c("PIT", "traditional")){
+getQuantile <- function(simulations, observed, integerResponse, method = c("PIT", "traditional"), rotation = NULL){
 
   method = match.arg(method)
 
@@ -56,6 +63,8 @@ getQuantile <- function(simulations, observed, integerResponse, method = c("PIT"
 
 
   if(method == "traditional"){
+    
+    if(!is.null(rotation)) stop("rotation can only be used with PIT residuals")
 
     if(integerResponse == F){
 
@@ -83,6 +92,18 @@ getQuantile <- function(simulations, observed, integerResponse, method = c("PIT"
     }
 
   } else {
+    
+    # optional rotation before PIT 
+    if(!is.null(rotation)){
+      if(is.character(rotation) && rotation == "estimated"){
+        covar = Matrix::nearPD(cov(t(simulations)))$mat
+        L = t(as.matrix(Matrix::chol(covar)))
+      } 
+      else if(is.matrix(rotation)) L <- t(chol(rotation))
+      else stop("DHARMa::getQuantile - wrong argument to rotation parameter")
+      observed <- solve(L, observed)
+      simulations = apply(simulations, 2, function(a) solve(L, a))
+    }
 
     scaledResiduals = rep(NA, n)
     for (i in 1:n){
@@ -92,6 +113,7 @@ getQuantile <- function(simulations, observed, integerResponse, method = c("PIT"
       else scaledResiduals[i] = runif(1, minSim, maxSim)
     }
   }
+  
   return(scaledResiduals)
 }
 

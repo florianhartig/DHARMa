@@ -11,6 +11,16 @@ Minor changes
 - re-modelled package unit tests
 - added RStan, CmdStanR, rjags, BayesianTools to enhances, as they coudld be used with DHARMa
 
+New features
+
+- Added rotation option to all functions that create residuals (simulateResiduals, recalculateResiduals, createDHARMa)
+
+Documentation
+
+- Added help comments about autocorrelation structures, in particular in simulateResiduals, testSpatialAutocorrelation, testTemporalAutocorrelation
+- Added example about the use of rotation in testTemporalAutocorrelation
+- Improved help of dispersion test
+
 DHARMa 0.4.3
 ============
 
