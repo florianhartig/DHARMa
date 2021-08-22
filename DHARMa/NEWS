@@ -74,7 +74,7 @@ New features
 
 Major changes
 
-- 
+-
 
 Minor changes
 
@@ -311,5 +311,3 @@ DHARMA 0.1.0
 ============
 
 - initial release, with support for lm, glm, lme4
-
-
