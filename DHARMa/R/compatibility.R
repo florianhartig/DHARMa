@@ -3,11 +3,11 @@
 # This file contains the wrappers for the models supported by DHARMa. DHARMa is interaction with packages ONLY via the wrappers. Below are
 #
 # 1) supported models in getPossibleModels
-# 2) generic S3 wrapper functions (function names see "New Class Template"), including default functions. 
+# 2) generic S3 wrapper functions (function names see "New Class Template"), including default functions.
 # 3) package / class specific wrappers.
 
 # The general approach for integrating a package in DHARMa is
-# 
+#
 # i) copy new class template
 # ii) test if S3 default functions work
 # iii) if not, define class-specific S3 functions
@@ -31,9 +31,9 @@
 ######### Generics / New S3 methods #############
 
 #' get possible models
-#' 
-#' returns a list of supported model classes 
-#' 
+#'
+#' returns a list of supported model classes
+#'
 #' @keywords internal
 getPossibleModels<-function()c("lm", "glm", "negbin", "lmerMod", "lmerModLmerTest", "glmerMod", "gam", "bam", "glmmTMB", "HLfit", "MixMod")
 
@@ -45,7 +45,7 @@ weightsWarning = "Model was fit with prior weights. These will be ignored in the
 #' Extract the response of a fitted model
 #'
 #' The purpose of this function is to safely extract the observed response (dependent variable) of the fitted model classes
-#' 
+#'
 #'
 #' @param object a fitted model
 #' @param ... additional parameters
@@ -75,10 +75,13 @@ getObservedResponse <- function (object, ...) {
 #'
 #' @seealso \code{\link{getObservedResponse}}, \code{\link{getRefit}}, \code{\link{getFixedEffects}}, \code{\link{getFitted}}
 #'
-#' @details The function is a wrapper for for the simulate function is to return the simulations from a model in a standardized way.
+#' @details The purpose of this function is to wrap or implement the simulate function of different model classes and thus return simulations from fitted models in a standardized way.
 #'
-#' Note: if the model was fit with weights, the function will throw a warning if used with a model class whose simulate function does not include the weightsi in the simulations. Note that the results may or may not be appropriate in this case, depending on how you use the weights.
+#' Note: GLMM and other regression packages often differ in how simulations are produced, and which parameters can be used to modify this behavior.
 #'
+#' One important difference is how to modifiy which hierarchical levels are held constant, and which are re-simulated. In lme4, this is controlled by the re.form argument (see [lme4::simulate.merMod]). For other packages, please consort the help.
+#'
+#' If the model was fit with weights and the respective model class does not include the weights in the simulations, getSimulations will throw a warning. The background is if weights are used on the likelihood directly, then what is fitted is effectively a pseudo likelihood, and there is no way to directly simulate from the specified likelihood. Whether or not residuals can be used in this case depends very much on what is tested and how weights are used. I'm sorry to say that it is hard to give a general recommendation, you have to consult someone that understands how weights are processed in the respective model class.
 #'
 #' @author Florian Hartig
 #' @export
@@ -125,7 +128,7 @@ getRefit <- function (object, newresp, ...) {
 #' Wrapper to get the fitted / predicted response of model at the response scale
 #'
 #' The purpose of this wrapper is to standardize extract the fitted values, which is implemented via predict(model, type = "response") for most model classes.
-#' 
+#'
 #' If you implement this function for a new model class, you should include an option to modifying which REs are included in the predictions. If this option is not available, it is essential that predictions are provided marginally / unconditionally, i.e. without the random effect estimates (because of https://github.com/florianhartig/DHARMa/issues/43), which corresponds to re-form = ~0 in lme4
 #'
 #' @param object a fitted model
@@ -141,12 +144,21 @@ getFitted <- function (object, ...) {
   UseMethod("getFitted", object)
 }
 
+# NOTE - a bit unclear if fitted or predict should be used
+
+#' @rdname getFitted
+#' @export
+getFitted.default <- function (object,...){
+  out = predict(object, type = "response", re.form = ~0)
+  out = as.vector(out) # introduced because of phyr error
+}
+
 
 #' Get model residuals
 #'
 #' Wrapper to get the residuals of a fitted model
 #'
-#' The purpose of this wrapper is to standardize extract the model residuals. Similar to some other functions, a key question is whether to calculate those conditional or unconditional on the fitted REs. 
+#' The purpose of this wrapper is to standardize extract the model residuals. Similar to some other functions, a key question is whether to calculate those conditional or unconditional on the fitted REs.
 #'
 #' @param object a fitted model
 #' @param ... additional parameters to be passed on, usually to the residual function of the respective model class
@@ -184,35 +196,35 @@ getResiduals <- function (object, ...) {
 #' @export
 getObservedResponse.default <- function (object, ...){
   out = model.frame(object)[,1]
-  
+
   # check for weights in k/n case
   if(family(object)$family %in% c("binomial", "betabinomial") & "(weights)" %in% colnames(model.frame(object))){
     x = model.frame(object)
     out = out * x$`(weights)`
   }
-  
+
   # check for k/n binomial
   if(is.matrix(out)){
     if(!(ncol(out) == 2)) securityAssertion("nKcase - wrong dimensions of response")
     if(!(family(object)$family %in% c("binomial", "betabinomial"))) securityAssertion("nKcase - wrong family")
-    
+
     out = out[,1]
   }
-  
+
   # observation is factor - unlike lme4 and older, glmmTMB simulates nevertheless as numeric
   if(is.factor(out)) out = as.numeric(out) - 1
-  
+
   return(out)
 }
 
 #' @rdname getSimulations
 #' @export
 getSimulations.default <- function (object, nsim = 1, type = c("normal", "refit"), ...){
-  
+
   type <- match.arg(type)
-  
+
   out = simulate(object, nsim = nsim , ...)
-  
+
   if (type == "normal"){
     if(family(object)$family %in% c("binomial", "betabinomial")){
       if("(weights)" %in% colnames(model.frame(object))){
@@ -230,21 +242,21 @@ getSimulations.default <- function (object, nsim = 1, type = c("normal", "refit"
         }
       }
     }
-    
+
     if(!is.matrix(out)) out = data.matrix(out)
   } else{
     if(family(object)$family %in% c("binomial", "betabinomial")){
       if (!is.matrix(out[[1]]) & !is.numeric(out)) data.frame(data.matrix(out)-1)
     }
   }
-  
+
   return(out)
 }
 
 #' @rdname getFixedEffects
 #' @export
 getFixedEffects.default <- function(object, ...){
-  
+
   if(class(object)[1] %in% c("glm", "lm", "gam", "bam", "negbin") ){
     out  = coef(object)
   } else if(class(object)[1] %in% c("glmerMod", "lmerMod", "HLfit")){
@@ -337,17 +349,17 @@ fitted.gam <- function(object, ...){
 #' @rdname getSimulations
 #' @export
 getSimulations.gam <- function (object, nsim = 1, type = c("normal", "refit"), ...){
-  
+
   type <- match.arg(type)
-  
+
   if(system.file(package = "mgcViz") == ""){
     message("mgcViz not found. When using DHARMa with mgcv, it is recommended to also install mgcViz. See Vigette, package mgcv for details")
     out = getSimulations.default(object, nsim, type)
   }
   else {
-    
+
     out = mgcvViz::simulate(object, nsim = nsim , ...)
-    
+
     if (type == "normal"){
       if(family(object)$family %in% c("binomial", "betabinomial")){
         if("(weights)" %in% colnames(model.frame(object))){
@@ -365,7 +377,7 @@ getSimulations.gam <- function (object, nsim = 1, type = c("normal", "refit"), .
           }
         }
       }
-      
+
       if(!is.matrix(out)) out = data.matrix(out)
     } else{
       if(family(object)$family %in% c("binomial", "betabinomial")){
@@ -373,7 +385,7 @@ getSimulations.gam <- function (object, nsim = 1, type = c("normal", "refit"), .
       }
     }
   }
-  
+
   return(out)
 }
 
@@ -533,13 +545,13 @@ getFitted.HLfit <- function (object,...){
 #' @rdname getSimulations
 #' @export
 getSimulations.MixMod <- function(object, nsim = 1, type = c("normal", "refit"), ...){
-  
+
   if ("weights" %in% names(object)) warning(weightsWarning)
-  
+
   type <- match.arg(type)
-  
+
   out = simulate(object, nsim = nsim , ...)
-  
+
   if(type == "normal"){
     if(!is.matrix(out)) out = data.matrix(out)
   }else{
@@ -551,7 +563,7 @@ getSimulations.MixMod <- function(object, nsim = 1, type = c("normal", "refit"),
 #' @rdname getFixedEffects
 #' @export
 getFixedEffects.MixMod <- function(object, ...){
-  out <- fixef(object, sub_model = "main")   
+  out <- fixef(object, sub_model = "main")
   return(out)
 }
 
@@ -561,7 +573,7 @@ getFixedEffects.MixMod <- function(object, ...){
 #' @rdname getRefit
 #' @export
 getRefit.MixMod <- function(object, newresp, ...) {
-  responsename = colnames(model.frame(object))[1] 
+  responsename = colnames(model.frame(object))[1]
   newDat = object$data
   newDat[, match(responsename,names(newDat))] = newresp
   update(object, data = newDat)
@@ -578,7 +590,3 @@ getFitted.MixMod <- function (object,...){
 getResiduals.MixMod <- function (object,...){
   residuals(object, type = "subject_specific")
 }
-
-
-
-

@@ -3,66 +3,61 @@
 \docType{data}
 \name{hurricanes}
 \alias{hurricanes}
-\title{hurricanes dataset residual analysis}
+\title{Hurricanes}
 \format{
 A 'data.frame': 93 obs. of  14 variables
 \describe{
-  \item{Year}{Year the hurricanes appeared (1950-2012)}
-  \item{Name}{Name the hurricanes was named after (name)}
-  \item{MasFem}{Rating of the Name, if it is more masculin or feminine (1:11). In the range 1 = very masculine, 11 = very feminine}
-  \item{MinPressure_before}{Minimum air-pressure (909-1002)}
-  \item{Minpressure_Updated_2014}{Minimum air-pressure (909-1003)}
-  \item{Gender_MF}{eGender rating binary (male/female). Male = 0, female = 1)}
-  \item{Category}{strength of the hurricane in categories (1:7). (1 = not at all, 7 = very intense)}
-  \item{alldeaths}{Deaths counted (1:256)}
-  \item{NDAM}{normalized damage in millions (1:75.000). The raw (dollar) amounts of property damage caused by hurricanes were obtained, and the unadjusted dollar amounts were normalized to 2013 monetary values by adjusting them to inflation, wealth and population density}
-  \item{Elapsed_Yrs}{elapsed since the occurrence of hurricanes (1:63)}
-  \item{Source}{MWR/wikipedia ()}
-  \item{ZMasFem}{scaled (MasFem)}
-  \item{ZMinPressure_A}{scaled (Minpressure_Updated_2014)}
-  \item{ZNDAM}{scaled (NDAM)}
-  ...
+\item{Year}{Year of the hurricane (1950-2012)}
+\item{Name}{Name of the hurricane}
+\item{MasFem}{Masculinity-femininity rating of the hurricane's name in the range 1 = very masculine, 11 = very feminine}
+\item{MinPressure_before}{Minimum air pressure (909-1002)}
+\item{Minpressure_Updated_2014}{Updated minimum air pressure (909-1003)}
+\item{Gender_MF}{Binary gender (male/female) based on MasFem (male = 0, female = 1)}
+\item{Category}{Strength of the hurricane in categories (1:7). (1 = not at all, 7 = very intense)}
+\item{alldeaths}{Deaths occured (1:256)}
+\item{NDAM}{normalized damage in millions (1:75.000). The raw (dollar) amounts of property damage caused by hurricanes were obtained, and the unadjusted dollar amounts were normalized to 2013 monetary values by adjusting them to inflation, wealth and population density}
+\item{Elapsed_Yrs}{elapsed since the occurrence of hurricanes (1:63)}
+\item{Source}{MWR/wikipedia ()}
+\item{ZMasFem}{scaled (MasFem)}
+\item{ZMinPressure_A}{scaled (Minpressure_Updated_2014)}
+\item{ZNDAM}{scaled (NDAM)}
+...
 }
-}
-\source{
-https://theoreticalecology.wordpress.com/2021/04/17/hurricanes-and-himmicanes-revisited-with-dharma/
 }
 \description{
-hurricanes
-}
-\details{
-This dataset contains hurricanes in the USA between 1950 and 2012 their strength, names ..., see parameter for more informations.
+A data set on hurricane strength and fatalities in the US between 1950 and 2012. The data originates from the study by Jung et al., PNAS, 2014, who claim that the masculinity / femininity of a hurricane name has a causal effect on fatalities, presumably through a different perception of danger caused by the names.
 }
 \examples{
+\dontrun{
 # Loading hurricanes dataset
 
 library(DHARMa)
-data(hurricanes)
 
+data(hurricanes)
 str(hurricanes)
+
+# this is the model fit by Jung et al.
 library(glmmTMB)
 originalModelGAM = glmmTMB(alldeaths ~ scale(MasFem) *
                              (scale(Minpressure_Updated_2014) + scale(NDAM)),
                            data = hurricanes, family = nbinom2)
 
-# Residual checks with DHARMa
+# no significant deviation in the general DHARMa plot
 res <- simulateResiduals(originalModelGAM)
 plot(res)
 
-# no significant deviation in the general plot, but try this
-# which was highlighted by https://www.theguardian.com/science/grrlscientist/2014/jun/04/hurricane-gender-name-bias-sexism-statistics
+# but residuals ~ NDAM looks funny, which was pointed 
+# out by Bob O'Hara in a blog post after publication of the paper
 plotResiduals(res, hurricanes$NDAM)
 
 # we also find temporal autocorrelation
 res2 = recalculateResiduals(res, group = hurricanes$Year)
 testTemporalAutocorrelation(res2, time = unique(hurricanes$Year))
+
+# task: try to address these issues - in many instances, this will 
+# make the MasFem predictor n.s.
+}
 }
 \references{
-Jung et al., PNAS, 2014
+Jung, K., Shavitt, S., Viswanathan, M., & Hilbe, J. M. (2014). Female hurricanes are deadlier than male hurricanes. Proceedings of the National Academy of Sciences, 111(24), 8782-8787.
 }
-\seealso{
-\code{\link{simulateResiduals}}
-}
-\keyword{DHARMa,}
-\keyword{hurricanes,}
-\keyword{simulateResiduals,}

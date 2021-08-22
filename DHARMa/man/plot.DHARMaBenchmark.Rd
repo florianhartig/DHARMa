@@ -19,7 +19,7 @@ The function will create two types of plots, depending on whether the run contai
 
 If a single or no value of the control parameter was provided, the function will create box plots of the estimated p-values, with the number of significant p-values plotted to the left
 
-If a control parameter was provided, the function will plot the proportion of significant p-values against the control parameter, with 95% CIs based based on the performed replicates displayed as confidence bands
+If a control parameter was provided, the function will plot the proportion of significant p-values against the control parameter, with 95\% CIs based based on the performed replicates displayed as confidence bands
 }
 \seealso{
 \code{\link{runBenchmarks}}

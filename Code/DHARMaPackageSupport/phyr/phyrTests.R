@@ -1,4 +1,4 @@
-install.packages("phyr")
+# install.packages("phyr")
 library(phyr)
 library(ape)
 library(dplyr)
@@ -12,9 +12,22 @@ library(dplyr)
 #>     intersect, setdiff, setequal, union
 data("oldfield")
 
-mod_disturbed <- phyr::pglmm(pres ~ (1 | sp__) + (1 | sp__@site) + 
-                               (1 | site), 
+data = oldfield$data %>%
+  dplyr::filter(disturbance == 1)
+
+
+mod_disturbed <- phyr::pglmm(pres ~ (1 | sp__) , 
                              data = oldfield$data %>%
                                dplyr::filter(disturbance == 1), 
                              cov_ranef = list(sp = oldfield$phy),
                              family = "binomial")
+
+res <- simulateResiduals(mod_disturbed)
+
+plot(res)
+
+length(res$observedResponse)
+length(res$fittedPredictedResponse)
+length(res$scaledResiduals)
+
+res$simulatedResponse

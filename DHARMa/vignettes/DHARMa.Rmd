@@ -57,7 +57,7 @@ But even experienced statistical analysts currently have few options to diagnose
 
 DHARMa aims at solving these problems by creating readily interpretable residuals for generalized linear (mixed) models that are standardized to values between 0 and 1, and that can be interpreted as intuitively as residuals for the linear model. This is achieved by a simulation-based approach, similar to the Bayesian p-value or the parametric bootstrap, that transforms the residuals to a standardized scale. The basic steps are:
 
-1. Simulate new data from the fitted model for each observation.
+1. Simulate new response data from the fitted model for each observation.
 
 2. For each observation, calculate the empirical cumulative density function for the simulated observations, which describes the possible values (and their probability) at the predictor combination of the observed value, assuming the fitted model is correct.
 
@@ -262,15 +262,15 @@ Moreover (general advice), to ensure reproducibility, it's advisable to add a se
 
 ## General remarks on interperting residual patterns and tests
 
-In all plots / tests that were shown so far, the model was correctly specified, resulting in "perfect" residual plots. In this section, we discuss how to recognize and interpret model misspecifications in the scaled residuals. Note, however, that 
+So far, all shown DHARMa results were calculated for a correctly specified model, resulting in "perfect" residual plots and diagnostics. In this section, we discuss how to recognize and interpret diagnostics that indicate a misspecified model. Before going into the details, note, however, that 
 
-1. The fact that none of the here-presented tests shows a misspecification problem doesn't proof that the model is correctly specified. There are likely a large number of structural problems that will not show a pattern in the standard residual plots. 
+1. **No residual pattern does not "proof" that the model is correct**: The fact that none of the DHARMa tests indicates a problem does not "proof" that the model is correctly specified - in good old Popper fashion, you should only few this as your working hypothesis not having been rejected, keeping in mind that there are likely a large number of structural problems that will not create a pattern in the DHARMa diagnostics. So, keep your skepticism alive, and if you find the results fishy, keep searching and testing. 
 
-2. Conversely, while a clear pattern in the residuals indicates with good reliability that the observed data would not be likely to originate from the fitted model, it doesn't necessarily  indicate that the model results are not useable. There are many cases where it is common practice to work "wrong models". For example, random effect estimates (in particular in GLMMs) are often slightly biased, especially if the model is fit with MLE. For that reason, DHARMa will often show a slight pattern in the residuals even if the model is correctly specified, and tests for this can get significant for large sample sizes. Another example is data that is missing at random (MAR) (see [here](https://github.com/florianhartig/DHARMa/issues/101)). It is known that this phenomenon does not create a bias on the fixed effect estimates, and it is therefore common practice to fit this data with mixed models. Nevertheless, DHARMa recognizes that the observed data looks different than what would be expected from the model assumptions, and flags the model as problematic
+2. **A residual pattern does not indicate that the model is unusable**: Conversely, while a significant pattern in the residuals indicates with good reliability that the observed data did likely not originate from the fitted model, this doesn't necessarily imply that the inferential results from this wrong model are not usable. There are many situations in statistics where it is common practice to work with "wrong models". For example, many statistical models used shrinkage estimators, which purposefully bias parameter estimates to certain values. Random effects are a special case of this. If DHARMa residuals for these estimators are calculated, they will often show a slight pattern in the residuals even if the model is correctly specified, and tests for this can get significant for large sample sizes. For this reason, DHARMa is excluding RE estimates in the predictions when plotting res ~ pred Another example is data that is missing at random (MAR). Because it is known that this phenomenon does not create a bias on the fixed effect estimates, is is common practice to fit this data with standard mixed models. Nevertheless, DHARMa recognizes that the observed data looks different than what would be expected from the model assumptions, and flags the model as problematic (see [here](https://github.com/florianhartig/DHARMa/issues/101)).
   
-**Important conclusion: DHARMa only flags a difference between the observed and expected data - the user has to decide whether this difference is actually a problem for the analysis!**
+3. **Once an residual effect is statistically significant, look the magnitude to decide if there is a problem**: finally, it is crucial to note that significance is NOT a measures of the strength of the residual pattern, it is a measure of the signal/noise ratio, i.e. whether you are sure there is a pattern at all. Significance in hypothesis tests depends on at least 2 ingredients: strength of the signal, and the number of data points. If you have a lot of data points, residual diagnostics will nearly inevitably become significant, because having a perfectly fitting model is very unlikely. That, however, doesn't necessarily mean that you need to change your model. The p-values confirm that there is a deviation from your null hypothesis. It is, however, in your discretion to decide whether this deviation is worth worrying about. For example, if you see a dispersion parameter of 1.01, I would not worry, even if the dispersion test is significant. A significant value of 5, however, is clearly a reason to move to a model that accounts for overdispersion. 
 
-This leads us to another *A word of warning* that applies also to all tests: significance is NOT a measures of the strength of the residual pattern, it is a measure of the signa/noise ratio. Significance in hypothesis tests depends on at least 2 ingredients: strenght of the signal, and number of data points. Hence, the p-value alone is not a good indicator of the extent to which your residuals deviate from assumptions. Specifically, if you have a lot of data points, residual diagnostics will nearly inevitably become significant, because having a perfectly fitting model is very unlikely. That, however, doesn't necessarily mean that you need to change your model. The p-values confirm that there is a deviation from your null hypothesis. It is, however, in your discretion to decide whether this deviation is worth worrying about. For example, if you see a dispersion parameter of 1.01, I would not worry, even if the dispersion test is significant. A significant value of 5, however, is clearly a reason to move to a model that accounts for overdispersion. 
+**Important conclusion: DHARMa only flags a difference between the observed and expected data - the user has to decide whether this difference is actually a problem for the analysis!**
 
 ## Recognizing over/underdispersion
 
@@ -367,8 +367,8 @@ testZeroInflation(simulationOutput)
 
 This test is likely better suited for detecting zero-inflation than the standard plot, but note that also overdispersion will lead to excess zeros, so only seeing too many zeros is not a reliable diagnostics for moving towards a zero-inflated model. A reliable differentiation between overdispersion and zero-inflation will usually only be possible when directly comparing alternative models, e.g. through residual comparison / model selection of a model with / without zero-inflation, or by simply fitting a model with zero-inflation and looking at the parameter estimate for the zero-inflation. A good option is the R package glmmTMB, which is also supported by DHARMa. We can use this to fit
 
-```{r}
-library(glmmTMB)
+```{r, eval= F}
+# requires glmmTMB
 fittedModel <- glmmTMB(observedResponse ~ Environment1 + I(Environment1^2) + (1|group), ziformula = ~1 , family = "poisson", data = testData)
 summary(fittedModel)
 
@@ -565,12 +565,11 @@ I guess you could use either Model 2 or 3 - the broader point is: increasing mod
 
 ## Owl example (count data)
 
-The next examples uses the fairly well known Owl dataset which is provided in glmmTMB (see ?Owls for more info about the data).
-
-The following shows a sequence of models, all checked with DHARMa. The example is discussed in a talk at ISEC 2018, see slides [here](https://www.slideshare.net/florianhartig/mon-c5hartig2493). 
+The next examples uses the fairly well known Owl dataset which is provided in glmmTMB (see ?Owls for more info about the data). The following shows a sequence of models, all checked with DHARMa. The example is discussed in a talk at ISEC 2018, see slides [here](https://www.slideshare.net/florianhartig/mon-c5hartig2493). 
 
 
 ```{r}
+library(glmmTMB)
 m1 <- glm(SiblingNegotiation ~ FoodTreatment*SexParent + offset(log(BroodSize)), data=Owls , family = poisson)
 res <- simulateResiduals(m1)
 plot(res)
@@ -626,9 +625,9 @@ but that seems to make little difference. Both models would be acceptable in ter
 
 ## Poisson data
 
-The main concern in Poisson data is dispersion. Poisson regression are nearly always overdispersed. If you address this problem with quasi-poisson models, you will not be able to test the model with DHARMa. It is anyway better to move to a negative Binomial, or an observation-level random effect. 
+The main concern in Poisson data is dispersion. See comments in the section on the dispersion test, in particulr regarding the advantage of conditional simulations in this case. To address overdispersion, I would recommend to prefer the negative binomial model over observation-level random effects, because this mode will be easier to test in DHARMa and its dispersion can be easier modeled, e.g. with glmmTMB. The third option would be quasi models, but there are few advantages, except runtime. Note also that quasi models cannot be tested with DHARMa. 
 
-Once that is done, you should check for heteroscedasticity (via standard plot, also against all predictors), and for zero-inflation. As noted, zero-inflation tests are often negative, and rather show up as underdispersion. Work through the owl example below. 
+Once dispersion is adjusted, you should check for heteroscedasticity (via standard plot, also against all predictors), and for zero-inflation. As noted, zero-inflation tests are often negative, and rather show up as underdispersion. Work through the owl example below. 
 
 ## Proportional data
 
@@ -801,6 +800,16 @@ spaMM is supported by DHARMa since 0.2.1
 ## GLMMadaptive
 
 GLMMadaptive is supported by DHARMa since 0.3.4. 
+
+## phyr
+
+DHARMa residuals work with phyr, but the correct implementation is not fully tested as of DHARMa 0.4.2. See also [https://github.com/florianhartig/DHARMa/issues/235](https://github.com/florianhartig/DHARMa/issues/235)
+
+## brms
+
+brms can be made to work together with DHARMa, see [https://github.com/florianhartig/DHARMa/issues/33](https://github.com/florianhartig/DHARMa/issues/33)
+
+
 
 ## Unsupported packages
 
