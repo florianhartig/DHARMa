@@ -21,6 +21,7 @@ Imports:
     graphics,
     utils,
     grDevices,
+    Matrix,
     parallel,
     doParallel,
     foreach,

@@ -10,6 +10,7 @@
 #' @param ... parameters to pass to the simulate function of the model object. An important use of this is to specify whether simulations should be conditional on the current random effect estimates, e.g. via re.form. Note that not all models support syntax to specify conditional or unconditional simulations. See also details
 #' @param seed the random seed to be used within DHARMa. The default setting, recommended for most users, is keep the random seed on a fixed value 123. This means that you will always get the same randomization and thus the same result when running the same code. NULL = no new seed is set, but previous random state will be restored after simulation. FALSE = no seed is set, and random state will not be restored. The latter two options are only recommended for simulation experiments. See vignette for details.
 #' @param method for refit = F, the quantile randomization method used. The two options implemented at the moment are probability integral transform (PIT-) residuals (current default), and the "traditional" randomization procedure, that was used in DHARMa until version 0.3.0. Refit = T will always use "traditional", respectively of the value of method. For details, see \code{\link{getQuantile}}
+#' @param rotation optional rotation of the residual space prior to calculating the quantile residuals. The main purpose of this is to remove residual autocorrelation. See details below, section *residual auto-correlation*, and help of [getQuantile]. 
 #'
 #' @details There are a number of important considerations when simulating from a more complex (hierarchical) model:
 #'
@@ -27,9 +28,11 @@
 #'
 #' \strong{Residuals per group}: In many situations, it can be useful to look at residuals per group, e.g. to see how much the model over / underpredicts per plot, year or subject. To do this, use \code{\link{recalculateResiduals}}, together with a grouping variable (see also help)
 #'
-#' \strong{Transformation to other distributions}: DHARMa calculates residuals for which the theoretical expectation (assuming a correctly specified model) is uniform. To transfor this residuals to another distribution (e.g. so that a correctly specified model will have normal residuals) see \code{\link{residuals.DHARMa}}.
+#' \strong{Transformation to other distributions}: DHARMa calculates residuals for which the theoretical expectation (assuming a correctly specified model) is uniform. To transform this residuals to another distribution (e.g. so that a correctly specified model will have normal residuals) see \code{\link{residuals.DHARMa}}.
 #' 
 #' \strong{Integer responses}: this is only relevant if method = "traditional", in which case it activates the randomization of the residuals. Usually, this does not need to be changed, as DHARMa will try to automatically if the fitted model has an integer or discrete distribution via the family argument. However, in some cases the family does not allow to uniquely identify the distribution type. For example, a tweedie distribution can be inter or continuous. Therefore, DHARMa will additionally check the simulation results for repeated values, and will change the distribution type if repeated values are found (a message is displayed in this case).
+#' 
+#' \strong{Residual auto-correlation}: a common problem is residual autocorrelation. Spatial, temporal and phylogenetic autocorrelation can be tested with [testSpatialAutocorrelation] and [testTemporalAutocorrelation]. If simulations are unconditional, residual correlations will be maintained, even if the autocorrelation is addressed by an appropriate CAR structure. This may be a problem, because autocorrelation may create apparently systematic patterns in plots or tests such as [testUniformity]. To reduce this problem, either simulate conditional on fitted correlated REs, or you could try to rotate residuals via the rotation parameter (the latter will likely only work in approximately linear models). See [getQuantile] for details on the rotation. 
 #' 
 #' @return An S3 class of type "DHARMa". Implemented S3 functions include \code{\link{plot.DHARMa}}, \code{\link{print.DHARMa}} and \code{\link{residuals.DHARMa}}. For other functions that can be used on a DHARMa object, see section "See Also" below.
 #'
@@ -38,7 +41,7 @@
 #' @example inst/examples/simulateResidualsHelp.R
 #' @import stats
 #' @export
-simulateResiduals <- function(fittedModel, n = 250, refit = F, integerResponse = NULL, plot = F, seed = 123, method = c("PIT", "traditional"), ...){
+simulateResiduals <- function(fittedModel, n = 250, refit = F, integerResponse = NULL, plot = F, seed = 123, method = c("PIT", "traditional"), rotation = NULL, ...){
 
   ######## general assertions and startup calculations ##########
 
@@ -86,7 +89,7 @@ simulateResiduals <- function(fittedModel, n = 250, refit = F, integerResponse =
 
     checkSimulations(out$simulatedResponse, out$nObs, out$nSim)
 
-    out$scaledResiduals = getQuantile(simulations = out$simulatedResponse , observed = out$observedResponse , integerResponse = integerResponse, method = method)
+    out$scaledResiduals = getQuantile(simulations = out$simulatedResponse , observed = out$observedResponse , integerResponse = integerResponse, method = method, rotation = rotation)
 
   ######## refit = T ##################
   } else {
@@ -141,7 +144,7 @@ simulateResiduals <- function(fittedModel, n = 250, refit = F, integerResponse =
 
     ######### residual calculations ###########
 
-    out$scaledResiduals = getQuantile(simulations = out$refittedResiduals, observed = out$fittedResiduals, integerResponse = integerResponse, method = "traditional")
+    out$scaledResiduals = getQuantile(simulations = out$refittedResiduals, observed = out$fittedResiduals, integerResponse = integerResponse, method = "traditional", rotation = rotation)
   }
 
   ########### Wrapup ############
@@ -226,11 +229,12 @@ checkSimulations <- function(simulatedResponse, nObs, nSim){
 #' @param sel an optional vector for selecting the data to be aggregated
 #' @param seed the random seed to be used within DHARMa. The default setting, recommended for most users, is keep the random seed on a fixed value 123. This means that you will always get the same randomization and thus teh same result when running the same code. NULL = no new seed is set, but previous random state will be restored after simulation. FALSE = no seed is set, and random state will not be restored. The latter two options are only recommended for simulation experiments. See vignette for details.
 #' @param method the quantile randomization method used. The two options implemented at the moment are probability integral transform (PIT-) residuals (current default), and the "traditional" randomization procedure, that was used in DHARMa until version 0.3.0. For details, see \code{\link{getQuantile}}
+#' @param rotation optional rotation of the residual space to remove residual autocorrelation. See details in [simulateResiduals], section *residual auto-correlation* for an extended explanation, and [getQuantile] for syntax. 
 #' @return an object of class DHARMa, similar to what is returned by \code{\link{simulateResiduals}}, but with additional outputs for the new grouped calculations. Note that the relevant outputs are 2x in the object, the first is the grouped calculations (which is returned by $name access), and later another time, under identical name, the original output. Moreover, there is a function 'aggregateByGroup', which can be used to aggregate predictor variables in the same way as the variables calculated here
 #'
 #' @example inst/examples/simulateResidualsHelp.R
 #' @export
-recalculateResiduals <- function(simulationOutput, group = NULL, aggregateBy = sum, sel = NULL, seed = 123, method = c("PIT", "traditional")){
+recalculateResiduals <- function(simulationOutput, group = NULL, aggregateBy = sum, sel = NULL, seed = 123, method = c("PIT", "traditional"), rotation = NULL){
 
   randomState <-getRandomState(seed)
   on.exit({randomState$restoreCurrent()})
@@ -261,7 +265,7 @@ recalculateResiduals <- function(simulationOutput, group = NULL, aggregateBy = s
     if (simulationOutput$refit == F){
   
       out$simulatedResponse = apply(simulationOutput$simulatedResponse, 2, aggregateByGroup)
-      out$scaledResiduals = getQuantile(simulations = out$simulatedResponse , observed = out$observedResponse, integerResponse = simulationOutput$integerResponse, method = method)
+      out$scaledResiduals = getQuantile(simulations = out$simulatedResponse , observed = out$observedResponse, integerResponse = simulationOutput$integerResponse, method = method, rotation = rotation)
   
     ######## refit = T ##################
     } else {
@@ -271,7 +275,7 @@ recalculateResiduals <- function(simulationOutput, group = NULL, aggregateBy = s
       out$refittedResiduals = apply(simulationOutput$refittedResiduals, 2, aggregateByGroup)
       out$refittedPearsonResiduals = apply(simulationOutput$refittedPearsonResiduals, 2, aggregateByGroup)
   
-      out$scaledResiduals = getQuantile(simulations = out$refittedResiduals , observed = out$fittedResiduals , integerResponse = simulationOutput$integerResponse, method = method)
+      out$scaledResiduals = getQuantile(simulations = out$refittedResiduals , observed = out$fittedResiduals , integerResponse = simulationOutput$integerResponse, method = method, rotation = rotation)
     }
     # hack - the c here will result in both old and new outputs to be present resulting output, but a named access should refer to the new, grouped calculations
     # question to myself - what's the use of that, why not erase the old outputs? they are anyway saved in the old object

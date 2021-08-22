@@ -9,6 +9,16 @@ Minor changes
 - glmmTMB added again to suggests
 - phyr removed in suggests as it is currently not (yet) tested, to remove dependency problems
 
+
+New features
+
+- Added rotation option to all functions that create residuals (simulateResiduals, recalculateResiduals, createDHARMa)
+
+Documentation
+
+- Added help comments about autocorrelation structures, in particular in simulateResiduals, testSpatialAutocorrelation, testTemporalAutocorrelation
+- Added example about the use of rotation in testTemporalAutocorrelation
+
 DHARMa 0.4.3
 ============
 
