@@ -34,6 +34,9 @@ simulationOutput <- simulateResiduals(fittedModel = fittedModel)
 # run the quantile test
 x = testQuantiles(simulationOutput)
 x # the test shows a combined p-value, corrected for multiple testing
+
+\dontrun{
+# accessing results of the test
 x$pvals # pvalues for the individual quantiles
 x$qgamFits # access the fitted quantile regression 
 summary(x$qgamFits[[1]]) # summary of the first fitted quantile
@@ -46,8 +49,6 @@ fittedModel <- glm(observedResponse ~ 1 , family = "poisson", data = testData)
 simulationOutput <- simulateResiduals(fittedModel = fittedModel)
 testQuantiles(simulationOutput, predictor = testData$Environment1)
 
-# the quantile test is automatically performed in 
-\dontrun{
 plot(simulationOutput)
 plotResiduals(simulationOutput)
 }
