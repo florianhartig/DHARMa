@@ -11,7 +11,6 @@
 #' @note The benchmark function in DHARMa are intended for development purposes, and for users that want to test / confirm the properties of functions in DHARMa. If you are running an applied data analysis, they are probably of little use. 
 #' @return A object with list structure of class DHARMaBenchmark. Contains an entry simulations with a matrix of simulations, and an entry summaries with an list of summaries (significant (T/F), mean, p-value for KS-test uniformity). Can be plotted with \code{\link{plot.DHARMaBenchmark}}
 #' @export 
-#' @importFrom foreach "%dopar%"
 #' @author Florian Hartig
 #' @seealso \code{\link{plot.DHARMaBenchmark}}
 #' @example inst/examples/runBenchmarksHelp.R
