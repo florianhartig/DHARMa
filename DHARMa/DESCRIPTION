@@ -36,6 +36,7 @@ Suggests:
     sfsmisc,
     MASS,
     mgcv,
+    mgcViz,
     spaMM (>= 3.2.0),
     GLMMadaptive,
     glmmTMB (>= 1.0.1)

@@ -209,11 +209,12 @@ test_that("mgcv works",
             runEverything(fittedModel, testData$binomial_10)
             
             fittedModel <- gam(observedResponse ~ s(Environment1) ,family = "binomial", data = testData$binomial_yn)
-            # runEverything(fittedModel, testData)
+            runEverything(fittedModel, testData = testData$binomial_yn)
             
             fittedModel <- gam(cbind(observedResponse1,observedResponse0) ~ Environment1 ,family = "binomial", data = testData$binomial_nk_matrix)
+            # simulate(fittedModel)
             # gam doesn't work, check
-            #runEverything(fittedModel, testData)
+            runEverything(fittedModel, testData = testData$binomial_nk_matrix)
             
             fittedModel <- gam(prop ~ Environment1 ,family = "binomial", data = testData$binomial_nk_weights, weights = rep(20,200))
             runEverything(fittedModel, testData$binomial_nk_weights)
