@@ -1,3 +1,15 @@
+# Version 0.4.4
+
+## Submission 1, 23.8.2021
+
+This is a minor update of DHARMa, including various smaller improvements and bugfixes. See NEWS for details.
+
+This release was tested without apparent problems under
+
+* local MAC OS 11.4 (Big Sur), R 4.1.0
+* GitHub Actions - Windows / Mac / Ubuntu (release), Ubuntu (devel)
+* http://win-builder.r-project.org/ - oldrelease / devel / release
+
 # Version 0.4.3
 
 ## Submission 1, 6.7.2021
