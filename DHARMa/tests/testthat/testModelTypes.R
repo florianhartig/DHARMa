@@ -221,7 +221,7 @@ test_that("mgcv works",
             runEverything(fittedModel, testData$poisson1)
             
             fittedModel2 <- gam(observedResponse ~ Environment1 , family = "poisson", data = testData$poisson2)
-            expectDispersion(fittedModel2, testData$poisson2)
+            expectDispersion(fittedModel2)
             
             # gam warns about weights
             fittedModel <- gam(observedResponse ~ Environment1 , weights = testData$weights, data = testData$poisson_weights, family = "poisson")
