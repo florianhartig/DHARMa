@@ -348,11 +348,13 @@ getSimulations.gam <- function(object, nsim = 1, type = c("normal", "refit"), ..
   type <- match.arg(type)
   
   if("mgcViz" %in% installed.packages()){
+    
+    if("(weights)" %in% colnames(model.frame(object)) & ! family(object)$family %in% c("binomial", "betabinomial")) warning(weightsWarning)
   
     # use mgcViz if available
     out = mgcViz:::simulate.gam(object, nsim = nsim , ...)
     out = as.data.frame(out)
-    
+
     # from here to end identical to default
     
     if (type == "normal"){
@@ -360,26 +362,15 @@ getSimulations.gam <- function(object, nsim = 1, type = c("normal", "refit"), ..
         if("(weights)" %in% colnames(model.frame(object))){
           x = model.frame(object)
           out = out * x$`(weights)`
-        } else if (is.matrix(out[[1]])){
+        } else if (is.matrix(model.frame(object)[[1]])){
           # this is for the k/n binomial case
-          out = as.matrix(out)[,seq(1, (2*nsim), by = 2)]
-        } else if(is.factor(out[[1]])){
-          if(nlevels(out[[1]]) != 2){
-            warning("The fitted model has a factorial response with number of levels not equal to 2 - there is currently no sensible application in DHARMa that would lead to this situation. Likely, you are trying something that doesn't work.")
-          }
-          else{
-            out = data.matrix(out) - 1
-          }
+          out = out * rowSums(model.frame(object)[[1]])
         }
       }
-      
       if(!is.matrix(out)) out = data.matrix(out)
     } else{
-      if(family(object)$family %in% c("binomial", "betabinomial")){
-        if (!is.matrix(out[[1]]) & !is.numeric(out)) data.frame(data.matrix(out)-1)
-      }
+      # check if refit works OK
     }
-    
   } else {
    message("You don't have mgcViz installed. When using DHARMa with mgcv objects, it is recommended to also install mgcViz, which will extend the ability of DHARMa to simulate from various gam objects")
     out = getSimulations.default(object, nsim, type, ...)
