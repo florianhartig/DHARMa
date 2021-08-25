@@ -352,7 +352,7 @@ getSimulations.gam <- function(object, nsim = 1, type = c("normal", "refit"), ..
     if("(weights)" %in% colnames(model.frame(object)) & ! family(object)$family %in% c("binomial", "betabinomial")) warning(weightsWarning)
   
     # use mgcViz if available
-    out = mgcViz:::simulate.gam(object, nsim = nsim , ...)
+    out = mgcViz::simulate.gam(object, nsim = nsim , ...)
     out = as.data.frame(out)
 
     # from here to end identical to default
