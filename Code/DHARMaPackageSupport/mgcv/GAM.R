@@ -90,5 +90,15 @@ simulate(snails_gam2) # works
 
 
 
+# 
+
+library(DHARMa)
+testData = createData(family = binomial(), factorResponse = T)
+
+library(mgcv)
+fit <- gam(observedResponse ~ Environment1, data = testData, family = "binomial")
+simulate(fit)
+
+library(mgcv)
 
 
