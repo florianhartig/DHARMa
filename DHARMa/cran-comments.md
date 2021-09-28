@@ -1,6 +1,6 @@
 # Version 0.4.4
 
-## Submission 1, 23.8.2021
+## Submission 1, 28.9.2021
 
 This is a minor update of DHARMa, including various smaller improvements and bugfixes. See NEWS for details.
 
