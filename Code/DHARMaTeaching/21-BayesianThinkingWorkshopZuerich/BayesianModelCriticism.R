@@ -135,22 +135,21 @@ modelCode = "model{
   env ~ dnorm(0,0.0001)
   tauRE ~ dgamma(0.001,0.001)
 
-  # Posterior predictive simulations, conditional 
-  # recipe: re-simulate the top part of the likelihood
-  for (i in 1:nobs) {
-    observedResponsePred[i]~dpois(lambda[i])
-  }
-  
-  # Posterior predictive simulations, unconditional 
-  # recipe: just copy the likelihood and replace 
-  # everything that is stochastic
+  # Posterior predictive simulations
   for(i in 1:nobs){
+    # conditional simulations, use lambda from the model
+    observedResponsePred[i]~dpois(lambda[i])
+  
+    # unconditional simulations, use new lambda with new RE
     observedResponsePred2[i] ~ dpois(lambda2[i])  # poisson error distribution
-    lambda2[i] <- exp(eta2[i]) # inverse link function
-    eta2[i] <- intercept + env*Environment1[i] + RE2[group[i]] # linear predictor
+    lambda2[i] <- exp(eta2[i]) 
+    eta2[i] <- intercept + env*Environment1[i] + RE2[group[i]] 
+    
+    # unconditional predictions (conditional predictions use normal lambda)
     lambda3[i] <- exp(intercept + env*Environment1[i])
   }
   
+  # new RE for unconditional simulations
   for(j in 1:nGroups){
    RE2[j] ~ dnorm(0,tauRE)  
   }
