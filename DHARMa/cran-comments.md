@@ -6,7 +6,7 @@ This is a minor update of DHARMa, including various smaller improvements and bug
 
 This release was tested without apparent problems under
 
-* local MAC OS 11.4 (Big Sur), R 4.1.0
+* local MAC OS 11.6 (Big Sur), R 4.1.0
 * GitHub Actions - Windows / Mac / Ubuntu (release), Ubuntu (devel)
 * http://win-builder.r-project.org/ - oldrelease / devel / release
 
