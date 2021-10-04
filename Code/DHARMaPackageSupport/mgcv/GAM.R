@@ -91,14 +91,19 @@ simulate(snails_gam2) # works
 
 
 # 
-
 library(DHARMa)
 testData = createData(family = binomial(), factorResponse = T)
 
 library(mgcv)
 fit <- gam(observedResponse ~ Environment1, data = testData, family = "binomial")
 simulate(fit)
+class(fit)
 
-library(mgcv)
+res <- simulateResiduals(fit, plot = T)
 
+library(mgcViz)
+
+simulate(fit)
+
+res <- simulateResiduals(fit, plot = T)
 
