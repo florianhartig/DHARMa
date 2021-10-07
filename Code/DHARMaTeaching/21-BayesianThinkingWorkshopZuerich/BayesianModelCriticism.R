@@ -3,52 +3,14 @@ library(lme4)
 library(rjags) # note - requires to also install Jags via https://sourceforge.net/projects/mcmc-jags/files/
 library(BayesianTools)
 
-###### Prior predictive checks ######
-
-# Purpose of prior predictive checks is to find out if the chosen prior
-# creates predictions that we would classify as reasonable given our 
-# intentions, e.g. when we specified an uninformative prior, we would usually  
-# expect that the model predictions have no strong preference for a particular
-# value.
-
-# Extreme example: strongly nonlinear model
-model = function(x) exp(-abs(x)) + rnorm(1,sd = 0.05)
-
-# wide uniform prior leads to a prior predictive distribution that is centered
-# at zero
-priorDraws = rnorm(5000, sd = 20)
-priorPredictiveSims = model(priorDraws)
-hist(priorPredictiveSims, breaks = 50)
-
-# an exponential prior, which concentrates mass around 0 (transformed by the model to large values) is arguably far more "neutral" prior predictive distribution
-priorDraws = rexp(5000) * sample(c(-1,1), 5000, T)
-priorPredictiveSims = model(priorDraws)
-hist(priorPredictiveSims, breaks = 50)
-
-# Essentially, what we see here is a principle that is extended in Jeffrey's prior https://en.wikipedia.org/wiki/Jeffreys_prior
-
-# If you want to do the checks in Jags, just leave the data vector empty (see example below)
-
-# There are two further checks we could do now, both based on re-fitting the simulated data. 
-
-# 1) Calibration check of the MCMC sampler, see e.g. https://www.rdocumentation.org/packages/BayesianTools/versions/0.1.7/topics/calibrationTest
-# 2) Check of bias in parameter estimates (i.e. plot true / estimated)
-
-# We will skip this here because it cost too much runtime, but If you want an example: both checks are performed in https://www.nature.com/articles/s41559-019-0908-0
-
-###### Posterior predictive checks ######
-
-# After the prior predictive checks, which mostly as about whether we have a 
-# sensibly specified prior, we now turn our attention to the posterior 
-# predictive checks, which are checks on the model assumptions (= likelihood)
-
 set.seed(123)
 
 # creating some test data following a poisson distribution
 # you can check the data.frame to see the predictors
+# true values: intercept = 0, slope = 1
 dat <- DHARMa::createData(200, overdispersion = 0.0)
 
-# I will first show you how the residual checks work for frequentists
+# I will first slowly show you how the residual checks work for frequentists
 
 # fit poisson glm
 fit <- glm(observedResponse ~ Environment1, data = dat, family = "poisson")
@@ -72,14 +34,14 @@ testZeroInflation(res)
 testSpatialAutocorrelation(res, x = dat$x, y = dat$y)
 testGeneric(res, mean) # tests a generic summary statistics.
 
-# now the Bayesian way - I am using Jags, same in STAN, but cold also directly use DHARMa with brms, tighter coupling is on our agenda https://github.com/florianhartig/DHARMa/issues/33
+# Checking Bayesian models models
+
+# now the Bayesian way - I am using Jags here, would be the same in STAN, but cold also directly use DHARMa with brms, tighter coupling is on our agenda https://github.com/florianhartig/DHARMa/issues/33
+# special notes on Bayesian checks with DHARMa in 
 
 library(rjags)
-Data = as.list(dat)
-Data$nobs = nrow(dat)
-Data$nGroups = length(unique(dat$group))
 
-# Possion model without RE
+# Poisson GLM without RE
 modelCode = "model{
 
   for(i in 1:nobs){
@@ -93,19 +55,62 @@ modelCode = "model{
 
   # Posterior predictive simulations 
   for (i in 1:nobs) {
-    observedResponsePred[i]~dpois(lambda[i])
-    lambda2[i] <- exp(intercept + env*Environment1[i])
+    observedResponseSim[i]~dpois(lambda[i])
   }
 
 }"
 
+# data preparation
+Data = as.list(dat)
+Data$nobs = nrow(dat)
+Data$nGroups = length(unique(dat$group))
+
+# for prior predictive distribution, create copy of the same data
+# but with data column set to NA
+Data2 = Data
+Data2$observedResponse = rep(NA, Data$nobs)
+
+# run the Jags model with Data2 (NAs for observations -> prior predictive)
+jagsModel <- jags.model(file= textConnection(modelCode), data=Data2, n.chains = 3)
+para.names <- c("intercept","env", "lambda")
+Samples <- coda.samples(jagsModel, variable.names = para.names, n.iter = 5000)
+
+x = BayesianTools::getSample(Samples)
+marginalPlot(x, which = 1:2) # sampled prior parameters
+priorPredDistr = x[,3:202] # prior predictive distribution
+hist(priorPredDistr, breaks = 100)
+hist(log(priorPredDistr), breaks = 100)
+
+# We see that the prior predictive distribution is massively centered at 0
+# Still, half of the predictions are > 1. The reason for this is the log link
+# in the Poisson GLM. 
+# having wide priors on regression estimates is still the standard 
+# choice for these models, but a warning that if you would have
+# very weak data (priors dominate), these priors would favor posterior 
+# predictions close to 0, which could be a problem in practical applications
+
+# Suggested reading: Jeffrey's prior https://en.wikipedia.org/wiki/Jeffreys_prior
+
+# There are two further checks we could do now, both based on re-fitting the simulated data. 
+
+# 1) Calibration check of the MCMC sampler, see e.g. https://www.rdocumentation.org/packages/BayesianTools/versions/0.1.7/topics/calibrationTest
+# 2) Check of bias in parameter estimates (i.e. plot true / estimated)
+
+# We will skip this here because it cost too much runtime, but If you want an example: both checks are performed in https://www.nature.com/articles/s41559-019-0908-0
+
+# After the prior predictive checks, which mostly as about whether we have a 
+# sensibly specified prior, we now turn our attention to the posterior 
+# predictive checks, which are checks on the model assumptions (= likelihood)
+
+# Now using the real data to fit the model
+
 jagsModel <- jags.model(file= textConnection(modelCode), data=Data, n.chains = 3)
-para.names <- c("intercept","env", "lambda2", "observedResponsePred")
+para.names <- c("intercept","env", "lambda", "observedResponseSim" )
 Samples <- coda.samples(jagsModel, variable.names = para.names, n.iter = 5000)
 
 x = BayesianTools::getSample(Samples)
 
-colnames(x) # problem: all the variables are in one array - this is better in STAN, where this is a list - have to extract the right columns by hand
+marginalPlot(x, which = 1:2) # fitted regression parameters
 posteriorPredDistr = x[,3:202] # this is the uncertainty of the mean prediction (lambda)
 posteriorPredSim = x[,203:402] # these are the simulations 
 
@@ -115,8 +120,7 @@ sim = createDHARMa(simulatedResponse = t(posteriorPredSim),
                    integerResponse = T)
 plot(sim)
 
-# Task: check if there is a difference between using conditional or unconditional
-# predictions for fittedPredictedResponse (by observing lambda vs. lambda2)
+# Fit is not very nice, so let's add a random effect
 
 # Possion model with RE 
 modelCode = "model{
@@ -137,6 +141,7 @@ modelCode = "model{
 
   # Posterior predictive simulations
   for(i in 1:nobs){
+    
     # conditional simulations, use lambda from the model
     observedResponsePred[i]~dpois(lambda[i])
   
@@ -144,7 +149,6 @@ modelCode = "model{
     observedResponsePred2[i] ~ dpois(lambda2[i])  # poisson error distribution
     lambda2[i] <- exp(eta2[i]) 
     eta2[i] <- intercept + env*Environment1[i] + RE2[group[i]] 
-    
     # unconditional predictions (conditional predictions use normal lambda)
     lambda3[i] <- exp(intercept + env*Environment1[i])
   }
@@ -162,7 +166,7 @@ Samples <- coda.samples(jagsModel, variable.names = para.names, n.iter = 5000)
 
 x = BayesianTools::getSample(Samples)
 
-colnames(x) # problem: all the variables are in one array - this is better in STAN, where this is a list - have to extract the right columns by hand
+marginalPlot(x, which = 1:2) # fitted regression parameters
 posteriorPredDistr = x[,3:202] # this is the uncertainty of the mean prediction (lambda)
 posteriorPredSim = x[,203:402] # these are the simulations 
 
@@ -173,7 +177,7 @@ sim = createDHARMa(simulatedResponse = t(posteriorPredSim),
 plot(sim)
 
 # Task: check if there is a difference between using conditional or unconditional
-# predictions and/or simulations for simulatedResponse and fittedPredictedResponse (by observing lambda vs. lambda2, and observedResponsePred vs. observedResponsePred2, respectively)
+# predictions and/or simulations for simulatedResponse and fittedPredictedResponse (by observing lambda vs. lambda3, and observedResponsePred vs. observedResponsePred2, respectively)
 
 # If there is time, here are two additional tasks:
 
