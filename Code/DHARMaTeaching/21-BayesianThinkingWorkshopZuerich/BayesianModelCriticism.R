@@ -90,6 +90,7 @@ hist(log(priorPredDistr), breaks = 100)
 # predictions close to 0, which could be a problem in practical applications
 
 # Suggested reading: Jeffrey's prior https://en.wikipedia.org/wiki/Jeffreys_prior
+# Bedrick, E. J., Christensen, R., & Johnson, W. (1996). A new perspective on priors for generalized linear models. Journal of the American Statistical Association, 91(436), 1450-1460.
 
 # There are two further checks we could do now, both based on re-fitting the simulated data. 
 
