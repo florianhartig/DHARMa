@@ -209,11 +209,10 @@ test_that("mgcv works",
             runEverything(fittedModel, testData$binomial_10)
             
             fittedModel <- gam(observedResponse ~ s(Environment1) ,family = "binomial", data = testData$binomial_yn)
-            # runEverything(fittedModel, testData)
+            runEverything(fittedModel, testData = testData$binomial_yn)
             
             fittedModel <- gam(cbind(observedResponse1,observedResponse0) ~ Environment1 ,family = "binomial", data = testData$binomial_nk_matrix)
-            # gam doesn't work, check
-            #runEverything(fittedModel, testData)
+            runEverything(fittedModel, testData = testData$binomial_nk_matrix)
             
             fittedModel <- gam(prop ~ Environment1 ,family = "binomial", data = testData$binomial_nk_weights, weights = rep(20,200))
             runEverything(fittedModel, testData$binomial_nk_weights)
@@ -222,7 +221,7 @@ test_that("mgcv works",
             runEverything(fittedModel, testData$poisson1)
             
             fittedModel2 <- gam(observedResponse ~ Environment1 , family = "poisson", data = testData$poisson2)
-            # expectDispersion(fittedModel2, testData$poisson2)
+            expectDispersion(fittedModel2)
             
             # gam warns about weights
             fittedModel <- gam(observedResponse ~ Environment1 , weights = testData$weights, data = testData$poisson_weights, family = "poisson")

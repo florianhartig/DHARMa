@@ -339,6 +339,45 @@ getFitted.gam <- function(object, ...){
 # plot(fitted(fittedModelGAM), predict(fittedModelGAM, type = "response"))
 
 
+# Get Simulations of gam object
+
+#' @rdname getSimulations
+#' @export
+getSimulations.gam <- function(object, nsim = 1, type = c("normal", "refit"), ...){
+  
+  type <- match.arg(type)
+  
+  if("mgcViz" %in% installed.packages()){
+    
+    if("(weights)" %in% colnames(model.frame(object)) & ! family(object)$family %in% c("binomial", "betabinomial")) warning(weightsWarning)
+  
+    # use mgcViz if available
+    out = mgcViz::simulate.gam(object, nsim = nsim , ...)
+    out = as.data.frame(out)
+
+    # from here to end identical to default
+    
+    if (type == "normal"){
+      if(family(object)$family %in% c("binomial", "betabinomial")){
+        if("(weights)" %in% colnames(model.frame(object))){
+          x = model.frame(object)
+          out = out * x$`(weights)`
+        } else if (is.matrix(model.frame(object)[[1]])){
+          # this is for the k/n binomial case
+          out = out * rowSums(model.frame(object)[[1]])
+        }
+      }
+      if(!is.matrix(out)) out = data.matrix(out)
+    } else{
+      # check if refit works OK
+    }
+  } else {
+   message("You don't have mgcViz installed. When using DHARMa with mgcv objects, it is recommended to also install mgcViz, which will extend the ability of DHARMa to simulate from various gam objects")
+    out = getSimulations.default(object, nsim, type, ...)
+  }
+  return(out)
+}
+
 ######## lme4 ############
 
 
