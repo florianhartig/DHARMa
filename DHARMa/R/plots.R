@@ -177,10 +177,10 @@ plotResiduals <- function(simulationOutput, form = NULL, quantreg = NULL, rank =
   ##### Checks #####
 
   a <- list(...)
-  a$ylab = checkDots("ylab", "Standardized residual", ...)
-  if(is.null(form)){
-    a$xlab = checkDots("xlab", ifelse(rank, "Model predictions (rank transformed)", "Model predictions"), ...)
-  }
+  a$ylab = checkDots("ylab", "DHARMa residual", ...)
+  a$xlab = checkDots("xlab", ifelse(is.null(form), "Model predictions", 
+                                    gsub(".*[$]","",deparse(substitute(form)))), ...)
+  if(rank == T) a$xlab = paste(a$xlab, "(rank transformed)")
 
   simulationOutput = ensureDHARMa(simulationOutput, convert = T)
   res = simulationOutput$scaledResiduals
@@ -242,7 +242,7 @@ plotResiduals <- function(simulationOutput, form = NULL, quantreg = NULL, rank =
 
   ##### Quantile regressions #####
 
-  main = checkDots("main", "Residual vs. predicted", ...)
+  main = checkDots("main", ifelse(is.null(form), "Residual vs. predicted", "Residual vs. predictor"), ...)
   out = NULL
 
   if(is.numeric(pred)){
