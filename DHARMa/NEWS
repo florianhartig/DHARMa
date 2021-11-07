@@ -1,5 +1,16 @@
 NOTE: for more news about the package, see https://github.com/florianhartig/DHARMa/releases
 
+DHARMa 0.4.5
+============
+
+Major changes
+
+Minor changes
+
+- included option to simulate mgcv models using the functions implemented in mgcViz which should improve mgcv compatibility with DHARMa 
+
+
+
 
 DHARMa 0.4.4
 ============
