@@ -356,7 +356,7 @@ testCategorical <- function(simulationOutput, catPred, quantiles = c(0.25, 0.5, 
         line = 1)
 
   if(length(out) > 1) {
-    mtext(ifelse(out$homogeneity$`Pr(>F)`[1] < 0.05, "Levene Test for homogeneity of variance significant", "Levene Test for homongeneity of variance n.s."),
+    mtext(ifelse(out$homogeneity$`Pr(>F)`[1] < 0.05, "Levene Test for homogeneity of variance significant", "Levene Test for homogeneity of variance n.s."),
           col = ifelse(out$homogeneity$`Pr(>F)`[1] < 0.05, "red", "black"))
   }
 
