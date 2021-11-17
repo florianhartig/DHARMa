@@ -6,7 +6,7 @@ on:
       - main
       - master
       - GitAction
-      
+
   pull_request:
     branches:
       - main
@@ -42,7 +42,7 @@ jobs:
           r-version: ${{ matrix.config.r }}
 
       - uses: r-lib/actions/setup-pandoc@v1
-      
+
       - name: Query dependencies
         run: |
           setwd("DHARMa")
@@ -50,7 +50,7 @@ jobs:
           saveRDS(remotes::dev_package_deps(dependencies = TRUE), "../.github/depends.Rds", version = 2)
           writeLines(sprintf("R-%i.%i", getRversion()$major, getRversion()$minor), "../.github/R-version")
         shell: Rscript {0}
-
+        
       - name: Install system dependencies
         if: runner.os == 'Linux'
         run: |
@@ -66,7 +66,7 @@ jobs:
           remotes::install_deps(dependencies = TRUE)
           remotes::install_cran("rcmdcheck")
         shell: Rscript {0}
-        
+
       - name: Check_II
         env:
           _R_CHECK_CRAN_INCOMING_REMOTE_: false
@@ -74,7 +74,7 @@ jobs:
         run: |
           rcmdcheck::rcmdcheck("DHARMa", args = c("--no-multiarch", "--no-manual"), error_on = "warning", check_dir = "check")
         shell: Rscript {0}
-        
+
       - name: Check
         env:
           _R_CHECK_CRAN_INCOMING_REMOTE_: false

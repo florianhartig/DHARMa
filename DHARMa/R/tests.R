@@ -314,7 +314,7 @@ testOutliers <- function(simulationOutput, alternative = c("two.sided", "greater
 
 #' Test for categorical dependencies
 #'
-#' This function tests if there are probles in a res ~ group structure. It performs two tests: test for within-group uniformity, and test for between-group homongeity of variances
+#' This function tests if there are probles in a res ~ group structure. It performs two tests: test for within-group uniformity, and test for between-group homogeneity of variances
 #'
 #' @param simulationOutput an object of class DHARMa, either created via \code{\link{simulateResiduals}} for supported models or by \code{\link{createDHARMa}} for simulations created outside DHARMa, or a supported model. Providing a supported model directly is discouraged, because simulation settings cannot be changed in this case.
 #' @param catPred a categorical predictor with the same dimensions as the residuals in simulationOutput
@@ -356,7 +356,7 @@ testCategorical <- function(simulationOutput, catPred, quantiles = c(0.25, 0.5, 
         line = 1)
 
   if(length(out) > 1) {
-    mtext(ifelse(out$homogeneity$`Pr(>F)`[1] < 0.05, "Levene Test for homogeneity of variance significant", "Levene Test for homongeneity of variance n.s."),
+    mtext(ifelse(out$homogeneity$`Pr(>F)`[1] < 0.05, "Levene Test for homogeneity of variance significant", "Levene Test for homogeneity of variance n.s."),
           col = ifelse(out$homogeneity$`Pr(>F)`[1] < 0.05, "red", "black"))
   }
 

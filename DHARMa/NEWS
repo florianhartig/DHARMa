@@ -9,7 +9,9 @@ Minor changes
 
 - included option to simulate mgcv models using the functions implemented in mgcViz which should improve mgcv compatibility with DHARMa 
 
+Bugfixes
 
+- fixed issues with plotting, see #313 and #274
 
 
 DHARMa 0.4.4
