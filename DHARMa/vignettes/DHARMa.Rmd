@@ -787,7 +787,9 @@ lme4 model classes are fully supported.
 
 ## mgcv
 
-mgcv is partly supported. Non-standard distributions are not supported, because mgcv doesn't implement a simulate function for those.
+When using mgcv with DHARMa, it is highly recommended to also install mgcViz. Since version 0.4.5, this will allow DHARMa to fall back on the simulate.gam function in mgcViz, which is more general than the default simulate function. For example, without mgcViz, it will not be possible to simulate from mgcv::gam objects fitted with extended families. 
+
+If you absolutely want to use DHARMa without mgcViz, you should make sure that simulate(model) works correctly for the model object for which you want to calculate DHARMa residuals. 
 
 ## glmmTMB
 

@@ -42,82 +42,82 @@
 #' @import stats
 #' @export
 simulateResiduals <- function(fittedModel, n = 250, refit = F, integerResponse = NULL, plot = F, seed = 123, method = c("PIT", "traditional"), rotation = NULL, ...){
-
+  
   ######## general assertions and startup calculations ##########
-
+  
   if (n < 2) stop("error in DHARMa::simulateResiduals: n > 1 is required to calculate scaled residuals")
   checkModel(fittedModel)
   match.arg(method)
   randomState <-getRandomState(seed)
   on.exit({randomState$restoreCurrent()})
   ptm <- proc.time()
-
+  
   ####### extract model info ############
-
+  
   out = list()
-
+  
   family = family(fittedModel)
   out$fittedModel = fittedModel
   out$modelClass = class(fittedModel)[1]
   
   out$additionalParameters = list(...)
-
+  
   out$nObs = nobs(fittedModel)
   out$nSim = n
   out$refit = refit
   out$observedResponse = getObservedResponse(fittedModel)
-
+  
   if(is.null(integerResponse)){
     if (family$family %in% c("binomial", "poisson", "quasibinomial", "quasipoisson", "Negative Binom", "nbinom2", "nbinom1", "genpois", "compois", "truncated_poisson", "truncated_nbinom2", "truncated_nbinom1", "betabinomial", "Poisson", "Tpoisson", "COMPoisson", "negbin", "Tnegbin") | grepl("Negative Binomial",family$family) ) integerResponse = TRUE
     else integerResponse = FALSE
   }
   out$integerResponse = integerResponse
-
+  
   out$problems = list()
   
   out$fittedPredictedResponse = getFitted(fittedModel)
   out$fittedFixedEffects = getFixedEffects(fittedModel)
   out$fittedResiduals = getResiduals(fittedModel)
-
+  
   ######## refit = F ##################
-
+  
   if (refit == FALSE){
     
     out$method = method
-
+    
     out$simulatedResponse = getSimulations(fittedModel, nsim = n, type = "normal", ...)
-
+    
     checkSimulations(out$simulatedResponse, out$nObs, out$nSim)
-
+    
     out$scaledResiduals = getQuantile(simulations = out$simulatedResponse , observed = out$observedResponse , integerResponse = integerResponse, method = method, rotation = rotation)
-
-  ######## refit = T ##################
+    
+    ######## refit = T ##################
   } else {
-
+    
     out$method = "traditional"
     
     # Adding new outputs
-
+    
     out$refittedPredictedResponse <- matrix(nrow = out$nObs, ncol = n )
     out$refittedFixedEffects <- matrix(nrow = length(out$fittedFixedEffects), ncol = n )
     #out$refittedRandomEffects <- matrix(nrow = length(out$fittedRandomEffects), ncol = n )
     out$refittedResiduals = matrix(nrow = out$nObs, ncol = n)
     out$refittedPearsonResiduals = matrix(nrow = out$nObs, ncol = n)
-
+    
     out$simulatedResponse = getSimulations(fittedModel, nsim = n, type = "refit", ...)
-
+    
     for (i in 1:n){
-
+      
       simObserved = out$simulatedResponse[[i]]
-
+      
       try({
-
+        
         # for testing
         # if (i==3) stop("x")
         # Note: also set silent = T for production
-
+        
         refittedModel = getRefit(fittedModel, simObserved)
-
+        
         out$refittedPredictedResponse[,i] = getFitted(refittedModel)
         out$refittedFixedEffects[,i] = getFixedEffects(refittedModel)
         out$refittedResiduals[,i] = getResiduals(refittedModel)
@@ -125,13 +125,13 @@ simulateResiduals <- function(fittedModel, n = 250, refit = F, integerResponse =
         #out$refittedRandomEffects[,i]  = ranef(refittedModel)
       }, silent = TRUE)
     }
-
+    
     ######### residual checks ###########
-
+    
     if(anyNA(out$refittedResiduals)) warning("DHARMa::simulateResiduals warning: on refit = TRUE, at least one of the refitted models produced an error. Inspect the refitted model values. Results may not be reliable.")
-
+    
     ## check for convergence problems
-
+    
     dup = sum(duplicated(out$refittedFixedEffects, MARGIN = 2))
     if (dup > 0){
       if (dup < n/3){
@@ -141,57 +141,23 @@ simulateResiduals <- function(fittedModel, n = 250, refit = F, integerResponse =
         out$problems[[length(out$problems)+ 1]] = "error in refit"
       }
     }
-
+    
     ######### residual calculations ###########
-
+    
     out$scaledResiduals = getQuantile(simulations = out$refittedResiduals, observed = out$fittedResiduals, integerResponse = integerResponse, method = "traditional", rotation = rotation)
   }
-
+  
   ########### Wrapup ############
-
+  
   out$time = proc.time() - ptm
   out$randomState = randomState
-
+  
   class(out) = "DHARMa"
-
+  
   if(plot == TRUE) plot(out)
-
+  
   return(out)
 }
-
-
-#' Check if the fitted model is supported by DHARMa
-#'
-#' The function checks if the fitted model is supported by DHARMa, and if there are other issues that could create problems
-#'
-#' @param fittedModel a fitted model
-#' @param stop whether to throw an error if the model is not supported by DHARMa
-#'
-#' @details The main purpose of this function os to check if the fitted model class is supported by DHARMa. The function additionally checks for properties of the fitted model that could create problems for calculating residuals or working with the resuls in DHARMa.
-#'
-#'
-#' @keywords internal
-checkModel <- function(fittedModel, stop = F){
-
-  out = T
-
-  if(!(class(fittedModel)[1] %in% getPossibleModels())){
-    if(stop == FALSE) warning("DHARMa: fittedModel not in class of supported models. Absolutely no guarantee that this will work!")
-    else stop("DHARMa: fittedModel not in class of supported models")
-  }
-
-  # if(hasNA(fittedModel)) message("It seems there were NA values in the data used for fitting the model. This can create problems if you supply additional data to DHARMa functions. See ?checkModel for details")
-
-  # TODO: check as implemented does not work reliably, check if there is any other option to check for NA
-  # #' @example inst/examples/checkModelHelp.R
-
-  #  NA values in the data: checkModel will detect if there were NA values in the data frame. For NA values, most regression models will remove the entire observation from the data. This is not a problem for DHARMa - residuals are then only calculated for non-NA rows in the data. However, if you provide additional predictors to DHARMa, for example to plot residuals against a predictor, you will have to remove all NA rows that were also removed in the model. For most models, you can get the rows of the data that were actually used in the fit via rownames(model.frame(fittedModel))
-
-
-  #if (class(fittedModel)[1] == "gam" ) if (class(fittedModel$family)[1] == "extended.family") stop("It seems you are trying to fit a model from mgcv that was fit with an extended.family. Simulation functions for these families are not yet implemented in DHARMa. See issue https://github.com/florianhartig/DHARMa/issues/11 for updates about this")
-
-}
-
 
 
 #' Check simulated data
@@ -204,16 +170,16 @@ checkModel <- function(fittedModel, stop = F){
 #'
 #' @keywords internal
 checkSimulations <- function(simulatedResponse, nObs, nSim){
-
+  
   if(!inherits(simulatedResponse, "matrix")) securityAssertion("Simulation from the model produced wrong class", stop = T)
-
+  
   if(any(dim(simulatedResponse) != c(nObs, nSim) )) securityAssertion("Simulation from the model produced wrong dimension", stop = T)
-
+  
   if(any(!is.finite(simulatedResponse))) message("Simulations from your fitted model produce infinite values. Consider if this is sensible")
-
+  
   if(any(is.nan(simulatedResponse))) securityAssertion("Simulations from your fitted model produce NaN values. DHARMa cannot calculated residuals for this. This is nearly certainly an error of the regression package you are using", stop = T)
   if(any(is.na(simulatedResponse))) securityAssertion("Simulations from your fitted model produce NA values. DHARMa cannot calculated residuals for this. This is nearly certainly an error of the regression package you are using", stop = T)
-
+  
 }
 
 
@@ -235,14 +201,14 @@ checkSimulations <- function(simulatedResponse, nObs, nSim){
 #' @example inst/examples/simulateResidualsHelp.R
 #' @export
 recalculateResiduals <- function(simulationOutput, group = NULL, aggregateBy = sum, sel = NULL, seed = 123, method = c("PIT", "traditional"), rotation = NULL){
-
+  
   randomState <-getRandomState(seed)
   on.exit({randomState$restoreCurrent()})
   match.arg(method)
-
+  
   # ensures that the base simulation is always used for recalculate
   if(!is.null(simulationOutput$original)) simulationOutput = simulationOutput$original
-
+  
   out = list()
   out$original = simulationOutput
   out$group = group
@@ -256,30 +222,30 @@ recalculateResiduals <- function(simulationOutput, group = NULL, aggregateBy = s
     out$nGroups = nlevels(group)
     if(is.null(sel)) sel = 1:simulationOutput$nObs
     out$sel = sel
-  
+    
     aggregateByGroup <- function(x) aggregate(x[sel], by=list(group[sel]), FUN=aggregateBy)[,2]
-  
+    
     out$observedResponse = aggregateByGroup(simulationOutput$observedResponse)
     out$fittedPredictedResponse = aggregateByGroup(simulationOutput$fittedPredictedResponse)
-  
+    
     if (simulationOutput$refit == F){
-  
+      
       out$simulatedResponse = apply(simulationOutput$simulatedResponse, 2, aggregateByGroup)
       out$scaledResiduals = getQuantile(simulations = out$simulatedResponse , observed = out$observedResponse, integerResponse = simulationOutput$integerResponse, method = method, rotation = rotation)
-  
-    ######## refit = T ##################
+      
+      ######## refit = T ##################
     } else {
-  
+      
       out$refittedPredictedResponse <- apply(simulationOutput$refittedPredictedResponse, 2, aggregateByGroup)
       out$fittedResiduals = aggregateByGroup(simulationOutput$fittedResiduals)
       out$refittedResiduals = apply(simulationOutput$refittedResiduals, 2, aggregateByGroup)
       out$refittedPearsonResiduals = apply(simulationOutput$refittedPearsonResiduals, 2, aggregateByGroup)
-  
+      
       out$scaledResiduals = getQuantile(simulations = out$refittedResiduals , observed = out$fittedResiduals , integerResponse = simulationOutput$integerResponse, method = method, rotation = rotation)
     }
     # hack - the c here will result in both old and new outputs to be present resulting output, but a named access should refer to the new, grouped calculations
     # question to myself - what's the use of that, why not erase the old outputs? they are anyway saved in the old object
-  
+    
     out$aggregateByGroup = aggregateByGroup
     out = c(out, simulationOutput)
     out$randomState = randomState
