@@ -36,6 +36,8 @@ getSimulations(object, nsim = 1, type = c("normal", "refit"), ...)
 \item{type}{if simulations should be prepared for getQuantile or for refit}
 
 \item{...}{additional parameters to be passed on, usually to the simulate function of the respective model class}
+
+\item{mgcViz}{whether simulations should be created with mgcViz}
 }
 \value{
 a matrix with simulations

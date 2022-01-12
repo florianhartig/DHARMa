@@ -276,7 +276,7 @@ getFixedEffects.default <- function(object, ...){
   } else if(class(object)[1] %in% c("glmerMod", "lmerMod", "HLfit")){
     out = fixef(object)
   } else if(class(object)[1] %in% c("glmmTMB")){
-    out = fixef(object)
+    out = glmmTMB::fixef(object)
     out = out$cond
   } else {
     out = coef(object)
@@ -376,6 +376,7 @@ getFitted.gam <- function(object, ...){
 # Get Simulations of gam object
 
 #' @rdname getSimulations
+#' @param mgcViz whether simulations should be created with mgcViz (if mgcViz is available)
 #' @export
 getSimulations.gam <- function(object, nsim = 1, type = c("normal", "refit"), mgcViz = TRUE, ...){
   
