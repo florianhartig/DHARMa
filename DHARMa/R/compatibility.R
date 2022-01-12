@@ -403,27 +403,26 @@ getSimulations.gam <- function(object, nsim = 1, type = c("normal", "refit"), mg
       }
       if(!is.matrix(out)) out = data.matrix(out)
     } else{
-      # if(family(object)$family %in% c("binomial", "betabinomial")){
-      #   if (is.matrix(model.frame(object)[[1]])){
-      # 
-      #     # need to convert to k,n-k format for refit. Syntax here is from
-      #     # https://stackoverflow.com/questions/6143697/data-frame-with-a-column-containing-a-matrix-in-r
-      # 
-      #     trials = rowSums(model.frame(object)[[1]])
-      #     oldnames = names(out)
-      #     oldrownames = row.names(out)
-      #     out = out * trials
-      #     out = as.list(out)
-      #     for(i in 1:length(out)){
-      #       out[[i]] = cbind(out[[i]], trials - out[[i]])
-      #       colnames(out[[i]]) = colnames(model.frame(object)[[1]])
-      #     }
-      #     class(out) = "data.frame"
-      #     names(out) = oldnames
-      #     row.names(out) = oldrownames
-      #   }
-      # }
-      
+      if(family(object)$family %in% c("binomial", "betabinomial")){
+        if (is.matrix(model.frame(object)[[1]])){
+
+          # need to convert to k,n-k format for refit. Syntax here is from
+          # https://stackoverflow.com/questions/6143697/data-frame-with-a-column-containing-a-matrix-in-r
+
+          trials = rowSums(model.frame(object)[[1]])
+          oldnames = names(out)
+          oldrownames = row.names(out)
+          out = out * trials
+          out = as.list(out)
+          for(i in 1:length(out)){
+            out[[i]] = cbind(out[[i]], trials - out[[i]])
+            colnames(out[[i]]) = colnames(model.frame(object)[[1]])
+          }
+          class(out) = "data.frame"
+          names(out) = oldnames
+          row.names(out) = oldrownames
+        }
+      }
     }
   } else {
     message("It seems you don't have mgcViz installed on this computer. When using DHARMa with mgcv objects, it is highly recommended to also install mgcViz, which will extend the ability of DHARMa to simulate from various gam objects. Withoug mgcViz, simulations will fail in various situations. See vignette for details!")
