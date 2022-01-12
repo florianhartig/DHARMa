@@ -20,6 +20,9 @@ getSimulations(object, nsim = 1, type = c("normal", "refit"), ...)
 \method{getSimulations}{gam}(object, nsim = 1, type = c("normal", "refit"),
   mgcViz = TRUE, ...)
 
+\method{getSimulations}{gam}(object, nsim = 1, type = c("normal", "refit"),
+  mgcViz = TRUE, ...)
+
 \method{getSimulations}{lmerMod}(object, nsim = 1, type = c("normal", "refit"), ...)
 
 \method{getSimulations}{glmmTMB}(object, nsim = 1, type = c("normal", "refit"), ...)
