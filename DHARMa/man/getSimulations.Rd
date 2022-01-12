@@ -37,7 +37,7 @@ getSimulations(object, nsim = 1, type = c("normal", "refit"), ...)
 
 \item{...}{additional parameters to be passed on, usually to the simulate function of the respective model class}
 
-\item{mgcViz}{whether simulations should be created with mgcViz}
+\item{mgcViz}{whether simulations should be created with mgcViz (if mgcViz is available)}
 }
 \value{
 a matrix with simulations
