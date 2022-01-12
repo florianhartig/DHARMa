@@ -62,6 +62,12 @@ jobs:
           key: ${{ runner.os }}-${{ hashFiles('.github/R-version') }}-1-${{ hashFiles('.github/depends.Rds') }}
           restore-keys: ${{ runner.os }}-${{ hashFiles('.github/R-version') }}-1-
 
+      - name: Install curl for r-devel version
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get install -y curl
+          sudo apt-get install -y texlive texlive-fonts-extra
+     
       - name: Install system dependencies
         if: runner.os == 'Linux'
         run: |
