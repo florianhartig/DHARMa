@@ -17,7 +17,7 @@ testCategorical(simulationOutput, catPred, quantiles = c(0.25, 0.5, 0.75),
 \item{plot}{if T, the function will create an additional plot}
 }
 \description{
-This function tests if there are probles in a res ~ group structure. It performs two tests: test for within-group uniformity, and test for between-group homongeity of variances
+This function tests if there are probles in a res ~ group structure. It performs two tests: test for within-group uniformity, and test for between-group homogeneity of variances
 }
 \details{
 The function tests for two common problems: are residuals within each group distributed according to model assumptions, and is the variance between group heterogeneous.

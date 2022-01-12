@@ -1,13 +1,40 @@
 NOTE: for more news about the package, see https://github.com/florianhartig/DHARMa/releases
 
-
-DHARMa 0.4.4
+DHARMa 0.4.5
 ============
 
 Minor changes
 
-- glmmTMB added again to suggests
-- phyr removed in suggests as it is currently not (yet) tested, to remove dependency problems
+- included option to simulate mgcv models using the functions implemented in mgcViz which should improve mgcv compatibility with DHARMa
+
+Bugfixes
+
+- fixed issues with plotting, see #313 and #274
+
+DHARMa 0.4.4
+============
+
+Major changes
+
+- remodelled tests so that all tested packages can be used conditionally
+
+Minor changes
+
+- re-introduced glmmTMB to suggests
+- phyr moved to enhances
+- re-modelled package unit tests
+- added RStan, CmdStanR, rjags, BayesianTools to enhances, as they coudld be used with DHARMa
+- moved parallel calculations in runBenchmark to R native parallel functions
+
+New features
+
+- Added rotation option to all functions that create residuals (simulateResiduals, recalculateResiduals, createDHARMa)
+
+Documentation
+
+- Added help comments about autocorrelation structures, in particular in simulateResiduals, testSpatialAutocorrelation, testTemporalAutocorrelation
+- Added example about the use of rotation in testTemporalAutocorrelation
+- Improved help of dispersion test
 
 DHARMa 0.4.3
 ============
@@ -62,7 +89,7 @@ New features
 
 Major changes
 
-- 
+-
 
 Minor changes
 
@@ -299,5 +326,3 @@ DHARMA 0.1.0
 ============
 
 - initial release, with support for lm, glm, lme4
-
-

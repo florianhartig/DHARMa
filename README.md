@@ -52,11 +52,7 @@ If you want to install the current (development) version from this repository, r
 devtools::install_github(repo = "florianhartig/DHARMa", subdir = "DHARMa", 
 dependencies = T, build_vignettes = T)
 ```
-Below the status of the automatic Travis CI tests on the master branch (if this doesn't load see [here](https://travis-ci.org/florianhartig/DHARMa))
-
-[![Build Status](https://travis-ci.com/florianhartig/DHARMa.svg?branch=master)](https://travis-ci.com/florianhartig/DHARMa)
-
-Additionally, we also test via GitHub Actions
+Below the status of the automatic tests via GitHub Actions
 
 [![R-CMD-check](https://github.com/florianhartig/DHARMa/workflows/R-CMD-check/badge.svg)](https://github.com/florianhartig/DHARMa/actions)
 

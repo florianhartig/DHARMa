@@ -11,7 +11,6 @@
 #' @note The benchmark function in DHARMa are intended for development purposes, and for users that want to test / confirm the properties of functions in DHARMa. If you are running an applied data analysis, they are probably of little use. 
 #' @return A object with list structure of class DHARMaBenchmark. Contains an entry simulations with a matrix of simulations, and an entry summaries with an list of summaries (significant (T/F), mean, p-value for KS-test uniformity). Can be plotted with \code{\link{plot.DHARMaBenchmark}}
 #' @export 
-#' @importFrom foreach "%dopar%"
 #' @author Florian Hartig
 #' @seealso \code{\link{plot.DHARMaBenchmark}}
 #' @example inst/examples/runBenchmarksHelp.R
@@ -44,23 +43,37 @@ runBenchmarks <- function(calculateStatistics, controlValues = NULL, nRep = 10, 
     
     cl <- parallel::makeCluster(cores)
 
-    doParallel::registerDoParallel(cl)
-    
-    `%dopar%` <- foreach::`%dopar%`
-    
-    if(is.null(controlValues)) simulations[[1]] =  t(foreach::foreach(i=1:nRep, .packages=c("lme4", "DHARMa"), .combine = rbind) %dopar% calculateStatistics())
+    # for each
+    # doParallel::registerDoParallel(cl)
+    # 
+    # `%dopar%` <- foreach::`%dopar%`
+    # 
+    # if(is.null(controlValues)) simulations[[1]] =  t(foreach::foreach(i=1:nRep, .packages=c("lme4", "DHARMa"), .combine = rbind) %dopar% calculateStatistics())
+    # 
+    # else for(j in 1:length(controlValues)){
+    #   simulations[[j]] = t(foreach::foreach(i=1:nRep, .packages=c("lme4", "DHARMa"), .combine = rbind) %dopar% calculateStatistics(controlValues[j]))
+    # }
+    # 
+    # End for each
 
-    else for(j in 1:length(controlValues)){
-      simulations[[j]] = t(foreach::foreach(i=1:nRep, .packages=c("lme4", "DHARMa"), .combine = rbind) %dopar% calculateStatistics(controlValues[j]))
-    }
-
+    # doesn't see to work properly
+    loadedPackages = (.packages())
+    parExectuer = function(x = NULL, control = NULL) calculateStatistics(control)
+    parallel::clusterExport(cl = cl, c("parExectuer", "loadedPackages"), envir = environment())
+    parallel::clusterEvalQ(cl, {for(p in loadedPackages) library(p, character.only=TRUE)})
+    
+    # parallel::clusterExport(cl = cl, varlist = ls(envir = .GlobalEnv))
+    
     # parallel::clusterExport(cl=cl,varlist = c("calculateStatistics"), envir=environment())
     # parallel::clusterExport(cl=cl,varlist = c("controlValues", "alpha", envir=environment())
-    #if(is.null(controlValues)) simulations[[1]] =  parallel::parSapply(cl, 1:nRep, calculateStatistics())
-    #else for(j in 1:length(controlValues)){
-    #  simulations[[j]] = parallel::parSapply(cl, 1:nRep, calculateStatistics(controlValues[j]))
-    #}
     
+    # parallel::clusterExport(cl=cl,varlist = c("calculateStatistics"), envir=environment())
+    # parallel::clusterExport(cl=cl,varlist = c("controlValues", "alpha", envir=environment())
+    
+    if(is.null(controlValues)) simulations[[1]] = parallel::parSapply(cl, 1:nRep, parExectuer)
+    else for(j in 1:length(controlValues)){
+      simulations[[j]] = parallel::parSapply(cl, 1:nRep, parExectuer, control = controlValues[j])
+    }
     
     parallel::stopCluster(cl)
   }

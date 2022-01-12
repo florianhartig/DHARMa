@@ -23,6 +23,7 @@ plot(out)
 
 # running benchmark can be done using parallel cores
 # out = runBenchmarks(returnStatistics, nRep = 100, parallel = TRUE)
+# out = runBenchmarks(returnStatistics, controlValues = c(0,0.5,1), nRep = 10, parallel = TRUE)
 
 # Alternative plot function using vioplot, provides nicer pictures 
 
