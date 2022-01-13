@@ -6,12 +6,12 @@ on:
       - main
       - master
       - GitAction
-      
+
   pull_request:
     branches:
       - main
       - master
-
+          
 name: R-CMD-check
 
 jobs:
@@ -24,14 +24,18 @@ jobs:
       fail-fast: false
       matrix:
         config:
+          - {os: macOS-latest, r: 'release'}
+          - {os: windows-latest, r: 'release'}
           - {os: ubuntu-20.04, r: 'release', rspm: "https://packagemanager.rstudio.com/cran/__linux__/focal/latest"}
           - {os: ubuntu-20.04, r: 'devel', rspm: "https://packagemanager.rstudio.com/cran/__linux__/focal/latest"}
           - {os: ubuntu-20.04, r: 'oldrel', rspm: "https://packagemanager.rstudio.com/cran/__linux__/focal/latest"}
+
     env:
       R_REMOTES_NO_ERRORS_FROM_WARNINGS: true
       RSPM: ${{ matrix.config.rspm }}
       GITHUB_PAT: ${{ secrets.GITHUB_TOKEN }}
-
+      KMP_DUPLICATE_LIB_OK: TRUE
+      
     steps:
       - uses: actions/checkout@v2
 
@@ -41,6 +45,11 @@ jobs:
 
       - uses: r-lib/actions/setup-pandoc@v1
       
+      - uses: r-lib/actions/setup-tinytex@master
+      
+      - name: Install makeindex
+        run: tlmgr install makeindex
+
       - name: Query dependencies
         run: |
           setwd("DHARMa")
@@ -49,55 +58,61 @@ jobs:
           writeLines(sprintf("R-%i.%i", getRversion()$major, getRversion()$minor), "../.github/R-version")
         shell: Rscript {0}
 
-      - name: Cache R packages 
+      - name: Cache R packages
         if: runner.os != 'Windows'
         uses: actions/cache@v2
         with:
           path: ${{ env.R_LIBS_USER }}
-          key: ${{ runner.os }}-${{ hashFiles('.github/R-version') }}-1-${{ hashFiles('.github/depends.Rds') }}
-          restore-keys: ${{ runner.os }}-${{ hashFiles('.github/R-version') }}-1-
+          key: ${{ matrix.config.os }}-${{ steps.install-r.outputs.installed-r-version }}-1-${{ hashFiles('.github/r-depends.rds') }}
+          restore-keys: ${{ matrix.config.os }}-${{ steps.install-r.outputs.installed-r-version }}-1-
 
       - name: Install curl for r-devel version
         if: runner.os == 'Linux'
         run: |
           sudo apt-get install -y curl
           sudo apt-get install -y texlive texlive-fonts-extra
-     
+          
       - name: Install system dependencies
         if: runner.os == 'Linux'
         run: |
-          cd DHARMa
-          while read -r cmd
-          do
-            eval sudo $cmd
-          done < <(Rscript -e 'writeLines(remotes::system_requirements("ubuntu", "20.04"))')
-
+          setwd("DHARMa")
+          pak::local_system_requirements(execute = TRUE)
+          pak::pkg_system_requirements("rcmdcheck", execute = TRUE)
+        shell: Rscript {0}
+          
       - name: Install dependencies
         run: |
           setwd("DHARMa")
-          remotes::install_deps(dependencies = TRUE)
-          remotes::install_cran("rcmdcheck")
-        shell: Rscript {0}
-        
-      - name: Check_II
-        env:
-          _R_CHECK_CRAN_INCOMING_REMOTE_: false
-          CI: true
-        run: |
-          rcmdcheck::rcmdcheck("DHARMa", args = c("--no-multiarch", "--no-manual"), error_on = "warning", check_dir = "check")
-        shell: Rscript {0}
-        
-      - name: Check
-        env:
-          _R_CHECK_CRAN_INCOMING_REMOTE_: false
-          CI: true
-        run: |
-          rcmdcheck::rcmdcheck("DHARMa", args = c("--no-manual", "--as-cran"), error_on = "warning", check_dir = "check")
+          pak::local_install_dev_deps(upgrade = TRUE)
+          pak::pkg_install("rcmdcheck")
         shell: Rscript {0}
 
+      - name: Check I
+        env:
+          _R_CHECK_CRAN_INCOMING_REMOTE_: false
+          CI: true
+        run: |
+          options(crayon.enabled = TRUE)
+          rcmdcheck::rcmdcheck("DHARMa", args = c("--no-multiarch", "--no-manual"), error_on = "error", check_dir = "check")
+        shell: Rscript {0}
+        
+      - name: testthat output
+        if: always()
+        run: find check -name 'testthat.Rout*' -exec cat '{}' \; || true
+        shell: bash
+        
+      - name: Check II
+        env:
+          _R_CHECK_CRAN_INCOMING_REMOTE_: false
+          CI: true
+        run: |
+          options(crayon.enabled = TRUE)
+          rcmdcheck::rcmdcheck("DHARMa", args = c("--no-manual", "--as-cran"), error_on = "note", check_dir = "check")
+        shell: Rscript {0}
+        
       - name: Upload check results
         if: failure()
         uses: actions/upload-artifact@main
         with:
-          name: ${{ runner.os }}-r${{ matrix.config.r }}-results
+          name: ${{ matrix.config.os }}-r${{ matrix.config.r }}-results
           path: check
