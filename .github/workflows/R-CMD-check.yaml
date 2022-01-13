@@ -58,6 +58,11 @@ jobs:
           path: ${{ env.R_LIBS_USER }}
           key: ${{ runner.os }}-${{ hashFiles('.github/R-version') }}-1-${{ hashFiles('.github/depends.Rds') }}
           restore-keys: ${{ runner.os }}-${{ hashFiles('.github/R-version') }}-1-
+          
+      - name: Install curl for r-devel version
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get install -y curl
 
       - name: Install system dependencies
         if: runner.os == 'Linux'
@@ -74,7 +79,7 @@ jobs:
           remotes::install_deps(dependencies = TRUE)
           remotes::install_cran("rcmdcheck")
         shell: Rscript {0}
-        
+
       - name: Check_II
         env:
           _R_CHECK_CRAN_INCOMING_REMOTE_: false
