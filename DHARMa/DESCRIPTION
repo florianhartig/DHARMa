@@ -39,7 +39,7 @@ Suggests:
     mgcViz (>= 	0.1.9),
     spaMM (>= 3.2.0),
     GLMMadaptive,
-    glmmTMB (>= 1.1.3)
+    glmmTMB (>= 1.1.2.3)
 Enhances:
     phyr,
     rstan,

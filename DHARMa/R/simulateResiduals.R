@@ -67,7 +67,8 @@ simulateResiduals <- function(fittedModel, n = 250, refit = F, integerResponse =
   out$refit = refit
   out$observedResponse = getObservedResponse(fittedModel)
   
-  if (out$nObs < length(out$observedResponse)) stop("DHARMA::simulateResiduals: nobs(model) < nrow(model.frame). A possible reason is that you have observation with zero prior weights in your data. Calculating residuals in this case wouldn't be sensible. Please remove zero-weight observations from your data and re-fit your model!")
+  # this is to check for problem #325
+  if (out$nObs < length(out$observedResponse)) stop("DHARMA::simulateResiduals: nobs(model) < nrow(model.frame). A possible reason is that you have observation with zero prior weights (ir binomial with n=0) in your data. Calculating residuals in this case wouldn't be sensible. Please remove zero-weight observations from your data and re-fit your model! If you believe that this is not the reason, please file an issue under https://github.com/florianhartig/DHARMa/issues")
   
   if(is.null(integerResponse)){
     if (family$family %in% c("binomial", "poisson", "quasibinomial", "quasipoisson", "Negative Binom", "nbinom2", "nbinom1", "genpois", "compois", "truncated_poisson", "truncated_nbinom2", "truncated_nbinom1", "betabinomial", "Poisson", "Tpoisson", "COMPoisson", "negbin", "Tnegbin") | grepl("Negative Binomial",family$family) ) integerResponse = TRUE
