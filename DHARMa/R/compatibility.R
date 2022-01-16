@@ -382,7 +382,7 @@ getSimulations.gam <- function(object, nsim = 1, type = c("normal", "refit"), mg
   
   type <- match.arg(type)
   
-  if("mgcViz" %in% installed.packages() & mgcViz == T){
+  if(length(find.package("mgcViz")) > 0 & mgcViz == T){
     
     if("(weights)" %in% colnames(model.frame(object)) & ! family(object)$family %in% c("binomial", "betabinomial")) warning(weightsWarning)
     
