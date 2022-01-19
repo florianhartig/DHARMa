@@ -67,6 +67,9 @@ simulateResiduals <- function(fittedModel, n = 250, refit = F, integerResponse =
   out$refit = refit
   out$observedResponse = getObservedResponse(fittedModel)
   
+  # this is to check for problem #325
+  if (out$nObs < length(out$observedResponse)) stop("DHARMA::simulateResiduals: nobs(model) < nrow(model.frame). A possible reason is that you have observation with zero prior weights (ir binomial with n=0) in your data. Calculating residuals in this case wouldn't be sensible. Please remove zero-weight observations from your data and re-fit your model! If you believe that this is not the reason, please file an issue under https://github.com/florianhartig/DHARMa/issues")
+  
   if(is.null(integerResponse)){
     if (family$family %in% c("binomial", "poisson", "quasibinomial", "quasipoisson", "Negative Binom", "nbinom2", "nbinom1", "genpois", "compois", "truncated_poisson", "truncated_nbinom2", "truncated_nbinom1", "betabinomial", "Poisson", "Tpoisson", "COMPoisson", "negbin", "Tnegbin") | grepl("Negative Binomial",family$family) ) integerResponse = TRUE
     else integerResponse = FALSE
@@ -173,7 +176,7 @@ checkSimulations <- function(simulatedResponse, nObs, nSim){
   
   if(!inherits(simulatedResponse, "matrix")) securityAssertion("Simulation from the model produced wrong class", stop = T)
   
-  if(any(dim(simulatedResponse) != c(nObs, nSim) )) securityAssertion("Simulation from the model produced wrong dimension", stop = T)
+  if(any(dim(simulatedResponse) != c(nObs, nSim) )) securityAssertion("Simulation from the model do not have the same dimension as nObs.", stop = F)
   
   if(any(!is.finite(simulatedResponse))) message("Simulations from your fitted model produce infinite values. Consider if this is sensible")
   
