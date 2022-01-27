@@ -3,16 +3,15 @@ NOTE: for more news about the package, see https://github.com/florianhartig/DHAR
 DHARMa 0.4.5
 ============
 
-Major changes
-
 Minor changes
 
-- included option to simulate mgcv models using the functions implemented in mgcViz which should improve mgcv compatibility with DHARMa 
+- included option to simulate mgcv models using the functions implemented in mgcViz which should improve mgcv compatibility with DHARMa
+
+- Added option to include plot title in plot() #320
 
 Bugfixes
 
 - fixed issues with plotting, see #313 and #274
-
 
 DHARMa 0.4.4
 ============

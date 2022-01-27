@@ -2,15 +2,20 @@
 % Please edit documentation in R/compatibility.R
 \name{getFixedEffects}
 \alias{getFixedEffects}
+\alias{getFixedEffects.default}
 \alias{getFixedEffects.MixMod}
 \title{Extract fixed effects of a supported model}
 \usage{
-getFixedEffects(fittedModel)
+getFixedEffects(object, ...)
 
-getFixedEffects.MixMod(fittedModel)
+\method{getFixedEffects}{default}(object, ...)
+
+\method{getFixedEffects}{MixMod}(object, ...)
 }
 \arguments{
-\item{fittedModel}{a fitted model}
+\item{object}{a fitted model}
+
+\item{...}{additional parameters}
 }
 \description{
 A wrapper to extract fixed effects of a supported model

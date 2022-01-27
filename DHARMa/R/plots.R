@@ -4,6 +4,7 @@
 #' 
 #' @param x an object of class DHARMa with simulated residuals created by \code{\link{simulateResiduals}}
 #' @param ... further options for \code{\link{plotResiduals}}. Consider in particular parameters quantreg, rank and asFactor. xlab, ylab and main cannot be changed when using plot.DHARMa, but can be changed when using plotResiduals.
+#' @param title The title for both panels (plotted via mtext, outer = T)
 #' 
 #' @details The function creates a plot with two panels. The left panel is a uniform qq plot (calling \code{\link{plotQQunif}}), and the right panel shows residuals against predicted values (calling \code{\link{plotResiduals}}), with outliers highlighted in red. 
 #' 
@@ -22,15 +23,15 @@
 #' @import graphics
 #' @import utils
 #' @export
-plot.DHARMa <- function(x, ...){
+plot.DHARMa <- function(x, title = "DHARMa residual", ...){
 
   oldpar <- par(mfrow = c(1,2), oma = c(0,1,2,1))
   on.exit(par(oldpar))
-
+  
   plotQQunif(x)
   plotResiduals(x, ...)
 
-  mtext("DHARMa residual diagnostics", outer = T)
+  mtext(title, outer = T)
 }
 
 

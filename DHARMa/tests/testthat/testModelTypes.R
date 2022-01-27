@@ -208,7 +208,7 @@ test_that("mgcv works",
             fittedModel <- gam(observedResponse ~ Environment1 ,family = "binomial", data = testData$binomial_10)
             runEverything(fittedModel, testData$binomial_10)
             
-            fittedModel <- gam(observedResponse ~ s(Environment1) ,family = "binomial", data = testData$binomial_yn)
+            fittedModel <- gam(observedResponse ~ Environment1 ,family = "binomial", data = testData$binomial_yn)
             runEverything(fittedModel, testData = testData$binomial_yn)
             
             fittedModel <- gam(cbind(observedResponse1,observedResponse0) ~ Environment1 ,family = "binomial", data = testData$binomial_nk_matrix)
