@@ -751,3 +751,4 @@ getP <- function(simulated, observed, alternative, plot = F){
 
   return(p)
 }
+
