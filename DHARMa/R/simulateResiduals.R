@@ -43,6 +43,13 @@
 #' @export
 simulateResiduals <- function(fittedModel, n = 250, refit = F, integerResponse = NULL, plot = F, seed = 123, method = c("PIT", "traditional"), rotation = NULL, ...){
   
+  ######## Progress bar
+  pb <- progress::progress_bar$new(
+    format = "  Time remaining [:bar] :percent eta: :eta",
+    total = 100, clear = FALSE, width= 60)
+  for (i in 1:100) {
+    pb$tick()
+  
   ######## general assertions and startup calculations ##########
   
   if (n < 2) stop("error in DHARMa::simulateResiduals: n > 1 is required to calculate scaled residuals")
@@ -160,6 +167,9 @@ simulateResiduals <- function(fittedModel, n = 250, refit = F, integerResponse =
   if(plot == TRUE) plot(out)
   
   return(out)
+  
+  Sys.sleep(1 / 100)
+  }
 }
 
 
