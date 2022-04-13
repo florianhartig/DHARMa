@@ -43,7 +43,7 @@ DHARMa.ecdf <- function (x)
 #' 
 #' **Rotation (optional)**
 #' 
-#' The getQuantile function includes an additional option to rotate residuals. The purpose is to de-correlated residuals in case of residual autocorrelation. If the expected residual autocorrelation is known (e.h. when fitting gls type models), it can be provided as a covariance matrix. If that is note the case, the option "estimated" will try to estimate the covariance from the data simulated by the model. Note, however, that this approximation will tend to have considerable error and may be slow to compute for high-dimensional data. 
+#' The getQuantile function includes an additional option to rotate residuals. The purpose is to de-correlated residuals in case of residual autocorrelation. If the expected residual autocorrelation is known (e.g. when fitting gls type models), it can be provided as a covariance matrix. If that is note the case, the option "estimated" will try to estimate the covariance from the data simulated by the model. Note, however, that this approximation will tend to have considerable error and may be slow to compute for high-dimensional data. 
 #'
 #' @references
 #'
