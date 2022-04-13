@@ -36,7 +36,7 @@ DHARMa.ecdf <- function (x)
 #'
 #' For discrete data, there are two options implemented.
 #'
-#' The current default (available since DHARMa 0.3.1) are probability integral transform (PIT-) residuals (Smith, 1985; Dunn & Smyth, 1996; see also see also Warton, et al., 2017).
+#' The current default (available since DHARMa 0.3.1) are probability integral transform (PIT-) residuals (Smith, 1985; Dunn & Smyth, 1996; see also Warton, et al., 2017).
 #'
 #' Before DHARMa 0.3.1, a different randomization procedure was used, in which the a U(-0.5, 0.5) distribution was added on observations and simulations for discrete distributions. For a completely discrete distribution, the two procedures should deliver equivalent results, but the second method has the disadvantage that a) one has to know if the distribution is discrete (DHARMa tries to recognize this automatically), and b) that it leads to inefficiencies for some distributions such as the Tweedie, which are partly continuous, partly discrete (see e.g. https://github.com/florianhartig/DHARMa/issues/168).
 #' 
