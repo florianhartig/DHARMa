@@ -59,10 +59,11 @@ runBenchmarks <- function(calculateStatistics, controlValues = NULL, nRep = 10, 
     # doesn't see to work properly
     loadedPackages = (.packages())
     parExectuer = function(x = NULL, control = NULL) calculateStatistics(control)
-    parallel::clusterExport(cl = cl, c("parExectuer", "loadedPackages"), envir = environment())
-    parallel::clusterEvalQ(cl, {for(p in loadedPackages) library(p, character.only=TRUE)})
+    parallel::clusterExport(cl = cl, varlist = ls(envir = .GlobalEnv)) # 
+    parallel::clusterExport(cl = cl, c("loadedPackages"), envir = environment())
     
-    # parallel::clusterExport(cl = cl, varlist = ls(envir = .GlobalEnv))
+    
+    parallel::clusterEvalQ(cl, {for(p in loadedPackages) library(p, character.only=TRUE)})
     
     # parallel::clusterExport(cl=cl,varlist = c("calculateStatistics"), envir=environment())
     # parallel::clusterExport(cl=cl,varlist = c("controlValues", "alpha", envir=environment())
