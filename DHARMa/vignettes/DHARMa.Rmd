@@ -791,6 +791,10 @@ When using mgcv with DHARMa, it is highly recommended to also install mgcViz. Si
 
 If you absolutely want to use DHARMa without mgcViz, you should make sure that simulate(model) works correctly for the model object for which you want to calculate DHARMa residuals. 
 
+## gamm4
+
+Models fitted with gamm4 return a list that contains a lme4 object under the name "mer". You can test this object like an lme4 model, so e.g. simulateResiduals(myGamm4Model$mer). All remarks regarding lme4 objects apply. 
+
 ## glmmTMB
 
 glmmTMB is nearly fully supported since DHARMa 0.2.7 and glmmTMB 1.0.0. A remaining limitation is that you can't adjust whether simulation are conditional or not, so simulateResiduals(model, re.form = NULL) will have no effect, simulations will always be done from the full model. 
