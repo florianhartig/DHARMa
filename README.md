@@ -66,6 +66,17 @@ ref = "v0.0.2.1", dependencies = T, build_vignettes = T)
 ```
 with the appropriate version number / branch as argument to ref. 
 
+# Contributing to DHARMa
+
+Contributions to DHARMa are welcome! There are several ways in which you can contribute:
+
+* A simple but nevertheless important way to contribute is to suggest problems / new features in DHARMa, and post them as an issue [here](https://github.com/florianhartig/DHARMa/issues). A good issue should have at least a clear reproducible example. If possible, it could also already contain an analysis of the problem, and / or ideas for a fix.
+
+* If you want to propose a solution an existing problem, for simple things (typos, etc.), the easiest would be to just create a PR that I can directly merge. For more complicated changes, however, I would suggest that it is more effective to first discuss the approach via an issue.
+
+When working on these issues, note that there is extensive code for tests / development purposes outsite the core package in the folde ./code/ on GH. You may find useful information there, and in case you have code intended for development to contribute, you may also create a PR intended for this section. 
+
+
 # Acknowledgements
 
 A question by Catalina Gutiérrez Chacón provided me with the motivation write the first version of DHARMa. Thanks for useful suggestions to improve DHARMa by Jochen Fründ, Tomer J. Czaczkes, Luis Cayuela Delgado, Alexandre Courtiol, Jim Thorson, Lukas Lohse, jmniehaus, justintimm and many other people that made comments on GitHub, Crossvalidated or via email. 
