@@ -74,8 +74,11 @@ Contributions to DHARMa are welcome! There are several ways in which you can con
 
 * If you want to propose a solution an existing problem, for simple things (typos, etc.), the easiest would be to just create a PR that I can directly merge. For more complicated changes, however, I would suggest that it is more effective to first discuss the approach via an issue.
 
-When working on these issues, note that there is extensive code for tests / development purposes outsite the core package in the folde ./code/ on GH. You may find useful information there, and in case you have code intended for development to contribute, you may also create a PR intended for this section. 
+When working on these issues, note that there is extensive code for tests / development purposes outsite the core package in the folde ./code/ on GH. You may find useful information there, and in case you have code intended for development to contribute, you may also create a PR intended for this section.
 
+# Code of conduct
+
+The development of DHARMA and all its surrounding activities is based on the values of scientific integrity, free software and knowledge, and mutual respect, indepdent of background or world view. 
 
 # Acknowledgements
 
