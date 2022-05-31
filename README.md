@@ -70,11 +70,13 @@ with the appropriate version number / branch as argument to ref.
 
 Contributions to DHARMa are welcome! There are several ways in which you can contribute:
 
-* A simple but nevertheless important way to contribute is to suggest problems / new features in DHARMa, and post them as an issue [here](https://github.com/florianhartig/DHARMa/issues). A good issue should have at least a clear reproducible example. If possible, it could also already contain an analysis of the problem, and / or ideas for a fix.
+* A simple but nevertheless important way to contribute is to suggest problems / new features in DHARMa, and post them in our [issue tracker](https://github.com/florianhartig/DHARMa/issues). A good issue should at least have a clear reproducible example. If possible, it could also already contain an analysis of the problem, and / or ideas for a fix. Likewise, feel free to comment on issues existing issues, e.g. by adding examples or suggesting sollutions. 
 
-* If you want to propose a solution an existing problem, for simple things (typos, etc.), the easiest would be to just create a PR that I can directly merge. For more complicated changes, however, I would suggest that it is more effective to first discuss the approach via an issue.
+* If you want to propose a solution an existing problem, for simple things (typos, etc.), the easiest would be to just create a PR that I can directly merge. For more complicated changes, however, I would suggest that it is more effective to first discuss the approach at the thread of the issue.
 
 When working on these issues, note that there is extensive code for tests / development purposes outsite the core package in the folde ./code/ on GH. You may find useful information there, and in case you have code intended for development to contribute, you may also create a PR intended for this section.
+
+Also, there are a few technical hints about DHARMA development on the [DHARMa GH wiki](https://github.com/florianhartig/DHARMa/wiki). 
 
 # Code of conduct
 
