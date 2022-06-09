@@ -193,6 +193,7 @@ To support the visual inspection of the residuals, the DHARMa package provides a
 
 See the help of the functions and further comments below for a more detailed description. 
 
+
 ## Simulation options
 
 There are a few important technical details regarding how the simulations are performed, in particular regarding the treatments of random effects and integer responses. It is strongly recommended to read the help of
@@ -225,7 +226,9 @@ For controlling how many levels should be re-simulated, the simulateResidual fun
 simulationOutput <- simulateResiduals(fittedModel = fittedModel, n = 250, use.u = T)
 ```
 
-If the model is correctly specified and the fitting procedure is unbiased (disclaimer: GLMM estimators are not always unbiased), the simulated residuals should be flat regardless how many hierarchical levels we re-simulate. The most thorough procedure would be therefore to test all possible options. If testing only one option, I would recommend to re-simulate all levels, because this essentially tests the model structure as a whole. This is the default setting in the DHARMa package. A potential drawback is that re-simulating the random effects creates more variability, which may reduce power for detecting problems in the upper-level stochastic processes.
+If the model is correctly specified and the fitting procedure is unbiased (disclaimer: GLMM estimators are not always unbiased), the simulated residuals should be flat regardless how many hierarchical levels we re-simulate. The most thorough procedure would be therefore to test all possible options. If testing only one option, I would recommend to re-simulate all levels, because this essentially tests the model structure as a whole. This is the default setting in the DHARMa package. A potential drawback is that re-simulating the random effects creates more variability, which may reduce power for detecting problems in the upper-level stochastic processes, in particular overdispersion (see section on dispersion tests below).
+
+*Note:* Although unconditional residuals implicitly also test the normal distribution of the REs, it is probably not a bad idea to look addditionally check for normality of the RE distribution. As this is not based on quantile residuals, there is no special DHARMa function for this, so you should just extract the REs, and then run e.g. a Shapiro test. 
 
 #### Integer treatment / randomization
 
@@ -327,8 +330,7 @@ As support for these statements, here results of the simulation, which compares 
 
 <img src="dispersion.png" width="700">
 
-Thus, the current recommendation is: for most users, use the default DHARMa test, but create simulations conditionally. 
-
+Thus, my current recommendation is: for most users, use the default DHARMa test, but create simulations conditionally. 
 
 ## Zero-inflation / k-inflation or deficits
 
@@ -708,7 +710,7 @@ set.seed(123)
 
 # created data and fit with a missing predictor (Environment2)
 
-testData = createData(sampleSize = 500, overdispersion = 0, fixedEffects = c(1,3), family = binomial(), randomEffectVariance = 3, numGroups = 50)
+testData = createData(sampleSize = 500, overdispersion = 0, fixedEffects = c(0,3), family = binomial(), randomEffectVariance = 3, numGroups = 50)
 fittedModel <- glm(observedResponse ~ Environment1, family = "binomial", data = testData)
 
 res <- simulateResiduals(fittedModel = fittedModel)
@@ -747,6 +749,9 @@ grouping = cut(x, breaks = quantile(x, seq(0,1,0.02)))
 res3 = recalculateResiduals(res , group = grouping)
 plot(res3)
 ```
+
+
+**Conclusions:** if you see overdispersion or a pattern after grouping, it highlights a model error that is structured by group. As the pattern usually highlights a model misfit, rather than a dispersion problem akin to what happens in an overdispersed binomial (which has major impacts on p-values and CIs), I view this binomial grouping pattern as less critical. Likely, most conclusions will not change if you ignore the problem. Nevertheless, you should try to understand the reason for it. When the group is spatial, it could be the sign of residual spatial autocorrelation which could be addressed by a spatial RE or a spatial model. When grouped by a continuous variable, it could be the sign of a nonlinear effect. 
 
 ## Bayesian vs. MLE quantile residuals 
 
