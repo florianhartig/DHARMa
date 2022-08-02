@@ -8,11 +8,11 @@
 
 The 'DHARMa' package uses a simulation-based approach to create readily interpretable scaled (quantile) residuals for fitted (generalized) linear mixed models. Currently supported are linear and generalized linear (mixed) models from 'lme4' (classes 'lmerMod', 'glmerMod'), 'glmmTMB' 'GLMMadaptive' and 'spaMM', generalized additive models ('gam' from 'mgcv'), 'glm' (including 'negbin' from 'MASS', but excluding quasi-distributions) and 'lm' model classes. Moreover, externally created simulations, e.g. posterior predictive simulations from Bayesian software such as 'JAGS', 'STAN', or 'BUGS' can be processed as well. The resulting residuals are standardized to values between 0 and 1 and can be interpreted as intuitively as residuals from a linear regression. The package also provides a number of plot and test functions for typical model misspecification problems, such as over/underdispersion, zero-inflation, and residual spatial and temporal autocorrelation.
 
-## Getting DHARMa
+## Installing DHARMa
 
 ### From CRAN 
 
-DHARMa is on [CRAN](https://cran.r-project.org/web/packages/DHARMa/index.html). So, to install the latest CRAN release, just run 
+DHARMa is on [CRAN](https://cran.r-project.org/web/packages/DHARMa/index.html), and for most users, installing from CRAN will be the best option. To install the latest CRAN release, just run 
 
 ```{r}
 install.packages("DHARMa")
@@ -42,11 +42,11 @@ m1 <- glm(observedResponse ~ Environment1,
 res <- simulateResiduals(m1, plot = T)
 ```
 
-and read to help of ?simulateResiduals and the vignette to understand what you can do with the object res. 
+and read to help of ?simulateResiduals and the vignette to understand what you can do with the object res. If you want to ask questions about DHARMa, or report a bug, please use the [DHARMa GH issue page](https://github.com/florianhartig/DHARMa/issues). 
 
 ### Development release 
 
-If you want to install the current (development) version from this repository, run
+New features in DHARMa will typically on GitHub 1-2 months before they are on CRAN. If you want to install the current (development) version from this repository, run
 
 ```{r}
 devtools::install_github(repo = "florianhartig/DHARMa", subdir = "DHARMa", 
@@ -65,6 +65,22 @@ devtools::install_github(repo = "florianhartig/DHARMa", subdir = "DHARMa",
 ref = "v0.0.2.1", dependencies = T, build_vignettes = T)
 ```
 with the appropriate version number / branch as argument to ref. 
+
+# Contributing to DHARMa
+
+Contributions to DHARMa are very welcome! There are several ways in which you can contribute:
+
+* A simple but nevertheless important way to contribute is to suggest problems / new features in DHARMa, and post them in our [issue tracker](https://github.com/florianhartig/DHARMa/issues). A good issue should at least have a clear reproducible example. If possible, it could also already contain an analysis of the problem, and / or ideas for a fix. Likewise, feel free to comment on issues existing issues, e.g. by adding examples or suggesting sollutions. 
+
+* If you want to propose a solution an existing problem, for simple things (typos, etc.), the easiest would be to just create a PR that I can directly merge. For more complicated changes, however, I would suggest that it is more effective to first discuss the approach at the thread of the issue.
+
+When working on these issues, note that there is extensive code for tests / development purposes outsite the core package in the folde ./code/ on GH. You may find useful information there, and in case you have code intended for development to contribute, you may also create a PR intended for this section.
+
+Also, there are a few technical hints about DHARMA development on the [DHARMa GH wiki](https://github.com/florianhartig/DHARMa/wiki). 
+
+# Code of conduct
+
+The development of DHARMA and all its surrounding activities is based on the values of scientific integrity, free software and knowledge, and mutual respect, indepdent of background or world view. 
 
 # Acknowledgements
 

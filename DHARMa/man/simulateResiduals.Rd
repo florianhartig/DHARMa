@@ -25,7 +25,7 @@ simulateResiduals(fittedModel, n = 250, refit = F,
 
 \item{rotation}{optional rotation of the residual space prior to calculating the quantile residuals. The main purpose of this is to remove residual autocorrelation. See details below, section \emph{residual auto-correlation}, and help of \link{getQuantile}.}
 
-\item{...}{parameters to pass to the simulate function of the model object. An important use of this is to specify whether simulations should be conditional on the current random effect estimates, e.g. via re.form. Note that not all models support syntax to specify conditional or unconditional simulations. See also details}
+\item{...}{parameters to pass on to the simulate function of the model object. An important use of this is to specify whether simulations should be conditional on the current random effect estimates, e.g. via re.form. Note that not all models support syntax to specify conditional or unconditional simulations. See also details}
 }
 \value{
 An S3 class of type "DHARMa". Implemented S3 functions include \code{\link{plot.DHARMa}}, \code{\link{print.DHARMa}} and \code{\link{residuals.DHARMa}}. For other functions that can be used on a DHARMa object, see section "See Also" below.
