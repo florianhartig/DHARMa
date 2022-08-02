@@ -4,7 +4,8 @@
 \alias{simulateLRT}
 \title{Simulated Likelihood Ratio tests}
 \usage{
-simulateLRT(m0, m1, n = 250, seed = 123, plot = T, ...)
+simulateLRT(m0, m1, n = 250, seed = 123, plot = T,
+  suppressWarnings = F, saveModels = F, ...)
 }
 \arguments{
 \item{m0}{Null Model}
@@ -14,6 +15,12 @@ simulateLRT(m0, m1, n = 250, seed = 123, plot = T, ...)
 \item{n}{number of simulations}
 
 \item{seed}{random seed}
+
+\item{plot}{whether null distribution should be plotted}
+
+\item{suppressWarnings}{whether to suppress warnings that occur during refitting the models to simulated data}
+
+\item{saveModels}{Whether to save refitted models}
 
 \item{...}{additional parameters to pass on to the simulate function of the model object.}
 }
@@ -32,6 +39,8 @@ The function performs a simulated LRT, which works as follows:
 }
 
 The motivation for using a simulated LRT rather than a standard ANOVA or AIC for model selection in mixed models is that df for mixed models are not clearly defined, thus standard ANOVA based on Chi2 statistics or AIC are unrealiable, in particular for models with large contributions of REs to the likelihood.
+
+About warnings: it frequently occurs that models produce warnings when being refit to simulated data. This is not necessarily a sign of a problem, and may simply indicate that RE variance are fit to zero because the simulated data does not support such variances (as in the example), but it may also indicate that the models that are fit haven't converged. It is difficult to provide any general advice for these problems, other than checking whether refitted models seem to have reasonable parameter estimates. You can record the refitted models for inspection via the parameter saveModels, and suppress the warnings with surpressWarnings.
 }
 \note{
 Note that the logic of an LRT assumes that m0 is nested in m1, which guarantees that the L(M1) > L(M0). The function does not explicitly check if models are nested and will work as long as data can be simulated from M0 that can be refit with M) and M1; however, I would strongly advice against using this for non-nested models unless you have a good statsitical reason for doing so.
@@ -49,8 +58,14 @@ m1 = glmer(observedResponse ~ Environment1 + (1|group), data = dat, family = "po
 
 m0 = glm(observedResponse ~ Environment1 , data = dat, family = "poisson")
 
-out = simulateLRT(m0, m1)
-out
+\dontrun{
+out = simulateLRT(m0, m1, n = 10)
+
+# LRT produced warnings, can inspect what's going on
+out = simulateLRT(m0, m1, saveModels = T, suppressWarnings = T, n = 10)
+summary(out$saveModels[[2]]$refittedM1) # RE SD = 0
+# Could try changing the optimizer to reduce warnings
+}
 }
 \author{
 Florian Hartig
