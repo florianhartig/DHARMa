@@ -7,6 +7,7 @@
 #' @param nRep number of replicates per level of the controlValues
 #' @param alpha significance level
 #' @param parallel whether to use parallel computations. Possible values are F, T (sets the cores automatically to number of available cores -1), or an integer number for the number of cores that should be used for the cluster
+#' @param exportGlobal whether the global environment should be exported to the parallel nodes. This will use more memory. Set to true only if you function calculate statistics depends on other functions or global variables.
 #' @param ... additional parameters to calculateStatistics
 #' @note The benchmark function in DHARMa are intended for development purposes, and for users that want to test / confirm the properties of functions in DHARMa. If you are running an applied data analysis, they are probably of little use.
 #' @return A object with list structure of class DHARMaBenchmark. Contains an entry simulations with a matrix of simulations, and an entry summaries with an list of summaries (significant (T/F), mean, p-value for KS-test uniformity). Can be plotted with \code{\link{plot.DHARMaBenchmark}}
@@ -14,7 +15,7 @@
 #' @author Florian Hartig
 #' @seealso \code{\link{plot.DHARMaBenchmark}}
 #' @example inst/examples/runBenchmarksHelp.R
-runBenchmarks <- function(calculateStatistics, controlValues = NULL, nRep = 10, alpha = 0.05, parallel = FALSE, ...){
+runBenchmarks <- function(calculateStatistics, controlValues = NULL, nRep = 10, alpha = 0.05, parallel = FALSE, exportGlobal = F, ...){
 
 
   start_time <- Sys.time()
@@ -59,7 +60,8 @@ runBenchmarks <- function(calculateStatistics, controlValues = NULL, nRep = 10, 
     # doesn't see to work properly
     loadedPackages = (.packages())
     parExectuer = function(x = NULL, control = NULL) calculateStatistics(control)
-    parallel::clusterExport(cl = cl, c("parExectuer", "loadedPackages"), envir = environment())
+    if (exportGlobal == T) parallel::clusterExport(cl = cl, varlist = ls(envir = .GlobalEnv))
+    parallel::clusterExport(cl = cl, c("parExectuer", "calculateStatistics", "loadedPackages"), envir = environment())
     parallel::clusterEvalQ(cl, {for(p in loadedPackages) library(p, character.only=TRUE)})
 
     # parallel::clusterExport(cl = cl, varlist = ls(envir = .GlobalEnv))
