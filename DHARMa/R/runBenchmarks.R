@@ -242,12 +242,13 @@ generateGenerator <- function(mod){
 #' @param createModels a function that creates a model. See examples
 #' @param evaluationFunctions a list of functions that are to be evaluated on the models
 #' @param n number of replicates
+#' @details This is a small helper function designed to benchmark runtimes of several operations that are to be performed on a list of fitted models. In the example, this is used to benchmark the runtimes of several DHARMa tests
 #' @author Florian Hartig
-#' @example inst/examples/benchmarkRuntime.R
+#' @example inst/examples/benchmarkRuntimeHelp.R
 #' @export
-benchmarkRuntime<- function(createModels, evaluationFunctions, n){
+benchmarkRuntime<- function(createModel, evaluationFunctions, n){
   m = length(evaluationFunctions)
-  models = replicate(n, createModels(), simplify = F)
+  models = replicate(n, createModel(), simplify = F)
   runtimes = rep(NA, m)
 
   for (i in 1:m){

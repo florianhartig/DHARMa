@@ -1,6 +1,6 @@
 
-createModels = function(){
-  testData = createData(sampleSize = 20, family = poisson(), overdispersion = 1,
+createModel = function(){
+  testData = createData(family = poisson(), overdispersion = 1,
                         randomEffectVariance = 0)
   fittedModel <- glm(observedResponse ~ Environment1, data = testData, family = poisson())
   return(fittedModel)
@@ -16,4 +16,4 @@ b = function(m){
 
 evaluationFunctions = list(a,b)
 
-benchmarkRuntime(createModels, evaluationFunctions, 10)
+benchmarkRuntime(createModel, evaluationFunctions, 2)
