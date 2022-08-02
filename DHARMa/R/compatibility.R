@@ -202,6 +202,9 @@ getResiduals <- function (object, ...) {
 getObservedResponse.default <- function (object, ...){
   out = model.frame(object)[,1]
   
+  # observation is factor - unlike lme4 and older, glmmTMB simulates nevertheless as numeric
+  if(is.factor(out)) out = as.numeric(out) - 1
+  
   # check for weights in k/n case
   if(family(object)$family %in% c("binomial", "betabinomial") & "(weights)" %in% colnames(model.frame(object))){
     x = model.frame(object)
@@ -216,8 +219,7 @@ getObservedResponse.default <- function (object, ...){
     out = out[,1]
   }
   
-  # observation is factor - unlike lme4 and older, glmmTMB simulates nevertheless as numeric
-  if(is.factor(out)) out = as.numeric(out) - 1
+
   
   return(out)
 }
@@ -239,13 +241,8 @@ getSimulations.default <- function (object, nsim = 1, type = c("normal", "refit"
   
   if (type == "normal"){
     if(family(object)$family %in% c("binomial", "betabinomial")){
-      if("(weights)" %in% colnames(model.frame(object))){
-        x = model.frame(object)
-        out = out * x$`(weights)`
-      } else if (is.matrix(out[[1]])){
-        # this is for the k/n binomial case
-        out = as.matrix(out)[,seq(1, (2*nsim), by = 2)]
-      } else if(is.factor(out[[1]])){
+      
+      if(is.factor(out[[1]])){
         if(nlevels(out[[1]]) != 2){
           warning("The fitted model has a factorial response with number of levels not equal to 2 - there is currently no sensible application in DHARMa that would lead to this situation. Likely, you are trying something that doesn't work.")
         }
@@ -253,8 +250,15 @@ getSimulations.default <- function (object, nsim = 1, type = c("normal", "refit"
           out = data.matrix(out) - 1
         }
       }
+      
+      if("(weights)" %in% colnames(model.frame(object))){
+        x = model.frame(object)
+        out = out * x$`(weights)`
+      } else if (is.matrix(out[[1]])){
+        # this is for the k/n binomial case
+        out = as.matrix(out)[,seq(1, (2*nsim), by = 2)]
+      } 
     }
-    
     if(!is.matrix(out)) out = data.matrix(out)
   } else{
     if(family(object)$family %in% c("binomial", "betabinomial")){
