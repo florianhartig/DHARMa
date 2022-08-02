@@ -13,20 +13,26 @@
 \usage{
 getSimulations(object, nsim = 1, type = c("normal", "refit"), ...)
 
-\method{getSimulations}{default}(object, nsim = 1, type = c("normal", "refit"), ...)
+\method{getSimulations}{default}(object, nsim = 1, type = c("normal",
+  "refit"), ...)
 
-\method{getSimulations}{negbin}(object, nsim = 1, type = c("normal", "refit"), ...)
+\method{getSimulations}{negbin}(object, nsim = 1, type = c("normal",
+  "refit"), ...)
 
 \method{getSimulations}{gam}(object, nsim = 1, type = c("normal", "refit"),
   mgcViz = TRUE, ...)
 
-\method{getSimulations}{lmerMod}(object, nsim = 1, type = c("normal", "refit"), ...)
+\method{getSimulations}{lmerMod}(object, nsim = 1, type = c("normal",
+  "refit"), ...)
 
-\method{getSimulations}{glmmTMB}(object, nsim = 1, type = c("normal", "refit"), ...)
+\method{getSimulations}{glmmTMB}(object, nsim = 1, type = c("normal",
+  "refit"), ...)
 
-\method{getSimulations}{HLfit}(object, nsim = 1, type = c("normal", "refit"), ...)
+\method{getSimulations}{HLfit}(object, nsim = 1, type = c("normal",
+  "refit"), ...)
 
-\method{getSimulations}{MixMod}(object, nsim = 1, type = c("normal", "refit"), ...)
+\method{getSimulations}{MixMod}(object, nsim = 1, type = c("normal",
+  "refit"), ...)
 }
 \arguments{
 \item{object}{a fitted model}

@@ -1,5 +1,16 @@
 NOTE: for more news about the package, see https://github.com/florianhartig/DHARMa/releases
 
+DHARMa 0.4.6
+============
+
+
+New Features
+
+- new function benchmarkRuntime() for checking runtime of functions
+
+
+
+
 DHARMa 0.4.5
 ============
 
