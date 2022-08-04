@@ -8,7 +8,9 @@ New Features
 
 - new function benchmarkRuntime() for checking runtime of functions
 
+Bugfixes
 
+- fixed issue with parallelization
 
 
 DHARMa 0.4.5
