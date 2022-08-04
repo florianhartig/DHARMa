@@ -374,7 +374,7 @@ testCategorical <- function(simulationOutput, catPred, quantiles = c(0.25, 0.5, 
 #' @param plot whether to provide a plot for the results
 #' @param type which test to run. Default is DHARMa, other options are PearsonChisq (see details)
 #' @param ... arguments to pass on to \code{\link{testGeneric}}
-#' 
+#'
 #' @details Over / underdispersion means that the observed data is more / less dispersed than expected under the fitted model. There is no unique way to test for dispersion problems, and there are a number of different dispersion tests implemented in various R packages. This function implements several dispersion tests.
 #'
 #' Simulation-based dispersion tests (type == "DHARMa")
@@ -391,7 +391,7 @@ testCategorical <- function(simulationOutput, catPred, quantiles = c(0.25, 0.5, 
 #'
 #' This is the test described in https://bbolker.github.io/mixedmodels-misc/glmmFAQ.html#overdispersion, identical to performance::check_overdispersion. Works only if the fitted model provides df.residual and Pearson residuals.
 #'
-#' The test statistics is biased to lower values under quite general conditions, and will therefore tend to test significant for underdispersion. It is recommended to use this test only for overdispersion, i.e. use alternative == "greater". Also, obviously, it requires that Pearson residuals are available for the chosen model, which will not be the case for all models / packages. 
+#' The test statistics is biased to lower values under quite general conditions, and will therefore tend to test significant for underdispersion. It is recommended to use this test only for overdispersion, i.e. use alternative == "greater". Also, obviously, it requires that Pearson residuals are available for the chosen model, which will not be the case for all models / packages.
 #'
 #' @note For particular model classes / situations, there may be more powerful and thus preferable over the DHARMa test. The advantage of the DHARMa test is that it directly targets the spread of the data (unless other tests such as dispersion/df, which essentially measure fit and may thus be triggered by problems other than dispersion as well), and it makes practically no assumptions about the fitted model, other than the availability of simulations.
 #'
@@ -406,9 +406,10 @@ testDispersion <- function(simulationOutput, alternative = c("two.sided", "great
 
   out = list()
   out$data.name = deparse(substitute(simulationOutput))
-  simulationOutput = ensureDHARMa(simulationOutput, convert = "Model")
 
   if(type == "DHARMa"){
+
+    simulationOutput = ensureDHARMa(simulationOutput, convert = "Model")
 
   # if(class(simulationOutput$fittedModel) %in% c("glmerMod", "lmerMod"){
   #   if(!"re.form" %in% names(simulationOutput$additionalParameters) & is.null(simulationOutput$additionalParameters$re.form)) message("recommended to run conditional simulations for dispersion test, see help")
@@ -456,26 +457,31 @@ testDispersion <- function(simulationOutput, alternative = c("two.sided", "great
 
   } else if(type == "PearsonChisq"){
 
-      if(! alternative == "greater") message("Note that the chi2 test on Pearson residuals is biased for mixed models towards underdispersion. Tests with alternative = two.sided or less are therefore not reliable. I recommend to test only with alternative = 'greater', i.e. test for overdispersion")
+    if("DHARMa" %in% class(simulationOutput)){
+      model = simulationOutput$fittedModel
+    }
+    else model = simulationOutput
 
-      rdf <- df.residual(simulationOutput$fittedModel)
-      rp <- residuals(simulationOutput$fittedModel,type="pearson")
-      Pearson.chisq <- sum(rp^2)
-      prat <- Pearson.chisq/rdf
-      if(alternative == "greater") pval <- pchisq(Pearson.chisq, df=rdf, lower.tail=FALSE)
-      else if (alternative == "less") pval <- pchisq(Pearson.chisq, df=rdf, lower.tail=TRUE)
-      else if (alternative == "two.sided") pval <- min(min(pchisq(Pearson.chisq, df=rdf, lower.tail=TRUE), pchisq(Pearson.chisq, df=rdf, lower.tail=FALSE)) * 2,1)
+    if(! alternative == "greater") message("Note that the chi2 test on Pearson residuals is biased for MIXED models towards underdispersion. Tests with alternative = two.sided or less are therefore not reliable. If you have random effects in your model, I recommend to test only with alternative = 'greater', i.e. test for overdispersion, or else use the DHARMa default tests which are unbiased. See help for details.")
 
-      out$statistic = prat
-      names(out$statistic) = "dispersion"
-      out$parameter = rdf
-      names(out$parameter) = "df"
-      out$method = "Parametric dispersion test via mean Pearson-chisq statistic"
-      out$alternative = alternative
-      out$p.value = pval
-      class(out) = "htest"
-      # c(chisq=Pearson.chisq,ratio=prat,rdf=rdf,p=pval)
-      return(out)
+    rdf <- df.residual(model)
+    rp <- residuals(model,type="pearson")
+    Pearson.chisq <- sum(rp^2)
+    prat <- Pearson.chisq/rdf
+    if(alternative == "greater") pval <- pchisq(Pearson.chisq, df=rdf, lower.tail=FALSE)
+    else if (alternative == "less") pval <- pchisq(Pearson.chisq, df=rdf, lower.tail=TRUE)
+    else if (alternative == "two.sided") pval <- min(min(pchisq(Pearson.chisq, df=rdf, lower.tail=TRUE), pchisq(Pearson.chisq, df=rdf, lower.tail=FALSE)) * 2,1)
+
+    out$statistic = prat
+    names(out$statistic) = "dispersion"
+    out$parameter = rdf
+    names(out$parameter) = "df"
+    out$method = "Parametric dispersion test via mean Pearson-chisq statistic"
+    out$alternative = alternative
+    out$p.value = pval
+    class(out) = "htest"
+    # c(chisq=Pearson.chisq,ratio=prat,rdf=rdf,p=pval)
+    return(out)
   }
 
   return(out)
@@ -588,7 +594,7 @@ testGeneric <- function(simulationOutput, summary, alternative = c("two.sided", 
 #' This function performs a standard test for temporal autocorrelation on the simulated residuals
 #'
 #' @param simulationOutput an object of class DHARMa, either created via \code{\link{simulateResiduals}} for supported models or by \code{\link{createDHARMa}} for simulations created outside DHARMa, or a supported model. Providing a supported model directly is discouraged, because simulation settings cannot be changed in this case.
-#' @param time the time, in the same order as the data points. 
+#' @param time the time, in the same order as the data points.
 #' @param alternative a character string specifying whether the test should test if observations are "greater", "less" or "two.sided" compared to the simulated null hypothesis
 #' @param plot whether to plot output
 #' @details The function performs a Durbin-Watson test on the uniformly scaled residuals, and plots the residuals against time. The DB test was originally be designed for normal residuals. In simulations, I didn't see a problem with this setting though. The alternative is to transform the uniform residuals to normal residuals and perform the DB test on those.
@@ -596,17 +602,17 @@ testGeneric <- function(simulationOutput, summary, alternative = c("two.sided", 
 #' Testing for temporal autocorrelation requires unique time values - if you have several observations per time value, either use [recalculateResiduals] function to aggregate residuals per time step, or extract the residuals from the fitted object, and plot / test each of them independently for temporally repeated subgroups (typical choices would be location / subject etc.). Note that the latter must be done by hand, outside testTemporalAutocorrelation.
 #'
 #' @note Standard DHARMa simulations from models with (temporal / spatial / phylogenetic) conditional autoregressive terms will still have the respective temporal / spatial / phylogenetic correlation in the DHARMa residuals, unless the package you are using is modelling the autoregressive terms as explicit REs and is able to simulate conditional on the fitted REs. This has two consequences
-#' 
-#' 1. If you check the residuals for such a model, they will still show significant autocorrelation, even if the model fully accounts for this structure.
-#' 
-#' 2. Because the DHARMa residuals for such a model are not statistically independent any more, other tests (e.g. dispersion, uniformity) may have inflated type I error, i.e. you will have a higher likelihood of spurious residual problems. 
 #'
-#' There are three (non-exclusive) routes to address these issues when working with spatial / temporal / other autoregressive models: 
-#' 
+#' 1. If you check the residuals for such a model, they will still show significant autocorrelation, even if the model fully accounts for this structure.
+#'
+#' 2. Because the DHARMa residuals for such a model are not statistically independent any more, other tests (e.g. dispersion, uniformity) may have inflated type I error, i.e. you will have a higher likelihood of spurious residual problems.
+#'
+#' There are three (non-exclusive) routes to address these issues when working with spatial / temporal / other autoregressive models:
+#'
 #' 1. Simulate conditional on the fitted CAR structures (see conditional simulations in the help of [simulateResiduals])
-#' 
+#'
 #' 2. Rotate simulations prior to residual calculations (see parameter rotation in [simulateResiduals])
-#' 
+#'
 #' 3. Use custom tests / plots that explicitly compare the correlation structure in the simulated data to the correlation structure in the observed data.
 #'
 #' @author Florian Hartig
@@ -659,8 +665,8 @@ testTemporalAutocorrelation <- function(simulationOutput, time, alternative = c(
 #' This function performs a Moran's I test for distance-based (spatial, phylogenetic or similar) autocorrelation on the calculated quantile residuals
 #'
 #' @param simulationOutput an object of class DHARMa, either created via \code{\link{simulateResiduals}} for supported models or by \code{\link{createDHARMa}} for simulations created outside DHARMa, or a supported model. Providing a supported model directly is discouraged, because simulation settings cannot be changed in this case.
-#' @param x the x coordinate, in the same order as the data points. Must be specified unless distMat is provided. 
-#' @param y the y coordinate, in the same order as the data points. Must be specified unless distMat is provided. 
+#' @param x the x coordinate, in the same order as the data points. Must be specified unless distMat is provided.
+#' @param y the y coordinate, in the same order as the data points. Must be specified unless distMat is provided.
 #' @param distMat optional distance matrix. If not provided, euclidean distances based on x and y will be calculated. See details for explanation
 #' @param alternative a character string specifying whether the test should test if observations are "greater", "less" or "two.sided" compared to the simulated null hypothesis
 #' @param plot whether to plot output
@@ -669,17 +675,17 @@ testTemporalAutocorrelation <- function(simulationOutput, time, alternative = c(
 #' Testing for spatial autocorrelation requires unique x,y values - if you have several observations per location, either use the recalculateResiduals function to aggregate residuals per location, or extract the residuals from the fitted object, and plot / test each of them independently for spatially repeated subgroups (a typical scenario would repeated spatial observation, in which case one could plot / test each time step separately for temporal autocorrelation). Note that the latter must be done by hand, outside testSpatialAutocorrelation.
 #'
 #' @note Standard DHARMa simulations from models with (temporal / spatial / phylogenetic) conditional autoregressive terms will still have the respective temporal / spatial / phylogenetic correlation in the DHARMa residuals, unless the package you are using is modelling the autoregressive terms as explicit REs and is able to simulate conditional on the fitted REs. This has two consequences
-#' 
-#' 1. If you check the residuals for such a model, they will still show significant autocorrelation, even if the model fully accounts for this structure.
-#' 
-#' 2. Because the DHARMa residuals for such a model are not statistically independent any more, other tests (e.g. dispersion, uniformity) may have inflated type I error, i.e. you will have a higher likelihood of spurious residual problems. 
 #'
-#' There are three (non-exclusive) routes to address these issues when working with spatial / temporal / other autoregressive models: 
-#' 
+#' 1. If you check the residuals for such a model, they will still show significant autocorrelation, even if the model fully accounts for this structure.
+#'
+#' 2. Because the DHARMa residuals for such a model are not statistically independent any more, other tests (e.g. dispersion, uniformity) may have inflated type I error, i.e. you will have a higher likelihood of spurious residual problems.
+#'
+#' There are three (non-exclusive) routes to address these issues when working with spatial / temporal / other autoregressive models:
+#'
 #' 1. Simulate conditional on the fitted CAR structures (see conditional simulations in the help of [simulateResiduals])
-#' 
+#'
 #' 2. Rotate simulations prior to residual calculations (see parameter rotation in [simulateResiduals])
-#' 
+#'
 #' 3. Use custom tests / plots that explicitly compare the correlation structure in the simulated data to the correlation structure in the observed data.
 #'
 #' @author Florian Hartig
@@ -693,19 +699,19 @@ testSpatialAutocorrelation <- function(simulationOutput, x = NULL, y  = NULL, di
   data.name = deparse(substitute(simulationOutput)) # needs to be before ensureDHARMa
   simulationOutput = ensureDHARMa(simulationOutput, convert = T)
 
-  # Assertions 
-  
+  # Assertions
+
   if(any(duplicated(cbind(x,y)))) stop("testing for spatial autocorrelation requires unique x,y values - if you have several observations per location, either use the recalculateResiduals function to aggregate residuals per location, or extract the residuals from the fitted object, and plot / test each of them independently for spatially repeated subgroups (a typical scenario would repeated spatial observation, in which case one could plot / test each time step separately for temporal autocorrelation). Note that the latter must be done by hand, outside testSpatialAutocorrelation.")
 
   if( (!is.null(x) | !is.null(y)) & !is.null(distMat) ) message("both coordinates and distMat provided, calculations will be done based on the distance matrix, coordinates will only be used for plotting")
-  
+
   if( (is.null(x) | is.null(y)) & is.null(distMat) ) stop("You need to provide either x,y, coordinates, or a distMatrix")
-  
+
   if(is.null(distMat) & (length(x) != length(residuals(simulationOutput)) | length(y) != length(residuals(simulationOutput))))
-    
+
   # To avoid Issue #190
-  if (!is.null(x) & length(x) != length(residuals(simulationOutput)) | !is.null(y) & length(y) != length(residuals(simulationOutput))) stop("Dimensions of x / y coordinates don't match the dimension of the residuals")  
-  
+  if (!is.null(x) & length(x) != length(residuals(simulationOutput)) | !is.null(y) & length(y) != length(residuals(simulationOutput))) stop("Dimensions of x / y coordinates don't match the dimension of the residuals")
+
   # if not provided, create distance matrix based on x and y
   if(is.null(distMat)) distMat <- as.matrix(dist(cbind(x, y)))
 

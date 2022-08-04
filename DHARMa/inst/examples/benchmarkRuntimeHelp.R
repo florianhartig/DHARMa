@@ -14,6 +14,11 @@ b = function(m){
   testDispersion(m, plot = FALSE)$p.value
 }
 
-evaluationFunctions = list(a,b)
+c = function(m){
+  testDispersion(m, plot = FALSE, type = "PearsonChisq")$p.value
+}
+
+
+evaluationFunctions = list(a,b, c)
 
 benchmarkRuntime(createModel, evaluationFunctions, 2)
