@@ -2,10 +2,10 @@
 % Please edit documentation in R/simulateLRT.R
 \name{simulateLRT}
 \alias{simulateLRT}
-\title{Simulated Likelihood Ratio tests}
+\title{Simulated likelihood ratio tests for (generalized) linear mixed models}
 \usage{
 simulateLRT(m0, m1, n = 250, seed = 123, plot = T,
-  suppressWarnings = F, saveModels = F, ...)
+  suppressWarnings = T, saveModels = F, ...)
 }
 \arguments{
 \item{m0}{Null Model}
@@ -18,18 +18,18 @@ simulateLRT(m0, m1, n = 250, seed = 123, plot = T,
 
 \item{plot}{whether null distribution should be plotted}
 
-\item{suppressWarnings}{whether to suppress warnings that occur during refitting the models to simulated data}
+\item{suppressWarnings}{whether to suppress warnings that occur during refitting the models to simulated data. See details for explanations}
 
 \item{saveModels}{Whether to save refitted models}
 
 \item{...}{additional parameters to pass on to the simulate function of the model object.}
 }
 \description{
-This function uses the DHARMa model wrappers to generate simulated likelihood ratio tests (LRTs) based on a parameteric bootstrap.
+This function uses the DHARMa model wrappers to generate simulated likelihood ratio tests (LRTs) for (generalized) linear mixed models based on a parametric bootstrap. The motivation for using a simulated LRT rather than a standard ANOVA or AIC for model selection in mixed models is that df for mixed models are not clearly defined, thus standard ANOVA based on Chi2 statistics or AIC are unreliable, in particular for models with large contributions of REs to the likelihood.
+
+Interpretation of the results as in a normal LRT: the null hypothesis is that m0 is correct, the tests checks if the increase in likelihood of m1 is higher than expected, using data simulated from m0
 }
 \details{
-The null hypothesis is that m0 is correct, the tests checks if the increase in likelihood of m1 is higher than expected, using data simulated from m0
-
 The function performs a simulated LRT, which works as follows:
 \enumerate{
 \item H0: Model 1 is correct
@@ -38,12 +38,12 @@ The function performs a simulated LRT, which works as follows:
 \item Based on this, calculate p-values etc. in the usual way.
 }
 
-The motivation for using a simulated LRT rather than a standard ANOVA or AIC for model selection in mixed models is that df for mixed models are not clearly defined, thus standard ANOVA based on Chi2 statistics or AIC are unrealiable, in particular for models with large contributions of REs to the likelihood.
-
-About warnings: it frequently occurs that models produce warnings when being refit to simulated data. This is not necessarily a sign of a problem, and may simply indicate that RE variance are fit to zero because the simulated data does not support such variances (as in the example), but it may also indicate that the models that are fit haven't converged. It is difficult to provide any general advice for these problems, other than checking whether refitted models seem to have reasonable parameter estimates. You can record the refitted models for inspection via the parameter saveModels, and suppress the warnings with surpressWarnings.
+About warnings: warnings such as "boundary (singular) fit: see ?isSingular" will likely occur in this function and are not necessarily the sign of a problem. lme4 warns if RE variances are fit to zero. This is desired / likely in this case, however, because we are simulating data with zero RE variances. Therefore, warnings are turned off per default. For diagnostic reasons, you can turn warnings on, and possibly also inspect fitted models via the parameter saveModels to see if there are any other problems in the re-fitted models.
 }
 \note{
-Note that the logic of an LRT assumes that m0 is nested in m1, which guarantees that the L(M1) > L(M0). The function does not explicitly check if models are nested and will work as long as data can be simulated from M0 that can be refit with M) and M1; however, I would strongly advice against using this for non-nested models unless you have a good statsitical reason for doing so.
+The logic of an LRT assumes that m0 is nested in m1, which guarantees that the L(M1) > L(M0). The function does not explicitly check if models are nested and will work as long as data can be simulated from M0 that can be refit with M) and M1; however, I would strongly advice against using this for non-nested models unless you have a good statistical reason for doing so.
+
+Also, note that LRTs may be unreliable when fit with REML or some other kind of penalized / restricted ML. Therefore, you should fit model with ML for use in this function.
 }
 \examples{
 

@@ -796,6 +796,8 @@ lm and glm and MASS::glm.nb are fully supported.
 
 lme4 model classes are fully supported. 
 
+Possible to condition on REs via re.form, see help of predict.merMod
+
 ## mgcv
 
 When using mgcv with DHARMa, it is highly recommended to also install mgcViz. Since version 0.4.5, this will allow DHARMa to fall back on the simulate.gam function in mgcViz, which is more general than the default simulate function. For example, without mgcViz, it will not be possible to simulate from mgcv::gam objects fitted with extended families. 
@@ -825,7 +827,6 @@ DHARMa residuals work with phyr, but the correct implementation is not fully tes
 ## brms
 
 brms can be made to work together with DHARMa, see [https://github.com/florianhartig/DHARMa/issues/33](https://github.com/florianhartig/DHARMa/issues/33)
-
 
 
 ## Unsupported packages

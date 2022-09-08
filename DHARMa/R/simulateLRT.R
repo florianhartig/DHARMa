@@ -1,15 +1,15 @@
-#' Simulated Likelihood Ratio tests
-#'
-#' This function uses the DHARMa model wrappers to generate simulated likelihood ratio tests (LRTs) based on a parameteric bootstrap.
-#'
-#' The null hypothesis is that m0 is correct, the tests checks if the increase in likelihood of m1 is higher than expected, using data simulated from m0
+#' Simulated likelihood ratio tests for (generalized) linear mixed models
+#' 
+#' @description This function uses the DHARMa model wrappers to generate simulated likelihood ratio tests (LRTs) for (generalized) linear mixed models based on a parametric bootstrap. The motivation for using a simulated LRT rather than a standard ANOVA or AIC for model selection in mixed models is that df for mixed models are not clearly defined, thus standard ANOVA based on Chi2 statistics or AIC are unreliable, in particular for models with large contributions of REs to the likelihood.
+#' 
+#' Interpretation of the results as in a normal LRT: the null hypothesis is that m0 is correct, the tests checks if the increase in likelihood of m1 is higher than expected, using data simulated from m0
 #'
 #' @param m0 Null Model
 #' @param m1 Alternative Model
 #' @param n number of simulations
 #' @param seed random seed
 #' @param plot whether null distribution should be plotted
-#' @param suppressWarnings whether to suppress warnings that occur during refitting the models to simulated data
+#' @param suppressWarnings whether to suppress warnings that occur during refitting the models to simulated data. See details for explanations
 #' @param saveModels Whether to save refitted models
 #' @param ... additional parameters to pass on to the simulate function of the model object.
 #'
@@ -20,17 +20,17 @@
 #' 3. To generate an expected distribution of the test statistic under H0, we simulate new response data under M0, refit M0 and M1 on this data, and calculate the LRs.
 #' 4. Based on this, calculate p-values etc. in the usual way.
 #'
-#' The motivation for using a simulated LRT rather than a standard ANOVA or AIC for model selection in mixed models is that df for mixed models are not clearly defined, thus standard ANOVA based on Chi2 statistics or AIC are unrealiable, in particular for models with large contributions of REs to the likelihood.
+#' About warnings: warnings such as "boundary (singular) fit: see ?isSingular" will likely occur in this function and are not necessarily the sign of a problem. lme4 warns if RE variances are fit to zero. This is desired / likely in this case, however, because we are simulating data with zero RE variances. Therefore, warnings are turned off per default. For diagnostic reasons, you can turn warnings on, and possibly also inspect fitted models via the parameter saveModels to see if there are any other problems in the re-fitted models. 
 #'
-#' About warnings: it frequently occurs that models produce warnings when being refit to simulated data. This is not necessarily a sign of a problem, and may simply indicate that RE variance are fit to zero because the simulated data does not support such variances (as in the example), but it may also indicate that the models that are fit haven't converged. It is difficult to provide any general advice for these problems, other than checking whether refitted models seem to have reasonable parameter estimates. You can record the refitted models for inspection via the parameter saveModels, and suppress the warnings with surpressWarnings.
-#'
-#' @note Note that the logic of an LRT assumes that m0 is nested in m1, which guarantees that the L(M1) > L(M0). The function does not explicitly check if models are nested and will work as long as data can be simulated from M0 that can be refit with M) and M1; however, I would strongly advice against using this for non-nested models unless you have a good statsitical reason for doing so.
-#'
+#' @note The logic of an LRT assumes that m0 is nested in m1, which guarantees that the L(M1) > L(M0). The function does not explicitly check if models are nested and will work as long as data can be simulated from M0 that can be refit with M) and M1; however, I would strongly advice against using this for non-nested models unless you have a good statistical reason for doing so.
+#' 
+#' Also, note that LRTs may be unreliable when fit with REML or some other kind of penalized / restricted ML. Therefore, you should fit model with ML for use in this function. 
+#' 
 #' @author Florian Hartig
 #'
 #' @example inst/examples/simulateLRTHelp.R
 #' @export
-simulateLRT<-function(m0, m1, n = 250, seed = 123, plot = T, suppressWarnings = F, saveModels = F, ...){
+simulateLRT<-function(m0, m1, n = 250, seed = 123, plot = T, suppressWarnings = T, saveModels = F, ...){
 
   ######## general assertions and startup calculations ##########
   # identical to simulateResiduals
@@ -93,10 +93,10 @@ simulateLRT<-function(m0, m1, n = 250, seed = 123, plot = T, suppressWarnings = 
   }
 
   out$statistic = out$observedLRT
-  names(out$statistic) = "Log LRT Obs"
+  names(out$statistic) = "LogL(M1/M0)"
   out$method = "DHARMa simulated LRT"
-  out$alternative = "greater"
-  out$p.value =   getP(out$simulatedLR, out$observedLRT, alternative = "greater", plot = plot)
+  out$alternative = "M1 describes the data better than M0"
+  out$p.value =   getP(out$simulatedLR, out$observedLRT, alternative = "greater", plot = plot, xlab="LogL(M1/M0)")
 
   class(out) = "htest"
 

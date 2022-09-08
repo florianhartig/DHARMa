@@ -3,15 +3,15 @@ NOTE: for more news about the package, see https://github.com/florianhartig/DHAR
 DHARMa 0.4.6
 ============
 
-
 New Features
 
 - new function benchmarkRuntime() for checking runtime of functions
+- new function simulatedLRT() to generate a simulated likelihood ratio test
 
 Bugfixes
 
-- fixed issue with parallelization
-
+- fixed issue with parallelization in runBenchmarks
+- various minor bugfixed and help improvements
 
 DHARMa 0.4.5
 ============

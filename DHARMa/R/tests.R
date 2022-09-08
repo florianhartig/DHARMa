@@ -743,14 +743,14 @@ testSpatialAutocorrelation <- function(simulationOutput, x = NULL, y  = NULL, di
 }
 
 
-getP <- function(simulated, observed, alternative, plot = F){
+getP <- function(simulated, observed, alternative, plot = F, ...){
 
   if(alternative == "greater") p = mean(simulated >= observed)
   if(alternative == "less") p = mean(simulated <= observed)
   if(alternative == "two.sided") p = min(min(mean(simulated <= observed), mean(simulated >= observed) ) * 2,1)
 
   if(plot == T){
-    hist(simulated, xlim = range(simulated, observed), col = "lightgrey")
+    hist(simulated, xlim = range(simulated, observed), col = "lightgrey", main = "Distribution of test statistic \n grey = simulated, red = observed", ...)
     abline(v = mean(simulated), col = 1, lwd = 2)
     abline(v = observed, col = "red", lwd = 2)
   }
