@@ -296,7 +296,9 @@ simulationOutput <- simulateResiduals(fittedModel = fittedModel)
 plot(simulationOutput)
 ```
 
-This is an example of underdispersion. Here, we get too many residuals around 0.5, which means that we are not getting as many residuals as we would expect in the tail of the distribution than expected from the fitted model.  
+If you see this pattern, note that overdispersion is often caused by model misfit. Thus, before moving to a GLM with variable dispersion (for count data this would typically be a negative binomial), you should check your model for misfit, e.g. by plotting residuals against all predictors using plotResiduals().
+
+Next, this is an example of underdispersion. Here, we get too many residuals around 0.5, which means that we are not getting as many residuals as we would expect in the tail of the distribution than expected from the fitted model.  
 
 ```{r}
 testData = createData(sampleSize = 500, intercept=0, fixedEffects = 2, overdispersion = 0, family = poisson(), roundPoissonVariance = 0.001, randomEffectVariance = 0)
@@ -305,6 +307,10 @@ fittedModel <- glmer(observedResponse ~ Environment1 + (1|group) , family = "poi
 simulationOutput <- simulateResiduals(fittedModel = fittedModel)
 plot(simulationOutput)
 ```
+
+If you see this pattern, note that a common reason for underdispersion is overfitting, i.e. your model is too complex. Other possible explanations to check for include zero-inflation (best to check by comparing to a ZIP model, but see also DHARMa::testZeroInflation), non-independence of the data (e.g. temporal autocorrelation, check via DHARMa:: testTemporalAutocorrelation) that your predictors can use to overfit, or that your data-generating process is simply not a Poisson process.
+
+From a technical side, underdispersion is not as concerning as over dispersion, as it will usually bias p-values to the conservative side, but if your goal is to get a good power, you may want to consider a simpler model. If that is not helping, you can move to a distribution for underdispersed count data (e.g. Conway-Maxwell-Poisson, generalized Poisson).
 
 ### Formal tests for over/underdispersion
 
