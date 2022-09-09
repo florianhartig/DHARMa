@@ -11,7 +11,7 @@
 #' @param plot whether null distribution should be plotted
 #' @param suppressWarnings whether to suppress warnings that occur during refitting the models to simulated data. See details for explanations
 #' @param saveModels Whether to save refitted models
-#' @param ... additional parameters to pass on to the simulate function of the model object.
+#' @param ... additional parameters to pass on to the simulate function of the model object. See \code{\link{get Simulations}} for details. 
 #'
 #' @details The function performs a simulated LRT, which works as follows:
 #'
@@ -21,6 +21,8 @@
 #' 4. Based on this, calculate p-values etc. in the usual way.
 #'
 #' About warnings: warnings such as "boundary (singular) fit: see ?isSingular" will likely occur in this function and are not necessarily the sign of a problem. lme4 warns if RE variances are fit to zero. This is desired / likely in this case, however, because we are simulating data with zero RE variances. Therefore, warnings are turned off per default. For diagnostic reasons, you can turn warnings on, and possibly also inspect fitted models via the parameter saveModels to see if there are any other problems in the re-fitted models. 
+#' 
+#' Data simulations are performed by \code{\link{get Simulations}}, which is a wrapper for the respective model functions. The default for all packages, wherever possible, is to generate marginal simulations (meaning that REs are re-simulated as well). I see no sensible reason to change this, but if you want to and if supported by the respective regression package, you could do so by supplying the necessary arguments via ...
 #'
 #' @note The logic of an LRT assumes that m0 is nested in m1, which guarantees that the L(M1) > L(M0). The function does not explicitly check if models are nested and will work as long as data can be simulated from M0 that can be refit with M) and M1; however, I would strongly advice against using this for non-nested models unless you have a good statistical reason for doing so.
 #' 

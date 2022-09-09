@@ -22,7 +22,7 @@ simulateLRT(m0, m1, n = 250, seed = 123, plot = T,
 
 \item{saveModels}{Whether to save refitted models}
 
-\item{...}{additional parameters to pass on to the simulate function of the model object.}
+\item{...}{additional parameters to pass on to the simulate function of the model object. See \code{\link{get Simulations}} for details.}
 }
 \description{
 This function uses the DHARMa model wrappers to generate simulated likelihood ratio tests (LRTs) for (generalized) linear mixed models based on a parametric bootstrap. The motivation for using a simulated LRT rather than a standard ANOVA or AIC for model selection in mixed models is that df for mixed models are not clearly defined, thus standard ANOVA based on Chi2 statistics or AIC are unreliable, in particular for models with large contributions of REs to the likelihood.
@@ -39,6 +39,8 @@ The function performs a simulated LRT, which works as follows:
 }
 
 About warnings: warnings such as "boundary (singular) fit: see ?isSingular" will likely occur in this function and are not necessarily the sign of a problem. lme4 warns if RE variances are fit to zero. This is desired / likely in this case, however, because we are simulating data with zero RE variances. Therefore, warnings are turned off per default. For diagnostic reasons, you can turn warnings on, and possibly also inspect fitted models via the parameter saveModels to see if there are any other problems in the re-fitted models.
+
+Data simulations are performed by \code{\link{get Simulations}}, which is a wrapper for the respective model functions. The default for all packages, wherever possible, is to generate marginal simulations (meaning that REs are re-simulated as well). I see no sensible reason to change this, but if you want to and if supported by the respective regression package, you could do so by supplying the necessary arguments via ...
 }
 \note{
 The logic of an LRT assumes that m0 is nested in m1, which guarantees that the L(M1) > L(M0). The function does not explicitly check if models are nested and will work as long as data can be simulated from M0 that can be refit with M) and M1; however, I would strongly advice against using this for non-nested models unless you have a good statistical reason for doing so.
@@ -50,21 +52,23 @@ Also, note that LRTs may be unreliable when fit with REML or some other kind of 
 library(DHARMa)
 library(lme4)
 
+# create test data
 set.seed(123)
 dat <- createData(sampleSize = 200, randomEffectVariance = 1)
 
+# define Null and alternative model (should be nested)
 m1 = glmer(observedResponse ~ Environment1 + (1|group), data = dat, family = "poisson")
-
-
 m0 = glm(observedResponse ~ Environment1 , data = dat, family = "poisson")
 
 \dontrun{
+# run LRT - n should be increased to at least 250 for a real study
 out = simulateLRT(m0, m1, n = 10)
 
-# LRT produced warnings, can inspect what's going on
-out = simulateLRT(m0, m1, saveModels = T, suppressWarnings = T, n = 10)
-summary(out$saveModels[[2]]$refittedM1) # RE SD = 0
-# Could try changing the optimizer to reduce warnings
+# To inspect warnings thrown during the refits:
+out = simulateLRT(m0, m1, saveModels = T, suppressWarnings = F, n = 10)
+summary(out$saveModels[[2]]$refittedM1) # RE SD = 0, no problem
+# If there are warnings that seem problematic, 
+# could try changing the optimizer or iterations
 }
 }
 \author{
