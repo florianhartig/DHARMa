@@ -615,19 +615,21 @@ testDispersion(res)
 testZeroInflation(res)
 ```
 
-This looks a lot better. Trying a slightly different model specification 
+This looks a lot better. Trying a slightly different model specification, adding a dispersion model as well
 
 ```{r, error=TRUE}
-m5 <- glmmTMB(SiblingNegotiation ~ FoodTreatment*SexParent + offset(log(BroodSize)) + (1|Nest), dispformula = ~ FoodTreatment , ziformula = ~ FoodTreatment + SexParent,  data=Owls , family = nbinom1)
+m5 <- glmmTMB(SiblingNegotiation ~ FoodTreatment*SexParent + offset(log(BroodSize)) + (1|Nest), dispformula = ~ FoodTreatment + SexParent , ziformula = ~ FoodTreatment + SexParent,  data=Owls , family = nbinom1)
 
-res <- simulateResiduals(m4, plot = T)
+res <- simulateResiduals(m5, plot = T)
 par(mfrow = c(1,3))
 plotResiduals(res, Owls$FoodTreatment)
 testDispersion(res)
 testZeroInflation(res)
 ```
 
-but that seems to make little difference. Both models would be acceptable in terms of their fit to the data. Which one should you prefer? This is not a question for residual checks. Residual checks tell you which models can be rejected with the data. Which of the typically many acceptable models you should fit must be decided by your scientific question, and/or possibly by model selection methods. 
+but that does not seem to make things better. 
+
+Both models would be acceptable in terms of their fit to the data. Which one should you prefer? This is not a question for residual checks. Residual checks tell you which models can be rejected with the data. Which of the typically many acceptable models you should fit must be decided by your scientific question, and/or possibly by model selection methods. In doubt, I would tend towards the simpler model though. 
 
 # Notes on particular data types 
 
