@@ -3,3 +3,4 @@
 ^cran-comments\.md$
 util
 ^data-raw$
+tests/testthat/Rplots.pdf
