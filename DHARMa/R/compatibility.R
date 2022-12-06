@@ -1,20 +1,22 @@
-
 # General notes -----------------------------------------------------------
 
 
-# This file contains the wrappers for the models supported by DHARMa. DHARMa is interaction with packages ONLY via the wrappers. Below are
+# This file contains the wrappers for the models supported by DHARMa. 
+# The design philosophy is that DHARMa with with packages ONLY via the wrappers, 
+# so that the internal package functions can rely on a standardized interface
 #
-# 1) supported models in getPossibleModels
-# 2) generic S3 wrapper functions (function names see "New Class Template"), including default functions. 
-# 3) package / class specific wrappers.
-
-# The general approach for integrating a package in DHARMa is
+# The currently supported models can be returned via getPossibleModels()
+#
+# Below, you find under the section "Generic S3 Wrappers" the 6 Wrapper
+# functions that need to be implemented to add a model to DHARMa
 # 
-# i) copy new class template
-# ii) test if S3 default functions work
-# iii) if not, define class-specific S3 functions
+# Each of these generics has a default, which may already work with a given
+# model class. The general approach for integrating a package in DHARMa is
+# 
+# i) test if the default DHARMa wrappers work as intended
+# ii) if not, define new class-specific S3 wrapper (e.g. getSimulations.gam)
 
-# See comments in the help of the generic S3 functions for guidance about how to implement each function
+# See comments in the help of the generic S3 functions for guidance about how to implement each function.
 
 
 # Checks -----------------------------------------------------------
