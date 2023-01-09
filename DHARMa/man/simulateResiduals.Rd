@@ -23,7 +23,7 @@ simulateResiduals(fittedModel, n = 250, refit = F,
 
 \item{method}{for refit = F, the quantile randomization method used. The two options implemented at the moment are probability integral transform (PIT-) residuals (current default), and the "traditional" randomization procedure, that was used in DHARMa until version 0.3.0. Refit = T will always use "traditional", respectively of the value of method. For details, see \code{\link{getQuantile}}}
 
-\item{rotation}{optional rotation of the residual space prior to calculating the quantile residuals. The main purpose of this is to remove residual autocorrelation. See details below, section \emph{residual auto-correlation}, and help of \link{getQuantile}.}
+\item{rotation}{optional rotation of the residual space prior to calculating the quantile residuals. The main purpose of this is to account for residual covariance as created by temporal or spatial residual autocorrelation. See details below, section \emph{residual auto-correlation} ass well as the help of \link{getQuantile} and, for a practical example, \link{testTemporalAutocorrelation}.}
 
 \item{...}{parameters to pass on to the simulate function of the model object. An important use of this is to specify whether simulations should be conditional on the current random effect estimates, e.g. via re.form. Note that not all models support syntax to specify conditional or unconditional simulations. See also details and \code{\link{get Simulations}}}
 }
