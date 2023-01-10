@@ -11,7 +11,7 @@
 #' @param plot whether null distribution should be plotted
 #' @param suppressWarnings whether to suppress warnings that occur during refitting the models to simulated data. See details for explanations
 #' @param saveModels Whether to save refitted models
-#' @param ... additional parameters to pass on to the simulate function of the model object. See \code{\link{get Simulations}} for details. 
+#' @param ... additional parameters to pass on to the simulate function of the model object. See \code{\link{getSimulations}} for details. 
 #'
 #' @details The function performs a simulated LRT, which works as follows:
 #'

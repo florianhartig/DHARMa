@@ -22,7 +22,7 @@ simulateLRT(m0, m1, n = 250, seed = 123, plot = T,
 
 \item{saveModels}{Whether to save refitted models}
 
-\item{...}{additional parameters to pass on to the simulate function of the model object. See \code{\link{get Simulations}} for details.}
+\item{...}{additional parameters to pass on to the simulate function of the model object. See \code{\link{getSimulations}} for details.}
 }
 \description{
 This function uses the DHARMa model wrappers to generate simulated likelihood ratio tests (LRTs) for (generalized) linear mixed models based on a parametric bootstrap. The motivation for using a simulated LRT rather than a standard ANOVA or AIC for model selection in mixed models is that df for mixed models are not clearly defined, thus standard ANOVA based on Chi2 statistics or AIC are unreliable, in particular for models with large contributions of REs to the likelihood.
