@@ -4,3 +4,8 @@
 util
 ^data-raw$
 tests/testthat/Rplots.pdf
+vignettes/*.R
+vignettes/*.html
+vignettes/*.pdf
+vignettes/DHARMa_files
+vignettes/DHARMa_cache
