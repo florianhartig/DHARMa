@@ -3,6 +3,8 @@ title: "DHARMa: residual diagnostics for hierarchical (multi-level/mixed) regres
 author: "Florian Hartig, Theoretical Ecology, University of Regensburg [website](https://www.uni-regensburg.de/biologie-vorklinische-medizin/theoretische-oekologie/mitarbeiter/hartig/)"
 date: "`r Sys.Date()`"
 output: 
+  pdf_document:
+    toc: true
   rmarkdown::html_vignette:
     toc: true
 vignette: >
@@ -267,7 +269,7 @@ Moreover (general advice), to ensure reproducibility, it's advisable to add a se
 
 So far, all shown DHARMa results were calculated for a correctly specified model, resulting in "perfect" residual plots and diagnostics. In this section, we discuss how to recognize and interpret diagnostics that indicate a misspecified model. Before going into the details, note, however, that 
 
-1. **No residual pattern does not "proof" that the model is correct**: The fact that none of the DHARMa tests indicates a problem does not "proof" that the model is correctly specified - in good old Popper fashion, you should only few this as your working hypothesis not having been rejected, keeping in mind that there are likely a large number of structural problems that will not create a pattern in the DHARMa diagnostics. So, keep your skepticism alive, and if you find the results fishy, keep searching and testing. 
+1. **No residual pattern does not "proof" that the model is correct**: The fact that none of the DHARMa tests indicates a problem does not "proof" that the model is correctly specified. For each model, there are likely a large number of structural problems that will not create a pattern in the DHARMa diagnostics. In good old Popper fashion, you should only interpret no residual problems as your working hypothesis not having been rejected in this particular test, which increases confidence in the model, but does not constitute a decisive proof. So, keep your skepticism alive, and if you find the results fishy, keep searching and testing. 
 
 2. **A residual pattern does not indicate that the model is unusable**: Conversely, while a significant pattern in the residuals indicates with good reliability that the observed data did likely not originate from the fitted model, this doesn't necessarily imply that the inferential results from this wrong model are not usable. There are many situations in statistics where it is common practice to work with "wrong models". For example, many statistical models used shrinkage estimators, which purposefully bias parameter estimates to certain values. Random effects are a special case of this. If DHARMa residuals for these estimators are calculated, they will often show a slight pattern in the residuals even if the model is correctly specified, and tests for this can get significant for large sample sizes. For this reason, DHARMa is excluding RE estimates in the predictions when plotting res ~ pred Another example is data that is missing at random (MAR). Because it is known that this phenomenon does not create a bias on the fixed effect estimates, is is common practice to fit this data with standard mixed models. Nevertheless, DHARMa recognizes that the observed data looks different than what would be expected from the model assumptions, and flags the model as problematic (see [here](https://github.com/florianhartig/DHARMa/issues/101)).
   
