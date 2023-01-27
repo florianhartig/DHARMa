@@ -196,6 +196,21 @@ getResiduals <- function (object, ...) {
 
 
 
+#' Get model family
+#'
+#' Wrapper to get the family of a fitted model
+#' 
+#' @param object a fitted model
+#' @param ... additional parameters to be passed on
+#'
+#' @seealso \code{\link{getObservedResponse}}, \code{\link{getSimulations}}, \code{\link{getRefit}}, \code{\link{getFixedEffects}}, \code{\link{getFitted}}
+#'
+#' @author Florian Hartig
+#' @export
+getFamily <- function (object, ...) {
+  UseMethod("getFamily", object)
+}
+
 
 # default -----------------------------------------------------------------
 
@@ -220,9 +235,6 @@ getObservedResponse.default <- function (object, ...){
     
     out = out[,1]
   }
-  
-
-  
   return(out)
 }
 
@@ -319,6 +331,14 @@ getResiduals.default <- function (object,...){
 #   if(length(x) < as.numeric(x[length(x) ])) return(TRUE)
 #   else return(FALSE)
 # }
+#
+
+
+#' @rdname getFamily
+#' @export
+getFamily.default <- function (object,...){
+  family(fittedModel)
+}
 
 
 
@@ -357,6 +377,7 @@ hasWeigths.lm <- function(object, ...){
 #' @rdname getSimulations
 #' @export
 getSimulations.negbin<- function (object, nsim = 1, type = c("normal", "refit"), ...){
+  type <- match.arg(type)
   if("(weights)" %in% colnames(model.frame(object))) warning(weightsWarning)
   getSimulations.default(object = object, nsim = nsim, type = type, ...)
 }
@@ -478,6 +499,7 @@ getRefit.glmmTMB <- function(object, newresp, ...){
 #' @export
 getSimulations.glmmTMB <- function (object, nsim = 1, type = c("normal", "refit"), ...){
   
+  type <- match.arg(type)
   if("(weights)" %in% colnames(model.frame(object)) & ! family(object)$family %in% c("binomial", "betabinomial")) warning(weightsWarning)
   
   type <- match.arg(type)
@@ -635,6 +657,48 @@ getResiduals.MixMod <- function (object,...){
   residuals(object, type = "subject_specific")
 }
 
+####### phylolm #########
 
+
+#' @rdname getObservedResponse
+#' @export
+getObservedResponse.phyloglm <- function (object, ...){
+  out = object$y
+  return(out)
+}
+
+
+#' @rdname getSimulations
+#' @export
+getSimulations.phyloglm <- function(object, nsim = 1, type = c("normal", "refit"), ...){
+  type <- match.arg(type)
+  fitBoot = update(fit, boot = nsim, save = T)
+  out = fitBoot$bootdata
+  
+  if(type == "normal"){
+    if(!is.matrix(out)) out = data.matrix(out)
+  }else{
+    out = as.data.frame(out)
+  }
+  
+  return(out)
+}
+
+#' @rdname getFitted
+#' @export
+getFitted.phyloglm  <- function (object,...){
+  fit$fitted.values
+}
+
+
+
+#' @rdname getFamily
+#' @export
+getFamily.phyloglm <- function (object,...){
+  out = list()
+  # out$family = object$method
+  out$family = "integer-valued" # all families of phyloglm are integer-valued
+  return(out)
+}
 
 

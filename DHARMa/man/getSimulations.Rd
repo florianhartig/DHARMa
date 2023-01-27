@@ -9,6 +9,7 @@
 \alias{getSimulations.glmmTMB}
 \alias{getSimulations.HLfit}
 \alias{getSimulations.MixMod}
+\alias{getSimulations.phyloglm}
 \title{Get model simulations}
 \usage{
 getSimulations(object, nsim = 1, type = c("normal", "refit"), ...)
@@ -32,6 +33,9 @@ getSimulations(object, nsim = 1, type = c("normal", "refit"), ...)
   "refit"), ...)
 
 \method{getSimulations}{MixMod}(object, nsim = 1, type = c("normal",
+  "refit"), ...)
+
+\method{getSimulations}{phyloglm}(object, nsim = 1, type = c("normal",
   "refit"), ...)
 }
 \arguments{
