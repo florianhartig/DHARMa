@@ -49,11 +49,8 @@ jobs:
 
       - uses: r-lib/actions/setup-pandoc@v2
       
-      - uses: r-lib/actions/setup-tinytex@master
-      
-      - name: Install makeindex
-        run: tlmgr install makeindex
-      
+      - uses: r-lib/actions/setup-tinytex@v2
+
       - name: Query dependencies
         run: |
           setwd("DHARMa")
