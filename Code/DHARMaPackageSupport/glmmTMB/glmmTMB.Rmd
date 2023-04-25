@@ -38,6 +38,13 @@ testData = createData(sampleSize = 200, randomEffectVariance = 1.5, family = poi
 m1 <- glmmTMB(observedResponse ~ Environment1 + (1|group), family = "poisson", data = testData)
 res = simulateResiduals(m1)
 plot(res)
+
+predict(m1,  re.form = NULL) # conditional 
+predict(m1,  re.form = ~0)  # unconditional
+
+residuals()
+
+
 ```
 
 
