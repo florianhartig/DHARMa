@@ -2,7 +2,7 @@
 % Please edit documentation in R/tests.R
 \name{testGeneric}
 \alias{testGeneric}
-\title{Generic simulation test of a summary statistic}
+\title{Test for a generic summary statistic based on simulated data}
 \usage{
 testGeneric(simulationOutput, summary, alternative = c("two.sided",
   "greater", "less"), plot = T,
@@ -23,7 +23,7 @@ testGeneric(simulationOutput, summary, alternative = c("two.sided",
 This function tests if a user-defined summary differs when applied to simulated / observed data.
 }
 \details{
-This function tests if a user-defined summary differs when applied to simulated / observed data. the function can easily be remodeled to apply summaries on the residuals, by simply defining f = function(x) summary (x - predictions), as done in \code{\link{testDispersion}}
+This function applies a user-defined summary on the simulated simulated / observed data of a DHARMa object. The summary is applied directly on the data and not the residuals, but it can easily be remodeled to apply summaries on the residuals, by simply defining something like f = function(x) summary (x - predictions), as done in \code{\link{testDispersion}}
 }
 \note{
 The function that you supply is applied on the data as it is represented in your fitted model, which may not always correspond to how you think. This is important in particular when you use k/n binomial data, and want to test for 1-inflation. As an example, if have k/20 observations, and you provide your data via cbind (y, y-20), you have to test for 20-inflation (because this is how the data is represented in the model). However, if you provide data via y/20, and weights = 20, you should test for 1-inflation. In doubt, check how the data is internally represented in model.frame(model), or via simulate(model)
