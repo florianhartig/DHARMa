@@ -19,7 +19,7 @@ plotResiduals(simulationOutput, form = NULL, quantreg = NULL, rank = T,
 
 \item{asFactor}{should a numeric predictor provided in form be treated as a factor. Default is to choose this for < 10 unique values, as long as enough predictions are available to draw a boxplot.}
 
-\item{smoothScatter}{if T, a smooth scatter plot will plotted instead of a normal scatter plot. This makes sense when the number of residuals is very large. Default NULL chooses T for nObs < 10000, and F otherwise.}
+\item{smoothScatter}{if T, a smooth scatter plot will plotted instead of a normal scatter plot. This makes sense when the number of residuals is very large. Default NULL chooses T for nObs > 10000, and F otherwise.}
 
 \item{quantiles}{for a quantile regression, which quantiles should be plotted}
 

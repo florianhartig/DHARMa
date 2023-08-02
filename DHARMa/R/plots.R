@@ -152,7 +152,7 @@ plotQQunif <- function(simulationOutput, testUniformity = T, testOutliers = T, t
 #' @param quantreg whether to perform a quantile regression based on \code{\link{testQuantiles}} or a smooth spline around the mean. Default NULL chooses T for nObs < 2000, and F otherwise.
 #' @param rank if T, the values provided in form will be rank transformed. This will usually make patterns easier to spot visually, especially if the distribution of the predictor is skewed. If form is a factor, this has no effect.
 #' @param asFactor should a numeric predictor provided in form be treated as a factor. Default is to choose this for < 10 unique values, as long as enough predictions are available to draw a boxplot.
-#' @param smoothScatter if T, a smooth scatter plot will plotted instead of a normal scatter plot. This makes sense when the number of residuals is very large. Default NULL chooses T for nObs < 10000, and F otherwise.
+#' @param smoothScatter if T, a smooth scatter plot will plotted instead of a normal scatter plot. This makes sense when the number of residuals is very large. Default NULL chooses T for nObs > 10000, and F otherwise.
 #' @param quantiles for a quantile regression, which quantiles should be plotted
 #' @param ... additional arguments to plot / boxplot.
 #' @details The function plots residuals against a predictor (by default against the fitted value, extracted from the DHARMa object, or any other predictor).
