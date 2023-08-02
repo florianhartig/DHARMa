@@ -649,9 +649,12 @@ Note: discrete proportions, of the type k/n should NOT be modeled with the beta 
 
 ## Binomial data
 
-Binomial data behaves slightly different depending on whether we have a 0/1 response (Bernoulli) or a k/n response (true binomial). A k/n response, in particular when n is large, will behave pretty much in the same way as you would expect from other distributions (Poisson, ...). Things are a bit different for the 0/1 response. 
+Binomial data behave slightly different depending on whether we have a 0/1 response (Bernoulli) or a k/n response (true binomial). 
 
-Let's look at the residuals of a clearly misspecified binomial model (missing predictor) with 0/1 response data. 
+A k/n response, in particular when n is large, will behave similar to the Poisson, in that it approaches a normal distribution with fixed dispersion for large n and becomes more assymetric at its borders (for k = 0 or n). You should check for dispersion and consider a beta-binomial in cases of overdispersion.  
+
+
+Things are a bit different for the 0/1 response. Let's look at the residuals of a clearly misspecified binomial model (missing predictor) with 0/1 response data. 
 
 ```{r}
 testData = createData(sampleSize = 500, overdispersion = 0, fixedEffects = 5, family = binomial(), randomEffectVariance = 3, numGroups = 25)
@@ -660,19 +663,21 @@ fittedModel <- glm(observedResponse ~ 1, family = "binomial", data = testData)
 simulationOutput <- simulateResiduals(fittedModel = fittedModel)
 ```
 
-If you would do the same with a binomial k/n response or count data, such a misspecification would produce overdispersion (try it out). For the 0/1 response we see nothing.  
+If you would do the same with a binomial k/n response or count data, such a misspecification would produce overdispersion (try it out). For the 0/1 response we see neither dispersion problems nor a misfit in the general res ~ predicted plot.   
 
 ```{r}
 plot(simulationOutput, asFactor = T)
 ```
 
-However, you can still clearly see the misfit if you plot, e.g. 
+even though the misfit is clearly visible if we plot the residauls against the missing predictor.
 
 ```{r}
 plotResiduals(simulationOutput, testData$Environment1, quantreg = T)
 ```
 
-Moreover, you will see overdispersion from the misfit if you group your data, and the group correlates with a model error. Grouping basically transforms the 0/1 response in a k/n response. Here, I show the difference of the dispersion test for the same data, once ungrouped (left), and grouped according the the random effects group (right)
+However, we can see the overdispersion arising from the misfit if we group our residuals, which basically basically transforms the 0/1 response in a k/n response. 
+
+To show this, let's look at the dispersion test for the same model, once ungrouped (left), and grouped according the variable group which was in the the data (right).
 
 ```{r}
 par(mfrow = c(1,2))
@@ -682,7 +687,7 @@ simulationOutput = recalculateResiduals(simulationOutput , group = testData$grou
 testDispersion(simulationOutput)
 ```
 
-It is rewarding to think about why this happens. Consider an even more artificial simulation, where we create binonial data with a certain true probabilities p, drawn from a uniform distribution. 
+In general, you can group according to any variable that you like, including continous variables or space. However, some variables make more sense than others. To understand this, consider a simulation where we create binonial data with true probabilities p, drawn from a uniform distribution: 
 
 ```{r}
 n = 1000
@@ -713,7 +718,9 @@ res3 <- recalculateResiduals(res, group = grouping)
 plot(res3)
 ```
 
-In this case, the groups have a different mean than the fitted grand mean, and the misfit shows up in the residuals. If you don't have a natural grouping variable, you can introduce arbitrary grouping variables, e.g. via discretising a predictor or the response (usually preferable), and grouping according to that, or via discretising space (e.g. group observation in spatial blocks). The pattern appears only, however, if the grouping variable correlates with the model error. Consider the following example: 
+In this case, the groups have a different mean than the fitted grand mean, and the misfit shows up in the residuals. Thus, what we are looking for in the grouping is variables that may correlate with the misfit. 
+
+If you don't have a natural grouping variable, you can introduce arbitrary grouping variables, e.g. via discretising a predictor or the response (usually preferable), and grouping according to that, or via discretising space (e.g. group observation in spatial blocks). The pattern appears only, however, if the grouping variable correlates with the model error. Consider the following example: 
 
 ```{r}
 set.seed(123)
@@ -759,7 +766,6 @@ grouping = cut(x, breaks = quantile(x, seq(0,1,0.02)))
 res3 = recalculateResiduals(res , group = grouping)
 plot(res3)
 ```
-
 
 **Conclusions:** if you see overdispersion or a pattern after grouping, it highlights a model error that is structured by group. As the pattern usually highlights a model misfit, rather than a dispersion problem akin to what happens in an overdispersed binomial (which has major impacts on p-values and CIs), I view this binomial grouping pattern as less critical. Likely, most conclusions will not change if you ignore the problem. Nevertheless, you should try to understand the reason for it. When the group is spatial, it could be the sign of residual spatial autocorrelation which could be addressed by a spatial RE or a spatial model. When grouped by a continuous variable, it could be the sign of a nonlinear effect. 
 
