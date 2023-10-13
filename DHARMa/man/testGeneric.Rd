@@ -23,10 +23,14 @@ testGeneric(simulationOutput, summary, alternative = c("two.sided",
 This function tests if a user-defined summary differs when applied to simulated / observed data.
 }
 \details{
-This function applies a user-defined summary on the simulated simulated / observed data of a DHARMa object. The summary is applied directly on the data and not the residuals, but it can easily be remodeled to apply summaries on the residuals, by simply defining something like f = function(x) summary (x - predictions), as done in \code{\link{testDispersion}}
+This function applies a user-defined summary to the simulated/observed data of a DHARMa object and then performs a hypothesis test using the ratio Obs / Sim as the test statistic.
+
+The summary is applied directly to the data and not to the residuals, but it can easily be remodeled to apply summaries to the residuals by simply defining something like f = function(x) summary (x - predictions), as done in \code{\link{testDispersion}}
 }
 \note{
-The function that you supply is applied on the data as it is represented in your fitted model, which may not always correspond to how you think. This is important in particular when you use k/n binomial data, and want to test for 1-inflation. As an example, if have k/20 observations, and you provide your data via cbind (y, y-20), you have to test for 20-inflation (because this is how the data is represented in the model). However, if you provide data via y/20, and weights = 20, you should test for 1-inflation. In doubt, check how the data is internally represented in model.frame(model), or via simulate(model)
+The summary function you specify will be applied to the data as it appears in your fitted model, which may not always be what you want.
+
+As an example, consider the case where we want to test for n-inflation in k/n data. If you provide your data via cbind (k, n-k), you have to test for n-inflation, but if you provide your data via k/n and weights = n, you should test for 1-inflation. When in doubt, check how the data is represented internally in model.frame(model) or via simulate(model).
 }
 \examples{
 testData = createData(sampleSize = 100, overdispersion = 0.5, randomEffectVariance = 0)

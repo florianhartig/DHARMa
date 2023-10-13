@@ -15,16 +15,14 @@ testZeroInflation(simulationOutput, ...)
 This function compares the observed number of zeros with the zeros expected from simulations.
 }
 \details{
-The plot shows the expected distribution of zeros against the observed values, the ratioObsSim shows observed vs. simulated zeros. A value < 1 means that the observed data has less zeros than expected, a value > 1 means that it has more zeros than expected (aka zero-inflation). Per default, the function tests both sides.
+Zero-inflation means that the observed data contain more zeros than would be expected under the fitted model. Zero-inflation must always be accessed with respect to a particular model, so the mere fact that there are many zeros in the observed data is not an indication of zero-inflation, see Warton, D. I. (2005). Many zeros does not mean zero inflation: comparing the goodness-of-fit of parametric models to multivariate abundance data. Environmetrics 16(3), 275-289.
 
-Some notes about common problems / questions:
-\itemize{
-\item Zero-inflation tests after fitting the model are crucial to see if you have zero-inflation. Just because there are a lot of zeros doesn't mean you have zero-inflation, see Warton, D. I. (2005). Many zeros does not mean zero inflation: comparing the goodness-of-fit of parametric models to multivariate abundance data. Environmetrics 16(3), 275-289.
-\item That being said, zero-inflation tests are often not a reliable guide to decide wheter to add a zi term or not. In general, model structures should be decided on ideally a priori, if that is not possible via model selection techniques (AIC, BIC, WAIC, Bayes Factor). A zero-inflation test should only be run after that decision, and to validate the decision that was taken.
-}
+The testZeroInflation function simulates new datasets from the fitted model and compares this null distribution (gray histogram in the plot) with the observed values (red line in the plot). Technically, it is a wrapper for \code{\link{testGeneric}}, with the summary argument set to function(x) sum(x == 0). The test statistic is the ratio of observed to simulated zeros. A value < 1 means that the observed data have fewer zeros than expected, a value > 1 means that they have more zeros than expected (aka zero inflation). By default, the function tests both sides, so it would also test for fewer zeros than expected.
 }
 \note{
-This function is a wrapper for \code{\link{testGeneric}}, where the summary argument is set to function(x) sum(x == 0)
+Zero-inflation can occur for a number of reasons other than an underlying data generating process corresponding to a ZIP model. Vice versa, it is very well possible that no zero-inflation will be observed when fitting models to data derived from a ZIP process. The latter is due to the fact that excess zeros can often be explained by other model parameters, such as the theta parameter in the negative binomial.
+
+For this reason, results of the zero-inflation test should be interpreted as a residual pattern that can have many reasons, not as a decision criterion for whether or not to fit a ZIP model. To decide whether to add a ZIP term, I would advise relying on appropriate model selection techniques such as AIC, BIC, WAIC, Bayes factor, or LRT. Note that these tests are often not reliable in GLMMs because it is difficult to determine the df spent by the different models. The \code{\link{simulateLRT}} function in DHARMa provides a nonparametric alternative to obtain p-values for LRT is nested models with unknown df.
 }
 \examples{
 testData = createData(sampleSize = 100, overdispersion = 0.5, randomEffectVariance = 0)

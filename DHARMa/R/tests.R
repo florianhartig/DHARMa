@@ -521,15 +521,14 @@ testOverdispersionParametric <- function(...){
 #'
 #' @param simulationOutput an object of class DHARMa, either created via \code{\link{simulateResiduals}} for supported models or by \code{\link{createDHARMa}} for simulations created outside DHARMa, or a supported model. Providing a supported model directly is discouraged, because simulation settings cannot be changed in this case.
 #' @param ... further arguments to \code{\link{testGeneric}}
-#' @details The plot shows the expected distribution of zeros against the observed values, the ratioObsSim shows observed vs. simulated zeros. A value < 1 means that the observed data has less zeros than expected, a value > 1 means that it has more zeros than expected (aka zero-inflation). Per default, the function tests both sides.
+#' @details Zero-inflation means that the observed data contain more zeros than would be expected under the fitted model. Zero-inflation must always be accessed with respect to a particular model, so the mere fact that there are many zeros in the observed data is not an indication of zero-inflation, see Warton, D. I. (2005). Many zeros does not mean zero inflation: comparing the goodness-of-fit of parametric models to multivariate abundance data. Environmetrics 16(3), 275-289.
+#' 
+#' The testZeroInflation function simulates new datasets from the fitted model and compares this null distribution (gray histogram in the plot) with the observed values (red line in the plot). Technically, it is a wrapper for \code{\link{testGeneric}}, with the summary argument set to function(x) sum(x == 0). The test statistic is the ratio of observed to simulated zeros. A value < 1 means that the observed data have fewer zeros than expected, a value > 1 means that they have more zeros than expected (aka zero inflation). By default, the function tests both sides, so it would also test for fewer zeros than expected.
+#' 
+#' @note Zero-inflation can occur for a number of reasons other than an underlying data generating process corresponding to a ZIP model. Vice versa, it is very well possible that no zero-inflation will be observed when fitting models to data derived from a ZIP process. The latter is due to the fact that excess zeros can often be explained by other model parameters, such as the theta parameter in the negative binomial. 
+#' 
+#' For this reason, results of the zero-inflation test should be interpreted as a residual pattern that can have many reasons, not as a decision criterion for whether or not to fit a ZIP model. To decide whether to add a ZIP term, I would advise relying on appropriate model selection techniques such as AIC, BIC, WAIC, Bayes factor, or LRT. Note that these tests are often not reliable in GLMMs because it is difficult to determine the df spent by the different models. The \code{\link{simulateLRT}} function in DHARMa provides a nonparametric alternative to obtain p-values for LRT is nested models with unknown df.
 #'
-#' Some notes about common problems / questions:
-#'
-#' * Zero-inflation tests after fitting the model are crucial to see if you have zero-inflation. Just because there are a lot of zeros doesn't mean you have zero-inflation, see Warton, D. I. (2005). Many zeros does not mean zero inflation: comparing the goodness-of-fit of parametric models to multivariate abundance data. Environmetrics 16(3), 275-289.
-#'
-#' * That being said, zero-inflation tests are often not a reliable guide to decide wheter to add a zi term or not. In general, model structures should be decided on ideally a priori, if that is not possible via model selection techniques (AIC, BIC, WAIC, Bayes Factor). A zero-inflation test should only be run after that decision, and to validate the decision that was taken.
-#'
-#' @note This function is a wrapper for \code{\link{testGeneric}}, where the summary argument is set to function(x) sum(x == 0)
 #' @author Florian Hartig
 #' @example inst/examples/testsHelp.R
 #' @seealso \code{\link{testResiduals}}, \code{\link{testUniformity}}, \code{\link{testOutliers}}, \code{\link{testDispersion}}, \code{\link{testZeroInflation}}, \code{\link{testGeneric}}, \code{\link{testTemporalAutocorrelation}}, \code{\link{testSpatialAutocorrelation}}, \code{\link{testQuantiles}}, \code{\link{testCategorical}}
@@ -550,9 +549,13 @@ testZeroInflation <- function(simulationOutput, ...){
 #' @param plot whether to plot the simulated summary
 #' @param methodName name of the test (will be used in plot)
 #'
-#' @details This function applies a user-defined summary on the simulated simulated / observed data of a DHARMa object. The summary is applied directly on the data and not the residuals, but it can easily be remodeled to apply summaries on the residuals, by simply defining something like f = function(x) summary (x - predictions), as done in \code{\link{testDispersion}}
+#' @details This function applies a user-defined summary to the simulated/observed data of a DHARMa object and then performs a hypothesis test using the ratio Obs / Sim as the test statistic. 
+#' 
+#' The summary is applied directly to the data and not to the residuals, but it can easily be remodeled to apply summaries to the residuals by simply defining something like f = function(x) summary (x - predictions), as done in \code{\link{testDispersion}}
 #'
-#' @note The function that you supply is applied on the data as it is represented in your fitted model, which may not always correspond to how you think. This is important in particular when you use k/n binomial data, and want to test for 1-inflation. As an example, if have k/20 observations, and you provide your data via cbind (y, y-20), you have to test for 20-inflation (because this is how the data is represented in the model). However, if you provide data via y/20, and weights = 20, you should test for 1-inflation. In doubt, check how the data is internally represented in model.frame(model), or via simulate(model)
+#' @note The summary function you specify will be applied to the data as it appears in your fitted model, which may not always be what you want. 
+#' 
+#' As an example, consider the case where we want to test for n-inflation in k/n data. If you provide your data via cbind (k, n-k), you have to test for n-inflation, but if you provide your data via k/n and weights = n, you should test for 1-inflation. When in doubt, check how the data is represented internally in model.frame(model) or via simulate(model).
 #'
 #' @export
 #' @author Florian Hartig
