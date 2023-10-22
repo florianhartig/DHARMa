@@ -279,7 +279,7 @@ getFixedEffects.default <- function(object, ...){
   
   if(class(object)[1] %in% c("glm", "lm", "gam", "bam", "negbin") ){
     out  = coef(object)
-  } else if(class(object)[1] %in% c("glmerMod", "lmerMod", "HLfit")){
+  } else if(class(object)[1] %in% c("glmerMod", "lmerMod", "HLfit", "lmerTest")){
     out = fixef(object)
   } else if(class(object)[1] %in% c("glmmTMB")){
     out = glmmTMB::fixef(object)
