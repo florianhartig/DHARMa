@@ -69,4 +69,21 @@ check_zeroinflation(m1b) # shows again zero-inflation
 
 
 
+# simulate Data from Poisson distribution
+
+dat <- createData(sampleSize = 1000)
+fit <- glmmTMB(observedResponse ~ Environment1 + (1|group), data = dat, family = "poisson")
+
+res <- simulateResiduals(fit, plot = T)
+testZeroInflation(res)
+check_zeroinflation(fit) # performance package calcualtes correct value
+
+fit <- glmmTMB(observedResponse ~ Environment1 + (1|group), data = dat, family = "nbinom1")
+
+res <- simulateResiduals(fit, plot = T)
+testZeroInflation(res)
+check_zeroinflation(fit)
+
+
+
 
