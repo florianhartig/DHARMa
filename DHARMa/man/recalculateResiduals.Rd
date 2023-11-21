@@ -29,6 +29,9 @@ an object of class DHARMa, similar to what is returned by \code{\link{simulateRe
 \description{
 The purpose of this function is to recalculate scaled residuals per group, based on the simulations done by \code{\link{simulateResiduals}}
 }
+\details{
+The function aggregates the observed and simulated data per group according to the function provided by the aggregateBy option. DHARMa residuals are then calculated exactly as for a single data point (see \code{\link{getQuantile}} for details).
+}
 \examples{
 library(lme4)
 
