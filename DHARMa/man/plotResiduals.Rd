@@ -6,7 +6,7 @@
 \usage{
 plotResiduals(simulationOutput, form = NULL, quantreg = NULL, rank = T,
   asFactor = NULL, smoothScatter = NULL, quantiles = c(0.25, 0.5, 0.75),
-  ...)
+  absoluteDeviation = FALSE, ...)
 }
 \arguments{
 \item{simulationOutput}{on object, usually a DHARMa object, from which residual values can be extracted. Alternatively, a vector with residuals or a fitted model can be provided, which will then be transformed into a DHARMa object.}
@@ -23,6 +23,8 @@ plotResiduals(simulationOutput, form = NULL, quantreg = NULL, rank = T,
 
 \item{quantiles}{for a quantile regression, which quantiles should be plotted}
 
+\item{absoluteDeviation}{If T, switch from displaying normal quantile residuals to absolute deviation from the mean expectation of 0.5 (calculated as 2 * abs(res - 0.5)). Purpose of this is to test explicitly for heteroskedasticity, see details.}
+
 \item{...}{additional arguments to plot / boxplot.}
 }
 \value{
@@ -36,9 +38,11 @@ The function plots residuals against a predictor (by default against the fitted 
 
 Outliers are highlighted in red (for information on definition and interpretation of outliers, see \code{\link{testOutliers}}).
 
-To provide a visual aid in detecting deviations from uniformity in y-direction, the plot function calculates an (optional) quantile regression of the residuals, by default for the 0.25, 0.5 and 0.75 quantiles. As the residuals should be uniformly distributed for a correctly specified model, the theoretical expectations for these regressions are straight lines at 0.25, 0.5 and 0.75, which are displayed as dashed black lines on the plot. Some deviations from these expectations are to be expected by chance, however, even for a perfect model, especially if the sample size is small. The function therefore tests if deviation of the fitted quantile regression from the expectation is significant, using  \code{\link{testQuantiles}}. If so, the significant quantile regression will be highlighted as red, and a warning will be displayed in the plot.
+To provide a visual aid for detecting deviations from uniformity in the y-direction, the plot function calculates an (optional) quantile regression of the residuals, by default for the 0.25, 0.5 and 0.75 quantiles. Since the residuals should be uniformly distributed for a correctly specified model, the theoretical expectations for these regressions are straight lines at 0.25, 0.5 and 0.75, shown as dashed black lines on the plot. However, even for a perfect model, some deviation from these expectations is to be expected by chance, especially if the sample size is small. The function therefore tests whether the deviation of the fitted quantile regression from the expectation is significant, using \code{\link{testQuantiles}}. If so, the significant quantile regression is highlighted in red and a warning is displayed in the plot.
 
-The quantile regression can take some time to calculate, especially for larger datasets. For that reason, quantreg = F can be set to produce a smooth spline instead. This is default for n > 2000.
+Overdispersion typically manifests itself as Q1 deviating towards 0 and Q3 deviating towards 1. Heteroskedasticity manifests itself as non-parallel quantile lines. To diagnose heteroskedasticity and overdispersion, it can be helpful to additionally plot the absolute deviation of the residuals from the mean expectation of 0.5, using the option absoluteDeviation = T. In this case, we would again expect Q1-Q3 quantile lines at 0.25, 0.5, 0.75, but greater dispersion (also locally in the case of heteroskedasticity) always manifests itself in deviations towards 1.
+
+The quantile regression can take some time to calculate, especially for larger data sets. For this reason, quantreg = F can be set to generate a smooth spline instead. This is the default for n > 2000.
 
 If form is a factor, a boxplot will be plotted instead of a scatter plot. The distribution for each factor level should be uniformly distributed, so the box should go from 0.25 to 0.75, with the median line at 0.5 (within-group ). To test if deviations from those expecations are significant, KS-tests per group and a Levene test for homogeneity of variances is performed. See \code{\link{testCategorical}} for details.
 }
@@ -82,6 +86,10 @@ plotResiduals(simulationOutput, form = testData$Environment1,
 
 # if pred is a factor, or if asFactor = T, will produce a boxplot
 plotResiduals(simulationOutput, form = testData$group)
+
+# to diagnose overdispersion and heteroskedasticity it can be useful to 
+# display residuals as absolute deviation from the expected mean 0.5
+plotResiduals(simulationOutput, absoluteDeviation = T, quantreg = FALSE)
 
 # All these options can also be provided to the main plotting function
 
