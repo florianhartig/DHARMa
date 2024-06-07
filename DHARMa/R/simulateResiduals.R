@@ -9,7 +9,7 @@
 #' @param plot if TRUE, \code{\link{plotResiduals}} will be directly run after the residuals have been calculated
 #' @param ... parameters to pass on to the simulate function of the model object. An important use of this is to specify whether simulations should be conditional on the current random effect estimates, e.g. via re.form. Note that not all models support syntax to specify conditional or unconditional simulations. See also details and \code{\link{getSimulations}}
 #' @param seed the random seed to be used within DHARMa. The default setting, recommended for most users, is keep the random seed on a fixed value 123. This means that you will always get the same randomization and thus the same result when running the same code. NULL = no new seed is set, but previous random state will be restored after simulation. FALSE = no seed is set, and random state will not be restored. The latter two options are only recommended for simulation experiments. See vignette for details.
-#' @param method for refit = F, the quantile randomization method used. The two options implemented at the moment are probability integral transform (PIT-) residuals (current default), and the "traditional" randomization procedure, that was used in DHARMa until version 0.3.0. Refit = T will always use "traditional", respectively of the value of method. For details, see \code{\link{getQuantile}}
+#' @param method for refit = FALSE, the quantile randomization method used. The two options implemented at the moment are probability integral transform (PIT-) residuals (current default), and the "traditional" randomization procedure, that was used in DHARMa until version 0.3.0. Refit = T will always use "traditional", respectively of the value of method. For details, see \code{\link{getQuantile}}
 #' @param rotation optional rotation of the residual space prior to calculating the quantile residuals. The main purpose of this is to account for residual covariance as created by temporal or spatial residual autocorrelation. See details below, section *residual auto-correlation* ass well as the help of [getQuantile] and, for a practical example, [testTemporalAutocorrelation]. 
 #'
 #' @details There are a number of important considerations when simulating from a more complex (hierarchical) model:
@@ -41,7 +41,7 @@
 #' @example inst/examples/simulateResidualsHelp.R
 #' @import stats
 #' @export
-simulateResiduals <- function(fittedModel, n = 250, refit = F, integerResponse = NULL, plot = F, seed = 123, method = c("PIT", "traditional"), rotation = NULL, ...){
+simulateResiduals <- function(fittedModel, n = 250, refit = FALSE, integerResponse = NULL, plot = FALSE, seed = 123, method = c("PIT", "traditional"), rotation = NULL, ...){
   
   ######## general assertions and startup calculations ##########
   
@@ -174,14 +174,14 @@ simulateResiduals <- function(fittedModel, n = 250, refit = F, integerResponse =
 #' @keywords internal
 checkSimulations <- function(simulatedResponse, nObs, nSim){
   
-  if(!inherits(simulatedResponse, "matrix")) securityAssertion("Simulation from the model produced wrong class", stop = T)
+  if(!inherits(simulatedResponse, "matrix")) securityAssertion("Simulation from the model produced wrong class", stop = TRUE)
   
-  if(any(dim(simulatedResponse) != c(nObs, nSim) )) securityAssertion("Simulation from the model do not have the same dimension as nObs.", stop = F)
+  if(any(dim(simulatedResponse) != c(nObs, nSim) )) securityAssertion("Simulation from the model do not have the same dimension as nObs.", stop = FALSE)
   
   if(any(!is.finite(simulatedResponse))) message("Simulations from your fitted model produce infinite values. Consider if this is sensible")
   
-  if(any(is.nan(simulatedResponse))) securityAssertion("Simulations from your fitted model produce NaN values. DHARMa cannot calculated residuals for this. This is nearly certainly an error of the regression package you are using", stop = T)
-  if(any(is.na(simulatedResponse))) securityAssertion("Simulations from your fitted model produce NA values. DHARMa cannot calculated residuals for this. This is nearly certainly an error of the regression package you are using", stop = T)
+  if(any(is.nan(simulatedResponse))) securityAssertion("Simulations from your fitted model produce NaN values. DHARMa cannot calculated residuals for this. This is nearly certainly an error of the regression package you are using", stop = TRUE)
+  if(any(is.na(simulatedResponse))) securityAssertion("Simulations from your fitted model produce NA values. DHARMa cannot calculated residuals for this. This is nearly certainly an error of the regression package you are using", stop = TRUE)
   
 }
 
@@ -233,7 +233,7 @@ recalculateResiduals <- function(simulationOutput, group = NULL, aggregateBy = s
     out$observedResponse = aggregateByGroup(simulationOutput$observedResponse)
     out$fittedPredictedResponse = aggregateByGroup(simulationOutput$fittedPredictedResponse)
     
-    if (simulationOutput$refit == F){
+    if (simulationOutput$refit == FALSE){
       
       out$simulatedResponse = apply(simulationOutput$simulatedResponse, 2, aggregateByGroup)
       out$scaledResiduals = getQuantile(simulations = out$simulatedResponse , observed = out$observedResponse, integerResponse = simulationOutput$integerResponse, method = method, rotation = rotation)

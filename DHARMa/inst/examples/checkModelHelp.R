@@ -1,5 +1,5 @@
 
-testData = createData(sampleSize = 200, overdispersion = 0.5, randomEffectVariance = 0.5, family = gaussian(), hasNA = T)
+testData = createData(sampleSize = 200, overdispersion = 0.5, randomEffectVariance = 0.5, family = gaussian(), hasNA = TRUE)
 fittedModel <- lm(observedResponse ~ Environment1 , data = testData)
 res <- simulateResiduals(fittedModel) # throws NA message
 

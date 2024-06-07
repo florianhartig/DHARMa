@@ -15,7 +15,7 @@
 #' @author Florian Hartig
 #' @seealso \code{\link{plot.DHARMaBenchmark}}
 #' @example inst/examples/runBenchmarksHelp.R
-runBenchmarks <- function(calculateStatistics, controlValues = NULL, nRep = 10, alpha = 0.05, parallel = FALSE, exportGlobal = F, ...){
+runBenchmarks <- function(calculateStatistics, controlValues = NULL, nRep = 10, alpha = 0.05, parallel = FALSE, exportGlobal = FALSE, ...){
 
 
   start_time <- Sys.time()
@@ -60,7 +60,7 @@ runBenchmarks <- function(calculateStatistics, controlValues = NULL, nRep = 10, 
     # doesn't see to work properly
     loadedPackages = (.packages())
     parExectuer = function(x = NULL, control = NULL) calculateStatistics(control)
-    if (exportGlobal == T) parallel::clusterExport(cl = cl, varlist = ls(envir = .GlobalEnv))
+    if (exportGlobal == TRUE) parallel::clusterExport(cl = cl, varlist = ls(envir = .GlobalEnv))
     parallel::clusterExport(cl = cl, c("parExectuer", "calculateStatistics", "loadedPackages"), envir = environment())
     parallel::clusterEvalQ(cl, {for(p in loadedPackages) library(p, character.only=TRUE)})
 
@@ -141,11 +141,11 @@ runBenchmarks <- function(calculateStatistics, controlValues = NULL, nRep = 10, 
 plot.DHARMaBenchmark <- function(x, ...){
 
   if(length(x$controlValues)== 1){
-    boxplot(x$simulations[,1:x$nSummaries], col = "grey", ylim = c(-0.3,1), horizontal = T, las = 2,  xaxt='n', main = "p distribution", ...)
+    boxplot(x$simulations[,1:x$nSummaries], col = "grey", ylim = c(-0.3,1), horizontal = TRUE, las = 2,  xaxt='n', main = "p distribution", ...)
     abline(v = 0)
     abline(v = c(0.25, 0.5, 0.75), lty = 2)
     text(-0.2, 1:x$nSummaries, labels = x$summaries$propSignificant[-1])
-    # barplot(as.matrix(x$summaries$propSignificant[-1]), horiz = T, add = T, offset = -0.2, names.arg = "test", width = 0.5, space = 1.4)
+    # barplot(as.matrix(x$summaries$propSignificant[-1]), horiz = TRUE, add = TRUE, offset = -0.2, names.arg = "test", width = 0.5, space = 1.4)
   }else{
     res = x$summaries$propSignificant
 
@@ -157,7 +157,7 @@ plot.DHARMaBenchmark <- function(x, ...){
 
       polygon(c(res$controlValues, rev(res$controlValues)),
               c(CIs[1,], rev(CIs[2,])),
-              col = "#00000020", border = F)
+              col = "#00000020", border = FALSE)
       lines(res$controlValues, res[,i+1], col = i, lty = i, lwd = 2)
     }
     legend("bottomright", colnames(res[,-1]), col = 1:x$nSummaries, lty = 1:x$nSummaries, lwd = 2)
@@ -170,7 +170,7 @@ plot.DHARMaBenchmark <- function(x, ...){
 plotMultipleHist <- function(x){
 
   lin = ncol(x)
-  histList <- lapply(x, hist, breaks = seq(0,1,0.02), plot = F)
+  histList <- lapply(x, hist, breaks = seq(0,1,0.02), plot = FALSE)
 
   plot(NULL, xlim = c(0,1), ylim = c(0, lin), yaxt = 'n', ylab = NULL, xlab = "p-value")
   abline(h= 0)
@@ -198,18 +198,18 @@ plotMultipleHist <- function(x){
 #' @param main title for the plot
 #' @param ... additional arguments to hist
 #' @author Florian Hartig
-testPDistribution <- function(x, plot = T, main = "p distribution \n expected is flat at 1", ...){
+testPDistribution <- function(x, plot = TRUE, main = "p distribution \n expected is flat at 1", ...){
   out = suppressWarnings(ks.test(x, 'punif'))
-  hist(x, xlim = c(0,1), breaks = 20, freq = F, main = main, ...)
+  hist(x, xlim = c(0,1), breaks = 20, freq = FALSE, main = main, ...)
   abline(h=1, col = "red")
   return(out)
 }
 
 
-# if(plot == T){
+# if(plot == TRUE){
 #   oldpar <- par(mfrow = c(4,4))
 #   hist(out, breaks = 50, col = "red", main = paste("mean of", nSim, "simulations"))
-#   for (i in 1:min(nSim, 15)) hist(out[i,], breaks = 50, freq = F, main = i)
+#   for (i in 1:min(nSim, 15)) hist(out[i,], breaks = 50, freq = FALSE, main = i)
 #   par(oldpar)
 # }
 
@@ -250,7 +250,7 @@ generateGenerator <- function(mod){
 #' @export
 benchmarkRuntime<- function(createModel, evaluationFunctions, n){
   m = length(evaluationFunctions)
-  models = replicate(n, createModel(), simplify = F)
+  models = replicate(n, createModel(), simplify = FALSE)
   runtimes = rep(NA, m)
 
   for (i in 1:m){
