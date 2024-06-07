@@ -5,7 +5,7 @@
 \title{Benchmark calculations}
 \usage{
 runBenchmarks(calculateStatistics, controlValues = NULL, nRep = 10,
-  alpha = 0.05, parallel = FALSE, exportGlobal = F, ...)
+  alpha = 0.05, parallel = FALSE, exportGlobal = FALSE, ...)
 }
 \arguments{
 \item{calculateStatistics}{the statistics to be benchmarked. Should return one value, or a vector of values. If controlValues are given, must accept a parameter control}
@@ -66,8 +66,8 @@ out = runBenchmarks(returnStatistics, controlValues = c(0,0.5,1), nRep = 10, par
 plot.DHARMaBenchmark <- function(x, ...){
 
   if(length(x$controlValues)== 1){
-    vioplot::vioplot(x$simulations[,x$nSummaries:1], las = 2, horizontal = T, side = "right",
-                     areaEqual = F,
+    vioplot::vioplot(x$simulations[,x$nSummaries:1], las = 2, horizontal = TRUE, side = "right",
+                     areaEqual = FALSE,
                      main = "p distribution under H0",
                      ylim = c(-0.15,1), ...)
     abline(v = 1, lty = 2)

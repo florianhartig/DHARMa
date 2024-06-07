@@ -5,7 +5,7 @@
 \title{Test for a generic summary statistic based on simulated data}
 \usage{
 testGeneric(simulationOutput, summary, alternative = c("two.sided",
-  "greater", "less"), plot = T,
+  "greater", "less"), plot = TRUE,
   methodName = "DHARMa generic simulation test")
 }
 \arguments{

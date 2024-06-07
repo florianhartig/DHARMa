@@ -4,8 +4,8 @@
 \alias{plotQQunif}
 \title{Quantile-quantile plot for a uniform distribution}
 \usage{
-plotQQunif(simulationOutput, testUniformity = T, testOutliers = T,
-  testDispersion = T, ...)
+plotQQunif(simulationOutput, testUniformity = TRUE, testOutliers = TRUE,
+  testDispersion = TRUE, ...)
 }
 \arguments{
 \item{simulationOutput}{a DHARMa simulation output (class DHARMa)}
@@ -59,7 +59,7 @@ plotResiduals(simulationOutput, rank = TRUE, quantreg = FALSE, smoothScatter = T
 plotResiduals(simulationOutput, form = testData$Environment1, 
               quantreg = FALSE)
 
-# if pred is a factor, or if asFactor = T, will produce a boxplot
+# if pred is a factor, or if asFactor = TRUE, will produce a boxplot
 plotResiduals(simulationOutput, form = testData$group)
 
 # to diagnose overdispersion and heteroskedasticity it can be useful to 

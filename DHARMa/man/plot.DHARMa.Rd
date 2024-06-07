@@ -9,7 +9,7 @@
 \arguments{
 \item{x}{an object of class DHARMa with simulated residuals created by \code{\link{simulateResiduals}}}
 
-\item{title}{The title for both panels (plotted via mtext, outer = T)}
+\item{title}{The title for both panels (plotted via mtext, outer = TRUE)}
 
 \item{...}{further options for \code{\link{plotResiduals}}. Consider in particular parameters quantreg, rank and asFactor. xlab, ylab and main cannot be changed when using plot.DHARMa, but can be changed when using plotResiduals.}
 }
@@ -64,7 +64,7 @@ plotResiduals(simulationOutput, rank = TRUE, quantreg = FALSE, smoothScatter = T
 plotResiduals(simulationOutput, form = testData$Environment1, 
               quantreg = FALSE)
 
-# if pred is a factor, or if asFactor = T, will produce a boxplot
+# if pred is a factor, or if asFactor = TRUE, will produce a boxplot
 plotResiduals(simulationOutput, form = testData$group)
 
 # to diagnose overdispersion and heteroskedasticity it can be useful to 
