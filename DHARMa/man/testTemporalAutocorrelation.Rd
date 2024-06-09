@@ -94,18 +94,32 @@ testTemporalAutocorrelation(res, time = unique(testData$time))
   group <- factor(rep(1,n*5))
   dat0 <- data.frame(y,times,group)
   
-  # fit model
+  # fit model / would be similar for nlme::gls and similar models
   model = glmmTMB(y ~ ar1(times + 0 | group), data=dat0)
   
-  # Standard residuals show spurious problems because of autocorrelation
+  # Note that standard residuals still show problems because of autocorrelation
   res <- simulateResiduals(model)
   plot(res)
-
-  # grouped according to times, unrotated shows autocorrelation
+  
+  # The reason is that most (if not all) autoregressive models treat the 
+  # autocorrelated error as random, i.e. the autocorrelated error structure
+  # is not used for making predictions. If you then make predictions based
+  # on the fixed effects and calculate residuals, the autocorrelation in the 
+  # residuals remains. We can see this if we again calculate the auto-
+  # correlation test
+  
   res2 <- recalculateResiduals(res, group=dat0$times) 
   testTemporalAutocorrelation(res2, time = 1:length(res2$scaledResiduals))
   
-  # extract estimated AR1 covariance
+  # so, how can we check then if the current model correctly removed the
+  # autocorrelation?
+  
+  # Option 1: rotate the residuals in the direction of the autocorrelation
+  # to make the independent. Note that this only works perfectly for gls
+  # type models as nonlinear link function make the residuals covariance
+  # different from a multivariate normal distribution 
+  
+  # this can be either done by extracting estimated AR1 covariance
   cov <- VarCorr(model)
   cov <- cov$cond$group # extract covariance matrix of REs
 
@@ -113,6 +127,33 @@ testTemporalAutocorrelation(res, time = unique(testData$time))
   res3 <- recalculateResiduals(res, group=dat0$times, rotation=cov) 
   plot(res3)
   testTemporalAutocorrelation(res3, time = 1:length(res2$scaledResiduals))
+  
+  # alternatively, you can let DHARMa estimate the covariance from the
+  # simulations 
+  
+  res4 <- recalculateResiduals(res, group=dat0$times, rotation="estimated") 
+  plot(res4)
+  testTemporalAutocorrelation(res3, time = 1:length(res2$scaledResiduals))
+  
+  # Alternatively, in glmmTMB, we can condition on the estimated correlated 
+  # residuals. Unfortunately, in this case, we will have to do simulations by
+  # hand as glmmTMB does not allow to simulate conditional on a fitted
+  # correlation structure
+ 
+  # re.form = NULL creates predictions conditional on the fitted temporally
+  # autocorreated REs
+  pred = predict(model, re.form = NULL) 
+  
+  # now we simulate data, conditional on the autocorrelation part, with the 
+  # uncorrelated residual error
+  simulations = sapply(1:250, function(i) rnorm(length(pred), 
+                                                pred, 
+                                                summary(model)$sigma))
+  res5 = createDHARMa(simulations, dat0$y, pred)
+  plot(res5)
+  
+  res5b <- recalculateResiduals(res5, group=dat0$times) 
+  testTemporalAutocorrelation(res5b, time = 1:length(res5b$scaledResiduals))
 
   # Poisson error 
   # note that for GLMMs, covariances will be estimated at the scale of the 

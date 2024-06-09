@@ -67,7 +67,7 @@ plotResiduals(simulationOutput, form = testData$group)
 
 # to diagnose overdispersion and heteroskedasticity it can be useful to 
 # display residuals as absolute deviation from the expected mean 0.5
-plotResiduals(simulationOutput, absoluteDeviation = T, quantreg = FALSE)
+plotResiduals(simulationOutput, absoluteDeviation = TRUE, quantreg = FALSE)
 
 # All these options can also be provided to the main plotting function
 
