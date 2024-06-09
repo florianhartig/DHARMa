@@ -195,6 +195,24 @@ getResiduals <- function (object, ...) {
 # NOTE - a bit unclear if fitted or predict should be used
 
 
+#' Get Pearson residuals
+#'
+#' Wrapper to get the Pearson residuals of a fitted model
+#'
+#' The purpose of this wrapper is to extract the Pearson residuals of a fitted model. 
+#'
+#' @param object a fitted model
+#' @param ... additional parameters to be passed on, usually to the residual function of the respective model class
+#'
+#' @example inst/examples/wrappersHelp.R
+#'
+#' @seealso \code{\link{getObservedResponse}}, \code{\link{getSimulations}}, \code{\link{getRefit}}, \code{\link{getFixedEffects}}, \code{\link{getFitted}}
+#'
+#' @author Florian Hartig
+#' @export
+getPearsonResiduals <- function (object, ...) {
+  UseMethod("getPearsonResiduals", object)
+}
 
 
 # default -----------------------------------------------------------------
@@ -298,10 +316,16 @@ getFitted.default <- function (object,...){
   out = as.vector(out) # introduced because of phyr error
 }
 
-#' @rdname getFitted
+#' @rdname getResiduals
 #' @export
-getResiduals.default <- function (object,...){
-  residuals(object, type = "response")
+getResiduals.default <- function (object, ...){
+  residuals(object, type = "response", ...)
+}
+
+#' @rdname getPearsonResiduals
+#' @export
+getPearsonResiduals.default <- function (object, ...){
+  residuals(object, type = "pearson", ...)
 }
 
 #' has NA
@@ -378,6 +402,16 @@ getFitted.gam <- function(object, ...){
 # Check that this works
 # plot(fitted(fittedModelGAM), predict(fittedModelGAM, type = "response"))
 
+
+
+
+#' @rdname getPearsonResiduals
+#' @export
+#' @details this needed to be adopted because for some reason, mgcv uses the argument scaled.pearson for what most packags define as pearson see comments in ?residuals.gam
+#' 
+getPearsonResiduals.gam <- function (object, ...){
+  residuals(object, type = "scaled.pearson", ...)
+}
 
 # Get Simulations of gam object
 
