@@ -24,23 +24,23 @@ n <- 3000
 x <- runif(n)
 mu <- exp(f2(x)/3+.1);x <- x*10 - 4
 y <- rTweedie(mu,p=1.5,phi=1.3)
-b <- gam(y~s(x,k=20),family=Tweedie(p=1.3))
 
+# correct p
+b <- gam(y~s(x,k=20),family=Tweedie(p=1.5))
 
-res = simulateResiduals(b, plot = F)
-plot(res, quantreg = F)
-
-
+res = simulateResiduals(b, plot = T)
 testDispersion(res)
 testDispersion(res, type = "PearsonChisq")
 
+# incorrect p
+b <- gam(y~s(x,k=20),family=Tweedie(p=1.1))
 
-x = residuals(b, type = "response")
+res = simulateResiduals(b, plot = T)
+testDispersion(res) # reacts to the pattern 
+testDispersion(res, type = "PearsonChisq") # doesn't react to the pattern
 
+# reason is probably that 
 x = residuals(b, type = "scaled.pearson")
-sd(x)
-
-x = residuals(b, type = "pearson")
 sd(x)
 
 
@@ -57,11 +57,9 @@ fit <- readRDS("~/Downloads/Basalarea_fit_Pinus.strobus_tekc(25,50).rds")
 x = residuals(fit, type = "scaled.pearson")
 sd(x)
 
-# 
-x = residuals(fit, type = "pearson")
-sd(x)
 
 testDispersion(res, type = "PearsonChisq")
+
 
 res = simulateResiduals(fit, n = 1000, plot = F)
 
