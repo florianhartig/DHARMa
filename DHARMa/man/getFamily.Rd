@@ -3,12 +3,15 @@
 \name{getFamily}
 \alias{getFamily}
 \alias{getFamily.default}
+\alias{getFamily.phylolm}
 \alias{getFamily.phyloglm}
 \title{Get model family}
 \usage{
 getFamily(object, ...)
 
 \method{getFamily}{default}(object, ...)
+
+\method{getFamily}{phylolm}(object, ...)
 
 \method{getFamily}{phyloglm}(object, ...)
 }

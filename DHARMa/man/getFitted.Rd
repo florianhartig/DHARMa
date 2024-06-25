@@ -6,6 +6,7 @@
 \alias{getFitted.gam}
 \alias{getFitted.HLfit}
 \alias{getFitted.MixMod}
+\alias{getFitted.phylolm}
 \alias{getFitted.phyloglm}
 \title{Get fitted / predicted values}
 \usage{
@@ -18,6 +19,8 @@ getFitted(object, ...)
 \method{getFitted}{HLfit}(object, ...)
 
 \method{getFitted}{MixMod}(object, ...)
+
+\method{getFitted}{phylolm}(object, ...)
 
 \method{getFitted}{phyloglm}(object, ...)
 }

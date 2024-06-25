@@ -17,3 +17,12 @@ vignette("DHARMa", package="DHARMa")
 \seealso{
 \code{\link{simulateResiduals}}
 }
+\author{
+\strong{Maintainer}: Florian Hartig \email{florian.hartig@biologie.uni-regensburg.de} (\href{https://orcid.org/0000-0002-6255-9059}{ORCID})
+
+Other contributors:
+\itemize{
+  \item Lukas Lohse [contributor]
+}
+
+}

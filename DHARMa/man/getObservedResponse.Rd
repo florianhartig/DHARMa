@@ -4,6 +4,7 @@
 \alias{getObservedResponse}
 \alias{getObservedResponse.default}
 \alias{getObservedResponse.HLfit}
+\alias{getObservedResponse.phylolm}
 \alias{getObservedResponse.phyloglm}
 \title{Get model response}
 \usage{
@@ -12,6 +13,8 @@ getObservedResponse(object, ...)
 \method{getObservedResponse}{default}(object, ...)
 
 \method{getObservedResponse}{HLfit}(object, ...)
+
+\method{getObservedResponse}{phylolm}(object, ...)
 
 \method{getObservedResponse}{phyloglm}(object, ...)
 }
