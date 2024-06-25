@@ -657,7 +657,52 @@ getResiduals.MixMod <- function (object,...){
   residuals(object, type = "subject_specific")
 }
 
-####### phylolm #########
+####### phylolm / phyloglm #########
+
+
+#' @rdname getObservedResponse
+#' @export
+getObservedResponse.phylolm <- function (object, ...){
+  out = object$y
+  return(out)
+}
+
+
+#' @rdname getSimulations
+#' @export
+getSimulations.phylolm <- function(object, nsim = 1, type = c("normal", "refit"), ...){
+  type <- match.arg(type)
+  fitBoot = update(fit, boot = nsim, save = T)
+  out = fitBoot$bootdata
+  
+  if(type == "normal"){
+    if(!is.matrix(out)) out = data.matrix(out)
+  }else{
+    out = as.data.frame(out)
+  }
+  
+  return(out)
+}
+
+#' @rdname getFitted
+#' @export
+getFitted.phylolm  <- function (object,...){
+  fit$fitted.values
+}
+
+
+
+#' @rdname getFamily
+#' @export
+getFamily.phylolm <- function (object,...){
+  out = list()
+  # out$family = object$method
+  out$family = "integer-valued" # all families of phyloglm are integer-valued
+  return(out)
+}
+
+
+
 
 
 #' @rdname getObservedResponse
