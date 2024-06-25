@@ -361,7 +361,7 @@ getPearsonResiduals.default <- function (object, ...){
 #' @rdname getFamily
 #' @export
 getFamily.default <- function (object,...){
-  family(fittedModel)
+  family(object)
 }
 
 
