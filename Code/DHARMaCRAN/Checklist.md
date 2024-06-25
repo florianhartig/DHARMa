@@ -1,13 +1,6 @@
 Submission Checklist
 
-
-
-
-
-
 https://cran.r-project.org/web/checks/check_results_DHARMa.html
-
-
 
 
 ## Prepare release
@@ -35,6 +28,12 @@ revdep_maintainers
 res <- devtools::revdep_check()
 devtools::revdep_check_summary(res)
 devtools::revdep_check_save_logs(res)
+
+install.packages("rhub")
+rhub::platforms()
+rhub::check_for_cran("")
+
+
 
 
 # check when a function was introduced to base

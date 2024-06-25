@@ -3,7 +3,6 @@
 \name{getFitted}
 \alias{getFitted}
 \alias{getFitted.default}
-\alias{getResiduals.default}
 \alias{getFitted.gam}
 \alias{getFitted.HLfit}
 \alias{getFitted.MixMod}
@@ -13,8 +12,6 @@
 getFitted(object, ...)
 
 \method{getFitted}{default}(object, ...)
-
-\method{getResiduals}{default}(object, ...)
 
 \method{getFitted}{gam}(object, ...)
 
