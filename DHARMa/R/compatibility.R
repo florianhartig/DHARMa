@@ -671,4 +671,8 @@ getResiduals.MixMod <- function (object,...){
 
 
 
+####### sjSDM #########
+
+
+
 
