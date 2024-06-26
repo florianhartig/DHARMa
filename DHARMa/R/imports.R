@@ -1,13 +1,11 @@
 
 #### Package car ####
 
-# this is copied from car, to avoid dependencies / S3 clashes when importing car together with lme4
+# this is copied, slightly modified, from car, to avoid dependencies / S3 clashes when importing car together with lme4
 
-leveneTest <- function (y, ...) {
-  UseMethod("leveneTest") 
-}
 
-leveneTest.default <- function (y, group, center=median, ...) { # original levene.test
+
+leveneTest_default <- function (y, group, center=median, ...) { # original levene.test
   if (!is.numeric(y)) 
     stop(deparse(substitute(y)), " is not a numeric variable")
   if (!is.factor(group)) {
@@ -26,7 +24,7 @@ leveneTest.default <- function (y, group, center=median, ...) { # original leven
 }
 
 
-leveneTest.formula <- function(y, data, ...) {
+leveneTest_formula <- function(y, data, ...) {
   form <- y
   mf <- if (missing(data)) model.frame(form) else model.frame(form, data)
   if (any(sapply(2:dim(mf)[2], function(j) is.numeric(mf[[j]])))) 
@@ -37,14 +35,14 @@ leveneTest.formula <- function(y, data, ...) {
     if (length(grep("\\+ | \\| | \\^ | \\:",form))>0) stop("Model must be completely crossed formula only.")
     group <- interaction(mf[,2:dim(mf)[2]])
   }
-  leveneTest.default(y=y, group=group, ...)
+  leveneTest_default(y=y, group=group, ...)
 }
 
 
-leveneTest.lm <- function(y, ...) {
+leveneTest_lm <- function(y, ...) {
   m <- model.frame(y)
   m$..y <- model.response(m)
   f <- formula(y)
   f[2] <- expression(..y)
-  leveneTest.formula(f, data=m, ...)
+  leveneTest_formula(f, data=m, ...)
 }

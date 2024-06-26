@@ -342,7 +342,7 @@ testCategorical <- function(simulationOutput, catPred, quantiles = c(0.25, 0.5, 
   for(i in 1:nlevels(catPred)) out$uniformity$p.value[i] = out$uniformity$details[[i]]$p.value
   out$uniformity$p.value.cor = p.adjust(out$uniformity$p.value)
 
-  if(nlevels(catPred) > 1) out$homogeneity = leveneTest(simulationOutput$scaledResiduals ~ catPred)
+  if(nlevels(catPred) > 1) out$homogeneity = leveneTest_formula(simulationOutput$scaledResiduals ~ catPred)
 
   if(plot == T){
     boxplot(simulationOutput$scaledResiduals ~ catPred, ylim = c(0,1), axes = FALSE, col = ifelse(out$uniformity$p.value.cor < 0.05, "red", "lightgrey"))
