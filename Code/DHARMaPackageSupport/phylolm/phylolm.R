@@ -17,9 +17,13 @@ summary(fit)
 coef(fit)
 vcov(fit)
 
-fit = DHARMa::simulateResiduals(fit, plot = T)
+DHARMa:::checkModel(fit, stop = F)
 
+res = DHARMa::simulateResiduals(fit, plot = T)
 
+fitBoot = phylolm:::update(fit, boot = nsim, save = T)
+
+phylolm:::up
 
 # LM 
 

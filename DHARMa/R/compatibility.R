@@ -39,6 +39,7 @@ checkModel <- function(fittedModel, stop = F){
   if(!(class(fittedModel)[1] %in% getPossibleModels())){
     if(stop == FALSE) warning("DHARMa: fittedModel not in class of supported models. Absolutely no guarantee that this will work!")
     else stop("DHARMa: fittedModel not in class of supported models")
+    
   }
   
   # if(hasNA(fittedModel)) message("It seems there were NA values in the data used for fitting the model. This can create problems if you supply additional data to DHARMa functions. See ?checkModel for details")
@@ -58,7 +59,7 @@ checkModel <- function(fittedModel, stop = F){
 #' returns a list of supported model classes 
 #' 
 #' @keywords internal
-getPossibleModels<-function()c("lm", "glm", "negbin", "lmerMod", "lmerModLmerTest", "glmerMod", "gam", "bam", "glmmTMB", "HLfit", "MixMod")
+getPossibleModels<-function()c("lm", "glm", "negbin", "lmerMod", "lmerModLmerTest", "glmerMod", "gam", "bam", "glmmTMB", "HLfit", "MixMod", "phylolm", "phyloglm")
 
 
 weightsWarning = "Model was fit with prior weights. These will be ignored in the simulation. See ?getSimulations for details"
@@ -229,6 +230,7 @@ getFamily <- function (object, ...) {
   UseMethod("getFamily", object)
 }
 
+# nObs 
 
 # default -----------------------------------------------------------------
 
@@ -706,7 +708,8 @@ getObservedResponse.phylolm <- function (object, ...){
 #' @export
 getSimulations.phylolm <- function(object, nsim = 1, type = c("normal", "refit"), ...){
   type <- match.arg(type)
-  fitBoot = update(fit, boot = nsim, save = T)
+  
+  fitBoot = update(object, boot = nsim, save = T)
   out = fitBoot$bootdata
   
   if(type == "normal"){
@@ -721,26 +724,17 @@ getSimulations.phylolm <- function(object, nsim = 1, type = c("normal", "refit")
 #' @rdname getFitted
 #' @export
 getFitted.phylolm  <- function (object,...){
-  fit$fitted.values
+  return(object$fitted.values)
 }
-
-
-####### sjSDM #########
-
-
 
 
 #' @rdname getFamily
 #' @export
 getFamily.phylolm <- function (object,...){
   out = list()
-  # out$family = object$method
-  out$family = "integer-valued" # all families of phyloglm are integer-valued
+  out$family = "gaussian" 
   return(out)
 }
-
-
-
 
 
 #' @rdname getObservedResponse
@@ -755,7 +749,8 @@ getObservedResponse.phyloglm <- function (object, ...){
 #' @export
 getSimulations.phyloglm <- function(object, nsim = 1, type = c("normal", "refit"), ...){
   type <- match.arg(type)
-  fitBoot = update(fit, boot = nsim, save = T)
+  
+  fitBoot = update(object, boot = nsim, save = T)
   out = fitBoot$bootdata
   
   if(type == "normal"){
@@ -770,7 +765,7 @@ getSimulations.phyloglm <- function(object, nsim = 1, type = c("normal", "refit"
 #' @rdname getFitted
 #' @export
 getFitted.phyloglm  <- function (object,...){
-  fit$fitted.values
+  return(object$fitted.values)
 }
 
 
@@ -785,3 +780,11 @@ getFamily.phyloglm <- function (object,...){
 }
 
 
+#' @rdname getFamily
+#' @export
+getFamily.phyloglm <- function (object,...){
+  out = list()
+  # out$family = object$method
+  out$family = "integer-valued" # all families of phyloglm are integer-valued
+  return(out)
+}
