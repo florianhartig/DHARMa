@@ -467,7 +467,7 @@ testDispersion <- function(simulationOutput, alternative = c("two.sided", "great
     if(! alternative == "greater") message("Note that the chi2 test on Pearson residuals is biased for MIXED models towards underdispersion. Tests with alternative = two.sided or less are therefore not reliable. If you have random effects in your model, I recommend to test only with alternative = 'greater', i.e. test for overdispersion, or else use the DHARMa default tests which are unbiased. See help for details.")
 
     rdf <- df.residual(model)
-    rp <- residuals(model,type="pearson")
+    rp <- getPearsonResiduals(model)
     Pearson.chisq <- sum(rp^2)
     prat <- Pearson.chisq/rdf
     if(alternative == "greater") pval <- pchisq(Pearson.chisq, df=rdf, lower.tail=FALSE)
