@@ -21,7 +21,7 @@ Imports:
     graphics,
     utils,
     grDevices,
-    Matrix (>= 1.6-2),
+    Matrix,
     parallel,
     gap,
     lmtest,

@@ -4,8 +4,8 @@
 \alias{simulateResiduals}
 \title{Create simulated residuals}
 \usage{
-simulateResiduals(fittedModel, n = 250, refit = F,
-  integerResponse = NULL, plot = F, seed = 123, method = c("PIT",
+simulateResiduals(fittedModel, n = 250, refit = FALSE,
+  integerResponse = NULL, plot = FALSE, seed = 123, method = c("PIT",
   "traditional"), rotation = NULL, ...)
 }
 \arguments{
@@ -21,7 +21,7 @@ simulateResiduals(fittedModel, n = 250, refit = F,
 
 \item{seed}{the random seed to be used within DHARMa. The default setting, recommended for most users, is keep the random seed on a fixed value 123. This means that you will always get the same randomization and thus the same result when running the same code. NULL = no new seed is set, but previous random state will be restored after simulation. FALSE = no seed is set, and random state will not be restored. The latter two options are only recommended for simulation experiments. See vignette for details.}
 
-\item{method}{for refit = F, the quantile randomization method used. The two options implemented at the moment are probability integral transform (PIT-) residuals (current default), and the "traditional" randomization procedure, that was used in DHARMa until version 0.3.0. Refit = T will always use "traditional", respectively of the value of method. For details, see \code{\link{getQuantile}}}
+\item{method}{for refit = FALSE, the quantile randomization method used. The two options implemented at the moment are probability integral transform (PIT-) residuals (current default), and the "traditional" randomization procedure, that was used in DHARMa until version 0.3.0. Refit = T will always use "traditional", respectively of the value of method. For details, see \code{\link{getQuantile}}}
 
 \item{rotation}{optional rotation of the residual space prior to calculating the quantile residuals. The main purpose of this is to account for residual covariance as created by temporal or spatial residual autocorrelation. See details below, section \emph{residual auto-correlation} ass well as the help of \link{getQuantile} and, for a practical example, \link{testTemporalAutocorrelation}.}
 

@@ -10,7 +10,7 @@
 #' @seealso \code{\link{testResiduals}}, \code{\link{testUniformity}}, \code{\link{testOutliers}}, \code{\link{testDispersion}}, \code{\link{testZeroInflation}}, \code{\link{testGeneric}}, \code{\link{testTemporalAutocorrelation}}, \code{\link{testSpatialAutocorrelation}}, \code{\link{testQuantiles}}, \code{\link{testCategorical}}
 #' @example inst/examples/testsHelp.R
 #' @export
-testResiduals <- function(simulationOutput, plot = T){
+testResiduals <- function(simulationOutput, plot = TRUE){
 
   opar = par(mfrow = c(1,3))
   on.exit(par(opar))
@@ -48,23 +48,23 @@ testSimulatedResiduals <- function(simulationOutput){
 #' @seealso \code{\link{testResiduals}}, \code{\link{testUniformity}}, \code{\link{testOutliers}}, \code{\link{testDispersion}}, \code{\link{testZeroInflation}}, \code{\link{testGeneric}}, \code{\link{testTemporalAutocorrelation}}, \code{\link{testSpatialAutocorrelation}}, \code{\link{testQuantiles}}, \code{\link{testCategorical}}
 #' @example inst/examples/testsHelp.R
 #' @export
-testUniformity<- function(simulationOutput, alternative = c("two.sided", "less", "greater"), plot = T){
+testUniformity<- function(simulationOutput, alternative = c("two.sided", "less", "greater"), plot = TRUE){
 
-  simulationOutput = ensureDHARMa(simulationOutput, convert = T)
+  simulationOutput = ensureDHARMa(simulationOutput, convert = TRUE)
 
   out <- suppressWarnings(ks.test(simulationOutput$scaledResiduals, 'punif', alternative = alternative))
-  if(plot == T) plotQQunif(simulationOutput = simulationOutput)
+  if(plot == TRUE) plotQQunif(simulationOutput = simulationOutput)
   return(out)
 }
 
 
 # Experimental
-testBivariateUniformity<- function(simulationOutput, alternative = c("two.sided", "less", "greater"), plot = T){
+testBivariateUniformity<- function(simulationOutput, alternative = c("two.sided", "less", "greater"), plot = TRUE){
 
-  simulationOutput = ensureDHARMa(simulationOutput, convert = T)
+  simulationOutput = ensureDHARMa(simulationOutput, convert = TRUE)
 
   #out <- suppressWarnings(ks.test(simulationOutput$scaledResiduals, 'punif', alternative = alternative))
-  #if(plot == T) plotQQunif(simulationOutput = simulationOutput)
+  #if(plot == TRUE) plotQQunif(simulationOutput = simulationOutput)
   out = NULL
   return(out)
 }
@@ -89,14 +89,14 @@ testBivariateUniformity<- function(simulationOutput, alternative = c("two.sided"
 #' @example inst/examples/testQuantilesHelp.R
 #' @seealso \code{\link{testResiduals}}, \code{\link{testUniformity}}, \code{\link{testOutliers}}, \code{\link{testDispersion}}, \code{\link{testZeroInflation}}, \code{\link{testGeneric}}, \code{\link{testTemporalAutocorrelation}}, \code{\link{testSpatialAutocorrelation}}, \code{\link{testQuantiles}}, \code{\link{testCategorical}}
 #' @export
-testQuantiles <- function(simulationOutput, predictor = NULL, quantiles = c(0.25,0.5,0.75), plot = T){
+testQuantiles <- function(simulationOutput, predictor = NULL, quantiles = c(0.25,0.5,0.75), plot = TRUE){
 
-  if(plot == F){
+  if(plot == FALSE){
 
     out = list()
     out$data.name = deparse(substitute(simulationOutput))
 
-    simulationOutput = ensureDHARMa(simulationOutput, convert = T)
+    simulationOutput = ensureDHARMa(simulationOutput, convert = TRUE)
     res = simulationOutput$scaledResiduals
     pred = ensurePredictor(simulationOutput, predictor)
 
@@ -113,13 +113,13 @@ testQuantiles <- function(simulationOutput, predictor = NULL, quantiles = c(0.25
       # settings for k = the dimension of the basis used to represent the smooth term.
       # see https://github.com/mfasiolo/qgam/issues/37
       dimSmooth =  min(length(unique(datTemp$pred)), 10)
-      quantResult = try(capture.output(quantileFits[[i]] <- qgam::qgam(res ~ s(pred, k = dimSmooth) ,  data =datTemp, qu = quantiles[i])), silent = T)
+      quantResult = try(capture.output(quantileFits[[i]] <- qgam::qgam(res ~ s(pred, k = dimSmooth) ,  data =datTemp, qu = quantiles[i])), silent = TRUE)
       if(inherits(quantResult, "try-error")){
         message("Unable to calculate quantile regression for quantile ", quantiles[i], ". Possibly to few (unique) data points / predictions. Will be ommited in plots and significance calculations.")
       } else {
         x = summary(quantileFits[[i]])
         pval[i] = min(p.adjust(c(x$p.table[1,4], x$s.table[1,4]), method = "BH")) # correction for test on slope and intercept
-        quantPre = predict(quantileFits[[i]], newdata = predictions, se = T)
+        quantPre = predict(quantileFits[[i]], newdata = predictions, se = TRUE)
         predictions[, 2*i] = quantPre$fit + quantiles[i]
         predictions[, 2*i + 1] = quantPre$se.fit
       }
@@ -134,7 +134,7 @@ testQuantiles <- function(simulationOutput, predictor = NULL, quantiles = c(0.25
 
     class(out) = "htest"
 
-  } else if(plot == T) {
+  } else if(plot == TRUE) {
     out <- plotResiduals(simulationOutput = simulationOutput, form = predictor, quantiles = quantiles, quantreg = TRUE)
   }
   return(out)
@@ -169,7 +169,7 @@ testQuantiles <- function(simulationOutput, predictor = NULL, quantiles = c(0.25
 #' @author Florian Hartig
 #' @seealso \code{\link{testResiduals}}, \code{\link{testUniformity}}, \code{\link{testOutliers}}, \code{\link{testDispersion}}, \code{\link{testZeroInflation}}, \code{\link{testGeneric}}, \code{\link{testTemporalAutocorrelation}}, \code{\link{testSpatialAutocorrelation}}, \code{\link{testQuantiles}}, \code{\link{testCategorical}}
 #' @export
-testOutliers <- function(simulationOutput, alternative = c("two.sided", "greater", "less"), margin = c("both", "upper", "lower"), type = c("default","bootstrap", "binomial"), nBoot = 100, plot = T){
+testOutliers <- function(simulationOutput, alternative = c("two.sided", "greater", "less"), margin = c("both", "upper", "lower"), type = c("default","bootstrap", "binomial"), nBoot = 100, plot = TRUE){
 
   # check inputs
   alternative = match.arg(alternative)
@@ -210,7 +210,7 @@ testOutliers <- function(simulationOutput, alternative = c("two.sided", "greater
 
     if (simulationOutput$integerResponse == T & out$p.value < 0.05) message("DHARMa:testOutliers with type = binomial may have inflated Type I error rates for integer-valued distributions. To get a more exact result, it is recommended to re-run testOutliers with type = 'bootstrap'. See ?testOutliers for details")
 
-    if(plot == T) {
+    if(plot == TRUE) {
 
       hist(simulationOutput, main = "")
 
@@ -235,7 +235,7 @@ testOutliers <- function(simulationOutput, alternative = c("two.sided", "greater
 
     simIndices = 1:simulationOutput$nSim
     nSim = simulationOutput$nSim
-    if(simulationOutput$refit == T){
+    if(simulationOutput$refit == TRUE){
       simResp = simulationOutput$refittedResiduals
     } else {
       simResp = simulationOutput$simulatedResponse
@@ -254,7 +254,7 @@ testOutliers <- function(simulationOutput, alternative = c("two.sided", "greater
     for (i in 1:nBoot){
 
       #sel = -i
-      sel = sample(simIndices[-i], size = nSim, replace = T)
+      sel = sample(simIndices[-i], size = nSim, replace = TRUE)
 
       residuals <- getQuantile(simulations = simResp[,sel],
                                observed = simResp[,i],
@@ -285,7 +285,7 @@ testOutliers <- function(simulationOutput, alternative = c("two.sided", "greater
     out$estimate = outliers
     names(out$estimate) = paste("outlier frequency (expected:", mean(frequBoot),")")
 
-    if(plot == T) {
+    if(plot == TRUE) {
 
       opar <- par(mfrow = c(1,2))
       on.exit(par(opar))
@@ -330,9 +330,9 @@ testOutliers <- function(simulationOutput, alternative = c("two.sided", "greater
 #' @seealso \code{\link{testResiduals}}, \code{\link{testUniformity}}, \code{\link{testOutliers}}, \code{\link{testDispersion}}, \code{\link{testZeroInflation}}, \code{\link{testGeneric}}, \code{\link{testTemporalAutocorrelation}}, \code{\link{testSpatialAutocorrelation}}, \code{\link{testQuantiles}}, \code{\link{testCategorical}}
 #' @example inst/examples/testsHelp.R
 #' @export
-testCategorical <- function(simulationOutput, catPred, quantiles = c(0.25, 0.5, 0.75), plot = T){
+testCategorical <- function(simulationOutput, catPred, quantiles = c(0.25, 0.5, 0.75), plot = TRUE){
 
-  simulationOutput = ensureDHARMa(simulationOutput, convert = T)
+  simulationOutput = ensureDHARMa(simulationOutput, convert = TRUE)
 
   catPred = as.factor(catPred)
   out = list()
@@ -344,7 +344,7 @@ testCategorical <- function(simulationOutput, catPred, quantiles = c(0.25, 0.5, 
 
   if(nlevels(catPred) > 1) out$homogeneity = leveneTest_formula(simulationOutput$scaledResiduals ~ catPred)
 
-  if(plot == T){
+  if(plot == TRUE){
     boxplot(simulationOutput$scaledResiduals ~ catPred, ylim = c(0,1), axes = FALSE, col = ifelse(out$uniformity$p.value.cor < 0.05, "red", "lightgrey"))
     axis(1, at = 1:nlevels(catPred), levels(catPred))
     axis(2, at=c(0, quantiles, 1))
@@ -367,7 +367,7 @@ testCategorical <- function(simulationOutput, catPred, quantiles = c(0.25, 0.5, 
 
 #' DHARMa dispersion tests
 #'
-#' This function performs simulation-based tests for over/underdispersion. If type = "DHARMa" (default and recommended), simulation-based dispersion tests are performed. Their behavior differs depending on whether simulations are done with refit = F, or refit = T, and whether data is simulated conditional (e.g. re.form ~0 in lme4) (see below). If type = "PearsonChisq", a chi2 test on Pearson residuals is performed.
+#' This function performs simulation-based tests for over/underdispersion. If type = "DHARMa" (default and recommended), simulation-based dispersion tests are performed. Their behavior differs depending on whether simulations are done with refit = FALSE, or refit = TRUE, and whether data is simulated conditional (e.g. re.form ~0 in lme4) (see below). If type = "PearsonChisq", a chi2 test on Pearson residuals is performed.
 #'
 #' @param simulationOutput an object of class DHARMa, either created via \code{\link{simulateResiduals}} for supported models or by \code{\link{createDHARMa}} for simulations created outside DHARMa, or a supported model. Providing a supported model directly is discouraged, because simulation settings cannot be changed in this case.
 #' @param alternative a character string specifying whether the test should test if observations are "greater", "less" or "two.sided" compared to the simulated null hypothesis. Greater corresponds to testing only for overdispersion. It is recommended to keep the default setting (testing for both over and underdispersion)
@@ -381,13 +381,13 @@ testCategorical <- function(simulationOutput, catPred, quantiles = c(0.25, 0.5, 
 #'
 #' **Simulation-based dispersion tests (type == "DHARMa")**
 #'
-#' If type = "DHARMa" (default and recommended), simulation-based dispersion tests are performed. Their behavior differs depending on whether simulations are done with refit = F, or refit = T
+#' If type = "DHARMa" (default and recommended), simulation-based dispersion tests are performed. Their behavior differs depending on whether simulations are done with refit = FALSE, or refit = T
 #' 
 #' #' **Important:** for either refit = T or F, the results of type = "DHARMa" dispersion test will differ depending on whether simulations are done conditional (= conditional on fitted random effects) or unconditional (= REs are re-simulated). How to change between conditional or unconditional simulations is discussed in \code{\link{simulateResiduals}}. The general default in DHARMa is to use unconditional simulations, because this has advantages in other situations, but dispersion tests for models with strong REs specifically may increase substantially in power / sensitivity when switching to conditional simulations. I therefore recommend checking dispersion with conditional simulations if supported by the used regression package.
 #'
-#' If refit = F, the function uses \code{\link{testGeneric}} to compare the variance of the observed raw residuals (i.e. var(observed - predicted), displayed as a red line) against the variance of the simulated residuals (i.e. var(simulated - predicted), histogram). The variances are scaled to the mean simulated variance. A significant ratio > 1 indicates overdispersion, a significant ratio < 1 underdispersion. 
+#' If refit = FALSE, the function uses \code{\link{testGeneric}} to compare the variance of the observed raw residuals (i.e. var(observed - predicted), displayed as a red line) against the variance of the simulated residuals (i.e. var(simulated - predicted), histogram). The variances are scaled to the mean simulated variance. A significant ratio > 1 indicates overdispersion, a significant ratio < 1 underdispersion. 
 #'
-#' If refit = T, the function compares the approximate deviance (via squared pearson residuals) with the same quantity from the models refitted with simulated data. Applying this is much slower than the previous alternative. Given the computational cost, I would suggest that most users will be satisfied with the standard dispersion test.
+#' If refit = TRUE, the function compares the approximate deviance (via squared pearson residuals) with the same quantity from the models refitted with simulated data. Applying this is much slower than the previous alternative. Given the computational cost, I would suggest that most users will be satisfied with the standard dispersion test.
 #'
 #' ** Analytical dispersion tests (type == "PearsonChisq")**
 #'
@@ -401,7 +401,7 @@ testCategorical <- function(simulationOutput, catPred, quantiles = c(0.25, 0.5, 
 #' @seealso \code{\link{testResiduals}}, \code{\link{testUniformity}}, \code{\link{testOutliers}}, \code{\link{testDispersion}}, \code{\link{testZeroInflation}}, \code{\link{testGeneric}}, \code{\link{testTemporalAutocorrelation}}, \code{\link{testSpatialAutocorrelation}}, \code{\link{testQuantiles}}, \code{\link{testCategorical}}
 #' @example inst/examples/testDispersionHelp.R
 #' @export
-testDispersion <- function(simulationOutput, alternative = c("two.sided", "greater", "less"), plot = T, type = c("DHARMa", "PearsonChisq"), ...){
+testDispersion <- function(simulationOutput, alternative = c("two.sided", "greater", "less"), plot = TRUE, type = c("DHARMa", "PearsonChisq"), ...){
 
   alternative <- match.arg(alternative)
   type <- match.arg(type)
@@ -417,7 +417,7 @@ testDispersion <- function(simulationOutput, alternative = c("two.sided", "great
   #   if(!"re.form" %in% names(simulationOutput$additionalParameters) & is.null(simulationOutput$additionalParameters$re.form)) message("recommended to run conditional simulations for dispersion test, see help")
   #}
 
-  if(simulationOutput$refit == F){
+  if(simulationOutput$refit == FALSE){
 
       expectedVar = sd(simulationOutput$simulatedResponse)^2
       spread <- function(x) var(x - simulationOutput$fittedPredictedResponse) / expectedVar
@@ -441,7 +441,7 @@ testDispersion <- function(simulationOutput, alternative = c("two.sided", "great
       out$p.value = p
       class(out) = "htest"
 
-      if(plot == T) {
+      if(plot == TRUE) {
         #plotTitle = gsub('(.{1,50})(\\s|$)', '\\1\n', out$method)
         xLabel = paste("Simulated values, red line = fitted model. p-value (",out$alternative, ") = ", out$p.value, sep ="")
 
@@ -561,7 +561,7 @@ testZeroInflation <- function(simulationOutput, ...){
 #' @author Florian Hartig
 #' @example inst/examples/testsHelp.R
 #' @seealso \code{\link{testResiduals}}, \code{\link{testUniformity}}, \code{\link{testOutliers}}, \code{\link{testDispersion}}, \code{\link{testZeroInflation}}, \code{\link{testGeneric}}, \code{\link{testTemporalAutocorrelation}}, \code{\link{testSpatialAutocorrelation}}, \code{\link{testQuantiles}}, \code{\link{testCategorical}}
-testGeneric <- function(simulationOutput, summary, alternative = c("two.sided", "greater", "less"), plot = T, methodName = "DHARMa generic simulation test"){
+testGeneric <- function(simulationOutput, summary, alternative = c("two.sided", "greater", "less"), plot = TRUE, methodName = "DHARMa generic simulation test"){
 
   out = list()
   out$data.name = deparse(substitute(simulationOutput))
@@ -584,7 +584,7 @@ testGeneric <- function(simulationOutput, summary, alternative = c("two.sided", 
 
   class(out) = "htest"
 
-  if(plot == T) {
+  if(plot == TRUE) {
     plotTitle = gsub('(.{1,50})(\\s|$)', '\\1\n', methodName)
     xLabel = paste("Simulated values, red line = fitted model. p-value (",out$alternative, ") = ", out$p.value, sep ="")
    hist(simulated, xlim = range(simulated, observed, na.rm=T ), col = "lightgrey", main = plotTitle, xlab = xLabel, breaks = max(round(simulationOutput$nSim / 5), 20), cex.main = 0.8)
@@ -624,9 +624,9 @@ testGeneric <- function(simulationOutput, summary, alternative = c("two.sided", 
 #' @seealso \code{\link{testResiduals}}, \code{\link{testUniformity}}, \code{\link{testOutliers}}, \code{\link{testDispersion}}, \code{\link{testZeroInflation}}, \code{\link{testGeneric}}, \code{\link{testTemporalAutocorrelation}}, \code{\link{testSpatialAutocorrelation}}, \code{\link{testQuantiles}}, \code{\link{testCategorical}}
 #' @example inst/examples/testTemporalAutocorrelationHelp.R
 #' @export
-testTemporalAutocorrelation <- function(simulationOutput, time, alternative = c("two.sided", "greater", "less"), plot = T){
+testTemporalAutocorrelation <- function(simulationOutput, time, alternative = c("two.sided", "greater", "less"), plot = TRUE){
 
-  simulationOutput = ensureDHARMa(simulationOutput, convert = T)
+  simulationOutput = ensureDHARMa(simulationOutput, convert = TRUE)
 
   # actually not sure if this is neccessary for dwtest, but seems better to aggregate
   if(any(duplicated(time))) stop("testing for temporal autocorrelation requires unique time values - if you have several observations per time value, either use the recalculateResiduals function to aggregate residuals per time step, or extract the residuals from the fitted object, and plot / test each of them independently for temporally repeated subgroups (typical choices would be location / subject etc.). Note that the latter must be done by hand, outside testTemporalAutocorrelation.")
@@ -643,7 +643,7 @@ testTemporalAutocorrelation <- function(simulationOutput, time, alternative = c(
 
   out = lmtest::dwtest(simulationOutput$scaledResiduals ~ 1, order.by = time, alternative = alternative)
 
-  if(plot == T) {
+  if(plot == TRUE) {
     oldpar <- par(mfrow = c(1,2))
     on.exit(par(oldpar))
 
@@ -677,7 +677,7 @@ testTemporalAutocorrelation <- function(simulationOutput, time, alternative = c(
 #' @param plot whether to plot output
 #' @details The function performs Moran.I test from the package ape on the DHARMa residuals. If a distance matrix (distMat) is provided, calculations will be based on this distance matrix, and x,y coordinates will only used for the plotting (if provided). If distMat is not provided, the function will calculate the euclidean distances between x,y coordinates, and test Moran.I based on these distances.
 #' 
-#' If plot = T, a plot will be produced showing each residual with at its x,y position, colored according to the residual value. Residuals with 0.5 are colored white, everything below 0.5 is colored increasinly red, everything above 0.5 is colored increasingly blue. 
+#' If plot = TRUE, a plot will be produced showing each residual with at its x,y position, colored according to the residual value. Residuals with 0.5 are colored white, everything below 0.5 is colored increasinly red, everything above 0.5 is colored increasingly blue. 
 #'
 #' Testing for spatial autocorrelation requires unique x,y values - if you have several observations per location, either use the recalculateResiduals function to aggregate residuals per location, or extract the residuals from the fitted object, and plot / test each of them independently for spatially repeated subgroups (a typical scenario would repeated spatial observation, in which case one could plot / test each time step separately for temporal autocorrelation). Note that the latter must be done by hand, outside testSpatialAutocorrelation.
 #'
@@ -700,11 +700,11 @@ testTemporalAutocorrelation <- function(simulationOutput, time, alternative = c(
 #' @import grDevices
 #' @example inst/examples/testSpatialAutocorrelationHelp.R
 #' @export
-testSpatialAutocorrelation <- function(simulationOutput, x = NULL, y  = NULL, distMat = NULL, alternative = c("two.sided", "greater", "less"), plot = T){
+testSpatialAutocorrelation <- function(simulationOutput, x = NULL, y  = NULL, distMat = NULL, alternative = c("two.sided", "greater", "less"), plot = TRUE){
 
   alternative <- match.arg(alternative)
   data.name = deparse(substitute(simulationOutput)) # needs to be before ensureDHARMa
-  simulationOutput = ensureDHARMa(simulationOutput, convert = T)
+  simulationOutput = ensureDHARMa(simulationOutput, convert = TRUE)
 
   # Assertions
 
@@ -750,13 +750,13 @@ testSpatialAutocorrelation <- function(simulationOutput, x = NULL, y  = NULL, di
 }
 
 
-getP <- function(simulated, observed, alternative, plot = F, ...){
+getP <- function(simulated, observed, alternative, plot = FALSE, ...){
 
   if(alternative == "greater") p = mean(simulated >= observed)
   if(alternative == "less") p = mean(simulated <= observed)
   if(alternative == "two.sided") p = min(min(mean(simulated <= observed), mean(simulated >= observed) ) * 2,1)
 
-  if(plot == T){
+  if(plot == TRUE){
     hist(simulated, xlim = range(simulated, observed), col = "lightgrey", main = "Distribution of test statistic \n grey = simulated, red = observed", ...)
     abline(v = mean(simulated), col = 1, lwd = 2)
     abline(v = observed, col = "red", lwd = 2)

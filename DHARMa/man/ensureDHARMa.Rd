@@ -4,7 +4,7 @@
 \alias{ensureDHARMa}
 \title{Ensures that an object is of class DHARMa}
 \usage{
-ensureDHARMa(simulationOutput, convert = F)
+ensureDHARMa(simulationOutput, convert = FALSE)
 }
 \arguments{
 \item{simulationOutput}{a DHARMa simulation output or an object that can be converted into a DHARMa simulation output}

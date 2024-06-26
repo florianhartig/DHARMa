@@ -5,7 +5,7 @@
 \title{DHARMa dispersion tests}
 \usage{
 testDispersion(simulationOutput, alternative = c("two.sided", "greater",
-  "less"), plot = T, type = c("DHARMa", "PearsonChisq"), ...)
+  "less"), plot = TRUE, type = c("DHARMa", "PearsonChisq"), ...)
 }
 \arguments{
 \item{simulationOutput}{an object of class DHARMa, either created via \code{\link{simulateResiduals}} for supported models or by \code{\link{createDHARMa}} for simulations created outside DHARMa, or a supported model. Providing a supported model directly is discouraged, because simulation settings cannot be changed in this case.}
@@ -19,7 +19,7 @@ testDispersion(simulationOutput, alternative = c("two.sided", "greater",
 \item{...}{arguments to pass on to \code{\link{testGeneric}}}
 }
 \description{
-This function performs simulation-based tests for over/underdispersion. If type = "DHARMa" (default and recommended), simulation-based dispersion tests are performed. Their behavior differs depending on whether simulations are done with refit = F, or refit = T, and whether data is simulated conditional (e.g. re.form ~0 in lme4) (see below). If type = "PearsonChisq", a chi2 test on Pearson residuals is performed.
+This function performs simulation-based tests for over/underdispersion. If type = "DHARMa" (default and recommended), simulation-based dispersion tests are performed. Their behavior differs depending on whether simulations are done with refit = FALSE, or refit = TRUE, and whether data is simulated conditional (e.g. re.form ~0 in lme4) (see below). If type = "PearsonChisq", a chi2 test on Pearson residuals is performed.
 }
 \details{
 Over / underdispersion means that the observed data is more / less dispersed than expected under the fitted model. There is no unique way to test for dispersion problems, and there are a number of different dispersion tests implemented in various R packages.
@@ -28,13 +28,13 @@ The testDispersion function implements several dispersion tests:
 
 \strong{Simulation-based dispersion tests (type == "DHARMa")}
 
-If type = "DHARMa" (default and recommended), simulation-based dispersion tests are performed. Their behavior differs depending on whether simulations are done with refit = F, or refit = T
+If type = "DHARMa" (default and recommended), simulation-based dispersion tests are performed. Their behavior differs depending on whether simulations are done with refit = FALSE, or refit = T
 
 #' \strong{Important:} for either refit = T or F, the results of type = "DHARMa" dispersion test will differ depending on whether simulations are done conditional (= conditional on fitted random effects) or unconditional (= REs are re-simulated). How to change between conditional or unconditional simulations is discussed in \code{\link{simulateResiduals}}. The general default in DHARMa is to use unconditional simulations, because this has advantages in other situations, but dispersion tests for models with strong REs specifically may increase substantially in power / sensitivity when switching to conditional simulations. I therefore recommend checking dispersion with conditional simulations if supported by the used regression package.
 
-If refit = F, the function uses \code{\link{testGeneric}} to compare the variance of the observed raw residuals (i.e. var(observed - predicted), displayed as a red line) against the variance of the simulated residuals (i.e. var(simulated - predicted), histogram). The variances are scaled to the mean simulated variance. A significant ratio > 1 indicates overdispersion, a significant ratio < 1 underdispersion.
+If refit = FALSE, the function uses \code{\link{testGeneric}} to compare the variance of the observed raw residuals (i.e. var(observed - predicted), displayed as a red line) against the variance of the simulated residuals (i.e. var(simulated - predicted), histogram). The variances are scaled to the mean simulated variance. A significant ratio > 1 indicates overdispersion, a significant ratio < 1 underdispersion.
 
-If refit = T, the function compares the approximate deviance (via squared pearson residuals) with the same quantity from the models refitted with simulated data. Applying this is much slower than the previous alternative. Given the computational cost, I would suggest that most users will be satisfied with the standard dispersion test.
+If refit = TRUE, the function compares the approximate deviance (via squared pearson residuals) with the same quantity from the models refitted with simulated data. Applying this is much slower than the previous alternative. Given the computational cost, I would suggest that most users will be satisfied with the standard dispersion test.
 
 ** Analytical dispersion tests (type == "PearsonChisq")**
 
@@ -70,7 +70,7 @@ testDispersion(simulationOutput)
 # of RE groups. In doubt, only test for overdispersion
 testDispersion(simulationOutput, type = "PearsonChisq", alternative = "greater")
 
-# if refit = T, a different test on simulated Pearson residuals will calculated (see help)
+# if refit = TRUE, a different test on simulated Pearson residuals will calculated (see help)
 simulationOutput2 <- simulateResiduals(fittedModel = fittedModel, refit = TRUE, seed = 12, n = 20)
 testDispersion(simulationOutput2)
 

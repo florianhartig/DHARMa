@@ -4,7 +4,7 @@
 \alias{testPDistribution}
 \title{Plot distribution of p-values}
 \usage{
-testPDistribution(x, plot = T,
+testPDistribution(x, plot = TRUE,
   main = "p distribution \\n expected is flat at 1", ...)
 }
 \arguments{

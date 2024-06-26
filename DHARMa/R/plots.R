@@ -4,7 +4,7 @@
 #' 
 #' @param x an object of class DHARMa with simulated residuals created by \code{\link{simulateResiduals}}
 #' @param ... further options for \code{\link{plotResiduals}}. Consider in particular parameters quantreg, rank and asFactor. xlab, ylab and main cannot be changed when using plot.DHARMa, but can be changed when using plotResiduals.
-#' @param title The title for both panels (plotted via mtext, outer = T)
+#' @param title The title for both panels (plotted via mtext, outer = TRUE)
 #' 
 #' @details The function creates a plot with two panels. The left panel is a uniform qq plot (calling \code{\link{plotQQunif}}), and the right panel shows residuals against predicted values (calling \code{\link{plotResiduals}}), with outliers highlighted in red. 
 #' 
@@ -31,7 +31,7 @@ plot.DHARMa <- function(x, title = "DHARMa residual", ...){
   plotQQunif(x)
   plotResiduals(x, ...)
 
-  mtext(title, outer = T)
+  mtext(title, outer = TRUE)
 }
 
 
@@ -57,7 +57,7 @@ hist.DHARMa <- function(x,
                         cex.main = 1,
                         ...){
 
-  x = ensureDHARMa(x, convert = T)
+  x = ensureDHARMa(x, convert = TRUE)
 
   val = x$scaledResiduals
   val[val == 0] = -0.01
@@ -97,7 +97,7 @@ plotSimulatedResiduals <- function(simulationOutput, ...){
 #' @seealso \code{\link{plotSimulatedResiduals}}, \code{\link{plotResiduals}}
 #' @example inst/examples/plotsHelp.R
 #' @export
-plotQQunif <- function(simulationOutput, testUniformity = T, testOutliers = T, testDispersion = T, ...){
+plotQQunif <- function(simulationOutput, testUniformity = TRUE, testOutliers = TRUE, testDispersion = TRUE, ...){
   
   a <- list(...)
   a$pch = checkDots("pch", 2, ...)
@@ -114,7 +114,7 @@ plotQQunif <- function(simulationOutput, testUniformity = T, testOutliers = T, t
   do.call(gap::qqunif, append(list(simulationOutput$scaledResiduals), a))
 
   if(testUniformity == TRUE){
-    temp = testUniformity(simulationOutput, plot = F)
+    temp = testUniformity(simulationOutput, plot = FALSE)
     legend("topleft", 
            c(paste("KS test: p=", round(temp$p.value, digits = 5)), 
              paste("Deviation ", ifelse(temp$p.value < 0.05, "significant", "n.s."))), 
@@ -123,7 +123,7 @@ plotQQunif <- function(simulationOutput, testUniformity = T, testOutliers = T, t
   }
 
   if(testOutliers == TRUE){
-    temp = testOutliers(simulationOutput, plot = F)
+    temp = testOutliers(simulationOutput, plot = FALSE)
     legend("bottomright", 
            c(paste("Outlier test: p=", round(temp$p.value, digits = 5)), 
              paste("Deviation ", ifelse(temp$p.value < 0.05, "significant", "n.s."))),
@@ -132,7 +132,7 @@ plotQQunif <- function(simulationOutput, testUniformity = T, testOutliers = T, t
   }
 
   if(testDispersion == TRUE){
-    temp = testDispersion(simulationOutput, plot = F)
+    temp = testDispersion(simulationOutput, plot = FALSE)
     legend("center", 
            c(paste("Dispersion test: p=", round(temp$p.value, digits = 5)), 
              paste("Deviation ", ifelse(temp$p.value < 0.05, "significant", "n.s."))), 
@@ -175,7 +175,7 @@ plotQQunif <- function(simulationOutput, testUniformity = T, testOutliers = T, t
 #' @seealso \code{\link{plotQQunif}}, \code{\link{testQuantiles}}, \code{\link{testOutliers}}
 #' @example inst/examples/plotsHelp.R
 #' @export
-plotResiduals <- function(simulationOutput, form = NULL, quantreg = NULL, rank = T, asFactor = NULL, smoothScatter = NULL, quantiles = c(0.25, 0.5, 0.75), absoluteDeviation = FALSE, ...){
+plotResiduals <- function(simulationOutput, form = NULL, quantreg = NULL, rank = TRUE, asFactor = NULL, smoothScatter = NULL, quantiles = c(0.25, 0.5, 0.75), absoluteDeviation = FALSE, ...){
 
 
   ##### Checks #####
@@ -185,12 +185,12 @@ plotResiduals <- function(simulationOutput, form = NULL, quantreg = NULL, rank =
   a$ylab = checkDots("ylab", yAxis , ...)
   a$xlab = checkDots("xlab", ifelse(is.null(form), "Model predictions", 
                                     gsub(".*[$]","",deparse(substitute(form)))), ...)
-  if(rank == T) a$xlab = paste(a$xlab, "(rank transformed)")
+  if(rank == TRUE) a$xlab = paste(a$xlab, "(rank transformed)")
 
-  simulationOutput = ensureDHARMa(simulationOutput, convert = T)
+  simulationOutput = ensureDHARMa(simulationOutput, convert = TRUE)
   res = simulationOutput$scaledResiduals
   
-  if(absoluteDeviation == T){
+  if(absoluteDeviation == TRUE){
     res = 2 * abs(res - 0.5)
   }
   
@@ -202,7 +202,7 @@ plotResiduals <- function(simulationOutput, form = NULL, quantreg = NULL, rank =
 
   if(!is.factor(pred)){
 
-    if (rank == T){
+    if (rank == TRUE){
       pred = rank(pred, ties.method = "average")
       pred = pred / max(pred)
       a$xlim = checkDots("xlim", c(0,1), ...)
@@ -256,16 +256,16 @@ plotResiduals <- function(simulationOutput, form = NULL, quantreg = NULL, rank =
   out = NULL
 
   if(is.numeric(pred)){
-    if(quantreg == F){
+    if(quantreg == FALSE){
       title(main = main, cex.main = 1)
       abline(h = quantiles, col = "black", lwd = 0.5, lty = 2)
       try({
         lines(smooth.spline(pred, res, df = 10), lty = 2, lwd = 2, col = "red")
         abline(h = 0.5, col = "red", lwd = 2)
-      }, silent = T)
+      }, silent = TRUE)
     }else{
 
-      out = testQuantiles(res, pred, quantiles = quantiles, plot = F)
+      out = testQuantiles(res, pred, quantiles = quantiles, plot = FALSE)
 
 
       if(any(out$pvals < 0.05, na.rm = TRUE)){
@@ -293,7 +293,7 @@ plotResiduals <- function(simulationOutput, form = NULL, quantreg = NULL, rank =
         abline(h = quantiles[i], col = lineCol, lwd = 0.5, lty = 2)
         polygon(c(out$predictions$pred, rev(out$predictions$pred)),
                 c(out$predictions[,2*i] - out$predictions[,2*i+1], rev(out$predictions[,2*i] + out$predictions[,2*i+1])),
-                col = "#00000020", border = F)
+                col = "#00000020", border = FALSE)
         lines(out$predictions$pred, out$predictions[,2*i], col = lineCol, lwd = 2)
       }
 
@@ -358,7 +358,7 @@ plotConventionalResiduals <- function(fittedModel){
   plot(predict(fittedModel), resid(fittedModel, type = "deviance"), main = "Deviance" , ylab = "Residual", xlab = "Predicted")
   plot(predict(fittedModel), resid(fittedModel, type = "pearson") , main = "Pearson", ylab = "Residual", xlab = "Predicted")
   plot(predict(fittedModel), resid(fittedModel, type = "response") , main = "Raw residuals" , ylab = "Residual", xlab = "Predicted")
-  mtext("Conventional residual plots", outer = T)
+  mtext("Conventional residual plots", outer = TRUE)
 }
 
 
@@ -366,7 +366,7 @@ plotConventionalResiduals <- function(fittedModel){
 
 #
 #
-# if(quantreg == F){
+# if(quantreg == FALSE){
 #
 #   lines(smooth.spline(simulationOutput$fittedPredictedResponse, simulationOutput$scaledResiduals, df = 10), lty = 2, lwd = 2, col = "red")
 #

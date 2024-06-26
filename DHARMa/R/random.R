@@ -22,7 +22,7 @@ getRandomState <- function(seed = NULL){
   
   current = mget(".Random.seed", envir = .GlobalEnv, ifnotfound = list(NULL))[[1]]
   
-  if(!is.null(seed) && is.logical(seed) && seed == F){
+  if(!is.null(seed) && is.logical(seed) && seed == FALSE){
     restoreCurrent <- function(){}    
   }else{
     restoreCurrent <- function(){

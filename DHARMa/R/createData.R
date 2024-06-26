@@ -20,7 +20,7 @@
 #' @param hasNA should an NA be added to the environmental predictor (for test purposes)
 #' @export
 #' @example /inst/examples/createDataHelp.R
-createData <- function(sampleSize = 100, intercept = 0, fixedEffects = 1, quadraticFixedEffects = NULL, numGroups = 10, randomEffectVariance = 1, overdispersion = 0, family = poisson(), scale = 1, cor = 0, roundPoissonVariance = NULL,  pZeroInflation = 0, binomialTrials = 1, temporalAutocorrelation = 0, spatialAutocorrelation =0, factorResponse = F, replicates=1, hasNA = F){
+createData <- function(sampleSize = 100, intercept = 0, fixedEffects = 1, quadraticFixedEffects = NULL, numGroups = 10, randomEffectVariance = 1, overdispersion = 0, family = poisson(), scale = 1, cor = 0, roundPoissonVariance = NULL,  pZeroInflation = 0, binomialTrials = 1, temporalAutocorrelation = 0, spatialAutocorrelation =0, factorResponse = FALSE, replicates=1, hasNA = FALSE){
 
   nPredictors = length(fixedEffects)
 

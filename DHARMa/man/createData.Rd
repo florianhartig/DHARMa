@@ -9,7 +9,7 @@ createData(sampleSize = 100, intercept = 0, fixedEffects = 1,
   overdispersion = 0, family = poisson(), scale = 1, cor = 0,
   roundPoissonVariance = NULL, pZeroInflation = 0, binomialTrials = 1,
   temporalAutocorrelation = 0, spatialAutocorrelation = 0,
-  factorResponse = F, replicates = 1, hasNA = F)
+  factorResponse = FALSE, replicates = 1, hasNA = FALSE)
 }
 \arguments{
 \item{sampleSize}{sample size of the dataset}

@@ -5,7 +5,7 @@
 \title{Test for overall uniformity}
 \usage{
 testUniformity(simulationOutput, alternative = c("two.sided", "less",
-  "greater"), plot = T)
+  "greater"), plot = TRUE)
 }
 \arguments{
 \item{simulationOutput}{an object of class DHARMa, either created via \code{\link{simulateResiduals}} for supported models or by \code{\link{createDHARMa}} for simulations created outside DHARMa, or a supported model. Providing a supported model directly is discouraged, because simulation settings cannot be changed in this case.}

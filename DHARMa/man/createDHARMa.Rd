@@ -5,7 +5,7 @@
 \title{Create a DHARMa object from hand-coded simulations or Bayesian posterior predictive simulations}
 \usage{
 createDHARMa(simulatedResponse, observedResponse,
-  fittedPredictedResponse = NULL, integerResponse = F, seed = 123,
+  fittedPredictedResponse = NULL, integerResponse = FALSE, seed = 123,
   method = c("PIT", "traditional"), rotation = NULL)
 }
 \arguments{
