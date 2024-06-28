@@ -757,12 +757,7 @@ testSpatialAutocorrelation <- function(simulationOutput, x = NULL, y  = NULL, di
 #' @param simulationOutput an object of class DHARMa, either created via \code{\link{simulateResiduals}} for supported models or by \code{\link{createDHARMa}} for simulations created outside DHARMa, or a supported model. Providing a supported model directly is discouraged, because simulation settings cannot be changed in this case.
 #' @param tree phylogenetic tree
 #' @param alternative a character string specifying whether the test should test if observations are "greater", "less" or "two.sided" compared to the simulated null hypothesis
-#' @param plot whether to plot output
-#' @details The function performs Moran.I test from the package ape on the DHARMa residuals. If a distance matrix (distMat) is provided, calculations will be based on this distance matrix, and x,y coordinates will only used for the plotting (if provided). If distMat is not provided, the function will calculate the euclidean distances between x,y coordinates, and test Moran.I based on these distances.
-#' 
-#' If plot = T, a plot will be produced showing each residual with at its x,y position, colored according to the residual value. Residuals with 0.5 are colored white, everything below 0.5 is colored increasinly red, everything above 0.5 is colored increasingly blue. 
-#'
-#' Testing for spatial autocorrelation requires unique x,y values - if you have several observations per location, either use the recalculateResiduals function to aggregate residuals per location, or extract the residuals from the fitted object, and plot / test each of them independently for spatially repeated subgroups (a typical scenario would repeated spatial observation, in which case one could plot / test each time step separately for temporal autocorrelation). Note that the latter must be done by hand, outside testSpatialAutocorrelation.
+#' @details The function performs Moran.I test from the package ape on the DHARMa residuals, based on the phylogenetic distance matrix internally created from the provided tree. For custom distance matrices, you can use [testSpatialAutocorrelation]
 #'
 #' @note Standard DHARMa simulations from models with (temporal / spatial / phylogenetic) conditional autoregressive terms will still have the respective temporal / spatial / phylogenetic correlation in the DHARMa residuals, unless the package you are using is modelling the autoregressive terms as explicit REs and is able to simulate conditional on the fitted REs. This has two consequences
 #'
@@ -784,8 +779,7 @@ testSpatialAutocorrelation <- function(simulationOutput, x = NULL, y  = NULL, di
 #' @export
 testPhylogeneticAutocorrelation <- function(simulationOutput, 
                                             tree, 
-                                            alternative = c("two.sided", "greater", "less"), 
-                                            plot = T){
+                                            alternative = c("two.sided", "greater", "less")){
   
   alternative <- match.arg(alternative)
   data.name = deparse(substitute(simulationOutput)) # needs to be before ensureDHARMa
@@ -806,10 +800,6 @@ testPhylogeneticAutocorrelation <- function(simulationOutput,
   out$data.name = data.name
   
   class(out) = "htest"
-  
-  if(plot == T ) {
-    # todo
-  }
   return(out)
 }
 
