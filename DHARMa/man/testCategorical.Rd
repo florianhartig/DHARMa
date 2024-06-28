@@ -14,7 +14,7 @@ testCategorical(simulationOutput, catPred, quantiles = c(0.25, 0.5, 0.75),
 
 \item{quantiles}{whether to draw the quantile lines.}
 
-\item{plot}{if T, the function will create an additional plot}
+\item{plot}{if TRUE, the function will create an additional plot}
 }
 \description{
 This function tests if there are probles in a res ~ group structure. It performs two tests: test for within-group uniformity, and test for between-group homogeneity of variances

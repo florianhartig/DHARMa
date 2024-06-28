@@ -19,7 +19,7 @@ testOutliers(simulationOutput, alternative = c("two.sided", "greater",
 
 \item{nBoot}{number of boostrap replicates. Only used ot type = "bootstrap"}
 
-\item{plot}{if T, the function will create an additional plot}
+\item{plot}{if TRUE, the function will create an additional plot}
 }
 \description{
 This function tests if the number of observations outside the simulatio envelope are larger or smaller than expected

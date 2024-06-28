@@ -5,12 +5,12 @@
 #' This function is a wrapper for the various test functions implemented in DHARMa. Currently, this function calls the \code{\link{testUniformity}} and the \code{\link{testDispersion}} functions. All other tests (see list below) have to be called by hand.
 #'
 #' @param simulationOutput an object of class DHARMa, either created via \code{\link{simulateResiduals}} for supported models or by \code{\link{createDHARMa}} for simulations created outside DHARMa, or a supported model. Providing a supported model directly is discouraged, because simulation settings cannot be changed in this case.
-#' @param plot if T, plots functions of the tests are called
+#' @param plot if TRUE, plots functions of the tests are called
 #' @author Florian Hartig
 #' @seealso \code{\link{testResiduals}}, \code{\link{testUniformity}}, \code{\link{testOutliers}}, \code{\link{testDispersion}}, \code{\link{testZeroInflation}}, \code{\link{testGeneric}}, \code{\link{testTemporalAutocorrelation}}, \code{\link{testSpatialAutocorrelation}}, \code{\link{testQuantiles}}, \code{\link{testCategorical}}
 #' @example inst/examples/testsHelp.R
 #' @export
-testResiduals <- function(simulationOutput, plot = T){
+testResiduals <- function(simulationOutput, plot = TRUE){
 
   opar = par(mfrow = c(1,3))
   on.exit(par(opar))
@@ -42,13 +42,13 @@ testSimulatedResiduals <- function(simulationOutput){
 #'
 #' @param simulationOutput an object of class DHARMa, either created via \code{\link{simulateResiduals}} for supported models or by \code{\link{createDHARMa}} for simulations created outside DHARMa, or a supported model. Providing a supported model directly is discouraged, because simulation settings cannot be changed in this case.
 #' @param alternative a character string specifying whether the test should test if observations are "greater", "less" or "two.sided" compared to the simulated null hypothesis. See \code{\link[stats]{ks.test}} for details
-#' @param plot if T, plots calls \code{\link{plotQQunif}} as well
+#' @param plot if TRUE, plots calls \code{\link{plotQQunif}} as well
 #' @details The function applies a \code{\link[stats]{ks.test}} for uniformity on the simulated residuals.
 #' @author Florian Hartig
 #' @seealso \code{\link{testResiduals}}, \code{\link{testUniformity}}, \code{\link{testOutliers}}, \code{\link{testDispersion}}, \code{\link{testZeroInflation}}, \code{\link{testGeneric}}, \code{\link{testTemporalAutocorrelation}}, \code{\link{testSpatialAutocorrelation}}, \code{\link{testQuantiles}}, \code{\link{testCategorical}}
 #' @example inst/examples/testsHelp.R
 #' @export
-testUniformity<- function(simulationOutput, alternative = c("two.sided", "less", "greater"), plot = T){
+testUniformity<- function(simulationOutput, alternative = c("two.sided", "less", "greater"), plot = TRUE){
 
   simulationOutput = ensureDHARMa(simulationOutput, convert = T)
 
@@ -59,7 +59,7 @@ testUniformity<- function(simulationOutput, alternative = c("two.sided", "less",
 
 
 # Experimental
-testBivariateUniformity<- function(simulationOutput, alternative = c("two.sided", "less", "greater"), plot = T){
+testBivariateUniformity<- function(simulationOutput, alternative = c("two.sided", "less", "greater"), plot = TRUE){
 
   simulationOutput = ensureDHARMa(simulationOutput, convert = T)
 
@@ -78,7 +78,7 @@ testBivariateUniformity<- function(simulationOutput, alternative = c("two.sided"
 #' @param simulationOutput an object of class DHARMa, either created via \code{\link{simulateResiduals}} for supported models or by \code{\link{createDHARMa}} for simulations created outside DHARMa, or a supported model. Providing a supported model directly is discouraged, because simulation settings cannot be changed in this case.
 #' @param predictor an optional predictor variable to be used, instead of the predicted response (default)
 #' @param quantiles the quantiles to be tested
-#' @param plot if T, the function will create an additional plot
+#' @param plot if TRUE, the function will create an additional plot
 #' @details The function fits quantile regressions (via package qgam) on the residuals, and compares their location to the expected location (because of the uniform distributionm, the expected location is 0.5 for the 0.5 quantile).
 #'
 #' A significant p-value for the splines means the fitted spline deviates from a flat line at the expected location (p-values of intercept and spline are combined via Benjamini & Hochberg adjustment to control the FDR)
@@ -89,7 +89,7 @@ testBivariateUniformity<- function(simulationOutput, alternative = c("two.sided"
 #' @example inst/examples/testQuantilesHelp.R
 #' @seealso \code{\link{testResiduals}}, \code{\link{testUniformity}}, \code{\link{testOutliers}}, \code{\link{testDispersion}}, \code{\link{testZeroInflation}}, \code{\link{testGeneric}}, \code{\link{testTemporalAutocorrelation}}, \code{\link{testSpatialAutocorrelation}}, \code{\link{testQuantiles}}, \code{\link{testCategorical}}
 #' @export
-testQuantiles <- function(simulationOutput, predictor = NULL, quantiles = c(0.25,0.5,0.75), plot = T){
+testQuantiles <- function(simulationOutput, predictor = NULL, quantiles = c(0.25,0.5,0.75), plot = TRUE){
 
   if(plot == F){
 
@@ -152,7 +152,7 @@ testQuantiles <- function(simulationOutput, predictor = NULL, quantiles = c(0.25
 #' @param margin whether to test for outliers only at the lower, only at the upper, or both sides (default) of the simulated data distribution
 #' @param type either default, bootstrap or binomial. See details
 #' @param nBoot number of boostrap replicates. Only used ot type = "bootstrap"
-#' @param plot if T, the function will create an additional plot
+#' @param plot if TRUE, the function will create an additional plot
 #' @details DHARMa residuals are created by simulating from the fitted model, and comparing the simulated values to the observed data. It can occur that all simulated values are higher or smaller than the observed data, in which case they get the residual value of 0 and 1, respectively. I refer to these values as simulation outliers, or simply outliers.
 #'
 #' Because no data was simulated in the range of the observed value, we don't know "how strongly" these values deviate from the model expectation, so the term "outlier" should be used with a grain of salt. It is not a judgment about the magnitude of the residual deviation, but simply a dichotomous sign that we are outside the simulated range. Moreover, the number of outliers will decrease as we increase the number of simulations.
@@ -169,7 +169,7 @@ testQuantiles <- function(simulationOutput, predictor = NULL, quantiles = c(0.25
 #' @author Florian Hartig
 #' @seealso \code{\link{testResiduals}}, \code{\link{testUniformity}}, \code{\link{testOutliers}}, \code{\link{testDispersion}}, \code{\link{testZeroInflation}}, \code{\link{testGeneric}}, \code{\link{testTemporalAutocorrelation}}, \code{\link{testSpatialAutocorrelation}}, \code{\link{testQuantiles}}, \code{\link{testCategorical}}
 #' @export
-testOutliers <- function(simulationOutput, alternative = c("two.sided", "greater", "less"), margin = c("both", "upper", "lower"), type = c("default","bootstrap", "binomial"), nBoot = 100, plot = T){
+testOutliers <- function(simulationOutput, alternative = c("two.sided", "greater", "less"), margin = c("both", "upper", "lower"), type = c("default","bootstrap", "binomial"), nBoot = 100, plot = TRUE){
 
   # check inputs
   alternative = match.arg(alternative)
@@ -319,7 +319,7 @@ testOutliers <- function(simulationOutput, alternative = c("two.sided", "greater
 #' @param simulationOutput an object of class DHARMa, either created via \code{\link{simulateResiduals}} for supported models or by \code{\link{createDHARMa}} for simulations created outside DHARMa, or a supported model. Providing a supported model directly is discouraged, because simulation settings cannot be changed in this case.
 #' @param catPred a categorical predictor with the same dimensions as the residuals in simulationOutput
 #' @param quantiles whether to draw the quantile lines.
-#' @param plot if T, the function will create an additional plot
+#' @param plot if TRUE, the function will create an additional plot
 #' @details The function tests for two common problems: are residuals within each group distributed according to model assumptions, and is the variance between group heterogeneous.
 #'
 #'  The test for within-group uniformity is performed via multipe KS-tests, with adjustment of p-values for multiple testing. If the plot is drawn, problematic groups are highlighted in red, and a corresponding message is displayed in the plot.
@@ -330,7 +330,7 @@ testOutliers <- function(simulationOutput, alternative = c("two.sided", "greater
 #' @seealso \code{\link{testResiduals}}, \code{\link{testUniformity}}, \code{\link{testOutliers}}, \code{\link{testDispersion}}, \code{\link{testZeroInflation}}, \code{\link{testGeneric}}, \code{\link{testTemporalAutocorrelation}}, \code{\link{testSpatialAutocorrelation}}, \code{\link{testQuantiles}}, \code{\link{testCategorical}}
 #' @example inst/examples/testsHelp.R
 #' @export
-testCategorical <- function(simulationOutput, catPred, quantiles = c(0.25, 0.5, 0.75), plot = T){
+testCategorical <- function(simulationOutput, catPred, quantiles = c(0.25, 0.5, 0.75), plot = TRUE){
 
   simulationOutput = ensureDHARMa(simulationOutput, convert = T)
 
@@ -624,7 +624,7 @@ testGeneric <- function(simulationOutput, summary, alternative = c("two.sided", 
 #' @seealso \code{\link{testResiduals}}, \code{\link{testUniformity}}, \code{\link{testOutliers}}, \code{\link{testDispersion}}, \code{\link{testZeroInflation}}, \code{\link{testGeneric}}, \code{\link{testTemporalAutocorrelation}}, \code{\link{testSpatialAutocorrelation}}, \code{\link{testQuantiles}}, \code{\link{testCategorical}}
 #' @example inst/examples/testTemporalAutocorrelationHelp.R
 #' @export
-testTemporalAutocorrelation <- function(simulationOutput, time, alternative = c("two.sided", "greater", "less"), plot = T){
+testTemporalAutocorrelation <- function(simulationOutput, time, alternative = c("two.sided", "greater", "less"), plot = TRUE){
 
   simulationOutput = ensureDHARMa(simulationOutput, convert = T)
 
@@ -700,7 +700,7 @@ testTemporalAutocorrelation <- function(simulationOutput, time, alternative = c(
 #' @import grDevices
 #' @example inst/examples/testSpatialAutocorrelationHelp.R
 #' @export
-testSpatialAutocorrelation <- function(simulationOutput, x = NULL, y  = NULL, distMat = NULL, alternative = c("two.sided", "greater", "less"), plot = T){
+testSpatialAutocorrelation <- function(simulationOutput, x = NULL, y  = NULL, distMat = NULL, alternative = c("two.sided", "greater", "less"), plot = TRUE){
 
   alternative <- match.arg(alternative)
   data.name = deparse(substitute(simulationOutput)) # needs to be before ensureDHARMa
@@ -805,7 +805,7 @@ testPhylogeneticAutocorrelation <- function(simulationOutput,
 
 
 
-getP <- function(simulated, observed, alternative, plot = F, ...){
+getP <- function(simulated, observed, alternative, plot = FALSE, ...){
 
   if(alternative == "greater") p = mean(simulated >= observed)
   if(alternative == "less") p = mean(simulated <= observed)

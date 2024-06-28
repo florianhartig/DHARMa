@@ -14,7 +14,7 @@ testQuantiles(simulationOutput, predictor = NULL, quantiles = c(0.25, 0.5,
 
 \item{quantiles}{the quantiles to be tested}
 
-\item{plot}{if T, the function will create an additional plot}
+\item{plot}{if TRUE, the function will create an additional plot}
 }
 \description{
 This function tests
