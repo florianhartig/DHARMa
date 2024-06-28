@@ -5,7 +5,7 @@
 \title{Test for categorical dependencies}
 \usage{
 testCategorical(simulationOutput, catPred, quantiles = c(0.25, 0.5, 0.75),
-  plot = T)
+  plot = TRUE)
 }
 \arguments{
 \item{simulationOutput}{an object of class DHARMa, either created via \code{\link{simulateResiduals}} for supported models or by \code{\link{createDHARMa}} for simulations created outside DHARMa, or a supported model. Providing a supported model directly is discouraged, because simulation settings cannot be changed in this case.}
@@ -14,7 +14,7 @@ testCategorical(simulationOutput, catPred, quantiles = c(0.25, 0.5, 0.75),
 
 \item{quantiles}{whether to draw the quantile lines.}
 
-\item{plot}{if T, the function will create an additional plot}
+\item{plot}{if TRUE, the function will create an additional plot}
 }
 \description{
 This function tests if there are probles in a res ~ group structure. It performs two tests: test for within-group uniformity, and test for between-group homogeneity of variances

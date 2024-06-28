@@ -70,7 +70,7 @@ testDispersion(simulationOutput)
 # of RE groups. In doubt, only test for overdispersion
 testDispersion(simulationOutput, type = "PearsonChisq", alternative = "greater")
 
-# if refit = T, a different test on simulated Pearson residuals will calculated (see help)
+# if refit = TRUE, a different test on simulated Pearson residuals will calculated (see help)
 simulationOutput2 <- simulateResiduals(fittedModel = fittedModel, refit = TRUE, seed = 12, n = 20)
 testDispersion(simulationOutput2)
 

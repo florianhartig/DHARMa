@@ -4,8 +4,8 @@
 \alias{simulateLRT}
 \title{Simulated likelihood ratio tests for (generalized) linear mixed models}
 \usage{
-simulateLRT(m0, m1, n = 250, seed = 123, plot = T,
-  suppressWarnings = T, saveModels = F, ...)
+simulateLRT(m0, m1, n = 250, seed = 123, plot = TRUE,
+  suppressWarnings = TRUE, saveModels = FALSE, ...)
 }
 \arguments{
 \item{m0}{Null Model}
@@ -65,7 +65,7 @@ m0 = glm(observedResponse ~ Environment1 , data = dat, family = "poisson")
 out = simulateLRT(m0, m1, n = 10)
 
 # To inspect warnings thrown during the refits:
-out = simulateLRT(m0, m1, saveModels = T, suppressWarnings = F, n = 10)
+out = simulateLRT(m0, m1, saveModels = TRUE, suppressWarnings = FALSE, n = 10)
 summary(out$saveModels[[2]]$refittedM1) # RE SD = 0, no problem
 # If there are warnings that seem problematic, 
 # could try changing the optimizer or iterations

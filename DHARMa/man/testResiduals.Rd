@@ -4,12 +4,12 @@
 \alias{testResiduals}
 \title{DHARMa general residual test}
 \usage{
-testResiduals(simulationOutput, plot = T)
+testResiduals(simulationOutput, plot = TRUE)
 }
 \arguments{
 \item{simulationOutput}{an object of class DHARMa, either created via \code{\link{simulateResiduals}} for supported models or by \code{\link{createDHARMa}} for simulations created outside DHARMa, or a supported model. Providing a supported model directly is discouraged, because simulation settings cannot be changed in this case.}
 
-\item{plot}{if T, plots functions of the tests are called}
+\item{plot}{if TRUE, plots functions of the tests are called}
 }
 \description{
 Calls both uniformity and dispersion test

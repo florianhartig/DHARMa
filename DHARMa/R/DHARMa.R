@@ -95,7 +95,7 @@ outliers <- function(object, lowerQuantile = 0, upperQuantile = 1, return = c("i
 #' @note Either scaled residuals or (simulatedResponse AND observed response) have to be provided
 #' @example inst/examples/createDharmaHelp.R
 #' @export
-createDHARMa <- function(simulatedResponse , observedResponse , fittedPredictedResponse = NULL, integerResponse = F, seed = 123,  method = c("PIT", "traditional"), rotation = NULL){
+createDHARMa <- function(simulatedResponse , observedResponse , fittedPredictedResponse = NULL, integerResponse = FALSE, seed = 123,  method = c("PIT", "traditional"), rotation = NULL){
 
   randomState <-getRandomState(seed)
   on.exit({randomState$restoreCurrent()})
@@ -142,7 +142,7 @@ createDHARMa <- function(simulatedResponse , observedResponse , fittedPredictedR
 #' @return an object of class DHARMa
 #' @keywords internal
 ensureDHARMa <- function(simulationOutput,
-                         convert = F){
+                         convert = FALSE){
 
   if(inherits(simulationOutput, "DHARMa")){
     return(simulationOutput)
@@ -152,8 +152,8 @@ ensureDHARMa <- function(simulationOutput,
     else {
 
       if (class(simulationOutput)[1] %in% getPossibleModels()){
-        if (convert == "Model" | convert == T) return(simulateResiduals(simulationOutput))
-      } else if(is.vector(simulationOutput, mode = "numeric") & convert == T) {
+        if (convert == "Model" | convert == TRUE) return(simulateResiduals(simulationOutput))
+      } else if(is.vector(simulationOutput, mode = "numeric") & convert == TRUE) {
         out = list()
         out$scaledResiduals = simulationOutput
         out$nObs = length(out$scaledResiduals)

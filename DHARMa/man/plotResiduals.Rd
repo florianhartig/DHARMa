@@ -4,9 +4,9 @@
 \alias{plotResiduals}
 \title{Generic res ~ pred scatter plot with spline or quantile regression on top}
 \usage{
-plotResiduals(simulationOutput, form = NULL, quantreg = NULL, rank = T,
-  asFactor = NULL, smoothScatter = NULL, quantiles = c(0.25, 0.5, 0.75),
-  absoluteDeviation = FALSE, ...)
+plotResiduals(simulationOutput, form = NULL, quantreg = NULL,
+  rank = TRUE, asFactor = NULL, smoothScatter = NULL,
+  quantiles = c(0.25, 0.5, 0.75), absoluteDeviation = FALSE, ...)
 }
 \arguments{
 \item{simulationOutput}{on object, usually a DHARMa object, from which residual values can be extracted. Alternatively, a vector with residuals or a fitted model can be provided, which will then be transformed into a DHARMa object.}
@@ -84,7 +84,7 @@ plotResiduals(simulationOutput, rank = TRUE, quantreg = FALSE, smoothScatter = T
 plotResiduals(simulationOutput, form = testData$Environment1, 
               quantreg = FALSE)
 
-# if pred is a factor, or if asFactor = T, will produce a boxplot
+# if pred is a factor, or if asFactor = TRUE, will produce a boxplot
 plotResiduals(simulationOutput, form = testData$group)
 
 # to diagnose overdispersion and heteroskedasticity it can be useful to 

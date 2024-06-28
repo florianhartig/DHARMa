@@ -32,7 +32,7 @@
 #'
 #' @example inst/examples/simulateLRTHelp.R
 #' @export
-simulateLRT<-function(m0, m1, n = 250, seed = 123, plot = T, suppressWarnings = T, saveModels = F, ...){
+simulateLRT<-function(m0, m1, n = 250, seed = 123, plot = TRUE, suppressWarnings = TRUE, saveModels = FALSE, ...){
 
   ######## general assertions and startup calculations ##########
   # identical to simulateResiduals
@@ -64,7 +64,7 @@ simulateLRT<-function(m0, m1, n = 250, seed = 123, plot = T, suppressWarnings = 
 
   out$simulatedLR = rep(NA, n)
 
-  if(saveModels == T) out$saveModels == list()
+  if(saveModels == TRUE) out$saveModels == list()
 
   for (i in 1:n){
 
@@ -76,7 +76,7 @@ simulateLRT<-function(m0, m1, n = 250, seed = 123, plot = T, suppressWarnings = 
       # if (i==3) stop("x")
       # Note: also set silent = T for production
 
-      if(suppressWarnings == T){
+      if(suppressWarnings == TRUE){
         invisible(capture.output(suppressWarnings(suppressMessages({
           refittedM0 = getRefit(m0, simObserved)
           refittedM1 = getRefit(m1, simObserved)
@@ -87,7 +87,7 @@ simulateLRT<-function(m0, m1, n = 250, seed = 123, plot = T, suppressWarnings = 
         refittedM1 = getRefit(m1, simObserved)
       }
 
-      if(saveModels == T) out$saveModels[[i]] = list(refittedM0 = refittedM0, refittedM1 = refittedM1)
+      if(saveModels == TRUE) out$saveModels[[i]] = list(refittedM0 = refittedM0, refittedM1 = refittedM1)
 
       out$simulatedLR[i] = logLik(refittedM1) - logLik(refittedM0)
 

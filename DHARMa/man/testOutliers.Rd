@@ -6,7 +6,7 @@
 \usage{
 testOutliers(simulationOutput, alternative = c("two.sided", "greater",
   "less"), margin = c("both", "upper", "lower"), type = c("default",
-  "bootstrap", "binomial"), nBoot = 100, plot = T)
+  "bootstrap", "binomial"), nBoot = 100, plot = TRUE)
 }
 \arguments{
 \item{simulationOutput}{an object of class DHARMa, either created via \code{\link{simulateResiduals}} for supported models or by \code{\link{createDHARMa}} for simulations created outside DHARMa, or a supported model. Providing a supported model directly is discouraged, because simulation settings cannot be changed in this case.}
@@ -19,7 +19,7 @@ testOutliers(simulationOutput, alternative = c("two.sided", "greater",
 
 \item{nBoot}{number of boostrap replicates. Only used ot type = "bootstrap"}
 
-\item{plot}{if T, the function will create an additional plot}
+\item{plot}{if TRUE, the function will create an additional plot}
 }
 \description{
 This function tests if the number of observations outside the simulatio envelope are larger or smaller than expected
