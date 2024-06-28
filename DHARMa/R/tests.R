@@ -750,6 +750,71 @@ testSpatialAutocorrelation <- function(simulationOutput, x = NULL, y  = NULL, di
 }
 
 
+#' Test for phylogenetic autocorrelation
+#'
+#' This function performs a Moran's I test for phylogenetic autocorrelation on the calculated quantile residuals
+#'
+#' @param simulationOutput an object of class DHARMa, either created via \code{\link{simulateResiduals}} for supported models or by \code{\link{createDHARMa}} for simulations created outside DHARMa, or a supported model. Providing a supported model directly is discouraged, because simulation settings cannot be changed in this case.
+#' @param tree phylogenetic tree
+#' @param alternative a character string specifying whether the test should test if observations are "greater", "less" or "two.sided" compared to the simulated null hypothesis
+#' @param plot whether to plot output
+#' @details The function performs Moran.I test from the package ape on the DHARMa residuals. If a distance matrix (distMat) is provided, calculations will be based on this distance matrix, and x,y coordinates will only used for the plotting (if provided). If distMat is not provided, the function will calculate the euclidean distances between x,y coordinates, and test Moran.I based on these distances.
+#' 
+#' If plot = T, a plot will be produced showing each residual with at its x,y position, colored according to the residual value. Residuals with 0.5 are colored white, everything below 0.5 is colored increasinly red, everything above 0.5 is colored increasingly blue. 
+#'
+#' Testing for spatial autocorrelation requires unique x,y values - if you have several observations per location, either use the recalculateResiduals function to aggregate residuals per location, or extract the residuals from the fitted object, and plot / test each of them independently for spatially repeated subgroups (a typical scenario would repeated spatial observation, in which case one could plot / test each time step separately for temporal autocorrelation). Note that the latter must be done by hand, outside testSpatialAutocorrelation.
+#'
+#' @note Standard DHARMa simulations from models with (temporal / spatial / phylogenetic) conditional autoregressive terms will still have the respective temporal / spatial / phylogenetic correlation in the DHARMa residuals, unless the package you are using is modelling the autoregressive terms as explicit REs and is able to simulate conditional on the fitted REs. This has two consequences
+#'
+#' 1. If you check the residuals for such a model, they will still show significant autocorrelation, even if the model fully accounts for this structure.
+#'
+#' 2. Because the DHARMa residuals for such a model are not statistically independent any more, other tests (e.g. dispersion, uniformity) may have inflated type I error, i.e. you will have a higher likelihood of spurious residual problems.
+#'
+#' There are three (non-exclusive) routes to address these issues when working with spatial / temporal / other autoregressive models:
+#'
+#' 1. Simulate conditional on the fitted CAR structures (see conditional simulations in the help of [simulateResiduals])
+#'
+#' 2. Rotate simulations prior to residual calculations (see parameter rotation in [simulateResiduals])
+#'
+#' 3. Use custom tests / plots that explicitly compare the correlation structure in the simulated data to the correlation structure in the observed data.
+#'
+#' @author Florian Hartig
+#' @seealso \code{\link{testResiduals}}, \code{\link{testUniformity}}, \code{\link{testOutliers}}, \code{\link{testDispersion}}, \code{\link{testZeroInflation}}, \code{\link{testGeneric}}, \code{\link{testTemporalAutocorrelation}}, \code{\link{testSpatialAutocorrelation}}, \code{\link{testQuantiles}}, \code{\link{testCategorical}}
+#' @example inst/examples/testPhylogeneticAutocorrelationHelp.R
+#' @export
+testPhylogeneticAutocorrelation <- function(simulationOutput, 
+                                            tree, 
+                                            alternative = c("two.sided", "greater", "less"), 
+                                            plot = T){
+  
+  alternative <- match.arg(alternative)
+  data.name = deparse(substitute(simulationOutput)) # needs to be before ensureDHARMa
+  simulationOutput = ensureDHARMa(simulationOutput, convert = T)
+  
+  # calculate distance matrix
+  distMat <- cophenetic(tree)
+  invDistMat <- 1/distMat
+  diag(invDistMat) <- 0
+  
+  MI = ape::Moran.I(simulationOutput$scaledResiduals, weight = invDistMat, alternative = alternative)
+  
+  out = list()
+  out$statistic = c(observed = MI$observed, expected = MI$expected, sd = MI$sd)
+  out$method = "DHARMa Moran's I test for phylogenetic autocorrelation"
+  out$alternative = "Phylogenetic autocorrelation"
+  out$p.value = MI$p.value
+  out$data.name = data.name
+  
+  class(out) = "htest"
+  
+  if(plot == T ) {
+    # todo
+  }
+  return(out)
+}
+
+
+
 getP <- function(simulated, observed, alternative, plot = F, ...){
 
   if(alternative == "greater") p = mean(simulated >= observed)
