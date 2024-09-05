@@ -2,7 +2,7 @@
 
 
 # This file contains the wrappers for the models supported by DHARMa. 
-# The design philosophy is that DHARMa with with packages ONLY via the wrappers, 
+# The design philosophy is that DHARMa interacts with packages ONLY via the wrappers, 
 # so that the internal package functions can rely on a standardized interface
 #
 # The currently supported models can be returned via getPossibleModels()
