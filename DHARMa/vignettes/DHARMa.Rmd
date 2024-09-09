@@ -267,11 +267,11 @@ Moreover (general advice), to ensure reproducibility, it's advisable to add a se
 
 So far, all shown DHARMa results were calculated for a correctly specified model, resulting in "perfect" residual plots and diagnostics. In this section, we discuss how to recognize and interpret diagnostics that indicate a misspecified model. Before going into the details, note, however, that
 
-1.  **No residual pattern does not "proof" that the model is correct**: The fact that none of the DHARMa tests indicates a problem does not "proof" that the model is correctly specified. For each model, there are likely a large number of structural problems that will not create a pattern in the DHARMa diagnostics. In good old Popper fashion, you should interpret no residual problems as your working hypothesis not having been rejected in this particular test, which increases confidence in the model, but does not constitute a decisive proof. So, keep your skepticism alive, and if you find the results fishy, keep searching and testing.
+1.  **No residual pattern does not "prove" that the model is correct**: The fact that none of the DHARMa tests indicate a problem does not "prove" that the model is correctly specified. For any model, there are likely a large number of structural problems that do not create a pattern in the DHARMa diagnostics. In good old Popper fashion, you should interpret no residual problems as your working hypothesis not being rejected in that particular test, which increases confidence in the model, but does not constitute a conclusive proof. So, keep your skepticism alive, and if you find the results fishy, keep searching and testing.
 
-2.  **A residual pattern does not indicate that the model is unusable**: Conversely, while a significant pattern in the residuals indicates with good reliability that the observed data did likely not originate from the fitted model, this doesn't necessarily imply that the inferential results from this wrong model are not usable. There are many situations in statistics where it is common practice to work with "wrong models". For example, many statistical models used shrinkage estimators, which purposefully bias parameter estimates to certain values. Random effects are a special case of this. If DHARMa residuals for these estimators are calculated, they will often show a slight pattern in the residuals even if the model is correctly specified, and tests for this can get significant for large sample sizes. For this reason, DHARMa is excluding RE estimates in the predictions when plotting res \~ pred Another example is data that is missing at random (MAR). Because it is known that this phenomenon does not create a bias on the fixed effect estimates, is is common practice to fit this data with standard mixed models. Nevertheless, DHARMa recognizes that the observed data looks different than what would be expected from the model assumptions, and flags the model as problematic (see [here](https://github.com/florianhartig/DHARMa/issues/101)).
+2.  **Once a residual effect is statistically significant, look at the magnitude to decide if there is a problem**: It is crucial to note that significance is NOT a measure of the strength of the residual pattern, it is a measure of the signal/noise ratio, i.e. whether you are sure there is a pattern at all. Significance in hypothesis tests depends on at least 2 ingredients: the strength of the signal and the number of data points. If you have a lot of data points, residual diagnostics will nearly inevitably become significant, because having a perfectly fitting model is very unlikely. That, however, doesn't necessarily mean that you need to change your model. The p-values confirm that there is a deviation from your null hypothesis. It is, however, in your discretion to decide whether this deviation is worth worrying about. For example, if you see a dispersion parameter of 1.01, I would not worry, even if the dispersion test is significant. A significant value of 5, however, is clearly a reason to move to a model that accounts for overdispersion.
 
-3.  **Once an residual effect is statistically significant, look the magnitude to decide if there is a problem**: It is crucial to note that significance is NOT a measures of the strength of the residual pattern, it is a measure of the signal/noise ratio, i.e. whether you are sure there is a pattern at all. Significance in hypothesis tests depends on at least 2 ingredients: strength of the signal, and the number of data points. If you have a lot of data points, residual diagnostics will nearly inevitably become significant, because having a perfectly fitting model is very unlikely. That, however, doesn't necessarily mean that you need to change your model. The p-values confirm that there is a deviation from your null hypothesis. It is, however, in your discretion to decide whether this deviation is worth worrying about. For example, if you see a dispersion parameter of 1.01, I would not worry, even if the dispersion test is significant. A significant value of 5, however, is clearly a reason to move to a model that accounts for overdispersion.
+3.  **A residual pattern does not indicate that the model is unusable**: While a significant pattern in the residuals indicates with good reliability that the observed data did likely not originate from the fitted model, this doesn't necessarily imply that the inferential results from this wrong model are not usable. There are many situations in statistics where it is common practice to work with "wrong models". For example, many statistical models use shrinkage estimators, which purposefully bias parameter estimates to certain values. Random effects are a special case of this. If DHARMa residuals for these estimators are calculated, they will often show a slight pattern in the residuals even if the model is correctly specified, and tests for this can get significant for large sample sizes. For this reason, DHARMa is excluding RE estimates in the predictions when plotting res \~ pred. Another example is data that is missing at random (MAR). Since it is known that this phenomenon does not create a bias on the fixed effects estimates, it is common practice to fit these data with standard mixed models. Nevertheless, DHARMa recognizes that the observed data looks different from what would be expected from the model assumptions, and flags the model as problematic (see [here](https://github.com/florianhartig/DHARMa/issues/101)).
 
 **Important conclusion: DHARMa only flags a difference between the observed and expected data - the user has to decide whether this difference is actually a problem for the analysis!**
 
@@ -490,7 +490,7 @@ Note that all these tests are most sensitive against homogeneous residual struct
 
 ## Budworm example (count-proportion n/k binomial)
 
-This example comes from [Jochen Fruend](https://jochenfruend.wordpress.com/). Measured are the number of parasitized observations, with population density as a covariate
+This example comes from [Jochen Fruend](https://jochenfruend.wordpress.com/). Measured are the number of parasitized observations, with population density as a covariate:
 
 ```{r, echo = F}
 data = structure(list(N_parasitized = c(226, 689, 481, 960, 1177, 266, 
@@ -581,30 +581,37 @@ res <- simulateResiduals(m1)
 plot(res)
 ```
 
-OK, this is highly overdispersed. Let's add a RE on nest
+OK, this is highly overdispersed. Let's add a RE on nest:
 
 ```{r, error=TRUE}
-m2 <- glmer(SiblingNegotiation ~ FoodTreatment*SexParent + offset(log(BroodSize)) + (1|Nest), data=Owls , family = poisson)
+m2 <- glmmTMB(SiblingNegotiation ~ FoodTreatment*SexParent + offset(log(BroodSize)) + (1|Nest), data=Owls , family = poisson)
 res <- simulateResiduals(m2)
 plot(res)
 ```
 
-Somewhat better, but not good. Move to neg binom, to adjust dispersion
+Somewhat better, but not good. Move to neg binom, to adjust dispersion, and checking dispersion and residuals against FoodTreatment predictor:
 
 ```{r, error=TRUE}
 m3 <- glmmTMB(SiblingNegotiation ~ FoodTreatment*SexParent + offset(log(BroodSize)) + (1|Nest), data=Owls , family = nbinom1)
 
 res <- simulateResiduals(m3, plot = T)
-par(mfrow = c(1,3))
-plotResiduals(res, Owls$FoodTreatment)
+par(mfrow = c(1,2))
 testDispersion(res)
+plotResiduals(res, Owls$FoodTreatment)
+```
+
+We see underdispersion now. In a model with variable dispersion, this is often the signal that some other distributional assumptions are violated. Let's check for zero-inflation:
+
+```{r}
 testZeroInflation(res)
 ```
 
-We see underdispersion now. In a model with variable dispersion, this is often the signal that some other distributional assumptions are violated, that is why I checked for zero-inflation, and it looks as if there is some. Therefore fitting a zero-inflated model
+It looks as if there is some zero-inflation, although non-significant. Fitting a zero-inflated model:
 
 ```{r, error=TRUE}
-m4 <- glmmTMB(SiblingNegotiation ~ FoodTreatment*SexParent + offset(log(BroodSize)) + (1|Nest), ziformula = ~ FoodTreatment + SexParent,  data=Owls , family = nbinom1)
+m4 <- glmmTMB(SiblingNegotiation ~ FoodTreatment*SexParent + offset(log(BroodSize)) +
+                (1|Nest), 
+              ziformula = ~ FoodTreatment + SexParent,  data=Owls , family = nbinom1)
 
 res <- simulateResiduals(m4, plot = T)
 par(mfrow = c(1,3))
@@ -613,10 +620,13 @@ testDispersion(res)
 testZeroInflation(res)
 ```
 
-This looks a lot better. Trying a slightly different model specification, adding a dispersion model as well
+This looks a lot better. Trying a slightly different model specification, adding a dispersion model as well:
 
 ```{r, error=TRUE}
-m5 <- glmmTMB(SiblingNegotiation ~ FoodTreatment*SexParent + offset(log(BroodSize)) + (1|Nest), dispformula = ~ FoodTreatment + SexParent , ziformula = ~ FoodTreatment + SexParent,  data=Owls , family = nbinom1)
+m5 <- glmmTMB(SiblingNegotiation ~ FoodTreatment*SexParent + offset(log(BroodSize)) +
+                (1|Nest), 
+              dispformula = ~ FoodTreatment + SexParent , 
+              ziformula = ~ FoodTreatment + SexParent,  data=Owls , family = nbinom1)
 
 res <- simulateResiduals(m5, plot = T)
 par(mfrow = c(1,3))
@@ -639,9 +649,11 @@ Once dispersion is adjusted, you should check for heteroscedasticity (via standa
 
 ## Proportional data
 
-Proportional data is often modeled with beta regressions. Those can be tested with DHARMa. Note that beta regressions are often 0 or 1 inflated. Both should be tested with testZeroInflation or testGeneric.
+Proportional data expressed as percentage or fractions of a whole, i.e. non-count-based data, is often modeled with beta regressions. Those can be tested with DHARMa. Note that beta regressions are often 0 or 1 inflated. Both should be tested with testZeroInflation or testGeneric.
 
-Note: discrete proportions, of the type k/n should NOT be modeled with the beta regression. Use the binomial (see below).
+techniques for analysing continuous (also called non-count-based or non-binomial) proportions (e.g. percent cover, fraction time spent on an activity)
+
+Note: discrete proportions, i.e. count-based proportions, of the type k/n should NOT be modeled with the beta regression. Use the binomial (see below).
 
 ## Binomial data
 
@@ -652,7 +664,10 @@ A k/n response, in particular when n is large, will behave similar to the Poisso
 Things are a bit different for the 0/1 response. Let's look at the residuals of a clearly misspecified binomial model (missing predictor) with 0/1 response data.
 
 ```{r}
-testData = createData(sampleSize = 500, overdispersion = 0, fixedEffects = 5, family = binomial(), randomEffectVariance = 3, numGroups = 25)
+testData = createData(sampleSize = 500, overdispersion = 0, fixedEffects = 5, 
+                      family = binomial(), randomEffectVariance = 3, 
+                      numGroups = 25)
+
 fittedModel <- glm(observedResponse ~ 1, family = "binomial", data = testData)
 
 simulationOutput <- simulateResiduals(fittedModel = fittedModel)
@@ -664,38 +679,38 @@ If you would do the same with a binomial k/n response or count data, such a miss
 plot(simulationOutput, asFactor = T)
 ```
 
-even though the misfit is clearly visible if we plot the residauls against the missing predictor.
+Even though the misfit is clearly visible if we plot the residuals against the missing predictor.
 
 ```{r}
 plotResiduals(simulationOutput, testData$Environment1, quantreg = T)
 ```
 
-However, we can see the overdispersion arising from the misfit if we group our residuals, which basically basically transforms the 0/1 response in a k/n response.
+However, we can see the overdispersion arising from the misfit if we group our residuals, which basically transforms the 0/1 response in a k/n response.
 
-To show this, let's look at the dispersion test for the same model, once ungrouped (left), and grouped according the variable group which was in the data (right).
+To show this, let's look at the dispersion test for the same model, once ungrouped (left), and grouped according to the variable group which was in the data (right).
 
 ```{r}
 par(mfrow = c(1,2))
 testDispersion(simulationOutput)
 
-simulationOutput = recalculateResiduals(simulationOutput , group = testData$group)
-testDispersion(simulationOutput)
+simulationOutput2 = recalculateResiduals(simulationOutput, group = testData$group)
+testDispersion(simulationOutput2)
 ```
 
 In general, you can group according to any variable that you like, including continous variables or space. However, some variables make more sense than others. To understand this, consider a simulation where we create binonial data with true probabilities p, drawn from a uniform distribution:
 
 ```{r}
 n = 1000
-p = runif(n, 0.1,0.9) # true probabilities
-obs = rbinom(n,1,p)
+p = runif(n, 0.1, 0.9) # true probabilities
+obs = rbinom(n, 1, p)
 ```
 
-The important thing to note here is that rbinom(n,1,p) will generate an identical overall distribution as rbinom(1,n,mean(p)). What that means: a misfit of the prediction will not show up unless they are wrong in the overall mean. Consequenly, if we fit
+The important thing to note here is that `rbinom(n, 1, p)` will generate an identical overall distribution as `rbinom(1, n, mean(p))`. What that means: a misfit of the prediction will not show up unless they are wrong in the overall mean. Consequenly, if we fit:
 
 ```{r}
-fit<-glm(obs ~ 1, family = "binomial") # wrong model, assumes equal probabilities
+fit <- glm(obs ~ 1, family = "binomial") # wrong model, assumes equal probabilities
 library(DHARMa)
-res<-simulateResiduals(fit, plot = T) # nothing to see
+res <- simulateResiduals(fit, plot = T) # nothing to see
 ```
 
 We see no misfit, and neither do we see a misfit when we group the data points randomly, as the mean of a random group is still fit well by the overall mean.
@@ -705,7 +720,7 @@ res2 <- recalculateResiduals(res, group = rep(1:20, each = 10))
 plot(res2) 
 ```
 
-However, we see thes misfit / overdispersion if we aggregate according to something that is correlated to the misfit. For our example, let's just group according to the true means.
+However, we see thes misfit / overdispersion if we aggregate according to something that is correlated to the misfit. For our example, let's just group according to the true means:
 
 ```{r}
 grouping = cut(p, breaks = quantile(p, seq(0,1,0.02)))
@@ -717,45 +732,60 @@ In this case, the groups have a different mean than the fitted grand mean, and t
 
 If you don't have a natural grouping variable, you can introduce arbitrary grouping variables, e.g. via discretising a predictor or the response (usually preferable), and grouping according to that, or via discretising space (e.g. group observation in spatial blocks). The pattern appears only, however, if the grouping variable correlates with the model error. Consider the following example:
 
+We create data and fit a model with a missing predictor (Environment2):
+
 ```{r}
 set.seed(123)
 
-# created data and fit with a missing predictor (Environment2)
-
 testData = createData(sampleSize = 500, overdispersion = 0, fixedEffects = c(0,3), family = binomial(), randomEffectVariance = 3, numGroups = 50)
-fittedModel <- glm(observedResponse ~ Environment1, family = "binomial", data = testData)
+```
 
+Apparently, no problem with the residuals for the misfitted model:
+
+```{r}
 res <- simulateResiduals(fittedModel = fittedModel)
+fittedModel <- glm(observedResponse ~ Environment1, family = "binomial", 
+                   data = testData)
 plot(res)
+```
 
-# grouping according to RE produces overdispersion because RE is missing in the model 
+1.  Grouping according to the RE produces overdispersion because RE is missing in the first model:
 
+```{r}
 res2 = recalculateResiduals(res , group = testData$group)
 plot(res2)
+```
 
-# grouping according to random factor does not produce an effect, wrt. to this the model has correct dispersion
+2.  Grouping according to a random factor does not produce an effect. In this respect, the model has correct dispersion:
 
+```{r}
 grouping = as.factor(sample.int(50, 500, replace = T))
 
 res2 = recalculateResiduals(res , group = grouping)
 plot(res2)
+```
 
-# grouping according to response doesn't create a pattern
+3.  Grouping according to the response doesn't create a pattern:
 
+```{r}
 x = predict(fittedModel)
 grouping = cut(x, breaks = quantile(x, seq(0,1,0.02)))
 res2 = recalculateResiduals(res , group = grouping)
 plot(res2)
+```
 
-# grouping according to missing variable creates pattern, because wrt. to this variable, the model is overdispersed
+4.  Grouping according to the missing variable creates pattern, because in relation to this variable, the model is overdispersed:
 
+```{r}
 x = testData$Environment2
 grouping = cut(x, breaks = quantile(x, seq(0,1,0.02)))
 res2 = recalculateResiduals(res , group = grouping)
 plot(res2)
+```
 
-# grouping according to space does not create a pattern, because there is no missing spatial predictor
+5.  Grouping according to space does not create a pattern, because there is no missing spatial predictor:
 
+```{r}
 x = testData$x
 grouping = cut(x, breaks = quantile(x, seq(0,1,0.02)))
 res3 = recalculateResiduals(res , group = grouping)
