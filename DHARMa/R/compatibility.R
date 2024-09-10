@@ -779,12 +779,3 @@ getFamily.phyloglm <- function (object,...){
   return(out)
 }
 
-
-#' @rdname getFamily
-#' @export
-getFamily.phyloglm <- function (object,...){
-  out = list()
-  # out$family = object$method
-  out$family = "integer-valued" # all families of phyloglm are integer-valued
-  return(out)
-}
