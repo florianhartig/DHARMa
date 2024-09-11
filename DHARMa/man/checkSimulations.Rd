@@ -14,6 +14,6 @@ checkSimulations(simulatedResponse, nObs, nSim)
 \item{nSim}{number of simulations}
 }
 \description{
-The function checks if the simulated data seems fine
+The function checks if the simulated data seems fine.
 }
 \keyword{internal}

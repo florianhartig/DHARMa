@@ -22,14 +22,14 @@ getRefit(object, newresp, ...)
 \method{getRefit}{MixMod}(object, newresp, ...)
 }
 \arguments{
-\item{object}{a fitted model}
+\item{object}{a fitted model.}
 
-\item{newresp}{the new response that should be used to refit the model}
+\item{newresp}{the new response that should be used to refit the model.}
 
-\item{...}{additional parameters to be passed on to the refit or update class that is used to refit the model}
+\item{...}{additional parameters to be passed on to the refit or update class that is used to refit the model.}
 }
 \description{
-Wrapper to refit a fitted model
+Wrapper to refit a fitted model.
 }
 \details{
 The purpose of this wrapper is to standardize the refit of a model. The behavior of this function depends on the supplied model. When available, it uses the refit method, otherwise it will use update. For glmmTMB: since version 1.0, glmmTMB has a refit function, but this didn't work, so I switched back to this implementation, which is a hack based on the update function.
