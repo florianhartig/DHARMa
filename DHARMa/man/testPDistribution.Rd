@@ -2,22 +2,22 @@
 % Please edit documentation in R/runBenchmarks.R
 \name{testPDistribution}
 \alias{testPDistribution}
-\title{Plot distribution of p-values}
+\title{Plot distribution of p-values.}
 \usage{
 testPDistribution(x, plot = TRUE,
   main = "p distribution \\n expected is flat at 1", ...)
 }
 \arguments{
-\item{x}{vector of p values}
+\item{x}{vector of p values.}
 
-\item{plot}{should the values be plotted}
+\item{plot}{should the values be plotted.}
 
-\item{main}{title for the plot}
+\item{main}{title for the plot.}
 
-\item{...}{additional arguments to hist}
+\item{...}{additional arguments to hist.}
 }
 \description{
-Plot distribution of p-values
+Plot distribution of p-values.
 }
 \author{
 Florian Hartig

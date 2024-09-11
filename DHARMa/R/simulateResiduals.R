@@ -2,7 +2,7 @@
 #'
 #' The function creates scaled residuals by simulating from the fitted model. Residuals can be extracted with \code{\link{residuals.DHARMa}}. See \code{\link{testResiduals}} for an overview of residual tests, \code{\link{plot.DHARMa}} for an overview of available plots.
 #'
-#' @param fittedModel a fitted model  of a class supported by DHARMa
+#' @param fittedModel a fitted model  of a class supported by DHARMa.
 #' @param n number of simulations. The smaller the number, the higher the stochastic error on the residuals. Also, for very small n, discretization artefacts can influence the tests. Default is 250, which is a relatively safe value. You can consider increasing to 1000 to stabilize the simulated values. 
 #' @param refit if FALSE, new data will be simulated and scaled residuals will be created by comparing observed data with new data. If TRUE, the model will be refit on the simulated data (parametric bootstrap), and scaled residuals will be created by comparing observed with refitted residuals.
 #' @param integerResponse if TRUE, noise will be added at to the residuals to maintain a uniform expectations for integer responses (such as Poisson or Binomial). Usually, the model will automatically detect the appropriate setting, so there is no need to adjust this setting.
@@ -16,17 +16,17 @@
 #'
 #' \strong{Re-simulating random effects / hierarchical structure}: in a hierarchical model, we have several stochastic processes aligned on top of each other. Specifically, in a GLMM, we have a lower level stochastic process (random effect), whose result enters into a higher level (e.g. Poisson distribution). For other hierarchical models such as state-space models, similar considerations apply.
 #'
-#' In such a situation, we have to decide if we want to re-simulate all stochastic levels, or only a subset of those. For example, in a GLMM, it is common to only simulate the last stochastic level (e.g. Poisson) conditional on the fitted random effects. This is often referred to as a conditional simuation. For controlling how many levels should be re-simulated, the simulateResidual function allows to pass on parameters to the simulate function of the fitted model object. Please refer to the help of the different simulate functions (e.g. ?simulate.merMod) for details. For merMod (lme4) model objects, the relevant parameters are parameters are use.u and re.form
+#' In such a situation, we have to decide if we want to re-simulate all stochastic levels, or only a subset of those. For example, in a GLMM, it is common to only simulate the last stochastic level (e.g. Poisson) conditional on the fitted random effects. This is often referred to as a conditional simuation. For controlling how many levels should be re-simulated, the simulateResidual function allows to pass on parameters to the simulate function of the fitted model object. Please refer to the help of the different simulate functions (e.g. ?simulate.merMod) for details. For merMod (lme4) model objects, the relevant parameters are parameters are use.u and re.form.
 #'
 #' If the model is correctly specified, the simulated residuals should be flat regardless how many hierarchical levels we re-simulate. The most thorough procedure would therefore be to test all possible options. If testing only one option, I would recommend to re-simulate all levels, because this essentially tests the model structure as a whole. This is the default setting in the DHARMa package. A potential drawback is that re-simulating the lower-level random effects creates more variability, which may reduce power for detecting problems in the upper-level stochastic processes. In particular dispersion tests may produce different results when switching from conditional to unconditional simulations, and often the conditional simulation is more sensitive.
 #'
 #' \strong{Refitting or not}: a third issue is how residuals are calculated. simulateResiduals has two options that are controlled by the refit parameter:
 #'
-#' 1. if refit = FALSE (default), new data is simulated from the fitted model, and residuals are calculated by comparing the observed data to the new data
+#' 1. if refit = FALSE (default), new data is simulated from the fitted model, and residuals are calculated by comparing the observed data to the new data.
 #'
 #' 2. if refit = TRUE, a parametric bootstrap is performed, meaning that the model is refit on the new data, and residuals are created by comparing observed residuals against refitted residuals. I advise against using this method per default (see more comments in the vignette), unless you are really sure that you need it.
 #'
-#' \strong{Residuals per group}: In many situations, it can be useful to look at residuals per group, e.g. to see how much the model over / underpredicts per plot, year or subject. To do this, use \code{\link{recalculateResiduals}}, together with a grouping variable (see also help)
+#' \strong{Residuals per group}: In many situations, it can be useful to look at residuals per group, e.g. to see how much the model over / underpredicts per plot, year or subject. To do this, use \code{\link{recalculateResiduals}}, together with a grouping variable (see also help).
 #'
 #' \strong{Transformation to other distributions}: DHARMa calculates residuals for which the theoretical expectation (assuming a correctly specified model) is uniform. To transform this residuals to another distribution (e.g. so that a correctly specified model will have normal residuals) see \code{\link{residuals.DHARMa}}.
 #' 
@@ -48,7 +48,7 @@ simulateResiduals <- function(fittedModel, n = 250, refit = FALSE, integerRespon
   if (n < 2) stop("error in DHARMa::simulateResiduals: n > 1 is required to calculate scaled residuals")
   checkModel(fittedModel)
   match.arg(method)
-  randomState <-getRandomState(seed)
+  randomState <- getRandomState(seed)
   on.exit({randomState$restoreCurrent()})
   ptm <- proc.time()
   
@@ -68,7 +68,7 @@ simulateResiduals <- function(fittedModel, n = 250, refit = FALSE, integerRespon
   out$observedResponse = getObservedResponse(fittedModel)
   
   # this is to check for problem #325
-  if (out$nObs < length(out$observedResponse)) stop("DHARMA::simulateResiduals: nobs(model) < nrow(model.frame). A possible reason is that you have observation with zero prior weights (ir binomial with n=0) in your data. Calculating residuals in this case wouldn't be sensible. Please remove zero-weight observations from your data and re-fit your model! If you believe that this is not the reason, please file an issue under https://github.com/florianhartig/DHARMa/issues")
+  if (out$nObs < length(out$observedResponse)) stop("DHARMA::simulateResiduals: nobs(model) < nrow(model.frame). A possible reason is that you have observation with zero prior weights (in binomial with n=0) in your data. Calculating residuals in this case wouldn't be sensible. Please remove zero-weight observations from your data and re-fit your model! If you believe that this is not the reason, please file an issue under https://github.com/florianhartig/DHARMa/issues")
   
   if(is.null(integerResponse)){
     if (family$family %in% c("integer-valued", "binomial", "poisson", "quasibinomial", "quasipoisson", "Negative Binom", "nbinom2", "nbinom1", "genpois", "compois", "truncated_poisson", "truncated_nbinom2", "truncated_nbinom1", "betabinomial", "Poisson", "Tpoisson", "COMPoisson", "negbin", "Tnegbin") | grepl("Negative Binomial",family$family) ) integerResponse = TRUE
@@ -165,7 +165,7 @@ simulateResiduals <- function(fittedModel, n = 250, refit = FALSE, integerRespon
 
 #' Check simulated data
 #'
-#' The function checks if the simulated data seems fine
+#' The function checks if the simulated data seems fine.
 #'
 #' @param simulatedResponse the simulated response
 #' @param nObs number of observations
@@ -190,7 +190,7 @@ checkSimulations <- function(simulatedResponse, nObs, nSim){
 
 #' Recalculate residuals with grouping
 #'
-#' The purpose of this function is to recalculate scaled residuals per group, based on the simulations done by \code{\link{simulateResiduals}}
+#' The purpose of this function is to recalculate scaled residuals per group, based on the simulations done by \code{\link{simulateResiduals}}.
 #'
 #' @param simulationOutput an object with simulated residuals created by \code{\link{simulateResiduals}}
 #' @param group group of each data point

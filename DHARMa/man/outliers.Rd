@@ -8,16 +8,16 @@ outliers(object, lowerQuantile = 0, upperQuantile = 1,
   return = c("index", "logical"))
 }
 \arguments{
-\item{object}{an object with simulated residuals created by \code{\link{simulateResiduals}}}
+\item{object}{an object with simulated residuals created by \code{\link{simulateResiduals}}.}
 
-\item{lowerQuantile}{lower threshold for outliers. Default is zero = outside simulation envelope}
+\item{lowerQuantile}{lower threshold for outliers. Default is zero = outside simulation envelope.}
 
-\item{upperQuantile}{upper threshold for outliers. Default is 1 = outside simulation envelope}
+\item{upperQuantile}{upper threshold for outliers. Default is 1 = outside simulation envelope.}
 
-\item{return}{wheter to return an indices of outliers or a logical vector}
+\item{return}{wheter to return an indices of outliers or a logical vector.}
 }
 \description{
-Returns the outliers of a DHARMa object
+Returns the outliers of a DHARMa object.
 }
 \details{
 First of all, note that the standard definition of outlier in the DHARMa plots and outlier tests is an observation that is outside the simulation envelope. How far outside that is depends a lot on how many simulations you do. If you have 100 data points and to 100 simulations, you would expect to have one "outlier" on average, even with a perfectly fitting model. This is in fact what the outlier test tests.

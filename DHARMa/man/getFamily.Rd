@@ -18,17 +18,17 @@ getFamily(object, ...)
 \method{getFamily}{phyloglm}(object, ...)
 }
 \arguments{
-\item{object}{a fitted model}
+\item{object}{a fitted model.}
 
-\item{...}{additional parameters to be passed on}
+\item{...}{additional parameters to be passed on.}
 }
 \description{
-Wrapper to get the family of a fitted model
+Wrapper to get the family of a fitted model.
 
-checks if the fitted model excluded NA values
+checks if the fitted model excluded NA values.
 }
 \details{
-Checks if the fitted model excluded NA values
+Checks if the fitted model excluded NA values.
 }
 \seealso{
 \code{\link{getObservedResponse}}, \code{\link{getSimulations}}, \code{\link{getRefit}}, \code{\link{getFixedEffects}}, \code{\link{getFitted}}
