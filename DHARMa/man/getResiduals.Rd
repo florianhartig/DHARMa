@@ -45,7 +45,7 @@ getRefit(fittedModel, x[[1]])
 getRefit(fittedModel, getObservedResponse(fittedModel))
 }
 \seealso{
-\code{\link{getObservedResponse}}, \code{\link{getSimulations}}, \code{\link{getRefit}}, \code{\link{getFixedEffects}}, \code{\link{getFitted}}
+\link{getObservedResponse}, \link{getSimulations}, \link{getRefit}, \link{getFixedEffects}, \link{getFitted}
 }
 \author{
 Florian Hartig

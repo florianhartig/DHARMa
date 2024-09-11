@@ -79,7 +79,7 @@ weightsWarning = "Model was fit with prior weights. These will be ignored in the
 #'
 #' @example inst/examples/wrappersHelp.R
 #'
-#' @seealso \code{\link{getRefit}}, \code{\link{getSimulations}}, \code{\link{getFixedEffects}}, \code{\link{getFitted}}
+#' @seealso [getRefit], [getSimulations], [getFixedEffects], [getFitted]
 #' @author Florian Hartig
 #' @export
 getObservedResponse <- function (object, ...) {
@@ -99,7 +99,7 @@ getObservedResponse <- function (object, ...) {
 #' @return A matrix with simulations.
 #' @example inst/examples/wrappersHelp.R
 #'
-#' @seealso \code{\link{getObservedResponse}}, \code{\link{getRefit}}, \code{\link{getFixedEffects}}, \code{\link{getFitted}}
+#' @seealso [getObservedResponse], [getRefit], [getFixedEffects], [getFitted]
 #'
 #' @details The purpose of this function is to wrap or implement the simulate function of different model classes and thus return simulations from fitted models in a standardized way.
 #'
@@ -122,7 +122,7 @@ getSimulations <- function (object, nsim = 1 , type = c("normal", "refit"), ...)
 #' @param object a fitted model.
 #' @param ... additional parameters.
 #' @example inst/examples/wrappersHelp.R
-#' @seealso \code{\link{getObservedResponse}}, \code{\link{getSimulations}}, \code{\link{getRefit}}, \code{\link{getFitted}}
+#' @seealso [getObservedResponse], [getSimulations], [getRefit], [getFitted]
 #' @export
 getFixedEffects <- function(object, ...){
   UseMethod("getFixedEffects", object)
@@ -141,7 +141,7 @@ getFixedEffects <- function(object, ...){
 #'
 #' @example inst/examples/wrappersHelp.R
 #'
-#' @seealso \code{\link{getObservedResponse}}, \code{\link{getSimulations}}, \code{\link{getFixedEffects}}
+#' @seealso [getObservedResponse], [getSimulations], [getFixedEffects]
 #' @author Florian Hartig
 #' @export
 getRefit <- function (object, newresp, ...) {
@@ -161,7 +161,7 @@ getRefit <- function (object, newresp, ...) {
 #'
 #' @example inst/examples/wrappersHelp.R
 #'
-#' @seealso \code{\link{getObservedResponse}}, \code{\link{getSimulations}}, \code{\link{getRefit}}, \code{\link{getFixedEffects}}
+#' @seealso [getObservedResponse], [getSimulations], [getRefit], [getFixedEffects]
 #'
 #' @author Florian Hartig
 #' @export
@@ -183,7 +183,7 @@ getFitted <- function (object, ...) {
 #'
 #' @example inst/examples/wrappersHelp.R
 #'
-#' @seealso \code{\link{getObservedResponse}}, \code{\link{getSimulations}}, \code{\link{getRefit}}, \code{\link{getFixedEffects}}, \code{\link{getFitted}}
+#' @seealso [getObservedResponse], [getSimulations], [getRefit], [getFixedEffects], [getFitted]
 #'
 #' @author Florian Hartig
 #' @export
@@ -205,7 +205,7 @@ getResiduals <- function (object, ...) {
 #'
 #' @example inst/examples/wrappersHelp.R
 #'
-#' @seealso \code{\link{getObservedResponse}}, \code{\link{getSimulations}}, \code{\link{getRefit}}, \code{\link{getFixedEffects}}, \code{\link{getFitted}}
+#' @seealso [getObservedResponse], [getSimulations], [getRefit], [getFixedEffects], [getFitted]
 #'
 #' @author Florian Hartig
 #' @export
@@ -220,7 +220,7 @@ getPearsonResiduals <- function (object, ...) {
 #' @param object a fitted model.
 #' @param ... additional parameters to be passed on.
 #'
-#' @seealso \code{\link{getObservedResponse}}, \code{\link{getSimulations}}, \code{\link{getRefit}}, \code{\link{getFixedEffects}}, \code{\link{getFitted}}
+#' @seealso [getObservedResponse], [getSimulations], [getRefit], [getFixedEffects], [getFitted]
 #'
 #' @author Florian Hartig
 #' @export

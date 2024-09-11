@@ -40,14 +40,14 @@ DHARMa.ecdf <- function (x)
 #'
 #' Before DHARMa 0.3.1, a different randomization procedure was used, in which the a U(-0.5, 0.5) distribution was added on observations and simulations for discrete distributions. For a completely discrete distribution, the two procedures should deliver equivalent results, but the second method has the disadvantage that a) one has to know if the distribution is discrete (DHARMa tries to recognize this automatically), and b) that it leads to inefficiencies for some distributions such as the Tweedie, which are partly continuous, partly discrete
 #' (see e.g. [issue #168](https://github.com/florianhartig/DHARMa/issues/168)).
-#' 
+#'
 #' **Rotation (optional)**
-#' 
-#' The getQuantile function includes an additional option to rotate residuals. This option should ONLY be used when the fitted model includes a particular residuals covariance structure, such as an AR1 or a spatial CAR model. 
-#' 
+#'
+#' The getQuantile function includes an additional option to rotate residuals. This option should ONLY be used when the fitted model includes a particular residuals covariance structure, such as an AR1 or a spatial CAR model.
+#'
 #' For these models, residuals calculated from unconditional simulations will include the specified covariance structure, which will trigger e.g. temporal autocorrelation tests and can inflate type I errors of other tests. The idea of the rotation is to rotate the residual space according to the covariance structure of the fitted model, such that the rotated residuals are conditional independent (provided the fitted model is correct).
-#'  
-#' If the residual covariance of the fitted model at the response scale can be extracted (e.g. when fitting gls type models), it would be best to extract it and provide this covariance matrix to the rotation option. If that is not the case, providing the argument "estimated" to rotation will estimate the covariance from the data simulated by the model. This is probably without alternative for GLMMs, where the covariance at the response scale is likely not known / provided, but note, that this approximation will tend to have considerable error and may be slow to compute for high-dimensional data. If you try to estimate the rotation from simulations, you should set n as high as possible! See [testTemporalAutocorrelation] for a practical example. 
+#'
+#' If the residual covariance of the fitted model at the response scale can be extracted (e.g. when fitting gls type models), it would be best to extract it and provide this covariance matrix to the rotation option. If that is not the case, providing the argument "estimated" to rotation will estimate the covariance from the data simulated by the model. This is probably without alternative for GLMMs, where the covariance at the response scale is likely not known / provided, but note, that this approximation will tend to have considerable error and may be slow to compute for high-dimensional data. If you try to estimate the rotation from simulations, you should set n as high as possible! See [testTemporalAutocorrelation] for a practical example.
 #'
 #' @references
 #'
@@ -68,7 +68,7 @@ getQuantile <- function(simulations, observed, integerResponse, method = c("PIT"
 
 
   if(method == "traditional"){
-    
+
     if(!is.null(rotation)) stop("rotation can only be used with PIT residuals")
 
     if(integerResponse == F){
@@ -79,7 +79,7 @@ getQuantile <- function(simulations, observed, integerResponse, method = c("PIT"
       if(length(values) > 0){
         if (all(values%%1==0)){
           integerResponse = T
-          message("Model family was recognized or set as continuous, but duplicate values were detected in the simulation - changing to integer residuals (see ?simulateResiduals for details)")
+          message("Model family was recognized or set as continuous, but duplicate values were detected in the simulation - changing to integer residuals (see ?simulateResiduals for details).")
         } else {
           message("Duplicate non-integer values found in the simulation. If this is because you are fitting a non-inter valued discrete response model, note that DHARMa does not perform appropriate randomization for such cases.")
         }
@@ -97,28 +97,28 @@ getQuantile <- function(simulations, observed, integerResponse, method = c("PIT"
     }
 
   } else {
-    
-    # optional rotation before PIT 
+
+    # optional rotation before PIT
     if(!is.null(rotation)){
       if(is.character(rotation) && rotation == "estimated"){
         covar = Matrix::nearPD(cov(t(simulations)))$mat
         L = t(as.matrix(Matrix::chol(covar)))
-      } 
+      }
       else if(is.matrix(rotation)) L <- t(chol(rotation))
-      else stop("DHARMa::getQuantile - wrong argument to rotation parameter")
+      else stop("DHARMa::getQuantile - wrong argument to rotation parameter.")
       observed <- solve(L, observed)
       simulations = apply(simulations, 2, function(a) solve(L, a))
     }
 
     scaledResiduals = rep(NA, n)
     for (i in 1:n){
-      minSim <- mean(simulations[i,] < observed[i]) 
-      maxSim <- mean(simulations[i,] <= observed[i]) 
+      minSim <- mean(simulations[i,] < observed[i])
+      maxSim <- mean(simulations[i,] <= observed[i])
       if (minSim == maxSim) scaledResiduals[i] = minSim
       else scaledResiduals[i] = runif(1, minSim, maxSim)
     }
   }
-  
+
   return(scaledResiduals)
 }
 

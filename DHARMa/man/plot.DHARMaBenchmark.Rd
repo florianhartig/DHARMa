@@ -7,12 +7,12 @@
 \method{plot}{DHARMaBenchmark}(x, ...)
 }
 \arguments{
-\item{x}{object of class DHARMaBenchmark, created by \code{\link{runBenchmarks}}.}
+\item{x}{object of class DHARMaBenchmark, created by \link{runBenchmarks}.}
 
 \item{...}{parameters to pass to the plot function.}
 }
 \description{
-The function plots the result of an object of class DHARMaBenchmark, created by \code{\link{runBenchmarks}}.
+The function plots the result of an object of class DHARMaBenchmark, created by \link{runBenchmarks}.
 }
 \details{
 The function will create two types of plots, depending on whether the run contains only a single value (or no value) of the control parameter, or whether a vector of control values is provided:
@@ -22,5 +22,5 @@ If a single or no value of the control parameter is provided, the function will 
 If a control parameter is provided, the function will plot the proportion of significant p-values against the control parameter, with 95\% CIs based based on the performed replicates displayed as confidence bands.
 }
 \seealso{
-\code{\link{runBenchmarks}}
+\link{runBenchmarks}
 }

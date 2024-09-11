@@ -79,5 +79,5 @@ plot(simulationOutput, quantreg = FALSE)
 
 }
 \seealso{
-\code{\link{plotSimulatedResiduals}}, \code{\link{plotResiduals}}
+\link{plotSimulatedResiduals}, \link{plotResiduals}
 }

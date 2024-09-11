@@ -8,17 +8,17 @@ testUniformity(simulationOutput, alternative = c("two.sided", "less",
   "greater"), plot = TRUE)
 }
 \arguments{
-\item{simulationOutput}{an object of class DHARMa, either created via \code{\link{simulateResiduals}} for supported models or by \code{\link{createDHARMa}} for simulations created outside DHARMa, or a supported model. Providing a supported model directly is discouraged, because simulation settings cannot be changed in this case.}
+\item{simulationOutput}{an object of class DHARMa, either created via \link{simulateResiduals} for supported models or by \link{createDHARMa} for simulations created outside DHARMa, or a supported model. Providing a supported model directly is discouraged, because simulation settings cannot be changed in this case.}
 
-\item{alternative}{a character string specifying whether the test should test if observations are "greater", "less" or "two.sided" compared to the simulated null hypothesis. See \code{\link[stats]{ks.test}} for details}
+\item{alternative}{a character string specifying whether the test should test if observations are "greater", "less" or "two.sided" compared to the simulated null hypothesis. See \link[stats:ks.test]{stats::ks.test} for details}
 
-\item{plot}{if TRUE, plots calls \code{\link{plotQQunif}} as well}
+\item{plot}{if TRUE, plots calls \link{plotQQunif} as well}
 }
 \description{
 This function tests the overall uniformity of the simulated residuals in a DHARMa object
 }
 \details{
-The function applies a \code{\link[stats]{ks.test}} for uniformity on the simulated residuals.
+The function applies a \link[stats:ks.test]{stats::ks.test} for uniformity on the simulated residuals.
 }
 \examples{
 testData = createData(sampleSize = 100, overdispersion = 0.5, randomEffectVariance = 0)
@@ -62,7 +62,7 @@ spread <- function(x) sd(x) # testing if mean sd fits
 testGeneric(simulationOutput, summary = spread)
 }
 \seealso{
-\code{\link{testResiduals}}, \code{\link{testUniformity}}, \code{\link{testOutliers}}, \code{\link{testDispersion}}, \code{\link{testZeroInflation}}, \code{\link{testGeneric}}, \code{\link{testTemporalAutocorrelation}}, \code{\link{testSpatialAutocorrelation}}, \code{\link{testQuantiles}}, \code{\link{testCategorical}}
+\link{testResiduals}, \link{testUniformity}, \link{testOutliers}, \link{testDispersion}, \link{testZeroInflation}, \link{testGeneric}, \link{testTemporalAutocorrelation}, \link{testSpatialAutocorrelation}, \link{testQuantiles}, \link{testCategorical}
 }
 \author{
 Florian Hartig

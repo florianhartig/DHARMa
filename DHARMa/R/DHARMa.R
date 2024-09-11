@@ -1,17 +1,17 @@
 
 
-#' @keywords internal 
+#' @keywords internal
 #' @references vignette("DHARMa", package="DHARMa")
 #' @details
 #' To get started with the package, look at the vignette and start with [simulateResiduals]
-#' 
+#'
 "_PACKAGE"
 
 
 
 #' Print simulated residuals
 #'
-#' @param x an object with simulated residuals created by \code{\link{simulateResiduals}}.
+#' @param x an object with simulated residuals created by [simulateResiduals].
 #' @param ... optional arguments for compatibility with the generic function, no function implemented.
 #' @export
 print.DHARMa <- function(x, ...){
@@ -24,7 +24,7 @@ print.DHARMa <- function(x, ...){
 
 #' Return residuals of a DHARMa simulation
 #'
-#' @param object an object with simulated residuals created by \code{\link{simulateResiduals}}
+#' @param object an object with simulated residuals created by [simulateResiduals]
 #' @param quantileFunction optional - a quantile function to transform the uniform 0/1 scaling of DHARMa to another distribution
 #' @param outlierValues if a quantile function with infinite support (such as dnorm) is used, residuals that are 0/1 are mapped to -Inf / Inf. outlierValues allows to convert -Inf / Inf values to an optional min / max value.
 #' @param ... optional arguments for compatibility with the generic function, no function implemented
@@ -55,7 +55,7 @@ residuals.DHARMa <- function(object, quantileFunction = NULL, outlierValues = NU
 #'
 #' Returns the outliers of a DHARMa object.
 #'
-#' @param object an object with simulated residuals created by \code{\link{simulateResiduals}}.
+#' @param object an object with simulated residuals created by [simulateResiduals].
 #' @param lowerQuantile lower threshold for outliers. Default is zero = outside simulation envelope.
 #' @param upperQuantile upper threshold for outliers. Default is 1 = outside simulation envelope.
 #' @param return wheter to return an indices of outliers or a logical vector.
@@ -64,7 +64,7 @@ residuals.DHARMa <- function(object, quantileFunction = NULL, outlierValues = NU
 #'
 #' Thus, keep in mind that for a small number of simulations, outliers are mostly a technical term: these are points that are outside our simulations, but we don't know how far away they are.
 #'
-#' If you are seriously interested in HOW FAR outside the expected distribution a data point is, you should increase the number of simulations in \code{\link{simulateResiduals}} to be sure to get the tail of the data distribution correctly. In this case, it may make sense to adjust lowerQuantile and upperQuantile, e.g. to 0.025, 0.975, which would define outliers as values outside the central 95% of the distribution.
+#' If you are seriously interested in HOW FAR outside the expected distribution a data point is, you should increase the number of simulations in [simulateResiduals] to be sure to get the tail of the data distribution correctly. In this case, it may make sense to adjust lowerQuantile and upperQuantile, e.g. to 0.025, 0.975, which would define outliers as values outside the central 95% of the distribution.
 #'
 #' Also, note that outliers are particularly concerning if they have a strong influence on the model fit. One could test the influence, for example, by removing them from the data, or by some meausures of leverage, e.g. generalisations for Cook's distance as in Pinho, L. G. B., Nobre, J. S., & Singer, J. M. (2015). Cook’s distance for generalized linear mixed models. Computational Statistics & Data Analysis, 82, 126–136. doi:10.1016/j.csda.2014.08.008. At the moment, however, no such function is provided in DHARMa.
 #'
@@ -87,10 +87,10 @@ outliers <- function(object, lowerQuantile = 0, upperQuantile = 1, return = c("i
 #' @param simulatedResponse matrix of observations simulated from the fitted model - row index for observations and colum index for simulations.
 #' @param observedResponse true observations.
 #' @param fittedPredictedResponse optional fitted predicted response. For Bayesian posterior predictive simulations, using the median posterior prediction as fittedPredictedResponse is recommended. If not provided, the mean simulatedResponse will be used.
-#' @param integerResponse if T, noise will be added at to the residuals to maintain a uniform expectations for integer responses (such as Poisson or Binomial). Unlike in \code{\link{simulateResiduals}}, the nature of the data is not automatically detected, so this MUST be set by the user appropriately.
+#' @param integerResponse if T, noise will be added at to the residuals to maintain a uniform expectations for integer responses (such as Poisson or Binomial). Unlike in [simulateResiduals], the nature of the data is not automatically detected, so this MUST be set by the user appropriately.
 #' @param seed the random seed to be used within DHARMa. The default setting, recommended for most users, is keep the random seed on a fixed value 123. This means that you will always get the same randomization and thus teh same result when running the same code. NULL = no new seed is set, but previous random state will be restored after simulation. FALSE = no seed is set, and random state will not be restored. The latter two options are only recommended for simulation experiments. See vignette for details.
-#' @param method the quantile randomization method used. The two options implemented at the moment are probability integral transform (PIT-) residuals (current default), and the "traditional" randomization procedure, that was used in DHARMa until version 0.3.0. For details, see \code{\link{getQuantile}}.
-#' @param rotation optional rotation of the residual space to remove residual autocorrelation. See details in [simulateResiduals], section *residual auto-correlation* for an extended explanation, and [getQuantile] for syntax. 
+#' @param method the quantile randomization method used. The two options implemented at the moment are probability integral transform (PIT-) residuals (current default), and the "traditional" randomization procedure, that was used in DHARMa until version 0.3.0. For details, see [getQuantile].
+#' @param rotation optional rotation of the residual space to remove residual autocorrelation. See details in [simulateResiduals], section *residual auto-correlation* for an extended explanation, and [getQuantile] for syntax.
 #' @details The use of this function is to convert simulated residuals (e.g. from a point estimate, or Bayesian p-values) to a DHARMa object, to make use of the plotting / test functions in DHARMa.
 #' @note Either scaled residuals or (simulatedResponse AND observed response) have to be provided.
 #' @example inst/examples/createDharmaHelp.R
@@ -107,16 +107,16 @@ createDHARMa <- function(simulatedResponse , observedResponse , fittedPredictedR
   out$integerResponse = integerResponse
   out$observedResponse = observedResponse
 
-  if(!is.matrix(simulatedResponse) & !is.null(observedResponse)) stop("either scaled residuals or simulations and observations have to be provided")
+  if(!is.matrix(simulatedResponse) & !is.null(observedResponse)) stop("either scaled residuals or simulations and observations have to be provided.")
   if(ncol(simulatedResponse) < 2) stop("simulatedResponse with less than 2 simulations provided - cannot calculate residuals on that.")
 
-  if(ncol(simulatedResponse) < 10) warning("simulatedResponse with less than 10 simulations provided. This rarely makes sense")
+  if(ncol(simulatedResponse) < 10) warning("simulatedResponse with less than 10 simulations provided. This rarely makes sense.")
 
   out$nObs = length(observedResponse)
 
-  if (out$nObs < 3) stop("warning - number of observations < 3 ... this rarely makes sense")
+  if (out$nObs < 3) stop("warning - number of observations < 3 ... this rarely makes sense.")
 
-  if(! (out$nObs == nrow(simulatedResponse))) stop("dimensions of observedResponse and simulatedResponse do not match")
+  if(! (out$nObs == nrow(simulatedResponse))) stop("dimensions of observedResponse and simulatedResponse do not match.")
 
   out$nSim = ncol(simulatedResponse)
 

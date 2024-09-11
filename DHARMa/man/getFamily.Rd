@@ -26,7 +26,7 @@ getFamily(object, ...)
 Wrapper to get the family of a fitted model.
 }
 \seealso{
-\code{\link{getObservedResponse}}, \code{\link{getSimulations}}, \code{\link{getRefit}}, \code{\link{getFixedEffects}}, \code{\link{getFitted}}
+\link{getObservedResponse}, \link{getSimulations}, \link{getRefit}, \link{getFixedEffects}, \link{getFitted}
 }
 \author{
 Florian Hartig
