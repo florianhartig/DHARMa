@@ -13,12 +13,12 @@ getFixedEffects(object, ...)
 \method{getFixedEffects}{MixMod}(object, ...)
 }
 \arguments{
-\item{object}{a fitted model}
+\item{object}{a fitted model.}
 
-\item{...}{additional parameters}
+\item{...}{additional parameters.}
 }
 \description{
-A wrapper to extract fixed effects of a supported model
+A wrapper to extract fixed effects of a supported model.
 }
 \examples{
 testData = createData(sampleSize = 400, family = gaussian())

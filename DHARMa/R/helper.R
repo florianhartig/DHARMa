@@ -1,6 +1,6 @@
-#' Modified ECDF function
+#' Modified ECDF function.
 #'
-#' @details ensures symmetric ECDF (standard ECDF is <), and that 0 / 1 values are only produced if the data is strictly < > than the observed data
+#' @details ensures symmetric ECDF (standard ECDF is <), and that 0 / 1 values are only produced if the data is strictly < > than the observed data.
 #'
 #' @keywords internal
 DHARMa.ecdf <- function (x)

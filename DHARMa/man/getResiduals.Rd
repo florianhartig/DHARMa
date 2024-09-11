@@ -13,15 +13,15 @@ getResiduals(object, ...)
 \method{getResiduals}{MixMod}(object, ...)
 }
 \arguments{
-\item{object}{a fitted model}
+\item{object}{a fitted model.}
 
-\item{...}{additional parameters to be passed on, usually to the residual function of the respective model class}
+\item{...}{additional parameters to be passed on, usually to the residual function of the respective model class.}
 }
 \description{
-Wrapper to get the residuals of a fitted model
+Wrapper to get the residuals of a fitted model.
 }
 \details{
-The purpose of this wrapper is to standardize extract the model residuals. Similar to some other functions, a key question is whether to calculate those conditional or unconditional on the fitted REs.
+The purpose of this wrapper is to standardize the extraction of model residuals. Similar to some other functions, a key question is whether to calculate those conditional or unconditional on the fitted Random Effects.
 }
 \examples{
 testData = createData(sampleSize = 400, family = gaussian())

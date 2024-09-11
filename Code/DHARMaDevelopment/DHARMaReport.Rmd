@@ -88,7 +88,7 @@ testOutliers(res, type = "binomial")
 ## Overdispersion test 
 
 
-
+```{r}
 library(sjstats) 
 library(performance)
 
@@ -110,6 +110,9 @@ performance::check_overdispersion(fittedModel)
 
 simulationOutput <- simulateResiduals(fittedModel = fittedModel, n = 2000, refit = T)
 testDispersion(simulationOutput)
+```
+
+
 
 
 

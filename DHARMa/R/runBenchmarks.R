@@ -125,16 +125,16 @@ runBenchmarks <- function(calculateStatistics, controlValues = NULL, nRep = 10, 
 
 #' Plots DHARMa benchmarks
 #'
-#' The function plots the result of an object of class DHARMaBenchmark, created by \code{\link{runBenchmarks}}
+#' The function plots the result of an object of class DHARMaBenchmark, created by \code{\link{runBenchmarks}}.
 #'
-#' @param x object of class DHARMaBenchmark, created by \code{\link{runBenchmarks}}
-#' @param ... parameters to pass to the plot function
+#' @param x object of class DHARMaBenchmark, created by \code{\link{runBenchmarks}}.
+#' @param ... parameters to pass to the plot function.
 #'
-#' @details The function will create two types of plots, depending on whether the run contains only a single value (or no value) of the control parameter, or whether a vector of control values was provided.
+#' @details The function will create two types of plots, depending on whether the run contains only a single value (or no value) of the control parameter, or whether a vector of control values is provided:
 #'
-#' If a single or no value of the control parameter was provided, the function will create box plots of the estimated p-values, with the number of significant p-values plotted to the left
+#' If a single or no value of the control parameter is provided, the function will create box plots of the estimated p-values, with the number of significant p-values plotted to the left.
 #'
-#' If a control parameter was provided, the function will plot the proportion of significant p-values against the control parameter, with 95% CIs based based on the performed replicates displayed as confidence bands
+#' If a control parameter is provided, the function will plot the proportion of significant p-values against the control parameter, with 95% CIs based based on the performed replicates displayed as confidence bands.
 #'
 #' @seealso \code{\link{runBenchmarks}}
 #' @export
@@ -192,11 +192,11 @@ plotMultipleHist <- function(x){
 
 
 
-#' Plot distribution of p-values
-#' @param x vector of p values
-#' @param plot should the values be plotted
-#' @param main title for the plot
-#' @param ... additional arguments to hist
+#' Plot distribution of p-values.
+#' @param x vector of p values.
+#' @param plot should the values be plotted.
+#' @param main title for the plot.
+#' @param ... additional arguments to hist.
 #' @author Florian Hartig
 testPDistribution <- function(x, plot = TRUE, main = "p distribution \n expected is flat at 1", ...){
   out = suppressWarnings(ks.test(x, 'punif'))
@@ -241,10 +241,10 @@ generateGenerator <- function(mod){
 
 
 #' Benchmark runtimes of several functions
-#' @param createModel a function that creates and returns a fitted model
-#' @param evaluationFunctions a list of functions that are to be evaluated on the fitted models
-#' @param n number of replicates
-#' @details This is a small helper function designed to benchmark runtimes of several operations that are to be performed on a list of fitted models. In the example, this is used to benchmark the runtimes of several DHARMa tests
+#' @param createModel a function that creates and returns a fitted model.
+#' @param evaluationFunctions a list of functions that are to be evaluated on the fitted models.
+#' @param n number of replicates.
+#' @details This is a small helper function designed to benchmark runtimes of several operations that are to be performed on a list of fitted models. In the example, this is used to benchmark the runtimes of several DHARMa tests.
 #' @author Florian Hartig
 #' @example inst/examples/benchmarkRuntimeHelp.R
 #' @export
