@@ -10,13 +10,13 @@ plotQQunif(simulationOutput, testUniformity = TRUE, testOutliers = TRUE,
 \arguments{
 \item{simulationOutput}{a DHARMa simulation output (class DHARMa)}
 
-\item{testUniformity}{if T, the function \code{\link{testUniformity}} will be called and the result will be added to the plot}
+\item{testUniformity}{if T, the function \link{testUniformity} will be called and the result will be added to the plot}
 
-\item{testOutliers}{if T, the function \code{\link{testOutliers}} will be called and the result will be added to the plot}
+\item{testOutliers}{if T, the function \link{testOutliers} will be called and the result will be added to the plot}
 
-\item{testDispersion}{if T, the function \code{\link{testDispersion}} will be called and the result will be added to the plot}
+\item{testDispersion}{if T, the function \link{testDispersion} will be called and the result will be added to the plot}
 
-\item{...}{arguments to be passed on to \code{\link[gap]{qqunif}}}
+\item{...}{arguments to be passed on to\link[gap:qqunif]{gap::qqunif}}
 }
 \description{
 The function produces a uniform quantile-quantile plot from a DHARMa output
@@ -76,5 +76,5 @@ plot(simulationOutput, quantreg = FALSE)
 
 }
 \seealso{
-\code{\link{plotSimulatedResiduals}}, \code{\link{plotResiduals}}
+\link{plotSimulatedResiduals}, \link{plotResiduals}
 }

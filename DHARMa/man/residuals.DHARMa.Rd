@@ -8,7 +8,7 @@
   outlierValues = NULL, ...)
 }
 \arguments{
-\item{object}{an object with simulated residuals created by \code{\link{simulateResiduals}}}
+\item{object}{an object with simulated residuals created by \link{simulateResiduals}}
 
 \item{quantileFunction}{optional - a quantile function to transform the uniform 0/1 scaling of DHARMa to another distribution}
 

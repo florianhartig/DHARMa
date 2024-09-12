@@ -17,21 +17,21 @@ simulateResiduals(fittedModel, n = 250, refit = FALSE,
 
 \item{integerResponse}{if TRUE, noise will be added at to the residuals to maintain a uniform expectations for integer responses (such as Poisson or Binomial). Usually, the model will automatically detect the appropriate setting, so there is no need to adjust this setting.}
 
-\item{plot}{if TRUE, \code{\link{plotResiduals}} will be directly run after the residuals have been calculated}
+\item{plot}{if TRUE, \link{plotResiduals} will be directly run after the residuals have been calculated}
 
 \item{seed}{the random seed to be used within DHARMa. The default setting, recommended for most users, is keep the random seed on a fixed value 123. This means that you will always get the same randomization and thus the same result when running the same code. NULL = no new seed is set, but previous random state will be restored after simulation. FALSE = no seed is set, and random state will not be restored. The latter two options are only recommended for simulation experiments. See vignette for details.}
 
-\item{method}{for refit = FALSE, the quantile randomization method used. The two options implemented at the moment are probability integral transform (PIT-) residuals (current default), and the "traditional" randomization procedure, that was used in DHARMa until version 0.3.0. Refit = T will always use "traditional", respectively of the value of method. For details, see \code{\link{getQuantile}}}
+\item{method}{for refit = FALSE, the quantile randomization method used. The two options implemented at the moment are probability integral transform (PIT-) residuals (current default), and the "traditional" randomization procedure, that was used in DHARMa until version 0.3.0. Refit = T will always use "traditional", respectively of the value of method. For details, see \link{getQuantile}.}
 
-\item{rotation}{optional rotation of the residual space prior to calculating the quantile residuals. The main purpose of this is to account for residual covariance as created by temporal or spatial residual autocorrelation. See details below, section \emph{residual auto-correlation} ass well as the help of \link{getQuantile} and, for a practical example, \link{testTemporalAutocorrelation}.}
+\item{rotation}{optional rotation of the residual space prior to calculating the quantile residuals. The main purpose of this is to account for residual covariance as created by temporal or spatial residual autocorrelation. See details below, section \emph{residual auto-correlation} as well as the help of \link{getQuantile} and, for a practical example, \link{testTemporalAutocorrelation}.}
 
-\item{...}{parameters to pass on to the simulate function of the model object. An important use of this is to specify whether simulations should be conditional on the current random effect estimates, e.g. via re.form. Note that not all models support syntax to specify conditional or unconditional simulations. See also details and \code{\link{getSimulations}}}
+\item{...}{parameters to pass on to the simulate function of the model object. An important use of this is to specify whether simulations should be conditional on the current random effect estimates, e.g. via re.form. Note that not all models support syntax to specify conditional or unconditional simulations. See details and \link{getSimulations}.}
 }
 \value{
-An S3 class of type "DHARMa". Implemented S3 functions include \code{\link{plot.DHARMa}}, \code{\link{print.DHARMa}} and \code{\link{residuals.DHARMa}}. For other functions that can be used on a DHARMa object, see section "See Also" below.
+An S3 class of type "DHARMa". Implemented S3 functions include \link{plot.DHARMa}, \link{print.DHARMa} and \link{residuals.DHARMa}. For other functions that can be used on a DHARMa object, see section "See Also" below.
 }
 \description{
-The function creates scaled residuals by simulating from the fitted model. Residuals can be extracted with \code{\link{residuals.DHARMa}}. See \code{\link{testResiduals}} for an overview of residual tests, \code{\link{plot.DHARMa}} for an overview of available plots.
+The function creates scaled residuals by simulating from the fitted model. Residuals can be extracted with \link{residuals.DHARMa}. See \link{testResiduals} for an overview of residual tests, \link{plot.DHARMa} for an overview of available plots.
 }
 \details{
 There are a number of important considerations when simulating from a more complex (hierarchical) model:
@@ -48,9 +48,9 @@ If the model is correctly specified, the simulated residuals should be flat rega
 \item if refit = TRUE, a parametric bootstrap is performed, meaning that the model is refit on the new data, and residuals are created by comparing observed residuals against refitted residuals. I advise against using this method per default (see more comments in the vignette), unless you are really sure that you need it.
 }
 
-\strong{Residuals per group}: In many situations, it can be useful to look at residuals per group, e.g. to see how much the model over / underpredicts per plot, year or subject. To do this, use \code{\link{recalculateResiduals}}, together with a grouping variable (see also help).
+\strong{Residuals per group}: In many situations, it can be useful to look at residuals per group, e.g. to see how much the model over / underpredicts per plot, year or subject. To do this, use \link{recalculateResiduals}, together with a grouping variable (see also help).
 
-\strong{Transformation to other distributions}: DHARMa calculates residuals for which the theoretical expectation (assuming a correctly specified model) is uniform. To transform this residuals to another distribution (e.g. so that a correctly specified model will have normal residuals) see \code{\link{residuals.DHARMa}}.
+\strong{Transformation to other distributions}: DHARMa calculates residuals for which the theoretical expectation (assuming a correctly specified model) is uniform. To transform this residuals to another distribution (e.g. so that a correctly specified model will have normal residuals) see \link{residuals.DHARMa}.
 
 \strong{Integer responses}: this is only relevant if method = "traditional", in which case it activates the randomization of the residuals. Usually, this does not need to be changed, as DHARMa will try to automatically if the fitted model has an integer or discrete distribution via the family argument. However, in some cases the family does not allow to uniquely identify the distribution type. For example, a tweedie distribution can be inter or continuous. Therefore, DHARMa will additionally check the simulation results for repeated values, and will change the distribution type if repeated values are found (a message is displayed in this case).
 
@@ -89,5 +89,5 @@ simulationOutput3 = recalculateResiduals(simulationOutput, sel = testData$group 
 plot(simulationOutput3, quantreg = FALSE)
 }
 \seealso{
-\code{\link{testResiduals}}, \code{\link{plotResiduals}}, \code{\link{recalculateResiduals}}, \code{\link{outliers}}
+\link{testResiduals}, \link{plotResiduals}, \link{recalculateResiduals}, \link{outliers}
 }

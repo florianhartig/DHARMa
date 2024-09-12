@@ -8,7 +8,7 @@ testPhylogeneticAutocorrelation(simulationOutput, tree,
   alternative = c("two.sided", "greater", "less"))
 }
 \arguments{
-\item{simulationOutput}{an object of class DHARMa, either created via \code{\link{simulateResiduals}} for supported models or by \code{\link{createDHARMa}} for simulations created outside DHARMa, or a supported model. Providing a supported model directly is discouraged, because simulation settings cannot be changed in this case.}
+\item{simulationOutput}{an object of class DHARMa, either created via \link{simulateResiduals} for supported models or by \link{createDHARMa} for simulations created outside DHARMa, or a supported model. Providing a supported model directly is discouraged, because simulation settings cannot be changed in this case.}
 
 \item{tree}{phylogenetic tree}
 
@@ -64,7 +64,7 @@ There are three (non-exclusive) routes to address these issues when working with
 }
 }
 \seealso{
-\code{\link{testResiduals}}, \code{\link{testUniformity}}, \code{\link{testOutliers}}, \code{\link{testDispersion}}, \code{\link{testZeroInflation}}, \code{\link{testGeneric}}, \code{\link{testTemporalAutocorrelation}}, \code{\link{testSpatialAutocorrelation}}, \code{\link{testQuantiles}}, \code{\link{testCategorical}}
+\link{testResiduals}, \link{testUniformity}, \link{testOutliers}, \link{testDispersion}, \link{testZeroInflation}, \link{testGeneric}, \link{testTemporalAutocorrelation}, \link{testSpatialAutocorrelation}, \link{testQuantiles}, \link{testCategorical}
 }
 \author{
 Florian Hartig

@@ -8,7 +8,7 @@
 \alias{getFitted.MixMod}
 \alias{getFitted.phylolm}
 \alias{getFitted.phyloglm}
-\title{Get fitted / predicted values}
+\title{Get fitted/predicted values}
 \usage{
 getFitted(object, ...)
 
@@ -25,17 +25,17 @@ getFitted(object, ...)
 \method{getFitted}{phyloglm}(object, ...)
 }
 \arguments{
-\item{object}{a fitted model}
+\item{object}{A fitted model.}
 
-\item{...}{additional parameters to be passed on, usually to the simulate function of the respective model class}
+\item{...}{Additional parameters to be passed on, usually to the simulate function of the respective model class.}
 }
 \description{
-Wrapper to get the fitted / predicted response of model at the response scale.
+Wrapper to get the fitted/predicted response of model at the response scale.
 }
 \details{
 The purpose of this wrapper is to standardize extract the fitted values, which is implemented via predict(model, type = "response") for most model classes.
 
-If you implement this function for a new model class, you should include an option to modifying which REs are included in the predictions. If this option is not available, it is essential that predictions are provided marginally / unconditionally, i.e. without the random effect estimates (because of https://github.com/florianhartig/DHARMa/issues/43), which corresponds to re-form = ~0 in lme4.
+If you implement this function for a new model class, you should include an option to modifying which random effects (REs) are included in the predictions. If this option is not available, it is essential that predictions are provided marginally/unconditionally, i.e. without the RE estimates (because of https://github.com/florianhartig/DHARMa/issues/43), which corresponds to re-form = ~0 in lme4.
 }
 \examples{
 testData = createData(sampleSize = 400, family = gaussian())
@@ -59,7 +59,7 @@ getRefit(fittedModel, x[[1]])
 getRefit(fittedModel, getObservedResponse(fittedModel))
 }
 \seealso{
-\code{\link{getObservedResponse}}, \code{\link{getSimulations}}, \code{\link{getRefit}}, \code{\link{getFixedEffects}}
+\link{getObservedResponse}, \link{getSimulations}, \link{getRefit}, \link{getFixedEffects}
 }
 \author{
 Florian Hartig
