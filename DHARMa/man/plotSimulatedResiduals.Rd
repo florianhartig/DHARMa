@@ -7,16 +7,16 @@
 plotSimulatedResiduals(simulationOutput, ...)
 }
 \arguments{
-\item{simulationOutput}{an object with simulated residuals created by \code{\link{simulateResiduals}}}
+\item{simulationOutput}{an object with simulated residuals created by \link{simulateResiduals}}
 
-\item{...}{further options for \code{\link{plotResiduals}}. Consider in particular parameters quantreg, rank and asFactor. xlab, ylab and main cannot be changed when using plotSimulatedResiduals, but can be changed when using plotResiduals.}
+\item{...}{further options for \link{plotResiduals}. Consider in particular parameters quantreg, rank and asFactor. xlab, ylab and main cannot be changed when using plotSimulatedResiduals, but can be changed when using plotResiduals.}
 }
 \description{
 DEPRECATED, use plot() instead
 }
 \note{
-This function is deprecated. Use \code{\link{plot.DHARMa}}
+This function is deprecated. Use \link{plot.DHARMa}
 }
 \seealso{
-\code{\link{plotResiduals}}, \code{\link{plotQQunif}}
+\link{plotResiduals}, \link{plotQQunif}
 }

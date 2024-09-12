@@ -23,7 +23,7 @@ runBenchmarks(calculateStatistics, controlValues = NULL, nRep = 10,
 \item{...}{additional parameters to calculateStatistics}
 }
 \value{
-A object with list structure of class DHARMaBenchmark. Contains an entry simulations with a matrix of simulations, and an entry summaries with an list of summaries (significant (T/F), mean, p-value for KS-test uniformity). Can be plotted with \code{\link{plot.DHARMaBenchmark}}
+A object with list structure of class DHARMaBenchmark. Contains an entry simulations with a matrix of simulations, and an entry summaries with an list of summaries (significant (T/F), mean, p-value for KS-test uniformity). Can be plotted with \link{plot.DHARMaBenchmark}
 }
 \description{
 This function runs statistical benchmarks, including Power / Type I error simulations for an arbitrary test with a control parameter
@@ -87,7 +87,7 @@ plot.DHARMaBenchmark <- function(x, ...){
 }
 }
 \seealso{
-\code{\link{plot.DHARMaBenchmark}}
+\link{plot.DHARMaBenchmark}
 }
 \author{
 Florian Hartig

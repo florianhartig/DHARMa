@@ -9,7 +9,7 @@ testOutliers(simulationOutput, alternative = c("two.sided", "greater",
   "bootstrap", "binomial"), nBoot = 100, plot = TRUE)
 }
 \arguments{
-\item{simulationOutput}{an object of class DHARMa, either created via \code{\link{simulateResiduals}} for supported models or by \code{\link{createDHARMa}} for simulations created outside DHARMa, or a supported model. Providing a supported model directly is discouraged, because simulation settings cannot be changed in this case.}
+\item{simulationOutput}{an object of class DHARMa, either created via \link{simulateResiduals} for supported models or by \link{createDHARMa} for simulations created outside DHARMa, or a supported model. Providing a supported model directly is discouraged, because simulation settings cannot be changed in this case.}
 
 \item{alternative}{a character string specifying whether the test should test if observations are "greater", "less" or "two.sided" (default) compared to the simulated null hypothesis}
 
@@ -31,14 +31,14 @@ Because no data was simulated in the range of the observed value, we don't know 
 
 To test if the outliers are a concern, testOutliers implements 2 options (bootstrap, binomial), which can be chosen via the parameter "type". The third option (default) chooses bootstrap for integer-valued distribubtions with nObs < 500, and else binomial.
 
-The binomial test considers that under the null hypothesis that the model is correct, and for continuous distributions (i.e. data and the model distribution are identical and continous), the probability that a given observation is higher than all simulations is 1/(nSim +1), and binomial distributed. The testOutlier function can test this null hypothesis via type = "binomial". In principle, it would be nice if we could extend this idea to integer-valued distributions, which are randomized via the PIT procedure (see \code{\link{simulateResiduals}}), the rate of "true" outliers is more difficult to calculate, and in general not 1/(nSim +1). The testOutlier function implements a small tweak that calculates the rate of residuals that are closer than 1/(nSim+1) to the 0/1 border, which roughly occur at a rate of nData /(nSim +1). This approximate value, however, is generally not exact, and may be particularly off non-bounded integer-valued distributions (such as Poisson or neg binom).
+The binomial test considers that under the null hypothesis that the model is correct, and for continuous distributions (i.e. data and the model distribution are identical and continous), the probability that a given observation is higher than all simulations is 1/(nSim +1), and binomial distributed. The testOutlier function can test this null hypothesis via type = "binomial". In principle, it would be nice if we could extend this idea to integer-valued distributions, which are randomized via the PIT procedure (see \link{simulateResiduals}), the rate of "true" outliers is more difficult to calculate, and in general not 1/(nSim +1). The testOutlier function implements a small tweak that calculates the rate of residuals that are closer than 1/(nSim+1) to the 0/1 border, which roughly occur at a rate of nData /(nSim +1). This approximate value, however, is generally not exact, and may be particularly off non-bounded integer-valued distributions (such as Poisson or neg binom).
 
 For this reason, the testOutlier function implements an alternative procedure that uses the bootstrap to generate a simulation-based expectation for the outliers. It is recommended to use the bootstrap for integer-valued distributions (and integer-valued only, because it has no advantage for continuous distributions, ideally with reasonably high values of nSim and nBoot (I recommend at least 1000 for both). Because of the high runtime, however, this option is switched off for type = default when nObs > 500.
 
 Both binomial or bootstrap generate a null expectation, and then test for an excess or lack of outliers. Per default, testOutliers() looks for both, so if you get a significant p-value, you have to check if you have to many or too few outliers. An excess of outliers is to be interpreted as too many values outside the simulation envelope. This could be caused by overdispersion, or by what we classically call outliers. A lack of outliers would be caused, for example, by underdispersion.
 }
 \seealso{
-\code{\link{testResiduals}}, \code{\link{testUniformity}}, \code{\link{testOutliers}}, \code{\link{testDispersion}}, \code{\link{testZeroInflation}}, \code{\link{testGeneric}}, \code{\link{testTemporalAutocorrelation}}, \code{\link{testSpatialAutocorrelation}}, \code{\link{testQuantiles}}, \code{\link{testCategorical}}
+\link{testResiduals}, \link{testUniformity}, \link{testOutliers}, \link{testDispersion}, \link{testZeroInflation}, \link{testGeneric}, \link{testTemporalAutocorrelation}, \link{testSpatialAutocorrelation}, \link{testQuantiles}, \link{testCategorical}
 }
 \author{
 Florian Hartig

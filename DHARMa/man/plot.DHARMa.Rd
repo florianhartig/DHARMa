@@ -7,27 +7,27 @@
 \method{plot}{DHARMa}(x, title = "DHARMa residual", ...)
 }
 \arguments{
-\item{x}{an object of class DHARMa with simulated residuals created by \code{\link{simulateResiduals}}}
+\item{x}{an object of class DHARMa with simulated residuals created by \link{simulateResiduals}}
 
 \item{title}{The title for both panels (plotted via mtext, outer = TRUE)}
 
-\item{...}{further options for \code{\link{plotResiduals}}. Consider in particular parameters quantreg, rank and asFactor. xlab, ylab and main cannot be changed when using plot.DHARMa, but can be changed when using plotResiduals.}
+\item{...}{further options for \link{plotResiduals}. Consider in particular parameters quantreg, rank and asFactor. xlab, ylab and main cannot be changed when using plot.DHARMa, but can be changed when using plotResiduals.}
 }
 \description{
-This S3 function creates standard plots for the simulated residuals contained in an object of class DHARMa, using \code{\link{plotQQunif}} (left panel) and \code{\link{plotResiduals}} (right panel)
+This S3 function creates standard plots for the simulated residuals contained in an object of class DHARMa, using \link{plotQQunif} (left panel) and \link{plotResiduals} (right panel)
 }
 \details{
-The function creates a plot with two panels. The left panel is a uniform qq plot (calling \code{\link{plotQQunif}}), and the right panel shows residuals against predicted values (calling \code{\link{plotResiduals}}), with outliers highlighted in red.
+The function creates a plot with two panels. The left panel is a uniform qq plot (calling \link{plotQQunif}), and the right panel shows residuals against predicted values (calling \link{plotResiduals}), with outliers highlighted in red.
 
 Very briefly, we would expect that a correctly specified model shows:
 
-a) a straight 1-1 line, as well as n.s. of the displayed tests in the qq-plot (left) -> evidence for an the correct overall residual distribution (for more details on the interpretation of this plot, see \code{\link{plotQQunif}})
+a) a straight 1-1 line, as well as n.s. of the displayed tests in the qq-plot (left) -> evidence for an the correct overall residual distribution (for more details on the interpretation of this plot, see \link{plotQQunif})
 
-b) visual homogeneity of residuals in both vertical and horizontal direction, as well as n.s. of quantile tests in the res ~ predictor plot (for more details on the interpretation of this plot, see \code{\link{plotResiduals}})
+b) visual homogeneity of residuals in both vertical and horizontal direction, as well as n.s. of quantile tests in the res ~ predictor plot (for more details on the interpretation of this plot, see \link{plotResiduals})
 
 Deviations from these expectations can be interpreted similar to a linear regression. See the vignette for detailed examples.
 
-Note that, unlike \code{\link{plotResiduals}}, plot.DHARMa command uses the default rank = T.
+Note that, unlike \link{plotResiduals}, plot.DHARMa command uses the default rank = T.
 }
 \examples{
 testData = createData(sampleSize = 200, family = poisson(), 
@@ -81,5 +81,5 @@ plot(simulationOutput, quantreg = FALSE)
 
 }
 \seealso{
-\code{\link{plotResiduals}}, \code{\link{plotQQunif}}
+\link{plotResiduals}, \link{plotQQunif}
 }

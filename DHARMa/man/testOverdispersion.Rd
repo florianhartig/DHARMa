@@ -7,13 +7,13 @@
 testOverdispersion(simulationOutput, ...)
 }
 \arguments{
-\item{simulationOutput}{an object of class DHARMa with simulated quantile residuals, either created via \code{\link{simulateResiduals}} or by \code{\link{createDHARMa}} for simulations created outside DHARMa}
+\item{simulationOutput}{an object of class DHARMa with simulated quantile residuals, either created via \link{simulateResiduals} or by \link{createDHARMa} for simulations created outside DHARMa}
 
-\item{...}{additional arguments to \code{\link{testDispersion}}}
+\item{...}{additional arguments to \link{testDispersion}}
 }
 \description{
 Simulated overdisperstion tests
 }
 \details{
-Deprecated, switch your code to using the \code{\link{testDispersion}} function
+Deprecated, switch your code to using the \link{testDispersion} function
 }

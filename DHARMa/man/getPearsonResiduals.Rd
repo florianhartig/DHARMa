@@ -13,7 +13,7 @@ getPearsonResiduals(object, ...)
 \method{getPearsonResiduals}{gam}(object, ...)
 }
 \arguments{
-\item{object}{a fitted model}
+\item{object}{a fitted model.}
 
 \item{...}{additional parameters to be passed on, usually to the residual function of the respective model class.}
 }
@@ -23,7 +23,7 @@ Wrapper to get the Pearson residuals of a fitted model.
 \details{
 The purpose of this wrapper is to extract the Pearson residuals of a fitted model.
 
-This needed to be adopted because for some reason, mgcv uses the argument scaled.pearson for what most packags define as pearson see comments in ?residuals.gam
+This needed to be adopted because for some reason, mgcv uses the argument "scaled.pearson" for what most packags define as "pearson". See comments in ?residuals.gam.
 }
 \examples{
 testData = createData(sampleSize = 400, family = gaussian())
@@ -47,7 +47,7 @@ getRefit(fittedModel, x[[1]])
 getRefit(fittedModel, getObservedResponse(fittedModel))
 }
 \seealso{
-\code{\link{getObservedResponse}}, \code{\link{getSimulations}}, \code{\link{getRefit}}, \code{\link{getFixedEffects}}, \code{\link{getFitted}}
+\link{getObservedResponse}, \link{getSimulations}, \link{getRefit}, \link{getFixedEffects}, \link{getFitted}
 }
 \author{
 Florian Hartig

@@ -24,14 +24,9 @@ getFamily(object, ...)
 }
 \description{
 Wrapper to get the family of a fitted model.
-
-checks if the fitted model excluded NA values.
-}
-\details{
-Checks if the fitted model excluded NA values.
 }
 \seealso{
-\code{\link{getObservedResponse}}, \code{\link{getSimulations}}, \code{\link{getRefit}}, \code{\link{getFixedEffects}}, \code{\link{getFitted}}
+\link{getObservedResponse}, \link{getSimulations}, \link{getRefit}, \link{getFixedEffects}, \link{getFitted}
 }
 \author{
 Florian Hartig

@@ -9,7 +9,7 @@ testGeneric(simulationOutput, summary, alternative = c("two.sided",
   methodName = "DHARMa generic simulation test")
 }
 \arguments{
-\item{simulationOutput}{an object of class DHARMa, either created via \code{\link{simulateResiduals}} for supported models or by \code{\link{createDHARMa}} for simulations created outside DHARMa, or a supported model. Providing a supported model directly is discouraged, because simulation settings cannot be changed in this case.}
+\item{simulationOutput}{an object of class DHARMa, either created via \link{simulateResiduals} for supported models or by \link{createDHARMa} for simulations created outside DHARMa, or a supported model. Providing a supported model directly is discouraged, because simulation settings cannot be changed in this case.}
 
 \item{summary}{a function that can be applied to simulated / observed data. See examples below}
 
@@ -25,7 +25,7 @@ This function tests if a user-defined summary differs when applied to simulated 
 \details{
 This function applies a user-defined summary to the simulated/observed data of a DHARMa object and then performs a hypothesis test using the ratio Obs / Sim as the test statistic.
 
-The summary is applied directly to the data and not to the residuals, but it can easily be remodeled to apply summaries to the residuals by simply defining something like f = function(x) summary (x - predictions), as done in \code{\link{testDispersion}}
+The summary is applied directly to the data and not to the residuals, but it can easily be remodeled to apply summaries to the residuals by simply defining something like f = function(x) summary (x - predictions), as done in \link{testDispersion}
 }
 \note{
 The summary function you specify will be applied to the data as it appears in your fitted model, which may not always be what you want.
@@ -74,7 +74,7 @@ spread <- function(x) sd(x) # testing if mean sd fits
 testGeneric(simulationOutput, summary = spread)
 }
 \seealso{
-\code{\link{testResiduals}}, \code{\link{testUniformity}}, \code{\link{testOutliers}}, \code{\link{testDispersion}}, \code{\link{testZeroInflation}}, \code{\link{testGeneric}}, \code{\link{testTemporalAutocorrelation}}, \code{\link{testSpatialAutocorrelation}}, \code{\link{testQuantiles}}, \code{\link{testCategorical}}
+\link{testResiduals}, \link{testUniformity}, \link{testOutliers}, \link{testDispersion}, \link{testZeroInflation}, \link{testGeneric}, \link{testTemporalAutocorrelation}, \link{testSpatialAutocorrelation}, \link{testQuantiles}, \link{testCategorical}
 }
 \author{
 Florian Hartig

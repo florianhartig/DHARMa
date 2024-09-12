@@ -10,10 +10,10 @@
 #' @param exportGlobal whether the global environment should be exported to the parallel nodes. This will use more memory. Set to true only if you function calculate statistics depends on other functions or global variables.
 #' @param ... additional parameters to calculateStatistics
 #' @note The benchmark function in DHARMa are intended for development purposes, and for users that want to test / confirm the properties of functions in DHARMa. If you are running an applied data analysis, they are probably of little use.
-#' @return A object with list structure of class DHARMaBenchmark. Contains an entry simulations with a matrix of simulations, and an entry summaries with an list of summaries (significant (T/F), mean, p-value for KS-test uniformity). Can be plotted with \code{\link{plot.DHARMaBenchmark}}
+#' @return A object with list structure of class DHARMaBenchmark. Contains an entry simulations with a matrix of simulations, and an entry summaries with an list of summaries (significant (T/F), mean, p-value for KS-test uniformity). Can be plotted with [plot.DHARMaBenchmark]
 #' @export
 #' @author Florian Hartig
-#' @seealso \code{\link{plot.DHARMaBenchmark}}
+#' @seealso [plot.DHARMaBenchmark]
 #' @example inst/examples/runBenchmarksHelp.R
 runBenchmarks <- function(calculateStatistics, controlValues = NULL, nRep = 10, alpha = 0.05, parallel = FALSE, exportGlobal = FALSE, ...){
 
@@ -125,9 +125,9 @@ runBenchmarks <- function(calculateStatistics, controlValues = NULL, nRep = 10, 
 
 #' Plots DHARMa benchmarks
 #'
-#' The function plots the result of an object of class DHARMaBenchmark, created by \code{\link{runBenchmarks}}.
+#' The function plots the result of an object of class DHARMaBenchmark, created by [runBenchmarks].
 #'
-#' @param x object of class DHARMaBenchmark, created by \code{\link{runBenchmarks}}.
+#' @param x object of class DHARMaBenchmark, created by [runBenchmarks].
 #' @param ... parameters to pass to the plot function.
 #'
 #' @details The function will create two types of plots, depending on whether the run contains only a single value (or no value) of the control parameter, or whether a vector of control values is provided:
@@ -136,7 +136,7 @@ runBenchmarks <- function(calculateStatistics, controlValues = NULL, nRep = 10, 
 #'
 #' If a control parameter is provided, the function will plot the proportion of significant p-values against the control parameter, with 95% CIs based based on the performed replicates displayed as confidence bands.
 #'
-#' @seealso \code{\link{runBenchmarks}}
+#' @seealso [runBenchmarks]
 #' @export
 plot.DHARMaBenchmark <- function(x, ...){
 
