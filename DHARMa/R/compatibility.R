@@ -246,12 +246,16 @@ getObservedResponse.default <- function (object, ...){
     out = out * x$`(weights)`
   }
 
-  # check for k/n binomial
   if(is.matrix(out)){
-    if(!(ncol(out) == 2)) securityAssertion("nKcase - wrong dimensions of response")
-    if(!(family(object)$family %in% c("binomial", "betabinomial"))) securityAssertion("nKcase - wrong family")
-
-    out = out[,1]
+    # case scaled variables or something like that 
+    if(ncol(out) == 1){
+      out = as.vector(out)
+    } else if(ncol(out) == 2) {
+      # case k/n binomial
+      if(!(family(object)$family %in% c("binomial", "betabinomial"))) securityAssertion("nKcase - wrong family")
+      out = out[,1]      
+    }
+    else securityAssertion("Response in the model is a matrix with > 2 dim")
   }
   return(out)
 }
