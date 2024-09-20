@@ -2,12 +2,12 @@ testData = createData(sampleSize = 100, overdispersion = 0.5, randomEffectVarian
 fittedModel <- glm(observedResponse ~ Environment1 , family = "poisson", data = testData)
 simulationOutput <- simulateResiduals(fittedModel = fittedModel)
 
-# the plot function runs 4 tests
+# the plot function shows 2 plots and runs 4 tests
 # i) KS test i) Dispersion test iii) Outlier test iv) quantile test
 plot(simulationOutput, quantreg = TRUE)
 
 # testResiduals tests distribution, dispersion and outliers
-# testResiduals(simulationOutput)
+testResiduals(simulationOutput)
 
 ####### Individual tests #######
 
