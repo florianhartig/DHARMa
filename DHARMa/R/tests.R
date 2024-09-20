@@ -1,8 +1,8 @@
 #' DHARMa general residual test
 #'
-#' Calls both uniformity and dispersion test
+#' Calls uniformity, dispersion and outliers tests.
 #'
-#' This function is a wrapper for the various test functions implemented in DHARMa. Currently, this function calls the [testUniformity] and the [testDispersion] functions. All other tests (see list below) have to be called by hand.
+#' This function is a wrapper for the various test functions implemented in DHARMa. Currently, this function calls the functions [testUniformity], [testDispersion], and [testOutliers]. All other tests (see list below) have to be called by hand.
 #'
 #' @param simulationOutput an object of class DHARMa, either created via [simulateResiduals] for supported models or by [createDHARMa] for simulations created outside DHARMa, or a supported model. Providing a supported model directly is discouraged, because simulation settings cannot be changed in this case.
 #' @param plot if TRUE, plots functions of the tests are called.
@@ -19,7 +19,7 @@ testResiduals <- function(simulationOutput, plot = TRUE){
   out$dispersion = testDispersion(simulationOutput, plot = plot)
   out$outliers = testOutliers(simulationOutput, plot = plot)
 
-  print(out)
+  #print(out) # do we need it?
   return(out)
 }
 
@@ -48,7 +48,7 @@ testSimulatedResiduals <- function(simulationOutput){
 #' @seealso [testResiduals], [testUniformity], [testOutliers], [testDispersion], [testZeroInflation], [testGeneric], [testTemporalAutocorrelation], [testSpatialAutocorrelation], [testQuantiles], [testCategorical]
 #' @example inst/examples/testsHelp.R
 #' @export
-testUniformity<- function(simulationOutput, alternative = c("two.sided", "less", "greater"), plot = TRUE){
+testUniformity <- function(simulationOutput, alternative = c("two.sided", "less", "greater"), plot = TRUE){
 
   simulationOutput = ensureDHARMa(simulationOutput, convert = T)
 
@@ -59,7 +59,7 @@ testUniformity<- function(simulationOutput, alternative = c("two.sided", "less",
 
 
 # Experimental
-testBivariateUniformity<- function(simulationOutput, alternative = c("two.sided", "less", "greater"), plot = TRUE){
+testBivariateUniformity <- function(simulationOutput, alternative = c("two.sided", "less", "greater"), plot = TRUE){
 
   simulationOutput = ensureDHARMa(simulationOutput, convert = T)
 
@@ -159,7 +159,7 @@ testQuantiles <- function(simulationOutput, predictor = NULL, quantiles = c(0.25
 #'
 #' To test if the outliers are a concern, testOutliers implements 2 options (bootstrap, binomial), which can be chosen via the parameter "type". The third option (default) chooses bootstrap for integer-valued distribubtions with nObs < 500, and else binomial.
 #'
-#' The binomial test considers that under the null hypothesis that the model is correct, and for continuous distributions (i.e. data and the model distribution are identical and continous), the probability that a given observation is higher than all simulations is 1/(nSim +1), and binomial distributed. The testOutlier function can test this null hypothesis via type = "binomial". In principle, it would be nice if we could extend this idea to integer-valued distributions, which are randomized via the PIT procedure (see [simulateResiduals]), the rate of "true" outliers is more difficult to calculate, and in general not 1/(nSim +1). The testOutlier function implements a small tweak that calculates the rate of residuals that are closer than 1/(nSim+1) to the 0/1 border, which roughly occur at a rate of nData /(nSim +1). This approximate value, however, is generally not exact, and may be particularly off non-bounded integer-valued distributions (such as Poisson or neg binom).
+#' The binomial test considers that under the null hypothesis that the model is correct, and for continuous distributions (i.e. data and the model distribution are identical and continous), the probability that a given observation is higher than all simulations is 1/(nSim +1), and binomial distributed. The testOutlier function can test this null hypothesis via type = "binomial". In principle, it would be nice if we could extend this idea to integer-valued distributions, which are randomized via the PIT procedure (see [simulateResiduals]), the rate of "true" outliers is more difficult to calculate, and in general not 1/(nSim +1). The testOutlier function implements a small tweak that calculates the rate of residuals that are closer than 1/(nSim+1) to the 0/1 border, which roughly occur at a rate of nData /(nSim +1). This approximate value, however, is generally not exact, and may be particularly off non-bounded integer-valued distributions (such as Poisson or Negative Binomial).
 #'
 #' For this reason, the testOutlier function implements an alternative procedure that uses the bootstrap to generate a simulation-based expectation for the outliers. It is recommended to use the bootstrap for integer-valued distributions (and integer-valued only, because it has no advantage for continuous distributions, ideally with reasonably high values of nSim and nBoot (I recommend at least 1000 for both). Because of the high runtime, however, this option is switched off for type = default when nObs > 500.
 #'
@@ -226,9 +226,9 @@ testOutliers <- function(simulationOutput, alternative = c("two.sided", "greater
   } else {
 
     if(margin == "both")  outliers = mean(simulationOutput$scaledResiduals == 0) +
-        mean(simulationOutput$scaledResiduals ==1)
+        mean(simulationOutput$scaledResiduals == 1)
     if(margin == "upper") outliers = mean(simulationOutput$scaledResiduals == 1)
-    if(margin == "lower") outliers = mean(simulationOutput$scaledResiduals ==0)
+    if(margin == "lower") outliers = mean(simulationOutput$scaledResiduals == 0)
 
 
     # Bootstrapping to compare to expected
