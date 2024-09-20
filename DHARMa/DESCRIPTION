@@ -30,13 +30,13 @@ Imports:
     lme4
 Suggests:
     knitr,
-    testthat,
+    testthat (>= 3.0.0),
     rmarkdown,
     KernSmooth,
     sfsmisc,
     MASS,
     mgcv,
-    mgcViz (>= 	0.1.9),
+    mgcViz (>= 0.1.9),
     spaMM (>= 3.2.0),
     GLMMadaptive,
     glmmTMB (>= 1.1.2.3)
@@ -53,3 +53,4 @@ RoxygenNote: 7.3.1
 Roxygen: list(old_usage = TRUE, markdown = TRUE)
 VignetteBuilder: knitr
 Encoding: UTF-8
+Config/testthat/edition: 3
