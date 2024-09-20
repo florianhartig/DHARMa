@@ -131,39 +131,6 @@
                                        0.01 
       
       
-      $uniformity
-      
-      	Asymptotic one-sample Kolmogorov-Smirnov test
-      
-      data:  simulationOutput$scaledResiduals
-      D = 0.046573, p-value = 0.7785
-      alternative hypothesis: two-sided
-      
-      
-      $dispersion
-      
-      	DHARMa nonparametric dispersion test via sd of residuals fitted vs.
-      	simulated
-      
-      data:  simulationOutput
-      dispersion = 1.4873, p-value < 2.2e-16
-      alternative hypothesis: two.sided
-      
-      
-      $outliers
-      
-      	DHARMa bootstrapped outlier test
-      
-      data:  simulationOutput
-      outliers at both margin(s) = 2, observations = 200, p-value = 0.26
-      alternative hypothesis: two.sided
-       percent confidence interval:
-       0.00 0.01
-      sample estimates:
-      outlier frequency (expected: 0.0033 ) 
-                                       0.01 
-      
-      
 
 ---
 
@@ -345,39 +312,6 @@
     Code
       testResiduals(simulationOutput, plot = FALSE)
     Output
-      $uniformity
-      
-      	Exact one-sample Kolmogorov-Smirnov test
-      
-      data:  simulationOutput$scaledResiduals
-      D = 0.19312, p-value = 0.7838
-      alternative hypothesis: two-sided
-      
-      
-      $dispersion
-      
-      	DHARMa nonparametric dispersion test via sd of residuals fitted vs.
-      	simulated
-      
-      data:  simulationOutput
-      dispersion = 1.4863, p-value = 0.248
-      alternative hypothesis: two.sided
-      
-      
-      $outliers
-      
-      	DHARMa bootstrapped outlier test
-      
-      data:  simulationOutput
-      outliers at both margin(s) = 0, observations = 200, p-value = 1
-      alternative hypothesis: two.sided
-       percent confidence interval:
-       0.0 0.1
-      sample estimates:
-      outlier frequency (expected: 0.007 ) 
-                                         0 
-      
-      
       $uniformity
       
       	Exact one-sample Kolmogorov-Smirnov test
