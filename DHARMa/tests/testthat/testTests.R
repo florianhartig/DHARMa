@@ -219,9 +219,41 @@ test_that("correlation tests work", {
 
 })
 
+
+### Test phylogenetic autocorrelation
+test_that("test phylogenetic autocorrelation", {
+
+  set.seed(123)
+  tre = ape::rcoal(60)
+  b0 = 0; b1 = 1;
+  x <- runif(length(tre$tip.label), 0,1)
+  y <- b0 + b1*x +
+    phylolm::rTrait(n = 1, phy = tre, model = "BM",
+           parameters = list(ancestral.state = 0, sigma2 = 10))
+  dat = data.frame(trait = y, pred = x)
+
+  fit = lm(trait ~ pred, data = dat)
+  res = simulateResiduals(fit, plot = F)
+
+  restest <- testPhylogeneticAutocorrelation(res, tree = tre)
+
+  expect_snapshot(restest)
+  expect_true(restest$p.value <= 0.05)
+
+  fit2 = phylolm::phylolm(trait ~ pred, data = dat, phy = tre, model = "BM")
+  res2 = simulateResiduals(fit2, plot = F, rotation = "estimated")
+
+  restest2 <- testPhylogeneticAutocorrelation(res2, tree = tre)
+
+  expect_snapshot(restest2)
+  expect_true(restest2$p.value > 0.05)
+})
+
+
+
 # Test Outliers
 test_that("testOutliers", {
-
+  set.seed(123)
   testData = createData(sampleSize = 1000, overdispersion = 0,
                         pZeroInflation = 0, randomEffectVariance = 0)
   fittedModel <- glm(observedResponse ~ Environment1 , family = "poisson",

@@ -581,46 +581,70 @@
       alternative hypothesis: true autocorrelation is greater than 0
       
 
+# test phylogenetic autocorrelation
+
+    Code
+      restest
+    Output
+      
+      	DHARMa Moran's I test for phylogenetic autocorrelation
+      
+      data:  res
+      observed = 0.851667, expected = -0.016949, sd = 0.088733, p-value <
+      2.2e-16
+      alternative hypothesis: Phylogenetic autocorrelation
+      
+
+---
+
+    Code
+      restest2
+    Output
+      
+      	DHARMa Moran's I test for phylogenetic autocorrelation
+      
+      data:  res2
+      observed = -0.093598, expected = -0.016949, sd = 0.088473, p-value =
+      0.3863
+      alternative hypothesis: Phylogenetic autocorrelation
+      
+
 # testOutliers
 
     Code
       testOutliers(simulationOutput, plot = F, margin = "lower")
-    Message
-      DHARMa:testOutliers with type = binomial may have inflated Type I error rates for integer-valued distributions. To get a more exact result, it is recommended to re-run testOutliers with type = 'bootstrap'. See ?testOutliers for details
     Output
       
       	DHARMa outlier test based on exact binomial test with approximate
       	expectations
       
       data:  simulationOutput
-      outliers at lower margin(s) = 0, observations = 1000, p-value = 0.03912
+      outliers at lower margin(s) = 5, observations = 1000, p-value = 0.6079
       alternative hypothesis: true probability of success is not equal to 0.003984064
       95 percent confidence interval:
-       0.000000000 0.003682084
+       0.00162542 0.01162947
       sample estimates:
       frequency of outliers (expected: 0.00398406374501992 ) 
-                                                           0 
+                                                       0.005 
       
 
 ---
 
     Code
       testOutliers(simulationOutput, plot = F, alternative = "two.sided", margin = "lower")
-    Message
-      DHARMa:testOutliers with type = binomial may have inflated Type I error rates for integer-valued distributions. To get a more exact result, it is recommended to re-run testOutliers with type = 'bootstrap'. See ?testOutliers for details
     Output
       
       	DHARMa outlier test based on exact binomial test with approximate
       	expectations
       
       data:  simulationOutput
-      outliers at lower margin(s) = 0, observations = 1000, p-value = 0.03912
+      outliers at lower margin(s) = 5, observations = 1000, p-value = 0.6079
       alternative hypothesis: true probability of success is not equal to 0.003984064
       95 percent confidence interval:
-       0.000000000 0.003682084
+       0.00162542 0.01162947
       sample estimates:
       frequency of outliers (expected: 0.00398406374501992 ) 
-                                                           0 
+                                                       0.005 
       
 
 ---
@@ -633,12 +657,12 @@
       	expectations
       
       data:  simulationOutput
-      outliers at upper margin(s) = 8, observations = 1000, p-value = 0.0683
+      outliers at upper margin(s) = 2, observations = 1000, p-value = 0.4519
       alternative hypothesis: true probability of success is not equal to 0.003984064
       95 percent confidence interval:
-       0.003459976 0.015702049
+       0.0002423011 0.0072058389
       sample estimates:
       frequency of outliers (expected: 0.00398406374501992 ) 
-                                                       0.008 
+                                                       0.002 
       
 
