@@ -22,13 +22,13 @@ DHARMa.ecdf <- function (x)
 
 #' calculate quantiles
 #'
-#' calculates residual quantiles from a given simulation
+#' Calculates residual quantiles from a given simulation.
 #'
-#' @param simulations a matrix with simulations from a fitted model. Rows = observations, columns = replicate simulations
-#' @param observed a vector with the observed data
-#' @param integerResponse is the response integer-valued. Only has an effect for method = "traditional"
-#' @param method the quantile randomization method used. See details
-#' @param rotation optional rotation of the residuals. You can either a) provide as a known or estimated covariance matrix (e.g. when fitting an AR1 model), or use the argument "estimated", in which case the residual covariance will be approximated by simulations. See comments in details
+#' @param simulations A matrix with simulations from a fitted model. Rows = observations, columns = replicate simulations.
+#' @param observed A vector with the observed data.
+#' @param integerResponse Is the response integer-valued? Only has an effect for method = "traditional".
+#' @param method The quantile randomization method used. See details.
+#' @param rotation Optional rotation of the residuals. You can either provide as a known or estimated covariance matrix (e.g. when fitting an AR1 model), or use the argument "estimated", in which case the residual covariance will be approximated by simulations. See comments in details.
 #'
 #' @details The function calculates residual quantiles from the simulated data. For continuous distributions, this will simply the the value of the ecdf.
 #'
@@ -38,8 +38,8 @@ DHARMa.ecdf <- function (x)
 #'
 #' The current default (available since DHARMa 0.3.1) are probability integral transform (PIT-) residuals (Smith, 1985; Dunn & Smyth, 1996; see also Warton, et al., 2017).
 #'
-#' Before DHARMa 0.3.1, a different randomization procedure was used, in which the a U(-0.5, 0.5) distribution was added on observations and simulations for discrete distributions. For a completely discrete distribution, the two procedures should deliver equivalent results, but the second method has the disadvantage that a) one has to know if the distribution is discrete (DHARMa tries to recognize this automatically), and b) that it leads to inefficiencies for some distributions such as the Tweedie, which are partly continuous, partly discrete
-#' (see e.g. [issue #168](https://github.com/florianhartig/DHARMa/issues/168)).
+#' Before DHARMa 0.3.1, a different randomization procedure was used, in which the a U(-0.5, 0.5) distribution was added on observations and simulations for discrete distributions. For a completely discrete distribution, the two procedures should deliver equivalent results, but the second method has the disadvantage that (a) one has to know if the distribution is discrete (DHARMa tries to recognize this automatically), and (b) that it leads to inefficiencies for some distributions such as the Tweedie, which are partly continuous, partly discrete
+#' (see e.g. [issue #168](https://github.com/florianhartig/DHARMa/issues/168) on DHARMa GitHub page).
 #'
 #' **Rotation (optional)**
 #'
