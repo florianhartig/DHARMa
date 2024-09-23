@@ -38,9 +38,6 @@ test_that("ensureDHARMa", {
 
 
   # testResiduals tests distribution, dispersion and outliers
-
-  testOutliers(simulationOutput)
-
   expect_error(testQuantiles(simulationOutput$scaledResiduals))
 
 })

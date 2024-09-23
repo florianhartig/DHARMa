@@ -58,12 +58,13 @@ DHARMa.ecdf <- function (x)
 #' Warton, David I., Loïc Thibaut, and Yi Alice Wang. "The PIT-trap—A “model-free” bootstrap procedure for inference about regression models with discrete, multivariate responses." PloS one 12.7 (2017)
 #'
 #' @export
-getQuantile <- function(simulations, observed, integerResponse, method = c("PIT", "traditional"), rotation = NULL){
+getQuantile <- function(simulations, observed, integerResponse,
+                        method = c("PIT", "traditional"), rotation = NULL){
 
   method = match.arg(method)
 
   n = length(observed)
-  if (nrow(simulations) != n) stop("DHARMa::getquantile: wrong dimension of simulations")
+  if(nrow(simulations) != n) stop("DHARMa::getquantile: wrong dimension of simulations")
   nSim = ncol(simulations)
 
 
@@ -77,7 +78,7 @@ getQuantile <- function(simulations, observed, integerResponse, method = c("PIT"
 
       values = as.vector(simulations)[duplicated(as.vector(simulations))]
       if(length(values) > 0){
-        if (all(values%%1==0)){
+        if(all(values%%1 == 0)){
           integerResponse = T
           message("Model family was recognized or set as continuous, but duplicate values were detected in the simulation - changing to integer residuals (see ?simulateResiduals for details).")
         } else {

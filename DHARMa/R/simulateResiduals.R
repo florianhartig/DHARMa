@@ -205,9 +205,12 @@ checkSimulations <- function(simulatedResponse, nObs, nSim){
 #'
 #' @example inst/examples/simulateResidualsHelp.R
 #' @export
-recalculateResiduals <- function(simulationOutput, group = NULL, aggregateBy = sum, sel = NULL, seed = 123, method = c("PIT", "traditional"), rotation = NULL){
+recalculateResiduals <- function(simulationOutput, group = NULL, aggregateBy = sum,
+                                 sel = NULL, seed = 123,
+                                 method = c("PIT", "traditional"),
+                                 rotation = NULL){
 
-  randomState <-getRandomState(seed)
+  randomState <- getRandomState(seed)
   on.exit({randomState$restoreCurrent()})
   match.arg(method)
 
@@ -223,30 +226,41 @@ recalculateResiduals <- function(simulationOutput, group = NULL, aggregateBy = s
   if(is.null(group) & is.null(sel)) return(simulationOutput)
   else {
     if(is.null(group)) group = 1:simulationOutput$nObs
-    group =as.factor(group)
+    group = as.factor(group)
     out$nGroups = nlevels(group)
     if(is.null(sel)) sel = 1:simulationOutput$nObs
     out$sel = sel
 
-    aggregateByGroup <- function(x) aggregate(x[sel], by=list(group[sel]), FUN=aggregateBy)[,2]
+    aggregateByGroup <- function(x) aggregate(x[sel], by = list(group[sel]),
+                                              FUN=aggregateBy)[,2]
 
     out$observedResponse = aggregateByGroup(simulationOutput$observedResponse)
     out$fittedPredictedResponse = aggregateByGroup(simulationOutput$fittedPredictedResponse)
 
     if (simulationOutput$refit == FALSE){
 
-      out$simulatedResponse = apply(simulationOutput$simulatedResponse, 2, aggregateByGroup)
-      out$scaledResiduals = getQuantile(simulations = out$simulatedResponse , observed = out$observedResponse, integerResponse = simulationOutput$integerResponse, method = method, rotation = rotation)
+      out$simulatedResponse = apply(simulationOutput$simulatedResponse, 2,
+                                    aggregateByGroup)
+      out$scaledResiduals = getQuantile(simulations = out$simulatedResponse ,
+                                        observed = out$observedResponse,
+                                        integerResponse = simulationOutput$integerResponse,
+                                        method = method, rotation = rotation)
 
       ######## refit = T ##################
     } else {
 
-      out$refittedPredictedResponse <- apply(simulationOutput$refittedPredictedResponse, 2, aggregateByGroup)
+      out$refittedPredictedResponse <- apply(simulationOutput$refittedPredictedResponse,
+                                             2, aggregateByGroup)
       out$fittedResiduals = aggregateByGroup(simulationOutput$fittedResiduals)
-      out$refittedResiduals = apply(simulationOutput$refittedResiduals, 2, aggregateByGroup)
-      out$refittedPearsonResiduals = apply(simulationOutput$refittedPearsonResiduals, 2, aggregateByGroup)
+      out$refittedResiduals = apply(simulationOutput$refittedResiduals, 2,
+                                    aggregateByGroup)
+      out$refittedPearsonResiduals = apply(simulationOutput$refittedPearsonResiduals,
+                                           2, aggregateByGroup)
 
-      out$scaledResiduals = getQuantile(simulations = out$refittedResiduals , observed = out$fittedResiduals , integerResponse = simulationOutput$integerResponse, method = method, rotation = rotation)
+      out$scaledResiduals = getQuantile(simulations = out$refittedResiduals ,
+                                        observed = out$fittedResiduals ,
+                                        integerResponse = simulationOutput$integerResponse,
+                                        method = method, rotation = rotation)
     }
     # hack - the c here will result in both old and new outputs to be present resulting output, but a named access should refer to the new, grouped calculations
     # question to myself - what's the use of that, why not erase the old outputs? they are anyway saved in the old object

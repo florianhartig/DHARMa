@@ -22,6 +22,6 @@
   summary(fit)
 
   res = simulateResiduals(fit, plot = T) # phylogenetic autoorrelation still present in residuals
-  res = simulateResiduals(fit, plot = T, rotation = "estimated") #with "rotation"the residual autcorrelation is gone see ?simulateResiduals
+  res = simulateResiduals(fit, plot = T, rotation = "estimated") #with "rotation" the residual autcorrelation is gone see ?simulateResiduals.
 
 }

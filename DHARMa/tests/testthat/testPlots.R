@@ -19,8 +19,9 @@ doPlots <- function(simulationOutput, testData){
   plotResiduals(simulationOutput, rank = T, quantreg = F)
   plotResiduals(simulationOutput, quantiles = 0.5)
   plotResiduals(simulationOutput, quantiles = c(0.3, 0.6))
-  plotResiduals(simulationOutput$scaledResiduals, form = simulationOutput$fittedPredictedResponse)
-  
+  plotResiduals(simulationOutput$scaledResiduals, form =
+                  simulationOutput$fittedPredictedResponse)
+
   # hist
   hist(simulationOutput)
 }
@@ -29,9 +30,8 @@ doTests <- function(simulationOutput, testData){
   testUniformity(simulationOutput = simulationOutput)
   testZeroInflation(simulationOutput = simulationOutput)
   testTemporalAutocorrelation(simulationOutput = simulationOutput, time = testData$time)
-  testTemporalAutocorrelation(simulationOutput = simulationOutput)
-
-  testSpatialAutocorrelation(simulationOutput = simulationOutput, x = testData$x, y = testData$y)
+  testSpatialAutocorrelation(simulationOutput = simulationOutput, x = testData$x,
+                             y = testData$y)
 }
 
 # currently not testing the following because of warning
@@ -53,14 +53,19 @@ doTests <- function(simulationOutput, testData){
 test_that("Plots work",
           {
             skip_on_cran()
-            testData = createData(sampleSize = 100, overdispersion = 0, randomEffectVariance = 0, family = binomial())
-            fittedModel <- glm(observedResponse ~ Environment1 ,family = "binomial", data = testData)
+            testData = createData(sampleSize = 100, overdispersion = 0,
+                                  randomEffectVariance = 0, family = binomial())
+            fittedModel <- glm(observedResponse ~ Environment1 ,
+                               family = "binomial", data = testData)
             simulationOutput <- simulateResiduals(fittedModel = fittedModel)
             doClassFunctions(simulationOutput)
             doPlots(simulationOutput, testData)
+            doTests(simulationOutput, testData)
 
 
-            testData = createData(sampleSize = 100, overdispersion = 0, randomEffectVariance = 2, numGroups = 4, family = gaussian())
+            testData = createData(sampleSize = 100, overdispersion = 0,
+                                  randomEffectVariance = 2, numGroups = 4,
+                                  family = gaussian())
             fittedModel <- glm(observedResponse ~ group , data = testData)
             simulationOutput <- simulateResiduals(fittedModel = fittedModel)
             doClassFunctions(simulationOutput)
