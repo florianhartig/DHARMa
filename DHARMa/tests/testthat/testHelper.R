@@ -27,15 +27,10 @@ test_that("ensureDHARMa", {
   expect_error(DHARMa:::ensureDHARMa(simulationOutput$scaledResiduals, convert = "Model"))
   expect_error(DHARMa:::ensureDHARMa(matrix(rnorm(100))), "DHARMa")
 
-
-
   DHARMa:::ensurePredictor(simulationOutput, predictor = pred)
   DHARMa:::ensurePredictor(simulationOutput)
   DHARMa:::ensurePredictor(simulationOutput, predictor = testData$observedResponse)
   expect_error(DHARMa:::ensurePredictor(simulationOutput, predictor = c(1,2,3)))
-
-
-
 
   # testResiduals tests distribution, dispersion and outliers
   expect_error(testQuantiles(simulationOutput$scaledResiduals))
