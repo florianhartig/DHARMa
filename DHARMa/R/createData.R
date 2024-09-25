@@ -20,7 +20,14 @@
 #' @param hasNA should an NA be added to the environmental predictor (for test purposes).
 #' @export
 #' @example /inst/examples/createDataHelp.R
-createData <- function(sampleSize = 100, intercept = 0, fixedEffects = 1, quadraticFixedEffects = NULL, numGroups = 10, randomEffectVariance = 1, overdispersion = 0, family = poisson(), scale = 1, cor = 0, roundPoissonVariance = NULL,  pZeroInflation = 0, binomialTrials = 1, temporalAutocorrelation = 0, spatialAutocorrelation =0, factorResponse = FALSE, replicates=1, hasNA = FALSE){
+createData <- function(sampleSize = 100, intercept = 0, fixedEffects = 1,
+                       quadraticFixedEffects = NULL, numGroups = 10,
+                       randomEffectVariance = 1, overdispersion = 0,
+                       family = poisson(), scale = 1, cor = 0,
+                       roundPoissonVariance = NULL,  pZeroInflation = 0,
+                       binomialTrials = 1, temporalAutocorrelation = 0,
+                       spatialAutocorrelation = 0, factorResponse = FALSE,
+                       replicates = 1, hasNA = FALSE){
 
   nPredictors = length(fixedEffects)
 
@@ -77,7 +84,7 @@ createData <- function(sampleSize = 100, intercept = 0, fixedEffects = 1, quadra
       diag(invDistMat) <- 0
       invDistMat = sfsmisc::posdefify(invDistMat)
 
-      temporalError <- MASS::mvrnorm(n=1, mu=rep(0,sampleSize), Sigma=invDistMat)
+      temporalError <- MASS::mvrnorm(n = 1, mu = rep(0,sampleSize), Sigma = invDistMat)
 
       linearResponse = linearResponse + temporalAutocorrelation * temporalError
     }
@@ -90,7 +97,7 @@ createData <- function(sampleSize = 100, intercept = 0, fixedEffects = 1, quadra
       diag(invDistMat) <- 0
       invDistMat = sfsmisc::posdefify(invDistMat)
 
-      spatialError <- MASS::mvrnorm(n=1, mu=rep(0,sampleSize), Sigma=invDistMat)
+      spatialError <- MASS::mvrnorm(n = 1, mu = rep(0,sampleSize), Sigma = invDistMat)
 
       linearResponse = linearResponse + spatialAutocorrelation * spatialError
     }
