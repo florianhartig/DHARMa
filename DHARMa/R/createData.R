@@ -33,7 +33,7 @@ createData <- function(sampleSize = 100, intercept = 0, fixedEffects = 1,
 
   out = list()
 
-  time = 1:sampleSize
+  time = sample.int(sampleSize) #change to random order because of issue #436
   x = runif(sampleSize)
   y = runif(sampleSize)
 

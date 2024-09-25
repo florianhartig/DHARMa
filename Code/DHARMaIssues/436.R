@@ -47,7 +47,7 @@ createData2 <- function(sampleSize = 100, intercept = 0, fixedEffects = 1,
 
   out = list()
 
-  time = sample(1:sampleSize, sampleSize) # change here
+  time = sample.int(sampleSizex) # change here
   x = runif(sampleSize)
   y = runif(sampleSize)
 
@@ -92,8 +92,8 @@ createData2 <- function(sampleSize = 100, intercept = 0, fixedEffects = 1,
     # Autocorrelation
 
     if(!(temporalAutocorrelation == 0)){
-      t = 1:sampleSize             # INCLUDING CODE HERE
-      distMat <- as.matrix(dist(t))
+    #  t = 1:sampleSize             # INCLUDING CODE HERE
+      distMat <- as.matrix(dist(time))
 
       invDistMat <- 1/distMat * 5000
       diag(invDistMat) <- 0
@@ -101,7 +101,7 @@ createData2 <- function(sampleSize = 100, intercept = 0, fixedEffects = 1,
 
       temporalError <- MASS::mvrnorm(n = 1, mu = rep(0,sampleSize), Sigma = invDistMat)
 
-      linearResponse = linearResponse + temporalAutocorrelation * temporalError[time] #
+      linearResponse = linearResponse + temporalAutocorrelation * temporalError #
     }
 
 
