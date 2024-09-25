@@ -161,77 +161,147 @@ createData2 <- function(sampleSize = 100, intercept = 0, fixedEffects = 1,
   return(out)
 }
 
-##############
-set.seed(123)
-testData2 <- createData2(sampleSize = 200,
-                       overdispersion = 0, randomEffectVariance = 0.5,
-                       family = gaussian())
-head(testData2)
 
-fittedModel <- lme4::lmer(observedResponse ~ Environment1 + (1|group),
-                          data = testData2)
-summary(fittedModel)
-simulationOutput <- simulateResiduals(fittedModel, n=200)
-testTemporalAutocorrelation(simulationOutput = simulationOutput,
-                            time = testData2$time)
+############## TESTING FUNCTIONS IN TERMS OF TYPE I ERROR -----------
 
 
-set.seed(123)
-testData2 <- createData2(sampleSize = 100, temporalAutocorrelation = 2,
-                       overdispersion = 0, randomEffectVariance = 0.5,
-                       family = gaussian())
-head(testData2)
-
-fittedModel <- lme4::lmer(observedResponse ~ Environment1 + (1|group),
-                          data = testData2)
-summary(fittedModel)
-simulationOutput <- simulateResiduals(fittedModel, n=200)
-testTemporalAutocorrelation(simulationOutput = simulationOutput,
-                            time = testData2$time)
-
-
-
-## copying test function:
-
-testTemporalAutocorrelation2 <- function(simulationOutput, time, alternative = c("two.sided", "greater", "less"), plot = TRUE){
-  
-  simulationOutput = ensureDHARMa(simulationOutput, convert = T)
-  
-  # actually not sure if this is neccessary for dwtest, but seems better to aggregate
-  if(any(duplicated(time))) stop("testing for temporal autocorrelation requires unique time values - if you have several observations per time value, either use the recalculateResiduals function to aggregate residuals per time step, or extract the residuals from the fitted object, and plot / test each of them independently for temporally repeated subgroups (typical choices would be location / subject etc.). Note that the latter must be done by hand, outside testTemporalAutocorrelation.")
-  
-  alternative <- match.arg(alternative)
-  
-  if(is.null(time)){
-    time = sample.int(simulationOutput$nObs, simulationOutput$nObs)
-    message("DHARMa::testTemporalAutocorrelation - no time argument provided, using random times for each data point")
-  }
-  
-  # To avoid Issue #190
-  if (length(time) != length(residuals(simulationOutput))) stop("Dimensions of time don't match the dimension of the residuals")
-  
-  out = lmtest::dwtest(simulationOutput$scaledResiduals ~ 1, order.by = time, alternative = alternative)
-  
-  if(plot == T) {
-    oldpar <- par(mfrow = c(1,2))
-    on.exit(par(oldpar))
-    
-    plot(simulationOutput$scaledResiduals[order(time)] ~ time[order(time)],
-         type = "l", ylab = "Scaled residuals", xlab = "Time", main = "Residuals vs. time", ylim = c(0,1))
-    
-    abline(h=c(0.5))
-    abline(h=c(0,0.25,0.75,1), lty = 2 )
-    
-    acf(simulationOutput$scaledResiduals[order(time)], main = "Autocorrelation", ylim = c(-1,1))
-    legend("topright",
-           c(paste(out$method, " p=", round(out$p.value, digits = 5)),
-             paste("Deviation ", ifelse(out$p.value < 0.05, "significant", "n.s."))),
-           text.col = ifelse(out$p.value < 0.05, "red", "black" ), bty="n")
-    
-  }
-  
-  return(out)
+#### ORDERED createData ----------
+Ntemp.Nre <- c()
+for (i in 1:100){
+  testData = createData(sampleSize = 100, family = gaussian(), 
+                        fixedEffects = 1,  
+                        randomEffectVariance = 0, 
+                        temporalAutocorrelation = 0) 
+  fittedModel <- lm(observedResponse ~ Environment1, data = testData) 
+  res = simulateResiduals(fittedModel)
+  test <- testTemporalAutocorrelation(res, time =  testData$time)
+  Ntemp.Nre[i] <- test$p.value
 }
+
+Ntemp.re <- c()
+for (i in 1:100){
+  testData = createData(sampleSize = 100, family = gaussian(), 
+                        fixedEffects = 1,  
+                        randomEffectVariance = 0.5, 
+                        temporalAutocorrelation = 0) 
+  fittedModel <- lme4::lmer(observedResponse ~ Environment1 + (1|group), data = testData) 
+  res = simulateResiduals(fittedModel)
+  test <- testTemporalAutocorrelation(res, time =  testData$time)
+  Ntemp.re[i] <- test$p.value
+}
+
+temp.Nre <- c()
+for (i in 1:100){
+  testData = createData(sampleSize = 100, family = gaussian(), 
+                        fixedEffects = 1,  
+                        randomEffectVariance = 0, 
+                        temporalAutocorrelation = 20) 
+  fittedModel <- lm(observedResponse ~ Environment1, data = testData) 
+  res = simulateResiduals(fittedModel)
+  test <- testTemporalAutocorrelation(res, time =  testData$time)
+  temp.Nre[i] <- test$p.value
+}
+
+temp.re <- c()
+for (i in 1:100){
+  testData = createData(sampleSize = 100, family = gaussian(), 
+                        fixedEffects = 1,  
+                        randomEffectVariance = 0.5, 
+                        temporalAutocorrelation = 20) 
+  fittedModel <- lme4::lmer(observedResponse ~ Environment1 +(1|group), data = testData) 
+  res = simulateResiduals(fittedModel)
+  test <- testTemporalAutocorrelation(res, time =  testData$time)
+  temp.re[i] <- test$p.value
+}
+
+result <- expand.grid(temporal = c("no", "yes"),
+                   random.effect = c("no", "yes"))
+result$prop.sig = c(sum(Ntemp.Nre<0.05) ,sum(temp.Nre<0.05),
+                 sum(Ntemp.re<0.05), sum(temp.re<0.05) )
+result
+
+
+#### SUFFLED TIME createData2 --------
+
+Ntemp.Nre <- c()
+for (i in 1:100){
+  testData = createData2(sampleSize = 100, family = gaussian(), 
+                         fixedEffects = 1,  
+                         randomEffectVariance = 0, 
+                         temporalAutocorrelation = 0) 
+  fittedModel <- lm(observedResponse ~ Environment1, data = testData) 
+  res = simulateResiduals(fittedModel)
+  test <- testTemporalAutocorrelation(res, time =  testData$time)
+  Ntemp.Nre[i] <- test$p.value
+}
+
+Ntemp.re <- c()
+for (i in 1:100){
+  testData = createData2(sampleSize = 100, family = gaussian(), 
+                         fixedEffects = 1,  
+                         randomEffectVariance = 0.5, 
+                         temporalAutocorrelation = 0) 
+  fittedModel <- lme4::lmer(observedResponse ~ Environment1 + (1|group), data = testData) 
+  res = simulateResiduals(fittedModel)
+  test <- testTemporalAutocorrelation(res, time =  testData$time)
+  Ntemp.re[i] <- test$p.value
+}
+
+temp.Nre <- c()
+for (i in 1:100){
+  testData = createData2(sampleSize = 100, family = gaussian(), 
+                         fixedEffects = 1,  
+                         randomEffectVariance = 0, 
+                         temporalAutocorrelation = 20) 
+  fittedModel <- lm(observedResponse ~ Environment1, data = testData) 
+  res = simulateResiduals(fittedModel)
+  test <- testTemporalAutocorrelation(res, time =  testData$time)
+  temp.Nre[i] <- test$p.value
+}
+
+
+temp.re <- c()
+for (i in 1:100){
+  testData = createData2(sampleSize = 100, family = gaussian(), 
+                         fixedEffects = 1,  
+                         randomEffectVariance = 0.5, 
+                         temporalAutocorrelation = 20) 
+  fittedModel <- lme4::lmer(observedResponse ~ Environment1 +(1|group), data = testData) 
+  res = simulateResiduals(fittedModel)
+  test <- testTemporalAutocorrelation(res, time =  testData$time)
+  temp.re[i] <- test$p.value
+}
+
+result2 <- expand.grid(temporal = c("no", "yes"),
+                    random.effect = c("no", "yes"))
+result2$prop.sig = c(sum(Ntemp.Nre<0.05) ,sum(temp.Nre<0.05),
+                  sum(Ntemp.re<0.05), sum(temp.re<0.05) )
+result2
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
