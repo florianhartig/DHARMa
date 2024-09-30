@@ -6,7 +6,8 @@
 \usage{
 testOutliers(simulationOutput, alternative = c("two.sided", "greater",
   "less"), margin = c("both", "upper", "lower"), type = c("default",
-  "bootstrap", "binomial"), nBoot = 100, plot = TRUE)
+  "bootstrap", "binomial"), nBoot = 100, plot = TRUE,
+  plotBoostrap = FALSE)
 }
 \arguments{
 \item{simulationOutput}{an object of class DHARMa, either created via \link{simulateResiduals} for supported models or by \link{createDHARMa} for simulations created outside DHARMa, or a supported model. Providing a supported model directly is discouraged, because simulation settings cannot be changed in this case.}
@@ -20,6 +21,8 @@ testOutliers(simulationOutput, alternative = c("two.sided", "greater",
 \item{nBoot}{number of boostrap replicates. Only used ot type = "bootstrap"}
 
 \item{plot}{if TRUE, the function will create an additional plot}
+
+\item{plotBoostrap}{if plot should be produced of outlier frequencies calculated under the bootstrap}
 }
 \description{
 This function tests if the number of observations outside the simulatio envelope are larger or smaller than expected
@@ -31,7 +34,7 @@ Because no data was simulated in the range of the observed value, we don't know 
 
 To test if the outliers are a concern, testOutliers implements 2 options (bootstrap, binomial), which can be chosen via the parameter "type". The third option (default) chooses bootstrap for integer-valued distribubtions with nObs < 500, and else binomial.
 
-The binomial test considers that under the null hypothesis that the model is correct, and for continuous distributions (i.e. data and the model distribution are identical and continous), the probability that a given observation is higher than all simulations is 1/(nSim +1), and binomial distributed. The testOutlier function can test this null hypothesis via type = "binomial". In principle, it would be nice if we could extend this idea to integer-valued distributions, which are randomized via the PIT procedure (see \link{simulateResiduals}), the rate of "true" outliers is more difficult to calculate, and in general not 1/(nSim +1). The testOutlier function implements a small tweak that calculates the rate of residuals that are closer than 1/(nSim+1) to the 0/1 border, which roughly occur at a rate of nData /(nSim +1). This approximate value, however, is generally not exact, and may be particularly off non-bounded integer-valued distributions (such as Poisson or neg binom).
+The binomial test considers that under the null hypothesis that the model is correct, and for continuous distributions (i.e. data and the model distribution are identical and continous), the probability that a given observation is higher than all simulations is 1/(nSim +1), and binomial distributed. The testOutlier function can test this null hypothesis via type = "binomial". In principle, it would be nice if we could extend this idea to integer-valued distributions, which are randomized via the PIT procedure (see \link{simulateResiduals}), the rate of "true" outliers is more difficult to calculate, and in general not 1/(nSim +1). The testOutlier function implements a small tweak that calculates the rate of residuals that are closer than 1/(nSim+1) to the 0/1 border, which roughly occur at a rate of nData /(nSim +1). This approximate value, however, is generally not exact, and may be particularly off non-bounded integer-valued distributions (such as Poisson or Negative Binomial).
 
 For this reason, the testOutlier function implements an alternative procedure that uses the bootstrap to generate a simulation-based expectation for the outliers. It is recommended to use the bootstrap for integer-valued distributions (and integer-valued only, because it has no advantage for continuous distributions, ideally with reasonably high values of nSim and nBoot (I recommend at least 1000 for both). Because of the high runtime, however, this option is switched off for type = default when nObs > 500.
 
