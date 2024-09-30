@@ -9,11 +9,11 @@ simulateResiduals(fittedModel, n = 250, refit = FALSE,
   "traditional"), rotation = NULL, ...)
 }
 \arguments{
-\item{fittedModel}{a fitted model  of a class supported by DHARMa.}
+\item{fittedModel}{a fitted model of a class supported by DHARMa.}
 
 \item{n}{number of simulations. The smaller the number, the higher the stochastic error on the residuals. Also, for very small n, discretization artefacts can influence the tests. Default is 250, which is a relatively safe value. You can consider increasing to 1000 to stabilize the simulated values.}
 
-\item{refit}{if FALSE, new data will be simulated and scaled residuals will be created by comparing observed data with new data. If TRUE, the model will be refit on the simulated data (parametric bootstrap), and scaled residuals will be created by comparing observed with refitted residuals.}
+\item{refit}{if FALSE, new data will be simulated and scaled residuals will be created by comparing observed data with new data. If TRUE, the model will be refitted on the simulated data (parametric bootstrap), and scaled residuals will be created by comparing observed with refitted residuals.}
 
 \item{integerResponse}{if TRUE, noise will be added at to the residuals to maintain a uniform expectations for integer responses (such as Poisson or Binomial). Usually, the model will automatically detect the appropriate setting, so there is no need to adjust this setting.}
 
@@ -23,7 +23,7 @@ simulateResiduals(fittedModel, n = 250, refit = FALSE,
 
 \item{method}{for refit = FALSE, the quantile randomization method used. The two options implemented at the moment are probability integral transform (PIT-) residuals (current default), and the "traditional" randomization procedure, that was used in DHARMa until version 0.3.0. Refit = T will always use "traditional", respectively of the value of method. For details, see \link{getQuantile}.}
 
-\item{rotation}{optional rotation of the residual space prior to calculating the quantile residuals. The main purpose of this is to account for residual covariance as created by temporal or spatial residual autocorrelation. See details below, section \emph{residual auto-correlation} as well as the help of \link{getQuantile} and, for a practical example, \link{testTemporalAutocorrelation}.}
+\item{rotation}{optional rotation of the residual space prior to calculating the quantile residuals. The main purpose of this is to account for residual covariance as created by temporal, spatial or phylogenetic autocorrelation. See details below, section \emph{residual auto-correlation} as well as the help of \link{getQuantile} and, for a practical example, \link{testTemporalAutocorrelation}.}
 
 \item{...}{parameters to pass on to the simulate function of the model object. An important use of this is to specify whether simulations should be conditional on the current random effect estimates, e.g. via re.form. Note that not all models support syntax to specify conditional or unconditional simulations. See details and \link{getSimulations}.}
 }
@@ -54,7 +54,7 @@ If the model is correctly specified, the simulated residuals should be flat rega
 
 \strong{Integer responses}: this is only relevant if method = "traditional", in which case it activates the randomization of the residuals. Usually, this does not need to be changed, as DHARMa will try to automatically if the fitted model has an integer or discrete distribution via the family argument. However, in some cases the family does not allow to uniquely identify the distribution type. For example, a tweedie distribution can be inter or continuous. Therefore, DHARMa will additionally check the simulation results for repeated values, and will change the distribution type if repeated values are found (a message is displayed in this case).
 
-\strong{Residual auto-correlation}: a common problem is residual autocorrelation. Spatial, temporal and phylogenetic autocorrelation can be tested with \link{testSpatialAutocorrelation} and \link{testTemporalAutocorrelation}. If simulations are unconditional, residual correlations will be maintained, even if the autocorrelation is addressed by an appropriate CAR structure. This may be a problem, because autocorrelation may create apparently systematic patterns in plots or tests such as \link{testUniformity}. To reduce this problem, either simulate conditional on fitted correlated REs, or you could try to rotate residuals via the rotation parameter (the latter will likely only work in approximately linear models). See \link{getQuantile} for details on the rotation.
+\strong{Residual autocorrelation}: a common problem is residual autocorrelation. Spatial, temporal and phylogenetic autocorrelation can be tested with \link{testSpatialAutocorrelation} and \link{testTemporalAutocorrelation}. If simulations are unconditional, residual correlations will be maintained, even if the autocorrelation is addressed by an appropriate CAR structure. This may be a problem, because autocorrelation may create apparently systematic patterns in plots or tests such as \link{testUniformity}. To reduce this problem, either simulate conditional on fitted correlated REs, or rotate residuals via the rotation parameter (the latter will likely only work in approximately linear models). See \link{getQuantile} for details on the rotation.
 }
 \examples{
 library(lme4)
