@@ -134,49 +134,6 @@ testData$poisson_weights = createData(sampleSize = 200, overdispersion = 0.5,
 testData$weights = rep(c(1,1.1), each = 100)
 testData$poisson_weights$weights = testData$weights
 
-# testData --------------------------------------------------------------------
-testData = list()
-testData$lm = createData(sampleSize = 200, fixedEffects = c(1,0),
-                         overdispersion = 0, randomEffectVariance = 0,
-                         family = gaussian())
-testData$lmm = createData(sampleSize = 200,
-                          overdispersion = 0, randomEffectVariance = 0.5,
-                          family = gaussian())
-
-
-testData$binomial_10 = createData(sampleSize = 200, randomEffectVariance = 0,
-                                  family = binomial())
-testData$binomial_yn = createData(sampleSize = 200, fixedEffects = c(1,0),
-                                  overdispersion = 0, randomEffectVariance = 0,
-                                  family = binomial(), factorResponse = T)
-testData$binomial_nk_matrix = createData(sampleSize = 200, overdispersion = 0,
-                                         randomEffectVariance = 0, family = binomial(),
-                                         binomialTrials = 20)
-testData$binomial_nk_weights = createData(sampleSize = 200, overdispersion = 0,
-                                          randomEffectVariance = 0, family = binomial(),
-                                          binomialTrials = 20)
-testData$binomial_nk_weights$prop = testData$binomial_nk_weights$observedResponse1 / 20
-
-testData$binomial_nk_weights2 = createData(sampleSize = 200, overdispersion = 1,
-                                           randomEffectVariance = 0, family = binomial(),
-                                           binomialTrials = 20)
-testData$binomial_nk_weights2$prop = testData$binomial_nk_weights2$observedResponse1 / 20
-
-
-
-testData$poisson1 = createData(sampleSize = 500, overdispersion = 0,
-                               randomEffectVariance = 0.000, family = poisson())
-testData$poisson2 = createData(sampleSize = 200, overdispersion = 2,
-                               randomEffectVariance =0.000, family = poisson())
-testData$poisson3 = createData(sampleSize = 500, overdispersion = 0.5,
-                               randomEffectVariance = 0.000, family = poisson())
-
-testData$poisson_weights = createData(sampleSize = 200, overdispersion = 0.5,
-                                      randomEffectVariance = 0.5, family = poisson())
-testData$weights = rep(c(1,1.1), each = 100)
-testData$poisson_weights$weights = testData$weights
-
-
 # stats::lm ----------------------------------------------------------------------
 
 test_that("lm works",
@@ -311,7 +268,7 @@ test_that("lme4:lmer works",
           {
             fittedModel <- lme4::lmer(observedResponse ~ Environment1 + (1|group),
                                       data = testData$lmm)
-            runEverything(fittedModel, testData$lmm)
+            suppressMessages(runEverything(fittedModel, testData$lmm))
 
             # lmer warns!
             fittedModel <- lme4::lmer(observedResponse ~ Environment1 + (1|group),
@@ -327,24 +284,24 @@ test_that("lme4:glmer works",
             fittedModel <- lme4::glmer(observedResponse ~ Environment1 + (1|group),
                                        family = "binomial",
                                        data = testData$binomial_10)
-            runEverything(fittedModel, testData$binomial_10)
+            suppressMessages(runEverything(fittedModel, testData$binomial_10))
 
             fittedModel <- lme4::glmer(observedResponse ~ Environment1 + (1|group),
                                        family = "binomial",
                                        data = testData$binomial_yn)
-            runEverything(fittedModel, testData$binomial_yn)
+            suppressMessages( runEverything(fittedModel, testData$binomial_yn))
 
             fittedModel <- lme4::glmer(cbind(observedResponse1,observedResponse0) ~
                                          Environment1 + (1|group),
                                        family = "binomial",
                                        data = testData$binomial_nk_matrix)
-            runEverything(fittedModel, testData$binomial_nk_matrix)
+            suppressMessages(runEverything(fittedModel, testData$binomial_nk_matrix))
 
             fittedModel <- lme4::glmer(prop ~ Environment1 + (1|group),
                                        family = "binomial",
                                        data = testData$binomial_nk_weights,
                                        weights = rep(20,200))
-            runEverything(fittedModel, testData$binomial_nk_weights)
+            suppressMessages(runEverything(fittedModel, testData$binomial_nk_weights))
 
             fittedModel <- lme4::glmer(observedResponse ~ Environment1 +
                                          (1|group) + (1|ID),
@@ -352,7 +309,7 @@ test_that("lme4:glmer works",
                                        data = testData$poisson1,
                                        control = lme4::glmerControl(optCtrl = list(
                                          maxfun = 20000)))
-            runEverything(fittedModel, testData$poisson1)
+            suppressMessages(runEverything(fittedModel, testData$poisson1))
 
             fittedModel2 <- lme4::glmer(observedResponse ~ Environment1 +
                                           (1|group), family = "poisson",
@@ -366,7 +323,7 @@ test_that("lme4:glmer works",
                                           control = lme4::glmerControl(
                                             optimizer = "bobyqa",
                                             optCtrl = list(maxfun=20000)))
-            runEverything(fittedModel, testData$poisson1)
+            suppressMessages(runEverything(fittedModel, testData$poisson1))
 
             # lme4::glmer warns, OK
             fittedModel <- lme4::glmer(observedResponse ~ Environment1 +

@@ -58,8 +58,10 @@ There are three (non-exclusive) routes to address these issues when working with
   fit = phylolm(trait ~ pred,data = dat, phy = tre, model = "BM")
   summary(fit)
 
-  res = simulateResiduals(fit, plot = T) # phylogenetic autoorrelation still present in residuals
-  res = simulateResiduals(fit, plot = T, rotation = "estimated") #with "rotation" the residual autcorrelation is gone see ?simulateResiduals.
+  # phylogenetic autocorrelation still present in residuals
+  res = simulateResiduals(fit, plot = T)
+  # with "rotation" the residual autcorrelation is gone, see ?simulateResiduals.
+  res = simulateResiduals(fit, plot = T, rotation = "estimated")
 
 }
 }

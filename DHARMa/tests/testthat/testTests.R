@@ -20,11 +20,9 @@ test_that("overdispersion recognized", {
 })
 
 
-
-
-
 test_that("tests work", {
 
+  set.seed(123)
   # creating test data
 
   testData = createData(sampleSize = 200, overdispersion = 0.5,
@@ -155,7 +153,7 @@ test_that("tests work", {
 ###### Correlation tests #####
 
 test_that("correlation tests work", {
-
+  set.seed(123)
   testData = createData(sampleSize = 200, overdispersion = 0.5,
                         pZeroInflation = 0, randomEffectVariance = 0)
   fittedModel <- glm(observedResponse ~ Environment1 , family = "poisson",
@@ -224,13 +222,13 @@ test_that("correlation tests work", {
 test_that("test phylogenetic autocorrelation", {
 
   set.seed(123)
-  tre = ape::rcoal(60)
+  tre <<- ape::rcoal(60)
   b0 = 0; b1 = 1;
   x <- runif(length(tre$tip.label), 0,1)
   y <- b0 + b1*x +
     phylolm::rTrait(n = 1, phy = tre, model = "BM",
            parameters = list(ancestral.state = 0, sigma2 = 10))
-  dat = data.frame(trait = y, pred = x)
+  dat <<- data.frame(trait = y, pred = x)
 
   fit = lm(trait ~ pred, data = dat)
   res = simulateResiduals(fit, plot = F)

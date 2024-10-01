@@ -7,7 +7,7 @@
       	Asymptotic one-sample Kolmogorov-Smirnov test
       
       data:  simulationOutput$scaledResiduals
-      D = 0.046573, p-value = 0.7785
+      D = 0.035577, p-value = 0.9619
       alternative hypothesis: two-sided
       
 
@@ -20,7 +20,7 @@
       	Asymptotic one-sample Kolmogorov-Smirnov test
       
       data:  simulationOutput$scaledResiduals
-      D^- = 0.027964, p-value = 0.7314
+      D^- = 0.035577, p-value = 0.6027
       alternative hypothesis: the CDF of x lies below the null hypothesis
       
 
@@ -33,7 +33,7 @@
       	Asymptotic one-sample Kolmogorov-Smirnov test
       
       data:  simulationOutput$scaledResiduals
-      D^+ = 0.046573, p-value = 0.4199
+      D^+ = 0.034418, p-value = 0.6226
       alternative hypothesis: the CDF of x lies above the null hypothesis
       
 
@@ -47,7 +47,7 @@
       	simulated
       
       data:  simulationOutput
-      dispersion = 1.4873, p-value < 2.2e-16
+      dispersion = 1.2578, p-value = 0.096
       alternative hypothesis: two.sided
       
 
@@ -61,7 +61,7 @@
       	simulated
       
       data:  simulationOutput
-      dispersion = 1.4873, p-value = 1
+      dispersion = 1.2578, p-value = 0.952
       alternative hypothesis: less
       
 
@@ -75,7 +75,7 @@
       	simulated
       
       data:  simulationOutput
-      dispersion = 1.4873, p-value < 2.2e-16
+      dispersion = 1.2578, p-value = 0.048
       alternative hypothesis: greater
       
 
@@ -89,7 +89,7 @@
       	simulated
       
       data:  simulationOutput
-      dispersion = 1.4873, p-value < 2.2e-16
+      dispersion = 1.2578, p-value = 0.096
       alternative hypothesis: two.sided
       
 
@@ -103,7 +103,7 @@
       	Asymptotic one-sample Kolmogorov-Smirnov test
       
       data:  simulationOutput$scaledResiduals
-      D = 0.046573, p-value = 0.7785
+      D = 0.035577, p-value = 0.9619
       alternative hypothesis: two-sided
       
       
@@ -113,7 +113,7 @@
       	simulated
       
       data:  simulationOutput
-      dispersion = 1.4873, p-value < 2.2e-16
+      dispersion = 1.2578, p-value = 0.096
       alternative hypothesis: two.sided
       
       
@@ -122,13 +122,13 @@
       	DHARMa bootstrapped outlier test
       
       data:  simulationOutput
-      outliers at both margin(s) = 2, observations = 200, p-value = 0.26
+      outliers at both margin(s) = 1, observations = 200, p-value = 0.82
       alternative hypothesis: two.sided
        percent confidence interval:
-       0.00 0.01
+       0.000000 0.012625
       sample estimates:
-      outlier frequency (expected: 0.0033 ) 
-                                       0.01 
+      outlier frequency (expected: 0.0028 ) 
+                                      0.005 
       
       
 
@@ -142,7 +142,7 @@
       	simulation under H0 = fitted model
       
       data:  simulationOutput
-      ratioObsSim = 0.98524, p-value = 0.96
+      ratioObsSim = 1.0565, p-value = 0.552
       alternative hypothesis: two.sided
       
 
@@ -156,7 +156,7 @@
       	simulation under H0 = fitted model
       
       data:  simulationOutput
-      ratioObsSim = 0.98524, p-value = 0.48
+      ratioObsSim = 1.0565, p-value = 0.784
       alternative hypothesis: less
       
 
@@ -169,7 +169,7 @@
       	DHARMa generic simulation test
       
       data:  simulationOutput
-      ratioObsSim = 1.1792, p-value = 0.104
+      ratioObsSim = 0.97457, p-value = 0.808
       alternative hypothesis: two.sided
       
 
@@ -182,7 +182,7 @@
       	DHARMa generic simulation test
       
       data:  simulationOutput
-      ratioObsSim = 1.1792, p-value = 0.972
+      ratioObsSim = 0.97457, p-value = 0.404
       alternative hypothesis: less
       
 
@@ -195,7 +195,7 @@
       	DHARMa generic simulation test
       
       data:  simulationOutput
-      ratioObsSim = 1.0072, p-value = 0.92
+      ratioObsSim = 1.0077, p-value = 0.944
       alternative hypothesis: two.sided
       
 
@@ -208,7 +208,7 @@
       	DHARMa generic simulation test
       
       data:  simulationOutput
-      ratioObsSim = 1.1603, p-value < 2.2e-16
+      ratioObsSim = 1.0834, p-value = 0.208
       alternative hypothesis: two.sided
       
 
@@ -221,7 +221,7 @@
       	Exact one-sample Kolmogorov-Smirnov test
       
       data:  simulationOutput$scaledResiduals
-      D = 0.19312, p-value = 0.7838
+      D = 0.22547, p-value = 0.613
       alternative hypothesis: two-sided
       
 
@@ -234,7 +234,7 @@
       	Exact one-sample Kolmogorov-Smirnov test
       
       data:  simulationOutput$scaledResiduals
-      D^- = 0.19312, p-value = 0.4204
+      D^- = 0.16279, p-value = 0.5338
       alternative hypothesis: the CDF of x lies below the null hypothesis
       
 
@@ -247,7 +247,7 @@
       	Exact one-sample Kolmogorov-Smirnov test
       
       data:  simulationOutput$scaledResiduals
-      D^+ = 0.13112, p-value = 0.6547
+      D^+ = 0.22547, p-value = 0.315
       alternative hypothesis: the CDF of x lies above the null hypothesis
       
 
@@ -261,7 +261,7 @@
       	simulated
       
       data:  simulationOutput
-      dispersion = 1.4863, p-value = 0.248
+      dispersion = 2.1091, p-value = 0.048
       alternative hypothesis: two.sided
       
 
@@ -275,7 +275,7 @@
       	simulated
       
       data:  simulationOutput
-      dispersion = 1.4863, p-value = 0.876
+      dispersion = 2.1091, p-value = 0.976
       alternative hypothesis: less
       
 
@@ -289,7 +289,7 @@
       	simulated
       
       data:  simulationOutput
-      dispersion = 1.4863, p-value = 0.124
+      dispersion = 2.1091, p-value = 0.024
       alternative hypothesis: greater
       
 
@@ -303,7 +303,7 @@
       	simulated
       
       data:  simulationOutput
-      dispersion = 1.4863, p-value = 0.248
+      dispersion = 2.1091, p-value = 0.048
       alternative hypothesis: two.sided
       
 
@@ -317,7 +317,7 @@
       	Exact one-sample Kolmogorov-Smirnov test
       
       data:  simulationOutput$scaledResiduals
-      D = 0.19312, p-value = 0.7838
+      D = 0.22547, p-value = 0.613
       alternative hypothesis: two-sided
       
       
@@ -327,7 +327,7 @@
       	simulated
       
       data:  simulationOutput
-      dispersion = 1.4863, p-value = 0.248
+      dispersion = 2.1091, p-value = 0.048
       alternative hypothesis: two.sided
       
       
@@ -336,13 +336,13 @@
       	DHARMa bootstrapped outlier test
       
       data:  simulationOutput
-      outliers at both margin(s) = 0, observations = 200, p-value = 1
+      outliers at both margin(s) = 20, observations = 200, p-value = 0.1
       alternative hypothesis: two.sided
        percent confidence interval:
        0.0 0.1
       sample estimates:
-      outlier frequency (expected: 0.007 ) 
-                                         0 
+      outlier frequency (expected: 0.005 ) 
+                                       0.1 
       
       
 
@@ -409,7 +409,7 @@
       	DHARMa generic simulation test
       
       data:  simulationOutput
-      ratioObsSim = 1.0072, p-value = 0.92
+      ratioObsSim = 1.0077, p-value = 0.944
       alternative hypothesis: two.sided
       
 
@@ -422,7 +422,7 @@
       	DHARMa generic simulation test
       
       data:  simulationOutput
-      ratioObsSim = 0.9245, p-value = 0.752
+      ratioObsSim = 1.4725, p-value = 0.04
       alternative hypothesis: two.sided
       
 
@@ -436,7 +436,7 @@
       	vs. simulated-refitted
       
       data:  simulationOutput
-      dispersion = 1.3813, p-value < 2.2e-16
+      dispersion = 1.1231, p-value = 0.248
       alternative hypothesis: two.sided
       
 
@@ -450,8 +450,8 @@
       	DHARMa Moran's I test for distance-based autocorrelation
       
       data:  simulationOutput
-      observed = -0.0147107, expected = -0.0050251, sd = 0.0113003, p-value =
-      0.3914
+      observed = -0.0166319, expected = -0.0050251, sd = 0.0112750, p-value =
+      0.3033
       alternative hypothesis: Distance-based autocorrelation
       
 
@@ -465,8 +465,8 @@
       	DHARMa Moran's I test for distance-based autocorrelation
       
       data:  simulationOutput
-      observed = -0.0147107, expected = -0.0050251, sd = 0.0113003, p-value =
-      0.3914
+      observed = -0.0166319, expected = -0.0050251, sd = 0.0112750, p-value =
+      0.3033
       alternative hypothesis: Distance-based autocorrelation
       
 
@@ -479,8 +479,8 @@
       	DHARMa Moran's I test for distance-based autocorrelation
       
       data:  simulationOutput
-      observed = -0.0147107, expected = -0.0050251, sd = 0.0113003, p-value =
-      0.3914
+      observed = -0.0166319, expected = -0.0050251, sd = 0.0112750, p-value =
+      0.3033
       alternative hypothesis: Distance-based autocorrelation
       
 
@@ -494,8 +494,8 @@
       	DHARMa Moran's I test for distance-based autocorrelation
       
       data:  simulationOutput
-      observed = -0.0147107, expected = -0.0050251, sd = 0.0113003, p-value =
-      0.3914
+      observed = -0.0166319, expected = -0.0050251, sd = 0.0112750, p-value =
+      0.3033
       alternative hypothesis: Distance-based autocorrelation
       
 
@@ -531,8 +531,8 @@
       	DHARMa Moran's I test for distance-based autocorrelation
       
       data:  simulationOutput
-      observed = -0.0147107, expected = -0.0050251, sd = 0.0113003, p-value =
-      0.3914
+      observed = -0.0166319, expected = -0.0050251, sd = 0.0112750, p-value =
+      0.3033
       alternative hypothesis: Distance-based autocorrelation
       
 
@@ -548,8 +548,8 @@
       	DHARMa Moran's I test for distance-based autocorrelation
       
       data:  simulationOutput
-      observed = -0.0147107, expected = -0.0050251, sd = 0.0113003, p-value =
-      0.3914
+      observed = -0.0166319, expected = -0.0050251, sd = 0.0112750, p-value =
+      0.3033
       alternative hypothesis: Distance-based autocorrelation
       
 
@@ -563,7 +563,7 @@
       	Durbin-Watson test
       
       data:  simulationOutput$scaledResiduals ~ 1
-      DW = 2.1009, p-value = 0.4734
+      DW = 1.9703, p-value = 0.833
       alternative hypothesis: true autocorrelation is not 0
       
 
@@ -577,7 +577,7 @@
       	Durbin-Watson test
       
       data:  simulationOutput$scaledResiduals ~ 1
-      DW = 2.1009, p-value = 0.7633
+      DW = 1.9703, p-value = 0.4165
       alternative hypothesis: true autocorrelation is greater than 0
       
 
@@ -604,8 +604,8 @@
       	DHARMa Moran's I test for phylogenetic autocorrelation
       
       data:  res2
-      observed = -0.093598, expected = -0.016949, sd = 0.088473, p-value =
-      0.3863
+      observed = 0.047474, expected = -0.016949, sd = 0.088260, p-value =
+      0.4654
       alternative hypothesis: Phylogenetic autocorrelation
       
 
@@ -619,13 +619,13 @@
       	expectations
       
       data:  simulationOutput
-      outliers at lower margin(s) = 5, observations = 1000, p-value = 0.6079
+      outliers at lower margin(s) = 4, observations = 1000, p-value = 0.8037
       alternative hypothesis: true probability of success is not equal to 0.003984064
       95 percent confidence interval:
-       0.00162542 0.01162947
+       0.001090908 0.010209665
       sample estimates:
       frequency of outliers (expected: 0.00398406374501992 ) 
-                                                       0.005 
+                                                       0.004 
       
 
 ---
@@ -638,13 +638,13 @@
       	expectations
       
       data:  simulationOutput
-      outliers at lower margin(s) = 5, observations = 1000, p-value = 0.6079
+      outliers at lower margin(s) = 4, observations = 1000, p-value = 0.8037
       alternative hypothesis: true probability of success is not equal to 0.003984064
       95 percent confidence interval:
-       0.00162542 0.01162947
+       0.001090908 0.010209665
       sample estimates:
       frequency of outliers (expected: 0.00398406374501992 ) 
-                                                       0.005 
+                                                       0.004 
       
 
 ---
@@ -657,12 +657,12 @@
       	expectations
       
       data:  simulationOutput
-      outliers at upper margin(s) = 2, observations = 1000, p-value = 0.4519
+      outliers at upper margin(s) = 4, observations = 1000, p-value = 0.8037
       alternative hypothesis: true probability of success is not equal to 0.003984064
       95 percent confidence interval:
-       0.0002423011 0.0072058389
+       0.001090908 0.010209665
       sample estimates:
       frequency of outliers (expected: 0.00398406374501992 ) 
-                                                       0.002 
+                                                       0.004 
       
 
