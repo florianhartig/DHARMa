@@ -41,7 +41,7 @@ Suggests:
     spaMM (>= 3.2.0),
     GLMMadaptive,
     glmmTMB (>= 1.1.10),
-    phylolm (>=2.6.5)
+    phylolm
 Enhances:
     phyr,
     rstan,
