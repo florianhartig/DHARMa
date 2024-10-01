@@ -709,10 +709,10 @@ getObservedResponse.phylolm <- function (object, ...){
 #' @rdname getSimulations
 #' @export
 getSimulations.phylolm <- function(object, nsim = 1, type = c("normal", "refit"),
-                                   ...){
+                                    ...){
   type <- match.arg(type)
 
-  fitBoot = update(object, boot = nsim, save = T)
+  fitBoot = update(object, boot = nsim, save = T, ...)
   out = fitBoot$bootdata
 
   if(type == "normal"){
@@ -729,7 +729,7 @@ getSimulations.phylolm <- function(object, nsim = 1, type = c("normal", "refit")
 getRefit.phylolm <- function(object, newresp, ...){
   newData <- model.frame(object)
   newData[,1] = newresp
-  refittedModel = update(object, data = newData)
+  refittedModel = update(object, data = newData, ...)
 }
 
 
@@ -761,10 +761,11 @@ getObservedResponse.phyloglm <- function (object, ...){
 
 #' @rdname getSimulations
 #' @export
-getSimulations.phyloglm <- function(object, nsim = 1, type = c("normal", "refit"), ...){
+getSimulations.phyloglm <- function(object, nsim = 1,
+                                    type = c("normal", "refit"), ...){
   type <- match.arg(type)
 
-  fitBoot = update(object, boot = nsim, save = T)
+  fitBoot = update(object, boot = nsim, save = T, ...)
   out = fitBoot$bootdata
 
   if(type == "normal"){
@@ -786,7 +787,7 @@ getRefit.phyloglm <- function(object, newresp, ...){
   names(newData) <- terms
   newData[,1] = newresp
 
-  refittedModel = update(object, data = newData)
+  refittedModel = update(object, data = newData, ...)
   return(refittedModel)
 }
 

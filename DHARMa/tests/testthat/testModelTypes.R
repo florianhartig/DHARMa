@@ -1,8 +1,8 @@
 
 skip_on_cran()
-skip_on_ci()
+#skip_on_ci()
 
-set.seed(123)
+set.seed(1234)
 
 doPlots = F
 
@@ -27,7 +27,7 @@ expectDispersion <- function(x, answer = T){
   else expect_gt(testDispersion(res, plot = doPlots)$p.value, 0.05)
 }
 
-runEverything = function(fittedModel, testData, DHARMaData = T,
+runEverything = function(fittedModel, testData, DHARMaData = T, phy = NULL,
                          expectOverdispersion = F){
 
   t = getObservedResponse(fittedModel)
@@ -91,6 +91,48 @@ runEverything = function(fittedModel, testData, DHARMaData = T,
 
 }
 
+
+# testData --------------------------------------------------------------------
+testData = list()
+testData$lm = createData(sampleSize = 200, fixedEffects = c(1,0),
+                         overdispersion = 0, randomEffectVariance = 0,
+                         family = gaussian())
+testData$lmm = createData(sampleSize = 200,
+                          overdispersion = 0, randomEffectVariance = 0.5,
+                          family = gaussian())
+
+
+testData$binomial_10 = createData(sampleSize = 200, randomEffectVariance = 0,
+                                  family = binomial())
+testData$binomial_yn = createData(sampleSize = 200, fixedEffects = c(1,0),
+                                  overdispersion = 0, randomEffectVariance = 0,
+                                  family = binomial(), factorResponse = T)
+testData$binomial_nk_matrix = createData(sampleSize = 200, overdispersion = 0,
+                                         randomEffectVariance = 0, family = binomial(),
+                                         binomialTrials = 20)
+testData$binomial_nk_weights = createData(sampleSize = 200, overdispersion = 0,
+                                          randomEffectVariance = 0, family = binomial(),
+                                          binomialTrials = 20)
+testData$binomial_nk_weights$prop = testData$binomial_nk_weights$observedResponse1 / 20
+
+testData$binomial_nk_weights2 = createData(sampleSize = 200, overdispersion = 1,
+                                           randomEffectVariance = 0, family = binomial(),
+                                           binomialTrials = 20)
+testData$binomial_nk_weights2$prop = testData$binomial_nk_weights2$observedResponse1 / 20
+
+
+
+testData$poisson1 = createData(sampleSize = 500, overdispersion = 0,
+                               randomEffectVariance = 0.000, family = poisson())
+testData$poisson2 = createData(sampleSize = 200, overdispersion = 2,
+                               randomEffectVariance =0.000, family = poisson())
+testData$poisson3 = createData(sampleSize = 500, overdispersion = 0.5,
+                               randomEffectVariance = 0.000, family = poisson())
+
+testData$poisson_weights = createData(sampleSize = 200, overdispersion = 0.5,
+                                      randomEffectVariance = 0.5, family = poisson())
+testData$weights = rep(c(1,1.1), each = 100)
+testData$poisson_weights$weights = testData$weights
 
 # testData --------------------------------------------------------------------
 testData = list()
@@ -399,7 +441,7 @@ test_that("glmmTMB works",
 )
 
 
-# spaMM::HLfit works  --------------------------------------------------------------
+# spaMM::HLfit  --------------------------------------------------------------
 
 test_that("spaMM::HLfit works",
           {
@@ -452,7 +494,7 @@ test_that("spaMM::HLfit works",
 )
 
 
-# GLMMadaptive works  --------------------------------------------------------------
+# GLMMadaptive  --------------------------------------------------------------
 
 test_that("GLMMadaptive works",
           {
@@ -511,6 +553,54 @@ test_that("GLMMadaptive works",
           }
 )
 
+rm(testData)
+
+
+# phylolm::pylolm/phyloglm -----------------------------------------------
+
+# OBS: somehow, the base function update() in getSimulations.phylolm() and
+# getRefit.phylolm() searches for the objects in the global env, then the
+# test_that wasn't working. A workaround was to put the objects of the tree and
+# the dataset in the global env.
+
+test_that("phylolm works",
+          {
+            # LM
+            set.seed(123456)
+            tre1 <<- ape::rcoal(60) # global env
+            taxa = sort(tre1$tip.label)
+            b0 = 0; b1 = 1;
+            x <- phylolm::rTrait(n = 1, phy = tre1, model = "BM",
+                                 parameters = list(ancestral.state = 0,
+                                                   sigma2 = 10))
+            y <- b0 + b1*x +
+              phylolm::rTrait(n = 1, phy = tre1, model = "lambda",
+                              parameters = list(ancestral.state = 0, sigma2 = 1,
+                                                lambda = 0.5))
+            testData <<- data.frame(trait = y[taxa], predictor = x[taxa],
+                                    x = runif(length(y)), y= runif(length(y)))
+            fittedModel = phylolm::phylolm(trait ~ predictor, data = testData,
+                                           phy = tre1, model = "lambda")
+
+            runEverything(fittedModel, testData = testData, phy = tre1)
+          })
+
+test_that("phyloglm works",
+          {
+            #GLM
+            set.seed(123456)
+            tre <<- ape::rtree(50) # global env
+            x = phylolm::rTrait(n = 1, phy = tre)
+            X = cbind(rep(1, 50), x)
+            y = phylolm::rbinTrait(n = 1, phy = tre, beta = c(-1,0.5), alpha = 1,
+                                   X = X)
+            testData <<- data.frame(trait = y, predictor = x,
+                                    x = runif(length(y)), y = runif(length(y)))
+            fittedModel = phylolm::phyloglm(trait ~ predictor,
+                                            phy = tre, data = testData)
+
+            runEverything(fittedModel,  testData = testData, phy = tre)
+          })
 
 
 # isNA works? ------------------------------------------------------------------

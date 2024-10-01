@@ -41,7 +41,10 @@
 #' @example inst/examples/simulateResidualsHelp.R
 #' @import stats
 #' @export
-simulateResiduals <- function(fittedModel, n = 250, refit = FALSE, integerResponse = NULL, plot = FALSE, seed = 123, method = c("PIT", "traditional"), rotation = NULL, ...){
+simulateResiduals <- function(fittedModel, n = 250, refit = FALSE,
+                              integerResponse = NULL, plot = FALSE, seed = 123,
+                              method = c("PIT", "traditional"), rotation = NULL,
+                              ...){
 
   ######## general assertions and startup calculations ##########
 
@@ -88,11 +91,15 @@ simulateResiduals <- function(fittedModel, n = 250, refit = FALSE, integerRespon
 
     out$method = method
 
-    out$simulatedResponse = getSimulations(fittedModel, nsim = n, type = "normal", ...)
+    out$simulatedResponse <- getSimulations(fittedModel, nsim = n,
+                                           type = "normal", ...)
 
     checkSimulations(out$simulatedResponse, out$nObs, out$nSim)
 
-    out$scaledResiduals = getQuantile(simulations = out$simulatedResponse , observed = out$observedResponse , integerResponse = integerResponse, method = method, rotation = rotation)
+    out$scaledResiduals <- getQuantile(simulations = out$simulatedResponse ,
+                                      observed = out$observedResponse ,
+                                      integerResponse = integerResponse,
+                                      method = method, rotation = rotation)
 
     ######## refit = T ##################
   } else {
@@ -102,16 +109,18 @@ simulateResiduals <- function(fittedModel, n = 250, refit = FALSE, integerRespon
     # Adding new outputs
 
     out$refittedPredictedResponse <- matrix(nrow = out$nObs, ncol = n )
-    out$refittedFixedEffects <- matrix(nrow = length(out$fittedFixedEffects), ncol = n )
+    out$refittedFixedEffects <- matrix(nrow = length(out$fittedFixedEffects),
+                                       ncol = n )
     #out$refittedRandomEffects <- matrix(nrow = length(out$fittedRandomEffects), ncol = n )
-    out$refittedResiduals = matrix(nrow = out$nObs, ncol = n)
-    out$refittedPearsonResiduals = matrix(nrow = out$nObs, ncol = n)
+    out$refittedResiduals <- matrix(nrow = out$nObs, ncol = n)
+    out$refittedPearsonResiduals <- matrix(nrow = out$nObs, ncol = n)
 
-    out$simulatedResponse = getSimulations(fittedModel, nsim = n, type = "refit", ...)
+    out$simulatedResponse <- getSimulations(fittedModel, nsim = n,
+                                           type = "refit", ...)
 
     for (i in 1:n){
 
-      simObserved = out$simulatedResponse[[i]]
+      simObserved <- out$simulatedResponse[[i]]
 
       try({
 
@@ -119,13 +128,14 @@ simulateResiduals <- function(fittedModel, n = 250, refit = FALSE, integerRespon
         # if (i==3) stop("x")
         # Note: also set silent = T for production
 
-        refittedModel = getRefit(fittedModel, simObserved)
+        refittedModel <- getRefit(fittedModel, simObserved, ...)
 
-        out$refittedPredictedResponse[,i] = getFitted(refittedModel)
-        out$refittedFixedEffects[,i] = getFixedEffects(refittedModel)
-        out$refittedResiduals[,i] = getResiduals(refittedModel)
-        out$refittedPearsonResiduals[,i] = residuals(refittedModel, type = "pearson")
-        #out$refittedRandomEffects[,i]  = ranef(refittedModel)
+        out$refittedPredictedResponse[,i] <- getFitted(refittedModel)
+        out$refittedFixedEffects[,i] <- getFixedEffects(refittedModel)
+        out$refittedResiduals[,i] <- getResiduals(refittedModel)
+        out$refittedPearsonResiduals[,i] <- residuals(refittedModel,
+                                                     type = "pearson")
+        #out$refittedRandomEffects[,i]  <- ranef(refittedModel)
       }, silent = TRUE)
     }
 
@@ -147,7 +157,11 @@ simulateResiduals <- function(fittedModel, n = 250, refit = FALSE, integerRespon
 
     ######### residual calculations ###########
 
-    out$scaledResiduals = getQuantile(simulations = out$refittedResiduals, observed = out$fittedResiduals, integerResponse = integerResponse, method = "traditional", rotation = rotation)
+    out$scaledResiduals = getQuantile(simulations = out$refittedResiduals,
+                                      observed = out$fittedResiduals,
+                                      integerResponse = integerResponse,
+                                      method = "traditional",
+                                      rotation = rotation)
   }
 
   ########### Wrapup ############
