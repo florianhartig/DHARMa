@@ -49,19 +49,7 @@ jobs:
           needs: check
           working-directory: DHARMa
       # second check with different rcmdcheck arguments.
-      
-      - name: Install devtools for the latest phylolm
-        run: |
-          install.packages("devtools")
-        # this is just for the dev version of phylolm
-        shell: Rscript {0}
-      
-      - name: Install latest phylolm
-        run: |
-          devtools::install_github("lamho86/phylolm")
-        # this is just for the tests before the dev version is released on CRAN
-        shell: Rscript {0}
-      
+  
       - uses: r-lib/actions/check-r-package@v2
         with:
           upload-snapshots: true
