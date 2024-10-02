@@ -831,7 +831,7 @@ GLMMadaptive is supported by DHARMa since 0.3.4.
 
 ## phylolm 
 
-phylom is supported by DHARMa since 0.4.7 for both model classes phylolm and phyloglm.
+phylom (version >= 2.6.5) is supported by DHARMa since 0.4.7 for both model classes phylolm and phyloglm.
 
 ## phyr
 
