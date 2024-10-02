@@ -9,7 +9,7 @@ testSpatialAutocorrelation(res, x =  testData$x, y = testData$y)
 dM = as.matrix(dist(cbind(testData$x, testData$y)))
 testSpatialAutocorrelation(res, distMat = dM)
 
-# You could add a spatial variogram via 
+# You could add a spatial variogram via
 # library(gstat)
 # dat = data.frame(res = residuals(res), x = testData$x, y = testData$y)
 # coordinates(dat) = ~x+y
@@ -51,12 +51,12 @@ testData$x  = rnorm(clusters)[testData$group] + rnorm(size, sd = 0.01)
 testData$y  = rnorm(clusters)[testData$group] + rnorm(size, sd = 0.01)
 
 # It's a good idea to use a RE to take out the cluster effects. This accounts
-# for the autocorrelation within clusters 
+# for the autocorrelation within clusters
 
 library(lme4)
 fittedModel <- lmer(observedResponse ~ Environment1 + (1|group), data = testData)
 
-# DHARMa default is to re-simulted REs - this means spatial pattern remains
+# DHARMa default is to re-simulate REs - this means spatial pattern remains
 # because residuals are still clustered
 
 res = simulateResiduals(fittedModel)
@@ -66,13 +66,13 @@ testSpatialAutocorrelation(res, x =  testData$x, y = testData$y)
 # Because at least how the data are simulated, cluster are spatially independent
 
 res2 = recalculateResiduals(res, group = testData$group)
-testSpatialAutocorrelation(res2, 
-                           x =  aggregate(testData$x, list(testData$group), mean)$x, 
+testSpatialAutocorrelation(res2,
+                           x =  aggregate(testData$x, list(testData$group), mean)$x,
                            y = aggregate(testData$y, list(testData$group), mean)$x)
 
-# For lme4, it's also possible to simulated residuals conditional on fitted 
+# For lme4, it's also possible to simulated residuals conditional on fitted
 # REs (re.form). Conditional on the fitted REs (i.e. accounting for the clusters)
-# the residuals should now be indepdendent. The remaining RSA we see here is 
+# the residuals should now be indepdendent. The remaining RSA we see here is
 # probably due to the RE shrinkage
 
 res = simulateResiduals(fittedModel, re.form = NULL)

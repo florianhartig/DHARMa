@@ -43,7 +43,7 @@ DHARMa.ecdf <- function (x)
 #'
 #' **Rotation (optional)**
 #'
-#' The getQuantile function includes an additional option to rotate residuals. This option should ONLY be used when the fitted model includes a particular residuals covariance structure, such as an AR1 or a spatial CAR model.
+#' The getQuantile function includes an additional option to rotate residuals. This option should ONLY be used when the fitted model includes a particular residuals covariance structure, such as an AR1 or a spatial or phylogenetic CAR model.
 #'
 #' For these models, residuals calculated from unconditional simulations will include the specified covariance structure, which will trigger e.g. temporal autocorrelation tests and can inflate type I errors of other tests. The idea of the rotation is to rotate the residual space according to the covariance structure of the fitted model, such that the rotated residuals are conditional independent (provided the fitted model is correct).
 #'

@@ -9,20 +9,20 @@ testSpatialAutocorrelation(simulationOutput, x = NULL, y = NULL,
   plot = TRUE)
 }
 \arguments{
-\item{simulationOutput}{an object of class DHARMa, either created via \link{simulateResiduals} for supported models or by \link{createDHARMa} for simulations created outside DHARMa, or a supported model. Providing a supported model directly is discouraged, because simulation settings cannot be changed in this case.}
+\item{simulationOutput}{An object of class DHARMa, either created via \link{simulateResiduals} for supported models or via \link{createDHARMa} for simulations created outside DHARMa, or a supported model. Providing a supported model directly is discouraged, because simulation settings cannot be changed in this case.}
 
-\item{x}{the x coordinate, in the same order as the data points. Must be specified unless distMat is provided.}
+\item{x}{The x coordinate, in the same order as the data points. Must be specified unless distMat is provided.}
 
-\item{y}{the y coordinate, in the same order as the data points. Must be specified unless distMat is provided.}
+\item{y}{The y coordinate, in the same order as the data points. Must be specified unless distMat is provided.}
 
-\item{distMat}{optional distance matrix. If not provided, euclidean distances based on x and y will be calculated. See details for explanation}
+\item{distMat}{Optional distance matrix. If not provided, euclidean distances based on x and y will be calculated. See details for explanation.}
 
-\item{alternative}{a character string specifying whether the test should test if observations are "greater", "less" or "two.sided" compared to the simulated null hypothesis}
+\item{alternative}{A character string specifying whether the test should test if observations are "greater", "less" or "two.sided" compared to the simulated null hypothesis.}
 
-\item{plot}{whether to plot output}
+\item{plot}{Whether to plot output.}
 }
 \description{
-This function performs a Moran's I test for distance-based (spatial, phylogenetic or similar) autocorrelation on the calculated quantile residuals
+This function performs a Moran's I test for distance-based (spatial, phylogenetic or similar) autocorrelation on the calculated quantile residuals.
 }
 \details{
 The function performs Moran.I test from the package ape on the DHARMa residuals. If a distance matrix (distMat) is provided, calculations will be based on this distance matrix, and x,y coordinates will only used for the plotting (if provided). If distMat is not provided, the function will calculate the euclidean distances between x,y coordinates, and test Moran.I based on these distances.
@@ -32,16 +32,16 @@ If plot = T, a plot will be produced showing each residual with at its x,y posit
 Testing for spatial autocorrelation requires unique x,y values - if you have several observations per location, either use the recalculateResiduals function to aggregate residuals per location, or extract the residuals from the fitted object, and plot / test each of them independently for spatially repeated subgroups (a typical scenario would repeated spatial observation, in which case one could plot / test each time step separately for temporal autocorrelation). Note that the latter must be done by hand, outside testSpatialAutocorrelation.
 }
 \note{
-Standard DHARMa simulations from models with (temporal / spatial / phylogenetic) conditional autoregressive terms will still have the respective temporal / spatial / phylogenetic correlation in the DHARMa residuals, unless the package you are using is modelling the autoregressive terms as explicit REs and is able to simulate conditional on the fitted REs. This has two consequences
+Standard DHARMa simulations from models with (temporal / spatial / phylogenetic) conditional autoregressive terms will still have the respective temporal / spatial / phylogenetic correlation in the DHARMa residuals, unless the package you are using is modelling the autoregressive terms as explicit REs and is able to simulate conditional on the fitted REs. This has two consequences:
 \enumerate{
 \item If you check the residuals for such a model, they will still show significant autocorrelation, even if the model fully accounts for this structure.
 \item Because the DHARMa residuals for such a model are not statistically independent any more, other tests (e.g. dispersion, uniformity) may have inflated type I error, i.e. you will have a higher likelihood of spurious residual problems.
 }
 
-There are three (non-exclusive) routes to address these issues when working with spatial / temporal / other autoregressive models:
+There are three (non-exclusive) routes to address these issues when working with spatial / temporal / phylogenetic / other autoregressive models:
 \enumerate{
-\item Simulate conditional on the fitted CAR structures (see conditional simulations in the help of \link{simulateResiduals})
-\item Rotate simulations prior to residual calculations (see parameter rotation in \link{simulateResiduals})
+\item Simulate conditional on the fitted CAR structures (see conditional simulations in the help of \link{simulateResiduals}).
+\item Rotate simulations prior to residual calculations (see parameter rotation in \link{simulateResiduals}).
 \item Use custom tests / plots that explicitly compare the correlation structure in the simulated data to the correlation structure in the observed data.
 }
 }
@@ -57,7 +57,7 @@ testSpatialAutocorrelation(res, x =  testData$x, y = testData$y)
 dM = as.matrix(dist(cbind(testData$x, testData$y)))
 testSpatialAutocorrelation(res, distMat = dM)
 
-# You could add a spatial variogram via 
+# You could add a spatial variogram via
 # library(gstat)
 # dat = data.frame(res = residuals(res), x = testData$x, y = testData$y)
 # coordinates(dat) = ~x+y
@@ -99,12 +99,12 @@ testData$x  = rnorm(clusters)[testData$group] + rnorm(size, sd = 0.01)
 testData$y  = rnorm(clusters)[testData$group] + rnorm(size, sd = 0.01)
 
 # It's a good idea to use a RE to take out the cluster effects. This accounts
-# for the autocorrelation within clusters 
+# for the autocorrelation within clusters
 
 library(lme4)
 fittedModel <- lmer(observedResponse ~ Environment1 + (1|group), data = testData)
 
-# DHARMa default is to re-simulted REs - this means spatial pattern remains
+# DHARMa default is to re-simulate REs - this means spatial pattern remains
 # because residuals are still clustered
 
 res = simulateResiduals(fittedModel)
@@ -114,13 +114,13 @@ testSpatialAutocorrelation(res, x =  testData$x, y = testData$y)
 # Because at least how the data are simulated, cluster are spatially independent
 
 res2 = recalculateResiduals(res, group = testData$group)
-testSpatialAutocorrelation(res2, 
-                           x =  aggregate(testData$x, list(testData$group), mean)$x, 
+testSpatialAutocorrelation(res2,
+                           x =  aggregate(testData$x, list(testData$group), mean)$x,
                            y = aggregate(testData$y, list(testData$group), mean)$x)
 
-# For lme4, it's also possible to simulated residuals conditional on fitted 
+# For lme4, it's also possible to simulated residuals conditional on fitted
 # REs (re.form). Conditional on the fitted REs (i.e. accounting for the clusters)
-# the residuals should now be indepdendent. The remaining RSA we see here is 
+# the residuals should now be indepdendent. The remaining RSA we see here is
 # probably due to the RE shrinkage
 
 res = simulateResiduals(fittedModel, re.form = NULL)

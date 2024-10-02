@@ -12,7 +12,7 @@ vignette: >
   \usepackage[utf8]{inputenc}
   %\VignetteEngine{knitr::rmarkdown}
 abstract: "The 'DHARMa' package uses a simulation-based approach to create  readily interpretable scaled (quantile) residuals for fitted generalized linear (mixed) models. Currently supported are linear and generalized linear (mixed) models from 'lme4' (classes 'lmerMod', 'glmerMod'), 'glmmTMB', 'GLMMadaptive' and 'spaMM'; phylogenetic 
-    linear models from 'phylolm'(classes 'phylolm' and 'phyloglm'); generalized additive models ('gam' from 'mgcv'); 'glm' (including 'negbin' from 'MASS', but excluding quasi-distributions) and 'lm' model classes. Moreover, externally created simulations, e.g. posterior predictive simulations from Bayesian software such as 'JAGS', 'STAN', or 'BUGS' can be processed as well. The resulting residuals are standardized to values between 0 and 1 and can be interpreted as intuitively as residuals from a linear regression. The package also provides a number of plot and test functions for typical model misspecification problems, such as over/underdispersion, zero-inflation, and residual spatial and temporal autocorrelation. \n \n \n"
+    linear models from 'phylolm'(classes 'phylolm' and 'phyloglm'); generalized additive models ('gam' from 'mgcv'); 'glm' (including 'negbin' from 'MASS', but excluding quasi-distributions) and 'lm' model classes. Moreover, externally created simulations, e.g. posterior predictive simulations from Bayesian software such as 'JAGS', 'STAN', or 'BUGS' can be processed as well. The resulting residuals are standardized to values between 0 and 1 and can be interpreted as intuitively as residuals from a linear regression. The package also provides a number of plot and test functions for typical model misspecification problems, such as over/underdispersion, zero-inflation, and residual spatial, temporal and phylogenetic autocorrelation. \n \n \n"
 editor_options: 
   chunk_output_type: console
 ---
@@ -184,15 +184,16 @@ See ?plotResiduas for details, but very shortly: under H0 (perfect model), we wo
 
 To support the visual inspection of the residuals, the DHARMa package provides a number of specialized goodness-of-fit tests on the simulated residuals:
 
--   testUniformity() - tests if the overall distribution conforms to expectations
--   testOutliers() - tests if there are more simulation outliers than expected
--   testDispersion() - tests if the simulated dispersion is equal to the observed dispersion
--   testQuantiles() - fits a quantile regression or residuals against a predictor (default predicted value), and tests of this conforms to the expected quantile
--   testCategorical(simulationOutput, catPred = testData\$group) tests residuals against a categorical predictor
--   testZeroinflation() - tests if there are more zeros in the data than expected from the simulations
--   testGeneric() - test if a generic summary statistics (user-defined) deviates from model expectations
--   testTemporalAutocorrelation() - tests for temporal autocorrelation in the residuals
--   testSpatialAutocorrelation() - tests for spatial autocorrelation in the residuals. Can also be used with a generic distance function, for example to test for phylogenetic signal in the residuals
+-   testUniformity() - tests if the overall distribution conforms to expectations.
+-   testOutliers() - tests if there are more simulation outliers than expected.
+-   testDispersion() - tests if the simulated dispersion is equal to the observed dispersion.
+-   testQuantiles() - fits a quantile regression or residuals against a predictor (default predicted value), and tests of this conforms to the expected quantile.
+-   testCategorical(simulationOutput, catPred = testData\$group) tests residuals against a categorical predictor.
+-   testZeroinflation() - tests if there are more zeros in the data than expected from the simulations.
+-   testGeneric() - test if a generic summary statistics (user-defined) deviates from model expectations.
+-   testTemporalAutocorrelation() - tests for temporal autocorrelation in the residuals.
+-   testSpatialAutocorrelation() - tests for spatial autocorrelation in the residuals. Can also be used with a generic distance function.
+-   testPhylogeneticAutocorrelation() - tests for phylogenetic signal in the residuals.
 
 See the help of the functions and further comments below for a more detailed description.
 
@@ -467,27 +468,57 @@ plotResiduals(simulationOutput, testData$Environment2)
 
 ## Residual correlation structures (temporal, spatial, phylogenetic)
 
-If a distance between residuals can be defined (temporal, spatial, phylogenetic), you should check if there is a distance-dependence in the residuals, which would suggest to move to a gls structure for analysis.
+If a distance between residuals can be defined (temporal, spatial, phylogenetic), you should check if there is a distance-dependence in the residuals, which would suggest to move to a GLS (generalized least squares) structure for analysis.
 
-The two functions to test for this in DHARMa are
+The three functions to test for this in DHARMa are:
 
--   testTemporalAutocrrelation based on the Durbin-Watson test
--   testSpatialAutocorrelation, based on Moran's I, can also be used for phylogenetic tests
+-   testTemporalAutocrrelation based on the Durbin-Watson test.
+-   testSpatialAutocorrelation, based on Moran's I, can also be used for generic distance functions.
+-   testPhylogeneticAutocorrelation, based on Moran's I test from `Moran.I` function on package `ape`.
 
 Here a short example for the spatial case, see help of the functions for extended examples.
 
 ```{r, fig.width=4.5, fig.height=4.5}
-testData = createData(sampleSize = 100, family = poisson(), spatialAutocorrelation = 5)
-fittedModel <- glmer(observedResponse ~ Environment1 + (1|group), data = testData, family = poisson() )
+testData = createData(sampleSize = 100, family = poisson(), 
+                      spatialAutocorrelation = 3, numGroups = 1,
+                       randomEffectVariance = 0)
+fittedModel <- glm(observedResponse ~ Environment1 , data = testData, 
+                   family = poisson() )
 simulationOutput <- simulateResiduals(fittedModel = fittedModel)
-testSpatialAutocorrelation(simulationOutput = simulationOutput, x = testData$x, y= testData$y)
+testSpatialAutocorrelation(simulationOutput = simulationOutput, x = testData$x,
+                           y= testData$y)
+# plot(simulationOutput)
 ```
 
 Note that all these tests are most sensitive against homogeneous residual structure, and might miss local and heterogeneous (non-stationary) residual structures. Additional visual checks can be useful.
 
+However, standard DHARMa simulations from models with temporal / spatial / phylogenetic conditional autoregressive terms will still have the respective correlation in the DHARMa residuals, unless the package you are using is modelling the autoregressive terms as explicit REs and is able to simulate conditional on the fitted REs. It means that the residuals will still show significant autocorrelation, even if the model fully accounts for this strucuture, and other tests, such as dispersion, uniformity, may have inflated type I error. See the example below with a `glmmTMB` model with a spatial autocorrelation structure:
+
+```{r}
+library(glmmTMB)
+testData$pos <- numFactor(testData$x, testData$y)
+fittedModel2 <- glmmTMB(observedResponse ~ Environment1 + exp(pos + 0|group), 
+                        data = testData, family = poisson())
+simulationOutput2 <- simulateResiduals(fittedModel = fittedModel2)
+testSpatialAutocorrelation(simulationOutput = simulationOutput2, x = testData$x, 
+                           y= testData$y)
+# plot(simulationOutput2)
+```
+
+One of the options to solve it and get correct tests and no residual pattern (if the model is correct) is to rotate the residual space according to the coariance structure of the fitted model, such that the rotated residuals are conditionally independent. The argument rotation in `simulateResiduals` does it (see also `?getQuantile` for details about the rotation options):
+
+```{r}
+# rotation of the residuals 
+simulationOutput3 <- simulateResiduals(fittedModel = fittedModel2,
+                                       rotation = "estimated")
+testSpatialAutocorrelation(simulationOutput = simulationOutput3, x = testData$x, 
+                           y= testData$y)
+# plot(simulationOutput3)
+```
+
 # Case studies and examples
 
-**Note:** More real-world examples can be found on the DHARMa GitHub repository
+**Note:** More real-world examples can be found on the DHARMa GitHub repository.
 
 ## Budworm example (count-proportion n/k binomial)
 
@@ -829,9 +860,9 @@ spaMM is supported by DHARMa since 0.2.1
 
 GLMMadaptive is supported by DHARMa since 0.3.4.
 
-## phylolm 
+## phylolm
 
-phylom (version >= 2.6.5) is supported by DHARMa since 0.4.7 for both model classes phylolm and phyloglm.
+phylom (version \>= 2.6.5) is supported by DHARMa since 0.4.7 for both model classes phylolm and phyloglm.
 
 ## phyr
 
