@@ -100,12 +100,13 @@ testQuantiles <- function(simulationOutput, predictor = NULL, quantiles = c(0.25
     res = simulationOutput$scaledResiduals
     pred = ensurePredictor(simulationOutput, predictor)
 
-    dat=data.frame(res =  simulationOutput$scaledResiduals , pred = pred)
+    dat = data.frame(res = simulationOutput$scaledResiduals, pred = pred)
 
     quantileFits <- list()
     pval = rep(NA, length(quantiles))
     predictions = data.frame(pred = sort(dat$pred))
-    predictions = cbind(predictions, matrix(ncol = 2 * length(quantiles), nrow = nrow(dat)))
+    predictions = cbind(predictions, matrix(ncol = 2 * length(quantiles),
+                                            nrow = nrow(dat)))
     for(i in 1:length(quantiles)){
       datTemp = dat
       datTemp$res = datTemp$res - quantiles[i]
@@ -113,7 +114,10 @@ testQuantiles <- function(simulationOutput, predictor = NULL, quantiles = c(0.25
       # settings for k = the dimension of the basis used to represent the smooth term.
       # see https://github.com/mfasiolo/qgam/issues/37
       dimSmooth =  min(length(unique(datTemp$pred)), 10)
-      quantResult = try(capture.output(quantileFits[[i]] <- qgam::qgam(res ~ s(pred, k = dimSmooth) ,  data =datTemp, qu = quantiles[i])), silent = T)
+      quantResult = try(capture.output(quantileFits[[i]] <-
+                                         qgam::qgam(res ~ s(pred, k = dimSmooth),
+                                                    data = datTemp,
+                                                    qu = quantiles[i])), silent = T)
       if(inherits(quantResult, "try-error")){
         message("Unable to calculate quantile regression for quantile ", quantiles[i], ". Possibly to few (unique) data points / predictions. Will be ommited in plots and significance calculations.")
       } else {
@@ -135,7 +139,8 @@ testQuantiles <- function(simulationOutput, predictor = NULL, quantiles = c(0.25
     class(out) = "htest"
 
   } else if(plot == T) {
-    out <- plotResiduals(simulationOutput = simulationOutput, form = predictor, quantiles = quantiles, quantreg = TRUE)
+    out <- plotResiduals(simulationOutput = simulationOutput, form = predictor,
+                         quantiles = quantiles, quantreg = TRUE)
   }
   return(out)
 }
@@ -285,17 +290,17 @@ testOutliers <- function(simulationOutput, alternative = c("two.sided", "greater
     names(out$parameter) = "observations"
     out$estimate = outliers
     names(out$estimate) = paste("outlier frequency (expected:", mean(frequBoot),")")
-    
+
     if(plotBoostrap == T){
       hist(frequBoot, xlim = range(frequBoot, outliers), col = "lightgrey", main = "Bootstrapped outlier frequency")
       abline(v = mean(frequBoot), col = 1, lwd = 2)
       abline(v = outliers, col = "red", lwd = 2)
-      
+
       # legend("center", c(paste("p=", round(out$p.value, digits = 5)), paste("Deviation ", ifelse(out$p.value < 0.05, "significant", "n.s."))), text.col = ifelse(out$p.value < 0.05, "red", "black" ))
     }
 
     if(plot == T) {
-      
+
       hist(simulationOutput, main = "")
 
       main = ifelse(out$p.value <= 0.05,
