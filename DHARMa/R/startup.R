@@ -6,7 +6,7 @@ printDHARMaStartupInfo <- function()
 }
 
 .onLoad <- function(...) {
-  
+  options(DHARMaSignalColor = "red")
 }
 
 .onAttach <- function(...) { 

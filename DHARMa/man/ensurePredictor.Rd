@@ -7,9 +7,9 @@
 ensurePredictor(simulationOutput, predictor = NULL)
 }
 \arguments{
-\item{simulationOutput}{a DHARMa simulation output or an object that can be converted into a DHARMa simulation output}
+\item{simulationOutput}{A DHARMa simulation output or an object that can be converted into a DHARMa simulation output.}
 
-\item{predictor}{an optional predictor. If no predictor is provided, will try to extract the fitted value}
+\item{predictor}{An optional predictor. If no predictor is provided, will try to extract the fitted value.}
 }
 \description{
 Ensures the existence of a valid predictor to plot residuals against

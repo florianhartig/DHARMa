@@ -30,7 +30,7 @@ DHARMa.ecdf <- function (x)
 #' @param method The quantile randomization method used. See details.
 #' @param rotation Optional rotation of the residuals. You can either provide as a known or estimated covariance matrix (e.g. when fitting an AR1 model), or use the argument "estimated", in which case the residual covariance will be approximated by simulations. See comments in details.
 #'
-#' @details The function calculates residual quantiles from the simulated data. For continuous distributions, this will simply the the value of the ecdf.
+#' @details The function calculates residual quantiles from the simulated data. For continuous distributions, this will simply be the value of the ecdf.
 #'
 #' **Randomization procedure for discrete data**
 #'
@@ -55,7 +55,7 @@ DHARMa.ecdf <- function (x)
 #'
 #' Dunn, P.K., & Smyth, G.K. (1996). Randomized quantile residuals. Journal of Computational and Graphical Statistics 5, 236-244.
 #'
-#' Warton, David I., Loïc Thibaut, and Yi Alice Wang. "The PIT-trap—A “model-free” bootstrap procedure for inference about regression models with discrete, multivariate responses." PloS one 12.7 (2017)
+#' Warton, David I., Loïc Thibaut, and Yi Alice Wang. "The PIT-trap—A “model-free” bootstrap procedure for inference about regression models with discrete, multivariate responses." PloS one 12.7 (2017).
 #'
 #' @export
 getQuantile <- function(simulations, observed, integerResponse,

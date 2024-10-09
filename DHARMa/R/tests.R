@@ -100,12 +100,13 @@ testQuantiles <- function(simulationOutput, predictor = NULL, quantiles = c(0.25
     res = simulationOutput$scaledResiduals
     pred = ensurePredictor(simulationOutput, predictor)
 
-    dat=data.frame(res =  simulationOutput$scaledResiduals , pred = pred)
+    dat = data.frame(res = simulationOutput$scaledResiduals, pred = pred)
 
     quantileFits <- list()
     pval = rep(NA, length(quantiles))
     predictions = data.frame(pred = sort(dat$pred))
-    predictions = cbind(predictions, matrix(ncol = 2 * length(quantiles), nrow = nrow(dat)))
+    predictions = cbind(predictions, matrix(ncol = 2 * length(quantiles),
+                                            nrow = nrow(dat)))
     for(i in 1:length(quantiles)){
       datTemp = dat
       datTemp$res = datTemp$res - quantiles[i]
@@ -113,7 +114,10 @@ testQuantiles <- function(simulationOutput, predictor = NULL, quantiles = c(0.25
       # settings for k = the dimension of the basis used to represent the smooth term.
       # see https://github.com/mfasiolo/qgam/issues/37
       dimSmooth =  min(length(unique(datTemp$pred)), 10)
-      quantResult = try(capture.output(quantileFits[[i]] <- qgam::qgam(res ~ s(pred, k = dimSmooth) ,  data =datTemp, qu = quantiles[i])), silent = T)
+      quantResult = try(capture.output(quantileFits[[i]] <-
+                                         qgam::qgam(res ~ s(pred, k = dimSmooth),
+                                                    data = datTemp,
+                                                    qu = quantiles[i])), silent = T)
       if(inherits(quantResult, "try-error")){
         message("Unable to calculate quantile regression for quantile ", quantiles[i], ". Possibly to few (unique) data points / predictions. Will be ommited in plots and significance calculations.")
       } else {
@@ -135,7 +139,8 @@ testQuantiles <- function(simulationOutput, predictor = NULL, quantiles = c(0.25
     class(out) = "htest"
 
   } else if(plot == T) {
-    out <- plotResiduals(simulationOutput = simulationOutput, form = predictor, quantiles = quantiles, quantreg = TRUE)
+    out <- plotResiduals(simulationOutput = simulationOutput, form = predictor,
+                         quantiles = quantiles, quantreg = TRUE)
   }
   return(out)
 }
@@ -153,6 +158,7 @@ testQuantiles <- function(simulationOutput, predictor = NULL, quantiles = c(0.25
 #' @param type either default, bootstrap or binomial. See details
 #' @param nBoot number of boostrap replicates. Only used ot type = "bootstrap"
 #' @param plot if TRUE, the function will create an additional plot
+#' @param plotBoostrap if plot should be produced of outlier frequencies calculated under the bootstrap
 #' @details DHARMa residuals are created by simulating from the fitted model, and comparing the simulated values to the observed data. It can occur that all simulated values are higher or smaller than the observed data, in which case they get the residual value of 0 and 1, respectively. I refer to these values as simulation outliers, or simply outliers.
 #'
 #' Because no data was simulated in the range of the observed value, we don't know "how strongly" these values deviate from the model expectation, so the term "outlier" should be used with a grain of salt. It is not a judgment about the magnitude of the residual deviation, but simply a dichotomous sign that we are outside the simulated range. Moreover, the number of outliers will decrease as we increase the number of simulations.
@@ -169,7 +175,7 @@ testQuantiles <- function(simulationOutput, predictor = NULL, quantiles = c(0.25
 #' @author Florian Hartig
 #' @seealso [testResiduals], [testUniformity], [testOutliers], [testDispersion], [testZeroInflation], [testGeneric], [testTemporalAutocorrelation], [testSpatialAutocorrelation], [testQuantiles], [testCategorical]
 #' @export
-testOutliers <- function(simulationOutput, alternative = c("two.sided", "greater", "less"), margin = c("both", "upper", "lower"), type = c("default","bootstrap", "binomial"), nBoot = 100, plot = TRUE){
+testOutliers <- function(simulationOutput, alternative = c("two.sided", "greater", "less"), margin = c("both", "upper", "lower"), type = c("default","bootstrap", "binomial"), nBoot = 100, plot = TRUE, plotBoostrap = FALSE){
 
   # check inputs
   alternative = match.arg(alternative)
@@ -285,10 +291,15 @@ testOutliers <- function(simulationOutput, alternative = c("two.sided", "greater
     out$estimate = outliers
     names(out$estimate) = paste("outlier frequency (expected:", mean(frequBoot),")")
 
-    if(plot == T) {
+    if(plotBoostrap == T){
+      hist(frequBoot, xlim = range(frequBoot, outliers), col = "lightgrey", main = "Bootstrapped outlier frequency")
+      abline(v = mean(frequBoot), col = 1, lwd = 2)
+      abline(v = outliers, col = "red", lwd = 2)
 
-      opar <- par(mfrow = c(1,2))
-      on.exit(par(opar))
+      # legend("center", c(paste("p=", round(out$p.value, digits = 5)), paste("Deviation ", ifelse(out$p.value < 0.05, "significant", "n.s."))), text.col = ifelse(out$p.value < 0.05, "red", "black" ))
+    }
+
+    if(plot == T) {
 
       hist(simulationOutput, main = "")
 
@@ -298,12 +309,6 @@ testOutliers <- function(simulationOutput, alternative = c("two.sided", "greater
 
       title(main = main, cex.main = 1,
             col.main = ifelse(out$p.value <= 0.05, "red", "black"))
-
-      hist(frequBoot, xlim = range(frequBoot, outliers), col = "lightgrey")
-      abline(v = mean(frequBoot), col = 1, lwd = 2)
-      abline(v = outliers, col = "red", lwd = 2)
-
-      # legend("center", c(paste("p=", round(out$p.value, digits = 5)), paste("Deviation ", ifelse(out$p.value < 0.05, "significant", "n.s."))), text.col = ifelse(out$p.value < 0.05, "red", "black" ))
 
     }
   }
@@ -665,7 +670,7 @@ testTemporalAutocorrelation <- function(simulationOutput, time, alternative = c(
 }
 
 
-#' Test for distance-based (spatial, phylogenetic or similar) autocorrelation
+#' Test for distance-based spatial (or similar) autocorrelation
 #'
 #' This function performs a Moran's I test for distance-based (spatial, phylogenetic or similar) autocorrelation on the calculated quantile residuals.
 #'
