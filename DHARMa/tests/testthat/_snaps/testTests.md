@@ -508,7 +508,7 @@
       Warning in `cbind()`:
       number of rows of result is not a multiple of vector length (arg 2)
       Error in `testSpatialAutocorrelation()`:
-      ! Dimensions of x / y coordinates don't match the dimension of the residuals
+      ! Dimensions of x / y coordinates don't match the dimension of the residuals.
 
 ---
 
@@ -525,7 +525,7 @@
       testSpatialAutocorrelation(simulationOutput, distMat = dM, plot = FALSE, x = testData$
         x)
     Message
-      both coordinates and distMat provided, calculations will be done based on the distance matrix, coordinates will only be used for plotting
+      Both coordinates and distMat provided, calculations will be done based on the distance matrix, coordinates will only be used for plotting.
     Output
       
       	DHARMa Moran's I test for distance-based autocorrelation
@@ -542,7 +542,7 @@
       testSpatialAutocorrelation(simulationOutput, distMat = dM, plot = FALSE, y = testData$
         y)
     Message
-      both coordinates and distMat provided, calculations will be done based on the distance matrix, coordinates will only be used for plotting
+      Both coordinates and distMat provided, calculations will be done based on the distance matrix, coordinates will only be used for plotting.
     Output
       
       	DHARMa Moran's I test for distance-based autocorrelation
