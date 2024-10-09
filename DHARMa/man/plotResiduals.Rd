@@ -9,45 +9,47 @@ plotResiduals(simulationOutput, form = NULL, quantreg = NULL,
   quantiles = c(0.25, 0.5, 0.75), absoluteDeviation = FALSE, ...)
 }
 \arguments{
-\item{simulationOutput}{on object, usually a DHARMa object, from which residual values can be extracted. Alternatively, a vector with residuals or a fitted model can be provided, which will then be transformed into a DHARMa object.}
+\item{simulationOutput}{An object, usually a DHARMa object, from which residual values can be extracted. Alternatively, a vector with residuals or a fitted model can be provided, which will then be transformed into a DHARMa object.}
 
-\item{form}{optional predictor against which the residuals should be plotted. Default is to used the predicted(simulationOutput)}
+\item{form}{Optional predictor against which the residuals should be plotted. Default is to used the predicted(simulationOutput).}
 
-\item{quantreg}{whether to perform a quantile regression based on \link{testQuantiles} or a smooth spline around the mean. Default NULL chooses T for nObs < 2000, and F otherwise.}
+\item{quantreg}{Whether to perform a quantile regression based on \link{testQuantiles} or a smooth spline around the mean. Default NULL chooses T for nObs < 2000, and F otherwise.}
 
-\item{rank}{if T, the values provided in form will be rank transformed. This will usually make patterns easier to spot visually, especially if the distribution of the predictor is skewed. If form is a factor, this has no effect.}
+\item{rank}{If T, the values provided in form will be rank transformed. This will usually make patterns easier to spot visually, especially if the distribution of the predictor is skewed. If form is a factor, this has no effect.}
 
-\item{asFactor}{should a numeric predictor provided in form be treated as a factor. Default is to choose this for < 10 unique values, as long as enough predictions are available to draw a boxplot.}
+\item{asFactor}{Should a numeric predictor provided in form be treated as a factor. Default is to choose this for < 10 unique values, as long as enough predictions are available to draw a boxplot.}
 
 \item{smoothScatter}{if T, a smooth scatter plot will plotted instead of a normal scatter plot. This makes sense when the number of residuals is very large. Default NULL chooses T for nObs > 10000, and F otherwise.}
 
-\item{quantiles}{for a quantile regression, which quantiles should be plotted}
+\item{quantiles}{For a quantile regression, which quantiles should be plotted. Default is 0.25, 0.5, 0.75.}
 
-\item{absoluteDeviation}{If T, switch from displaying normal quantile residuals to absolute deviation from the mean expectation of 0.5 (calculated as 2 * abs(res - 0.5)). Purpose of this is to test explicitly for heteroskedasticity, see details.}
+\item{absoluteDeviation}{If T, switch from displaying normal quantile residuals to absolute deviation from the mean expectation of 0.5 (calculated as 2 * abs(res - 0.5)). The purpose of this is to test explicitly for heteroskedasticity, see details.}
 
-\item{...}{additional arguments to plot / boxplot.}
+\item{...}{Additional arguments to plot / boxplot.}
 }
 \value{
-if quantile tests are performed, the function returns them invisibly.
+If quantile tests are performed, the function returns them invisibly.
 }
 \description{
-The function creates a generic residual plot with either spline or quantile regression to highlight patterns in the residuals. Outliers are highlighted in red.
+The function creates a generic residual plot with either spline or quantile regression to highlight patterns in the residuals. Outliers are highlighted in red by default (but see Details).
 }
 \details{
 The function plots residuals against a predictor (by default against the fitted value, extracted from the DHARMa object, or any other predictor).
 
-Outliers are highlighted in red (for information on definition and interpretation of outliers, see \link{testOutliers}).
+Outliers are highlighted in red as default (for information on definition and interpretation of outliers, see \link{testOutliers}). This can be changed by setting \code{options(DHARMaSignalColor = "red")} to a different color. See \code{getOption("DHARMaSignalColor")} for the current setting.
 
-To provide a visual aid for detecting deviations from uniformity in the y-direction, the plot function calculates an (optional) quantile regression of the residuals, by default for the 0.25, 0.5 and 0.75 quantiles. Since the residuals should be uniformly distributed for a correctly specified model, the theoretical expectations for these regressions are straight lines at 0.25, 0.5 and 0.75, shown as dashed black lines on the plot. However, even for a perfect model, some deviation from these expectations is to be expected by chance, especially if the sample size is small. The function therefore tests whether the deviation of the fitted quantile regression from the expectation is significant, using \link{testQuantiles}. If so, the significant quantile regression is highlighted in red and a warning is displayed in the plot.
+To provide a visual aid for detecting deviations from uniformity in the y-direction, the plot function calculates an (optional) quantile regression of the residuals, by default for the 0.25, 0.5 and 0.75 quantiles. Since the residuals should be uniformly distributed for a correctly specified model, the theoretical expectations for these regressions are straight lines at 0.25, 0.5 and 0.75, shown as dashed black lines on the plot. However, even for a perfect model, some deviation from these expectations is to be expected by chance, especially if the sample size is small. The function therefore tests whether the deviation of the fitted quantile regression from the expectation is significant, using \link{testQuantiles}. If so, the significant quantile regression is highlighted in red (as default) and a warning is displayed in the plot.
 
-Overdispersion typically manifests itself as Q1 deviating towards 0 and Q3 deviating towards 1. Heteroskedasticity manifests itself as non-parallel quantile lines. To diagnose heteroskedasticity and overdispersion, it can be helpful to additionally plot the absolute deviation of the residuals from the mean expectation of 0.5, using the option absoluteDeviation = T. In this case, we would again expect Q1-Q3 quantile lines at 0.25, 0.5, 0.75, but greater dispersion (also locally in the case of heteroskedasticity) always manifests itself in deviations towards 1.
+Overdispersion typically manifests itself as Q1 (0.25) deviating towards 0 and Q3 (0.75) deviating towards 1. Heteroskedasticity manifests itself as non-parallel quantile lines. To diagnose heteroskedasticity and overdispersion, it can be helpful to additionally plot the absolute deviation of the residuals from the mean expectation of 0.5, using the option absoluteDeviation = T. In this case, we would again expect Q1-Q3 quantile lines at 0.25, 0.5, 0.75, but greater dispersion (also locally in the case of heteroskedasticity) always manifests itself in deviations towards 1.
 
 The quantile regression can take some time to calculate, especially for larger data sets. For this reason, quantreg = F can be set to generate a smooth spline instead. This is the default for n > 2000.
 
-If form is a factor, a boxplot will be plotted instead of a scatter plot. The distribution for each factor level should be uniformly distributed, so the box should go from 0.25 to 0.75, with the median line at 0.5 (within-group ). To test if deviations from those expecations are significant, KS-tests per group and a Levene test for homogeneity of variances is performed. See \link{testCategorical} for details.
+If form is a factor, a boxplot will be plotted instead of a scatter plot. The distribution for each factor level should be uniformly distributed, so the box should go from 0.25 to 0.75, with the median line at 0.5 (within-group). To test if deviations from those expecations are significant, KS-tests per group and a Levene test for homogeneity of variances is performed. See \link{testCategorical} for details.
 }
 \note{
-if nObs > 10000, the scatter plot is replaced by graphics::smoothScatter
+If nObs > 10000, the scatter plot is replaced by graphics::smoothScatter
+
+#' @note The color for highlighting outliers and quantile lines/splines with significant tests can be changed by setting \code{options(DHARMaSignalColor = "red")} to a different color. See \code{getOption("DHARMaSignalColor")} for the current setting. This is convenient for a color-blind friendly display, since red and black are difficult for some people to separate.
 }
 \examples{
 testData = createData(sampleSize = 200, family = poisson(), 

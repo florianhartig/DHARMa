@@ -8,21 +8,22 @@ plotQQunif(simulationOutput, testUniformity = TRUE, testOutliers = TRUE,
   testDispersion = TRUE, ...)
 }
 \arguments{
-\item{simulationOutput}{a DHARMa simulation output (class DHARMa)}
+\item{simulationOutput}{A DHARMa simulation output (class DHARMa).}
 
-\item{testUniformity}{if T, the function \link{testUniformity} will be called and the result will be added to the plot}
+\item{testUniformity}{If T, the function \link{testUniformity} will be called and the result will be added to the plot.}
 
-\item{testOutliers}{if T, the function \link{testOutliers} will be called and the result will be added to the plot}
+\item{testOutliers}{If T, the function \link{testOutliers} will be called and the result will be added to the plot.}
 
-\item{testDispersion}{if T, the function \link{testDispersion} will be called and the result will be added to the plot}
+\item{testDispersion}{If T, the function \link{testDispersion} will be called and the result will be added to the plot.}
 
-\item{...}{arguments to be passed on to\link[gap:qqunif]{gap::qqunif}}
+\item{...}{Arguments to be passed on to \link[gap:qqunif]{gap::qqunif}.}
 }
 \description{
-The function produces a uniform quantile-quantile plot from a DHARMa output
+The function produces a uniform quantile-quantile plot from a DHARMa output. Optionally, tests for uniformity, outliers and dispersion can be added.
 }
 \details{
-the function calls qqunif from the R package gap to create a quantile-quantile plot for a uniform distribution, and overlays tests for particular distributional problems as specified.
+The function calls qqunif() from the R package gap to create a quantile-quantile plot for a uniform distribution, and overlays tests for particular distributional problems as specified.
+When tests are displayed, significant p-values are highlighted in the color red by default. This can be changed by setting \code{options(DHARMaSignalColor = "red")} to a different color. See \code{getOption("DHARMaSignalColor")} for the current setting.
 }
 \examples{
 testData = createData(sampleSize = 200, family = poisson(), 

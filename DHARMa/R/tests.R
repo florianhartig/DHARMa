@@ -670,7 +670,7 @@ testTemporalAutocorrelation <- function(simulationOutput, time, alternative = c(
 }
 
 
-#' Test for distance-based (spatial, phylogenetic or similar) autocorrelation
+#' Test for distance-based spatial (or similar) autocorrelation
 #'
 #' This function performs a Moran's I test for distance-based (spatial, phylogenetic or similar) autocorrelation on the calculated quantile residuals
 #'
