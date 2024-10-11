@@ -55,7 +55,6 @@ jobs:
           upload-snapshots: true
           working-directory: DHARMa
           args: 'c("--no-multiarch", "--no-manual")'
-          build_args: 'c("--compact-vignettes=both")'
 
       - uses: r-lib/actions/check-r-package@v2
         with:
