@@ -181,7 +181,10 @@ plotQQunif <- function(simulationOutput, testUniformity = TRUE, testOutliers = T
 #' @seealso [plotQQunif], [testQuantiles], [testOutliers]
 #' @example inst/examples/plotsHelp.R
 #' @export
-plotResiduals <- function(simulationOutput, form = NULL, quantreg = NULL, rank = TRUE, asFactor = NULL, smoothScatter = NULL, quantiles = c(0.25, 0.5, 0.75), absoluteDeviation = FALSE, ...){
+plotResiduals <- function(simulationOutput, form = NULL, quantreg = NULL,
+                          rank = TRUE, asFactor = NULL, smoothScatter = NULL,
+                          quantiles = c(0.25, 0.5, 0.75),
+                          absoluteDeviation = FALSE, ...){
 
 
   ##### Checks #####
@@ -233,13 +236,17 @@ plotResiduals <- function(simulationOutput, form = NULL, quantreg = NULL, rank =
 
   # categorical plot
   if(is.factor(pred)){
-    testCategorical(simulationOutput = simulationOutput, catPred = pred, quantiles = quantiles)
+    testCategorical(simulationOutput = simulationOutput, catPred = pred,
+                    quantiles = quantiles)
   }
   # smooth scatter
   else if (smoothScatter == TRUE) {
     defaultCol = ifelse(res == 0 | res == 1, 2,blackcol)
-    do.call(graphics::smoothScatter, append(list(x = pred, y = res , ylim = c(0,1), axes = FALSE, colramp = colorRampPalette(c("white", "darkgrey"))),a))
-    points(pred[defaultCol == 2], res[defaultCol == 2], col = .Options$DHARMaSignalColor, cex = 0.5)
+    do.call(graphics::smoothScatter, append(list(x = pred, y = res ,
+                                                 ylim = c(0,1), axes = FALSE,
+                    colramp = colorRampPalette(c("white", "darkgrey"))),a))
+    points(pred[defaultCol == 2], res[defaultCol == 2],
+            col = .Options$DHARMaSignalColor, cex = 0.5)
 
     axis(1)
     axis(2, at=c(0, quantiles, 1))
@@ -266,14 +273,18 @@ plotResiduals <- function(simulationOutput, form = NULL, quantreg = NULL, rank =
       title(main = main, cex.main = 1)
       abline(h = quantiles, col = "black", lwd = 0.5, lty = 2)
       try({
-        lines(smooth.spline(pred, res, df = 10), lty = 2, lwd = 2, col = .Options$DHARMaSignalColor)
+        lines(smooth.spline(pred, res, df = 10), lty = 2, lwd = 2,
+              col = .Options$DHARMaSignalColor)
         abline(h = 0.5, col = .Options$DHARMaSignalColor, lwd = 2)
       }, silent = TRUE)
     }else{
 
       out = testQuantiles(res, pred, quantiles = quantiles, plot = FALSE)
 
-
+      if(is.na(out$p.value)){
+        main = paste(main, "Some quantile regressions failed", sep = "\n")
+        maincol = .Options$DHARMaSignalColor
+      } else{
       if(any(out$pvals < 0.05, na.rm = TRUE)){
         main = paste(main, "Quantile deviations detected (red curves)", sep ="\n")
         if(out$p.value <= 0.05){
@@ -286,7 +297,7 @@ plotResiduals <- function(simulationOutput, form = NULL, quantreg = NULL, rank =
         main = paste(main, "No significant problems detected", sep ="\n")
         maincol = "black"
       }
-
+    }
 
       title(main = main, cex.main = 0.8,
             col.main = maincol)
@@ -302,8 +313,6 @@ plotResiduals <- function(simulationOutput, form = NULL, quantreg = NULL, rank =
                 col = "#00000020", border = FALSE)
         lines(out$predictions$pred, out$predictions[,2*i], col = lineCol, lwd = 2)
       }
-
-      # legend("bottomright", c(paste("Quantile test: p=", round(out$p.value, digits = 5)), paste("Deviation ", ifelse(out$p.value < 0.05, "significant", "n.s."))), text.col = ifelse(out$p.value < 0.05, .Options$DHARMaSignalColor, "black" ), bty="n")
 
     }
   }
