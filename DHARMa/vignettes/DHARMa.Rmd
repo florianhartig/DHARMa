@@ -494,8 +494,27 @@ Note that all these tests are most sensitive against homogeneous residual struct
 
 However, standard DHARMa simulations from models with temporal / spatial / phylogenetic conditional autoregressive terms will still have the respective correlation in the DHARMa residuals, unless the package you are using is modelling the autoregressive terms as explicit REs and is able to simulate conditional on the fitted REs. It means that the residuals will still show significant autocorrelation, even if the model fully accounts for this strucuture, and other tests, such as dispersion, uniformity, may have inflated type I error. See the example below with a `glmmTMB` model with a spatial autocorrelation structure:
 
+```{r}
+library(glmmTMB)
+testData$pos <- numFactor(testData$x, testData$y)
+fittedModel2 <- glmmTMB(observedResponse ~ Environment1 + exp(pos + 0|group), 
+                        data = testData, family = poisson())
+simulationOutput2 <- simulateResiduals(fittedModel = fittedModel2)
+testSpatialAutocorrelation(simulationOutput = simulationOutput2, x = testData$x, 
+                           y= testData$y)
+# plot(simulationOutput2)
+```
+
 One of the options to solve it and get correct tests and no residual pattern (if the model is correct) is to rotate the residual space according to the coariance structure of the fitted model, such that the rotated residuals are conditionally independent. The argument rotation in `simulateResiduals` does it (see also `?getQuantile` for details about the rotation options):
 
+```{r}
+# rotation of the residuals 
+simulationOutput3 <- simulateResiduals(fittedModel = fittedModel2,
+                                       rotation = "estimated")
+testSpatialAutocorrelation(simulationOutput = simulationOutput3, x = testData$x, 
+                           y= testData$y)
+# plot(simulationOutput3)
+```
 
 # Case studies and examples
 
