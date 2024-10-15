@@ -9,3 +9,4 @@ vignettes/*.html
 vignettes/*.pdf
 vignettes/DHARMa_files
 vignettes/DHARMa_cache
+^revdep$
