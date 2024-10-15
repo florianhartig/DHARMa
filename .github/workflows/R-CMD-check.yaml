@@ -49,13 +49,15 @@ jobs:
           needs: check
           working-directory: DHARMa
       # second check with different rcmdcheck arguments.
+  
       - uses: r-lib/actions/check-r-package@v2
         with:
           upload-snapshots: true
           working-directory: DHARMa
           args: 'c("--no-multiarch", "--no-manual")'
+          build_args: c('--compact-vignettes=gs+qpdf')
 
       - uses: r-lib/actions/check-r-package@v2
         with:
-          upload-snapshots: true
+          upload-snapshots: false
           working-directory: DHARMa

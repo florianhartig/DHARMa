@@ -674,33 +674,34 @@ testTemporalAutocorrelation <- function(simulationOutput, time, alternative = c(
 }
 
 
-#' Test for distance-based spatial (or similar) autocorrelation
+#' Test for distance-based spatial (or similar type) autocorrelation
 #'
-#' This function performs a Moran's I test for distance-based (spatial, phylogenetic or similar) autocorrelation on the calculated quantile residuals
+#' This function performs a Moran's I test for distance-based spatial (or similar type) autocorrelation on the calculated quantile residuals.
 #'
-#' @param simulationOutput an object of class DHARMa, either created via [simulateResiduals] for supported models or by [createDHARMa] for simulations created outside DHARMa, or a supported model. Providing a supported model directly is discouraged, because simulation settings cannot be changed in this case.
-#' @param x the x coordinate, in the same order as the data points. Must be specified unless distMat is provided.
-#' @param y the y coordinate, in the same order as the data points. Must be specified unless distMat is provided.
-#' @param distMat optional distance matrix. If not provided, euclidean distances based on x and y will be calculated. See details for explanation
-#' @param alternative a character string specifying whether the test should test if observations are "greater", "less" or "two.sided" compared to the simulated null hypothesis
-#' @param plot whether to plot output
+#' @param simulationOutput An object of class DHARMa, either created via [simulateResiduals] for supported models or via [createDHARMa] for simulations created outside DHARMa, or a supported model. Providing a supported model directly is discouraged, because simulation settings cannot be changed in this case.
+#' @param x The x coordinate, in the same order as the data points. Must be specified unless distMat is provided.
+#' @param y The y coordinate, in the same order as the data points. Must be specified unless distMat is provided.
+#' @param distMat Optional distance matrix. If not provided, euclidean distances based on x and y will be calculated. See details for explanation.
+#' @param alternative A character string specifying whether the test should test if observations are "greater", "less" or "two.sided" compared to the simulated null hypothesis.
+#' @param plot If T, and if x and y is provided, plot the output (see Details).
+#'
 #' @details The function performs Moran.I test from the package ape on the DHARMa residuals. If a distance matrix (distMat) is provided, calculations will be based on this distance matrix, and x,y coordinates will only used for the plotting (if provided). If distMat is not provided, the function will calculate the euclidean distances between x,y coordinates, and test Moran.I based on these distances.
 #'
 #' If plot = T, a plot will be produced showing each residual with at its x,y position, colored according to the residual value. Residuals with 0.5 are colored white, everything below 0.5 is colored increasinly red, everything above 0.5 is colored increasingly blue.
 #'
-#' Testing for spatial autocorrelation requires unique x,y values - if you have several observations per location, either use the recalculateResiduals function to aggregate residuals per location, or extract the residuals from the fitted object, and plot / test each of them independently for spatially repeated subgroups (a typical scenario would repeated spatial observation, in which case one could plot / test each time step separately for temporal autocorrelation). Note that the latter must be done by hand, outside testSpatialAutocorrelation.
+#' Testing for spatial autocorrelation requires unique x,y values - if you have several observations per location, either use the [recalculateResiduals] function to aggregate residuals per location, or extract the residuals from the fitted object, and plot / test each of them independently for spatially repeated subgroups (a typical scenario would repeated spatial observation, in which case one could plot / test each time step separately for temporal autocorrelation). Note that the latter must be done by hand, outside [testSpatialAutocorrelation].
 #'
-#' @note Standard DHARMa simulations from models with (temporal / spatial / phylogenetic) conditional autoregressive terms will still have the respective temporal / spatial / phylogenetic correlation in the DHARMa residuals, unless the package you are using is modelling the autoregressive terms as explicit REs and is able to simulate conditional on the fitted REs. This has two consequences
+#' @note Standard DHARMa simulations from models with (temporal / spatial / phylogenetic) conditional autoregressive terms will still have the respective temporal / spatial / phylogenetic correlation in the DHARMa residuals, unless the package you are using is modelling the autoregressive terms as explicit REs and is able to simulate conditional on the fitted REs. This has two consequences:
 #'
 #' 1. If you check the residuals for such a model, they will still show significant autocorrelation, even if the model fully accounts for this structure.
 #'
 #' 2. Because the DHARMa residuals for such a model are not statistically independent any more, other tests (e.g. dispersion, uniformity) may have inflated type I error, i.e. you will have a higher likelihood of spurious residual problems.
 #'
-#' There are three (non-exclusive) routes to address these issues when working with spatial / temporal / other autoregressive models:
+#' There are three (non-exclusive) routes to address these issues when working with spatial / temporal / phylogenetic / other autoregressive models:
 #'
-#' 1. Simulate conditional on the fitted CAR structures (see conditional simulations in the help of [simulateResiduals])
+#' 1. Simulate conditional on the fitted CAR structures (see conditional simulations in the help of [simulateResiduals]).
 #'
-#' 2. Rotate simulations prior to residual calculations (see parameter rotation in [simulateResiduals])
+#' 2. Rotate simulations prior to residual calculations (see parameter rotation in [simulateResiduals]).
 #'
 #' 3. Use custom tests / plots that explicitly compare the correlation structure in the simulated data to the correlation structure in the observed data.
 #'
@@ -717,16 +718,16 @@ testSpatialAutocorrelation <- function(simulationOutput, x = NULL, y  = NULL, di
 
   # Assertions
 
-  if(any(duplicated(cbind(x,y)))) stop("testing for spatial autocorrelation requires unique x,y values - if you have several observations per location, either use the recalculateResiduals function to aggregate residuals per location, or extract the residuals from the fitted object, and plot / test each of them independently for spatially repeated subgroups (a typical scenario would repeated spatial observation, in which case one could plot / test each time step separately for temporal autocorrelation). Note that the latter must be done by hand, outside testSpatialAutocorrelation.")
+  if(any(duplicated(cbind(x,y)))) stop("Testing for spatial autocorrelation requires unique x,y values - if you have several observations per location, either use the recalculateResiduals function to aggregate residuals per location, or extract the residuals from the fitted object, and plot / test each of them independently for spatially repeated subgroups (a typical scenario would repeated spatial observation, in which case one could plot / test each time step separately for temporal autocorrelation). Note that the latter must be done by hand, outside testSpatialAutocorrelation.")
 
-  if( (!is.null(x) | !is.null(y)) & !is.null(distMat) ) message("both coordinates and distMat provided, calculations will be done based on the distance matrix, coordinates will only be used for plotting")
+  if( (!is.null(x) | !is.null(y)) & !is.null(distMat) ) message("Both coordinates and distMat provided, calculations will be done based on the distance matrix, coordinates will only be used for plotting.")
 
-  if( (is.null(x) | is.null(y)) & is.null(distMat) ) stop("You need to provide either x,y, coordinates, or a distMatrix")
+  if( (is.null(x) | is.null(y)) & is.null(distMat) ) stop("You need to provide either x,y, coordinates or a distMatrix.")
 
   if(is.null(distMat) & (length(x) != length(residuals(simulationOutput)) | length(y) != length(residuals(simulationOutput))))
 
   # To avoid Issue #190
-  if (!is.null(x) & length(x) != length(residuals(simulationOutput)) | !is.null(y) & length(y) != length(residuals(simulationOutput))) stop("Dimensions of x / y coordinates don't match the dimension of the residuals")
+  if (!is.null(x) & length(x) != length(residuals(simulationOutput)) | !is.null(y) & length(y) != length(residuals(simulationOutput))) stop("Dimensions of x / y coordinates don't match the dimension of the residuals.")
 
   # if not provided, create distance matrix based on x and y
   if(is.null(distMat)) distMat <- as.matrix(dist(cbind(x, y)))
@@ -761,24 +762,25 @@ testSpatialAutocorrelation <- function(simulationOutput, x = NULL, y  = NULL, di
 
 #' Test for phylogenetic autocorrelation
 #'
-#' This function performs a Moran's I test for phylogenetic autocorrelation on the calculated quantile residuals
+#' This function performs a Moran's I test for phylogenetic autocorrelation on the calculated quantile residuals.
 #'
-#' @param simulationOutput an object of class DHARMa, either created via [simulateResiduals] for supported models or by [createDHARMa] for simulations created outside DHARMa, or a supported model. Providing a supported model directly is discouraged, because simulation settings cannot be changed in this case.
-#' @param tree phylogenetic tree
-#' @param alternative a character string specifying whether the test should test if observations are "greater", "less" or "two.sided" compared to the simulated null hypothesis
-#' @details The function performs Moran.I test from the package ape on the DHARMa residuals, based on the phylogenetic distance matrix internally created from the provided tree. For custom distance matrices, you can use [testSpatialAutocorrelation]
+#' @param simulationOutput an object of class DHARMa, either created via [simulateResiduals] for supported models or via [createDHARMa] for simulations created outside DHARMa, or a supported model. Providing a supported model directly is discouraged, because simulation settings cannot be changed in this case.
+#' @param tree A phylogenetic tree object.
+#' @param alternative A character string specifying whether the test should test if observations are "greater", "less" or "two.sided" compared to the simulated null hypothesis of no phylogenetic correlation.
 #'
-#' @note Standard DHARMa simulations from models with (temporal / spatial / phylogenetic) conditional autoregressive terms will still have the respective temporal / spatial / phylogenetic correlation in the DHARMa residuals, unless the package you are using is modelling the autoregressive terms as explicit REs and is able to simulate conditional on the fitted REs. This has two consequences
+#' @details The function performs Moran.I test from the package ape on the DHARMa residuals, based on the phylogenetic distance matrix internally created from the provided tree. For custom distance matrices, you can use [testSpatialAutocorrelation].
+#'
+#' @note Standard DHARMa simulations from models with (temporal / spatial / phylogenetic) conditional autoregressive terms will still have the respective temporal / spatial / phylogenetic correlation in the DHARMa residuals, unless the package you are using is modelling the autoregressive terms as explicit REs and is able to simulate conditional on the fitted REs. This has two consequences:
 #'
 #' 1. If you check the residuals for such a model, they will still show significant autocorrelation, even if the model fully accounts for this structure.
 #'
 #' 2. Because the DHARMa residuals for such a model are not statistically independent any more, other tests (e.g. dispersion, uniformity) may have inflated type I error, i.e. you will have a higher likelihood of spurious residual problems.
 #'
-#' There are three (non-exclusive) routes to address these issues when working with spatial / temporal / other autoregressive models:
+#' There are three (non-exclusive) routes to address these issues when working with spatial / temporal / phylogenetic autoregressive models:
 #'
-#' 1. Simulate conditional on the fitted CAR structures (see conditional simulations in the help of [simulateResiduals])
+#' 1. Simulate conditional on the fitted CAR structures (see conditional simulations in the help of [simulateResiduals]).
 #'
-#' 2. Rotate simulations prior to residual calculations (see parameter rotation in [simulateResiduals])
+#' 2. Rotate simulations prior to residual calculations (see parameter rotation in [simulateResiduals]).
 #'
 #' 3. Use custom tests / plots that explicitly compare the correlation structure in the simulated data to the correlation structure in the observed data.
 #'

@@ -247,13 +247,13 @@ getObservedResponse.default <- function (object, ...){
   }
 
   if(is.matrix(out)){
-    # case scaled variables or something like that 
+    # case scaled variables or something like that
     if(ncol(out) == 1){
       out = as.vector(out)
     } else if(ncol(out) == 2) {
       # case k/n binomial
       if(!(family(object)$family %in% c("binomial", "betabinomial"))) securityAssertion("nKcase - wrong family")
-      out = out[,1]      
+      out = out[,1]
     }
     else securityAssertion("Response in the model is a matrix with > 2 dim")
   }
@@ -708,10 +708,11 @@ getObservedResponse.phylolm <- function (object, ...){
 
 #' @rdname getSimulations
 #' @export
-getSimulations.phylolm <- function(object, nsim = 1, type = c("normal", "refit"), ...){
+getSimulations.phylolm <- function(object, nsim = 1, type = c("normal", "refit"),
+                                    ...){
   type <- match.arg(type)
 
-  fitBoot = update(object, boot = nsim, save = T)
+  fitBoot = update(object, boot = nsim, save = T, ...)
   out = fitBoot$bootdata
 
   if(type == "normal"){
@@ -722,6 +723,16 @@ getSimulations.phylolm <- function(object, nsim = 1, type = c("normal", "refit")
 
   return(out)
 }
+
+#' @rdname getRefit
+#' @export
+getRefit.phylolm <- function(object, newresp, ...){
+  newData <- model.frame(object)
+  newData[,1] = newresp
+  refittedModel = update(object, data = newData, ...)
+}
+
+
 
 #' @rdname getFitted
 #' @export
@@ -747,12 +758,14 @@ getObservedResponse.phyloglm <- function (object, ...){
 }
 
 
+
 #' @rdname getSimulations
 #' @export
-getSimulations.phyloglm <- function(object, nsim = 1, type = c("normal", "refit"), ...){
+getSimulations.phyloglm <- function(object, nsim = 1,
+                                    type = c("normal", "refit"), ...){
   type <- match.arg(type)
 
-  fitBoot = update(object, boot = nsim, save = T)
+  fitBoot = update(object, boot = nsim, save = T, ...)
   out = fitBoot$bootdata
 
   if(type == "normal"){
@@ -763,6 +776,22 @@ getSimulations.phyloglm <- function(object, nsim = 1, type = c("normal", "refit"
 
   return(out)
 }
+
+
+#' @rdname getRefit
+#' @export
+getRefit.phyloglm <- function(object, newresp, ...){
+  #object phyloglm doesn't have a model.frame object
+  terms <-  as.character(formula(object))[-1]
+  newData <- model.frame(object$y ~ object$X[,-1])
+  names(newData) <- terms
+  newData[,1] = newresp
+
+  refittedModel = update(object, data = newData, ...)
+  return(refittedModel)
+}
+
+
 
 #' @rdname getFitted
 #' @export
@@ -781,12 +810,3 @@ getFamily.phyloglm <- function (object,...){
   return(out)
 }
 
-
-#' @rdname getFamily
-#' @export
-getFamily.phyloglm <- function (object,...){
-  out = list()
-  # out$family = object$method
-  out$family = "integer-valued" # all families of phyloglm are integer-valued
-  return(out)
-}

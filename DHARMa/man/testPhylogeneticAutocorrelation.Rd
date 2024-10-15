@@ -8,29 +8,29 @@ testPhylogeneticAutocorrelation(simulationOutput, tree,
   alternative = c("two.sided", "greater", "less"))
 }
 \arguments{
-\item{simulationOutput}{an object of class DHARMa, either created via \link{simulateResiduals} for supported models or by \link{createDHARMa} for simulations created outside DHARMa, or a supported model. Providing a supported model directly is discouraged, because simulation settings cannot be changed in this case.}
+\item{simulationOutput}{an object of class DHARMa, either created via \link{simulateResiduals} for supported models or via \link{createDHARMa} for simulations created outside DHARMa, or a supported model. Providing a supported model directly is discouraged, because simulation settings cannot be changed in this case.}
 
-\item{tree}{phylogenetic tree}
+\item{tree}{A phylogenetic tree object.}
 
-\item{alternative}{a character string specifying whether the test should test if observations are "greater", "less" or "two.sided" compared to the simulated null hypothesis}
+\item{alternative}{A character string specifying whether the test should test if observations are "greater", "less" or "two.sided" compared to the simulated null hypothesis of no phylogenetic correlation.}
 }
 \description{
-This function performs a Moran's I test for phylogenetic autocorrelation on the calculated quantile residuals
+This function performs a Moran's I test for phylogenetic autocorrelation on the calculated quantile residuals.
 }
 \details{
-The function performs Moran.I test from the package ape on the DHARMa residuals, based on the phylogenetic distance matrix internally created from the provided tree. For custom distance matrices, you can use \link{testSpatialAutocorrelation}
+The function performs Moran.I test from the package ape on the DHARMa residuals, based on the phylogenetic distance matrix internally created from the provided tree. For custom distance matrices, you can use \link{testSpatialAutocorrelation}.
 }
 \note{
-Standard DHARMa simulations from models with (temporal / spatial / phylogenetic) conditional autoregressive terms will still have the respective temporal / spatial / phylogenetic correlation in the DHARMa residuals, unless the package you are using is modelling the autoregressive terms as explicit REs and is able to simulate conditional on the fitted REs. This has two consequences
+Standard DHARMa simulations from models with (temporal / spatial / phylogenetic) conditional autoregressive terms will still have the respective temporal / spatial / phylogenetic correlation in the DHARMa residuals, unless the package you are using is modelling the autoregressive terms as explicit REs and is able to simulate conditional on the fitted REs. This has two consequences:
 \enumerate{
 \item If you check the residuals for such a model, they will still show significant autocorrelation, even if the model fully accounts for this structure.
 \item Because the DHARMa residuals for such a model are not statistically independent any more, other tests (e.g. dispersion, uniformity) may have inflated type I error, i.e. you will have a higher likelihood of spurious residual problems.
 }
 
-There are three (non-exclusive) routes to address these issues when working with spatial / temporal / other autoregressive models:
+There are three (non-exclusive) routes to address these issues when working with spatial / temporal / phylogenetic autoregressive models:
 \enumerate{
-\item Simulate conditional on the fitted CAR structures (see conditional simulations in the help of \link{simulateResiduals})
-\item Rotate simulations prior to residual calculations (see parameter rotation in \link{simulateResiduals})
+\item Simulate conditional on the fitted CAR structures (see conditional simulations in the help of \link{simulateResiduals}).
+\item Rotate simulations prior to residual calculations (see parameter rotation in \link{simulateResiduals}).
 \item Use custom tests / plots that explicitly compare the correlation structure in the simulated data to the correlation structure in the observed data.
 }
 }
@@ -39,27 +39,30 @@ There are three (non-exclusive) routes to address these issues when working with
 
   library(DHARMa)
   library(phylolm)
-  
+
   set.seed(123)
   tre = rcoal(60)
-  b0=0; b1=1;
-  x <- runif(length(tre$tip.label), 0,1)
-  y <- b0 + b1*x + 
-    rTrait(n=1, phy=tre,model="BM",
-           parameters=list(ancestral.state=0,sigma2=10))
-  dat = data.frame(trait=y,pred=x)
-  
-  fit = lm(trait~pred,data=dat)
+  b0 = 0; b1 = 1;
+  x <- runif(length(tre$tip.label), 0, 1)
+  y <- b0 + b1*x +
+    rTrait(n = 1, phy = tre,model="BM",
+           parameters = list(ancestral.state = 0, sigma2 = 10))
+  dat = data.frame(trait = y, pred = x)
+
+  fit = lm(trait ~ pred, data = dat)
   res = simulateResiduals(fit, plot = T)
-  
+
   testPhylogeneticAutocorrelation(res, tree = tre)
-  
-  
-  fit = phylolm(trait~pred,data=dat,phy=tre,model="BM")
+
+
+  fit = phylolm(trait ~ pred, data = dat, phy = tre, model = "BM")
   summary(fit)
-  
-  res = DHARMa::simulateResiduals(fit, plot = T)
-  res = DHARMa::simulateResiduals(fit, plot = T, rotation = "estimated")
+
+  # phylogenetic autocorrelation still present in residuals
+  res = simulateResiduals(fit, plot = T)
+
+  # with "rotation" the residual autcorrelation is gone, see ?simulateResiduals.
+  res = simulateResiduals(fit, plot = T, rotation = "estimated")
 
 }
 }

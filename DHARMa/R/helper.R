@@ -1,6 +1,6 @@
 #' Modified ECDF function.
 #'
-#' @details ensures symmetric ECDF (standard ECDF is <), and that 0 / 1 values are only produced if the data is strictly < > than the observed data.
+#' @details Ensures symmetric ECDF (standard ECDF is <), and that 0 / 1 values are only produced if the data is strictly < > than the observed data.
 #'
 #' @keywords internal
 DHARMa.ecdf <- function (x)
@@ -20,7 +20,7 @@ DHARMa.ecdf <- function (x)
 
 
 
-#' calculate quantiles
+#' Calculate Residual Quantiles
 #'
 #' Calculates residual quantiles from a given simulation.
 #'
@@ -43,11 +43,13 @@ DHARMa.ecdf <- function (x)
 #'
 #' **Rotation (optional)**
 #'
-#' The getQuantile function includes an additional option to rotate residuals. This option should ONLY be used when the fitted model includes a particular residuals covariance structure, such as an AR1 or a spatial CAR model.
+#' The getQuantile function includes an additional option to rotate residuals prior to calculating the quantile residuals. This option should ONLY be used when the fitted model includes a particular residuals covariance structure, such as an AR1 or a spatial or phylogenetic CAR model.
 #'
 #' For these models, residuals calculated from unconditional simulations will include the specified covariance structure, which will trigger e.g. temporal autocorrelation tests and can inflate type I errors of other tests. The idea of the rotation is to rotate the residual space according to the covariance structure of the fitted model, such that the rotated residuals are conditional independent (provided the fitted model is correct).
 #'
 #' If the residual covariance of the fitted model at the response scale can be extracted (e.g. when fitting gls type models), it would be best to extract it and provide this covariance matrix to the rotation option. If that is not the case, providing the argument "estimated" to rotation will estimate the covariance from the data simulated by the model. This is probably without alternative for GLMMs, where the covariance at the response scale is likely not known / provided, but note, that this approximation will tend to have considerable error and may be slow to compute for high-dimensional data. If you try to estimate the rotation from simulations, you should set n as high as possible! See [testTemporalAutocorrelation] for a practical example.
+#'
+#' The rotation of residuals implemented here is similar to the Variogram.lme() and Variongram.gls() functions in nlme package using the argument resType = "normalized".
 #'
 #' @references
 #'
@@ -58,12 +60,13 @@ DHARMa.ecdf <- function (x)
 #' Warton, David I., Loïc Thibaut, and Yi Alice Wang. "The PIT-trap—A “model-free” bootstrap procedure for inference about regression models with discrete, multivariate responses." PloS one 12.7 (2017).
 #'
 #' @export
-getQuantile <- function(simulations, observed, integerResponse, method = c("PIT", "traditional"), rotation = NULL){
+getQuantile <- function(simulations, observed, integerResponse,
+                        method = c("PIT", "traditional"), rotation = NULL){
 
   method = match.arg(method)
 
   n = length(observed)
-  if (nrow(simulations) != n) stop("DHARMa::getquantile: wrong dimension of simulations")
+  if(nrow(simulations) != n) stop("DHARMa::getquantile: wrong dimension of simulations")
   nSim = ncol(simulations)
 
 
@@ -77,7 +80,7 @@ getQuantile <- function(simulations, observed, integerResponse, method = c("PIT"
 
       values = as.vector(simulations)[duplicated(as.vector(simulations))]
       if(length(values) > 0){
-        if (all(values%%1==0)){
+        if(all(values%%1 == 0)){
           integerResponse = T
           message("Model family was recognized or set as continuous, but duplicate values were detected in the simulation - changing to integer residuals (see ?simulateResiduals for details).")
         } else {

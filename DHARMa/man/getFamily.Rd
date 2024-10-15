@@ -14,8 +14,6 @@ getFamily(object, ...)
 \method{getFamily}{phylolm}(object, ...)
 
 \method{getFamily}{phyloglm}(object, ...)
-
-\method{getFamily}{phyloglm}(object, ...)
 }
 \arguments{
 \item{object}{a fitted model.}

@@ -7,6 +7,8 @@
 \alias{getRefit.glmmTMB}
 \alias{getRefit.HLfit}
 \alias{getRefit.MixMod}
+\alias{getRefit.phylolm}
+\alias{getRefit.phyloglm}
 \title{Get model refit}
 \usage{
 getRefit(object, newresp, ...)
@@ -20,6 +22,10 @@ getRefit(object, newresp, ...)
 \method{getRefit}{HLfit}(object, newresp, ...)
 
 \method{getRefit}{MixMod}(object, newresp, ...)
+
+\method{getRefit}{phylolm}(object, newresp, ...)
+
+\method{getRefit}{phyloglm}(object, newresp, ...)
 }
 \arguments{
 \item{object}{a fitted model.}

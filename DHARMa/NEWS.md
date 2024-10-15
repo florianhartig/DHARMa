@@ -1,6 +1,23 @@
 NOTE: for more news about the package, see https://github.com/florianhartig/DHARMa/releases
 
 
+# DHARMa 0.4.7
+
+## New Features
+
+* Includes support for the package phylolm
+* new function for testing residual phylogenetic autocorrelation testPylogeneticAutocorrelation()
+
+## Major change
+
+* new optional argument 'rotation' in simulateResiduals() for the rotation of the residual space prior to calculating the quantile residuals to account for residual covariance as created by temporal, spatial or phylogenetic autocorrelation. 
+
+## Minor changes
+
+* color bind friendly plots as default
+* documentation: improved help files and vignette
+
+
 # DHARMa 0.4.6
 
 ## New Features
@@ -38,7 +55,7 @@ NOTE: for more news about the package, see https://github.com/florianhartig/DHAR
 * re-introduced glmmTMB to suggests
 * phyr moved to enhances
 * re-modelled package unit tests
-* added RStan, CmdStanR, rjags, BayesianTools to enhances, as they coudld be used with DHARMa
+* added RStan, CmdStanR, rjags, BayesianTools to enhances, as they could be used with DHARMa
 * moved parallel calculations in runBenchmark to R native parallel functions
 
 ## New features
@@ -169,7 +186,6 @@ This is actually a bugfix release for 0.3.4, but on reflection I decided that 0.
 ## New features
 
 * added smooth scatter in plotResiduals https://github.com/florianhartig/DHARMa/commit/da01d8c7a9a74558817e4a73fe826084164cf05d
-
 * glmmTMB now fully supported through new compulsory version 1.0 of glmmTMB, which includes the re.form argument in the simulations required by DHARMa https://github.com/florianhartig/DHARMa/pull/140
 
 
@@ -306,7 +322,6 @@ This is actually a bugfix release for 0.3.4, but on reflection I decided that 0.
 ## Minor changes
 
 * plotResiduals includes support for factors
-
 * updates to the help
 
 
@@ -318,7 +333,6 @@ This is actually a bugfix release for 0.3.4, but on reflection I decided that 0.
 # DHARMa 0.1.1
 
 * including now the negative binomial models from MASS and lme4, as well as the possibility to create synthetic data from the negative binomial family
-
 * includes a createDHARMa function that allows using the plot functions of DHARMa also with externally created simualtions, for example for Bayesian predictive simulations
 
 

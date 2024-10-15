@@ -10,6 +10,6 @@ DHARMa.ecdf(x)
 Modified ECDF function.
 }
 \details{
-ensures symmetric ECDF (standard ECDF is <), and that 0 / 1 values are only produced if the data is strictly < > than the observed data.
+Ensures symmetric ECDF (standard ECDF is <), and that 0 / 1 values are only produced if the data is strictly < > than the observed data.
 }
 \keyword{internal}
