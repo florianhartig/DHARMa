@@ -119,7 +119,8 @@ testQuantiles <- function(simulationOutput, predictor = NULL, quantiles = c(0.25
                                                     data = datTemp,
                                                     qu = quantiles[i])), silent = T)
       if(inherits(quantResult, "try-error")){
-        message("Unable to calculate quantile regression for quantile ", quantiles[i], ". Possibly to few (unique) data points / predictions. Will be ommited in plots and significance calculations.")
+        message("\n DHARMa: qgam was unable to calculate quantile regression for quantile ",
+                quantiles[i], ". Possibly to few (unique) data points / predictions. The quantile will be ommited in plots and significance calculations. \n")
       } else {
         x = summary(quantileFits[[i]])
         pval[i] = min(p.adjust(c(x$p.table[1,4], x$s.table[1,4]), method = "BH")) # correction for test on slope and intercept
@@ -335,14 +336,17 @@ testOutliers <- function(simulationOutput, alternative = c("two.sided", "greater
 #' @seealso [testResiduals], [testUniformity], [testOutliers], [testDispersion], [testZeroInflation], [testGeneric], [testTemporalAutocorrelation], [testSpatialAutocorrelation], [testQuantiles], [testCategorical]
 #' @example inst/examples/testsHelp.R
 #' @export
-testCategorical <- function(simulationOutput, catPred, quantiles = c(0.25, 0.5, 0.75), plot = TRUE){
+testCategorical <- function(simulationOutput, catPred,
+                            quantiles = c(0.25, 0.5, 0.75), plot = TRUE){
 
   simulationOutput = ensureDHARMa(simulationOutput, convert = T)
 
   catPred = as.factor(catPred)
   out = list()
 
-  out$uniformity$details = suppressWarnings(by(simulationOutput$scaledResiduals, catPred, ks.test, 'punif', simplify = TRUE))
+  out$uniformity$details = suppressWarnings(by(simulationOutput$scaledResiduals,
+                                               catPred, ks.test, 'punif',
+                                               simplify = TRUE))
   out$uniformity$p.value = rep(NA, nlevels(catPred))
   for(i in 1:nlevels(catPred)) out$uniformity$p.value[i] = out$uniformity$details[[i]]$p.value
   out$uniformity$p.value.cor = p.adjust(out$uniformity$p.value)
@@ -670,7 +674,7 @@ testTemporalAutocorrelation <- function(simulationOutput, time, alternative = c(
 }
 
 
-#' Test for distance-based (spatial, phylogenetic or similar) autocorrelation
+#' Test for distance-based spatial (or similar) autocorrelation
 #'
 #' This function performs a Moran's I test for distance-based (spatial, phylogenetic or similar) autocorrelation on the calculated quantile residuals
 #'
