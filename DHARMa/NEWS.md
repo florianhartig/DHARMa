@@ -5,17 +5,17 @@ NOTE: for more news about the package, see https://github.com/florianhartig/DHAR
 
 ## New Features
 
-* Includes support for the package phylolm
-* new function for testing residual phylogenetic autocorrelation testPylogeneticAutocorrelation()
+* Includes support for the package phylolm.
+* New function for testing residual phylogenetic autocorrelation testPylogeneticAutocorrelation().
 
 ## Major change
 
-* new optional argument 'rotation' in simulateResiduals() for the rotation of the residual space prior to calculating the quantile residuals to account for residual covariance as created by temporal, spatial or phylogenetic autocorrelation. 
+* New optional argument 'rotation' in simulateResiduals() for the rotation of the residual space prior to calculating the quantile residuals to account for residual covariance as created by temporal, spatial or phylogenetic autocorrelation. 
 
 ## Minor changes
 
-* color bind friendly plots as default
-* documentation: improved help files and vignette
+* Residual plots: Option to change the red color for significant results to any color of preference through options(DHARMaSignalColor = "red"). This is a good option for color-blind friendly plots.
+* Documentation: improved help files and vignette.
 
 
 # DHARMa 0.4.6

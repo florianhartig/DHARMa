@@ -4,11 +4,13 @@ The DHARMa package creates readily interpretable residuals for generalized linea
 
 The package includes various functions that deal with issues such as 
 
-* Misfit 
-* Overdispersion
+* Misfit
+* Heteroscedasticity
+* Under/Overdispersion
 * Zero-inflation
 * Residual temporal autocorrelation
 * Residual spatial autocorrelation
+* Residual phylogenetic autocorrelation
 
 To get more information, install the package and run
 

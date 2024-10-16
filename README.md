@@ -6,7 +6,8 @@
 
 # DHARMa - Residual Diagnostics for HierARchical Models
 
-The 'DHARMa' package uses a simulation-based approach to create readily interpretable scaled (quantile) residuals for fitted (generalized) linear mixed models. Currently supported are linear and generalized linear (mixed) models from 'lme4' (classes 'lmerMod', 'glmerMod'), 'glmmTMB' 'GLMMadaptive' and 'spaMM', generalized additive models ('gam' from 'mgcv'), 'glm' (including 'negbin' from 'MASS', but excluding quasi-distributions) and 'lm' model classes. Moreover, externally created simulations, e.g. posterior predictive simulations from Bayesian software such as 'JAGS', 'STAN', or 'BUGS' can be processed as well. The resulting residuals are standardized to values between 0 and 1 and can be interpreted as intuitively as residuals from a linear regression. The package also provides a number of plot and test functions for typical model misspecification problems, such as over/underdispersion, zero-inflation, and residual spatial and temporal autocorrelation.
+The 'DHARMa' package uses a simulation-based approach to create  readily interpretable scaled (quantile) residuals for fitted generalized linear (mixed) models. Currently supported are linear and generalized linear (mixed) models from 'lme4' (classes 'lmerMod', 'glmerMod'), 'glmmTMB', 'GLMMadaptive' and 'spaMM'; phylogenetic linear models from 'phylolm' (classes 'phylolm' and 'phyloglm'); generalized additive models ('gam' from 'mgcv'); 'glm' (including 'negbin' from 'MASS', but excluding quasi-distributions) and 'lm' model classes. Moreover, externally created simulations, e.g. posterior predictive simulations from Bayesian software such as 'JAGS', 'STAN', or 'BUGS' can be processed as well. The resulting residuals are standardized to values between 0 and 1 and can be interpreted as intuitively as residuals from a linear regression. The package also provides a number of plot and test functions for typical model misspecification problems, such as over/underdispersion, zero-inflation, and residual spatial, temporal and phylogenetic autocorrelation.
+
 
 ## Installing DHARMa
 
@@ -42,7 +43,7 @@ m1 <- glm(observedResponse ~ Environment1,
 res <- simulateResiduals(m1, plot = T)
 ```
 
-and read to help of ?simulateResiduals and the vignette to understand what you can do with the object res. If you want to ask questions about DHARMa, or report a bug, please use the [DHARMa GH issue page](https://github.com/florianhartig/DHARMa/issues). 
+and read to help of ?simulateResiduals and the vignette to understand what you can do with the object `res`. If you want to ask questions about DHARMa, or report a bug, please use the [DHARMa GitHub issue page](https://github.com/florianhartig/DHARMa/issues). 
 
 ### Development release 
 
@@ -70,7 +71,7 @@ with the appropriate version number / branch as argument to ref.
 
 Contributions to DHARMa are very welcome! There are several ways in which you can contribute:
 
-* A simple but nevertheless important way to contribute is to suggest problems / new features in DHARMa, and post them in our [issue tracker](https://github.com/florianhartig/DHARMa/issues). A good issue should at least have a clear reproducible example. If possible, it could also already contain an analysis of the problem, and / or ideas for a fix. Likewise, feel free to comment on issues existing issues, e.g. by adding examples or suggesting sollutions. 
+* A simple but nevertheless important way to contribute is to suggest problems / new features in DHARMa, and post them in our [issue tracker](https://github.com/florianhartig/DHARMa/issues). A good issue should at least have a clear reproducible example. If possible, it could also already contain an analysis of the problem, and / or ideas for a fix. Likewise, feel free to comment on issues existing issues, e.g. by adding examples or suggesting solutions. 
 
 * If you want to propose a solution an existing problem, for simple things (typos, etc.), the easiest would be to just create a PR that I can directly merge. For more complicated changes, however, I would suggest that it is more effective to first discuss the approach at the thread of the issue.
 
