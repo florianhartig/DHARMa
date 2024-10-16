@@ -2,23 +2,32 @@
 title: "DHARMa: residual diagnostics for hierarchical (multi-level/mixed) regression models"
 author: "Florian Hartig, Theoretical Ecology, University of Regensburg [website](https://www.uni-regensburg.de/biologie-vorklinische-medizin/theoretische-oekologie/mitarbeiter/hartig/)"
 date: "`r Sys.Date()`"
-output: 
-  pdf_document:
-    toc: true
+output:
   rmarkdown::html_vignette:
     toc: true
-vignette: >
-  %\VignetteIndexEntry{Vignette for the DHARMa package}
-  \usepackage[utf8]{inputenc}
-  %\VignetteEngine{knitr::rmarkdown}
-abstract: "The 'DHARMa' package uses a simulation-based approach to create  readily interpretable scaled (quantile) residuals for fitted generalized linear (mixed) models. Currently supported are linear and generalized linear (mixed) models from 'lme4' (classes 'lmerMod', 'glmerMod'), 'glmmTMB', 'GLMMadaptive' and 'spaMM'; phylogenetic 
-    linear models from 'phylolm'(classes 'phylolm' and 'phyloglm'); generalized additive models ('gam' from 'mgcv'); 'glm' (including 'negbin' from 'MASS', but excluding quasi-distributions) and 'lm' model classes. Moreover, externally created simulations, e.g. posterior predictive simulations from Bayesian software such as 'JAGS', 'STAN', or 'BUGS' can be processed as well. The resulting residuals are standardized to values between 0 and 1 and can be interpreted as intuitively as residuals from a linear regression. The package also provides a number of plot and test functions for typical model misspecification problems, such as over/underdispersion, zero-inflation, and residual spatial, temporal and phylogenetic autocorrelation. \n \n \n"
-editor_options: 
+  pdf_document:
+    toc: true
+vignette: |
+  %\VignetteIndexEntry{Vignette for the DHARMa package} \usepackage[utf8]{inputenc} %\VignetteEngine{knitr::rmarkdown}
+abstract: "The 'DHARMa' package uses a simulation-based approach to create  readily
+  interpretable scaled (quantile) residuals for fitted generalized linear (mixed)
+  models. Currently supported are linear and generalized linear (mixed) models from
+  'lme4' (classes 'lmerMod', 'glmerMod'), 'glmmTMB', 'GLMMadaptive' and 'spaMM'; phylogenetic
+  linear models from 'phylolm' (classes 'phylolm' and 'phyloglm'); generalized additive
+  models ('gam' from 'mgcv'); 'glm' (including 'negbin' from 'MASS', but excluding
+  quasi-distributions) and 'lm' model classes. Moreover, externally created simulations,
+  e.g. posterior predictive simulations from Bayesian software such as 'JAGS', 'STAN',
+  or 'BUGS' can be processed as well. The resulting residuals are standardized to
+  values between 0 and 1 and can be interpreted as intuitively as residuals from a
+  linear regression. The package also provides a number of plot and test functions
+  for typical model misspecification problems, such as over/underdispersion, zero-inflation,
+  and residual spatial, temporal and phylogenetic autocorrelation. \n \n \n"
+editor_options:
   chunk_output_type: console
 ---
 
 ```{r global_options, include=FALSE}
-knitr::opts_chunk$set(fig.width=8.5, fig.height=5.5, fig.align='center', warning=FALSE, message=FALSE, cache = T)
+knitr::opts_chunk$set(fig.width=6.5, fig.height=4.5, fig.align='center', warning=FALSE, message=FALSE, cache = T)
 ```
 
 ```{r, echo = F, message = F}
@@ -30,7 +39,7 @@ set.seed(123)
 
 The interpretation of conventional residuals for generalized linear (mixed) and other hierarchical statistical models is often problematic. As an example, here the result of conventional Deviance, Pearson and raw residuals for two Poisson GLMMs, one that is lacking a quadratic effect, and one that fits the data perfectly. Could you tell which is the correct model?
 
-```{r, echo = F, fig.width=8, fig.height=3.5}
+```{r, echo = F, fig.width=6, fig.height=3}
 library(lme4)
 
 overdispersedData = createData(sampleSize = 250, overdispersion = 0, quadraticFixedEffects = -2, family = poisson())
@@ -68,7 +77,7 @@ DHARMa aims at solving these problems by creating readily interpretable residual
 
 These steps are visualized in the following figure
 
-<img src="ECDFmotivation.png" width="400"/>
+<img src="ECDFmotivation.png" width="400" class="center"/>
 
 The key advantage of this definition is that the so-defined residuals always have the same, known distribution, independent of the model that is fit, if the model is correctly specified. To see this, note that, if the observed data was created from the same data-generating process that we simulate from, all values of the cumulative distribution should appear with equal probability. That means we expect the distribution of the residuals to be flat, regardless of the model structure (Poisson, binomial, random effects and so on).
 
@@ -292,7 +301,8 @@ This this is how **overdispersion** looks like in the DHARMa residuals. Note tha
 
 ```{r}
 testData = createData(sampleSize = 200, overdispersion = 1.5, family = poisson())
-fittedModel <- glm(observedResponse ~  Environment1 , family = "poisson", data = testData)
+fittedModel <- glm(observedResponse ~  Environment1 , family = "poisson", 
+                   data = testData)
 
 simulationOutput <- simulateResiduals(fittedModel = fittedModel)
 plot(simulationOutput)
@@ -303,8 +313,11 @@ If you see this pattern, note that overdispersion is often caused by model misfi
 Next, this is an example of underdispersion. Here, we get too many residuals around 0.5, which means that we are not getting as many residuals as we would expect in the tail of the distribution than expected from the fitted model.
 
 ```{r}
-testData = createData(sampleSize = 500, intercept=0, fixedEffects = 2, overdispersion = 0, family = poisson(), roundPoissonVariance = 0.001, randomEffectVariance = 0)
-fittedModel <- glmer(observedResponse ~ Environment1 + (1|group) , family = "poisson", data = testData)
+testData = createData(sampleSize = 500, intercept=0, fixedEffects = 2,
+                      overdispersion = 0, family = poisson(),
+                      roundPoissonVariance = 0.001, randomEffectVariance = 0)
+fittedModel <- glmer(observedResponse ~ Environment1 + (1|group) , 
+                     family = "poisson", data = testData)
 
 simulationOutput <- simulateResiduals(fittedModel = fittedModel)
 plot(simulationOutput)
@@ -324,7 +337,7 @@ Although, as discussed above, over/underdispersion will show up in the residuals
 
 All of these tests are included in the testDispersion function, see ?testDispersion for details.
 
-```{r overDispersionTest, echo = T, fig.width=4.5, fig.height=4.5}
+```{r overDispersionTest, echo = T, fig.width=4, fig.height=4}
 testDispersion(simulationOutput)
 ```
 
@@ -336,7 +349,7 @@ IMPORTANT INFO: we have made extensive simulations, which have shown that the va
 
 As support for these statements, here results of the simulation, which compares the uniform (KS) test with the standard simuation-based test (conditional and unconditional) and the Pearson-chi2 test (two-sided and greater) for an n=200 Poisson GLMM with 30 RE levels.
 
-<img src="dispersion.png" width="700"/>
+<img src="dispersion.png" width="700" class="center"/>
 
 Thus, my current recommendation is: for most users, use the default DHARMa test, but create simulations conditionally.
 
@@ -349,17 +362,22 @@ A common special case of overdispersion is zero-inflation, which is the situatio
 Here an example of a typical zero-inflated count dataset, plotted against the environmental predictor
 
 ```{r}
-testData = createData(sampleSize = 500, intercept = 2, fixedEffects = c(1), overdispersion = 0, family = poisson(), quadraticFixedEffects = c(-3), randomEffectVariance = 0, pZeroInflation = 0.6)
+testData = createData(sampleSize = 500, intercept = 2, fixedEffects = c(1),
+                      overdispersion = 0, family = poisson(), 
+                      quadraticFixedEffects = c(-3), randomEffectVariance = 0,
+                      pZeroInflation = 0.6)
 
 par(mfrow = c(1,2))
-plot(testData$Environment1, testData$observedResponse, xlab = "Envrionmental Predictor", ylab = "Response")
+plot(testData$Environment1, testData$observedResponse, xlab = "Envrionmental Predictor", 
+     ylab = "Response")
 hist(testData$observedResponse, xlab = "Response", main = "")
 ```
 
 We see a hump-shaped dependence of the environment, but with too many zeros. In the normal DHARMa residual plots, zero-inflation will look pretty much like overdispersion
 
-```{r}
-fittedModel <- glmer(observedResponse ~ Environment1 + I(Environment1^2) + (1|group) , family = "poisson", data = testData)
+```{r, fig.height=5.5}
+fittedModel <- glmer(observedResponse ~ Environment1 + I(Environment1^2) + (1|group) , 
+                     family = "poisson", data = testData)
 
 simulationOutput <- simulateResiduals(fittedModel = fittedModel)
 plot(simulationOutput)
@@ -404,7 +422,9 @@ So far, most of the things that we have tested could also have been detected wit
 Heteroscedasticity means that there is a systematic dependency of the dispersion / variance on another variable in the model. It is not sufficiently appreciated that also binomial or Poisson models can show heteroscedasticity. Basically, it means that the level of over/underdispersion depends on another parameter. Here an example where we create such data
 
 ```{r}
-testData = createData(sampleSize = 500, intercept = -1.5,  overdispersion = function(x){return(rnorm(length(x), sd = 1 * abs(x)))}, family = poisson(), randomEffectVariance = 0)
+testData = createData(sampleSize = 500, intercept = -1.5,  
+                      overdispersion = function(x){return(rnorm(length(x), sd = 1 * abs(x)))}, 
+                      family = poisson(), randomEffectVariance = 0)
 fittedModel <- glm(observedResponse ~ Environment1 , family = "poisson", data = testData)
 
 simulationOutput <- simulateResiduals(fittedModel = fittedModel)
@@ -426,8 +446,10 @@ testCategorical(simulationOutput, catPred = testData$group)
 Adding a simple overdispersion correction will try to find a compromise between the different levels of dispersion in the model. The qq plot looks better now, but there is still a pattern in the residuals
 
 ```{r}
-testData = createData(sampleSize = 500, intercept = 0, overdispersion = function(x){return(rnorm(length(x), sd = 2*abs(x)))}, family = poisson(), randomEffectVariance = 0)
-fittedModel <- glmer(observedResponse ~ Environment1 + (1|group) + (1|ID), family = "poisson", data = testData)
+testData = createData(sampleSize = 500, intercept = 0, overdispersion = function(x){return(rnorm(length(x), sd = 2*abs(x)))}, 
+                      family = poisson(), randomEffectVariance = 0)
+fittedModel <- glmer(observedResponse ~ Environment1 + (1|group) + (1|ID), 
+                     family = "poisson", data = testData)
 
 # plotConventionalResiduals(fittedModel)
 
@@ -450,8 +472,11 @@ Note again that the residual values are scaled between 0 and 1. If you plot the 
 Here an example with a missing quadratic effect in the model and 2 predictors
 
 ```{r}
-testData = createData(sampleSize = 200, intercept = 1, fixedEffects = c(1,2), overdispersion = 0, family = poisson(), quadraticFixedEffects = c(-3,0))
-fittedModel <- glmer(observedResponse ~ Environment1 + Environment2 + (1|group) , family = "poisson", data = testData)
+testData = createData(sampleSize = 200, intercept = 1, fixedEffects = c(1,2),
+                      overdispersion = 0, family = poisson(), 
+                      quadraticFixedEffects = c(-3,0))
+fittedModel <- glmer(observedResponse ~ Environment1 + Environment2 + (1|group),
+                     family = "poisson", data = testData)
 simulationOutput <- simulateResiduals(fittedModel = fittedModel)
 # plotConventionalResiduals(fittedModel)
 plot(simulationOutput, quantreg = T)
@@ -478,7 +503,7 @@ The three functions to test for this in DHARMa are:
 
 Here a short example for the spatial case, see help of the functions for extended examples.
 
-```{r, fig.width=4.5, fig.height=4.5}
+```{r, fig.width=4, fig.height=4}
 testData = createData(sampleSize = 100, family = poisson(), 
                       spatialAutocorrelation = 3, numGroups = 1,
                        randomEffectVariance = 0)
@@ -494,7 +519,7 @@ Note that all these tests are most sensitive against homogeneous residual struct
 
 However, standard DHARMa simulations from models with temporal / spatial / phylogenetic conditional autoregressive terms will still have the respective correlation in the DHARMa residuals, unless the package you are using is modelling the autoregressive terms as explicit REs and is able to simulate conditional on the fitted REs. It means that the residuals will still show significant autocorrelation, even if the model fully accounts for this strucuture, and other tests, such as dispersion, uniformity, may have inflated type I error. See the example below with a `glmmTMB` model with a spatial autocorrelation structure:
 
-```{r}
+```{r, fig.width=4, fig.height=4}
 library(glmmTMB)
 testData$pos <- numFactor(testData$x, testData$y)
 fittedModel2 <- glmmTMB(observedResponse ~ Environment1 + exp(pos + 0|group), 
@@ -507,7 +532,7 @@ testSpatialAutocorrelation(simulationOutput = simulationOutput2, x = testData$x,
 
 One of the options to solve it and get correct tests and no residual pattern (if the model is correct) is to rotate the residual space according to the coariance structure of the fitted model, such that the rotated residuals are conditionally independent. The argument rotation in `simulateResiduals` does it (see also `?getQuantile` for details about the rotation options):
 
-```{r}
+```{r, fig.width=4, fig.height=4}
 # rotation of the residuals 
 simulationOutput3 <- simulateResiduals(fittedModel = fittedModel2,
                                        rotation = "estimated")
@@ -551,7 +576,7 @@ data = structure(list(N_parasitized = c(226, 689, 481, 960, 1177, 266,
 data$logDensity = log10(data$density.attack+1)
 ```
 
-```{r, fig.width=5, fig.height=5}
+```{r, fig.height=4, fig.width=4}
 plot(N_parasitized / (N_adult + N_parasitized ) ~ logDensity, 
      xlab = "Density", ylab = "Proportion infected", data = data)
 ```
@@ -634,7 +659,7 @@ plotResiduals(res, Owls$FoodTreatment)
 
 We see underdispersion now. In a model with variable dispersion, this is often the signal that some other distributional assumptions are violated. Let's check for zero-inflation:
 
-```{r}
+```{r, fig.height=4, fig.width=4}
 testZeroInflation(res)
 ```
 
@@ -646,6 +671,9 @@ m4 <- glmmTMB(SiblingNegotiation ~ FoodTreatment*SexParent + offset(log(BroodSiz
               ziformula = ~ FoodTreatment + SexParent,  data=Owls , family = nbinom1)
 
 res <- simulateResiduals(m4, plot = T)
+```
+
+```{r, error=TRUE, fig.width=7}
 par(mfrow = c(1,3))
 plotResiduals(res, Owls$FoodTreatment)
 testDispersion(res)
@@ -661,6 +689,9 @@ m5 <- glmmTMB(SiblingNegotiation ~ FoodTreatment*SexParent + offset(log(BroodSiz
               ziformula = ~ FoodTreatment + SexParent,  data=Owls , family = nbinom1)
 
 res <- simulateResiduals(m5, plot = T)
+```
+
+```{r, error=TRUE, fig.width=7}
 par(mfrow = c(1,3))
 plotResiduals(res, Owls$FoodTreatment)
 testDispersion(res)
@@ -713,7 +744,7 @@ plot(simulationOutput, asFactor = T)
 
 Even though the misfit is clearly visible if we plot the residuals against the missing predictor.
 
-```{r}
+```{r, fig.width=4, fig.height=4}
 plotResiduals(simulationOutput, testData$Environment1, quantreg = T)
 ```
 
