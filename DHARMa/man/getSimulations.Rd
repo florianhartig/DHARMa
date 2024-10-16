@@ -64,7 +64,7 @@ The purpose of this function is to wrap or implement the simulate function of di
 
 Note: GLMM and other regression packages often differ in how simulations are produced, and which parameters can be used to modify this behavior.
 
-One important difference is how to modifiy which hierarchical levels are held constant, and which are re-simulated. In lme4, this is controlled by the re.form argument (see \link[lme4:simulate.merMod]{lme4::simulate.merMod}). For other packages, please consult the help.
+One important difference is how to modifiy which hierarchical levels are held constant, and which are re-simulated. In lme4, this is controlled by the re.form argument (see \link[lme4:simulate.merMod]{lme4::simulate.merMod}). In glmmTMB, the package version 1.1.10 has a temporary solution to simulate conditional to all random effects (see \link[glmmTMB:set_simcodes]{glmmTMB::set_simcodes} val = "fix", and issue \href{https://github.com/glmmTMB/glmmTMB/issues/888}{#888} in glmmTMB GitHub repository. For other packages, please consult the help.
 
 If the model was fit with weights and the respective model class does not include the weights in the simulations, getSimulations will throw a warning. The background is if weights are used on the likelihood directly, then what is fitted is effectively a pseudo likelihood, and there is no way to directly simulate from the specified likelihood. Whether or not residuals can be used in this case depends very much on what is tested and how weights are used. I'm sorry to say that it is hard to give a general recommendation, you have to consult someone that understands how weights are processed in the respective model class.
 }
