@@ -7,8 +7,10 @@ output:
     toc: true
   pdf_document:
     toc: true
-vignette: |
-  %\VignetteIndexEntry{Vignette for the DHARMa package} \usepackage[utf8]{inputenc} %\VignetteEngine{knitr::rmarkdown}
+vignette: >
+  %\VignetteIndexEntry{The import package}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
 abstract: "The 'DHARMa' package uses a simulation-based approach to create  readily
   interpretable scaled (quantile) residuals for fitted generalized linear (mixed)
   models. Currently supported are linear and generalized linear (mixed) models from
