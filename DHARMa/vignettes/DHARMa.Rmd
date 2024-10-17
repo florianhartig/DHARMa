@@ -3,12 +3,14 @@ title: "DHARMa: residual diagnostics for hierarchical (multi-level/mixed) regres
 author: "Florian Hartig, Theoretical Ecology, University of Regensburg [website](https://www.uni-regensburg.de/biologie-vorklinische-medizin/theoretische-oekologie/mitarbeiter/hartig/)"
 date: "`r Sys.Date()`"
 output:
-  rmarkdown::html_vignette:
-    toc: true
   pdf_document:
     toc: true
-vignette: |
-  %\VignetteIndexEntry{Vignette for the DHARMa package} \usepackage[utf8]{inputenc} %\VignetteEngine{knitr::rmarkdown}
+  rmarkdown::html_vignette:
+    toc: true
+vignette: >
+  %\VignetteIndexEntry{Vignette for the DHARMa package} 
+  \usepackage[utf8]{inputenc} 
+  %\VignetteEngine{knitr::rmarkdown}
 abstract: "The 'DHARMa' package uses a simulation-based approach to create  readily
   interpretable scaled (quantile) residuals for fitted generalized linear (mixed)
   models. Currently supported are linear and generalized linear (mixed) models from
