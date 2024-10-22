@@ -49,7 +49,7 @@ If form is a factor, a boxplot will be plotted instead of a scatter plot. The di
 \note{
 If nObs > 10000, the scatter plot is replaced by graphics::smoothScatter
 
-#' @note The color for highlighting outliers and quantile lines/splines with significant tests can be changed by setting \code{options(DHARMaSignalColor = "red")} to a different color. See \code{getOption("DHARMaSignalColor")} for the current setting. This is convenient for a color-blind friendly display, since red and black are difficult for some people to separate.
+The color for highlighting outliers and quantile lines/splines with significant tests can be changed by setting \code{options(DHARMaSignalColor = "red")} to a different color. See \code{getOption("DHARMaSignalColor")} for the current setting. This is convenient for a color-blind friendly display, since red and black are difficult for some people to distinguish.
 }
 \examples{
 testData = createData(sampleSize = 200, family = poisson(), 
