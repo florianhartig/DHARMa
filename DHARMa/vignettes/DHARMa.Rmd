@@ -189,7 +189,7 @@ If the predictor is a factor, or if there is just a small number of observations
 plotResiduals(simulationOutput, form = testData$group)
 ```
 
-See ?plotResiduas for details, but very shortly: under H0 (perfect model), we would expect those boxes to range homogeneously from 0.25-0.75. To see whether there are deviations from this expecation, the plot calculates a test for uniformity per box, and a test for homogeneity of variances between boxes. A positive test will be highlighted in red. \
+See ?plotResiduas for details, but very shortly: under H0 (perfect model), we would expect those boxes to range homogeneously from 0.25-0.75. To see whether there are deviations from this expecation, the plot calculates a test for uniformity per box, and a test for homogeneity of variances between boxes. A positive test will be highlighted in red.\
 \
 **NOTE on plots**: The default color for highlighting outliers and significant tests is **red**. However, it can be changed by setting \code{options(DHARMaSignalColor = "red")} to a different color. This is convenient for a color-blind friendly display, since red and black are difficult for some people to disentangle.
 
@@ -712,13 +712,11 @@ Both models would be acceptable in terms of their fit to the data. Which one sho
 
 The main concern in Poisson data is dispersion. See comments in the section on the dispersion test, in particular regarding the advantage of conditional simulations in this case. To address overdispersion, I would recommend to prefer the negative binomial model over observation-level random effects, because this mode will be easier to test in DHARMa and its dispersion can be easier modeled, e.g. with glmmTMB. The third option would be quasi models, but there are few advantages, except runtime. Note also that quasi models cannot be tested with DHARMa.
 
-Once dispersion is adjusted, you should check for heteroscedasticity (via standard plot, also against all predictors), and for zero-inflation. As noted, zero-inflation tests are often negative, and rather show up as underdispersion. Work through the owl example below.
+Once dispersion is adjusted, you should check for heteroscedasticity (via standard plot, also against all predictors), and for zero-inflation. As noted, zero-inflation tests are often negative, and rather show up as underdispersion. Work through the owl example above.
 
 ## Proportional data
 
-Proportional data expressed as percentage or fractions of a whole, i.e. non-count-based data, is often modeled with beta regressions. Those can be tested with DHARMa. Note that beta regressions are often 0 or 1 inflated. Both should be tested with testZeroInflation or testGeneric.
-
-techniques for analysing continuous (also called non-count-based or non-binomial) proportions (e.g. percent cover, fraction time spent on an activity)
+Proportional data expressed as percentage or fractions of a whole, i.e. non-count-based proportions, is often modeled with beta regressions. Those can be tested with DHARMa. Note that beta regressions are often 0 or 1 inflated. Both should be tested with testZeroInflation or testGeneric.
 
 Note: discrete proportions, i.e. count-based proportions, of the type k/n should NOT be modeled with the beta regression. Use the binomial (see below).
 
