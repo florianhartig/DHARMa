@@ -107,7 +107,7 @@ runBenchmarks <- function(calculateStatistics, controlValues = NULL, nRep = 10, 
 
   summary$propSignificant = aggreg(sig)
   summary$meanP = aggreg(mean)
-  summary$isUnifP = aggreg(mean)
+  summary$isUnifP = aggreg(isUnif)
 
   out = list()
   out$controlValues = controlValues
