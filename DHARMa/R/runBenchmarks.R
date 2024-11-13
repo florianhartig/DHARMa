@@ -96,17 +96,21 @@ runBenchmarks <- function(calculateStatistics, controlValues = NULL, nRep = 10, 
   summary = list()
 
   # function for aggregation
-  aggreg <- function(f) {
+  aggreg <- function(f,...) {
     ret <- aggregate(x[,- c(ncol(x) - 1, ncol(x))], by = list(x$controlValues), f)
     colnames(ret)[1] = "controlValues"
     return(ret)
   }
 
-  sig <- function(x) mean(x < alpha)
+  if(length(is.na(x)>0)){
+    warning("NA values in the output, this might be a problem for the summaries.")
+  }
+
+  sig <- function(x) mean(x < alpha, na.rm=T)
   isUnif <- function(x) ks.test(x, "punif")$p.value
 
   summary$propSignificant = aggreg(sig)
-  summary$meanP = aggreg(mean)
+  summary$meanP = aggreg(mean, na.rm=T)
   summary$isUnifP = aggreg(isUnif)
 
   out = list()

@@ -1,5 +1,12 @@
 NOTE: for more news about the package, see https://github.com/florianhartig/DHARMa/releases
 
+# DHARMa 0.4.8
+
+
+## Minor changes
+
+* fixing error in runBenchmarks
+
 
 # DHARMa 0.4.7
 
