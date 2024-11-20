@@ -70,7 +70,7 @@ hist.DHARMa <- function(x,
 }
 
 
-#' DHARMa standard residual plots
+#' DHARMa standard residual plots (deprecated)
 #'
 #' DEPRECATED, use plot() instead
 #'

@@ -2,7 +2,7 @@
 % Please edit documentation in R/tests.R
 \name{testOverdispersionParametric}
 \alias{testOverdispersionParametric}
-\title{Parametric overdisperstion tests}
+\title{Parametric overdisperstion tests (deprecated)}
 \usage{
 testOverdispersionParametric(...)
 }
@@ -10,7 +10,7 @@ testOverdispersionParametric(...)
 \item{...}{arguments will be ignored, the parametric tests is no longer recommend}
 }
 \description{
-Parametric overdisperstion tests
+Parametric overdisperstion tests (deprecated)
 }
 \details{
 Deprecated, switch your code to using the \link{testDispersion} function.
