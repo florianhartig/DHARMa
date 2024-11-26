@@ -498,7 +498,7 @@ testDispersion <- function(simulationOutput, alternative = c("two.sided", "great
   return(out)
 }
 
-#' Simulated overdisperstion tests
+#' Simulated overdisperstion tests (deprecated)
 #'
 #' @details Deprecated, switch your code to using the [testDispersion] function
 #'
@@ -510,7 +510,7 @@ testOverdispersion <- function(simulationOutput, ...){
   testDispersion(simulationOutput, ...)
 }
 
-#' Parametric overdisperstion tests
+#' Parametric overdisperstion tests (deprecated)
 #'
 #' @details Deprecated, switch your code to using the [testDispersion] function.
 #'

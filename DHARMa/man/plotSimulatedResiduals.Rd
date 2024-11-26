@@ -2,7 +2,7 @@
 % Please edit documentation in R/plots.R
 \name{plotSimulatedResiduals}
 \alias{plotSimulatedResiduals}
-\title{DHARMa standard residual plots}
+\title{DHARMa standard residual plots (deprecated)}
 \usage{
 plotSimulatedResiduals(simulationOutput, ...)
 }

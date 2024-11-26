@@ -2,7 +2,7 @@
 % Please edit documentation in R/tests.R
 \name{testOverdispersion}
 \alias{testOverdispersion}
-\title{Simulated overdisperstion tests}
+\title{Simulated overdisperstion tests (deprecated)}
 \usage{
 testOverdispersion(simulationOutput, ...)
 }
@@ -12,7 +12,7 @@ testOverdispersion(simulationOutput, ...)
 \item{...}{additional arguments to \link{testDispersion}}
 }
 \description{
-Simulated overdisperstion tests
+Simulated overdisperstion tests (deprecated)
 }
 \details{
 Deprecated, switch your code to using the \link{testDispersion} function
