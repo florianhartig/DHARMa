@@ -62,8 +62,9 @@ ggplot(testData, aes(y = observedResponse, x = Environment1, col = group))+
 
 Agora vamos ajustar o modelo **correto** para este dados, usando um GLMM Poisson da variável resposta em função da variável preditora ambiental e o intercepto aleatório de grupo, com o pacote `lme4`:
 ```{r}
-fittedModel <- glmer(observedResponse ~ Environment1 + (1|group), 
-                     family = "poisson", data = testData)
+fittedModel <- glmer(observedResponse ~ Environment1 + (1|group),
+                     family = "poisson",
+                     data = testData)
 ```
 
 ## Calculando os resíduos padronizados
@@ -187,9 +188,12 @@ Fazer o histograma dos resíduos `hist()`; ver os resíduos `residuals()`; e plo
 
 *Essa última função `plotResiduals()` é a mesma que apresentamos acima, mas agora motramos a opção de plotar os resíduos contra uma variável preditora. O que pode ser muit útil para verificar heterocedasticidade, por exemplo.
 
+```{r, eval=F}
+residuals(res)
+(res)
+```
+
 ```{r}
-#residuals(res)
-hist(res)
 plotResiduals(res, form = testData$Environment1)
 ```
 
@@ -347,7 +351,7 @@ De fato, um modelo com zero-inflação se ajusta melhor aos dados.
 
 # Sugestões de estudos
 
-Esse tutorial foi apenas um apanahdo para apresentar o DHARMa e suas funcionalidades. Para um estudo mais aprofundado, sugiro:
+Esse tutorial foi apenas um apanhado das funções e funcionalidades do DHARMa. Para um estudo mais aprofundado, sugiro:
 
 - A [Vinheta do pacote DHARMa](https://cran.r-project.org/web/packages/DHARMa/vignettes/DHARMa.html) tem outros exemplos e discute com muito mais profundidade as funções, os testes e diagnósticos de modelos.   
 - Exemplos reais também podem ser buscados nos [issues](https://github.com/florianhartig/DHARMa/issues) do pacote no GitHub.  
