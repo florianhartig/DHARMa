@@ -31,12 +31,12 @@ plotResiduals(simulationOutput, form = NULL, quantreg = NULL,
 If quantile tests are performed, the function returns them invisibly.
 }
 \description{
-The function creates a generic residual plot with either spline or quantile regression to highlight patterns in the residuals. Outliers are highlighted in red by default (but see Details).
+The function creates a generic residual plot with either spline or quantile regression to highlight patterns in the residuals. Outliers are marked in star/asterisk form and highlighted in red if the outlier test is significant.
 }
 \details{
 The function plots residuals against a predictor (by default against the fitted value, extracted from the DHARMa object, or any other predictor).
 
-Outliers are highlighted in red as default (for information on definition and interpretation of outliers, see \link{testOutliers}). This can be changed by setting \code{options(DHARMaSignalColor = "red")} to a different color. See \code{getOption("DHARMaSignalColor")} for the current setting.
+Outliers are highlighted in red if the outliers test is significant (for information on definition and interpretation of outliers, see \link{testOutliers}). The color of the outliers can be changed by setting \code{options(DHARMaSignalColor = "red")} to a different color. See \code{getOption("DHARMaSignalColor")} for the current setting.
 
 To provide a visual aid for detecting deviations from uniformity in the y-direction, the plot function calculates an (optional) quantile regression of the residuals, by default for the 0.25, 0.5 and 0.75 quantiles. Since the residuals should be uniformly distributed for a correctly specified model, the theoretical expectations for these regressions are straight lines at 0.25, 0.5 and 0.75, shown as dashed black lines on the plot. However, even for a perfect model, some deviation from these expectations is to be expected by chance, especially if the sample size is small. The function therefore tests whether the deviation of the fitted quantile regression from the expectation is significant, using \link{testQuantiles}. If so, the significant quantile regression is highlighted in red (as default) and a warning is displayed in the plot.
 
