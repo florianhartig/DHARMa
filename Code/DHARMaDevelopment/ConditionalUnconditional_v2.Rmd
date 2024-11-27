@@ -1,0 +1,212 @@
+---
+title: "Conditional x Unconditional simulations of GLMMs"
+author: "Melina Leite"
+date: "`r format(Sys.time(), '%d de %B de %Y')`"
+output:
+  rmdformats::readthedown:
+    highlight: kate
+    self_contained: true
+    thumbnails: false
+    lightbox: true
+    gallery: false
+  pdf_document:
+    highlight: tango
+    toc: yes
+---
+
+```{r setup, echo=FALSE, warning=FALSE, message=FALSE}
+library(knitr)
+library(lme4)
+library(DHARMa)
+library(glmmTMB)
+library(ggplot2); library(cowplot)
+theme_set(theme_cowplot())
+
+opts_chunk$set(fig.align = 'center', warning = FALSE, 
+               message = FALSE, error = FALSE,
+               cache = F)
+options(formatR.arrow = TRUE, width = 90, help_type = "html")
+```
+
+# simulating/predicting with conditional/unconditional
+
+## lme4
+
+Uses the argument `re.form`:   
+- **re.form = NA (default for simulating) ->  condition on no random effects (unconditional)**.   
+- re.form = ~ 0 ->  condition on no random effects (unconditional).  
+- **re.form = NULL (default for predicting) -> condition on all random effects.**
+
+HELP page `simulate.merMod`:  
+
+> re.fom: formula for random effects to condition on. If NULL, condition on all random effects; if NA or ~0, condition on no random effects. See Details.
+
+> The re.form argument allows the user to specify how the random effects are incorporated in the simulation. All of the random effects terms included in re.form will be conditioned on - that is, the conditional modes of those random effects will be included in the deterministic part of the simulation. (If new levels are used (and allow.new.levels is TRUE), the conditional modes for these levels will be set to the population mode, i.e. values of zero will be used for the random effects.) Conversely, the random effect terms that are not included in re.form will be simulated from - that is, new values will be chosen for each group based on the estimated random-effects variances.
+
+> The default behaviour (using re.form=NA) is to condition on none of the random effects, simulating new values for all of the random effects.
+
+
+For compatibility, the `getFitted()` from DHARMa sets the `predict(re.form = NA)` to be the same as in the `simulate.merMod`.
+
+
+## glmmTMB
+
+Using the function `set_simcodes()`to modify the TBM component of an object in place. 
+`on.exit()` to restore the sim code.  
+To get the sim code `sapply(m$obj$env$data$terms, getElement, "simcode")`.  
+
+- **`set_simcodes(m$obj, val = "random")` ->  condition on no random effects (uncondintional).**
+- `set_simcodes(m$obj, val = "zero")` ->  condition on all random effects.
+- `set_simcodes(m$obj, val = "fix")` ->  condition on all random effects.
+
+For `predict.glmmTMB`, there is the argument re.form, and the default is `re.form = NULL`. However, the default in getFitted() in DHARMa is `re.form = NA` (to work for lme4 and glmmTMB).
+
+
+# Example poisson GLMM - quadratic fixed effect
+
+```{r}
+set.seed(165)
+testData = createData(sampleSize = 200, quadraticFixedEffects = 1,
+                      randomEffectVariance = 1.5, 
+                      family = poisson(), numGroups = 20)
+```
+
+## Correct model:
+
+```{r}
+fittedModel <- glmer(observedResponse ~ Environment1 + I(Environment1^2) +
+                       (1|group), 
+                     family = "poisson", data = testData)
+
+resUN <- simulateResiduals(fittedModel, re.form=NA) # default
+resCO <- simulateResiduals(fittedModel, re.form=NULL)
+```
+
+Unconditional residuals
+```{r}
+plot(resUN)
+```
+
+Conditional residuals
+```{r}
+plot(resCO)
+```
+
+## Wrong model
+
+missing quadratic effect
+
+```{r}
+fittedModel <- glmer(observedResponse ~ Environment1 + (1|group), 
+                     family = "poisson", data = testData)
+```
+
+```{r}
+resUN <- simulateResiduals(fittedModel, re.form=NA) # default
+resCO <- simulateResiduals(fittedModel, re.form=NULL)
+```
+
+Unconditional residuals AND unconditional predictions
+```{r}
+plot(resUN)
+```
+
+Conditional residuals AND unconditional predictions
+```{r}
+plot(resCO)
+```
+
+Conditional residuals shows the misfit (missing quadratic effect) more strongly.
+
+
+
+## Runbenchmarks for both models
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# Example poisson GLMM - misfit in the RE
+
+```{r}
+set.seed(165)
+testData = createData(sampleSize = 200, 
+                      intercept = 1,
+                      randomEffectVariance = 1, 
+                      family = poisson(), numGroups = 10)
+```
+
+
+## Correct model:
+
+```{r}
+fittedModel <- glmer(observedResponse ~ Environment1 +
+                       (1|group), 
+                     family = "poisson", data = testData)
+#summary(fittedModel)
+resUN <- simulateResiduals(fittedModel, re.form=NA) # default
+resCO <- simulateResiduals(fittedModel, re.form=NULL)
+```
+
+Unconditional residuals
+```{r}
+plot(resUN)
+```
+
+Conditional residuals
+```{r}
+plot(resCO)
+```
+
+## Wrong model
+
+missing RE
+
+```{r}
+fittedModel <- glm(observedResponse ~ Environment1, 
+                     family = "poisson", data = testData)
+```
+
+```{r}
+resUN <- simulateResiduals(fittedModel, re.form=NA) # default
+resCO <- simulateResiduals(fittedModel, re.form=NULL)
+```
+
+Unconditional residuals AND unconditional predictions
+```{r}
+plot(resUN)
+```
+
+Conditional residuals AND unconditional predictions
+```{r}
+plot(resCO)
+```
+
+
+## Runbenchmarks for both models
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
