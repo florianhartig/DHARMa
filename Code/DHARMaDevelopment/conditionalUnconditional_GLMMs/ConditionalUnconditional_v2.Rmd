@@ -19,7 +19,7 @@ library(knitr)
 library(lme4)
 library(DHARMa)
 library(glmmTMB)
-library(ggplot2); library(cowplot)
+library(tidyverse); library(cowplot)
 theme_set(theme_cowplot())
 
 opts_chunk$set(fig.align = 'center', warning = FALSE, 
@@ -60,6 +60,45 @@ To get the sim code `sapply(m$obj$env$data$terms, getElement, "simcode")`.
 - `set_simcodes(m$obj, val = "fix")` ->  condition on all random effects.
 
 For `predict.glmmTMB`, there is the argument re.form, and the default is `re.form = NULL`. However, the default in getFitted() in DHARMa is `re.form = NA` (to work for lme4 and glmmTMB).
+
+
+
+# Run benchmarks for the tests with conditional X unconditional residuals
+
+## lme4
+```{r}
+load("benchmarks_poisson.Rdata")
+```
+
+```{r}
+result <- list()
+for (i in 1:length(output)){
+  result <- rbind(result, output[[i]]$summaries$propSignificant)
+} 
+result$ngroups <- rep(c(4,10,20), each=4)
+names(result)[1] <- "REvariance" 
+
+result <- result %>% pivot_longer(cols= -c(ngroups, REvariance), names_to = "tests",
+                        values_to = "propSignificant") %>%
+  separate(tests, into = c("test", "sim"))
+```
+
+```{r}
+ggplot(result, aes(x=REvariance, y=propSignificant, color=sim, 
+                   shape=as.factor(ngroups))) +
+  facet_grid(ngroups~test, labeller = as_labeller(c(`DISP`= "Dispersion",
+                                                    KS = "KS", OUT = "Outliers",
+                                                  `4` = "grp = 4",
+                                                  `10` = "grp = 10",
+                                                  `20` = "grp = 20"))) +
+  geom_point() + geom_line()+
+  geom_hline(yintercept = 0.05, linetype="dotted") +
+  
+  theme(panel.border = element_rect(color="black")) +
+  ggtitle("Type I error rate for conditional x unconditional residuals",
+          sub= "sampleSize=100")
+```
+
 
 
 # Example poisson GLMM - quadratic fixed effect
@@ -159,6 +198,59 @@ resUN <- simulateResiduals(fittedModel, re.form=NA) # default
 resCO <- simulateResiduals(fittedModel, re.form=NULL)
 ```
 
+
+```{r}
+fittedModel <- glmer(observedResponse ~ 1 +
+                       (1|ID), 
+                     family = "poisson", data = testData)
+
+fittedModel <- glmer.nb(observedResponse ~ 1 +
+                       (1|ID), 
+                      data = testData)
+
+resUN <- simulateResiduals(fittedModel, re.form=NA, plot = T) # default
+plotResiduals(resUN, form = testData$Environment1 )
+
+resCO <- simulateResiduals(fittedModel, re.form=NULL, plot = T) # conditional
+plotResiduals(resCO, form = testData$Environment1 )
+
+
+x = ranef(fittedModel)
+
+hist(x$ID$`(Intercept)`)
+
+plot(x$ID$`(Intercept)` ~ testData$Environment1)
+fit = lm(x$ID$`(Intercept)` ~ testData$Environment1)
+summary(fit)
+abline(fit)
+
+library(performance)
+check_overdispersion
+
+
+
+testData = createData(sampleSize = 200, 
+                      intercept = 1,
+                      randomEffectVariance = 0.001, 
+                      family = poisson(), numGroups = 10)
+
+
+library(mgcv)
+
+fittedModel <- gam(observedResponse ~ Environment1 + 
+                       s(group, bs = "re"), 
+                     family = "poisson", data = testData)
+
+
+
+summary(fittedModel)
+
+
+```
+
+
+
+
 Unconditional residuals
 ```{r}
 plot(resUN)
@@ -169,32 +261,6 @@ Conditional residuals
 plot(resCO)
 ```
 
-## Wrong model
-
-missing RE
-
-```{r}
-fittedModel <- glm(observedResponse ~ Environment1, 
-                     family = "poisson", data = testData)
-```
-
-```{r}
-resUN <- simulateResiduals(fittedModel, re.form=NA) # default
-resCO <- simulateResiduals(fittedModel, re.form=NULL)
-```
-
-Unconditional residuals AND unconditional predictions
-```{r}
-plot(resUN)
-```
-
-Conditional residuals AND unconditional predictions
-```{r}
-plot(resCO)
-```
-
-
-## Runbenchmarks for both models
 
 
 
