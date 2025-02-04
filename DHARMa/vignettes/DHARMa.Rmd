@@ -57,7 +57,7 @@ plotConventionalResiduals(fittedModel)
 
 Just for completeness - it was the second one. But don't get too excited if you got it right. Probably you were just lucky - I can't really tell a difference. But even so, would you have added a quadratic effect, instead of adding an overdispersion correction? The point here is that misspecifications in GL(M)Ms cannot reliably be diagnosed with standard residual plots, and thus GLMMs are often not as thoroughly checked as they should.
 
-One reason why GL(M)Ms residuals are harder to interpret is that the expected distribution of the data (aka predictive distribution) changes with the fitted values. Reweighting with the expected dispersion, as done in Pearson residuals, or using deviance residuals, helps to some extent, but it does not lead to visually homogenous residuals, even if the model is correctly specified. As a result, standard residual plots, when interpreted in the same way as for linear models, seem to show all kind of problems, such as non-normality, heteroscedasticity, even if the model is correctly specified. Questions on the R mailing lists and forums show that practitioners are regularly confused about whether such patterns in GL(M)M residuals are a problem or not.
+One reason why GL(M)Ms residuals are harder to interpret is that the expected distribution of the data (aka predictive distribution) changes with the fitted values. Reweighting with the expected dispersion, as done in Pearson residuals, or using deviance residuals, helps to some extent, but it does not lead to visually homogeneous residuals, even if the model is correctly specified. As a result, standard residual plots, when interpreted in the same way as for linear models, seem to show all kind of problems, such as non-normality, heteroscedasticity, even if the model is correctly specified. Questions on the R mailing lists and forums show that practitioners are regularly confused about whether such patterns in GL(M)M residuals are a problem or not.
 
 But even experienced statistical analysts currently have few options to diagnose misspecification problems in GLMMs. In my experience, the current standard practice is to eyeball the residual plots for major misspecifications, potentially have a look at the random effect distribution, and then run a test for overdispersion, which is usually positive, after which the model is modified towards an overdispersed / zero-inflated distribution. This approach, however, has a number of drawbacks, notably:
 
@@ -154,7 +154,7 @@ Note: the uniform distribution is the only differences to "conventional" residua
 residuals(simulationOutput, quantileFunction = qnorm, outlierValues = c(-7,7))
 ```
 
-These normal residuals will behave exactly like the residuals of a linear regression. However, for reasons of a) numeric stability with low number of simulations, which makes it neccessary to descide on which value outliers are to be transformed and b) my conviction that it is much easier to visually detect deviations from uniformity than normality, DHARMa checks all residuals in the uniform space, and I would personally advice against using the transformation.
+These normal residuals will behave exactly like the residuals of a linear regression. However, for reasons of a) numeric stability with low number of simulations, which makes it necessary to decide on which value outliers are to be transformed and b) my conviction that it is much easier to visually detect deviations from uniformity than normality, DHARMa checks all residuals in the uniform space, and I would personally advice against using the transformation.
 
 ## Plotting the scaled residuals
 
@@ -171,7 +171,7 @@ plotQQunif(simulationOutput) # left plot in plot.DHARMa()
 plotResiduals(simulationOutput) # right plot in plot.DHARMa()
 ```
 
--   plotQQunif (left panel) creates a qq-plot to detect overall deviations from the expected distribution, by default with added tests for correct distribution (KS test), dispersion and outliers. Note that outliers in DHARMa are values that are by default defined as values outside the simulation envelope, not in terms of a particular quantile. Thus, which values will appear as outliers will depend on the number of simulations. If you want outliers in terms of a particuar quantile, you can use the outliers() function.
+-   plotQQunif (left panel) creates a qq-plot to detect overall deviations from the expected distribution, by default with added tests for correct distribution (KS test), dispersion and outliers. Note that outliers in DHARMa are values that are by default defined as values outside the simulation envelope, not in terms of a particular quantile. Thus, which values will appear as outliers will depend on the number of simulations. If you want outliers in terms of a particular quantile, you can use the outliers() function.
 
 -   plotResiduals (right panel) produces a plot of the residuals against the predicted value (or alternatively, other variable). Simulation outliers (data points that are outside the range of simulated values) are highlighted as red stars. These points should be carefully interpreted, because we actually don't know "how much" these values deviate from the model expectation. Note also that the probability of an outlier depends on the number of simulations, so whether the existence of outliers is a reason for concern depends also on the number of simulations.
 
@@ -189,7 +189,7 @@ If the predictor is a factor, or if there is just a small number of observations
 plotResiduals(simulationOutput, form = testData$group)
 ```
 
-See ?plotResiduas for details, but very shortly: under H0 (perfect model), we would expect those boxes to range homogeneously from 0.25-0.75. To see whether there are deviations from this expecation, the plot calculates a test for uniformity per box, and a test for homogeneity of variances between boxes. A positive test will be highlighted in red.\
+See ?plotResiduals for details, but very shortly: under H0 (perfect model), we would expect those boxes to range homogeneously from 0.25-0.75. To see whether there are deviations from this expectation, the plot calculates a test for uniformity per box, and a test for homogeneity of variances between boxes. A positive test will be highlighted in red.\
 \
 **NOTE on plots**: The default color for highlighting outliers and significant tests is **red**. However, it can be changed by setting \code{options(DHARMaSignalColor = "red")} to a different color. This is convenient for a color-blind friendly display, since red and black are difficult for some people to disentangle.
 
@@ -232,7 +232,7 @@ The second option is much much slower, and also seemed to have lower power in so
 
 Note also that refit = T can sometimes run into numerical problems, if the fitted model does not converge on the newly simulated data.
 
-#### Conditinal vs. unconditinal simulations
+#### Conditional vs. unconditional simulations
 
 The second option is the treatment of the stochastic hierarchy. In a hierarchical model, several layers of stochasticity are placed on top of each other. Specifically, in a GLMM, we have a lower level stochastic process (random effect), whose result enters into a higher level (e.g. Poisson distribution). For other hierarchical models, such as state-space models, similar considerations apply, but the hierarchy can be more complex. When simulating, we have to decide if we want to re-simulate all stochastic levels, or only a subset of those. For example, in a GLMM, it is common to only simulate the last stochastic level (e.g. Poisson) conditional on the fitted random effects, meaning that the random effects are set on the fitted values.
 
@@ -244,11 +244,11 @@ simulationOutput <- simulateResiduals(fittedModel = fittedModel, n = 250, use.u 
 
 If the model is correctly specified and the fitting procedure is unbiased (disclaimer: GLMM estimators are not always unbiased), the simulated residuals should be flat regardless how many hierarchical levels we re-simulate. The most thorough procedure would be therefore to test all possible options. If testing only one option, I would recommend to re-simulate all levels, because this essentially tests the model structure as a whole. This is the default setting in the DHARMa package. A potential drawback is that re-simulating the random effects creates more variability, which may reduce power for detecting problems in the upper-level stochastic processes, in particular overdispersion (see section on dispersion tests below).
 
-*Note:* Although unconditional residuals implicitly also test the normal distribution of the REs, it is probably not a bad idea to look addditionally check for normality of the RE distribution. As this is not based on quantile residuals, there is no special DHARMa function for this, so you should just extract the REs, and then run e.g. a Shapiro test.
+*Note:* Although unconditional residuals implicitly also test the normal distribution of the REs, it is probably not a bad idea to look additionally check for normality of the RE distribution. As this is not based on quantile residuals, there is no special DHARMa function for this, so you should just extract the REs, and then run e.g. a Shapiro test.
 
 #### Integer treatment / randomization
 
-A third option is the treatment of integer responses. The background of this option is that, for integer-valued variables, some additional steps are necessary to make sure that the residual distribution becomes flat (essentially, we have to smoothen away the integer nature of the data). The idea is explained in
+A third option is the treatment of integer responses. The background of this option is that, for integer-valued variables, some additional steps are necessary to make sure that the residual distribution becomes flat (essentially, we have to smooth away the integer nature of the data). The idea is explained in
 
 -   Dunn, K. P., and Smyth, G. K. (1996). Randomized quantile residuals. Journal of Computational and Graphical Statistics 5, 1-10.
 
@@ -278,7 +278,7 @@ Moreover (general advice), to ensure reproducibility, it's advisable to add a se
 
 # Interpreting residuals and recognizing misspecification problems
 
-## General remarks on interperting residual patterns and tests
+## General remarks on interpreting residual patterns and tests
 
 So far, all shown DHARMa results were calculated for a correctly specified model, resulting in "perfect" residual plots and diagnostics. In this section, we discuss how to recognize and interpret diagnostics that indicate a misspecified model. Before going into the details, note, however, that
 
@@ -351,7 +351,7 @@ IMPORTANT INFO: we have made extensive simulations, which have shown that the va
 -   Option 2, the parametric Pearson-chi2 is fast if Pearson residuals are available, but based on a naive expectation of df (counts RE as 1 df) and the test statistic is thus biased towards underdispersion for mixed models. Similar to the df approximation, Bias increasing with the number of RE levels. When testing only for overdispersion (alternative = "greater"), this makes the test more conservative, but it also costs power.
 -   The DHARMa default option 1 is fast, nearly unbiased (i.e. you can test under and overdispersion), and only slightly less powerful as test 3, PROVIDED that simulations are made conditional on the fitted REs. Note that the latter is not the DHARMa default, so you have to actively request conditional simulations, e.g. for lme4 by specifying re.form = NULL. Power compared to the parametric Pearson-chi2 test depends on the number of RE levels, it will be more powerful for typical number of RE levels.
 
-As support for these statements, here results of the simulation, which compares the uniform (KS) test with the standard simuation-based test (conditional and unconditional) and the Pearson-chi2 test (two-sided and greater) for an n=200 Poisson GLMM with 30 RE levels.
+As support for these statements, here results of the simulation, which compares the uniform (KS) test with the standard simulation-based test (conditional and unconditional) and the Pearson-chi2 test (two-sided and greater) for an n=200 Poisson GLMM with 30 RE levels.
 
 <img src="dispersion.png" class="center" width="700"/>
 
@@ -372,7 +372,7 @@ testData = createData(sampleSize = 500, intercept = 2, fixedEffects = c(1),
                       pZeroInflation = 0.6)
 
 par(mfrow = c(1,2))
-plot(testData$Environment1, testData$observedResponse, xlab = "Envrionmental Predictor", 
+plot(testData$Environment1, testData$observedResponse, xlab = "Environmental Predictor", 
      ylab = "Response")
 hist(testData$observedResponse, xlab = "Response", main = "")
 ```
@@ -501,7 +501,7 @@ If a distance between residuals can be defined (temporal, spatial, phylogenetic)
 
 The three functions to test for this in DHARMa are:
 
--   testTemporalAutocrrelation based on the Durbin-Watson test.
+-   testTemporalAutocorrelation based on the Durbin-Watson test.
 -   testSpatialAutocorrelation, based on Moran's I, can also be used for generic distance functions.
 -   testPhylogeneticAutocorrelation, based on Moran's I test from `Moran.I` function on package `ape`.
 
@@ -521,7 +521,7 @@ testSpatialAutocorrelation(simulationOutput = simulationOutput, x = testData$x,
 
 Note that all these tests are most sensitive against homogeneous residual structure, and might miss local and heterogeneous (non-stationary) residual structures. Additional visual checks can be useful.
 
-However, standard DHARMa simulations from models with temporal / spatial / phylogenetic conditional autoregressive terms will still have the respective correlation in the DHARMa residuals, unless the package you are using is modelling the autoregressive terms as explicit REs and is able to simulate conditional on the fitted REs. It means that the residuals will still show significant autocorrelation, even if the model fully accounts for this strucuture, and other tests, such as dispersion, uniformity, may have inflated type I error. See the example below with a `glmmTMB` model with a spatial autocorrelation structure:
+However, standard DHARMa simulations from models with temporal / spatial / phylogenetic conditional autoregressive terms will still have the respective correlation in the DHARMa residuals, unless the package you are using is modelling the autoregressive terms as explicit REs and is able to simulate conditional on the fitted REs. It means that the residuals will still show significant autocorrelation, even if the model fully accounts for this structure, and other tests, such as dispersion, uniformity, may have inflated type I error. See the example below with a `glmmTMB` model with a spatial autocorrelation structure:
 
 ```{r, fig.width=4, fig.height=4}
 library(glmmTMB)
@@ -534,7 +534,7 @@ testSpatialAutocorrelation(simulationOutput = simulationOutput2, x = testData$x,
 # plot(simulationOutput2)
 ```
 
-One of the options to solve it and get correct tests and no residual pattern (if the model is correct) is to rotate the residual space according to the coariance structure of the fitted model, such that the rotated residuals are conditionally independent. The argument rotation in `simulateResiduals` does it (see also `?getQuantile` for details about the rotation options):
+One of the options to solve it and get correct tests and no residual pattern (if the model is correct) is to rotate the residual space according to the covariance structure of the fitted model, such that the rotated residuals are conditionally independent. The argument rotation in `simulateResiduals` does it (see also `?getQuantile` for details about the rotation options):
 
 ```{r, fig.width=4, fig.height=4}
 # rotation of the residuals 
@@ -595,7 +595,7 @@ plot(simulationOutput)
 
 We see various signals of overdispersion
 
--   QQ: s-shaped QQ plot, distribution test (KS) signficant
+-   QQ: s-shaped QQ plot, distribution test (KS) significant
 -   QQ: Dispersion test is significant
 -   QQ: Outlier test significant
 -   Res \~ predicted: Quantile fits are spread out too far
@@ -616,7 +616,7 @@ simulationOutput <- simulateResiduals(fittedModel = mod3)
 plot(simulationOutput)
 ```
 
-The residuals look perfect now. That being said, we dont' have a lot of data, and we have to be sure we're not overfitting. A likelihood ratio test tells us that the quadratic effect is not significantly supported.
+The residuals look perfect now. That being said, we don't have a lot of data, and we have to be sure we're not overfitting. A likelihood ratio test tells us that the quadratic effect is not significantly supported.
 
 ```{r}
 anova(mod2, mod3)
@@ -724,7 +724,7 @@ Note: discrete proportions, i.e. count-based proportions, of the type k/n should
 
 Binomial data behave slightly different depending on whether we have a 0/1 response (Bernoulli) or a k/n response (true binomial).
 
-A k/n response, in particular when n is large, will behave similar to the Poisson, in that it approaches a normal distribution with fixed dispersion for large n and becomes more assymetric at its borders (for k = 0 or n). You should check for dispersion and consider a beta-binomial in cases of overdispersion.
+A k/n response, in particular when n is large, will behave similar to the Poisson, in that it approaches a normal distribution with fixed dispersion for large n and becomes more asymmetric at its borders (for k = 0 or n). You should check for dispersion and consider a beta-binomial in cases of overdispersion.
 
 Things are a bit different for the 0/1 response. Let's look at the residuals of a clearly misspecified binomial model (missing predictor) with 0/1 response data.
 
@@ -762,7 +762,7 @@ simulationOutput2 = recalculateResiduals(simulationOutput, group = testData$grou
 testDispersion(simulationOutput2)
 ```
 
-In general, you can group according to any variable that you like, including continous variables or space. However, some variables make more sense than others. To understand this, consider a simulation where we create binonial data with true probabilities p, drawn from a uniform distribution:
+In general, you can group according to any variable that you like, including continuous variables or space. However, some variables make more sense than others. To understand this, consider a simulation where we create binomial data with true probabilities p, drawn from a uniform distribution:
 
 ```{r}
 n = 1000
@@ -770,7 +770,7 @@ p = runif(n, 0.1, 0.9) # true probabilities
 obs = rbinom(n, 1, p)
 ```
 
-The important thing to note here is that `rbinom(n, 1, p)` will generate an identical overall distribution as `rbinom(1, n, mean(p))`. What that means: a misfit of the prediction will not show up unless they are wrong in the overall mean. Consequenly, if we fit:
+The important thing to note here is that `rbinom(n, 1, p)` will generate an identical overall distribution as `rbinom(1, n, mean(p))`. What that means: a misfit of the prediction will not show up unless they are wrong in the overall mean. Consequently, if we fit:
 
 ```{r}
 fit <- glm(obs ~ 1, family = "binomial") # wrong model, assumes equal probabilities
@@ -785,7 +785,7 @@ res2 <- recalculateResiduals(res, group = rep(1:20, each = 10))
 plot(res2) 
 ```
 
-However, we see thes misfit / overdispersion if we aggregate according to something that is correlated to the misfit. For our example, let's just group according to the true means:
+However, we see the misfit / overdispersion if we aggregate according to something that is correlated to the misfit. For our example, let's just group according to the true means:
 
 ```{r}
 grouping = cut(p, breaks = quantile(p, seq(0,1,0.02)))
