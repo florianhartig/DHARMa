@@ -6,7 +6,7 @@
 #' @param ... Further options for [plotResiduals]. Consider in particular parameters quantreg, rank and asFactor. xlab, ylab and main cannot be changed when using plot.DHARMa, but can be changed when using [plotResiduals].
 #' @param title The title for both panels (plotted via mtext, outer = TRUE).
 #'
-#' @details The function creates a plot with two panels. The left panel is a uniform qq plot (calling [plotQQunif]), and the right panel shows residuals against predicted values (calling [plotResiduals]), with outliers highlighted in red (default color but see Note).
+#' @details The function creates a plot with two panels. The left panel is a uniform qq plot (calling [plotQQunif]), and the right panel shows residuals against predicted values (calling [plotResiduals]), with outliers as a star/asterisk and highlighted in red if outliers' test is significant (default color but see Note).
 #'
 #' Very briefly, we would expect that a correctly specified model shows:
 #'
@@ -39,7 +39,7 @@ plot.DHARMa <- function(x, title = "DHARMa residual", ...){
 
 #' Histogram of DHARMa residuals
 #'
-#' The function produces a histogram from a DHARMa output. Outliers are marked red.
+#' The function produces a histogram from a DHARMa output. Outliers are marked in red.
 #'
 #' @param x A DHARMa simulation output (class DHARMa)
 #' @param breaks Breaks for hist() function.
@@ -149,7 +149,7 @@ plotQQunif <- function(simulationOutput, testUniformity = TRUE, testOutliers = T
 
 #' Generic res ~ pred scatter plot with spline or quantile regression on top
 #'
-#' The function creates a generic residual plot with either spline or quantile regression to highlight patterns in the residuals. Outliers are highlighted in red by default (but see Details).
+#' The function creates a generic residual plot with either spline or quantile regression to highlight patterns in the residuals. Outliers are marked in star/asterisk form and highlighted in red if the outlier test is significant.
 #'
 #' @param simulationOutput An object, usually a DHARMa object, from which residual values can be extracted. Alternatively, a vector with residuals or a fitted model can be provided, which will then be transformed into a DHARMa object.
 #' @param form Optional predictor against which the residuals should be plotted. Default is to used the predicted(simulationOutput).
@@ -162,7 +162,7 @@ plotQQunif <- function(simulationOutput, testUniformity = TRUE, testOutliers = T
 #' @param ... Additional arguments to plot / boxplot.
 #' @details The function plots residuals against a predictor (by default against the fitted value, extracted from the DHARMa object, or any other predictor).
 #'
-#' Outliers are highlighted in red as default (for information on definition and interpretation of outliers, see [testOutliers]). This can be changed by setting \code{options(DHARMaSignalColor = "red")} to a different color. See \code{getOption("DHARMaSignalColor")} for the current setting.
+#' Outliers are highlighted in red if the outliers test is significant (for information on definition and interpretation of outliers, see [testOutliers]). The color of the outliers can be changed by setting \code{options(DHARMaSignalColor = "red")} to a different color. See \code{getOption("DHARMaSignalColor")} for the current setting.
 #'
 #' To provide a visual aid for detecting deviations from uniformity in the y-direction, the plot function calculates an (optional) quantile regression of the residuals, by default for the 0.25, 0.5 and 0.75 quantiles. Since the residuals should be uniformly distributed for a correctly specified model, the theoretical expectations for these regressions are straight lines at 0.25, 0.5 and 0.75, shown as dashed black lines on the plot. However, even for a perfect model, some deviation from these expectations is to be expected by chance, especially if the sample size is small. The function therefore tests whether the deviation of the fitted quantile regression from the expectation is significant, using [testQuantiles]. If so, the significant quantile regression is highlighted in red (as default) and a warning is displayed in the plot.
 #'
@@ -241,7 +241,8 @@ plotResiduals <- function(simulationOutput, form = NULL, quantreg = NULL,
   }
   # smooth scatter
   else if (smoothScatter == TRUE) {
-    defaultCol = ifelse(res == 0 | res == 1, 2,blackcol)
+    defaultCol = ifelse(res == 0 | res == 1 &
+            testOutliers(simulationOutput, plot = F)$p.value < 0.05, 2,blackcol)
     do.call(graphics::smoothScatter, append(list(x = pred, y = res ,
                                                  ylim = c(0,1), axes = FALSE,
                     colramp = colorRampPalette(c("white", "darkgrey"))),a))
@@ -253,7 +254,8 @@ plotResiduals <- function(simulationOutput, form = NULL, quantreg = NULL,
   }
   # normal plot
   else{
-    defaultCol = ifelse(res == 0 | res == 1, 2,blackcol)
+    defaultCol = ifelse(res == 0 | res == 1 &
+        testOutliers(simulationOutput, plot = F)$p.value < 0.05, 2,blackcol)
     defaultPch = ifelse(res == 0 | res == 1, 8,1)
     a$col = checkDots("col", defaultCol, ...)
     a$pch = checkDots("pch", defaultPch, ...)
