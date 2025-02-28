@@ -212,8 +212,7 @@ plotResiduals <- function(simulationOutput, form = NULL, quantreg = NULL,
   if(!is.factor(pred)){
 
     if (rank == TRUE){
-      pred = rank(pred, ties.method = "average")
-      pred = pred / max(pred)
+      pred = rankTransform(pred)
       a$xlim = checkDots("xlim", c(0,1), ...)
     }
 
@@ -279,7 +278,8 @@ plotResiduals <- function(simulationOutput, form = NULL, quantreg = NULL,
       }, silent = TRUE)
     }else{
 
-      out = testQuantiles(res, pred, quantiles = quantiles, plot = FALSE)
+      out = testQuantiles(res, pred, quantiles = quantiles, plot = FALSE,
+                          rank = rank)
 
       if(is.na(out$p.value)){
         main = paste(main, "Some quantile regressions failed", sep = "\n")
