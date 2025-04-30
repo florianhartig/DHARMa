@@ -47,7 +47,7 @@ The quantile regression can take some time to calculate, especially for larger d
 If form is a factor, a boxplot will be plotted instead of a scatter plot. The distribution for each factor level should be uniformly distributed, so the box should go from 0.25 to 0.75, with the median line at 0.5 (within-group). To test if deviations from those expecations are significant, KS-tests per group and a Levene test for homogeneity of variances is performed. See \link{testCategorical} for details.
 }
 \note{
-If nObs > 10000, the scatter plot is replaced by graphics::smoothScatter
+If nObs > 10,000, the scatter plot is replaced by graphics::smoothScatter().
 
 The color for highlighting outliers and quantile lines/splines with significant tests can be changed by setting \code{options(DHARMaSignalColor = "red")} to a different color. See \code{getOption("DHARMaSignalColor")} for the current setting. This is convenient for a color-blind friendly display, since red and black are difficult for some people to distinguish.
 }
