@@ -297,11 +297,11 @@ GL(M)Ms often display over/underdispersion, which means that residual variance i
 -   Dispersion is a property of the residuals, i.e. you can detect dispersion problems only AFTER fitting the model. It doesn't make sense to look at the dispersion of your response variable
 -   Overdispersion is more common than underdispersion
 -   If overdispersion is present, the main effect is that confidence intervals tend to be too narrow, and p-values to small, leading to inflated type I error. The opposite is true for underdispersion, i.e. the main issue of underdispersion is that you loose power.
--   A common reason for overdispersion is a misspecified model. When overdispersion is detected, one should therefore first search for problems in the model specification (e.g. by plotting residuals against predictors with DHARMa), and only if this doesn't lead to success, overdispersion corrections such as individual-level random effects or changes in the distribution should be applied
+-   A common reason for overdispersion is a misspecified model. When overdispersion is detected, one should therefore first search for problems in the model specification (e.g. by plotting residuals against predictors with DHARMa), and only if this doesn't lead to success, overdispersion corrections such as observation-level random effects or changes in the distribution should be applied
 
 ### Residual patterns of over/underdispersion
 
-This this is how **overdispersion** looks like in the DHARMa residuals. Note that we get more residuals around 0 and 1, which means that more residuals are in the tail of distribution than would be expected under the fitted model.
+This is how **overdispersion** looks like in the DHARMa residuals. Note that we get more residuals around 0 and 1, which means that more residuals are in the tail of distribution than would be expected under the fitted model.
 
 ```{r}
 testData = createData(sampleSize = 200, overdispersion = 1.5, family = poisson())
@@ -314,7 +314,7 @@ plot(simulationOutput)
 
 If you see this pattern, note that overdispersion is often caused by model misfit. Thus, before moving to a GLM with variable dispersion (for count data this would typically be a negative binomial), you should check your model for misfit, e.g. by plotting residuals against all predictors using plotResiduals().
 
-Next, this is an example of underdispersion. Here, we get too many residuals around 0.5, which means that we are not getting as many residuals as we would expect in the tail of the distribution than expected from the fitted model.
+Next, this is an example of underdispersion. Here, we get too many residuals around 0.5, which means that we are not getting as many residuals as we would expect in the tail of the distribution from the fitted model.
 
 ```{r}
 testData = createData(sampleSize = 500, intercept=0, fixedEffects = 2,
@@ -329,7 +329,7 @@ plot(simulationOutput)
 
 If you see this pattern, note that a common reason for underdispersion is overfitting, i.e. your model is too complex. Other possible explanations to check for include zero-inflation (best to check by comparing to a ZIP model, but see also DHARMa::testZeroInflation), non-independence of the data (e.g. temporal autocorrelation, check via DHARMa:: testTemporalAutocorrelation) that your predictors can use to overfit, or that your data-generating process is simply not a Poisson process.
 
-From a technical side, underdispersion is not as concerning as over dispersion, as it will usually bias p-values to the conservative side, but if your goal is to get a good power, you may want to consider a simpler model. If that is not helping, you can move to a distribution for underdispersed count data (e.g. Conway-Maxwell-Poisson, generalized Poisson).
+From a technical side, underdispersion is not as concerning as overdispersion, as it will usually bias p-values to the conservative side, but if your goal is to get a good power, you may want to consider a simpler model. If that is not helping, you can move to a distribution for underdispersed count data (e.g. Conway-Maxwell-Poisson, generalized Poisson).
 
 ### Formal tests for over/underdispersion
 
@@ -348,8 +348,8 @@ testDispersion(simulationOutput)
 IMPORTANT INFO: we have made extensive simulations, which have shown that the various tests have certain advantages and disadvantages. The basic results are that:
 
 -   The most powerful and reliable test is option 3, but this costs a lot of time and is not available for all regression packages, as it requires that Pearson residuals are available
--   Option 2, the parametric Pearson-chi2 is fast if Pearson residuals are available, but based on a naive expectation of df (counts RE as 1 df) and the test statistic is thus biased towards underdispersion for mixed models. Similar to the df approximation, Bias increasing with the number of RE levels. When testing only for overdispersion (alternative = "greater"), this makes the test more conservative, but it also costs power.
--   The DHARMa default option 1 is fast, nearly unbiased (i.e. you can test under and overdispersion), and only slightly less powerful as test 3, PROVIDED that simulations are made conditional on the fitted REs. Note that the latter is not the DHARMa default, so you have to actively request conditional simulations, e.g. for lme4 by specifying re.form = NULL. Power compared to the parametric Pearson-chi2 test depends on the number of RE levels, it will be more powerful for typical number of RE levels.
+-   Option 2, the parametric Pearson-chi2, is fast if Pearson residuals are available, but based on a naive expectation of df (counts RE as 1 df) and the test statistic is thus biased towards underdispersion for mixed models. Similar to the df approximation, bias increases with the number of RE levels. When testing only for overdispersion (alternative = "greater"), this makes the test more conservative, but it also costs power.
+-   The DHARMa default option 1 is fast, nearly unbiased (i.e. you can test under and overdispersion), and only slightly less powerful as test 3, PROVIDED that simulations are made conditional on the fitted REs. Note that the latter is not the DHARMa default, so you have to actively request conditional simulations, e.g. for lme4 by specifying re.form = NULL. Power compared to the parametric Pearson-chi2 test depends on the number of RE levels, it will be more powerful for a typical number of RE levels.
 
 As support for these statements, here results of the simulation, which compares the uniform (KS) test with the standard simulation-based test (conditional and unconditional) and the Pearson-chi2 test (two-sided and greater) for an n=200 Poisson GLMM with 30 RE levels.
 
@@ -397,7 +397,7 @@ DHARMa also has a special test for zero-inflation, which compares the distributi
 testZeroInflation(simulationOutput)
 ```
 
-This test is likely better suited for detecting zero-inflation than the standard plot, but note that also overdispersion will lead to excess zeros, so only seeing too many zeros is not a reliable diagnostics for moving towards a zero-inflated model. A reliable differentiation between overdispersion and zero-inflation will usually only be possible when directly comparing alternative models, e.g. through residual comparison / model selection of a model with / without zero-inflation, or by simply fitting a model with zero-inflation and looking at the parameter estimate for the zero-inflation. A good option is the R package glmmTMB, which is also supported by DHARMa. We can use this to fit
+This test is likely better suited for detecting zero-inflation than the standard plot, but note that also overdispersion will lead to excess zeros, so only seeing too many zeros is not a reliable diagnostic for moving towards a zero-inflated model. A reliable differentiation between overdispersion and zero-inflation will usually only be possible when directly comparing alternative models, e.g. through residual comparison / model selection of a model with / without zero-inflation, or by simply fitting a model with zero-inflation and looking at the parameter estimate for the zero-inflation. A good option is the R package glmmTMB, which is also supported by DHARMa. We can use this to fit
 
 ```{r, eval= FALSE}
 # requires glmmTMB
@@ -600,7 +600,7 @@ We see various signals of overdispersion
 -   QQ: Outlier test significant
 -   Res \~ predicted: Quantile fits are spread out too far
 
-OK, so let's add overdispersion through an individual-level random effect
+OK, so let's add overdispersion through an observation-level random effect
 
 ```{r}
 mod2 <- glmer(cbind(N_parasitized, N_adult) ~ logDensity + (1|ID), data = data, family=binomial)
@@ -608,7 +608,7 @@ simulationOutput <- simulateResiduals(fittedModel = mod2)
 plot(simulationOutput)
 ```
 
-The overdispersion looks better, but you can see that the residuals still look a bit irregular (although tests are n.s.). The raw data looks a bit humped-shaped, so we might be tempted to add a quadratic effect.
+The overdispersion looks better, but you can see that the residuals still look a bit irregular (although tests are n.s.). The raw data looks a bit hump-shaped, so we might be tempted to add a quadratic effect.
 
 ```{r}
 mod3 <- glmer(cbind(N_parasitized, N_adult) ~ logDensity + I(logDensity^2) + (1|ID), data = data, family=binomial)
@@ -633,7 +633,7 @@ I guess you could use either Model 2 or 3 - the broader point is: increasing mod
 
 ## Owl example (count data)
 
-The next examples uses the fairly well known Owl dataset which is provided in glmmTMB (see ?Owls for more info about the data). The following shows a sequence of models, all checked with DHARMa. The example is discussed in a talk at ISEC 2018, see slides [here](https://www.slideshare.net/florianhartig/mon-c5hartig2493).
+The next example uses the fairly well known Owl dataset which is provided in glmmTMB (see ?Owls for more info about the data). The following shows a sequence of models, all checked with DHARMa. The example is discussed in a talk at ISEC 2018, see slides [here](https://www.slideshare.net/florianhartig/mon-c5hartig2493).
 
 ```{r, error=TRUE}
 library(glmmTMB)
@@ -710,7 +710,7 @@ Both models would be acceptable in terms of their fit to the data. Which one sho
 
 ## Poisson data
 
-The main concern in Poisson data is dispersion. See comments in the section on the dispersion test, in particular regarding the advantage of conditional simulations in this case. To address overdispersion, I would recommend to prefer the negative binomial model over observation-level random effects, because this mode will be easier to test in DHARMa and its dispersion can be easier modeled, e.g. with glmmTMB. The third option would be quasi models, but there are few advantages, except runtime. Note also that quasi models cannot be tested with DHARMa.
+The main concern in Poisson data is dispersion. See comments in the section on the dispersion test, in particular regarding the advantage of conditional simulations in this case. To address overdispersion, I would recommend to prefer the negative binomial model over observation-level random effects, because this model will be easier to test in DHARMa and its dispersion can be easier modeled, e.g. with glmmTMB. The third option would be quasi models, but there are few advantages, except runtime. Note also that quasi models cannot be tested with DHARMa.
 
 Once dispersion is adjusted, you should check for heteroscedasticity (via standard plot, also against all predictors), and for zero-inflation. As noted, zero-inflation tests are often negative, and rather show up as underdispersion. Work through the owl example above.
 
@@ -750,7 +750,7 @@ Even though the misfit is clearly visible if we plot the residuals against the m
 plotResiduals(simulationOutput, testData$Environment1, quantreg = TRUE)
 ```
 
-However, we can see the overdispersion arising from the misfit if we group our residuals, which basically transforms the 0/1 response in a k/n response.
+However, we can see the overdispersion arising from the misfit if we group our residuals, which basically transforms the 0/1 response to a k/n response.
 
 To show this, let's look at the dispersion test for the same model, once ungrouped (left), and grouped according to the variable group which was in the data (right).
 
@@ -795,7 +795,7 @@ plot(res3)
 
 In this case, the groups have a different mean than the fitted grand mean, and the misfit shows up in the residuals. Thus, what we are looking for in the grouping is variables that may correlate with the misfit.
 
-If you don't have a natural grouping variable, you can introduce arbitrary grouping variables, e.g. via discretising a predictor or the response (usually preferable), and grouping according to that, or via discretising space (e.g. group observation in spatial blocks). The pattern appears only, however, if the grouping variable correlates with the model error. Consider the following example:
+If you don't have a natural grouping variable, you can introduce arbitrary grouping variables, e.g. via discretizing a predictor or the response (usually preferable), and grouping according to that, or via discretizing space (e.g. group observation in spatial blocks). The pattern appears only, however, if the grouping variable correlates with the model error. Consider the following example:
 
 We create data and fit a model with a missing predictor (Environment2):
 
@@ -857,7 +857,7 @@ res3 = recalculateResiduals(res , group = grouping)
 plot(res3)
 ```
 
-**Conclusions:** if you see overdispersion or a pattern after grouping, it highlights a model error that is structured by group. As the pattern usually highlights a model misfit, rather than a dispersion problem akin to what happens in an overdispersed binomial (which has major impacts on p-values and CIs), I view this binomial grouping pattern as less critical. Likely, most conclusions will not change if you ignore the problem. Nevertheless, you should try to understand the reason for it. When the group is spatial, it could be the sign of residual spatial autocorrelation which could be addressed by a spatial RE or a spatial model. When grouped by a continuous variable, it could be the sign of a nonlinear effect.
+**Conclusions:** if you see overdispersion or a pattern after grouping, it highlights a model error that is structured by group. As the pattern usually highlights a model misfit, rather than a dispersion problem akin to what happens in an overdispersed binomial (which has major impacts on p-values and CIs), I view this binomial grouping pattern as less critical. Likely, most conclusions will not change if you ignore the problem. Nevertheless, you should try to understand the reason for it. When the group is spatial, it could be a sign of residual spatial autocorrelation which could be addressed by a spatial RE or a spatial model. When grouped by a continuous variable, it could be a sign of a nonlinear effect.
 
 # Supported packages and frameworks
 
@@ -879,11 +879,11 @@ If you absolutely want to use DHARMa without mgcViz, you should make sure that s
 
 ## gamm4
 
-Models fitted with gamm4 return a list that contains a lme4 object under the name "mer". You can test this object like an lme4 model, so e.g. simulateResiduals(myGamm4Model\$mer). All remarks regarding lme4 objects apply.
+Models fitted with gamm4 return a list that contains an lme4 object under the name "mer". You can test this object like an lme4 model, so e.g. simulateResiduals(myGamm4Model\$mer). All remarks regarding lme4 objects apply.
 
 ## glmmTMB
 
-glmmTMB is nearly fully supported since DHARMa 0.2.7 and glmmTMB 1.0.0. A remaining limitation is that you can't adjust whether simulation are conditional or not, so simulateResiduals(model, re.form = NULL) will have no effect, simulations will always be done from the full model.
+glmmTMB is nearly fully supported since DHARMa 0.2.7 and glmmTMB 1.0.0. A remaining limitation is that you can't adjust whether simulations are conditional or not, so simulateResiduals(model, re.form = NULL) will have no effect, simulations will always be done from the full model.
 
 ## spaMM
 
