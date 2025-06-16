@@ -6,7 +6,7 @@
 #' @param ... Further options for [plotResiduals]. Consider in particular parameters quantreg, rank and asFactor. xlab, ylab and main cannot be changed when using plot.DHARMa, but can be changed when using [plotResiduals].
 #' @param title The title for both panels (plotted via mtext, outer = TRUE).
 #'
-#' @details The function creates a plot with two panels. The left panel is a uniform qq plot (calling [plotQQunif]), and the right panel shows residuals against predicted values (calling [plotResiduals]), with outliers as a star/asterisk and highlighted in red if outliers' test is significant (default color but see Note).
+#' @details The function creates a plot with two panels. The left panel is a uniform qq plot (calling [plotQQunif]), and the right panel shows residuals against predicted values (calling [plotResiduals]), with outliers as a star/asterisk and highlighted in red if outlier test is significant (default color but see Note).
 #'
 #' Very briefly, we would expect that a correctly specified model shows:
 #'
