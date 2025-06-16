@@ -8,13 +8,13 @@ testPDistribution(x, plot = TRUE,
   main = "p distribution \\n expected is flat at 1", ...)
 }
 \arguments{
-\item{x}{vector of p values.}
+\item{x}{Vector of p values.}
 
-\item{plot}{should the values be plotted.}
+\item{plot}{Should the values be plotted.}
 
-\item{main}{title for the plot.}
+\item{main}{Title for the plot.}
 
-\item{...}{additional arguments to hist.}
+\item{...}{Additional arguments to hist.}
 }
 \description{
 Plot distribution of p-values.

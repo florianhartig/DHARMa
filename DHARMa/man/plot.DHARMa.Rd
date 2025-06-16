@@ -21,9 +21,9 @@ The function creates a plot with two panels. The left panel is a uniform qq plot
 
 Very briefly, we would expect that a correctly specified model shows:
 
-a) a straight 1-1 line, as well as non-significance of the displayed tests in the qq-plot (left) -> evidence for an the correct overall residual distribution (for more details on the interpretation of this plot, see \link{plotQQunif})
+a) a straight 1-1 line, as well as non-significance of the displayed tests in the qq-plot (left) -> evidence for a correct overall residual distribution (for more details on the interpretation of this plot, see \link{plotQQunif})
 
-b) visual homogeneity of residuals in both vertical and horizontal direction, as well as n.s. of quantile tests in the res ~ predictor plot (for more details on the interpretation of this plot, see \link{plotResiduals})
+b) visual homogeneity of residuals in both vertical and horizontal direction, as well as non-significance of quantile tests in the res ~ predictor plot (for more details on the interpretation of this plot, see \link{plotResiduals})
 
 Deviations from these expectations can be interpreted similar to a linear regression. See the vignette for detailed examples.
 

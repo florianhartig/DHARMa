@@ -7,11 +7,11 @@
 benchmarkRuntime(createModel, evaluationFunctions, n)
 }
 \arguments{
-\item{createModel}{a function that creates and returns a fitted model.}
+\item{createModel}{A function that creates and returns a fitted model.}
 
-\item{evaluationFunctions}{a list of functions that are to be evaluated on the fitted models.}
+\item{evaluationFunctions}{A list of functions that are to be evaluated on the fitted models.}
 
-\item{n}{number of replicates.}
+\item{n}{Number of replicates.}
 }
 \description{
 Benchmark runtimes of several functions

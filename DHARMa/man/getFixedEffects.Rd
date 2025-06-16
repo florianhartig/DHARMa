@@ -13,9 +13,9 @@ getFixedEffects(object, ...)
 \method{getFixedEffects}{MixMod}(object, ...)
 }
 \arguments{
-\item{object}{a fitted model.}
+\item{object}{A fitted model.}
 
-\item{...}{additional parameters.}
+\item{...}{Additional parameters.}
 }
 \description{
 A wrapper to extract fixed effects of a supported model.

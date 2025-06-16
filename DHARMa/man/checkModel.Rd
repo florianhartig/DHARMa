@@ -7,14 +7,14 @@
 checkModel(fittedModel, stop = F)
 }
 \arguments{
-\item{fittedModel}{a fitted model.}
+\item{fittedModel}{A fitted model.}
 
-\item{stop}{whether to throw an error if the model is not supported by DHARMa.}
+\item{stop}{Whether to throw an error if the model is not supported by DHARMa.}
 }
 \description{
 The function checks if the fitted model is supported by DHARMa, and if there are other issues that could create problems.
 }
 \details{
-The main purpose of this function os to check if the fitted model class is supported by DHARMa. The function additionally checks for properties of the fitted model that could create problems for calculating residuals or working with the resuls in DHARMa.
+The main purpose of this function is to check if the fitted model class is supported by DHARMa. The function additionally checks for properties of the fitted model that could create problems for calculating residuals or working with the results in DHARMa.
 }
 \keyword{internal}

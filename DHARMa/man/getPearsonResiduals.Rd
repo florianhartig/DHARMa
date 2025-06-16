@@ -13,9 +13,9 @@ getPearsonResiduals(object, ...)
 \method{getPearsonResiduals}{gam}(object, ...)
 }
 \arguments{
-\item{object}{a fitted model.}
+\item{object}{A fitted model.}
 
-\item{...}{additional parameters to be passed on, usually to the residual function of the respective model class.}
+\item{...}{Additional parameters to be passed on, usually to the residual function of the respective model class.}
 }
 \description{
 Wrapper to get the Pearson residuals of a fitted model.

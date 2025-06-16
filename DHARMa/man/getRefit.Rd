@@ -28,11 +28,11 @@ getRefit(object, newresp, ...)
 \method{getRefit}{phyloglm}(object, newresp, ...)
 }
 \arguments{
-\item{object}{a fitted model.}
+\item{object}{A fitted model.}
 
-\item{newresp}{the new response that should be used to refit the model.}
+\item{newresp}{The new response that should be used to refit the model.}
 
-\item{...}{additional parameters to be passed on to the refit or update class that is used to refit the model.}
+\item{...}{Additional parameters to be passed on to the refit or update class that is used to refit the model.}
 }
 \description{
 Wrapper to refit a fitted model.
