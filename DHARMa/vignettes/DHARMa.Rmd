@@ -8,7 +8,7 @@ output:
   pdf_document:
     toc: true
 vignette: >
-  %\VignetteIndexEntry{The import package}
+  %\VignetteIndexEntry{The DHARMa package}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 abstract: "The 'DHARMa' package uses a simulation-based approach to create  readily
