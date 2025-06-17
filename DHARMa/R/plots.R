@@ -172,9 +172,9 @@ plotQQunif <- function(simulationOutput, testUniformity = TRUE, testOutliers = T
 #'
 #' If form is a factor, a boxplot will be plotted instead of a scatter plot. The distribution for each factor level should be uniformly distributed, so the box should go from 0.25 to 0.75, with the median line at 0.5 (within-group). To test if deviations from those expecations are significant, KS-tests per group and a Levene test for homogeneity of variances is performed. See [testCategorical] for details.
 #'
-#' @note If nObs > 10000, the scatter plot is replaced by graphics::smoothScatter
+#' @note If nObs > 10,000, the scatter plot is replaced by graphics::smoothScatter().
 #'
-#' @note The color for highlighting outliers and quantile lines/splines with significant tests can be changed by setting \code{options(DHARMaSignalColor = "red")} to a different color. See \code{getOption("DHARMaSignalColor")} for the current setting. This is convenient for a color-blind friendly display, since red and black are difficult for some people to distinguish.
+#' The color for highlighting outliers and quantile lines/splines with significant tests can be changed by setting \code{options(DHARMaSignalColor = "red")} to a different color. See \code{getOption("DHARMaSignalColor")} for the current setting. This is convenient for a color-blind friendly display, since red and black are difficult for some people to distinguish.
 #'
 #' @return If quantile tests are performed, the function returns them invisibly.
 #'
@@ -200,7 +200,7 @@ plotResiduals <- function(simulationOutput, form = NULL, quantreg = NULL,
   ### outliers - plot or not issue #453
   simOut <- simulationOutput
   if(is.vector(simOut)) {
-    warning("Outliers will be not displayed in the plot when simulationOutputs are not DHARMa objects.")}
+    warning("Outliers will be not displayed in the plot when simulationOutput is not a DHARMa object.")}
 
   simulationOutput = ensureDHARMa(simulationOutput, convert = TRUE)
   res = simulationOutput$scaledResiduals
@@ -244,6 +244,7 @@ plotResiduals <- function(simulationOutput, form = NULL, quantreg = NULL,
   if(is.factor(pred)){
     testCategorical(simulationOutput = simulationOutput, catPred = pred,
                     quantiles = quantiles)
+
   } else{
 
     # color/shape outliers - related to issue #453 - see lines 200-204 above
@@ -279,7 +280,6 @@ plotResiduals <- function(simulationOutput, form = NULL, quantreg = NULL,
       axis(1)
       axis(2, at=c(0, quantiles, 1))
     }
-  }
 
   ##### Quantile regressions #####
 
