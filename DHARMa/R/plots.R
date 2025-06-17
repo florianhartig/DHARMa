@@ -261,7 +261,6 @@ plotResiduals <- function(simulationOutput, form = NULL, quantreg = NULL,
 
     # smooth scatter
     if (smoothScatter == TRUE) {
-
       do.call(graphics::smoothScatter, append(list(x = pred, y = res ,
                                                    ylim = c(0,1), axes = FALSE,
                                                    colramp = colorRampPalette(c("white", "darkgrey"))),a))
@@ -273,8 +272,6 @@ plotResiduals <- function(simulationOutput, form = NULL, quantreg = NULL,
     }
     # normal plot
     else{
-
-
       a$col = checkDots("col", defaultCol, ...)
       a$pch = checkDots("pch", defaultPch, ...)
       do.call(plot, append(list(res ~ pred, ylim = c(0,1), axes = FALSE), a))
