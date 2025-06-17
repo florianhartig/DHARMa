@@ -162,9 +162,9 @@ plotQQunif <- function(simulationOutput, testUniformity = TRUE, testOutliers = T
 #' @param ... Additional arguments to plot / boxplot.
 #' @details The function plots residuals against a predictor (by default against the fitted value, extracted from the DHARMa object, or any other predictor).
 #'
-#' Outliers are highlighted in red if the outlier test is significant (for information on definition and interpretation of outliers, see [testOutliers]). The color of the outliers can be changed by setting \code{options(DHARMaSignalColor = "red")} to a different color. See \code{getOption("DHARMaSignalColor")} for the current setting.
+#' Outliers are drawn if simulationOutput is a DHARMa object and highlighted in red if the outlier test is significant (for information on definition and interpretation of outliers, see [testOutliers]). See the note below to change the highlighting color of the outliers.
 #'
-#' To provide a visual aid for detecting deviations from uniformity in the y-direction, the plot function calculates an (optional) quantile regression of the residuals, by default for the 0.25, 0.5 and 0.75 quantiles. Since the residuals should be uniformly distributed for a correctly specified model, the theoretical expectations for these regressions are straight lines at 0.25, 0.5 and 0.75, shown as dashed black lines on the plot. However, even for a perfect model, some deviation from these expectations is to be expected by chance, especially if the sample size is small. The function therefore tests whether the deviation of the fitted quantile regression from the expectation is significant, using [testQuantiles]. If so, the significant quantile regression is highlighted in red (as default) and a warning is displayed in the plot.
+#' To provide a visual aid for detecting deviations from uniformity in the y-direction, the plot function calculates an (optional) quantile regression of the residuals, by default for the 0.25, 0.5 and 0.75 quantiles. Since the residuals should be uniformly distributed for a correctly specified model, the theoretical expectations for these regressions are straight lines at 0.25, 0.5 and 0.75, shown as dashed black lines on the plot. However, even for a perfect model, some deviation from these expectations is to be expected by chance, especially if the sample size is small. The function therefore tests whether the deviation of the fitted quantile regression from the expectation is significant, using [testQuantiles]. If so, the significant quantile regression is highlighted in red (as default) and a warning is displayed in the plot. See the note below to change the color of significant quantile lines.
 #'
 #' Overdispersion typically manifests itself as Q1 (0.25) deviating towards 0 and Q3 (0.75) deviating towards 1. Heteroskedasticity manifests itself as non-parallel quantile lines. To diagnose heteroskedasticity and overdispersion, it can be helpful to additionally plot the absolute deviation of the residuals from the mean expectation of 0.5, using the option absoluteDeviation = T. In this case, we would again expect Q1-Q3 quantile lines at 0.25, 0.5, 0.75, but greater dispersion (also locally in the case of heteroskedasticity) always manifests itself in deviations towards 1.
 #'
@@ -195,6 +195,12 @@ plotResiduals <- function(simulationOutput, form = NULL, quantreg = NULL,
   a$xlab = checkDots("xlab", ifelse(is.null(form), "Model predictions",
                                     gsub(".*[$]","",deparse(substitute(form)))), ...)
   if(rank == TRUE) a$xlab = paste(a$xlab, "(rank transformed)")
+
+
+  ### outliers - plot or not issue #453
+  simOut <- simulationOutput
+  if(is.vector(simOut)) {
+    warning("Outliers will be not displayed in the plot when simulationOutputs are not DHARMa objects.")}
 
   simulationOutput = ensureDHARMa(simulationOutput, convert = TRUE)
   res = simulationOutput$scaledResiduals
@@ -238,31 +244,44 @@ plotResiduals <- function(simulationOutput, form = NULL, quantreg = NULL,
   if(is.factor(pred)){
     testCategorical(simulationOutput = simulationOutput, catPred = pred,
                     quantiles = quantiles)
-  }
-  # smooth scatter
-  else if (smoothScatter == TRUE) {
-    defaultCol = ifelse(res == 0 | res == 1 &
-            testOutliers(simulationOutput, plot = F)$p.value < 0.05, 2,blackcol)
-    do.call(graphics::smoothScatter, append(list(x = pred, y = res ,
-                                                 ylim = c(0,1), axes = FALSE,
-                    colramp = colorRampPalette(c("white", "darkgrey"))),a))
-    points(pred[defaultCol == 2], res[defaultCol == 2],
-            col = .Options$DHARMaSignalColor, cex = 0.5)
+  } else{
 
-    axis(1)
-    axis(2, at=c(0, quantiles, 1))
-  }
-  # normal plot
-  else{
-    defaultCol = ifelse(res == 0 | res == 1 &
-        testOutliers(simulationOutput, plot = F)$p.value < 0.05, 2,blackcol)
-    defaultPch = ifelse(res == 0 | res == 1, 8,1)
-    a$col = checkDots("col", defaultCol, ...)
-    a$pch = checkDots("pch", defaultPch, ...)
-    do.call(plot, append(list(res ~ pred, ylim = c(0,1), axes = FALSE), a))
+    # color/shape outliers - related to issue #453 - see lines 200-204 above
+    if(is.vector(simOut)) {
+      defaultCol = blackcol
+      defaultPch = 1
+    } else {
+      p.outliers <- testOutliers(simulationOutput, plot = F)$p.value
+      defaultPch = ifelse(res == 0 | res == 1, 8, 1)
+      if(p.outliers < 0.05){
+      outlier <- res == 0 | res == 1
+      defaultCol <- ifelse(outlier == TRUE, .Options$DHARMaSignalColor, blackcol)
+      } else{ defaultCol = blackcol}
+    }
 
-    axis(1)
-    axis(2, at=c(0, quantiles, 1))
+    # smooth scatter
+    if (smoothScatter == TRUE) {
+
+      do.call(graphics::smoothScatter, append(list(x = pred, y = res ,
+                                                   ylim = c(0,1), axes = FALSE,
+                                                   colramp = colorRampPalette(c("white", "darkgrey"))),a))
+      points(pred[outlier], res[outlier],
+             col = .Options$DHARMaSignalColor, cex = 0.5)
+
+      axis(1)
+      axis(2, at=c(0, quantiles, 1))
+    }
+    # normal plot
+    else{
+
+
+      a$col = checkDots("col", defaultCol, ...)
+      a$pch = checkDots("pch", defaultPch, ...)
+      do.call(plot, append(list(res ~ pred, ylim = c(0,1), axes = FALSE), a))
+
+      axis(1)
+      axis(2, at=c(0, quantiles, 1))
+    }
   }
 
   ##### Quantile regressions #####
@@ -287,19 +306,19 @@ plotResiduals <- function(simulationOutput, form = NULL, quantreg = NULL,
         main = paste(main, "Some quantile regressions failed", sep = "\n")
         maincol = .Options$DHARMaSignalColor
       } else{
-      if(any(out$pvals < 0.05, na.rm = TRUE)){
-        main = paste(main, "Quantile deviations detected (red curves)", sep ="\n")
-        if(out$p.value <= 0.05){
-          main = paste(main, "Combined adjusted quantile test significant", sep ="\n")
+        if(any(out$pvals < 0.05, na.rm = TRUE)){
+          main = paste(main, "Quantile deviations detected (red curves)", sep ="\n")
+          if(out$p.value <= 0.05){
+            main = paste(main, "Combined adjusted quantile test significant", sep ="\n")
+          } else {
+            main = paste(main, "Combined adjusted quantile test n.s.", sep ="\n")
+          }
+          maincol = .Options$DHARMaSignalColor
         } else {
-          main = paste(main, "Combined adjusted quantile test n.s.", sep ="\n")
+          main = paste(main, "No significant problems detected", sep ="\n")
+          maincol = "black"
         }
-        maincol = .Options$DHARMaSignalColor
-      } else {
-        main = paste(main, "No significant problems detected", sep ="\n")
-        maincol = "black"
       }
-    }
 
       title(main = main, cex.main = 0.8,
             col.main = maincol)
