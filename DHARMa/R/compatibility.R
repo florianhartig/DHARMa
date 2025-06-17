@@ -25,10 +25,10 @@
 #'
 #' The function checks if the fitted model is supported by DHARMa, and if there are other issues that could create problems.
 #'
-#' @param fittedModel a fitted model.
-#' @param stop whether to throw an error if the model is not supported by DHARMa.
+#' @param fittedModel A fitted model.
+#' @param stop Whether to throw an error if the model is not supported by DHARMa.
 #'
-#' @details The main purpose of this function os to check if the fitted model class is supported by DHARMa. The function additionally checks for properties of the fitted model that could create problems for calculating residuals or working with the resuls in DHARMa.
+#' @details The main purpose of this function is to check if the fitted model class is supported by DHARMa. The function additionally checks for properties of the fitted model that could create problems for calculating residuals or working with the results in DHARMa.
 #'
 #'
 #' @keywords internal
@@ -74,8 +74,8 @@ weightsWarning = "Model was fit with prior weights. These will be ignored in the
 #' The purpose of this function is to safely extract the observed response (dependent variable) of the fitted model classes.
 #'
 #'
-#' @param object a fitted model.
-#' @param ... additional parameters.
+#' @param object A fitted model.
+#' @param ... Additional parameters.
 #'
 #' @example inst/examples/wrappersHelp.R
 #'
@@ -91,10 +91,10 @@ getObservedResponse <- function (object, ...) {
 #'
 #' @description Wrapper to simulate from a fitted model.
 #'
-#' @param object a fitted model.
-#' @param nsim number of simulations.
-#' @param type if simulations should be prepared for getQuantile or for refit.
-#' @param ... additional parameters to be passed on, usually to the simulate function of the respective model class.
+#' @param object A fitted model.
+#' @param nsim Number of simulations.
+#' @param type If simulations should be prepared for getQuantile or for refit.
+#' @param ... Additional parameters to be passed on, usually to the simulate function of the respective model class.
 #'
 #' @return A matrix with simulations.
 #' @example inst/examples/wrappersHelp.R
@@ -105,7 +105,7 @@ getObservedResponse <- function (object, ...) {
 #'
 #' Note: GLMM and other regression packages often differ in how simulations are produced, and which parameters can be used to modify this behavior.
 #'
-#' One important difference is how to modifiy which hierarchical levels are held constant, and which are re-simulated. In lme4, this is controlled by the re.form argument (see [lme4::simulate.merMod]). In glmmTMB, the package version 1.1.10 has a temporary solution to simulate conditional to all random effects (see [glmmTMB::set_simcodes] val = "fix", and issue [#888](https://github.com/glmmTMB/glmmTMB/issues/888) in glmmTMB GitHub repository. For other packages, please consult the help.
+#' One important difference is how to modify which hierarchical levels are held constant, and which are re-simulated. In lme4, this is controlled by the re.form argument (see [lme4::simulate.merMod]). In glmmTMB, the package version 1.1.10 has a temporary solution to simulate conditional to all random effects (see [glmmTMB::set_simcodes] val = "fix", and issue [#888](https://github.com/glmmTMB/glmmTMB/issues/888) in glmmTMB GitHub repository. For other packages, please consult the help.
 #'
 #' If the model was fit with weights and the respective model class does not include the weights in the simulations, getSimulations will throw a warning. The background is if weights are used on the likelihood directly, then what is fitted is effectively a pseudo likelihood, and there is no way to directly simulate from the specified likelihood. Whether or not residuals can be used in this case depends very much on what is tested and how weights are used. I'm sorry to say that it is hard to give a general recommendation, you have to consult someone that understands how weights are processed in the respective model class.
 #'
@@ -119,8 +119,8 @@ getSimulations <- function (object, nsim = 1 , type = c("normal", "refit"), ...)
 #'
 #' A wrapper to extract fixed effects of a supported model.
 #'
-#' @param object a fitted model.
-#' @param ... additional parameters.
+#' @param object A fitted model.
+#' @param ... Additional parameters.
 #' @example inst/examples/wrappersHelp.R
 #' @seealso [getObservedResponse], [getSimulations], [getRefit], [getFitted]
 #' @export
@@ -133,9 +133,9 @@ getFixedEffects <- function(object, ...){
 #'
 #' Wrapper to refit a fitted model.
 #'
-#' @param object a fitted model.
-#' @param newresp the new response that should be used to refit the model.
-#' @param ... additional parameters to be passed on to the refit or update class that is used to refit the model.
+#' @param object A fitted model.
+#' @param newresp The new response that should be used to refit the model.
+#' @param ... Additional parameters to be passed on to the refit or update class that is used to refit the model.
 #'
 #' @details The purpose of this wrapper is to standardize the refit of a model. The behavior of this function depends on the supplied model. When available, it uses the refit method, otherwise it will use update. For glmmTMB: since version 1.0, glmmTMB has a refit function, but this didn't work, so I switched back to this implementation, which is a hack based on the update function.
 #'
@@ -150,11 +150,11 @@ getRefit <- function (object, newresp, ...) {
 
 #' Get fitted/predicted values
 #'
-#' Wrapper to get the fitted/predicted response of model at the response scale.
+#' Wrapper to get the fitted/predicted response of the model at the response scale.
 #'
-#' The purpose of this wrapper is to standardize extract the fitted values, which is implemented via predict(model, type = "response") for most model classes.
+#' The purpose of this wrapper is to extract the fitted values, which is implemented via predict(model, type = "response") for most model classes.
 #'
-#' If you implement this function for a new model class, you should include an option to modifying which random effects (REs) are included in the predictions. If this option is not available, it is essential that predictions are provided marginally/unconditionally, i.e. without the RE estimates (because of https://github.com/florianhartig/DHARMa/issues/43), which corresponds to re-form = ~0 in lme4.
+#' If you implement this function for a new model class, you should include an option to modify which random effects (REs) are included in the predictions. If this option is not available, it is essential that predictions are provided marginally/unconditionally, i.e. without the RE estimates (because of https://github.com/florianhartig/DHARMa/issues/43), which corresponds to re-form = ~0 in lme4.
 #'
 #' @param object A fitted model.
 #' @param ... Additional parameters to be passed on, usually to the simulate function of the respective model class.
@@ -178,8 +178,8 @@ getFitted <- function (object, ...) {
 #'
 #' The purpose of this wrapper is to standardize the extraction of model residuals. Similar to some other functions, a key question is whether to calculate those conditional or unconditional on the fitted Random Effects.
 #'
-#' @param object a fitted model.
-#' @param ... additional parameters to be passed on, usually to the residual function of the respective model class.
+#' @param object A fitted model.
+#' @param ... Additional parameters to be passed on, usually to the residual function of the respective model class.
 #'
 #' @example inst/examples/wrappersHelp.R
 #'
@@ -200,8 +200,8 @@ getResiduals <- function (object, ...) {
 #'
 #' The purpose of this wrapper is to extract the Pearson residuals of a fitted model.
 #'
-#' @param object a fitted model.
-#' @param ... additional parameters to be passed on, usually to the residual function of the respective model class.
+#' @param object A fitted model.
+#' @param ... Additional parameters to be passed on, usually to the residual function of the respective model class.
 #'
 #' @example inst/examples/wrappersHelp.R
 #'
@@ -217,8 +217,8 @@ getPearsonResiduals <- function (object, ...) {
 #'
 #' Wrapper to get the family of a fitted model.
 #'
-#' @param object a fitted model.
-#' @param ... additional parameters to be passed on.
+#' @param object A fitted model.
+#' @param ... Additional parameters to be passed on.
 #'
 #' @seealso [getObservedResponse], [getSimulations], [getRefit], [getFixedEffects], [getFitted]
 #'

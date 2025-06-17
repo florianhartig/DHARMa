@@ -12,41 +12,41 @@ createData(sampleSize = 100, intercept = 0, fixedEffects = 1,
   factorResponse = FALSE, replicates = 1, hasNA = FALSE)
 }
 \arguments{
-\item{sampleSize}{sample size of the dataset.}
+\item{sampleSize}{Sample size of the dataset.}
 
-\item{intercept}{intercept (linear scale).}
+\item{intercept}{Intercept (linear scale).}
 
-\item{fixedEffects}{vector of fixed effects (linear scale).}
+\item{fixedEffects}{Vector of fixed effects (linear scale).}
 
-\item{quadraticFixedEffects}{vector of quadratic fixed effects (linear scale).}
+\item{quadraticFixedEffects}{Vector of quadratic fixed effects (linear scale).}
 
-\item{numGroups}{number of groups for the random effect.}
+\item{numGroups}{Number of groups for the random effect.}
 
-\item{randomEffectVariance}{variance of the random effect (intercept).}
+\item{randomEffectVariance}{Variance of the random effect (intercept).}
 
-\item{overdispersion}{if this is a numeric value, it will be used as the sd of a random normal variate that is added to the linear predictor. Alternatively, a random function can be provided that takes as input the linear predictor.}
+\item{overdispersion}{If this is a numeric value, it will be used as the sd of a random normal variate that is added to the linear predictor. Alternatively, a random function can be provided that takes as input the linear predictor.}
 
-\item{family}{family.}
+\item{family}{Family.}
 
-\item{scale}{scale if the distribution has a scale (e.g. sd for the Gaussian)}
+\item{scale}{Scale if the distribution has a scale (e.g. sd for the Gaussian)}
 
-\item{cor}{correlation between predictors.}
+\item{cor}{Correlation between predictors.}
 
-\item{roundPoissonVariance}{if set, this creates a uniform noise on the possion response. The aim of this is to create heteroscedasticity.}
+\item{roundPoissonVariance}{If set, this creates a uniform noise on the poisson response. The aim of this is to create heteroscedasticity.}
 
-\item{pZeroInflation}{probability to set any data point to zero.}
+\item{pZeroInflation}{Probability to set any data point to zero.}
 
 \item{binomialTrials}{Number of trials for the binomial. Only active if family == binomial.}
 
-\item{temporalAutocorrelation}{strength of temporalAutocorrelation.}
+\item{temporalAutocorrelation}{Strength of temporal autocorrelation.}
 
-\item{spatialAutocorrelation}{strength of spatial Autocorrelation.}
+\item{spatialAutocorrelation}{Strength of spatial autocorrelation.}
 
-\item{factorResponse}{should the response be transformed to a factor (inteded to be used for 0/1 data).}
+\item{factorResponse}{Should the response be transformed to a factor (intended to be used for 0/1 data).}
 
 \item{replicates}{number of datasets to create.}
 
-\item{hasNA}{should an NA be added to the environmental predictor (for test purposes).}
+\item{hasNA}{Should an NA be added to the environmental predictor (for test purposes).}
 }
 \description{
 This function creates synthetic dataset with various problems such as overdispersion, zero-inflation, etc.

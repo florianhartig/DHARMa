@@ -7,9 +7,9 @@
 \method{print}{DHARMa}(x, ...)
 }
 \arguments{
-\item{x}{an object with simulated residuals created by \link{simulateResiduals}.}
+\item{x}{An object with simulated residuals created by \link{simulateResiduals}.}
 
-\item{...}{optional arguments for compatibility with the generic function, no function implemented.}
+\item{...}{Optional arguments for compatibility with the generic function, no function implemented.}
 }
 \description{
 Print simulated residuals

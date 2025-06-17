@@ -9,7 +9,7 @@ vignette: >
   %\VignetteIndexEntry{DHARMa for Bayesians}
   \usepackage[utf8]{inputenc}
   %\VignetteEngine{knitr::rmarkdown}
-abstract: "The 'DHARMa' package uses a simulation-based approach to create  readily interpretable scaled (quantile) residuals for fitted (generalized) linear mixed models. This Vignette describes how to user DHARMa vor checking Bayesian models. It is recommended to read this AFTER the general DHARMa vignette, as all comments made there (in pacticular regarding the interpretation of the residuals) also apply to Bayesian models. \n \n \n"
+abstract: "The 'DHARMa' package uses a simulation-based approach to create  readily interpretable scaled (quantile) residuals for fitted (generalized) linear mixed models. This vignette describes how to use DHARMa for checking Bayesian models. It is recommended to read this AFTER the general DHARMa vignette, as all comments made there (in pacticular regarding the interpretation of the residuals) also apply to Bayesian models. \n \n \n"
 editor_options: 
   chunk_output_type: console
 ---
@@ -33,7 +33,7 @@ The main difference for a Bayesian user is that, unlike for users of directly su
 2. Read these in with the createDHARMa function
 3. Interpret those as described in the main vignette
 
-This is more easy as it sounds. For the major Bayesian samplers (e.g. BUGS, JAGS, STAN), it amounts to adding a block with data simulations to the model, and observing those during the MCMC sampling. Then, feed the simulations into DHARMa via createDHARMa, and all else will work pretty much the same as in the main vignette. 
+This is more easy than it sounds. For the major Bayesian samplers (e.g. BUGS, JAGS, STAN), it amounts to adding a block with data simulations to the model, and observing those during the MCMC sampling. Then, feed the simulations into DHARMa via createDHARMa, and all else will work pretty much the same as in the main vignette. 
 
 ## Example in Jags
 
@@ -90,13 +90,13 @@ In the created plots, you will see overdispersion, which is completely expected,
 As an exercise, you could now:
 
 * Add a RE
-* Account for overdispersion, e.g. via an OLRE or a negative Binomial
+* Account for overdispersion, e.g. via an OLRE or a negative binomial
 
 And check how the residuals improve. 
 
 # Conditional vs. unconditional simulations in hierarchical models
 
-The most important consideration in using DHARMa with Bayesian models is how to create the simulations. You can see in my jags code that the block
+The most important consideration in using DHARMa with Bayesian models is how to create the simulations. You can see in my Jags code that the block
 
 ```{r, eval=F}
   # Posterior predictive simulations 
@@ -105,7 +105,7 @@ The most important consideration in using DHARMa with Bayesian models is how to 
   }
 ```
 
-performs the posterior predictive simulations. Here, we just take the predicted lambda (mean perdictions) during the MCMC simulations and sample from the assumed distribution. This will works for any non-hierarchical model. 
+performs the posterior predictive simulations. Here, we just take the predicted lambda (mean predictions) during the MCMC simulations and sample from the assumed distribution. This will work for any non-hierarchical model. 
 
 When we move to hierarchical or multi-level models, including GLMMs, the issue of simulation becomes a bit more complicated. In a hierarchical model, there are several random processes that sit on top of each other. In the same way as explained in the main vignette at the point conditional / unconditional simulations, we will have to decide which of these random processes should be included in the posterior predictive simulations. 
 
@@ -137,13 +137,13 @@ The predictions lambda[i] now depend on a lower-level stochastic effect, which i
   }
 ```
 
-Essentially, you can remember that if you want full (uncoditional) simulations, you basically have to copy the entire likelihood of the hierarchical model, minus the priors, and sample along the hierarchical model structure. If you want to condition on a part of this structure, just cut the DAG at the point on which you want to condition on. 
+Essentially, you can remember that if you want full (unconditional) simulations, you basically have to copy the entire likelihood of the hierarchical model, minus the priors, and sample along the hierarchical model structure. If you want to condition on a part of this structure, just cut the DAG at the point on which you want to condition on. 
 
 # Statistical differences between Bayesian vs. MLE quantile residuals 
 
 A common question is if there are differences between Bayesian and MLE quantile residuals. 
 
-First of all, note that MLE and Bayesian quantile residuals are not exactly identical. The main difference is in how the simulation of the data under the fitted model are performed:
+First of all, note that MLE and Bayesian quantile residuals are not exactly identical. The main difference is in how the simulation of the data under the fitted model is performed:
 
 * For models fitted by MLE, simulations in DHARMa are with the MLE (point estimate)
 
