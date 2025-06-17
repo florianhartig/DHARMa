@@ -244,7 +244,6 @@ plotResiduals <- function(simulationOutput, form = NULL, quantreg = NULL,
   if(is.factor(pred)){
     testCategorical(simulationOutput = simulationOutput, catPred = pred,
                     quantiles = quantiles)
-
   } else{
 
     # color/shape outliers - related to issue #453 - see lines 200-204 above
@@ -280,7 +279,7 @@ plotResiduals <- function(simulationOutput, form = NULL, quantreg = NULL,
       axis(1)
       axis(2, at=c(0, quantiles, 1))
     }
-
+}
   ##### Quantile regressions #####
 
   main = checkDots("main", ifelse(is.null(form), paste(yAxis, "vs. predicted"), paste(yAxis, "Residual vs. predictor")), ...)
