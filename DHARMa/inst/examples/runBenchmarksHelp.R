@@ -20,7 +20,7 @@ plot(out)
 \dontrun{
 
 # running benchmark with varying control values
-out = runBenchmarks(returnStatistics, controlValues = c(0,0.5,1), nRep = 100)
+out = runBenchmarks(returnStatistics, controlValues = c(0,0.5,1), nRep = 10)
 plot(out)
 
 # running benchmark can be done using parallel cores

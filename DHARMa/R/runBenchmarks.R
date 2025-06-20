@@ -7,7 +7,7 @@
 #' @param nRep number of replicates per level of the controlValues
 #' @param alpha significance level
 #' @param parallel whether to use parallel computations. Possible values are F, T (sets the cores automatically to number of available cores -1), or an integer number for the number of cores that should be used for the cluster
-#' @param exportGlobal whether the global environment should be exported to the parallel nodes. This will use more memory. Set to true only if you function calculate statistics depends on other functions or global variables.
+#' @param export what to export to the parallel nodes. Only used of parallel is active. Options are "minimal" (only minimal functions), "all" (all in the current environment), "global" (all in the global environment)
 #' @param ... additional parameters to calculateStatistics
 #' @note The benchmark function in DHARMa are intended for development purposes, and for users that want to test / confirm the properties of functions in DHARMa. If you are running an applied data analysis, they are probably of little use.
 #' @return A object with list structure of class DHARMaBenchmark. Contains an entry simulations with a matrix of simulations, and an entry summaries with an list of summaries (significant (T/F), mean, p-value for KS-test uniformity). Can be plotted with [plot.DHARMaBenchmark]
@@ -15,20 +15,25 @@
 #' @author Florian Hartig
 #' @seealso [plot.DHARMaBenchmark]
 #' @example inst/examples/runBenchmarksHelp.R
-runBenchmarks <- function(calculateStatistics, controlValues = NULL, nRep = 10, alpha = 0.05, parallel = FALSE, exportGlobal = FALSE, ...){
+runBenchmarks <- function(calculateStatistics, controlValues = NULL, nRep = 10, alpha = 0.05, parallel = FALSE, export = c("minimal", "all", "global"), ...){
 
-
+  export = match.arg(export)
+  
   start_time <- Sys.time()
-
+  
+  control = controlValues
+  if(is.null(control)) control = "none"
+  control = as.data.frame(control)
+  control[rep(seq_len(nrow(control)), nRep), ]
+  
   # Sequential Simulations
 
   simulations = list()
 
   if(parallel == FALSE){
-    if(is.null(controlValues)) simulations[[1]] = replicate(nRep, calculateStatistics(), simplify = "array")
-    else for(j in 1:length(controlValues)){
-      simulations[[j]] = replicate(nRep, calculateStatistics(controlValues[j]), simplify = "array")
-    }
+    for(j in 1:length(control)){
+      simulations[[j]] = replicate(nRep, calculateStatistics(control[j,]), simplify = "array")
+  }
 
   # Parallel Simulations
 
@@ -44,37 +49,18 @@ runBenchmarks <- function(calculateStatistics, controlValues = NULL, nRep = 10, 
 
     cl <- parallel::makeCluster(cores)
 
-    # for each
-    # doParallel::registerDoParallel(cl)
-    #
-    # `%dopar%` <- foreach::`%dopar%`
-    #
-    # if(is.null(controlValues)) simulations[[1]] =  t(foreach::foreach(i=1:nRep, .packages=c("lme4", "DHARMa"), .combine = rbind) %dopar% calculateStatistics())
-    #
-    # else for(j in 1:length(controlValues)){
-    #   simulations[[j]] = t(foreach::foreach(i=1:nRep, .packages=c("lme4", "DHARMa"), .combine = rbind) %dopar% calculateStatistics(controlValues[j]))
-    # }
-    #
-    # End for each
-
-    # doesn't see to work properly
     loadedPackages = (.packages())
     parExectuer = function(x = NULL, control = NULL) calculateStatistics(control)
-    if (exportGlobal == TRUE) parallel::clusterExport(cl = cl, varlist = ls(envir = .GlobalEnv))
-    parallel::clusterExport(cl = cl, c("parExectuer", "calculateStatistics", "loadedPackages"), envir = environment())
+    
+    # managing export
+    if (exportGlobal == "global") parallel::clusterExport(cl = cl, varlist = ls(envir = .GlobalEnv))
+    else if (exportGlobal == "all") parallel::clusterExport(cl = cl, varlist = ls(envir = environment()))
+    else parallel::clusterExport(cl = cl, c("parExectuer", "calculateStatistics", "loadedPackages"), envir = environment())
+    
     parallel::clusterEvalQ(cl, {for(p in loadedPackages) library(p, character.only=TRUE)})
 
-    # parallel::clusterExport(cl = cl, varlist = ls(envir = .GlobalEnv))
-
-    # parallel::clusterExport(cl=cl,varlist = c("calculateStatistics"), envir=environment())
-    # parallel::clusterExport(cl=cl,varlist = c("controlValues", "alpha", envir=environment())
-
-    # parallel::clusterExport(cl=cl,varlist = c("calculateStatistics"), envir=environment())
-    # parallel::clusterExport(cl=cl,varlist = c("controlValues", "alpha", envir=environment())
-
-    if(is.null(controlValues)) simulations[[1]] = parallel::parSapply(cl, 1:nRep, parExectuer)
-    else for(j in 1:length(controlValues)){
-      simulations[[j]] = parallel::parSapply(cl, 1:nRep, parExectuer, control = controlValues[j])
+    for(j in 1:length(controlValues)){
+      simulations[[j]] = parallel::parSapply(cl, 1:nRep, parExectuer, control = controlValues[j,])
     }
 
     parallel::stopCluster(cl)
@@ -85,7 +71,7 @@ runBenchmarks <- function(calculateStatistics, controlValues = NULL, nRep = 10, 
   if(is.null(controlValues)) controlValues = c("N")
 
   nOutputs = nrow(simulations[[1]])
-  nControl = length(controlValues)
+  nControl = nrow(controlValues)
 
   # reducing the list of outputs to a data.frame
   x = Reduce(rbind, lapply(simulations, t))
