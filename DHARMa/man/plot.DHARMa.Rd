@@ -17,7 +17,7 @@
 This S3 function creates standard plots for the simulated residuals contained in an object of class DHARMa, using \link{plotQQunif} (left panel) and \link{plotResiduals} (right panel)
 }
 \details{
-The function creates a plot with two panels. The left panel is a uniform qq plot (calling \link{plotQQunif}), and the right panel shows residuals against predicted values (calling \link{plotResiduals}), with outliers highlighted in red (default color but see Note).
+The function creates a plot with two panels. The left panel is a uniform qq plot (calling \link{plotQQunif}), and the right panel shows residuals against predicted values (calling \link{plotResiduals}), with outliers as a star/asterisk and highlighted in red if outlier test is significant (default color but see Note).
 
 Very briefly, we would expect that a correctly specified model shows:
 
