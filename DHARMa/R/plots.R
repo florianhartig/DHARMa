@@ -196,12 +196,7 @@ plotResiduals <- function(simulationOutput, form = NULL, quantreg = NULL,
                                     gsub(".*[$]","",deparse(substitute(form)))), ...)
   if(rank == TRUE) a$xlab = paste(a$xlab, "(rank transformed)")
 
-
-  ### outliers - plot or not issue #453
   simOut <- simulationOutput
-  if(is.vector(simOut)) {
-    warning("Outliers will be not displayed in the plot when simulationOutput is not a DHARMa object.")}
-
   simulationOutput = ensureDHARMa(simulationOutput, convert = TRUE)
   res = simulationOutput$scaledResiduals
 
@@ -245,8 +240,9 @@ plotResiduals <- function(simulationOutput, form = NULL, quantreg = NULL,
                     quantiles = quantiles)
   } else{
 
-    # color/shape outliers - related to issue #453 - see lines 200-204 above
+    # color/shape outliers according to significance of outlier test, related to issue #453 
     if(is.vector(simOut)) {
+      message("Outliers will be not displayed in the plot when simulationOutput is not a DHARMa object.")
       defaultCol = blackcol
       defaultPch = 1
     } else {
