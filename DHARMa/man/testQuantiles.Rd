@@ -27,6 +27,8 @@ The function fits quantile regressions (via package qgam) on the residuals, and 
 A significant p-value for the splines means the fitted spline deviates from a flat line at the expected location (p-values of intercept and spline are combined via Benjamini & Hochberg adjustment to control the FDR)
 
 The p-values of the splines are combined into a total p-value via Benjamini & Hochberg adjustment to control the FDR.
+
+When plotting (plot = TRUE), the shaded gray areas indicate 95\% confidence intervals of the quantile estimates (1.96 * standard error).
 }
 \examples{
 testData = createData(sampleSize = 200, overdispersion = 0.0, randomEffectVariance = 0)
