@@ -55,9 +55,7 @@ dependencies = T, build_vignettes = T)
 ```
 Below the status of the automatic tests via GitHub Actions
 
-[![R-CMD-check](https://github.com/florianhartig/DHARMa/actions?query=branch%3Amaster/R-CMD-check/badge.svg)](https://github.com/florianhartig/DHARMa/actions?query=branch%3Amaster)
-
-
+[![R-CMD-check.yaml](https://github.com/florianhartig/DHARMa/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/florianhartig/DHARMa/actions/workflows/R-CMD-check.yaml)
 
 ### Development branches / older releases
 
