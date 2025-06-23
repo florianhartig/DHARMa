@@ -4,13 +4,15 @@
 \alias{testQuantiles}
 \title{Test for quantiles}
 \usage{
-testQuantiles(simulationOutput, predictor = NULL, quantiles = c(0.25, 0.5,
-  0.75), plot = TRUE)
+testQuantiles(simulationOutput, predictor = NULL, rank = TRUE,
+  quantiles = c(0.25, 0.5, 0.75), plot = TRUE)
 }
 \arguments{
 \item{simulationOutput}{an object of class DHARMa, either created via \link{simulateResiduals} for supported models or by \link{createDHARMa} for simulations created outside DHARMa, or a supported model. Providing a supported model directly is discouraged, because simulation settings cannot be changed in this case.}
 
 \item{predictor}{an optional predictor variable to be used, instead of the predicted response (default)}
+
+\item{rank}{If TRUE, the values provided in predictor will be rank transformed. This will usually make patterns easier to spot visually, especially if the distribution of the predictor is skewed. If form is a factor, this has no effect.}
 
 \item{quantiles}{the quantiles to be tested}
 

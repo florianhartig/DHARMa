@@ -75,11 +75,12 @@ testBivariateUniformity <- function(simulationOutput, alternative = c("two.sided
 #'
 #' This function tests
 #'
-#' @param simulationOutput An object of class DHARMa, either created via [simulateResiduals] for supported models or by [createDHARMa] for simulations created outside DHARMa, or a supported model. Providing a supported model directly is discouraged, because simulation settings cannot be changed in this case.
-#' @param predictor An optional predictor variable to be used, instead of the predicted response (default)
-#' @param quantiles The quantiles to be tested
-#' @param plot If TRUE, the function will create an additional plot
-#' @details The function fits quantile regressions (via package qgam) on the residuals, and compares their location to the expected location (because of the uniform distribution, the expected location is 0.5 for the 0.5 quantile).
+#' @param simulationOutput an object of class DHARMa, either created via [simulateResiduals] for supported models or by [createDHARMa] for simulations created outside DHARMa, or a supported model. Providing a supported model directly is discouraged, because simulation settings cannot be changed in this case.
+#' @param predictor an optional predictor variable to be used, instead of the predicted response (default)
+#' @param rank If TRUE, the values provided in predictor will be rank transformed. This will usually make patterns easier to spot visually, especially if the distribution of the predictor is skewed. If form is a factor, this has no effect.
+#' @param quantiles the quantiles to be tested
+#' @param plot if TRUE, the function will create an additional plot
+#' @details The function fits quantile regressions (via package qgam) on the residuals, and compares their location to the expected location (because of the uniform distributionm, the expected location is 0.5 for the 0.5 quantile).
 #'
 #' A significant p-value for the splines means the fitted spline deviates from a flat line at the expected location (p-values of intercept and spline are combined via Benjamini & Hochberg adjustment to control the FDR)
 #'
@@ -89,7 +90,8 @@ testBivariateUniformity <- function(simulationOutput, alternative = c("two.sided
 #' @example inst/examples/testQuantilesHelp.R
 #' @seealso [testResiduals], [testUniformity], [testOutliers], [testDispersion], [testZeroInflation], [testGeneric], [testTemporalAutocorrelation], [testSpatialAutocorrelation], [testQuantiles], [testCategorical]
 #' @export
-testQuantiles <- function(simulationOutput, predictor = NULL, quantiles = c(0.25,0.5,0.75), plot = TRUE){
+testQuantiles <- function(simulationOutput, predictor = NULL, rank = TRUE,
+                          quantiles = c(0.25,0.5,0.75), plot = TRUE){
 
   if(plot == F){
 
@@ -99,6 +101,7 @@ testQuantiles <- function(simulationOutput, predictor = NULL, quantiles = c(0.25
     simulationOutput = ensureDHARMa(simulationOutput, convert = T)
     res = simulationOutput$scaledResiduals
     pred = ensurePredictor(simulationOutput, predictor)
+    if (rank == TRUE) pred = rankTransform(pred)
 
     dat = data.frame(res = simulationOutput$scaledResiduals, pred = pred)
 
@@ -141,7 +144,7 @@ testQuantiles <- function(simulationOutput, predictor = NULL, quantiles = c(0.25
 
   } else if(plot == T) {
     out <- plotResiduals(simulationOutput = simulationOutput, form = predictor,
-                         quantiles = quantiles, quantreg = TRUE)
+                         rank = rank, quantiles = quantiles, quantreg = TRUE)
   }
   return(out)
 }

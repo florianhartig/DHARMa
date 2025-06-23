@@ -25,7 +25,7 @@
 \item{...}{Other arguments to be passed on to hist().}
 }
 \description{
-The function produces a histogram from a DHARMa output. Outliers are marked red.
+The function produces a histogram from a DHARMa output. Outliers are marked in red.
 }
 \details{
 The function calls hist() to create a histogram of the scaled residuals. Outliers are marked red as default but it can be changed by setting \code{options(DHARMaSignalColor = "red")} to a different color. See \code{getOption("DHARMaSignalColor")} for the current setting.

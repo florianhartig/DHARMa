@@ -3,9 +3,13 @@ NOTE: for more news about the package, see https://github.com/florianhartig/DHAR
 # DHARMa 0.4.8
 
 
-## Minor changes
 
-* fixing error in runBenchmarks
+
+## Bugfixes
+
+* fixing error in runBenchmarks.  
+* fixing inconsistency in testQuantiles() #465. Including rankTransform() help function.  
+
 
 
 # DHARMa 0.4.7

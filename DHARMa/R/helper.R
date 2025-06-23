@@ -169,3 +169,24 @@ securityAssertion <- function(context = "Not provided", stop = F){
   else stop(paste(generalMessage, context))
 }
 
+
+
+
+#' Rank transform predictors
+#'
+#' @param x predictor variable
+#'
+#' @keywords internal
+
+rankTransform <- function(x){
+  pred = rank(x, ties.method = "average")
+  pred = pred / max(pred)
+  return(pred)
+}
+#rankTransform(rnorm(10))
+#prs <- rankTransform(rnorm(10))
+
+
+
+
+
