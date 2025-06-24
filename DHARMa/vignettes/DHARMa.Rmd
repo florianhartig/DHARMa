@@ -710,7 +710,7 @@ Both models would be acceptable in terms of their fit to the data. Which one sho
 
 ## Poisson data
 
-The main concern in Poisson data is dispersion. See comments in the section on the dispersion test, in particular regarding the advantage of conditional simulations in this case. To address overdispersion, I would recommend to prefer the negative binomial model over observation-level random effects, because this model will be easier to test in DHARMa and its dispersion can be easier modeled, e.g. with glmmTMB. The third option would be quasi models, but there are few advantages, except runtime. Note also that quasi models cannot be tested with DHARMa.
+The main concern in Poisson data is dispersion. See comments in the section on the dispersion test, in particular regarding the advantage of conditional simulations in this case. To address overdispersion, I would recommend to prefer the negative binomial model over observation-level random effects, because this model will be easier to test in DHARMa and its dispersion can be easier modeled, e.g. with glmmTMB. The third option would be quasi models, which have shorter runtime but otherwise offer few advantages. Note also that quasi models cannot be tested with DHARMa.
 
 Once dispersion is adjusted, you should check for heteroscedasticity (via standard plot, also against all predictors), and for zero-inflation. As noted, zero-inflation tests are often negative, and rather show up as underdispersion. Work through the owl example above.
 

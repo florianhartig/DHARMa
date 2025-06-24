@@ -16,9 +16,9 @@ getFamily(object, ...)
 \method{getFamily}{phyloglm}(object, ...)
 }
 \arguments{
-\item{object}{A fitted model.}
+\item{object}{a fitted model.}
 
-\item{...}{Additional parameters to be passed on.}
+\item{...}{additional parameters to be passed on.}
 }
 \description{
 Wrapper to get the family of a fitted model.

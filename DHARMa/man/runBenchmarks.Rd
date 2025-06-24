@@ -8,22 +8,22 @@ runBenchmarks(calculateStatistics, controlValues = NULL, nRep = 10,
   alpha = 0.05, parallel = FALSE, exportGlobal = FALSE, ...)
 }
 \arguments{
-\item{calculateStatistics}{The statistics to be benchmarked. Should return one value, or a vector of values. If controlValues are given, must accept a parameter control}
+\item{calculateStatistics}{the statistics to be benchmarked. Should return one value, or a vector of values. If controlValues are given, must accept a parameter control.}
 
-\item{controlValues}{Optionally, a vector with a control parameter (e.g. to vary the strength of a problem the test should be specific to). See help for an example}
+\item{controlValues}{optionally, a vector with a control parameter (e.g. to vary the strength of a problem the test should be specific to). See help for an example.}
 
-\item{nRep}{Number of replicates per level of the controlValues}
+\item{nRep}{number of replicates per level of the controlValues.}
 
-\item{alpha}{Significance level}
+\item{alpha}{significance level.}
 
-\item{parallel}{Whether to use parallel computations. Possible values are F, T (sets the cores automatically to number of available cores -1), or an integer number for the number of cores that should be used for the cluster}
+\item{parallel}{whether to use parallel computations. Possible values are F, T (sets the cores automatically to number of available cores -1), or an integer number for the number of cores that should be used for the cluster.}
 
-\item{exportGlobal}{Whether the global environment should be exported to the parallel nodes. This will use more memory. Set to true only if your function calculate statistics depends on other functions or global variables.}
+\item{exportGlobal}{whether the global environment should be exported to the parallel nodes. This will use more memory. Set to true only if your function calculate statistics depends on other functions or global variables.}
 
-\item{...}{Additional parameters to calculateStatistics}
+\item{...}{additional parameters to calculateStatistics.}
 }
 \value{
-An object with list structure of class DHARMaBenchmark. Contains entry simulations with a matrix of simulations, and entry summaries with an list of summaries (significant (T/F), mean, p-value for KS-test uniformity). Can be plotted with \link{plot.DHARMaBenchmark}
+an object with list structure of class DHARMaBenchmark. Contains entry simulations with a matrix of simulations, and entry summaries with an list of summaries (significant (T/F), mean, p-value for KS-test uniformity). Can be plotted with \link{plot.DHARMaBenchmark}.
 }
 \description{
 This function runs statistical benchmarks, including Power / Type I error simulations for an arbitrary test with a control parameter

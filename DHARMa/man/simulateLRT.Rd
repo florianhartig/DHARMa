@@ -8,21 +8,21 @@ simulateLRT(m0, m1, n = 250, seed = 123, plot = TRUE,
   suppressWarnings = TRUE, saveModels = FALSE, ...)
 }
 \arguments{
-\item{m0}{Null Model.}
+\item{m0}{null model.}
 
-\item{m1}{Alternative Model.}
+\item{m1}{alternative model.}
 
-\item{n}{Number of simulations.}
+\item{n}{number of simulations.}
 
-\item{seed}{Random seed.}
+\item{seed}{random seed.}
 
-\item{plot}{Whether null distribution should be plotted.}
+\item{plot}{whether null distribution should be plotted.}
 
-\item{suppressWarnings}{Whether to suppress warnings that occur during refitting the models to simulated data. See details for explanations.}
+\item{suppressWarnings}{whether to suppress warnings that occur during refitting the models to simulated data. See details for explanations.}
 
-\item{saveModels}{Whether to save refitted models.}
+\item{saveModels}{whether to save refitted models.}
 
-\item{...}{Additional parameters to pass on to the simulate function of the model object. See \link{getSimulations} for details.}
+\item{...}{additional parameters to pass on to the simulate function of the model object. See \link{getSimulations} for details.}
 }
 \description{
 This function uses the DHARMa model wrappers to generate simulated likelihood ratio tests (LRTs) for (generalized) linear mixed models based on a parametric bootstrap. The motivation for using a simulated LRT rather than a standard ANOVA or AIC for model selection in mixed models is that df for mixed models are not clearly defined, thus standard ANOVA based on Chi2 statistics or AIC are unreliable, in particular for models with large contributions of REs to the likelihood.

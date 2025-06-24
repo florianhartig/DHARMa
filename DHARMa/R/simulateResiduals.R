@@ -2,15 +2,15 @@
 #'
 #' The function creates scaled residuals by simulating from the fitted model. Residuals can be extracted with [residuals.DHARMa]. See [testResiduals] for an overview of residual tests, [plot.DHARMa] for an overview of available plots.
 #'
-#' @param fittedModel A fitted model of a class supported by DHARMa.
-#' @param n Number of simulations. The smaller the number, the higher the stochastic error on the residuals. Also, for very small n, discretization artefacts can influence the tests. Default is 250, which is a relatively safe value. You can consider increasing to 1000 to stabilize the simulated values.
-#' @param refit If FALSE, new data will be simulated and scaled residuals will be created by comparing observed data with new data. If TRUE, the model will be refitted on the simulated data (parametric bootstrap), and scaled residuals will be created by comparing observed with refitted residuals.
-#' @param integerResponse If TRUE, noise will be added to the residuals to maintain uniform expectations for integer responses (such as Poisson or Binomial). Usually, the model will automatically detect the appropriate setting, so there is no need to adjust this setting.
-#' @param plot If TRUE, [plotResiduals] will be directly run after the residuals have been calculated.
-#' @param ... Further parameters to pass on to the simulate function of the model object. An important use of this is to specify whether simulations should be conditional on the current random effect estimates, e.g. via re.form. Note that not all models support syntax to specify conditional or unconditional simulations. See details and [getSimulations].
-#' @param seed The random seed to be used within DHARMa. The default setting, recommended for most users, is to keep the random seed on a fixed value of 123. This means that you will always get the same randomization and thus the same result when running the same code. If NULL, no new seed is set, but previous random state will be restored after simulation. If FALSE, no seed is set, and random state will not be restored. The latter two options are only recommended for simulation experiments. See vignette for details.
-#' @param method For refit = FALSE, the quantile randomization method is used. The two options implemented at the moment are probability integral transform (PIT-) residuals (current default), and the "traditional" randomization procedure, that was used in DHARMa until version 0.3.0. refit = T will always use "traditional", regardless of the value of method. For details, see [getQuantile].
-#' @param rotation Optional rotation of the residual space prior to calculating the quantile residuals. The main purpose of this is to account for residual covariance as created by temporal, spatial or phylogenetic autocorrelation. See details below, section *residual autocorrelation* as well as the help of [getQuantile] and, for a practical example, [testTemporalAutocorrelation].
+#' @param fittedModel a fitted model of a class supported by DHARMa.
+#' @param n number of simulations. The smaller the number, the higher the stochastic error on the residuals. Also, for very small n, discretization artefacts can influence the tests. Default is 250, which is a relatively safe value. You can consider increasing to 1000 to stabilize the simulated values.
+#' @param refit if FALSE, new data will be simulated and scaled residuals will be created by comparing observed data with new data. If TRUE, the model will be refitted on the simulated data (parametric bootstrap), and scaled residuals will be created by comparing observed with refitted residuals.
+#' @param integerResponse if TRUE, noise will be added to the residuals to maintain uniform expectations for integer responses (such as Poisson or Binomial). Usually, the model will automatically detect the appropriate setting, so there is no need to adjust this setting.
+#' @param plot if TRUE, [plotResiduals] will be directly run after the residuals have been calculated.
+#' @param ... further parameters to pass on to the simulate function of the model object. An important use of this is to specify whether simulations should be conditional on the current random effect estimates, e.g. via re.form. Note that not all models support syntax to specify conditional or unconditional simulations. See details and [getSimulations].
+#' @param seed the random seed to be used within DHARMa. The default setting, recommended for most users, is to keep the random seed on a fixed value of 123. This means that you will always get the same randomization and thus the same result when running the same code. If NULL, no new seed is set, but previous random state will be restored after simulation. If FALSE, no seed is set, and random state will not be restored. The latter two options are only recommended for simulation experiments. See vignette for details.
+#' @param method for refit = FALSE, the quantile randomization method is used. The two options implemented at the moment are probability integral transform (PIT-) residuals (current default), and the "traditional" randomization procedure, that was used in DHARMa until version 0.3.0. refit = T will always use "traditional", regardless of the value of method. For details, see [getQuantile].
+#' @param rotation optional rotation of the residual space prior to calculating the quantile residuals. The main purpose of this is to account for residual covariance as created by temporal, spatial or phylogenetic autocorrelation. See details below, section *residual autocorrelation* as well as the help of [getQuantile] and, for a practical example, [testTemporalAutocorrelation].
 #'
 #' @details There are a number of important considerations when simulating from a more complex (hierarchical) model:
 #'
@@ -34,7 +34,7 @@
 #'
 #' \strong{Residual autocorrelation}: a common problem is residual autocorrelation. Spatial, temporal and phylogenetic autocorrelation can be tested with [testSpatialAutocorrelation], [testTemporalAutocorrelation] and [testPhylogeneticAutocorrelation]. If simulations are unconditional, residual correlations will be maintained, even if the autocorrelation is addressed by an appropriate CAR structure. This may be a problem, because autocorrelation may create apparently systematic patterns in plots or tests such as [testUniformity]. To reduce this problem, either simulate conditional on fitted correlated REs, or rotate residuals via the rotation parameter (the latter will likely only work in approximately linear models). See [getQuantile] for details on the rotation.
 #'
-#' @return An S3 class of type "DHARMa". Implemented S3 functions include [plot.DHARMa], [print.DHARMa] and [residuals.DHARMa]. For other functions that can be used on a DHARMa object, see section "See Also" below.
+#' @return an S3 class of type "DHARMa". Implemented S3 functions include [plot.DHARMa], [print.DHARMa] and [residuals.DHARMa]. For other functions that can be used on a DHARMa object, see section "See Also" below.
 #'
 #' @seealso [testResiduals], [plotResiduals], [recalculateResiduals], [outliers]
 #'
@@ -181,9 +181,9 @@ simulateResiduals <- function(fittedModel, n = 250, refit = FALSE,
 #'
 #' The function checks if the simulated data seems fine.
 #'
-#' @param simulatedResponse The simulated response
-#' @param nObs Number of observations
-#' @param nSim Number of simulations
+#' @param simulatedResponse the simulated response
+#' @param nObs number of observations
+#' @param nSim number of simulations
 #'
 #' @keywords internal
 checkSimulations <- function(simulatedResponse, nObs, nSim){
@@ -206,14 +206,14 @@ checkSimulations <- function(simulatedResponse, nObs, nSim){
 #'
 #' The purpose of this function is to recalculate scaled residuals per group, based on the simulations done by [simulateResiduals].
 #'
-#' @param simulationOutput An object with simulated residuals created by [simulateResiduals].
-#' @param group Group of each data point.
-#' @param aggregateBy Function for the aggregation. Default is sum. This should only be changed if you know what you are doing. Note in particular that the expected residual distribution might not be flat anymore if you choose general functions, such as sd etc.
-#' @param sel An optional vector for selecting the data to be aggregated.
-#' @param seed The random seed to be used within DHARMa. The default setting, recommended for most users, is to keep the random seed on a fixed value of 123. This means that you will always get the same randomization and thus the same result when running the same code. NULL = no new seed is set, but previous random state will be restored after simulation. FALSE = no seed is set, and random state will not be restored. The latter two options are only recommended for simulation experiments. See vignette for details.
-#' @param method The quantile randomization method used. The two options implemented at the moment are probability integral transform (PIT-) residuals (current default), and the "traditional" randomization procedure, that was used in DHARMa until version 0.3.0. For details, see [getQuantile].
-#' @param rotation Optional rotation of the residual space to remove residual autocorrelation. See details in [simulateResiduals], section *residual auto-correlation* for an extended explanation, and [getQuantile] for syntax.
-#' @return An object of class DHARMa, similar to what is returned by [simulateResiduals], but with additional outputs for the new grouped calculations. Note that the relevant outputs are 2x in the object, the first is the grouped calculations (which is returned by $name access), and later another time, under identical name, the original output. Moreover, there is a function 'aggregateByGroup', which can be used to aggregate predictor variables in the same way as the variables calculated here.
+#' @param simulationOutput an object with simulated residuals created by [simulateResiduals].
+#' @param group group of each data point.
+#' @param aggregateBy function for the aggregation. Default is sum. This should only be changed if you know what you are doing. Note in particular that the expected residual distribution might not be flat anymore if you choose general functions, such as sd etc.
+#' @param sel an optional vector for selecting the data to be aggregated.
+#' @param seed the random seed to be used within DHARMa. The default setting, recommended for most users, is to keep the random seed on a fixed value of 123. This means that you will always get the same randomization and thus the same result when running the same code. NULL = no new seed is set, but previous random state will be restored after simulation. FALSE = no seed is set, and random state will not be restored. The latter two options are only recommended for simulation experiments. See vignette for details.
+#' @param method the quantile randomization method used. The two options implemented at the moment are probability integral transform (PIT-) residuals (current default), and the "traditional" randomization procedure, that was used in DHARMa until version 0.3.0. For details, see [getQuantile].
+#' @param rotation optional rotation of the residual space to remove residual autocorrelation. See details in [simulateResiduals], section *residual auto-correlation* for an extended explanation, and [getQuantile] for syntax.
+#' @return an object of class DHARMa, similar to what is returned by [simulateResiduals], but with additional outputs for the new grouped calculations. Note that the relevant outputs are 2x in the object, the first is the grouped calculations (which is returned by $name access), and later another time, under identical name, the original output. Moreover, there is a function 'aggregateByGroup', which can be used to aggregate predictor variables in the same way as the variables calculated here.
 #'
 #' @details The function aggregates the observed and simulated data per group according to the function provided by the aggregateBy option. DHARMa residuals are then calculated exactly as for a single data point (see [getQuantile] for details).
 #'

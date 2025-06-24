@@ -24,11 +24,11 @@ DHARMa.ecdf <- function (x)
 #'
 #' Calculates residual quantiles from a given simulation.
 #'
-#' @param simulations A matrix with simulations from a fitted model. Rows = observations, columns = replicate simulations.
-#' @param observed A vector with the observed data.
-#' @param integerResponse Is the response integer-valued? Only has an effect for method = "traditional".
-#' @param method The quantile randomization method used. See details.
-#' @param rotation Optional rotation of the residuals. You can either provide as a known or estimated covariance matrix (e.g. when fitting an AR1 model), or use the argument "estimated", in which case the residual covariance will be approximated by simulations. See comments in details.
+#' @param simulations a matrix with simulations from a fitted model. Rows = observations, columns = replicate simulations.
+#' @param observed a vector with the observed data.
+#' @param integerResponse is the response integer-valued? Only has an effect for method = "traditional".
+#' @param method the quantile randomization method used. See details.
+#' @param rotation optional rotation of the residuals. You can either provide as a known or estimated covariance matrix (e.g. when fitting an AR1 model), or use the argument "estimated", in which case the residual covariance will be approximated by simulations. See comments in details.
 #'
 #' @details The function calculates residual quantiles from the simulated data. For continuous distributions, this will simply be the value of the ecdf.
 #'
@@ -84,7 +84,7 @@ getQuantile <- function(simulations, observed, integerResponse,
           integerResponse = T
           message("Model family was recognized or set as continuous, but duplicate values were detected in the simulation - changing to integer residuals (see ?simulateResiduals for details).")
         } else {
-          message("Duplicate non-integer values found in the simulation. If this is because you are fitting a non-inter valued discrete response model, note that DHARMa does not perform appropriate randomization for such cases.")
+          message("Duplicate non-integer values found in the simulation. If this is because you are fitting a non-integer valued discrete response model, note that DHARMa does not perform appropriate randomization for such cases.")
         }
 
       }

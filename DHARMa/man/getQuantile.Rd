@@ -8,15 +8,15 @@ getQuantile(simulations, observed, integerResponse, method = c("PIT",
   "traditional"), rotation = NULL)
 }
 \arguments{
-\item{simulations}{A matrix with simulations from a fitted model. Rows = observations, columns = replicate simulations.}
+\item{simulations}{a matrix with simulations from a fitted model. Rows = observations, columns = replicate simulations.}
 
-\item{observed}{A vector with the observed data.}
+\item{observed}{a vector with the observed data.}
 
-\item{integerResponse}{Is the response integer-valued? Only has an effect for method = "traditional".}
+\item{integerResponse}{is the response integer-valued? Only has an effect for method = "traditional".}
 
-\item{method}{The quantile randomization method used. See details.}
+\item{method}{the quantile randomization method used. See details.}
 
-\item{rotation}{Optional rotation of the residuals. You can either provide as a known or estimated covariance matrix (e.g. when fitting an AR1 model), or use the argument "estimated", in which case the residual covariance will be approximated by simulations. See comments in details.}
+\item{rotation}{optional rotation of the residuals. You can either provide as a known or estimated covariance matrix (e.g. when fitting an AR1 model), or use the argument "estimated", in which case the residual covariance will be approximated by simulations. See comments in details.}
 }
 \description{
 Calculates residual quantiles from a given simulation.

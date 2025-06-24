@@ -2,15 +2,15 @@
 #'
 #' This function runs statistical benchmarks, including Power / Type I error simulations for an arbitrary test with a control parameter
 #'
-#' @param controlValues Optionally, a vector with a control parameter (e.g. to vary the strength of a problem the test should be specific to). See help for an example
-#' @param calculateStatistics The statistics to be benchmarked. Should return one value, or a vector of values. If controlValues are given, must accept a parameter control
-#' @param nRep Number of replicates per level of the controlValues
-#' @param alpha Significance level
-#' @param parallel Whether to use parallel computations. Possible values are F, T (sets the cores automatically to number of available cores -1), or an integer number for the number of cores that should be used for the cluster
-#' @param exportGlobal Whether the global environment should be exported to the parallel nodes. This will use more memory. Set to true only if your function calculate statistics depends on other functions or global variables.
-#' @param ... Additional parameters to calculateStatistics
+#' @param controlValues optionally, a vector with a control parameter (e.g. to vary the strength of a problem the test should be specific to). See help for an example.
+#' @param calculateStatistics the statistics to be benchmarked. Should return one value, or a vector of values. If controlValues are given, must accept a parameter control.
+#' @param nRep number of replicates per level of the controlValues.
+#' @param alpha significance level.
+#' @param parallel whether to use parallel computations. Possible values are F, T (sets the cores automatically to number of available cores -1), or an integer number for the number of cores that should be used for the cluster.
+#' @param exportGlobal whether the global environment should be exported to the parallel nodes. This will use more memory. Set to true only if your function calculate statistics depends on other functions or global variables.
+#' @param ... additional parameters to calculateStatistics.
 #' @note The benchmark functions in DHARMa are intended for development purposes, and for users that want to test / confirm the properties of functions in DHARMa. If you are running an applied data analysis, they are probably of little use.
-#' @return An object with list structure of class DHARMaBenchmark. Contains entry simulations with a matrix of simulations, and entry summaries with an list of summaries (significant (T/F), mean, p-value for KS-test uniformity). Can be plotted with [plot.DHARMaBenchmark]
+#' @return an object with list structure of class DHARMaBenchmark. Contains entry simulations with a matrix of simulations, and entry summaries with an list of summaries (significant (T/F), mean, p-value for KS-test uniformity). Can be plotted with [plot.DHARMaBenchmark].
 #' @export
 #' @author Florian Hartig
 #' @seealso [plot.DHARMaBenchmark]
@@ -131,8 +131,8 @@ runBenchmarks <- function(calculateStatistics, controlValues = NULL, nRep = 10, 
 #'
 #' The function plots the result of an object of class DHARMaBenchmark, created by [runBenchmarks].
 #'
-#' @param x Object of class DHARMaBenchmark, created by [runBenchmarks].
-#' @param ... Parameters to pass to the plot function.
+#' @param x object of class DHARMaBenchmark, created by [runBenchmarks].
+#' @param ... parameters to pass to the plot function.
 #'
 #' @details The function will create two types of plots, depending on whether the run contains only a single value (or no value) of the control parameter, or whether a vector of control values is provided:
 #'
@@ -197,10 +197,10 @@ plotMultipleHist <- function(x){
 
 
 #' Plot distribution of p-values.
-#' @param x Vector of p values.
-#' @param plot Should the values be plotted.
-#' @param main Title for the plot.
-#' @param ... Additional arguments to hist.
+#' @param x vector of p values.
+#' @param plot should the values be plotted.
+#' @param main title for the plot.
+#' @param ... additional arguments to hist.
 #' @author Florian Hartig
 testPDistribution <- function(x, plot = TRUE, main = "p distribution \n expected is flat at 1", ...){
   out = suppressWarnings(ks.test(x, 'punif'))
@@ -245,9 +245,9 @@ generateGenerator <- function(mod){
 
 
 #' Benchmark runtimes of several functions
-#' @param createModel A function that creates and returns a fitted model.
-#' @param evaluationFunctions A list of functions that are to be evaluated on the fitted models.
-#' @param n Number of replicates.
+#' @param createModel a function that creates and returns a fitted model.
+#' @param evaluationFunctions a list of functions that are to be evaluated on the fitted models.
+#' @param n number of replicates.
 #' @details This is a small helper function designed to benchmark runtimes of several operations that are to be performed on a list of fitted models. In the example, this is used to benchmark the runtimes of several DHARMa tests.
 #' @author Florian Hartig
 #' @example inst/examples/benchmarkRuntimeHelp.R

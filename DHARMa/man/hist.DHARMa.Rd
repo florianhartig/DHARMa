@@ -10,19 +10,19 @@
   xlab = "Residuals (outliers are marked red)", cex.main = 1, ...)
 }
 \arguments{
-\item{x}{A DHARMa simulation output (class DHARMa)}
+\item{x}{a DHARMa simulation output (class DHARMa).}
 
-\item{breaks}{Breaks for hist() function.}
+\item{breaks}{breaks for hist() function.}
 
-\item{col}{Color for histogram bars.}
+\item{col}{color for histogram bars.}
 
-\item{main}{Plot title.}
+\item{main}{plot title.}
 
-\item{xlab}{Plot x-axis label.}
+\item{xlab}{plot x-axis label.}
 
-\item{cex.main}{Plot cex.main.}
+\item{cex.main}{plot cex.main.}
 
-\item{...}{Other arguments to be passed on to hist().}
+\item{...}{other arguments to be passed on to hist().}
 }
 \description{
 The function produces a histogram from a DHARMa output. Outliers are marked in red.

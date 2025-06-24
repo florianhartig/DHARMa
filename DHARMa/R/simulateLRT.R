@@ -4,14 +4,14 @@
 #'
 #' Interpretation of the results as in a normal LRT: the null hypothesis is that M0 is correct, the test checks if the increase in likelihood of M1 is higher than expected, using data simulated from M0.
 #'
-#' @param m0 Null Model.
-#' @param m1 Alternative Model.
-#' @param n Number of simulations.
-#' @param seed Random seed.
-#' @param plot Whether null distribution should be plotted.
-#' @param suppressWarnings Whether to suppress warnings that occur during refitting the models to simulated data. See details for explanations.
-#' @param saveModels Whether to save refitted models.
-#' @param ... Additional parameters to pass on to the simulate function of the model object. See [getSimulations] for details.
+#' @param m0 null model.
+#' @param m1 alternative model.
+#' @param n number of simulations.
+#' @param seed random seed.
+#' @param plot whether null distribution should be plotted.
+#' @param suppressWarnings whether to suppress warnings that occur during refitting the models to simulated data. See details for explanations.
+#' @param saveModels whether to save refitted models.
+#' @param ... additional parameters to pass on to the simulate function of the model object. See [getSimulations] for details.
 #'
 #' @details The function performs a simulated LRT, which works as follows:
 #'

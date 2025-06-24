@@ -10,9 +10,9 @@ testPhylogeneticAutocorrelation(simulationOutput, tree,
 \arguments{
 \item{simulationOutput}{an object of class DHARMa, either created via \link{simulateResiduals} for supported models or via \link{createDHARMa} for simulations created outside DHARMa, or a supported model. Providing a supported model directly is discouraged, because simulation settings cannot be changed in this case.}
 
-\item{tree}{A phylogenetic tree object.}
+\item{tree}{a phylogenetic tree object.}
 
-\item{alternative}{A character string specifying whether the test should test if observations are "greater", "less" or "two.sided" compared to the simulated null hypothesis of no phylogenetic correlation.}
+\item{alternative}{a character string specifying whether the test should test if observations are "greater", "less" or "two.sided" compared to the simulated null hypothesis of no phylogenetic correlation.}
 }
 \description{
 This function performs a Moran's I test for phylogenetic autocorrelation on the calculated quantile residuals.
@@ -24,7 +24,7 @@ The function performs Moran.I test from the package ape on the DHARMa residuals,
 Standard DHARMa simulations from models with (temporal / spatial / phylogenetic) conditional autoregressive terms will still have the respective temporal / spatial / phylogenetic correlation in the DHARMa residuals, unless the package you are using is modelling the autoregressive terms as explicit REs and is able to simulate conditional on the fitted REs. This has two consequences:
 \enumerate{
 \item If you check the residuals for such a model, they will still show significant autocorrelation, even if the model fully accounts for this structure.
-\item Because the DHARMa residuals for such a model are not statistically independent any more, other tests (e.g. dispersion, uniformity) may have inflated type I error, i.e. you will have a higher likelihood of spurious residual problems.
+\item Because the DHARMa residuals for such a model are not statistically independent anymore, other tests (e.g. dispersion, uniformity) may have inflated type I error, i.e. you will have a higher likelihood of spurious residual problems.
 }
 
 There are three (non-exclusive) routes to address these issues when working with spatial / temporal / phylogenetic autoregressive models:

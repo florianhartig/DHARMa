@@ -9,23 +9,23 @@ plotResiduals(simulationOutput, form = NULL, quantreg = NULL,
   quantiles = c(0.25, 0.5, 0.75), absoluteDeviation = FALSE, ...)
 }
 \arguments{
-\item{simulationOutput}{An object, usually a DHARMa object, from which residual values can be extracted. Alternatively, a vector with residuals or a fitted model can be provided, which will then be transformed into a DHARMa object.}
+\item{simulationOutput}{an object, usually a DHARMa object, from which residual values can be extracted. Alternatively, a vector with residuals or a fitted model can be provided, which will then be transformed into a DHARMa object.}
 
-\item{form}{Optional predictor against which the residuals should be plotted. Default is to use the predicted(simulationOutput).}
+\item{form}{optional predictor against which the residuals should be plotted. Default is to use the predicted(simulationOutput).}
 
-\item{quantreg}{Whether to perform a quantile regression based on \link{testQuantiles} or a smooth spline around the mean. Default NULL chooses T for nObs < 2000, and F otherwise.}
+\item{quantreg}{whether to perform a quantile regression based on \link{testQuantiles} or a smooth spline around the mean. Default NULL chooses T for nObs < 2000, and F otherwise.}
 
-\item{rank}{If T, the values provided in form will be rank transformed. This will usually make patterns easier to spot visually, especially if the distribution of the predictor is skewed. If form is a factor, this has no effect.}
+\item{rank}{if T, the values provided in form will be rank transformed. This will usually make patterns easier to spot visually, especially if the distribution of the predictor is skewed. If form is a factor, this has no effect.}
 
-\item{asFactor}{Should a numeric predictor provided in form be treated as a factor. Default is to choose this for < 10 unique values, as long as enough predictions are available to draw a boxplot.}
+\item{asFactor}{should a numeric predictor provided in form be treated as a factor. Default is to choose this for < 10 unique values, as long as enough predictions are available to draw a boxplot.}
 
-\item{smoothScatter}{If T, a smooth scatter plot will plotted instead of a normal scatter plot. This makes sense when the number of residuals is very large. Default NULL chooses T for nObs > 10000, and F otherwise.}
+\item{smoothScatter}{if T, a smooth scatter plot will plotted instead of a normal scatter plot. This makes sense when the number of residuals is very large. Default NULL chooses T for nObs > 10000, and F otherwise.}
 
-\item{quantiles}{For a quantile regression, which quantiles should be plotted. Default is 0.25, 0.5, 0.75.}
+\item{quantiles}{for a quantile regression, which quantiles should be plotted. Default is 0.25, 0.5, 0.75.}
 
-\item{absoluteDeviation}{If T, switch from displaying normal quantile residuals to absolute deviation from the mean expectation of 0.5 (calculated as 2 * abs(res - 0.5)). The purpose of this is to test explicitly for heteroskedasticity, see details.}
+\item{absoluteDeviation}{if T, switch from displaying normal quantile residuals to absolute deviation from the mean expectation of 0.5 (calculated as 2 * abs(res - 0.5)). The purpose of this is to test explicitly for heteroskedasticity, see details.}
 
-\item{...}{Additional arguments to plot / boxplot.}
+\item{...}{additional arguments to plot / boxplot.}
 }
 \value{
 If quantile tests are performed, the function returns them invisibly.

@@ -7,14 +7,14 @@
 \method{plot}{DHARMa}(x, title = "DHARMa residual", ...)
 }
 \arguments{
-\item{x}{An object of class DHARMa with simulated residuals created by \link{simulateResiduals}.}
+\item{x}{an object of class DHARMa with simulated residuals created by \link{simulateResiduals}.}
 
-\item{title}{The title for both panels (plotted via mtext, outer = TRUE).}
+\item{title}{the title for both panels (plotted via mtext, outer = TRUE).}
 
-\item{...}{Further options for \link{plotResiduals}. Consider in particular parameters quantreg, rank and asFactor. xlab, ylab and main cannot be changed when using plot.DHARMa, but can be changed when using \link{plotResiduals}.}
+\item{...}{further options for \link{plotResiduals}. Consider in particular parameters quantreg, rank and asFactor. xlab, ylab and main cannot be changed when using plot.DHARMa, but can be changed when using \link{plotResiduals}.}
 }
 \description{
-This S3 function creates standard plots for the simulated residuals contained in an object of class DHARMa, using \link{plotQQunif} (left panel) and \link{plotResiduals} (right panel)
+This S3 function creates standard plots for the simulated residuals contained in an object of class DHARMa, using \link{plotQQunif} (left panel) and \link{plotResiduals} (right panel).
 }
 \details{
 The function creates a plot with two panels. The left panel is a uniform qq plot (calling \link{plotQQunif}), and the right panel shows residuals against predicted values (calling \link{plotResiduals}), with outliers as a star/asterisk and highlighted in red if outlier test is significant (default color but see Note).

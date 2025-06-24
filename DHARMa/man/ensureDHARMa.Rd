@@ -7,17 +7,14 @@
 ensureDHARMa(simulationOutput, convert = FALSE)
 }
 \arguments{
-\item{simulationOutput}{A DHARMa simulation output or an object that can be converted into a DHARMa simulation output}
+\item{simulationOutput}{a DHARMa simulation output or an object that can be converted into a DHARMa simulation output.}
 
-\item{convert}{If TRUE, attempts to convert model + numeric to DHARMa, if "Model", converts only supported models to DHARMa}
+\item{convert}{if TRUE, attempts to convert model + numeric to DHARMa, if "Model", converts only supported models to DHARMa.}
 }
 \value{
-An object of class DHARMa
+an object of class DHARMa.
 }
 \description{
 Ensures that an object is of class DHARMa
-}
-\details{
-The
 }
 \keyword{internal}

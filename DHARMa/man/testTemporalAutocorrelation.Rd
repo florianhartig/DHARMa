@@ -12,29 +12,29 @@ testTemporalAutocorrelation(simulationOutput, time,
 
 \item{time}{the time, in the same order as the data points.}
 
-\item{alternative}{a character string specifying whether the test should test if observations are "greater", "less" or "two.sided" compared to the simulated null hypothesis}
+\item{alternative}{a character string specifying whether the test should test if observations are "greater", "less" or "two.sided" compared to the simulated null hypothesis.}
 
-\item{plot}{whether to plot output}
+\item{plot}{whether to plot output.}
 }
 \description{
-This function performs a standard test for temporal autocorrelation on the simulated residuals
+This function performs a standard test for temporal autocorrelation on the simulated residuals.
 }
 \details{
-The function performs a Durbin-Watson test on the uniformly scaled residuals, and plots the residuals against time. The DB test was originally be designed for normal residuals. In simulations, I didn't see a problem with this setting though. The alternative is to transform the uniform residuals to normal residuals and perform the DB test on those.
+The function performs a Durbin-Watson test on the uniformly scaled residuals, and plots the residuals against time. The DB test was originally designed for normal residuals. In simulations, I didn't see a problem with this setting though. The alternative is to transform the uniform residuals to normal residuals and perform the DB test on those.
 
 Testing for temporal autocorrelation requires unique time values - if you have several observations per time value, either use \link{recalculateResiduals} function to aggregate residuals per time step, or extract the residuals from the fitted object, and plot / test each of them independently for temporally repeated subgroups (typical choices would be location / subject etc.). Note that the latter must be done by hand, outside testTemporalAutocorrelation.
 }
 \note{
-Standard DHARMa simulations from models with (temporal / spatial / phylogenetic) conditional autoregressive terms will still have the respective temporal / spatial / phylogenetic correlation in the DHARMa residuals, unless the package you are using is modelling the autoregressive terms as explicit REs and is able to simulate conditional on the fitted REs. This has two consequences
+Standard DHARMa simulations from models with (temporal / spatial / phylogenetic) conditional autoregressive terms will still have the respective temporal / spatial / phylogenetic correlation in the DHARMa residuals, unless the package you are using is modelling the autoregressive terms as explicit REs and is able to simulate conditional on the fitted REs. This has two consequences:
 \enumerate{
 \item If you check the residuals for such a model, they will still show significant autocorrelation, even if the model fully accounts for this structure.
-\item Because the DHARMa residuals for such a model are not statistically independent any more, other tests (e.g. dispersion, uniformity) may have inflated type I error, i.e. you will have a higher likelihood of spurious residual problems.
+\item Because the DHARMa residuals for such a model are not statistically independent anymore, other tests (e.g. dispersion, uniformity) may have inflated type I error, i.e. you will have a higher likelihood of spurious residual problems.
 }
 
 There are three (non-exclusive) routes to address these issues when working with spatial / temporal / other autoregressive models:
 \enumerate{
-\item Simulate conditional on the fitted CAR structures (see conditional simulations in the help of \link{simulateResiduals})
-\item Rotate simulations prior to residual calculations (see parameter rotation in \link{simulateResiduals})
+\item Simulate conditional on the fitted CAR structures (see conditional simulations in the help of \link{simulateResiduals}).
+\item Rotate simulations prior to residual calculations (see parameter rotation in \link{simulateResiduals}).
 \item Use custom tests / plots that explicitly compare the correlation structure in the simulated data to the correlation structure in the observed data.
 }
 }

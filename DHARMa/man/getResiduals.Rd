@@ -13,9 +13,9 @@ getResiduals(object, ...)
 \method{getResiduals}{MixMod}(object, ...)
 }
 \arguments{
-\item{object}{A fitted model.}
+\item{object}{a fitted model.}
 
-\item{...}{Additional parameters to be passed on, usually to the residual function of the respective model class.}
+\item{...}{additional parameters to be passed on, usually to the residual function of the respective model class.}
 }
 \description{
 Wrapper to get the residuals of a fitted model.

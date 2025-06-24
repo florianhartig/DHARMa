@@ -7,9 +7,9 @@
 \method{plot}{DHARMaBenchmark}(x, ...)
 }
 \arguments{
-\item{x}{Object of class DHARMaBenchmark, created by \link{runBenchmarks}.}
+\item{x}{object of class DHARMaBenchmark, created by \link{runBenchmarks}.}
 
-\item{...}{Parameters to pass to the plot function.}
+\item{...}{parameters to pass to the plot function.}
 }
 \description{
 The function plots the result of an object of class DHARMaBenchmark, created by \link{runBenchmarks}.

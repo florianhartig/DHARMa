@@ -8,13 +8,13 @@ outliers(object, lowerQuantile = 0, upperQuantile = 1,
   return = c("index", "logical"))
 }
 \arguments{
-\item{object}{An object with simulated residuals created by \link{simulateResiduals}.}
+\item{object}{an object with simulated residuals created by \link{simulateResiduals}.}
 
-\item{lowerQuantile}{Lower threshold for outliers. Default is zero = outside simulation envelope.}
+\item{lowerQuantile}{lower threshold for outliers. Default is zero = outside simulation envelope.}
 
-\item{upperQuantile}{Upper threshold for outliers. Default is 1 = outside simulation envelope.}
+\item{upperQuantile}{upper threshold for outliers. Default is 1 = outside simulation envelope.}
 
-\item{return}{Whether to return indices of outliers or a logical vector.}
+\item{return}{whether to return indices of outliers or a logical vector.}
 }
 \description{
 Returns the outliers of a DHARMa object.

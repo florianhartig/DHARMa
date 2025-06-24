@@ -1,10 +1,10 @@
 #' DHARMa standard residual plots
 #'
-#' This S3 function creates standard plots for the simulated residuals contained in an object of class DHARMa, using [plotQQunif] (left panel) and [plotResiduals] (right panel)
+#' This S3 function creates standard plots for the simulated residuals contained in an object of class DHARMa, using [plotQQunif] (left panel) and [plotResiduals] (right panel).
 #'
-#' @param x An object of class DHARMa with simulated residuals created by [simulateResiduals].
-#' @param ... Further options for [plotResiduals]. Consider in particular parameters quantreg, rank and asFactor. xlab, ylab and main cannot be changed when using plot.DHARMa, but can be changed when using [plotResiduals].
-#' @param title The title for both panels (plotted via mtext, outer = TRUE).
+#' @param x an object of class DHARMa with simulated residuals created by [simulateResiduals].
+#' @param ... further options for [plotResiduals]. Consider in particular parameters quantreg, rank and asFactor. xlab, ylab and main cannot be changed when using plot.DHARMa, but can be changed when using [plotResiduals].
+#' @param title the title for both panels (plotted via mtext, outer = TRUE).
 #'
 #' @details The function creates a plot with two panels. The left panel is a uniform qq plot (calling [plotQQunif]), and the right panel shows residuals against predicted values (calling [plotResiduals]), with outliers as a star/asterisk and highlighted in red if outlier test is significant (default color but see Note).
 #'
@@ -41,13 +41,13 @@ plot.DHARMa <- function(x, title = "DHARMa residual", ...){
 #'
 #' The function produces a histogram from a DHARMa output. Outliers are marked in red.
 #'
-#' @param x A DHARMa simulation output (class DHARMa)
-#' @param breaks Breaks for hist() function.
-#' @param col Color for histogram bars.
-#' @param main Plot title.
-#' @param xlab Plot x-axis label.
-#' @param cex.main Plot cex.main.
-#' @param ... Other arguments to be passed on to hist().
+#' @param x a DHARMa simulation output (class DHARMa).
+#' @param breaks breaks for hist() function.
+#' @param col color for histogram bars.
+#' @param main plot title.
+#' @param xlab plot x-axis label.
+#' @param cex.main plot cex.main.
+#' @param ... other arguments to be passed on to hist().
 #' @details The function calls hist() to create a histogram of the scaled residuals. Outliers are marked red as default but it can be changed by setting \code{options(DHARMaSignalColor = "red")} to a different color. See \code{getOption("DHARMaSignalColor")} for the current setting.
 #' @seealso [plotSimulatedResiduals], [plotResiduals]
 #' @example inst/examples/plotsHelp.R
@@ -90,11 +90,11 @@ plotSimulatedResiduals <- function(simulationOutput, ...){
 #'
 #' The function produces a uniform quantile-quantile plot from a DHARMa output. Optionally, tests for uniformity, outliers and dispersion can be added.
 #'
-#' @param simulationOutput A DHARMa simulation output (class DHARMa).
-#' @param testUniformity If T, the function [testUniformity] will be called and the result will be added to the plot.
-#' @param testOutliers If T, the function [testOutliers] will be called and the result will be added to the plot.
-#' @param testDispersion If T, the function [testDispersion] will be called and the result will be added to the plot.
-#' @param ... Arguments to be passed on to [gap::qqunif].
+#' @param simulationOutput a DHARMa simulation output (class DHARMa).
+#' @param testUniformity if T, the function [testUniformity] will be called and the result will be added to the plot.
+#' @param testOutliers if T, the function [testOutliers] will be called and the result will be added to the plot.
+#' @param testDispersion if T, the function [testDispersion] will be called and the result will be added to the plot.
+#' @param ... arguments to be passed on to [gap::qqunif].
 #'
 #' @details The function calls qqunif() from the R package gap to create a quantile-quantile plot for a uniform distribution, and overlays tests for particular distributional problems as specified.
 #' When tests are displayed, significant p-values are highlighted in the color red by default. This can be changed by setting \code{options(DHARMaSignalColor = "red")} to a different color. See \code{getOption("DHARMaSignalColor")} for the current setting.
@@ -151,15 +151,15 @@ plotQQunif <- function(simulationOutput, testUniformity = TRUE, testOutliers = T
 #'
 #' The function creates a generic residual plot with either spline or quantile regression to highlight patterns in the residuals. Outliers are marked in star/asterisk form and highlighted in red if the outlier test is significant.
 #'
-#' @param simulationOutput An object, usually a DHARMa object, from which residual values can be extracted. Alternatively, a vector with residuals or a fitted model can be provided, which will then be transformed into a DHARMa object.
-#' @param form Optional predictor against which the residuals should be plotted. Default is to use the predicted(simulationOutput).
-#' @param quantreg Whether to perform a quantile regression based on [testQuantiles] or a smooth spline around the mean. Default NULL chooses T for nObs < 2000, and F otherwise.
-#' @param rank If T, the values provided in form will be rank transformed. This will usually make patterns easier to spot visually, especially if the distribution of the predictor is skewed. If form is a factor, this has no effect.
-#' @param asFactor Should a numeric predictor provided in form be treated as a factor. Default is to choose this for < 10 unique values, as long as enough predictions are available to draw a boxplot.
-#' @param smoothScatter If T, a smooth scatter plot will plotted instead of a normal scatter plot. This makes sense when the number of residuals is very large. Default NULL chooses T for nObs > 10000, and F otherwise.
-#' @param quantiles For a quantile regression, which quantiles should be plotted. Default is 0.25, 0.5, 0.75.
-#' @param absoluteDeviation If T, switch from displaying normal quantile residuals to absolute deviation from the mean expectation of 0.5 (calculated as 2 * abs(res - 0.5)). The purpose of this is to test explicitly for heteroskedasticity, see details.
-#' @param ... Additional arguments to plot / boxplot.
+#' @param simulationOutput an object, usually a DHARMa object, from which residual values can be extracted. Alternatively, a vector with residuals or a fitted model can be provided, which will then be transformed into a DHARMa object.
+#' @param form optional predictor against which the residuals should be plotted. Default is to use the predicted(simulationOutput).
+#' @param quantreg whether to perform a quantile regression based on [testQuantiles] or a smooth spline around the mean. Default NULL chooses T for nObs < 2000, and F otherwise.
+#' @param rank if T, the values provided in form will be rank transformed. This will usually make patterns easier to spot visually, especially if the distribution of the predictor is skewed. If form is a factor, this has no effect.
+#' @param asFactor should a numeric predictor provided in form be treated as a factor. Default is to choose this for < 10 unique values, as long as enough predictions are available to draw a boxplot.
+#' @param smoothScatter if T, a smooth scatter plot will plotted instead of a normal scatter plot. This makes sense when the number of residuals is very large. Default NULL chooses T for nObs > 10000, and F otherwise.
+#' @param quantiles for a quantile regression, which quantiles should be plotted. Default is 0.25, 0.5, 0.75.
+#' @param absoluteDeviation if T, switch from displaying normal quantile residuals to absolute deviation from the mean expectation of 0.5 (calculated as 2 * abs(res - 0.5)). The purpose of this is to test explicitly for heteroskedasticity, see details.
+#' @param ... additional arguments to plot / boxplot.
 #' @details The function plots residuals against a predictor (by default against the fitted value, extracted from the DHARMa object, or any other predictor).
 #'
 #' Outliers are drawn if simulationOutput is a DHARMa object and highlighted in red if the outlier test is significant (for information on definition and interpretation of outliers, see [testOutliers]). See the note below to change the highlighting color of the outliers.
@@ -240,7 +240,7 @@ plotResiduals <- function(simulationOutput, form = NULL, quantreg = NULL,
                     quantiles = quantiles)
   } else{
 
-    # color/shape outliers according to significance of outlier test, related to issue #453 
+    # color/shape outliers according to significance of outlier test, related to issue #453
     if(is.vector(simOut)) {
       message("Outliers will be not displayed in the plot when simulationOutput is not a DHARMa object.")
       defaultCol = blackcol
@@ -337,8 +337,8 @@ plotResiduals <- function(simulationOutput, form = NULL, quantreg = NULL,
 
 #' Ensures the existence of a valid predictor to plot residuals against
 #'
-#' @param simulationOutput A DHARMa simulation output or an object that can be converted into a DHARMa simulation output.
-#' @param predictor An optional predictor. If no predictor is provided, will try to extract the fitted value.
+#' @param simulationOutput a DHARMa simulation output or an object that can be converted into a DHARMa simulation output.
+#' @param predictor an optional predictor. If no predictor is provided, will try to extract the fitted value.
 #' @keywords internal
 ensurePredictor <- function(simulationOutput,
                             predictor = NULL){

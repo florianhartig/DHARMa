@@ -7,10 +7,10 @@
 getRandomState(seed = NULL)
 }
 \arguments{
-\item{seed}{Seed argument to set.seed(), typically a number. Additional options: NULL = no seed is set, but return includes function for restoring random seed. F = function does nothing, i.e. neither seed is changed, nor does the returned function do anything.}
+\item{seed}{seed argument to set.seed(), typically a number. Additional options: NULL = no seed is set, but return includes function for restoring random seed. F = function does nothing, i.e. neither seed is changed, nor does the returned function do anything.}
 }
 \value{
-A list with various infos about the random state after function execution, as well as a function to restore the previous state before the function execution.
+a list with various infos about the random state after function execution, as well as a function to restore the previous state before the function execution.
 }
 \description{
 The aim of this function is to record, manipulate and restore a random state.

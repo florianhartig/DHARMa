@@ -12,41 +12,41 @@ createData(sampleSize = 100, intercept = 0, fixedEffects = 1,
   factorResponse = FALSE, replicates = 1, hasNA = FALSE)
 }
 \arguments{
-\item{sampleSize}{Sample size of the dataset.}
+\item{sampleSize}{sample size of the dataset.}
 
-\item{intercept}{Intercept (linear scale).}
+\item{intercept}{intercept (linear scale).}
 
-\item{fixedEffects}{Vector of fixed effects (linear scale).}
+\item{fixedEffects}{vector of fixed effects (linear scale).}
 
-\item{quadraticFixedEffects}{Vector of quadratic fixed effects (linear scale).}
+\item{quadraticFixedEffects}{vector of quadratic fixed effects (linear scale).}
 
-\item{numGroups}{Number of groups for the random effect.}
+\item{numGroups}{number of groups for the random effect.}
 
-\item{randomEffectVariance}{Variance of the random effect (intercept).}
+\item{randomEffectVariance}{variance of the random effect (intercept).}
 
-\item{overdispersion}{If this is a numeric value, it will be used as the sd of a random normal variate that is added to the linear predictor. Alternatively, a random function can be provided that takes as input the linear predictor.}
+\item{overdispersion}{if this is a numeric value, it will be used as the sd of a random normal variate that is added to the linear predictor. Alternatively, a random function can be provided that takes as input the linear predictor.}
 
-\item{family}{Family.}
+\item{family}{a family function for the error distribution and link function to be used in the model to simulate data from. (See \code{\link[stats:family]{stats::family()}} for details of family functions for GLMs.)}
 
-\item{scale}{Scale if the distribution has a scale (e.g. sd for the Gaussian)}
+\item{scale}{scale if the distribution has a scale (e.g. sd for the Gaussian).}
 
-\item{cor}{Correlation between predictors.}
+\item{cor}{correlation between predictors.}
 
-\item{roundPoissonVariance}{If set, this creates a uniform noise on the poisson response. The aim of this is to create heteroscedasticity.}
+\item{roundPoissonVariance}{if set, this creates a uniform noise on the Poisson response. The aim of this is to create heteroscedasticity.}
 
-\item{pZeroInflation}{Probability to set any data point to zero.}
+\item{pZeroInflation}{probability to set any data point to zero.}
 
-\item{binomialTrials}{Number of trials for the binomial. Only active if family == binomial.}
+\item{binomialTrials}{number of trials for the binomial. Only active if family == binomial.}
 
-\item{temporalAutocorrelation}{Strength of temporal autocorrelation.}
+\item{temporalAutocorrelation}{strength of temporal autocorrelation.}
 
-\item{spatialAutocorrelation}{Strength of spatial autocorrelation.}
+\item{spatialAutocorrelation}{strength of spatial autocorrelation.}
 
-\item{factorResponse}{Should the response be transformed to a factor (intended to be used for 0/1 data).}
+\item{factorResponse}{should the response be transformed to a factor (intended to be used for 0/1 data).}
 
 \item{replicates}{number of datasets to create.}
 
-\item{hasNA}{Should an NA be added to the environmental predictor (for test purposes).}
+\item{hasNA}{should an NA be added to the environmental predictor (for test purposes).}
 }
 \description{
 This function creates synthetic dataset with various problems such as overdispersion, zero-inflation, etc.

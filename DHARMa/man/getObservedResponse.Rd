@@ -19,9 +19,9 @@ getObservedResponse(object, ...)
 \method{getObservedResponse}{phyloglm}(object, ...)
 }
 \arguments{
-\item{object}{A fitted model.}
+\item{object}{a fitted model.}
 
-\item{...}{Additional parameters.}
+\item{...}{additional parameters.}
 }
 \description{
 Extract the response of a fitted model.

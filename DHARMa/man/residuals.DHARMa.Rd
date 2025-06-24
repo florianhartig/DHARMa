@@ -8,13 +8,13 @@
   outlierValues = NULL, ...)
 }
 \arguments{
-\item{object}{An object with simulated residuals created by \link{simulateResiduals}}
+\item{object}{an object with simulated residuals created by \link{simulateResiduals}.}
 
-\item{quantileFunction}{Optional - a quantile function to transform the uniform 0/1 scaling of DHARMa to another distribution}
+\item{quantileFunction}{optional - a quantile function to transform the uniform 0/1 scaling of DHARMa to another distribution.}
 
-\item{outlierValues}{Ff a quantile function with infinite support (such as dnorm) is used, residuals that are 0/1 are mapped to -Inf / Inf. outlierValues allows to convert -Inf / Inf values to an optional min / max value.}
+\item{outlierValues}{if a quantile function with infinite support (such as dnorm) is used, residuals that are 0/1 are mapped to -Inf / Inf. outlierValues allows to convert -Inf / Inf values to an optional min / max value.}
 
-\item{...}{Optional arguments for compatibility with the generic function, no function implemented}
+\item{...}{optional arguments for compatibility with the generic function, no function implemented.}
 }
 \description{
 Return residuals of a DHARMa simulation
