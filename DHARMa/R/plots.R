@@ -160,7 +160,7 @@ plotQQunif <- function(simulationOutput, testUniformity = TRUE, testOutliers = T
 #' @param quantiles For a quantile regression, which quantiles should be plotted. Default is 0.25, 0.5, 0.75.
 #' @param absoluteDeviation If T, switch from displaying normal quantile residuals to absolute deviation from the mean expectation of 0.5 (calculated as 2 * abs(res - 0.5)). The purpose of this is to test explicitly for heteroskedasticity, see details.
 #' @param ... Additional arguments to plot / boxplot.
-#' @details The function plots residuals against a predictor (by default against the fitted value, extracted from the DHARMa object, or any other predictor).
+#' @details The function plots residuals against a predictor (by default against the fitted value, extracted from the DHARMa object, or any other predictor). The shaded gray areas indicate 95% confidence intervals of the quantile estimates (1.96 * standard error).
 #'
 #' Outliers are drawn if simulationOutput is a DHARMa object and highlighted in red if the outlier test is significant (for information on definition and interpretation of outliers, see [testOutliers]). See the note below to change the highlighting color of the outliers.
 #'
@@ -240,7 +240,7 @@ plotResiduals <- function(simulationOutput, form = NULL, quantreg = NULL,
                     quantiles = quantiles)
   } else{
 
-    # color/shape outliers according to significance of outlier test, related to issue #453 
+    # color/shape outliers according to significance of outlier test, related to issue #453
     if(is.vector(simOut)) {
       message("Outliers will be not displayed in the plot when simulationOutput is not a DHARMa object.")
       defaultCol = blackcol
