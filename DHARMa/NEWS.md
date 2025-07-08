@@ -11,6 +11,11 @@ NOTE: for more news about the package, see https://github.com/florianhartig/DHAR
 * fixing inconsistency in testQuantiles() #465. Including rankTransform() help function.  
 
 
+## Minor changes
+
+* Using 95% confidence intervals for confidence bands in plots for testQuantiles(). Before, we were using standard errors (~ 68% CI).
+
+
 
 # DHARMa 0.4.7
 

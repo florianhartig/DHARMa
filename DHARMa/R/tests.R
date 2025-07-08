@@ -86,6 +86,8 @@ testBivariateUniformity <- function(simulationOutput, alternative = c("two.sided
 #'
 #' The p-values of the intercept and splines are combined into a total p-value via Benjamini & Hochberg adjustment to control the FDR.
 #'
+#' When plotting (plot = TRUE), the shaded gray areas indicate 95% confidence intervals of the quantile estimates (1.96 * standard error).
+#'
 #' @author Florian Hartig
 #' @example inst/examples/testQuantilesHelp.R
 #' @seealso [testResiduals], [testUniformity], [testOutliers], [testDispersion], [testZeroInflation], [testGeneric], [testTemporalAutocorrelation], [testSpatialAutocorrelation], [testQuantiles], [testCategorical]
@@ -129,7 +131,7 @@ testQuantiles <- function(simulationOutput, predictor = NULL, rank = TRUE,
         pval[i] = min(p.adjust(c(x$p.table[1,4], x$s.table[1,4]), method = "BH")) # correction for test on slope and intercept
         quantPre = predict(quantileFits[[i]], newdata = predictions, se = T)
         predictions[, 2*i] = quantPre$fit + quantiles[i]
-        predictions[, 2*i + 1] = quantPre$se.fit
+        predictions[, 2*i + 1] = 1.96*quantPre$se.fit
       }
     }
 
