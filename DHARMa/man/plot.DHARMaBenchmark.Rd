@@ -17,9 +17,9 @@ The function plots the result of an object of class DHARMaBenchmark, created by 
 \details{
 The function will create two types of plots, depending on whether the run contains only a single value (or no value) of the control parameter, or whether a vector of control values is provided:
 
-If a single or no value of the control parameter is provided, the function will create box plots of the estimated p-values, with the number of significant p-values plotted to the left.
+If a single or no value of the control parameter is provided, the function will create boxplots of the estimated p-values, with the number of significant p-values plotted to the left.
 
-If a control parameter is provided, the function will plot the proportion of significant p-values against the control parameter, with 95\% CIs based based on the performed replicates displayed as confidence bands.
+If a control parameter is provided, the function will plot the proportion of significant p-values against the control parameter, with 95\% CIs based on the performed replicates displayed as confidence bands.
 }
 \seealso{
 \link{runBenchmarks}

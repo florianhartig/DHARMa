@@ -14,7 +14,7 @@ outliers(object, lowerQuantile = 0, upperQuantile = 1,
 
 \item{upperQuantile}{upper threshold for outliers. Default is 1 = outside simulation envelope.}
 
-\item{return}{wheter to return an indices of outliers or a logical vector.}
+\item{return}{whether to return indices of outliers or a logical vector.}
 }
 \description{
 Returns the outliers of a DHARMa object.
@@ -26,5 +26,5 @@ Thus, keep in mind that for a small number of simulations, outliers are mostly a
 
 If you are seriously interested in HOW FAR outside the expected distribution a data point is, you should increase the number of simulations in \link{simulateResiduals} to be sure to get the tail of the data distribution correctly. In this case, it may make sense to adjust lowerQuantile and upperQuantile, e.g. to 0.025, 0.975, which would define outliers as values outside the central 95\% of the distribution.
 
-Also, note that outliers are particularly concerning if they have a strong influence on the model fit. One could test the influence, for example, by removing them from the data, or by some meausures of leverage, e.g. generalisations for Cook's distance as in Pinho, L. G. B., Nobre, J. S., & Singer, J. M. (2015). Cook’s distance for generalized linear mixed models. Computational Statistics & Data Analysis, 82, 126–136. doi:10.1016/j.csda.2014.08.008. At the moment, however, no such function is provided in DHARMa.
+Also, note that outliers are particularly concerning if they have a strong influence on the model fit. One could test the influence, for example, by removing them from the data, or by some measures of leverage, e.g. generalizations for Cook's distance as in Pinho, L. G. B., Nobre, J. S., & Singer, J. M. (2015). Cook’s distance for generalized linear mixed models. Computational Statistics & Data Analysis, 82, 126–136. doi:10.1016/j.csda.2014.08.008. At the moment, however, no such function is provided in DHARMa.
 }

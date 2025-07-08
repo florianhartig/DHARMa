@@ -8,22 +8,22 @@
   outlierValues = NULL, ...)
 }
 \arguments{
-\item{object}{an object with simulated residuals created by \link{simulateResiduals}}
+\item{object}{an object with simulated residuals created by \link{simulateResiduals}.}
 
-\item{quantileFunction}{optional - a quantile function to transform the uniform 0/1 scaling of DHARMa to another distribution}
+\item{quantileFunction}{optional - a quantile function to transform the uniform 0/1 scaling of DHARMa to another distribution.}
 
 \item{outlierValues}{if a quantile function with infinite support (such as dnorm) is used, residuals that are 0/1 are mapped to -Inf / Inf. outlierValues allows to convert -Inf / Inf values to an optional min / max value.}
 
-\item{...}{optional arguments for compatibility with the generic function, no function implemented}
+\item{...}{optional arguments for compatibility with the generic function, no function implemented.}
 }
 \description{
 Return residuals of a DHARMa simulation
 }
 \details{
-the function accesses the slot $scaledResiduals in a fitted DHARMa object, and optionally transforms the standard DHARMa quantile residuals (which have a uniform distribution) to a particular pdf.
+The function accesses the slot $scaledResiduals in a fitted DHARMa object, and optionally transforms the standard DHARMa quantile residuals (which have a uniform distribution) to a particular pdf.
 }
 \note{
-some of the papers on simulated quantile residuals transforming the residuals (which are natively uniform) back to a normal distribution. I presume this is because of the larger familiarity of most users with normal residuals. Personally, I never considered this desirable, for the reasons explained in https://github.com/florianhartig/DHARMa/issues/39, but with this function, I wanted to give users the option to plot normal residuals if they so wish.
+Some of the papers on simulated quantile residuals transforming the residuals (which are natively uniform) back to a normal distribution. I presume this is because of the larger familiarity of most users with normal residuals. Personally, I never considered this desirable, for the reasons explained in https://github.com/florianhartig/DHARMa/issues/39, but with this function, I wanted to give users the option to plot normal residuals if they so wish.
 }
 \examples{
 library(lme4)

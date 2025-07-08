@@ -8,15 +8,15 @@ plotQQunif(simulationOutput, testUniformity = TRUE, testOutliers = TRUE,
   testDispersion = TRUE, ...)
 }
 \arguments{
-\item{simulationOutput}{A DHARMa simulation output (class DHARMa).}
+\item{simulationOutput}{a DHARMa simulation output (class DHARMa).}
 
-\item{testUniformity}{If T, the function \link{testUniformity} will be called and the result will be added to the plot.}
+\item{testUniformity}{if T, the function \link{testUniformity} will be called and the result will be added to the plot.}
 
-\item{testOutliers}{If T, the function \link{testOutliers} will be called and the result will be added to the plot.}
+\item{testOutliers}{if T, the function \link{testOutliers} will be called and the result will be added to the plot.}
 
-\item{testDispersion}{If T, the function \link{testDispersion} will be called and the result will be added to the plot.}
+\item{testDispersion}{if T, the function \link{testDispersion} will be called and the result will be added to the plot.}
 
-\item{...}{Arguments to be passed on to \link[gap:qqunif]{gap::qqunif}.}
+\item{...}{arguments to be passed on to \link[gap:qqunif]{gap::qqunif}.}
 }
 \description{
 The function produces a uniform quantile-quantile plot from a DHARMa output. Optionally, tests for uniformity, outliers and dispersion can be added.

@@ -2,15 +2,15 @@
 #'
 #' This function runs statistical benchmarks, including Power / Type I error simulations for an arbitrary test with a control parameter
 #'
-#' @param controlValues optionally, a vector with a control parameter (e.g. to vary the strength of a problem the test should be specific to). See help for an example
-#' @param calculateStatistics the statistics to be benchmarked. Should return one value, or a vector of values. If controlValues are given, must accept a parameter control
-#' @param nRep number of replicates per level of the controlValues
-#' @param alpha significance level
-#' @param parallel whether to use parallel computations. Possible values are F, T (sets the cores automatically to number of available cores -1), or an integer number for the number of cores that should be used for the cluster
-#' @param exportGlobal whether the global environment should be exported to the parallel nodes. This will use more memory. Set to true only if you function calculate statistics depends on other functions or global variables.
-#' @param ... additional parameters to calculateStatistics
-#' @note The benchmark function in DHARMa are intended for development purposes, and for users that want to test / confirm the properties of functions in DHARMa. If you are running an applied data analysis, they are probably of little use.
-#' @return A object with list structure of class DHARMaBenchmark. Contains an entry simulations with a matrix of simulations, and an entry summaries with an list of summaries (significant (T/F), mean, p-value for KS-test uniformity). Can be plotted with [plot.DHARMaBenchmark]
+#' @param controlValues optionally, a vector with a control parameter (e.g. to vary the strength of a problem the test should be specific to). See help for an example.
+#' @param calculateStatistics the statistics to be benchmarked. Should return one value, or a vector of values. If controlValues are given, must accept a parameter control.
+#' @param nRep number of replicates per level of the controlValues.
+#' @param alpha significance level.
+#' @param parallel whether to use parallel computations. Possible values are F, T (sets the cores automatically to number of available cores -1), or an integer number for the number of cores that should be used for the cluster.
+#' @param exportGlobal whether the global environment should be exported to the parallel nodes. This will use more memory. Set to true only if your function calculate statistics depends on other functions or global variables.
+#' @param ... additional parameters to calculateStatistics.
+#' @note The benchmark functions in DHARMa are intended for development purposes, and for users that want to test / confirm the properties of functions in DHARMa. If you are running an applied data analysis, they are probably of little use.
+#' @return an object with list structure of class DHARMaBenchmark. Contains entry simulations with a matrix of simulations, and entry summaries with an list of summaries (significant (T/F), mean, p-value for KS-test uniformity). Can be plotted with [plot.DHARMaBenchmark].
 #' @export
 #' @author Florian Hartig
 #' @seealso [plot.DHARMaBenchmark]
@@ -136,9 +136,9 @@ runBenchmarks <- function(calculateStatistics, controlValues = NULL, nRep = 10, 
 #'
 #' @details The function will create two types of plots, depending on whether the run contains only a single value (or no value) of the control parameter, or whether a vector of control values is provided:
 #'
-#' If a single or no value of the control parameter is provided, the function will create box plots of the estimated p-values, with the number of significant p-values plotted to the left.
+#' If a single or no value of the control parameter is provided, the function will create boxplots of the estimated p-values, with the number of significant p-values plotted to the left.
 #'
-#' If a control parameter is provided, the function will plot the proportion of significant p-values against the control parameter, with 95% CIs based based on the performed replicates displayed as confidence bands.
+#' If a control parameter is provided, the function will plot the proportion of significant p-values against the control parameter, with 95% CIs based on the performed replicates displayed as confidence bands.
 #'
 #' @seealso [runBenchmarks]
 #' @export

@@ -8,15 +8,15 @@ getQuantile(simulations, observed, integerResponse, method = c("PIT",
   "traditional"), rotation = NULL)
 }
 \arguments{
-\item{simulations}{A matrix with simulations from a fitted model. Rows = observations, columns = replicate simulations.}
+\item{simulations}{a matrix with simulations from a fitted model. Rows = observations, columns = replicate simulations.}
 
-\item{observed}{A vector with the observed data.}
+\item{observed}{a vector with the observed data.}
 
-\item{integerResponse}{Is the response integer-valued? Only has an effect for method = "traditional".}
+\item{integerResponse}{is the response integer-valued? Only has an effect for method = "traditional".}
 
-\item{method}{The quantile randomization method used. See details.}
+\item{method}{the quantile randomization method used. See details.}
 
-\item{rotation}{Optional rotation of the residuals. You can either provide as a known or estimated covariance matrix (e.g. when fitting an AR1 model), or use the argument "estimated", in which case the residual covariance will be approximated by simulations. See comments in details.}
+\item{rotation}{optional rotation of the residuals. You can either provide as a known or estimated covariance matrix (e.g. when fitting an AR1 model), or use the argument "estimated", in which case the residual covariance will be approximated by simulations. See comments in details.}
 }
 \description{
 Calculates residual quantiles from a given simulation.
@@ -30,16 +30,16 @@ For discrete data, there are two options implemented.
 
 The current default (available since DHARMa 0.3.1) are probability integral transform (PIT-) residuals (Smith, 1985; Dunn & Smyth, 1996; see also Warton, et al., 2017).
 
-Before DHARMa 0.3.1, a different randomization procedure was used, in which the a U(-0.5, 0.5) distribution was added on observations and simulations for discrete distributions. For a completely discrete distribution, the two procedures should deliver equivalent results, but the second method has the disadvantage that (a) one has to know if the distribution is discrete (DHARMa tries to recognize this automatically), and (b) that it leads to inefficiencies for some distributions such as the Tweedie, which are partly continuous, partly discrete
+Before DHARMa 0.3.1, a different randomization procedure was used, in which a U(-0.5, 0.5) distribution was added on observations and simulations for discrete distributions. For a completely discrete distribution, the two procedures should deliver equivalent results, but the second method has the disadvantage that (a) one has to know if the distribution is discrete (DHARMa tries to recognize this automatically), and (b) that it leads to inefficiencies for some distributions such as the Tweedie, which are partly continuous, partly discrete
 (see e.g. \href{https://github.com/florianhartig/DHARMa/issues/168}{issue #168} on DHARMa GitHub page).
 
 \strong{Rotation (optional)}
 
-The getQuantile function includes an additional option to rotate residuals prior to calculating the quantile residuals. This option should ONLY be used when the fitted model includes a particular residuals covariance structure, such as an AR1 or a spatial or phylogenetic CAR model.
+The getQuantile function includes an additional option to rotate residuals prior to calculating the quantile residuals. This option should ONLY be used when the fitted model includes a particular residual covariance structure, such as an AR1 or a spatial or phylogenetic CAR model.
 
 For these models, residuals calculated from unconditional simulations will include the specified covariance structure, which will trigger e.g. temporal autocorrelation tests and can inflate type I errors of other tests. The idea of the rotation is to rotate the residual space according to the covariance structure of the fitted model, such that the rotated residuals are conditional independent (provided the fitted model is correct).
 
-If the residual covariance of the fitted model at the response scale can be extracted (e.g. when fitting gls type models), it would be best to extract it and provide this covariance matrix to the rotation option. If that is not the case, providing the argument "estimated" to rotation will estimate the covariance from the data simulated by the model. This is probably without alternative for GLMMs, where the covariance at the response scale is likely not known / provided, but note, that this approximation will tend to have considerable error and may be slow to compute for high-dimensional data. If you try to estimate the rotation from simulations, you should set n as high as possible! See \link{testTemporalAutocorrelation} for a practical example.
+If the residual covariance of the fitted model at the response scale can be extracted (e.g. when fitting gls type models), it would be best to extract it and provide this covariance matrix to the rotation option. If that is not the case, providing the argument "estimated" to rotation will estimate the covariance from the data simulated by the model. This is probably without alternative for GLMMs, where the covariance at the response scale is likely not known / provided, but note that this approximation will tend to have considerable error and may be slow to compute for high-dimensional data. If you try to estimate the rotation from simulations, you should set n as high as possible! See \link{testTemporalAutocorrelation} for a practical example.
 
 The rotation of residuals implemented here is similar to the Variogram.lme() and Variongram.gls() functions in nlme package using the argument resType = "normalized".
 }

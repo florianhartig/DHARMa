@@ -15,6 +15,6 @@ checkModel(fittedModel, stop = F)
 The function checks if the fitted model is supported by DHARMa, and if there are other issues that could create problems.
 }
 \details{
-The main purpose of this function os to check if the fitted model class is supported by DHARMa. The function additionally checks for properties of the fitted model that could create problems for calculating residuals or working with the resuls in DHARMa.
+The main purpose of this function is to check if the fitted model class is supported by DHARMa. The function additionally checks for properties of the fitted model that could create problems for calculating residuals or working with the results in DHARMa.
 }
 \keyword{internal}

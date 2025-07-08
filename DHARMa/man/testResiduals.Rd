@@ -9,7 +9,7 @@ testResiduals(simulationOutput, plot = TRUE)
 \arguments{
 \item{simulationOutput}{an object of class DHARMa, either created via \link{simulateResiduals} for supported models or by \link{createDHARMa} for simulations created outside DHARMa, or a supported model. Providing a supported model directly is discouraged, because simulation settings cannot be changed in this case.}
 
-\item{plot}{if TRUE, plots functions of the tests are called.}
+\item{plot}{if TRUE, plot functions of the tests are called.}
 }
 \description{
 Calls uniformity, dispersion and outliers tests.

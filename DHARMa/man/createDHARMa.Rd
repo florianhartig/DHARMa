@@ -9,15 +9,15 @@ createDHARMa(simulatedResponse, observedResponse,
   method = c("PIT", "traditional"), rotation = NULL)
 }
 \arguments{
-\item{simulatedResponse}{matrix of observations simulated from the fitted model - row index for observations and colum index for simulations.}
+\item{simulatedResponse}{matrix of observations simulated from the fitted model - row index for observations and column index for simulations.}
 
 \item{observedResponse}{true observations.}
 
 \item{fittedPredictedResponse}{optional fitted predicted response. For Bayesian posterior predictive simulations, using the median posterior prediction as fittedPredictedResponse is recommended. If not provided, the mean simulatedResponse will be used.}
 
-\item{integerResponse}{if T, noise will be added at to the residuals to maintain a uniform expectations for integer responses (such as Poisson or Binomial). Unlike in \link{simulateResiduals}, the nature of the data is not automatically detected, so this MUST be set by the user appropriately.}
+\item{integerResponse}{if T, noise will be added at to the residuals to maintain a uniform expectation for integer responses (such as Poisson or Binomial). Unlike in \link{simulateResiduals}, the nature of the data is not automatically detected, so this MUST be set by the user appropriately.}
 
-\item{seed}{the random seed to be used within DHARMa. The default setting, recommended for most users, is keep the random seed on a fixed value 123. This means that you will always get the same randomization and thus teh same result when running the same code. NULL = no new seed is set, but previous random state will be restored after simulation. FALSE = no seed is set, and random state will not be restored. The latter two options are only recommended for simulation experiments. See vignette for details.}
+\item{seed}{the random seed to be used within DHARMa. The default setting, recommended for most users, is to keep the random seed on a fixed value 123. This means that you will always get the same randomization and thus the same result when running the same code. NULL = no new seed is set, but previous random state will be restored after simulation. FALSE = no seed is set, and random state will not be restored. The latter two options are only recommended for simulation experiments. See vignette for details.}
 
 \item{method}{the quantile randomization method used. The two options implemented at the moment are probability integral transform (PIT-) residuals (current default), and the "traditional" randomization procedure, that was used in DHARMa until version 0.3.0. For details, see \link{getQuantile}.}
 

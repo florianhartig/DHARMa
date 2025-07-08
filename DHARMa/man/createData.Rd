@@ -26,23 +26,23 @@ createData(sampleSize = 100, intercept = 0, fixedEffects = 1,
 
 \item{overdispersion}{if this is a numeric value, it will be used as the sd of a random normal variate that is added to the linear predictor. Alternatively, a random function can be provided that takes as input the linear predictor.}
 
-\item{family}{family.}
+\item{family}{a family function for the error distribution and link function to be used in the model to simulate data from. (See \code{\link[stats:family]{stats::family()}} for details of family functions for GLMs.)}
 
-\item{scale}{scale if the distribution has a scale (e.g. sd for the Gaussian)}
+\item{scale}{scale if the distribution has a scale (e.g. sd for the Gaussian).}
 
 \item{cor}{correlation between predictors.}
 
-\item{roundPoissonVariance}{if set, this creates a uniform noise on the possion response. The aim of this is to create heteroscedasticity.}
+\item{roundPoissonVariance}{if set, this creates a uniform noise on the Poisson response. The aim of this is to create heteroscedasticity.}
 
 \item{pZeroInflation}{probability to set any data point to zero.}
 
-\item{binomialTrials}{Number of trials for the binomial. Only active if family == binomial.}
+\item{binomialTrials}{number of trials for the binomial. Only active if family == binomial.}
 
-\item{temporalAutocorrelation}{strength of temporalAutocorrelation.}
+\item{temporalAutocorrelation}{strength of temporal autocorrelation.}
 
-\item{spatialAutocorrelation}{strength of spatial Autocorrelation.}
+\item{spatialAutocorrelation}{strength of spatial autocorrelation.}
 
-\item{factorResponse}{should the response be transformed to a factor (inteded to be used for 0/1 data).}
+\item{factorResponse}{should the response be transformed to a factor (intended to be used for 0/1 data).}
 
 \item{replicates}{number of datasets to create.}
 

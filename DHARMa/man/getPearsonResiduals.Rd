@@ -23,7 +23,7 @@ Wrapper to get the Pearson residuals of a fitted model.
 \details{
 The purpose of this wrapper is to extract the Pearson residuals of a fitted model.
 
-This needed to be adopted because for some reason, mgcv uses the argument "scaled.pearson" for what most packags define as "pearson". See comments in ?residuals.gam.
+This needed to be adopted because for some reason, mgcv uses the argument "scaled.pearson" for what most packages define as "pearson". See comments in ?residuals.gam.
 }
 \examples{
 testData = createData(sampleSize = 400, family = gaussian())

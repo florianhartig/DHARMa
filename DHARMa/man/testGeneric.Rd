@@ -11,21 +11,21 @@ testGeneric(simulationOutput, summary, alternative = c("two.sided",
 \arguments{
 \item{simulationOutput}{an object of class DHARMa, either created via \link{simulateResiduals} for supported models or by \link{createDHARMa} for simulations created outside DHARMa, or a supported model. Providing a supported model directly is discouraged, because simulation settings cannot be changed in this case.}
 
-\item{summary}{a function that can be applied to simulated / observed data. See examples below}
+\item{summary}{a function that can be applied to simulated / observed data. See examples below.}
 
-\item{alternative}{a character string specifying whether the test should test if observations are "greater", "less" or "two.sided" compared to the simulated null hypothesis}
+\item{alternative}{a character string specifying whether the test should test if observations are "greater", "less" or "two.sided" compared to the simulated null hypothesis.}
 
-\item{plot}{whether to plot the simulated summary}
+\item{plot}{whether to plot the simulated summary.}
 
-\item{methodName}{name of the test (will be used in plot)}
+\item{methodName}{name of the test (will be used in plot).}
 }
 \description{
 This function tests if a user-defined summary differs when applied to simulated / observed data.
 }
 \details{
-This function applies a user-defined summary to the simulated/observed data of a DHARMa object and then performs a hypothesis test using the ratio Obs / Sim as the test statistic.
+This function applies a user-defined summary to the simulated / observed data of a DHARMa object and then performs a hypothesis test using the ratio Obs / Sim as the test statistic.
 
-The summary is applied directly to the data and not to the residuals, but it can easily be remodeled to apply summaries to the residuals by simply defining something like f = function(x) summary (x - predictions), as done in \link{testDispersion}
+The summary is applied directly to the data and not to the residuals, but it can easily be remodeled to apply summaries to the residuals by simply defining something like f = function(x) summary (x - predictions), as done in \link{testDispersion}.
 }
 \note{
 The summary function you specify will be applied to the data as it appears in your fitted model, which may not always be what you want.
