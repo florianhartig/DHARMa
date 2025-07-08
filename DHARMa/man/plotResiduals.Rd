@@ -34,7 +34,7 @@ If quantile tests are performed, the function returns them invisibly.
 The function creates a generic residual plot with either spline or quantile regression to highlight patterns in the residuals. Outliers are marked in star/asterisk form and highlighted in red if the outlier test is significant.
 }
 \details{
-The function plots residuals against a predictor (by default against the fitted value, extracted from the DHARMa object, or any other predictor).
+The function plots residuals against a predictor (by default against the fitted value, extracted from the DHARMa object, or any other predictor). The shaded gray areas indicate 95\% confidence intervals of the quantile estimates (1.96 * standard error).
 
 Outliers are drawn if simulationOutput is a DHARMa object and highlighted in red if the outlier test is significant (for information on definition and interpretation of outliers, see \link{testOutliers}). See the note below to change the highlighting color of the outliers.
 
