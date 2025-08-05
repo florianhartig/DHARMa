@@ -16,3 +16,14 @@ test_that("Rotation of residuals works", {
 
 })
 
+
+test_that("Conditional, unconditional and user-specified simulations work for lme4", {
+
+  testData = createData(family = gaussian())
+  fittedModel <- lme4::lmer(observedResponse ~ Environment1 + (1|group), data = testData)
+
+  expect_no_error(res1 <- simulateResiduals(fittedModel, simulateREs = "conditional"))
+  expect_no_error(res2 <- simulateResiduals(fittedModel, simulateREs = "unconditional"))
+  expect_no_error(res3 <- simulateResiduals(fittedModel, simulateREs = "user-specified", re.form = ~(1|group)))
+
+})
