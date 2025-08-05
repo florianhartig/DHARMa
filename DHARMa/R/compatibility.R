@@ -106,7 +106,7 @@ getObservedResponse <- function (object, ...) {
 #'
 #' Note: GLMM and other regression packages often differ in how simulations are produced, and which parameters can be used to modify this behavior.
 #'
-#' One important difference is how to modify which hierarchical levels are held constant, and which are re-simulated. The default as of DHARMa 0.4.8 is to re-simulate conditional on all fitted random effects. To return to the previous DHARMa default, please set simulateREs = "user-specified. This allows you to use the syntax of the simulate function of the respective model class to switch between conditional and unconditional simulations. E.g. in lme4, conditioning of simulations is controlled by the re.form argument (see [lme4::simulate.merMod]). In glmmTMB, the package version 1.1.10 has a temporary solution to simulate conditional to all random effects (see [glmmTMB::set_simcodes] val = "fix", and issue [#888](https://github.com/glmmTMB/glmmTMB/issues/888) in glmmTMB GitHub repository. For details, please see [simulateResiduals] or consult the help of the different packages.
+#' One important difference is how to modify which hierarchical levels are held constant, and which are re-simulated. The default as of DHARMa 0.4.8 is to re-simulate conditional on all fitted random effects. To return to the previous DHARMa default, please set simulateREs = "user-specified". This allows you to use the syntax of the simulate function of the respective model class when switching between conditional and unconditional simulations. E.g. in lme4, conditioning of simulations is controlled by the re.form argument (see [lme4::simulate.merMod]). In glmmTMB, the package version 1.1.10 has a temporary solution to simulate conditional to all random effects (see [glmmTMB::set_simcodes] val = "fix", and issue [#888](https://github.com/glmmTMB/glmmTMB/issues/888) in glmmTMB GitHub repository. For details, please see [simulateResiduals] or consult the help of the different packages.
 #'
 #' If the model was fit with weights and the respective model class does not include the weights in the simulations, getSimulations will throw a warning. The background is if weights are used on the likelihood directly, then what is fitted is effectively a pseudo likelihood, and there is no way to directly simulate from the specified likelihood. Whether or not residuals can be used in this case depends very much on what is tested and how weights are used. I'm sorry to say that it is hard to give a general recommendation, you have to consult someone that understands how weights are processed in the respective model class.
 #'
@@ -562,11 +562,28 @@ getRefit.glmmTMB <- function(object, newresp, ...){
 getSimulations.glmmTMB <- function (object, nsim = 1, simulateREs = c("conditional", "unconditional", "user-specified"), type = c("normal", "refit"), ...){
 
   type <- match.arg(type)
+  simulateREs <- match.arg(simulateREs)
+
   if("(weights)" %in% colnames(model.frame(object)) & ! family(object)$family %in% c("binomial", "betabinomial")) warning(weightsWarning)
 
-  type <- match.arg(type)
+  out = NULL
 
-  out = simulate(object, nsim = nsim, ...)
+  # user-specified (as before)
+  if(simulateREs == "user-specified") {
+    out = simulate(object, nsim = nsim, ...)
+  }
+
+  # conditional
+  if(simulateREs == "conditional") {
+    glmmTMB::set_simcodes(object$obj, val = "fix", terms = "ALL")
+    out = simulate(object, nsim = nsim, ...)
+  }
+
+  # unconditional
+  if(simulateREs == "unconditional") {
+    glmmTMB::set_simcodes(object$obj, val = "random", terms = "ALL")
+    out = simulate(object, nsim = nsim, ...)
+  }
 
   if (type == "normal"){
     if (is.matrix(out[[1]])){
@@ -643,8 +660,24 @@ getObservedResponse.HLfit <- function(object, ...){
 getSimulations.HLfit <- function(object, nsim = 1, simulateREs = c("conditional", "unconditional", "user-specified"), type = c("normal", "refit"), ...){
 
   type <- match.arg(type)
+  simulateREs <- match.arg(simulateREs)
 
-  capture.output({out = simulate(object, nsim = nsim, ...)})
+  if(simulateREs != "user-specified" & "re.form" %in% names(list(...))) stop("DHARMa: If you want to specify certain random effects to condition on, you need to set simulateREs = \"user-specified\".")
+
+  # user-specified (as before)
+  if(simulateREs == "user-specified"){
+    capture.output({out = simulate(object, nsim = nsim, ...)})
+  }
+
+  # conditional
+  if(simulateREs == "conditional"){
+    capture.output({out = simulate(object, nsim = nsim, re.form = NULL, ...)})
+  }
+
+  # unconditional
+  if(simulateREs == "unconditional"){
+    capture.output({out = simulate(object, nsim = nsim, re.form = NA, ...)})
+  }
 
   if(type == "normal"){
     if(!is.matrix(out)) out = data.matrix(out)

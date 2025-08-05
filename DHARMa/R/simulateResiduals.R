@@ -19,11 +19,13 @@
 #'
 #' In such a situation, we have to decide if we want to re-simulate all stochastic levels, or only a subset of those. For example, in a GLMM, it is common to only simulate the last stochastic level (e.g. Poisson) conditional on the fitted random effects. This is often referred to as a conditional simulation. As of DHARMa 0.4.8, the default is conditional simulation on all random effects of the fitted model. Setting simulateREs = "user-specified" allows you to return to the previous DHARMa default, which used the respective default setting for the simulate function of your model class. Then the simulateResiduals function allows to pass on parameters to the simulate function of the fitted model object, using its respective syntax. It further allows to specify only a subset of random effects to be conditioned on, but note that this is not possible for all model classes.
 #'
-#' | \strong{Package}       | \strong{Unconditional}         | \strong{Conditional on all REs}        | \strong{Conditional on specific REs}          |
+#' Summary of the syntax for supported packages (this is only relevant for simulateREs = "user-specified"):
+#'
+#' | \strong{Package}       | \strong{Unconditional}         | \strong{Conditional on all REs}        | \strong{Conditional on specific REs}|
 #'  |--------------------|-------------------------------|-------------------------------------|------------------------------------------|
 #'  | lme4               | \code{re.form = NA} (default)        | \code{re.form = NULL}         | \code{re.form = ~(1|group)}           |
-
-#'
+#'  | spaMM              | \code{re.form = NA} (default)        | \code{re.form = NULL}         | \code{re.form = ~(1|group)}           |
+#'  | glmmTMB            | \code{set_simcodes(model$obj, val = "random", terms = "ALL")}, then \code{simulate(model)} | \code{set_simcodes(model$obj, val = "fix", terms = "ALL")}, then \code{simulate(model)} | not available for this package |
 #'
 #'
 #' For further details, please see [getSimulations] and refer to the help of the different simulate functions (e.g. ?simulate.merMod).

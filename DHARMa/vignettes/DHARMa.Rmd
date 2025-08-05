@@ -238,10 +238,14 @@ The second option is the treatment of the stochastic hierarchy. In a hierarchica
 
 As of DHARMa 0.4.8, the default is conditional simulation on all random effects of the fitted model. Setting simulateREs = "user-specified" allows you to return to the previous DHARMa default, which used the respective default setting for the simulate function of your model class. Then the simulateResiduals function allows to pass on parameters to the simulate function of the fitted model object, using its respective syntax. It further allows to specify only a subset of random effects to be conditioned on, but note that this is not possible for all model classes.
 
+Summary of the syntax for supported packages (this is only relevant for simulateREs = "user-specified"):
+
 |                    |                         |                              |                               |
 |:-------------------|:------------------------|:-----------------------------|:------------------------------|
 | **Package**        | **Unconditional**       | **Conditional on all REs**   |**Conditional on specific REs**|
 | lme4               | `re.form = NA (default)`| `re.form = NULL`             | `re.form = ~(1 | group)`      |
+| spaMM              | `re.form = NA (default)`| `re.form = NULL`             | `re.form = ~(1 | group)`      |
+| glmmTMB            | `set_simcodes(model$obj, val = "random", terms = "ALL")`, then `simulate(model)`| `set_simcodes(model$obj, val = "fix", terms = "ALL")`, then `simulate(model)`            | not available for this package     |
 
 
 
@@ -531,17 +535,19 @@ library(glmmTMB)
 testData$pos <- numFactor(testData$x, testData$y)
 fittedModel2 <- glmmTMB(observedResponse ~ Environment1 + exp(pos + 0|group), 
                         data = testData, family = poisson())
-simulationOutput2 <- simulateResiduals(fittedModel = fittedModel2)
+simulationOutput2 <- simulateResiduals(fittedModel = fittedModel2, simulateREs = "user-specified")
 testSpatialAutocorrelation(simulationOutput = simulationOutput2, x = testData$x, 
                            y= testData$y)
 # plot(simulationOutput2)
 ```
 
+Note that while glmmTMB supports conditional simulations in general, this is not yet supported for spatial covariance structures. Thus, we use simulateREs = "user-specific" here.
+
 One of the options to solve it and get correct tests and no residual pattern (if the model is correct) is to rotate the residual space according to the covariance structure of the fitted model, such that the rotated residuals are conditionally independent. The argument rotation in `simulateResiduals` does it (see also `?getQuantile` for details about the rotation options):
 
 ```{r, fig.width=4, fig.height=4}
 # rotation of the residuals 
-simulationOutput3 <- simulateResiduals(fittedModel = fittedModel2,
+simulationOutput3 <- simulateResiduals(fittedModel = fittedModel2, simulateREs = "user-specified",
                                        rotation = "estimated")
 testSpatialAutocorrelation(simulationOutput = simulationOutput3, x = testData$x, 
                            y= testData$y)
@@ -886,11 +892,13 @@ Models fitted with gamm4 return a list that contains an lme4 object under the na
 
 ## glmmTMB
 
-glmmTMB is nearly fully supported since DHARMa 0.2.7 and glmmTMB 1.0.0. A remaining limitation is that you can't adjust whether simulations are conditional or not, so simulateResiduals(model, re.form = NULL) will have no effect, simulations will always be done from the full model.
+glmmTMB is nearly fully supported since DHARMa 0.2.7 and glmmTMB 1.0.0. As of DHARMa 0.4.8 there is an implemented option to adjust whether simulations should be conditional on the fitted random effects or not by using the simulateREs argument in simulateResiduals.
 
 ## spaMM
 
 spaMM is supported by DHARMa since 0.2.1
+
+Possible to condition on specific REs via re.form, see help of simulate.HLfit and ?simulateResiduals.
 
 ## GLMMadaptive
 

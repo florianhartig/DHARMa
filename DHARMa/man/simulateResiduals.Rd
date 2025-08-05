@@ -41,9 +41,13 @@ There are a number of important considerations when simulating from a more compl
 
 \strong{Re-simulating random effects / hierarchical structure}: in a hierarchical model, we have several stochastic processes aligned on top of each other. Specifically, in a GLMM, we have a lower level stochastic process (random effect), whose result enters into a higher level (e.g. Poisson distribution). For other hierarchical models such as state-space models, similar considerations apply.
 
-In such a situation, we have to decide if we want to re-simulate all stochastic levels, or only a subset of those. For example, in a GLMM, it is common to only simulate the last stochastic level (e.g. Poisson) conditional on the fitted random effects. This is often referred to as a conditional simulation. As of DHARMa 0.4.8, the default is conditional simulation on all random effects of the fitted model. Setting simulateREs = "user-specified" allows you to return to the previous DHARMa default, which used the respective default setting for the simulate function of your model class. Then the simulateResiduals function allows to pass on parameters to the simulate function of the fitted model object, using its respective syntax. It further allows to specify only a subset of random effects to be conditioned on, but note that this is not possible for all model classes.\tabular{llll}{
+In such a situation, we have to decide if we want to re-simulate all stochastic levels, or only a subset of those. For example, in a GLMM, it is common to only simulate the last stochastic level (e.g. Poisson) conditional on the fitted random effects. This is often referred to as a conditional simulation. As of DHARMa 0.4.8, the default is conditional simulation on all random effects of the fitted model. Setting simulateREs = "user-specified" allows you to return to the previous DHARMa default, which used the respective default setting for the simulate function of your model class. Then the simulateResiduals function allows to pass on parameters to the simulate function of the fitted model object, using its respective syntax. It further allows to specify only a subset of random effects to be conditioned on, but note that this is not possible for all model classes.
+
+Summary of the syntax for supported packages (this is only relevant for simulateREs = "user-specified"):\tabular{llll}{
    \strong{Package} \tab \strong{Unconditional} \tab \strong{Conditional on all REs} \tab \strong{Conditional on specific REs} \cr
-   lme4 \tab \code{re.form = NA} (default) \tab \code{re.form = NULL} \tab \code{re.form = ~(1 | group)} \cr
+   lme4 \tab \code{re.form = NA} (default) \tab \code{re.form = NULL} \tab \code{re.form = ~(1|group)} \cr
+   spaMM \tab \code{re.form = NA} (default) \tab \code{re.form = NULL} \tab \code{re.form = ~(1|group)} \cr
+   glmmTMB \tab \code{set_simcodes(model$obj, val = "random", terms = "ALL")}, then \code{simulate(model)} \tab \code{set_simcodes(model$obj, val = "fix", terms = "ALL")}, then \code{simulate(model)} \tab not available for this package \cr
 }
 
 
