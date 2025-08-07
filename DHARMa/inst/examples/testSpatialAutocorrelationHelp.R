@@ -56,10 +56,10 @@ testData$y  = rnorm(clusters)[testData$group] + rnorm(size, sd = 0.01)
 library(lme4)
 fittedModel <- lmer(observedResponse ~ Environment1 + (1|group), data = testData)
 
-# DHARMa default is to re-simulate REs - this means spatial pattern remains
+# Re-simulating REs (unconditional) means spatial pattern remains
 # because residuals are still clustered
 
-res = simulateResiduals(fittedModel)
+res = simulateResiduals(fittedModel, simulateREs = "unconditional")
 testSpatialAutocorrelation(res, x =  testData$x, y = testData$y)
 
 # However, it should disappear if you just calculate an aggregate residuals per cluster
@@ -70,12 +70,12 @@ testSpatialAutocorrelation(res2,
                            x =  aggregate(testData$x, list(testData$group), mean)$x,
                            y = aggregate(testData$y, list(testData$group), mean)$x)
 
-# For lme4, it's also possible to simulated residuals conditional on fitted
-# REs (re.form). Conditional on the fitted REs (i.e. accounting for the clusters)
-# the residuals should now be indepdendent. The remaining RSA we see here is
+# For lme4 models, it's also possible to simulate residuals conditional on fitted
+# REs (DHARMa default). Conditional on the fitted REs (i.e. accounting for the clusters)
+# the residuals should now be independent. The remaining RSA we see here is
 # probably due to the RE shrinkage
 
-res = simulateResiduals(fittedModel, re.form = NULL)
+res = simulateResiduals(fittedModel, simulateREs = "conditional")
 testSpatialAutocorrelation(res, x =  testData$x, y = testData$y)
 
 
