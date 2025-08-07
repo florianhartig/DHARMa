@@ -14,7 +14,7 @@ simulateResiduals(fittedModel, n = 250, simulateREs = c("conditional",
 
 \item{n}{number of simulations. The smaller the number, the higher the stochastic error on the residuals. Also, for very small n, discretization artefacts can influence the tests. Default is 250, which is a relatively safe value. You can consider increasing to 1000 to stabilize the simulated values.}
 
-\item{simulateREs}{which hierarchical levels should be re-simulated. For simulateREs = "conditional", the simulations are done conditional on all fitted random effects. This is the default as of DHARMa 0.4.8. For simulateREs = "unconditional", all hierarchical levels are re-simulated, including the random effects. With simulateREs = "user-specified", the default simulate function of the respective fitted model object is used. The user can pass on further parameters to the simulate function of the fitted model object using its respective syntax, e.g. to condition only on some specific random effects. See details and \link{getSimulations}.}
+\item{simulateREs}{which hierarchical levels should be re-simulated. If \code{conditional}, the simulations are done conditional on all fitted random effects (default). If \code{unconditional}, all hierarchical levels are re-simulated, including the random effects. With \code{user-specified}, the default simulate function of the respective fitted model object is used. See details and \link{getSimulations}.}
 
 \item{refit}{if FALSE, new data will be simulated and scaled residuals will be created by comparing observed data with new data. If TRUE, the model will be refitted on the simulated data (parametric bootstrap), and scaled residuals will be created by comparing observed with refitted residuals.}
 
@@ -43,15 +43,7 @@ There are a number of important considerations when simulating from a more compl
 
 In such a situation, we have to decide if we want to re-simulate all stochastic levels, or only a subset of those. For example, in a GLMM, it is common to only simulate the last stochastic level (e.g. Poisson) conditional on the fitted random effects. This is often referred to as a conditional simulation. As of DHARMa 0.4.8, the default is conditional simulation on all random effects of the fitted model. Setting simulateREs = "user-specified" allows you to return to the previous DHARMa default, which used the respective default setting for the simulate function of your model class. Then the simulateResiduals function allows to pass on parameters to the simulate function of the fitted model object, using its respective syntax. It further allows to specify only a subset of random effects to be conditioned on, but note that this is not possible for all model classes.
 
-Summary of the syntax for supported packages (this is only relevant for simulateREs = "user-specified"):\tabular{llll}{
-   \strong{Package} \tab \strong{Unconditional} \tab \strong{Conditional on all REs} \tab \strong{Conditional on specific REs} \cr
-   lme4 \tab \code{re.form = NA} (default) \tab \code{re.form = NULL} \tab \code{re.form = ~(1|group)} \cr
-   spaMM \tab \code{re.form = NA} (default) \tab \code{re.form = NULL} \tab \code{re.form = ~(1|group)} \cr
-   glmmTMB \tab \code{set_simcodes(model$obj, val = "random", terms = "ALL")}, then \code{simulate(model)} \tab \code{set_simcodes(model$obj, val = "fix", terms = "ALL")}, then \code{simulate(model)} \tab not available for this package \cr
-}
-
-
-For further details, please see \link{getSimulations} and refer to the help of the different simulate functions (e.g. ?simulate.merMod).
+For further details, please see vignette, \link{getSimulations} and refer to the help of the different simulate functions (e.g. ?simulate.merMod).
 
 If the model is correctly specified, the simulated residuals should be flat regardless how many hierarchical levels we re-simulate. The most thorough procedure would therefore be to test all possible options. Re-simulating all levels (unconditional) can be advantageous because it tests the model structure as a whole. A potential drawback is that re-simulating the lower-level random effects creates more variability, which may reduce power for detecting problems in the upper-level stochastic processes. In particular dispersion tests may produce different results when switching from conditional to unconditional simulations, and often the conditional simulation is more sensitive.
 
@@ -77,36 +69,36 @@ fittedModel <- glmer(observedResponse ~ Environment1 + (1|group),
                      family = "poisson", data = testData)
 
 # simulate residuals (default behavior, conditional on the fitted random effects)
-simulationOutput <- simulateResiduals(fittedModel = fittedModel)
+simulationOutput1 <- simulateResiduals(fittedModel = fittedModel)
+plot(simulationOutput1)
 
 # simulate residuals unconditional on the fitted random effects (REs are re-simulated)
-simulationOutput <- simulateResiduals(fittedModel = fittedModel, simulateREs = "unconditional")
+simulationOutput2 <- simulateResiduals(fittedModel = fittedModel, simulateREs = "unconditional")
+plot(simulationOutput2)
 
 # simulate residuals user-specified using lme4 syntax (e.g. conditional only on a specific RE)
-simulationOutput <- simulateResiduals(fittedModel = fittedModel, simulateREs = "user-specified", re.form = ~(1|group))
-
-# standard plot
-plot(simulationOutput)
+simulationOutput3 <- simulateResiduals(fittedModel = fittedModel, simulateREs = "user-specified", re.form = ~(1|group))
+plot(simulationOutput3)
 
 # one of the possible test, for other options see ?testResiduals / vignette
-testDispersion(simulationOutput)
+testDispersion(simulationOutput1)
 
 # the calculated residuals can be accessed via
-residuals(simulationOutput)
+residuals(simulationOutput1)
 
 # transform residuals to other pdf, see ?residuals.DHARMa for details
-residuals(simulationOutput, quantileFunction = qnorm, outlierValues = c(-7,7))
+residuals(simulationOutput1, quantileFunction = qnorm, outlierValues = c(-7,7))
 
 # get residuals that are outside the simulation envelope
-outliers(simulationOutput)
+outliers(simulationOutput1)
 
 # calculating aggregated residuals per group
-simulationOutput2 = recalculateResiduals(simulationOutput, group = testData$group)
-plot(simulationOutput2, quantreg = FALSE)
+simulationOutput4 = recalculateResiduals(simulationOutput1, group = testData$group)
+plot(simulationOutput4, quantreg = FALSE)
 
 # calculating residuals only for subset of the data
-simulationOutput3 = recalculateResiduals(simulationOutput, sel = testData$group == 1 )
-plot(simulationOutput3, quantreg = FALSE)
+simulationOutput5 = recalculateResiduals(simulationOutput1, sel = testData$group == 1 )
+plot(simulationOutput5, quantreg = FALSE)
 }
 \seealso{
 \link{testResiduals}, \link{plotResiduals}, \link{recalculateResiduals}, \link{outliers}

@@ -93,7 +93,7 @@ getObservedResponse <- function (object, ...) {
 #'
 #' @param object a fitted model.
 #' @param nsim number of simulations.
-#' @param simulateREs which hierarchical levels should be re-simulated. For simulateREs = "conditional", the simulations are done conditional on all fitted random effects (default). For simulateREs = "unconditional", all hierarchical levels are re-simulated, including the random effects. With simulateREs = "user-specified", the default simulate function of the respective fitted model object is used.
+#' @param simulateREs which hierarchical levels should be re-simulated. If \code{conditional}, the simulations are done conditional on all fitted random effects (default). If \code{unconditional}, all hierarchical levels are re-simulated, including the random effects. With \code{user-specified}, the default simulate function of the respective fitted model object is used. See details and [simulateResiduals].
 #' @param type if simulations should be prepared for getQuantile or for refit.
 #' @param ... additional parameters to be passed on, usually to the simulate function of the respective model class.
 #'
@@ -106,7 +106,7 @@ getObservedResponse <- function (object, ...) {
 #'
 #' Note: GLMM and other regression packages often differ in how simulations are produced, and which parameters can be used to modify this behavior.
 #'
-#' One important difference is how to modify which hierarchical levels are held constant, and which are re-simulated. The default as of DHARMa 0.4.8 is to re-simulate conditional on all fitted random effects. To return to the previous DHARMa default, please set simulateREs = "user-specified". This allows you to use the syntax of the simulate function of the respective model class when switching between conditional and unconditional simulations. E.g. in lme4, conditioning of simulations is controlled by the re.form argument (see [lme4::simulate.merMod]). In glmmTMB, the package version 1.1.10 has a temporary solution to simulate conditional to all random effects (see [glmmTMB::set_simcodes] val = "fix", and issue [#888](https://github.com/glmmTMB/glmmTMB/issues/888) in glmmTMB GitHub repository. For details, please see [simulateResiduals] or consult the help of the different packages.
+#' One important difference is how to modify which hierarchical levels are held constant, and which are re-simulated. The default as of DHARMa 0.4.8 is to simulate conditional on all fitted random effects. To return to the previous DHARMa default, please set simulateREs = "user-specified". This allows you to use the syntax of the simulate function of the respective model class when switching between conditional and unconditional simulations. For details, please see vignette, [simulateResiduals] or consult the help of the different packages.
 #'
 #' If the model was fit with weights and the respective model class does not include the weights in the simulations, getSimulations will throw a warning. The background is if weights are used on the likelihood directly, then what is fitted is effectively a pseudo likelihood, and there is no way to directly simulate from the specified likelihood. Whether or not residuals can be used in this case depends very much on what is tested and how weights are used. I'm sorry to say that it is hard to give a general recommendation, you have to consult someone that understands how weights are processed in the respective model class.
 #'
@@ -575,8 +575,17 @@ getSimulations.glmmTMB <- function (object, nsim = 1, simulateREs = c("condition
 
   # conditional
   if(simulateREs == "conditional") {
-    glmmTMB::set_simcodes(object$obj, val = "fix", terms = "ALL")
-    out = simulate(object, nsim = nsim, ...)
+    out = tryCatch(
+      {
+        glmmTMB::set_simcodes(object$obj, val = "fix", terms = "ALL")
+        simulate(object, nsim = nsim, ...)
+      },
+      error = function(e){
+        message("Conditional simulations are not yet implemented for glmmTMB models with certain (spatial) covariance structures. DHARMa will fall back to unconditional simulations for your model.")
+        glmmTMB::set_simcodes(object$obj, val = "random", terms = "ALL")
+        out = simulate(object, nsim = nsim, ...)
+      }
+    )
   }
 
   # unconditional
