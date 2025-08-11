@@ -243,9 +243,10 @@ Summary of the syntax for supported packages (this is only relevant for simulate
 |                    |                         |                              |                               |
 |:-------------------|:------------------------|:-----------------------------|:------------------------------|
 | **Package**        | **Unconditional**       | **Conditional on all REs**   |**Conditional on specific REs**|
-| lme4               | `re.form = NA (default)`| `re.form = NULL`             | `re.form = ~(1 | group)`      |
-| spaMM              | `re.form = NA (default)`| `re.form = NULL`             | `re.form = ~(1 | group)`      |
-| glmmTMB            | `set_simcodes(model$obj, val = "random", terms = "ALL")`, then `simulate(model)`| `set_simcodes(model$obj, val = "fix", terms = "ALL")`, then `simulate(model)`            | not available for this package     |
+| lme4               | `re.form = NA` (default)| `re.form = NULL`             | `re.form = ~(1 | group)`      |
+| spaMM              | `re.form = NA` (default)| `re.form = NULL`             | `re.form = ~(1 | group)`      |
+| glmmTMB            | `set_simcodes(model$obj, val = "random", terms = "ALL")`, then `simulate(model)` (default)| `set_simcodes(model$obj, val = "fix", terms = "ALL")`, then `simulate(model)`            | not available|
+| GLMMadaptive       | `type = "subject-specific"` (default)| `type = "mean_subject"`|not available|
 
 
 
@@ -878,7 +879,7 @@ lm and glm and MASS::glm.nb are fully supported.
 
 lme4 model classes are fully supported.
 
-Possible to condition on specific REs via re.form, see help of predict.merMod and ?simulateResiduals.
+Possible to condition on specific REs via re.form, see help of predict.merMod, simulate.merMod and ?simulateResiduals.
 
 ## mgcv
 

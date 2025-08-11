@@ -719,8 +719,25 @@ getSimulations.MixMod <- function(object, nsim = 1, simulateREs = c("conditional
   if ("weights" %in% names(object)) warning(weightsWarning)
 
   type <- match.arg(type)
+  simulateREs <- match.arg(simulateREs)
 
-  out = simulate(object, nsim = nsim , ...)
+  out = NULL
+
+  # user-specified (as before)
+  if (simulateREs == "user-specified"){
+    out = simulate(object, nsim = nsim , ...)
+  }
+
+  # conditional
+  if (simulateREs == "conditional"){
+    out = simulate(object, nsim = nsim , type = "mean_subject", ...)
+  }
+
+  # unconditional
+  if (simulateREs == "unconditional"){
+    out = simulate(object, nsim = nsim , type = "subject_specific", ...)
+  }
+
 
   if(type == "normal"){
     if(!is.matrix(out)) out = data.matrix(out)

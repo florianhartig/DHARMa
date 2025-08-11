@@ -24,7 +24,11 @@ test_that("Conditional, unconditional and user-specified simulations work for lm
 
   expect_no_error(res1 <- simulateResiduals(fittedModel, simulateREs = "conditional"))
   expect_no_error(res2 <- simulateResiduals(fittedModel, simulateREs = "unconditional"))
-  expect_no_error(res3 <- simulateResiduals(fittedModel, simulateREs = "user-specified", re.form = ~(1|group)))
+  expect_no_error(res3 <- simulateResiduals(fittedModel, simulateREs = "user-specified"))
+  expect_no_error(res4 <- simulateResiduals(fittedModel, simulateREs = "user-specified", re.form = ~(1|group)))
+
+  expect_equal(residuals(res1), residuals(res4))
+  expect_equal(residuals(res2), residuals(res3))
 
 })
 
@@ -36,7 +40,11 @@ test_that("Conditional, unconditional and user-specified simulations work for sp
 
   expect_no_error(res1 <- simulateResiduals(fittedModel, simulateREs = "conditional"))
   expect_no_error(res2 <- simulateResiduals(fittedModel, simulateREs = "unconditional"))
-  expect_no_error(res3 <- simulateResiduals(fittedModel, simulateREs = "user-specified", re.form = ~(1|group)))
+  expect_no_error(res3 <- simulateResiduals(fittedModel, simulateREs = "user-specified"))
+  expect_no_error(res4 <- simulateResiduals(fittedModel, simulateREs = "user-specified", re.form = ~(1|group)))
+
+  expect_equal(residuals(res1), residuals(res4))
+  expect_equal(residuals(res2), residuals(res3))
 
 })
 
@@ -48,6 +56,24 @@ test_that("Conditional, unconditional and user-specified simulations work for gl
 
   expect_no_error(res1 <- simulateResiduals(fittedModel, simulateREs = "conditional"))
   expect_no_error(res2 <- simulateResiduals(fittedModel, simulateREs = "unconditional"))
-  expect_error(res3 <- simulateResiduals(fittedModel, simulateREs = "user-specified", re.form = ~(1|group)))
+  expect_no_error(res3 <- simulateResiduals(fittedModel, simulateREs = "user-specified"))
+  expect_error(res4 <- simulateResiduals(fittedModel, simulateREs = "user-specified", re.form = ~(1|group)))
+
+  expect_equal(residuals(res2), residuals(res3))
+
+})
+
+
+test_that("Conditional, unconditional and user-specified simulations work for GLMMadaptive", {
+
+  testData = createData(family = binomial())
+  fittedModel <- GLMMadaptive::mixed_model(fixed = observedResponse ~ Environment1, random = ~1|group, data = testData, family = binomial)
+
+  expect_no_error(res1 <- simulateResiduals(fittedModel, simulateREs = "conditional"))
+  expect_no_error(res2 <- simulateResiduals(fittedModel, simulateREs = "unconditional"))
+  expect_no_error(res3 <- simulateResiduals(fittedModel, simulateREs = "user-specified"))
+
+  expect_equal(residuals(res2), residuals(res3))
+  expect_error(expect_equal(residuals(res1), residuals(res2)))
 
 })
