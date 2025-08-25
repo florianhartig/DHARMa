@@ -246,7 +246,8 @@ Summary of the syntax for supported packages (this is only relevant for simulate
 | lme4               | `re.form = NA` (default)| `re.form = NULL`             | `re.form = ~(1 | group)`      |
 | spaMM              | `re.form = NA` (default)| `re.form = NULL`             | `re.form = ~(1 | group)`      |
 | glmmTMB            | `set_simcodes(model$obj, val = "random", terms = "ALL")`, then `simulate(model)` (default)| `set_simcodes(model$obj, val = "fix", terms = "ALL")`, then `simulate(model)`            | not available|
-| GLMMadaptive       | `type = "subject-specific"` (default)| `type = "mean_subject"`|not available|
+| GLMMadaptive       | `type = "mean_subject"`| `type = "subject_specific"` (default)    |not available|
+| mgcv               | not available           | default                      |not available|
 
 
 
@@ -302,14 +303,14 @@ So far, all shown DHARMa results were calculated for a correctly specified model
 
 GL(M)Ms often display over/underdispersion, which means that residual variance is larger/smaller than expected under the fitted model. This phenomenon is most common for GLM families with constant (fixed) dispersion, in particular for Poisson and binomial models, but it can also occur in GLM families that adjust the variance (such as the beta or negative binomial) when distribution assumptions are violated. A few general rules of thumb about dealing with dispersion problems:
 
--   Dispersion is a property of the residuals, i.e. you can detect dispersion problems only AFTER fitting the model. It doesn't make sense to look at the dispersion of your response variable
--   Overdispersion is more common than underdispersion
--   If overdispersion is present, the main effect is that confidence intervals tend to be too narrow, and p-values to small, leading to inflated type I error. The opposite is true for underdispersion, i.e. the main issue of underdispersion is that you loose power.
--   A common reason for overdispersion is a misspecified model. When overdispersion is detected, one should therefore first search for problems in the model specification (e.g. by plotting residuals against predictors with DHARMa), and only if this doesn't lead to success, overdispersion corrections such as observation-level random effects or changes in the distribution should be applied
+-   Dispersion is a property of the residuals, i.e. you can detect dispersion problems only AFTER fitting the model. It doesn't make sense to look at the dispersion of your response variable.
+-   Overdispersion is more common than underdispersion.
+-   If overdispersion is present, the main effect is that confidence intervals tend to be too narrow, and p-values too small, leading to inflated type I error. The opposite is true for underdispersion, i.e. the main issue of underdispersion is that you loose power.
+-   A common reason for overdispersion is a misspecified model. When overdispersion is detected, one should therefore first search for problems in the model specification (e.g. by plotting residuals against predictors with DHARMa), and only if this doesn't lead to success, overdispersion corrections such as observation-level random effects or changes in the distribution should be applied.
 
 ### Residual patterns of over/underdispersion
 
-This is how **overdispersion** looks like in the DHARMa residuals. Note that we get more residuals around 0 and 1, which means that more residuals are in the tail of distribution than would be expected under the fitted model.
+This is how **overdispersion** looks like in the DHARMa residuals. Note that we get more residuals around 0 and 1, which means that more residuals are in the tail of the distribution than would be expected under the fitted model.
 
 ```{r}
 testData = createData(sampleSize = 200, overdispersion = 1.5, family = poisson())
@@ -343,9 +344,9 @@ From a technical side, underdispersion is not as concerning as overdispersion, a
 
 Although, as discussed above, over/underdispersion will show up in the residuals, and it's possible to detect it with the testUniformity function, simulations show that this test is less powerful than more targeted tests. DHARMa contains several overdispersion tests that compare the dispersion of simulated residuals to the observed residuals.
 
-1.  *default:* a non-parametric test that compares the variance of the simulated residuals to the observed residuals (default), which has some analogy to the variance test implemented in aer::dispersiontest
-2.  *PearsonChisq:* alternatively, DHARMa implements the Pearson-chi2 test that is popular in the literature, suggested in the glmm Wiki, and implemented in some other R packages such as performance::check_overdispersion
-3.  *refit* if residual simulations are done via refit, DHARMa will compare the the Pearson residuals of the re-fitted simulations to the original Pearson residuals. This is essentially a nonparametric version of test 2.
+1.  *default:* a non-parametric test that compares the variance of the simulated residuals to the observed residuals (default), which has some analogy to the variance test implemented in aer::dispersiontest.
+2.  *PearsonChisq:* alternatively, DHARMa implements the Pearson-chi2 test that is popular in the literature, suggested in the glmm Wiki, and implemented in some other R packages such as performance::check_overdispersion.
+3.  *refit:* if residual simulations are done via refit, DHARMa will compare the Pearson residuals of the re-fitted simulations to the original Pearson residuals. This is essentially a non-parametric version of test 2.
 
 All of these tests are included in the testDispersion function, see ?testDispersion for details.
 
@@ -353,15 +354,17 @@ All of these tests are included in the testDispersion function, see ?testDispers
 testDispersion(simulationOutput)
 ```
 
-IMPORTANT INFO: we have made extensive simulations, which have shown that the various tests have certain advantages and disadvantages. The basic results are that:
+**IMPORTANT INFO:** we have made extensive simulations (see Leite M.S., Rettelbach, D. and Hartig, F. (2025)), which have shown that the various tests have certain advantages and disadvantages. The basic results are that:
 
--   The most powerful and reliable test is option 3, but this costs a lot of time and is not available for all regression packages, as it requires that Pearson residuals are available
+-   The most powerful and reliable test is option 3, but this costs a lot of time and is not available for all regression packages, as it requires that Pearson residuals are available.
 -   Option 2, the parametric Pearson-chi2, is fast if Pearson residuals are available, but based on a naive expectation of df (counts RE as 1 df) and the test statistic is thus biased towards underdispersion for mixed models. Similar to the df approximation, bias increases with the number of RE levels. When testing only for overdispersion (alternative = "greater"), this makes the test more conservative, but it also costs power.
--   The DHARMa default option 1 is fast, nearly unbiased (i.e. you can test under and overdispersion), and only slightly less powerful as test 3, PROVIDED that simulations are made conditional on the fitted REs. Conditional simulations are the default since DHARMa 0.4.8. Power compared to the parametric Pearson-chi2 test depends on the number of RE levels, it will be more powerful for a typical number of RE levels.
+-   The DHARMa default option 1 is fast, nearly unbiased (i.e. you can test under- and overdispersion), and only slightly less powerful than test 3, PROVIDED that simulations are made conditional on the fitted REs. Power compared to the parametric Pearson-chi2 test depends on the number of RE levels, it will be more powerful for a typical number of RE levels.
 
 As support for these statements, here results of the simulation, which compares the uniform (KS) test with the standard simulation-based test (conditional and unconditional) and the Pearson-chi2 test (two-sided and greater) for an n=200 Poisson GLMM with 30 RE levels.
 
 <img src="dispersion.png" class="center" width="700"/>
+
+**Note:** Conditional simulations are the default as of DHARMa 0.4.8. The problem with unconditional simulations is that they introduce additional variance in the simulated response by also re-simulating the lower-level stochastic process (random effects). This variability strongly reduces the power of the dispersion test. On the contrary, re-simulating conditional on the fitted random effects acts only at the higher-level stochastic process, the distribution (e.g. Poisson or binomial proportion). As over/underdispersion is a problem at the distribution-level, conditional simulations are the more adequate basis for dispersion tests, and results in substantially higher test power and sensitivity.
 
 Thus, my current recommendation is: for most users, use the default DHARMa test with conditional simulations.
 

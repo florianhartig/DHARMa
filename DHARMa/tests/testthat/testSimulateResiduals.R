@@ -77,3 +77,15 @@ test_that("Conditional, unconditional and user-specified simulations work for GL
   expect_error(expect_equal(residuals(res1), residuals(res2)))
 
 })
+
+
+test_that("Simulations work for mgcv::gam", {
+
+  testData = createData(family = gaussian())
+  fittedModel <- mgcv::gam(observedResponse ~ s(Environment1) + s(group, bs = "re"), data = testData)
+
+  expect_no_error(res1 <- simulateResiduals(fittedModel, simulateREs = "conditional"))
+  expect_warning(res2 <- simulateResiduals(fittedModel, simulateREs = "unconditional"))
+  expect_no_error(res3 <- simulateResiduals(fittedModel, simulateREs = "user-specified"))
+
+})

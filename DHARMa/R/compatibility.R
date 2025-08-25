@@ -447,6 +447,9 @@ getPearsonResiduals.gam <- function (object, ...){
 getSimulations.gam <- function(object, nsim = 1, simulateREs = c("conditional", "unconditional", "user-specified"), type = c("normal", "refit"), mgcViz = TRUE, ...){
 
   type <- match.arg(type)
+  simulateREs = match.arg(simulateREs)
+
+  if(simulateREs == "unconditional") warning("DHARMa: Unconditional simulations are not available for gam. Note that simulations from your model will be conditional on the fitted random effects.")
 
   if(length(find.package("mgcViz")) > 0 & mgcViz == T){
 
@@ -718,6 +721,8 @@ getSimulations.MixMod <- function(object, nsim = 1, simulateREs = c("conditional
 
   if ("weights" %in% names(object)) warning(weightsWarning)
 
+  if("re.form" %in% names(list(...))) warning("DHARMa: re.form is not available for GLMMadaptive mixed models. If you wish to switch to unconditional simulations, please use simulateREs = \"unconditional\".")
+
   type <- match.arg(type)
   simulateREs <- match.arg(simulateREs)
 
@@ -730,12 +735,12 @@ getSimulations.MixMod <- function(object, nsim = 1, simulateREs = c("conditional
 
   # conditional
   if (simulateREs == "conditional"){
-    out = simulate(object, nsim = nsim , type = "mean_subject", ...)
+    out = simulate(object, nsim = nsim , type = "subject_specific", ...)
   }
 
   # unconditional
   if (simulateREs == "unconditional"){
-    out = simulate(object, nsim = nsim , type = "subject_specific", ...)
+    out = simulate(object, nsim = nsim , type = "mean_subject", ...)
   }
 
 
