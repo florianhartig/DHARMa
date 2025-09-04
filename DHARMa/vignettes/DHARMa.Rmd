@@ -236,7 +236,7 @@ Note also that refit = TRUE can sometimes run into numerical problems, if the fi
 
 The second option is the treatment of the stochastic hierarchy. In a hierarchical model, several layers of stochasticity are placed on top of each other. Specifically, in a GLMM, we have a lower level stochastic process (random effect), whose result enters into a higher level (e.g. Poisson distribution). For other hierarchical models, such as state-space models, similar considerations apply, but the hierarchy can be more complex. When simulating, we have to decide if we want to re-simulate all stochastic levels, or only a subset of those. For example, in a GLMM, it is common to only simulate the last stochastic level (e.g. Poisson) conditional on the fitted random effects, meaning that the random effects are set on the fitted values.
 
-As of DHARMa 0.4.8, the default is conditional simulation on all random effects of the fitted model. Setting simulateREs = "user-specified" allows you to return to the previous DHARMa default, which used the respective default setting for the simulate function of your model class. Then the simulateResiduals function allows to pass on parameters to the simulate function of the fitted model object, using its respective syntax. It further allows to specify only a subset of random effects to be conditioned on, but note that this is not possible for all model classes.
+As of DHARMa 0.4.8, the default is conditional simulation on all random effects of the fitted model. Setting simulateREs = "user-specified" allows you to return to the previous DHARMa default, which used the respective default setting for the simulate function of your model class. Then the simulateResiduals function allows users to pass on parameters to the simulate function of the fitted model object, using its respective syntax. It further allows to specify only a subset of random effects to be conditioned on, but note that this is not possible for all model classes.
 
 Summary of the syntax for supported packages (this is only relevant for simulateREs = "user-specified"):
 
@@ -493,7 +493,6 @@ testData = createData(sampleSize = 200, intercept = 1, fixedEffects = c(1,2),
 fittedModel <- glmer(observedResponse ~ Environment1 + Environment2 + (1|group),
                      family = "poisson", data = testData)
 simulationOutput <- simulateResiduals(fittedModel = fittedModel)
-# plotConventionalResiduals(fittedModel)
 plot(simulationOutput, quantreg = TRUE)
 # testUniformity(simulationOutput = simulationOutput)
 ```

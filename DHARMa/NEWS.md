@@ -3,7 +3,9 @@ NOTE: for more news about the package, see https://github.com/florianhartig/DHAR
 # DHARMa 0.4.8
 
 
+## Major changes
 
+** For hierarchical models, we changed the default simulations from the supported model's default (mostly unconditional) to conditional simulations (for most of the supported models and packages). This represent a major change in the calculated scaled residuals and is implemented to ensure more power in dispersion and other tests. We expect different results for calculated residuals using this or older `DHARMa` versions. For compatibility you can use the argument `simulateREs  = "user-specified"` to change back to the model's default (older `DHARMa` versions). See package vignette for more details.  
 
 ## Bugfixes
 
