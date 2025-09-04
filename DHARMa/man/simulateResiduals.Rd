@@ -73,11 +73,14 @@ simulationOutput1 <- simulateResiduals(fittedModel = fittedModel)
 plot(simulationOutput1)
 
 # simulate residuals unconditional on the fitted random effects (REs are re-simulated)
-simulationOutput2 <- simulateResiduals(fittedModel = fittedModel, simulateREs = "unconditional")
+simulationOutput2 <- simulateResiduals(fittedModel = fittedModel,
+                                       simulateREs = "unconditional")
 plot(simulationOutput2)
 
 # simulate residuals user-specified using lme4 syntax (e.g. conditional only on a specific RE)
-simulationOutput3 <- simulateResiduals(fittedModel = fittedModel, simulateREs = "user-specified", re.form = ~(1|group))
+simulationOutput3 <- simulateResiduals(fittedModel = fittedModel,
+                                       simulateREs = "user-specified",
+                                       re.form = ~(1|group))
 plot(simulationOutput3)
 
 # one of the possible test, for other options see ?testResiduals / vignette

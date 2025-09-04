@@ -6,7 +6,8 @@ fittedModel <- glmer(observedResponse ~ Environment1 + (1|group),
                      family = "poisson", data = testData)
 simulationOutput <- simulateResiduals(fittedModel = fittedModel)
 
-# default DHARMa dispersion test using simulations conditional on fitted REs (more powerful for mixed models)
+# default DHARMa dispersion test using simulations conditional on fitted REs
+# (more powerful for mixed models)
 testDispersion(simulationOutput)
 testDispersion(simulationOutput, alternative = "less", plot = FALSE) # only underdispersion
 testDispersion(simulationOutput, alternative = "greater", plot = FALSE) # only overdispersion
