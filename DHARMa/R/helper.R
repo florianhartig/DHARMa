@@ -109,8 +109,8 @@ getQuantile <- function(simulations, observed, integerResponse,
       }
       else if(is.matrix(rotation)) L <- t(chol(rotation))
       else stop("DHARMa::getQuantile - wrong argument to rotation parameter.")
-      observed <- solve(L, observed)
-      simulations = apply(simulations, 2, function(a) solve(L, a))
+      observed <- forwardsolve(L, observed)
+      simulations = forwardsolve(L, simulations)
     }
 
     scaledResiduals = rep(NA, n)
