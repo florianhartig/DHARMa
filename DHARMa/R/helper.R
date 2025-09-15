@@ -112,13 +112,20 @@ getQuantile <- function(simulations, observed, integerResponse,
       observed <- forwardsolve(L, observed)
       simulations = forwardsolve(L, simulations)
     }
+    less_than <- rowMeans(simulations < observed)
+    less_equal <- rowMeans(simulations <= observed)
 
-    scaledResiduals = rep(NA, n)
-    for (i in 1:n){
-      minSim <- mean(simulations[i,] < observed[i])
-      maxSim <- mean(simulations[i,] <= observed[i])
-      if (minSim == maxSim) scaledResiduals[i] = minSim
-      else scaledResiduals[i] = runif(1, minSim, maxSim)
+    # Identify where randomization is needed
+    needs_random <- less_than != less_equal
+    scaledResiduals <- less_than
+
+    if(any(needs_random)) {
+      random_indices <- which(needs_random)
+      scaledResiduals[random_indices] <- runif(
+        length(random_indices), 
+        less_than[random_indices], 
+        less_equal[random_indices]
+      )
     }
   }
 
