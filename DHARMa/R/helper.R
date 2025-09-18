@@ -112,7 +112,7 @@ getQuantile <- function(simulations, observed, integerResponse,
       observed <- forwardsolve(L, observed)
       simulations = forwardsolve(L, simulations)
     }
-    less_than <- rowMeans(simulations < observed)
+    less_than <- unname(rowMeans(simulations < observed))
     less_equal <- rowMeans(simulations <= observed)
 
     # Identify where randomization is needed
