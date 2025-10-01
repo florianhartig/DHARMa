@@ -507,7 +507,7 @@ getSimulations.gam <- function(object, nsim = 1, simulateREs = c("conditional", 
 #' @rdname getSimulations
 #' @export
 
-getSimulations.lmerMod <- function (object, nsim = 1, simulateREs = c("conditional", "unconditional", "user-specified"), type = c("normal", "refit"), ...){
+getSimulations.merMod <- function (object, nsim = 1, simulateREs = c("conditional", "unconditional", "user-specified"), type = c("normal", "refit"), ...){
 
   simulateREs <- match.arg(simulateREs)
 
@@ -735,12 +735,12 @@ getSimulations.MixMod <- function(object, nsim = 1, simulateREs = c("conditional
 
   # conditional
   if (simulateREs == "conditional"){
-    out = simulate(object, nsim = nsim , type = "subject_specific", ...)
+    out = simulate(object, nsim = nsim , type = "mean_subject", ...)
   }
 
   # unconditional
   if (simulateREs == "unconditional"){
-    out = simulate(object, nsim = nsim , type = "mean_subject", ...)
+    out = simulate(object, nsim = nsim , type = "subject_specific", ...)
   }
 
 
