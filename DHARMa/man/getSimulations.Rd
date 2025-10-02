@@ -5,7 +5,7 @@
 \alias{getSimulations.default}
 \alias{getSimulations.negbin}
 \alias{getSimulations.gam}
-\alias{getSimulations.lmerMod}
+\alias{getSimulations.merMod}
 \alias{getSimulations.glmmTMB}
 \alias{getSimulations.HLfit}
 \alias{getSimulations.MixMod}
@@ -28,7 +28,7 @@ getSimulations(object, nsim = 1, simulateREs = c("conditional",
   simulateREs = c("conditional", "unconditional", "user-specified"),
   type = c("normal", "refit"), mgcViz = TRUE, ...)
 
-\method{getSimulations}{lmerMod}(object, nsim = 1,
+\method{getSimulations}{merMod}(object, nsim = 1,
   simulateREs = c("conditional", "unconditional", "user-specified"),
   type = c("normal", "refit"), ...)
 

@@ -73,8 +73,8 @@ test_that("Conditional, unconditional and user-specified simulations work for GL
   expect_no_error(res2 <- simulateResiduals(fittedModel, simulateREs = "unconditional"))
   expect_no_error(res3 <- simulateResiduals(fittedModel, simulateREs = "user-specified"))
 
-  expect_equal(residuals(res1), residuals(res3))
-  expect_error(expect_equal(residuals(res2), residuals(res3)))
+  expect_equal(residuals(res2), residuals(res3))
+  expect_error(expect_equal(residuals(res1), residuals(res3)))
   expect_error(expect_equal(residuals(res1), residuals(res2)))
 
 })
