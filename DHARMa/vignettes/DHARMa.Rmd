@@ -246,7 +246,7 @@ Summary of the syntax for supported packages (this is only relevant for simulate
 | lme4               | `re.form = NA` (default)| `re.form = NULL`             | `re.form = ~(1 | group)`      |
 | spaMM              | `re.form = NA` (default)| `re.form = NULL`             | `re.form = ~(1 | group)`      |
 | glmmTMB            | `set_simcodes(model$obj, val = "random", terms = "ALL")`, then `simulate(model)` (default)| `set_simcodes(model$obj, val = "fix", terms = "ALL")`, then `simulate(model)`            | not available|
-| GLMMadaptive       | `type = "subject_specific"`| `type = "mean_subject"` (default)    |not available|
+| GLMMadaptive       | `type = "subject_specific"` (default) | `type = "mean_subject"`    |not available|
 | mgcv               | not available           | default                      |not available|
 
 
