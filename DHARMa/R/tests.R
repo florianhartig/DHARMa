@@ -756,7 +756,26 @@ testSpatialAutocorrelation <- function(simulationOutput, x = NULL, y  = NULL, di
     on.exit(par(opar))
 
     col = colorRamp(c("red", "white", "blue"))(simulationOutput$scaledResiduals)
-    plot(x,y, col = rgb(col, maxColorValue = 255), main = out$method, cex.main = 0.8 )
+    layout(matrix(c(1, 2), ncol = 2), widths = c(6, 1))
+
+    # scatterplot
+    par(mar = c(5, 4, 4, 2))
+    plot(x, y,
+         col = rgb(col, maxColorValue = 255),
+         main = out$method, cex.main = 0.8)
+
+    # legend
+    par(mar = c(5, 1, 4, 4))
+    plot.new()
+    plot.window(xlim = c(0, 1), ylim = c(-1, 1))
+
+    legend_image = as.raster(matrix(colorRampPalette(c("blue", "white", "red"))(200), ncol = 1))
+    rasterImage(legend_image,
+                xleft = -0.5, xright = 1,
+                ybottom = 0.3, ytop = 0.9)
+
+    axis(4, at = c(0.3, 0.9), labels = c("-1", "1"), las = 1)
+    mtext("Correlation", side = 3, line = -1)
 
     # TODO implement correlogram
   }
