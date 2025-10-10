@@ -225,7 +225,7 @@ plotResiduals <- function(simulationOutput, form = NULL, quantreg = NULL,
 
   ##### Residual scatter plots #####
 
-  if(is.null(quantreg)) if (length(res) > 2000) quantreg = FALSE else quantreg = TRUE
+  if(is.null(quantreg)) if (length(res) > 10000) quantreg = FALSE else quantreg = TRUE
 
   switchScatter = 10000
   if(is.null(smoothScatter)) if (length(res) > switchScatter) smoothScatter = TRUE else smoothScatter = FALSE
@@ -283,12 +283,11 @@ plotResiduals <- function(simulationOutput, form = NULL, quantreg = NULL,
   if(is.numeric(pred)){
     if(quantreg == FALSE){
       title(main = main, cex.main = 1)
-      abline(h = quantiles, col = "black", lwd = 0.5, lty = 2)
       try({
         lines(smooth.spline(pred, res, df = 10), lty = 2, lwd = 2,
-              col = .Options$DHARMaSignalColor)
-        abline(h = 0.5, col = .Options$DHARMaSignalColor, lwd = 2)
+              col = "black")
       }, silent = TRUE)
+      message("plotResiduals() for datasets larger than 10,000 displays a spline instead of quantile regression lines for the sake of speed. To switch back to quantile regression lines, use the argument quantreg = T and have in mind that the function may take a while to compute and display the lines.")
     }else{
 
       out = testQuantiles(res, pred, quantiles = quantiles, plot = FALSE,
