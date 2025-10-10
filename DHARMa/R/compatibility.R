@@ -735,12 +735,12 @@ getSimulations.MixMod <- function(object, nsim = 1, simulateREs = c("conditional
 
   # conditional
   if (simulateREs == "conditional"){
-    out = simulate(object, nsim = nsim , type = "mean_subject", ...)
+    out = simulate(object, nsim = nsim , type = "subject_specific", new_RE = F, ...)
   }
 
   # unconditional
   if (simulateREs == "unconditional"){
-    out = simulate(object, nsim = nsim , type = "subject_specific", ...)
+    out = simulate(object, nsim = nsim , type = "subject_specific", new_RE = T, ...)
   }
 
 
