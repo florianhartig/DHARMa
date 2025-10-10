@@ -118,15 +118,14 @@ getQuantile <- function(simulations, observed, integerResponse,
     
     lower <- unname(rowMeans(simulations < observed))
     lowerOrEqual <- unname(rowMeans(simulations <= observed))
-    needsRandomization <- less_than != less_equal
+    needsRandomization <- lower != lowerOrEqual
     
     if(any(needsRandomization)) {
       scaledResiduals <- ifelse(needsRandomization, 
                                 runif(length(lower), lower, lowerOrEqual), 
                                 lower)
-    } else {
-      scaledResiduals = lower
-    }
+    } else scaledResiduals = lower
+  }
   return(scaledResiduals)
 }
 
