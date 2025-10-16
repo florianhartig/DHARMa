@@ -93,6 +93,7 @@ getObservedResponse <- function (object, ...) {
 #'
 #' @param object a fitted model.
 #' @param nsim number of simulations.
+#' @param simulateREs which hierarchical levels should be re-simulated. If \code{conditional}, the simulations are done conditional on all fitted random effects (default). If \code{unconditional}, all hierarchical levels are re-simulated, including the random effects. With \code{user-specified}, the default simulate function of the respective fitted model object is used. See details and [simulateResiduals].
 #' @param type if simulations should be prepared for getQuantile or for refit.
 #' @param ... additional parameters to be passed on, usually to the simulate function of the respective model class.
 #'
@@ -105,13 +106,13 @@ getObservedResponse <- function (object, ...) {
 #'
 #' Note: GLMM and other regression packages often differ in how simulations are produced, and which parameters can be used to modify this behavior.
 #'
-#' One important difference is how to modify which hierarchical levels are held constant, and which are re-simulated. In lme4, this is controlled by the re.form argument (see [lme4::simulate.merMod]). In glmmTMB, the package version 1.1.10 has a temporary solution to simulate conditional to all random effects (see [glmmTMB::set_simcodes] val = "fix", and issue [#888](https://github.com/glmmTMB/glmmTMB/issues/888) in glmmTMB GitHub repository. For other packages, please consult the help.
+#' One important difference is how to modify which hierarchical levels are held constant, and which are re-simulated. The default as of DHARMa 0.4.8 is to simulate conditional on all fitted random effects. To return to the previous DHARMa default, please set simulateREs = "user-specified". This allows you to use the syntax of the simulate function of the respective model class when switching between conditional and unconditional simulations. For details, please see vignette, [simulateResiduals] or consult the help of the different packages.
 #'
 #' If the model was fit with weights and the respective model class does not include the weights in the simulations, getSimulations will throw a warning. The background is if weights are used on the likelihood directly, then what is fitted is effectively a pseudo likelihood, and there is no way to directly simulate from the specified likelihood. Whether or not residuals can be used in this case depends very much on what is tested and how weights are used. I'm sorry to say that it is hard to give a general recommendation, you have to consult someone that understands how weights are processed in the respective model class.
 #'
 #' @author Florian Hartig
 #' @export
-getSimulations <- function (object, nsim = 1 , type = c("normal", "refit"), ...) {
+getSimulations <- function (object, nsim = 1, simulateREs = c("conditional", "unconditional", "user-specified"), type = c("normal", "refit"), ...) {
   UseMethod("getSimulations", object)
 }
 
@@ -269,11 +270,11 @@ getRefit.default <- function (object, newresp, ...){
 
 #' @rdname getSimulations
 #' @export
-getSimulations.default <- function (object, nsim = 1, type = c("normal", "refit"), ...){
+getSimulations.default <- function (object, nsim = 1, simulateREs = c("conditional", "unconditional", "user-specified"), type = c("normal", "refit"), ...){
 
   type <- match.arg(type)
 
-  out = simulate(object, nsim = nsim , ...)
+  out = simulate(object, nsim = nsim, ...)
 
   if (type == "normal"){
     if(family(object)$family %in% c("binomial", "betabinomial")){
@@ -404,7 +405,7 @@ hasWeigths.lm <- function(object, ...){
 
 #' @rdname getSimulations
 #' @export
-getSimulations.negbin<- function (object, nsim = 1, type = c("normal", "refit"), ...){
+getSimulations.negbin<- function (object, nsim = 1, simulateREs = c("conditional", "unconditional", "user-specified"), type = c("normal", "refit"), ...){
   type <- match.arg(type)
   if("(weights)" %in% colnames(model.frame(object))) warning(weightsWarning)
   getSimulations.default(object = object, nsim = nsim, type = type, ...)
@@ -443,9 +444,12 @@ getPearsonResiduals.gam <- function (object, ...){
 #' @rdname getSimulations
 #' @param mgcViz whether simulations should be created with mgcViz (if mgcViz is available)
 #' @export
-getSimulations.gam <- function(object, nsim = 1, type = c("normal", "refit"), mgcViz = TRUE, ...){
+getSimulations.gam <- function(object, nsim = 1, simulateREs = c("conditional", "unconditional", "user-specified"), type = c("normal", "refit"), mgcViz = TRUE, ...){
 
   type <- match.arg(type)
+  simulateREs = match.arg(simulateREs)
+
+  if(simulateREs == "unconditional") warning("DHARMa: Unconditional simulations are not available for gam. Note that simulations from your model will be conditional on the fitted random effects.")
 
   if(length(find.package("mgcViz")) > 0 & mgcViz == T){
 
@@ -502,10 +506,33 @@ getSimulations.gam <- function(object, nsim = 1, type = c("normal", "refit"), mg
 
 #' @rdname getSimulations
 #' @export
-getSimulations.lmerMod <- function (object, nsim = 1, type = c("normal", "refit"), ...){
+
+getSimulations.merMod <- function (object, nsim = 1, simulateREs = c("conditional", "unconditional", "user-specified"), type = c("normal", "refit"), ...){
+
+  simulateREs <- match.arg(simulateREs)
 
   if("(weights)" %in% colnames(model.frame(object))) warning(weightsWarning)
-  getSimulations.default(object = object, nsim = nsim, type = type, ...)
+
+  if(simulateREs != "user-specified" & "re.form" %in% names(list(...))) stop("DHARMa: If you want to specify certain random effects to condition on, you need to set simulateREs = \"user-specified\".")
+
+  out = NULL
+
+  # user-specified (as before)
+  if (simulateREs == "user-specified") {
+    out = getSimulations.default(object = object, nsim = nsim, type = type, ...)
+  }
+
+  # conditional
+  if (simulateREs == "conditional") {
+    out = getSimulations.default(object = object, nsim = nsim, type = type, re.form = NULL, ...)
+  }
+
+  # unconditional
+  if (simulateREs == "unconditional") {
+    out = getSimulations.default(object = object, nsim = nsim, type = type, re.form = NA, ...)
+  }
+
+  return(out)
 }
 
 
@@ -535,14 +562,40 @@ getRefit.glmmTMB <- function(object, newresp, ...){
 
 #' @rdname getSimulations
 #' @export
-getSimulations.glmmTMB <- function (object, nsim = 1, type = c("normal", "refit"), ...){
+getSimulations.glmmTMB <- function (object, nsim = 1, simulateREs = c("conditional", "unconditional", "user-specified"), type = c("normal", "refit"), ...){
 
   type <- match.arg(type)
+  simulateREs <- match.arg(simulateREs)
+
   if("(weights)" %in% colnames(model.frame(object)) & ! family(object)$family %in% c("binomial", "betabinomial")) warning(weightsWarning)
 
-  type <- match.arg(type)
+  out = NULL
 
-  out = simulate(object, nsim = nsim, ...)
+  # user-specified (as before)
+  if(simulateREs == "user-specified") {
+    out = simulate(object, nsim = nsim, ...)
+  }
+
+  # conditional
+  if(simulateREs == "conditional") {
+    out = tryCatch(
+      {
+        glmmTMB::set_simcodes(object$obj, val = "fix", terms = "ALL")
+        simulate(object, nsim = nsim, ...)
+      },
+      error = function(e){
+        message("Conditional simulations are not yet implemented for glmmTMB models with certain (spatial) covariance structures. DHARMa will fall back to unconditional simulations for your model.")
+        glmmTMB::set_simcodes(object$obj, val = "random", terms = "ALL")
+        out = simulate(object, nsim = nsim, ...)
+      }
+    )
+  }
+
+  # unconditional
+  if(simulateREs == "unconditional") {
+    glmmTMB::set_simcodes(object$obj, val = "random", terms = "ALL")
+    out = simulate(object, nsim = nsim, ...)
+  }
 
   if (type == "normal"){
     if (is.matrix(out[[1]])){
@@ -616,11 +669,27 @@ getObservedResponse.HLfit <- function(object, ...){
 
 #' @rdname getSimulations
 #' @export
-getSimulations.HLfit <- function(object, nsim = 1, type = c("normal", "refit"), ...){
+getSimulations.HLfit <- function(object, nsim = 1, simulateREs = c("conditional", "unconditional", "user-specified"), type = c("normal", "refit"), ...){
 
   type <- match.arg(type)
+  simulateREs <- match.arg(simulateREs)
 
-  capture.output({out = simulate(object, nsim = nsim, ...)})
+  if(simulateREs != "user-specified" & "re.form" %in% names(list(...))) stop("DHARMa: If you want to specify certain random effects to condition on, you need to set simulateREs = \"user-specified\".")
+
+  # user-specified (as before)
+  if(simulateREs == "user-specified"){
+    capture.output({out = simulate(object, nsim = nsim, ...)})
+  }
+
+  # conditional
+  if(simulateREs == "conditional"){
+    capture.output({out = simulate(object, nsim = nsim, re.form = NULL, ...)})
+  }
+
+  # unconditional
+  if(simulateREs == "unconditional"){
+    capture.output({out = simulate(object, nsim = nsim, re.form = NA, ...)})
+  }
 
   if(type == "normal"){
     if(!is.matrix(out)) out = data.matrix(out)
@@ -648,13 +717,32 @@ getFitted.HLfit <- function (object,...){
 
 #' @rdname getSimulations
 #' @export
-getSimulations.MixMod <- function(object, nsim = 1, type = c("normal", "refit"), ...){
+getSimulations.MixMod <- function(object, nsim = 1, simulateREs = c("conditional", "unconditional", "user-specified"), type = c("normal", "refit"), ...){
 
   if ("weights" %in% names(object)) warning(weightsWarning)
 
-  type <- match.arg(type)
+  if("re.form" %in% names(list(...))) warning("DHARMa: re.form is not available for GLMMadaptive mixed models. If you wish to switch to unconditional simulations, please use simulateREs = \"unconditional\".")
 
-  out = simulate(object, nsim = nsim , ...)
+  type <- match.arg(type)
+  simulateREs <- match.arg(simulateREs)
+
+  out = NULL
+
+  # user-specified (as before)
+  if (simulateREs == "user-specified"){
+    out = simulate(object, nsim = nsim , ...)
+  }
+
+  # conditional
+  if (simulateREs == "conditional"){
+    out = simulate(object, nsim = nsim , type = "subject_specific", new_RE = F, ...)
+  }
+
+  # unconditional
+  if (simulateREs == "unconditional"){
+    out = simulate(object, nsim = nsim , type = "subject_specific", new_RE = T, ...)
+  }
+
 
   if(type == "normal"){
     if(!is.matrix(out)) out = data.matrix(out)
@@ -708,7 +796,7 @@ getObservedResponse.phylolm <- function (object, ...){
 
 #' @rdname getSimulations
 #' @export
-getSimulations.phylolm <- function(object, nsim = 1, type = c("normal", "refit"),
+getSimulations.phylolm <- function(object, nsim = 1, simulateREs = c("conditional", "unconditional", "user-specified"), type = c("normal", "refit"),
                                     ...){
   type <- match.arg(type)
 
@@ -762,6 +850,7 @@ getObservedResponse.phyloglm <- function (object, ...){
 #' @rdname getSimulations
 #' @export
 getSimulations.phyloglm <- function(object, nsim = 1,
+                                    simulateREs = c("conditional", "unconditional", "user-specified"),
                                     type = c("normal", "refit"), ...){
   type <- match.arg(type)
 

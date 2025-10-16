@@ -10,3 +10,5 @@ vignettes/*.pdf
 vignettes/DHARMa_files
 vignettes/DHARMa_cache
 ^revdep$
+^doc$
+^Meta$

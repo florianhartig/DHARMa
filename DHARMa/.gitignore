@@ -2,3 +2,5 @@
 .Rhistory
 .RData
 *_files/
+/doc/
+/Meta/
