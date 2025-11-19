@@ -236,13 +236,22 @@ Note also that refit = TRUE can sometimes run into numerical problems, if the fi
 
 The second option is the treatment of the stochastic hierarchy. In a hierarchical model, several layers of stochasticity are placed on top of each other. Specifically, in a GLMM, we have a lower level stochastic process (random effect), whose result enters into a higher level (e.g. Poisson distribution). For other hierarchical models, such as state-space models, similar considerations apply, but the hierarchy can be more complex. When simulating, we have to decide if we want to re-simulate all stochastic levels, or only a subset of those. For example, in a GLMM, it is common to only simulate the last stochastic level (e.g. Poisson) conditional on the fitted random effects, meaning that the random effects are set on the fitted values.
 
-For controlling how many levels should be re-simulated, the simulateResidual function allows to pass on parameters to the simulate function of the fitted model object. Please refer to the help of the different simulate functions (e.g. ?simulate.merMod) for details. For merMod (lme4) model objects, the relevant parameters are "use.u", and "re.form", as, e.g., in
+As of DHARMa 0.4.8, the default is conditional simulation on all random effects of the fitted model. Setting simulateREs = "user-specified" allows you to return to the previous DHARMa default, which used the respective default setting for the simulate function of your model class. Then the simulateResiduals function allows users to pass on parameters to the simulate function of the fitted model object, using its respective syntax. It further allows to specify only a subset of random effects to be conditioned on, but note that this is not possible for all model classes.
 
-```{r, eval= FALSE}
-simulationOutput <- simulateResiduals(fittedModel = fittedModel, n = 250, use.u = TRUE)
-```
+Summary of the syntax for supported packages (this is only relevant for simulateREs = "user-specified"):
 
-If the model is correctly specified and the fitting procedure is unbiased (disclaimer: GLMM estimators are not always unbiased), the simulated residuals should be flat regardless how many hierarchical levels we re-simulate. The most thorough procedure would be therefore to test all possible options. If testing only one option, I would recommend to re-simulate all levels, because this essentially tests the model structure as a whole. This is the default setting in the DHARMa package. A potential drawback is that re-simulating the random effects creates more variability, which may reduce power for detecting problems in the upper-level stochastic processes, in particular overdispersion (see section on dispersion tests below).
+|                    |                         |                              |                               |
+|:-------------------|:------------------------|:-----------------------------|:------------------------------|
+| **Package**        | **Unconditional**       | **Conditional on all REs**   |**Conditional on specific REs**|
+| lme4               | `re.form = NA` (default)| `re.form = NULL`             | `re.form = ~(1 | group)`      |
+| spaMM              | `re.form = NA` (default)| `re.form = NULL`             | `re.form = ~(1 | group)`      |
+| glmmTMB            | `set_simcodes(model$obj, val = "random", terms = "ALL")`, then `simulate(model)` (default)| `set_simcodes(model$obj, val = "fix", terms = "ALL")`, then `simulate(model)`            | not available|
+| GLMMadaptive       | `type = "subject_specific"`, `new_RE = T` | `type = "subject_specific"` (default) |not available|
+| mgcv               | not available           | default                      |not available|
+
+
+
+If the model is correctly specified and the fitting procedure is unbiased (disclaimer: GLMM estimators are not always unbiased), the simulated residuals should be flat regardless how many hierarchical levels we re-simulate. The most thorough procedure would be therefore to test all possible options. Re-simulating all levels (unconditional) can be advantageous because it tests the model structure as a whole. A potential drawback is that re-simulating the lower-level random effects creates more variability, which may reduce power for detecting problems in the upper-level stochastic processes, in particular overdispersion (see section on dispersion tests below). In particular dispersion tests may produce different results when switching from conditional to unconditional simulations, and often the conditional simulation is more sensitive.
 
 *Note:* Although unconditional residuals implicitly also test the normal distribution of the REs, it is probably not a bad idea to additionally check for normality of the RE distribution. As this is not based on quantile residuals, there is no special DHARMa function for this, so you should just extract the REs, and then run e.g. a Shapiro test.
 
@@ -294,14 +303,14 @@ So far, all shown DHARMa results were calculated for a correctly specified model
 
 GL(M)Ms often display over/underdispersion, which means that residual variance is larger/smaller than expected under the fitted model. This phenomenon is most common for GLM families with constant (fixed) dispersion, in particular for Poisson and binomial models, but it can also occur in GLM families that adjust the variance (such as the beta or negative binomial) when distribution assumptions are violated. A few general rules of thumb about dealing with dispersion problems:
 
--   Dispersion is a property of the residuals, i.e. you can detect dispersion problems only AFTER fitting the model. It doesn't make sense to look at the dispersion of your response variable
--   Overdispersion is more common than underdispersion
--   If overdispersion is present, the main effect is that confidence intervals tend to be too narrow, and p-values to small, leading to inflated type I error. The opposite is true for underdispersion, i.e. the main issue of underdispersion is that you loose power.
--   A common reason for overdispersion is a misspecified model. When overdispersion is detected, one should therefore first search for problems in the model specification (e.g. by plotting residuals against predictors with DHARMa), and only if this doesn't lead to success, overdispersion corrections such as observation-level random effects or changes in the distribution should be applied
+-   Dispersion is a property of the residuals, i.e. you can detect dispersion problems only AFTER fitting the model. It doesn't make sense to look at the dispersion of your response variable.
+-   Overdispersion is more common than underdispersion.
+-   If overdispersion is present, the main effect is that confidence intervals tend to be too narrow, and p-values too small, leading to inflated type I error. The opposite is true for underdispersion, i.e. the main issue of underdispersion is that you loose power.
+-   A common reason for overdispersion is a misspecified model. When overdispersion is detected, one should therefore first search for problems in the model specification (e.g. by plotting residuals against predictors with DHARMa), and only if this doesn't lead to success, overdispersion corrections such as observation-level random effects or changes in the distribution should be applied.
 
 ### Residual patterns of over/underdispersion
 
-This is how **overdispersion** looks like in the DHARMa residuals. Note that we get more residuals around 0 and 1, which means that more residuals are in the tail of distribution than would be expected under the fitted model.
+This is how **overdispersion** looks like in the DHARMa residuals. Note that we get more residuals around 0 and 1, which means that more residuals are in the tail of the distribution than would be expected under the fitted model.
 
 ```{r}
 testData = createData(sampleSize = 200, overdispersion = 1.5, family = poisson())
@@ -335,9 +344,9 @@ From a technical side, underdispersion is not as concerning as overdispersion, a
 
 Although, as discussed above, over/underdispersion will show up in the residuals, and it's possible to detect it with the testUniformity function, simulations show that this test is less powerful than more targeted tests. DHARMa contains several overdispersion tests that compare the dispersion of simulated residuals to the observed residuals.
 
-1.  *default:* a non-parametric test that compares the variance of the simulated residuals to the observed residuals (default), which has some analogy to the variance test implemented in aer::dispersiontest
-2.  *PearsonChisq:* alternatively, DHARMa implements the Pearson-chi2 test that is popular in the literature, suggested in the glmm Wiki, and implemented in some other R packages such as performance::check_overdispersion
-3.  *refit* if residual simulations are done via refit, DHARMa will compare the the Pearson residuals of the re-fitted simulations to the original Pearson residuals. This is essentially a nonparametric version of test 2.
+1.  *default:* a non-parametric test that compares the variance of the simulated residuals to the observed residuals (default), which has some analogy to the variance test implemented in aer::dispersiontest.
+2.  *PearsonChisq:* alternatively, DHARMa implements the Pearson-chi2 test that is popular in the literature, suggested in the glmm Wiki, and implemented in some other R packages such as performance::check_overdispersion.
+3.  *refit:* if residual simulations are done via refit, DHARMa will compare the Pearson residuals of the re-fitted simulations to the original Pearson residuals. This is essentially a non-parametric version of test 2.
 
 All of these tests are included in the testDispersion function, see ?testDispersion for details.
 
@@ -345,17 +354,19 @@ All of these tests are included in the testDispersion function, see ?testDispers
 testDispersion(simulationOutput)
 ```
 
-IMPORTANT INFO: we have made extensive simulations, which have shown that the various tests have certain advantages and disadvantages. The basic results are that:
+**IMPORTANT INFO:** we have made extensive simulations (see Leite M.S., Rettelbach, D. and Hartig, F. (2025)), which have shown that the various tests have certain advantages and disadvantages. The basic results are that:
 
--   The most powerful and reliable test is option 3, but this costs a lot of time and is not available for all regression packages, as it requires that Pearson residuals are available
+-   The most powerful and reliable test is option 3, but this costs a lot of time and is not available for all regression packages, as it requires that Pearson residuals are available.
 -   Option 2, the parametric Pearson-chi2, is fast if Pearson residuals are available, but based on a naive expectation of df (counts RE as 1 df) and the test statistic is thus biased towards underdispersion for mixed models. Similar to the df approximation, bias increases with the number of RE levels. When testing only for overdispersion (alternative = "greater"), this makes the test more conservative, but it also costs power.
--   The DHARMa default option 1 is fast, nearly unbiased (i.e. you can test under and overdispersion), and only slightly less powerful as test 3, PROVIDED that simulations are made conditional on the fitted REs. Note that the latter is not the DHARMa default, so you have to actively request conditional simulations, e.g. for lme4 by specifying re.form = NULL. Power compared to the parametric Pearson-chi2 test depends on the number of RE levels, it will be more powerful for a typical number of RE levels.
+-   The DHARMa default option 1 is fast, nearly unbiased (i.e. you can test under- and overdispersion), and only slightly less powerful than test 3, PROVIDED that simulations are made conditional on the fitted REs. Power compared to the parametric Pearson-chi2 test depends on the number of RE levels, it will be more powerful for a typical number of RE levels.
 
 As support for these statements, here results of the simulation, which compares the uniform (KS) test with the standard simulation-based test (conditional and unconditional) and the Pearson-chi2 test (two-sided and greater) for an n=200 Poisson GLMM with 30 RE levels.
 
 <img src="dispersion.png" class="center" width="700"/>
 
-Thus, my current recommendation is: for most users, use the default DHARMa test, but create simulations conditionally.
+**Note:** Conditional simulations are the default as of DHARMa 0.4.8. The problem with unconditional simulations is that they introduce additional variance in the simulated response by also re-simulating the lower-level stochastic process (random effects). This variability strongly reduces the power of the dispersion test. On the contrary, re-simulating conditional on the fitted random effects acts only at the higher-level stochastic process, the distribution (e.g. Poisson or binomial proportion). As over/underdispersion is a problem at the distribution-level, conditional simulations are the more adequate basis for dispersion tests, and results in substantially higher test power and sensitivity.
+
+Thus, my current recommendation is: for most users, use the default DHARMa test with conditional simulations.
 
 ## Zero-inflation / k-inflation or deficits
 
@@ -482,7 +493,6 @@ testData = createData(sampleSize = 200, intercept = 1, fixedEffects = c(1,2),
 fittedModel <- glmer(observedResponse ~ Environment1 + Environment2 + (1|group),
                      family = "poisson", data = testData)
 simulationOutput <- simulateResiduals(fittedModel = fittedModel)
-# plotConventionalResiduals(fittedModel)
 plot(simulationOutput, quantreg = TRUE)
 # testUniformity(simulationOutput = simulationOutput)
 ```
@@ -528,17 +538,19 @@ library(glmmTMB)
 testData$pos <- numFactor(testData$x, testData$y)
 fittedModel2 <- glmmTMB(observedResponse ~ Environment1 + exp(pos + 0|group), 
                         data = testData, family = poisson())
-simulationOutput2 <- simulateResiduals(fittedModel = fittedModel2)
+simulationOutput2 <- simulateResiduals(fittedModel = fittedModel2, simulateREs = "unconditional")
 testSpatialAutocorrelation(simulationOutput = simulationOutput2, x = testData$x, 
                            y= testData$y)
 # plot(simulationOutput2)
 ```
 
+Note that while glmmTMB supports conditional simulations in general, this is not yet supported for certain (spatial) covariance structures. Thus, we use simulateREs = "unconditional" here. Otherwise DHARMa will give a warning and automatically fall back to unconditional simulations. For further details please refer to the help of glmmTMB.
+
 One of the options to solve it and get correct tests and no residual pattern (if the model is correct) is to rotate the residual space according to the covariance structure of the fitted model, such that the rotated residuals are conditionally independent. The argument rotation in `simulateResiduals` does it (see also `?getQuantile` for details about the rotation options):
 
 ```{r, fig.width=4, fig.height=4}
 # rotation of the residuals 
-simulationOutput3 <- simulateResiduals(fittedModel = fittedModel2,
+simulationOutput3 <- simulateResiduals(fittedModel = fittedModel2, simulateREs = "unconditional",
                                        rotation = "estimated")
 testSpatialAutocorrelation(simulationOutput = simulationOutput3, x = testData$x, 
                            y= testData$y)
@@ -869,7 +881,7 @@ lm and glm and MASS::glm.nb are fully supported.
 
 lme4 model classes are fully supported.
 
-Possible to condition on REs via re.form, see help of predict.merMod
+Possible to condition on specific REs via re.form, see help of predict.merMod, simulate.merMod and ?simulateResiduals.
 
 ## mgcv
 
@@ -883,11 +895,13 @@ Models fitted with gamm4 return a list that contains an lme4 object under the na
 
 ## glmmTMB
 
-glmmTMB is nearly fully supported since DHARMa 0.2.7 and glmmTMB 1.0.0. A remaining limitation is that you can't adjust whether simulations are conditional or not, so simulateResiduals(model, re.form = NULL) will have no effect, simulations will always be done from the full model.
+glmmTMB is nearly fully supported since DHARMa 0.2.7 and glmmTMB 1.0.0. As of DHARMa 0.4.8 there is an implemented option to adjust whether simulations should be conditional on the fitted random effects or not by using the simulateREs argument in simulateResiduals. Conditional simulations are, however, not available for glmmTMB models with certain (spatial) covariance structures.
 
 ## spaMM
 
 spaMM is supported by DHARMa since 0.2.1
+
+Possible to condition on specific REs via re.form, see help of simulate.HLfit and ?simulateResiduals.
 
 ## GLMMadaptive
 
