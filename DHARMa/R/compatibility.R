@@ -386,7 +386,7 @@ getFamily.default <- function (object,...){
 #' @rdname getData
 #' @export
 getData.default <- function (object,...){
-  eval(object$call$data, envir = parent.frame())
+  eval(object$call$data, envir = environment(formula(object)))
 }
 
 
@@ -533,7 +533,7 @@ getSimulations.lmerMod <- function (object, nsim = 1, type = c("normal", "refit"
 #' @rdname getData
 #' @export
 getData.merMod <- function (object, ...){
-  eval(object@call$data, envir = parent.frame())
+  eval(object@call$data, envir = environment(formula(object)))
 }
 
 

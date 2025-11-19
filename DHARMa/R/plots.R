@@ -180,6 +180,7 @@ plotQQunif <- function(simulationOutput, testUniformity = TRUE, testOutliers = T
 #'
 #' @seealso [plotQQunif], [testQuantiles], [testOutliers]
 #' @example inst/examples/plotsHelp.R
+#' @importFrom lattice xyplot bwplot
 #' @export
 plotResiduals <- function(simulationOutput, form = NULL, quantreg = NULL,
                           rank = TRUE, asFactor = NULL, smoothScatter = NULL,

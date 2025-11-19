@@ -76,7 +76,7 @@ testBivariateUniformity <- function(simulationOutput, alternative = c("two.sided
 #' This function fits quantile regressions on the residuals, and compares their location to the expected location.
 #'
 #' @param simulationOutput an object of class DHARMa, either created via [simulateResiduals] for supported models or by [createDHARMa] for simulations created outside DHARMa, or a supported model. Providing a supported model directly is discouraged, because simulation settings cannot be changed in this case.
-#' @param predictor an optional predictor variable to be used, instead of the predicted response (default).
+#' @param predictor an optional predictor variable to be used, instead of the predicted response (default). See details.
 #' @param rank if TRUE, the values provided in predictor will be rank transformed. This will usually make patterns easier to spot visually, especially if the distribution of the predictor is skewed. If form is a factor, this has no effect.
 #' @param quantiles the quantiles to be tested.
 #' @param plot if TRUE, the function will create an additional plot.
@@ -85,6 +85,8 @@ testBivariateUniformity <- function(simulationOutput, alternative = c("two.sided
 #' A significant p-value for the splines means the fitted spline deviates from a flat line at the expected location.
 #'
 #' The p-values of the intercept and splines are combined into a total p-value via Benjamini & Hochberg adjustment to control the FDR.
+#'
+#' Predictor needs to be a variable in your environment (e.g. predictor = your_data$your_predictor). For more details see also the help of form in [plotResiduals].
 #'
 #' When plotting (plot = TRUE), the shaded gray areas indicate 95% confidence intervals of the quantile estimates (1.96 * standard error).
 #'
@@ -145,8 +147,14 @@ testQuantiles <- function(simulationOutput, predictor = NULL, rank = TRUE,
     class(out) = "htest"
 
   } else if(plot == T) {
-    out <- plotResiduals(simulationOutput = simulationOutput, form = predictor,
-                         rank = rank, quantiles = quantiles, quantreg = TRUE)
+    if(is.null(predictor)) {
+      out <- plotResiduals(simulationOutput = simulationOutput, form = NULL,
+                           rank = rank, quantiles = quantiles, quantreg = TRUE)
+    } else {
+      out <- plotResiduals(simulationOutput = simulationOutput, form = predictor,
+                           rank = rank, quantiles = quantiles, quantreg = TRUE)
+      }
+
   }
   return(out)
 }
@@ -759,13 +767,13 @@ testSpatialAutocorrelation <- function(simulationOutput, x = NULL, y  = NULL, di
     layout(matrix(c(1, 2), ncol = 2), widths = c(6, 1))
 
     # scatterplot
-    par(mar = c(5, 4, 4, 2))
+    par(mar = c(5, 4, 4, 1))
     plot(x, y,
          col = rgb(col, maxColorValue = 255),
          main = out$method, cex.main = 0.8)
 
     # legend
-    par(mar = c(5, 1, 4, 4))
+    par(mar = c(1, 0.5, 2, 2))
     plot.new()
     plot.window(xlim = c(0, 1), ylim = c(-1, 1))
 
