@@ -152,7 +152,7 @@ plotQQunif <- function(simulationOutput, testUniformity = TRUE, testOutliers = T
 #' The function creates a generic residual plot with either spline or quantile regression to highlight patterns in the residuals. Outliers are marked in star/asterisk form and highlighted in red if the outlier test is significant.
 #'
 #' @param simulationOutput an object, usually a DHARMa object, from which residual values can be extracted. Alternatively, a vector with residuals or a fitted model can be provided, which will then be transformed into a DHARMa object.
-#' @param form optional predictor against which the residuals should be plotted. Default is to use the predicted(simulationOutput).
+#' @param form optional predictor (and grouping variable) against which the residuals should be plotted. Default is to use the predicted(simulationOutput). See details.
 #' @param quantreg whether to perform a quantile regression based on [testQuantiles] or a smooth spline around the mean. Default NULL chooses T for nObs < 2000, and F otherwise.
 #' @param rank if T, the values provided in form will be rank transformed. This will usually make patterns easier to spot visually, especially if the distribution of the predictor is skewed. If form is a factor, this has no effect.
 #' @param asFactor should a numeric predictor provided in form be treated as a factor. Default is to choose this for < 10 unique values, as long as enough predictions are available to draw a boxplot.
@@ -170,7 +170,7 @@ plotQQunif <- function(simulationOutput, testUniformity = TRUE, testOutliers = T
 #'
 #' The quantile regression can take some time to calculate, especially for larger datasets. For this reason, quantreg = F can be set to generate a smooth spline instead. This is the default for n > 2000.
 #'
-#' If form is a factor, a boxplot will be plotted instead of a scatter plot. The distribution for each factor level should be uniformly distributed, so the box should go from 0.25 to 0.75, with the median line at 0.5 (within-group). To test if deviations from those expectations are significant, KS-tests per group and a Levene test for homogeneity of variances is performed. See [testCategorical] for details.
+#' If form is specified as a formula, e.g. form = ~ your_predictor, NAs will be handled automatically (recommended). If a grouping variable is specified, e.g. form = ~ your_predictor|your_group, a residual plot for every grouping level will be created. If form is not a formula, e.g. form = your_data$your_predictor, NAs are not handled automatically. For phyr and gamm4$mer models, you need to specify form in this way. If the predictor is a factor, a boxplot will be plotted instead of a scatter plot. The distribution for each factor level should be uniformly distributed, so the box should go from 0.25 to 0.75, with the median line at 0.5 (within-group). To test if deviations from those expectations are significant, KS-tests per group and a Levene test for homogeneity of variances is performed. See [testCategorical] for details.
 #'
 #' @note If nObs > 10,000, the scatter plot is replaced by graphics::smoothScatter().
 #'
@@ -193,7 +193,7 @@ plotResiduals <- function(simulationOutput, form = NULL, quantreg = NULL,
   yAxis = ifelse(absoluteDeviation == TRUE, "Residual spread [2*abs(res - 0.5)]", "DHARMa residual")
   a$ylab = checkDots("ylab", yAxis , ...)
   a$xlab = checkDots("xlab", ifelse(is.null(form), "Model predictions",
-                                    gsub(".*[$]","",deparse(substitute(form)))), ...)
+                                    gsub(".*[$]|^~","",deparse(substitute(form)))), ...)
   if(rank == TRUE) a$xlab = paste(a$xlab, "(rank transformed)")
 
   simOut <- simulationOutput
@@ -206,7 +206,81 @@ plotResiduals <- function(simulationOutput, form = NULL, quantreg = NULL,
 
   if(inherits(form, "DHARMa"))stop("DHARMa::plotResiduals > argument form cannot be of class DHARMa. Note that the syntax of plotResiduals has changed since DHARMa 0.3.0. See ?plotResiduals.")
 
-  pred = ensurePredictor(simulationOutput, form)
+  ##### form #####
+  checkForm = substitute(form)
+  if(!is.null(checkForm)) {
+    if (!inherits(form, "formula")) {
+      predictor = form # go back to old default
+      group = NULL
+      if(is.null(predictor)) stop("DHARMA: unable to find specified predictor variable.")
+
+    } else {
+
+      if(simulationOutput$modelClass == "communityPGLMM") stop("DHARMa: to use plotResiduals with phyr models, please return to the old DHARMa default, e.g. form = your_data$your_predictor.")
+
+      allV = all.vars(form)
+      predictorName = allV[[1]]
+      groupName = tryCatch(allV[[2]], error = function(e) NULL)
+
+      modelData = getData(simulationOutput$fittedModel)
+      predictor = modelData[[predictorName]]
+      group = if(!is.null(groupName)) modelData[[groupName]]
+
+      # make predictor (and group) the same length as scaledResiduals
+      rownames = rownames(model.frame(simulationOutput$fittedModel))
+
+      if(length(predictor) != length(simulationOutput$scaledResiduals)) {
+        predictor = predictor[(rownames(modelData) %in% rownames)]
+      }
+
+      if(!is.null(group) && length(group) != length(simulationOutput$scaledResiduals)) {
+        group = group[(rownames(modelData) %in% rownames)]
+      }
+
+      if(is.null(predictor)) stop("DHARMA: unable to extract specified predictor variable from the data frame that was used to fit the model. Further note: if you are using a gamm4 model, please use form = your_data$your_predictor instead of form = ~ your_predictor.")
+    }
+  }
+
+  else {
+    predictor = NULL
+    group = NULL
+  }
+
+  pred = ensurePredictor(simulationOutput, predictor)
+  group = if(!is.null(group)) {ensurePredictor(simulationOutput, group)}
+
+  ##### grid for random effects #####
+  if(!is.null(group)) {
+    if(!is.factor(pred)) {
+      # scatterplots for numeric predictors
+      plot = lattice::xyplot(res ~ pred | group,
+                             xlab = allV[[1]],
+                             ylab = "Scaled Residuals",
+                             panel = function(x, y, subscripts) {
+                               lattice::panel.xyplot(x, y, col = "black")
+                               lattice::panel.abline(h = 0.5, lty = 2)
+                             })
+
+    } else {
+      # boxplots for categorical predictors
+      plot = lattice::bwplot(res ~ pred | group,
+                             xlab = allV[[1]],
+                             ylab = "Scaled Residuals",
+                             par.settings = list(
+                               box.rectangle = list(col = "black"),
+                               box.umbrella  = list(col = "black"),
+                               box.dot       = list(col = "black"),
+                               plot.symbol   = list(col = "black"),
+                               plot.line     = list(col = "black")
+                             ),
+                             panel = function(x, y, subscripts) {
+                               lattice::panel.bwplot(x, y, horizontal = F, pch="|")
+                               lattice::panel.abline(h = 0.5, lty = 2)
+                             })
+    }
+    return(plot)
+  }
+
 
   ##### Rank transform and factor conversion#####
 

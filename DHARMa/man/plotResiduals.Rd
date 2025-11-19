@@ -11,7 +11,7 @@ plotResiduals(simulationOutput, form = NULL, quantreg = NULL,
 \arguments{
 \item{simulationOutput}{an object, usually a DHARMa object, from which residual values can be extracted. Alternatively, a vector with residuals or a fitted model can be provided, which will then be transformed into a DHARMa object.}
 
-\item{form}{optional predictor against which the residuals should be plotted. Default is to use the predicted(simulationOutput).}
+\item{form}{optional predictor (and grouping variable) against which the residuals should be plotted. Default is to use the predicted(simulationOutput). See details.}
 
 \item{quantreg}{whether to perform a quantile regression based on \link{testQuantiles} or a smooth spline around the mean. Default NULL chooses T for nObs < 2000, and F otherwise.}
 
@@ -44,7 +44,7 @@ Overdispersion typically manifests itself as Q1 (0.25) deviating towards 0 and Q
 
 The quantile regression can take some time to calculate, especially for larger datasets. For this reason, quantreg = F can be set to generate a smooth spline instead. This is the default for n > 2000.
 
-If form is a factor, a boxplot will be plotted instead of a scatter plot. The distribution for each factor level should be uniformly distributed, so the box should go from 0.25 to 0.75, with the median line at 0.5 (within-group). To test if deviations from those expectations are significant, KS-tests per group and a Levene test for homogeneity of variances is performed. See \link{testCategorical} for details.
+If form is specified as a formula, e.g. form = ~ your_predictor, NAs will be handled automatically (recommended). If a grouping variable is specified, e.g. form = ~ your_predictor|your_group, a residual plot for every grouping level will be created. If form is not a formula, e.g. form = your_data$your_predictor, NAs are not handled automatically. For phyr and gamm4$mer models, you need to specify form in this way. If the predictor is a factor, a boxplot will be plotted instead of a scatter plot. The distribution for each factor level should be uniformly distributed, so the box should go from 0.25 to 0.75, with the median line at 0.5 (within-group). To test if deviations from those expectations are significant, KS-tests per group and a Levene test for homogeneity of variances is performed. See \link{testCategorical} for details.
 }
 \note{
 If nObs > 10,000, the scatter plot is replaced by graphics::smoothScatter().
