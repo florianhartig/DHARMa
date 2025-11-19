@@ -228,6 +228,21 @@ getFamily <- function (object, ...) {
   UseMethod("getFamily", object)
 }
 
+#' Get model data
+#'
+#' Wrapper to get the data that was used to fit a model.
+#'
+#' @param object a fitted model.
+#' @param ... additional parameters to be passed on.
+#'
+#' @seealso [getObservedResponse], [getSimulations], [getRefit], [getFixedEffects], [getFitted]
+#'
+#' @author Florian Hartig
+#' @export
+getData <- function (object, ...) {
+  UseMethod("getData", object)
+}
+
 # nObs
 
 # default -----------------------------------------------------------------
@@ -368,6 +383,12 @@ getFamily.default <- function (object,...){
   family(object)
 }
 
+#' @rdname getData
+#' @export
+getData.default <- function (object,...){
+  eval(object$call$data, envir = parent.frame())
+}
+
 
 
 ######### LM #############
@@ -506,6 +527,13 @@ getSimulations.lmerMod <- function (object, nsim = 1, type = c("normal", "refit"
 
   if("(weights)" %in% colnames(model.frame(object))) warning(weightsWarning)
   getSimulations.default(object = object, nsim = nsim, type = type, ...)
+}
+
+
+#' @rdname getData
+#' @export
+getData.merMod <- function (object, ...){
+  eval(object@call$data, envir = parent.frame())
 }
 
 
