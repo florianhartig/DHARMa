@@ -31,9 +31,9 @@ The function produces a histogram from a DHARMa output. Outliers are marked in r
 The function calls hist() to create a histogram of the scaled residuals. Outliers are marked red as default but it can be changed by setting \code{options(DHARMaSignalColor = "red")} to a different color. See \code{getOption("DHARMaSignalColor")} for the current setting.
 }
 \examples{
-testData = createData(sampleSize = 200, family = poisson(), 
+testData = createData(sampleSize = 200, family = poisson(),
                       randomEffectVariance = 1, numGroups = 10)
-fittedModel <- glm(observedResponse ~ Environment1, 
+fittedModel <- glm(observedResponse ~ Environment1,
                    family = "poisson", data = testData)
 simulationOutput <- simulateResiduals(fittedModel = fittedModel)
 
@@ -46,7 +46,7 @@ plot(simulationOutput, quantreg = FALSE)
 
 #############  Distribution  ######################
 
-plotQQunif(simulationOutput = simulationOutput, 
+plotQQunif(simulationOutput = simulationOutput,
            testDispersion = FALSE,
            testUniformity = FALSE,
            testOutliers = FALSE)
@@ -61,14 +61,21 @@ plotResiduals(simulationOutput, rank = TRUE, quantreg = FALSE)
 # smooth scatter plot - usually used for large datasets, default for n > 10000
 plotResiduals(simulationOutput, rank = TRUE, quantreg = FALSE, smoothScatter = TRUE)
 
-# residual vs predictors, using explicit values for pred, residual 
-plotResiduals(simulationOutput, form = testData$Environment1, 
+# residual vs predictors, using explicit values for pred, residual
+plotResiduals(simulationOutput, form = ~Environment1,
+              quantreg = FALSE)
+
+# or using the previous DHARMa default
+plotResiduals(simulationOutput, form = testData$Environment1,
               quantreg = FALSE)
 
 # if pred is a factor, or if asFactor = TRUE, will produce a boxplot
-plotResiduals(simulationOutput, form = testData$group)
+plotResiduals(simulationOutput, form = ~group)
 
-# to diagnose overdispersion and heteroskedasticity it can be useful to 
+# plot residuals against a predictor, separate for group levels
+plotResiduals(simulationOutput, form = ~Environment1|group)
+
+# to diagnose overdispersion and heteroskedasticity it can be useful to
 # display residuals as absolute deviation from the expected mean 0.5
 plotResiduals(simulationOutput, absoluteDeviation = TRUE, quantreg = FALSE)
 
@@ -76,7 +83,7 @@ plotResiduals(simulationOutput, absoluteDeviation = TRUE, quantreg = FALSE)
 
 # If you want to plot summaries per group, use
 simulationOutput = recalculateResiduals(simulationOutput, group = testData$group)
-plot(simulationOutput, quantreg = FALSE) 
+plot(simulationOutput, quantreg = FALSE)
 # we see one residual point per RE
 
 
