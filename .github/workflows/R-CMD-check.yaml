@@ -46,7 +46,6 @@ jobs:
         with:
           extra-packages: any::rcmdcheck
           needs: check
-          working-directory: DHARMa
 
       - uses: r-lib/actions/check-r-package@v2
         with:
