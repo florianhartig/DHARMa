@@ -128,13 +128,13 @@ Most functions in DHARMa can be calculated directly on the fitted model object. 
 testDispersion(fittedModel)
 ```
 
-In this case, the randomized quantile residuals are calculated on the fly inside the function call. If you work in this way, however, residual calculation will be repeated by every test / plot you call, and this can take a while. It is therefore highly recommended to first calculate the residuals once, using the simulateResiduals() function
+In this case, the randomized quantile residuals are calculated on the fly inside the function call. If you work in this way, however, residual calculation will be repeated by every test / plot you call, and this can take a while. It is therefore highly recommended to first calculate the residuals once, using the `simulateResiduals()` function
 
 ```{r}
 simulationOutput <- simulateResiduals(fittedModel = fittedModel, plot = FALSE)
 ```
 
-which calculates randomized quantile residuals according to the algorithm discussed above. The function returns an object of class DHARMa, containing the simulations and the scaled residuals, which can later be passed on to all other plots and test functions. When specifying the optional argument plot = TRUE, the standard DHARMa residual plot is displayed directly. The interpretation of the plot will be discussed below. Using the simulateResiduals function has the added benefit that you can modify the way in which residuals are calculated. For example, you may want to change the number of simulations, or the REs to condition on. See ?simulateResiduals and section "simulation options" below for details.
+which calculates randomized quantile residuals according to the algorithm discussed above. The function returns an object of class `DHARMa`, containing the simulations and the scaled residuals, which can later be passed on to all other plots and test functions. When specifying the optional argument `plot = TRUE`, the standard `DHARMa` residual plot is displayed directly. The interpretation of the plot will be discussed below. Using the `simulateResiduals` function has the added benefit that you can modify the way in which residuals are calculated. For example, you may want to change the number of simulations, or the REs to condition on. See `?simulateResiduals` and section "simulation options" below for details.
 
 The calculated (scaled) residuals can be plotted and tested via a number of DHARMa functions (see below), or accessed directly via
 
@@ -154,11 +154,11 @@ Note: the uniform distribution is the only difference to "conventional" residual
 residuals(simulationOutput, quantileFunction = qnorm, outlierValues = c(-7,7))
 ```
 
-These normal residuals will behave exactly like the residuals of a linear regression. However, for reasons of a) numeric stability with low number of simulations, which makes it necessary to decide on which value outliers are to be transformed and b) my conviction that it is much easier to visually detect deviations from uniformity than normality, DHARMa checks all residuals in the uniform space, and I would personally advise against using the transformation.
+These normal residuals will behave exactly like the residuals of a linear regression. However, for reasons of a) numeric stability with low number of simulations, which makes it necessary to decide on which value outliers are to be transformed and b) my conviction that it is much easier to visually detect deviations from uniformity than normality, `DHARMa` checks all residuals in the uniform space, and I would personally advise against using the transformation.
 
 ## Plotting the scaled residuals
 
-The main plot function for the calculated DHARMa object produced by simulateResiduals() is the plot.DHARMa() function
+The main plot function for the calculated `DHARMa` object produced by `simulateResiduals()` is the `plot.DHARMa()` function
 
 ```{r}
 plot(simulationOutput)
@@ -171,13 +171,13 @@ plotQQunif(simulationOutput) # left plot in plot.DHARMa()
 plotResiduals(simulationOutput) # right plot in plot.DHARMa()
 ```
 
--   plotQQunif (left panel) creates a qq-plot to detect overall deviations from the expected distribution, by default with added tests for correct distribution (KS test), dispersion and outliers. Note that outliers in DHARMa are values that are by default defined as values outside the simulation envelope, not in terms of a particular quantile. Thus, which values will appear as outliers will depend on the number of simulations. If you want outliers in terms of a particular quantile, you can use the outliers() function.
+-   `plotQQunif` (left panel) creates a qq-plot to detect overall deviations from the expected distribution, by default with added tests for correct distribution (KS test), dispersion and outliers. Note that outliers in DHARMa are values that are by default defined as values outside the simulation envelope, not in terms of a particular quantile. Thus, which values will appear as outliers will depend on the number of simulations. If you want outliers in terms of a particular quantile, you can use the `outliers()` `function.
 
--   plotResiduals (right panel) produces a plot of the residuals against the predicted value (or alternatively, other variable). Simulation outliers (data points that are outside the range of simulated values) are highlighted as red stars. These points should be carefully interpreted, because we actually don't know "how much" these values deviate from the model expectation. Note also that the probability of an outlier depends on the number of simulations, so whether the existence of outliers is a reason for concern depends also on the number of simulations.
+-   `plotResiduals` (right panel) produces a plot of the residuals against the predicted value (or alternatively, other variable). Simulation outliers (data points that are outside the range of simulated values) are highlighted as red stars. These points should be carefully interpreted, because we actually don't know "how much" these values deviate from the model expectation. Note also that the probability of an outlier depends on the number of simulations, so whether the existence of outliers is a reason for concern depends also on the number of simulations.
 
 To provide a visual aid in detecting deviations from uniformity in y-direction, the plot function calculates an (optional default) quantile regression, which compares the empirical 0.25, 0.5 and 0.75 quantiles in y direction (red solid lines) with the theoretical 0.25, 0.5 and 0.75 quantiles (dashed black line), and provides a p-value for the deviation from the expected quantile. The significance of the deviation to the expected quantiles is tested and displayed visually, and can be additionally extracted with the testQuantiles function.
 
-By default, plotResiduals plots against predicted values. However, you can also use it to plot residuals against a specific other predictors (highly recommended).
+By default, `plotResiduals` plots against predicted values. However, you can also use it to plot residuals against a specific other predictors (highly recommended).
 
 ```{r, eval = FALSE}
 plotResiduals(simulationOutput, form = YOURPREDICTOR)
@@ -189,24 +189,24 @@ If the predictor is a factor, or if there is just a small number of observations
 plotResiduals(simulationOutput, form = testData$group)
 ```
 
-See ?plotResiduals for details, but very shortly: under H0 (perfect model), we would expect those boxes to range homogeneously from 0.25-0.75. To see whether there are deviations from this expectation, the plot calculates a test for uniformity per box, and a test for homogeneity of variances between boxes. A positive test will be highlighted in red.\
+See `?plotResiduals` for details, but very shortly: under H0 (perfect model), we would expect those boxes to range homogeneously from 0.25-0.75. To see whether there are deviations from this expectation, the plot calculates a test for uniformity per box, and a test for homogeneity of variances between boxes. A positive test will be highlighted in red.\
 \
 **NOTE on plots**: The default color for highlighting outliers and significant tests is **red**. However, it can be changed by setting \code{options(DHARMaSignalColor = "red")} to a different color. This is convenient for a color-blind friendly display, since red and black are difficult for some people to disentangle.
 
 ## Goodness-of-fit tests on the scaled residuals
 
-To support the visual inspection of the residuals, the DHARMa package provides a number of specialized goodness-of-fit tests on the simulated residuals:
+To support the visual inspection of the residuals, the `DHARMa` package provides a number of specialized goodness-of-fit tests on the simulated residuals:
 
--   testUniformity() - tests if the overall distribution conforms to expectations.
--   testOutliers() - tests if there are more simulation outliers than expected.
--   testDispersion() - tests if the simulated dispersion is equal to the observed dispersion.
--   testQuantiles() - fits a quantile regression or residuals against a predictor (default predicted value), and tests of this conforms to the expected quantile.
--   testCategorical(simulationOutput, catPred = testData\$group) tests residuals against a categorical predictor.
--   testZeroinflation() - tests if there are more zeros in the data than expected from the simulations.
--   testGeneric() - test if a generic summary statistic (user-defined) deviates from model expectations.
--   testTemporalAutocorrelation() - tests for temporal autocorrelation in the residuals.
--   testSpatialAutocorrelation() - tests for spatial autocorrelation in the residuals. Can also be used with a generic distance function.
--   testPhylogeneticAutocorrelation() - tests for phylogenetic signal in the residuals.
+-   `testUniformity()` - tests if the overall distribution conforms to expectations.
+-   `testOutliers()` - tests if there are more simulation outliers than expected.
+-   `testDispersion()` - tests if the simulated dispersion is equal to the observed dispersion.
+-   `testQuantiles()` - fits a quantile regression or residuals against a predictor (default predicted value), and tests of this conforms to the expected quantile.
+-   `testCategorical(simulationOutput, catPred = testData\$group)` tests residuals against a categorical predictor.
+-   `testZeroinflation()` - tests if there are more zeros in the data than expected from the simulations.
+-   `testGeneric()` - test if a generic summary statistic (user-defined) deviates from model expectations.
+-   `testTemporalAutocorrelation()` - tests for temporal autocorrelation in the residuals.
+-   `testSpatialAutocorrelation()` - tests for spatial autocorrelation in the residuals. Can also be used with a generic distance function.
+-   `testPhylogeneticAutocorrelation()` - tests for phylogenetic signal in the residuals.
 
 See the help of the functions and further comments below for a more detailed description.
 
@@ -224,19 +224,19 @@ There are a few important technical details regarding how the simulations are pe
 simulationOutput <- simulateResiduals(fittedModel = fittedModel, refit = TRUE)
 ```
 
--   if refit = FALSE (default), new datasets are simulated from the fitted model, and residuals are calculated by comparing the observed data to the new data
+-   if `refit = FALSE` (default), new datasets are simulated from the fitted model, and residuals are calculated by comparing the observed data to the new data
 
--   if refit = TRUE, a parametric bootstrap is performed, meaning that the model is refit to all new datasets, and residuals are created by comparing observed residuals against refitted residuals
+-   if `refit = TRUE`, a parametric bootstrap is performed, meaning that the model is refit to all new datasets, and residuals are created by comparing observed residuals against refitted residuals
 
 The second option is much much slower, and also seemed to have lower power in some tests I ran. **It is therefore not recommended for standard residual diagnostics!** I only recommend using it if you know what you are doing, and have particular reasons, for example if you estimate that the tested model is biased. A bias could, for example, arise in small data situations, or when estimating models with shrinkage estimators that include a purposeful bias, such as ridge/lasso, random effects or the splines in GAMs. My idea was then that simulated data would not fit to the observations, but that residuals for model fits on simulated data would have the same patterns/bias than model fits on the observed data.
 
-Note also that refit = TRUE can sometimes run into numerical problems, if the fitted model does not converge on the newly simulated data.
+Note also that `refit = TRUE` can sometimes run into numerical problems, if the fitted model does not converge on the newly simulated data.
 
 #### Conditional vs. unconditional simulations
 
 The second option is the treatment of the stochastic hierarchy. In a hierarchical model, several layers of stochasticity are placed on top of each other. Specifically, in a GLMM, we have a lower level stochastic process (random effect), whose result enters into a higher level (e.g. Poisson distribution). For other hierarchical models, such as state-space models, similar considerations apply, but the hierarchy can be more complex. When simulating, we have to decide if we want to re-simulate all stochastic levels, or only a subset of those. For example, in a GLMM, it is common to only simulate the last stochastic level (e.g. Poisson) conditional on the fitted random effects, meaning that the random effects are set on the fitted values.
 
-As of DHARMa 0.4.8, the default is conditional simulation on all random effects of the fitted model. Setting simulateREs = "user-specified" allows you to return to the previous DHARMa default, which used the respective default setting for the simulate function of your model class. Then the simulateResiduals function allows users to pass on parameters to the simulate function of the fitted model object, using its respective syntax. It further allows to specify only a subset of random effects to be conditioned on, but note that this is not possible for all model classes.
+As of DHARMa 0.5.0, the default is conditional simulation on all random effects of the fitted model. Setting `simulateREs = "user-specified"` allows you to return to the previous DHARMa default, which used the respective default setting for the simulate function of your model class. Then the simulateResiduals function allows users to pass on parameters to the simulate function of the fitted model object, using its respective syntax. It further allows to specify only a subset of random effects to be conditioned on, but note that this is not possible for all model classes.
 
 Summary of the syntax for supported packages (this is only relevant for simulateREs = "user-specified"):
 
@@ -265,25 +265,25 @@ DHARMa currently implements two procedures for randomization. The default proced
 
 #### Calculating residuals for groups or subsets
 
-In many situations, it can be useful to look at residuals per group, e.g. to see how much the model over / underpredicts per plot, year or subject. To do this, use the recalculateResiduals() function, together with a grouping variable (group) or a subsetting variable (sel), which can also be used in combination.
+In many situations, it can be useful to look at residuals per group, e.g. to see how much the model over / underpredicts per plot, year or subject. To do this, use the `recalculateResiduals()` function, together with a grouping variable (group) or a subsetting variable (sel), which can also be used in combination.
 
 ```{r, eval= FALSE}
 simulationOutput = recalculateResiduals(simulationOutput, group = testData$group)
 ```
 
-Note, however, that you will have to change the selection of variables that you provide to plots and tests (e.g. in plotResiduals or testSpatialAutocorrelation) accordingly when you group or subset residuals.
+Note, however, that you will have to change the selection of variables that you provide to plots and tests (e.g. in `plotResiduals` or `testSpatialAutocorrelation`) accordingly when you group or subset residuals.
 
 #### Reproducibility notes, random seed and random state
 
-As DHARMa uses simulations to calculate the residuals, a naive implementation of the algorithm would mean that residuals would look slightly different each time a DHARMa calculation is executed. This might both be confusing and bear the danger that a user would run the simulation several times and take the result that looks better (which would amount to multiple testing / p-hacking). By default, DHARMa therefore fixes the random seed to the same value every time a simulation is run, and afterwards restores the random state to the old value. This means that you will get exactly the same residual plot each time. If you want to avoid this behavior, for example for simulation experiments on DHARMa, use seed = NULL -\> no seed set, but random state will be restored, or seed = FALSE -\> no seed set, and random state will not be restored. Whether or not you fix the seed, the setting for the random seed and the random state are stored in
+As DHARMa uses simulations to calculate the residuals, a naive implementation of the algorithm would mean that residuals would look slightly different each time a DHARMa calculation is executed. This might both be confusing and bear the danger that a user would run the simulation several times and take the result that looks better (which would amount to multiple testing / p-hacking). By default, DHARMa therefore fixes the random seed to the same value every time a simulation is run, and afterwards restores the random state to the old value. This means that you will get exactly the same residual plot each time. If you want to avoid this behavior, for example for simulation experiments on DHARMa, use `seed = NULL` -\> no seed set, but random state will be restored, or `seed = FALSE` -\> no seed set, and random state will not be restored. Whether or not you fix the seed, the setting for the random seed and the random state are stored in
 
 ```{r, eval = FALSE}
 simulationOutput$randomState
 ```
 
-If you want to reproduce simulations for such a run, set the variable .Random.seed by hand, and simulate with seed = NULL.
+If you want to reproduce simulations for such a run, set the variable `.Random.seed` by hand, and simulate with `seed = NULL`.
 
-Moreover (general advice), to ensure reproducibility, it's advisable to add a set.seed() at the beginning, and a session.info() at the end of your script. The latter will list the version number of R and all loaded packages.
+Moreover (general advice), to ensure reproducibility, it's advisable to add a `set.seed()` at the beginning, and a `sessionInfo()` at the end of your script. The latter will list the version number of R and all loaded packages.
 
 # Interpreting residuals and recognizing misspecification problems
 
@@ -321,7 +321,7 @@ simulationOutput <- simulateResiduals(fittedModel = fittedModel)
 plot(simulationOutput)
 ```
 
-If you see this pattern, note that overdispersion is often caused by model misfit. Thus, before moving to a GLM with variable dispersion (for count data this would typically be a negative binomial), you should check your model for misfit, e.g. by plotting residuals against all predictors using plotResiduals().
+If you see this pattern, note that overdispersion is often caused by model misfit. Thus, before moving to a GLM with variable dispersion (for count data this would typically be a negative binomial), you should check your model for misfit, e.g. by plotting residuals against all predictors using `plotResiduals()`.
 
 Next, this is an example of underdispersion. Here, we get too many residuals around 0.5, which means that we are not getting as many residuals as we would expect in the tail of the distribution from the fitted model.
 
@@ -336,7 +336,7 @@ simulationOutput <- simulateResiduals(fittedModel = fittedModel)
 plot(simulationOutput)
 ```
 
-If you see this pattern, note that a common reason for underdispersion is overfitting, i.e. your model is too complex. Other possible explanations to check for include zero-inflation (best to check by comparing to a ZIP model, but see also DHARMa::testZeroInflation), non-independence of the data (e.g. temporal autocorrelation, check via DHARMa:: testTemporalAutocorrelation) that your predictors can use to overfit, or that your data-generating process is simply not a Poisson process.
+If you see this pattern, note that a common reason for underdispersion is overfitting, i.e. your model is too complex. Other possible explanations to check for include zero-inflation (best to check by comparing to a ZIP model, but see also `testZeroInflation`), non-independence of the data (e.g. temporal autocorrelation, check via  `testTemporalAutocorrelation`) that your predictors can use to overfit, or that your data-generating process is simply not a Poisson process.
 
 From a technical side, underdispersion is not as concerning as overdispersion, as it will usually bias p-values to the conservative side, but if your goal is to get a good power, you may want to consider a simpler model. If that is not helping, you can move to a distribution for underdispersed count data (e.g. Conway-Maxwell-Poisson, generalized Poisson).
 
@@ -344,29 +344,29 @@ From a technical side, underdispersion is not as concerning as overdispersion, a
 
 Although, as discussed above, over/underdispersion will show up in the residuals, and it's possible to detect it with the testUniformity function, simulations show that this test is less powerful than more targeted tests. DHARMa contains several overdispersion tests that compare the dispersion of simulated residuals to the observed residuals.
 
-1.  *default:* a non-parametric test that compares the variance of the simulated residuals to the observed residuals (default), which has some analogy to the variance test implemented in aer::dispersiontest.
-2.  *PearsonChisq:* alternatively, DHARMa implements the Pearson-chi2 test that is popular in the literature, suggested in the glmm Wiki, and implemented in some other R packages such as performance::check_overdispersion.
-3.  *refit:* if residual simulations are done via refit, DHARMa will compare the Pearson residuals of the re-fitted simulations to the original Pearson residuals. This is essentially a non-parametric version of test 2.
+1.  *default: the simulation0-based response variance test* is a non-parametric test that compares the variance of the observed response variable to the variances of the simulated response variable (default).
+2.  *PearsonChisq:* alternatively, DHARMa implements the Pearson-Chi2 test that is popular in the literature, suggested in the glmm Wiki, and implemented in some other R packages such as `performance::check_overdispersion`.
+3.  *refit:* if residual simulations are done via refit and the test is **PearsonChisq**, DHARMa will compare the Pearson residuals of the re-fitted simulations to the original Pearson residuals. This is essentially a non-parametric version of test 2.
 
-All of these tests are included in the testDispersion function, see ?testDispersion for details.
+All of these tests are included in the `testDispersion` function, see `?testDispersion` for details.
 
 ```{r overDispersionTest, echo = TRUE, fig.width=4, fig.height=4}
 testDispersion(simulationOutput)
 ```
 
-**IMPORTANT INFO:** we have made extensive simulations (see Leite M.S., Rettelbach, D. and Hartig, F. (2025)), which have shown that the various tests have certain advantages and disadvantages. The basic results are that:
+**IMPORTANT INFO:** we have made extensive simulations (see [Leite M.S., Rettelbach, D. and Hartig, F. (2025)](https://ecoevorxiv.org/repository/view/10807/)), which have shown that the various tests have certain advantages and disadvantages. The figure below shows the general performance of the dispersion tests for Poisson and binomial models for: GLMs in general, GLMs with small sample size or intercept (“small data”), GLMMs with one random effect with few groups/levels, GLMMs with many groups/levels in a random effect, and computational time for calculating the test (speed). The symbols mean: “-” bad performance, “+” good performance, “++” very good performance. 
+
+![](testDispersion.jpeg){.center width="600"}
+
+The basic results are that:
 
 -   The most powerful and reliable test is option 3, but this costs a lot of time and is not available for all regression packages, as it requires that Pearson residuals are available.
--   Option 2, the parametric Pearson-chi2, is fast if Pearson residuals are available, but based on a naive expectation of df (counts RE as 1 df) and the test statistic is thus biased towards underdispersion for mixed models. Similar to the df approximation, bias increases with the number of RE levels. When testing only for overdispersion (alternative = "greater"), this makes the test more conservative, but it also costs power.
+-   Option 2, the parametric Pearson-chi2, is fast if Pearson residuals are available, but based on a naive expectation of residual degrees of freedom (df, counts RE as 1 df) and the test statistic is thus biased towards underdispersion for mixed-effects models. Similar to the df approximation, bias increases with the number of RE levels. When testing only for overdispersion (`alternative = "greater"`), this makes the test more conservative, but it also costs power.
 -   The DHARMa default option 1 is fast, nearly unbiased (i.e. you can test under- and overdispersion), and only slightly less powerful than test 3, PROVIDED that simulations are made conditional on the fitted REs. Power compared to the parametric Pearson-chi2 test depends on the number of RE levels, it will be more powerful for a typical number of RE levels.
 
-As support for these statements, here results of the simulation, which compares the uniform (KS) test with the standard simulation-based test (conditional and unconditional) and the Pearson-chi2 test (two-sided and greater) for an n=200 Poisson GLMM with 30 RE levels.
 
-<img src="dispersion.png" class="center" width="700"/>
+**Note:** Conditional simulations are the default as of DHARMa v0.5.0. The problem with unconditional simulations is that they introduce additional variance in the simulated response by also re-simulating the lower-level stochastic process (random effects). This variability strongly reduces the power of the dispersion test. Re-simulating conditional on the fitted random effects acts only at the higher-level stochastic process, the distribution (e.g. Poisson or binomial proportion). As over/underdispersion is a problem at the distribution-level, conditional simulations are the more adequate basis for dispersion tests, and results in substantially higher test power and sensitivity.
 
-**Note:** Conditional simulations are the default as of DHARMa 0.4.8. The problem with unconditional simulations is that they introduce additional variance in the simulated response by also re-simulating the lower-level stochastic process (random effects). This variability strongly reduces the power of the dispersion test. On the contrary, re-simulating conditional on the fitted random effects acts only at the higher-level stochastic process, the distribution (e.g. Poisson or binomial proportion). As over/underdispersion is a problem at the distribution-level, conditional simulations are the more adequate basis for dispersion tests, and results in substantially higher test power and sensitivity.
-
-Thus, my current recommendation is: for most users, use the default DHARMa test with conditional simulations.
 
 ## Zero-inflation / k-inflation or deficits
 
@@ -531,7 +531,7 @@ testSpatialAutocorrelation(simulationOutput = simulationOutput, x = testData$x,
 
 Note that all these tests are most sensitive against homogeneous residual structure, and might miss local and heterogeneous (non-stationary) residual structures. Additional visual checks can be useful.
 
-However, standard DHARMa simulations from models with temporal / spatial / phylogenetic conditional autoregressive terms will still have the respective correlation in the DHARMa residuals, unless the package you are using is modelling the autoregressive terms as explicit REs and is able to simulate conditional on the fitted REs. It means that the residuals will still show significant autocorrelation, even if the model fully accounts for this structure, and other tests, such as dispersion, uniformity, may have inflated type I error. See the example below with a `glmmTMB` model with a spatial autocorrelation structure:
+However, standard DHARMa simulations from models with temporal / spatial / phylogenetic conditional autoregressive terms will still have the respective correlation in the `DHARMa` residuals, unless the package you are using is modelling the autoregressive terms as explicit REs and is able to simulate conditional on the fitted REs. It means that the residuals will still show significant autocorrelation, even if the model fully accounts for this structure, and other tests, such as dispersion, uniformity, may have inflated type I error. See the example below with a `glmmTMB` model with a spatial autocorrelation structure:
 
 ```{r, fig.width=4, fig.height=4}
 library(glmmTMB)
@@ -544,7 +544,7 @@ testSpatialAutocorrelation(simulationOutput = simulationOutput2, x = testData$x,
 # plot(simulationOutput2)
 ```
 
-Note that while glmmTMB supports conditional simulations in general, this is not yet supported for certain (spatial) covariance structures. Thus, we use simulateREs = "unconditional" here. Otherwise DHARMa will give a warning and automatically fall back to unconditional simulations. For further details please refer to the help of glmmTMB.
+Note that while glmmTMB supports conditional simulations in general, this is not yet supported for certain (spatial) covariance structures. Thus, we use `simulateREs = "unconditional"` here. Otherwise DHARMa will give a warning and automatically fall back to unconditional simulations. For further details please refer to the help of `glmmTMB`.
 
 One of the options to solve it and get correct tests and no residual pattern (if the model is correct) is to rotate the residual space according to the covariance structure of the fitted model, such that the rotated residuals are conditionally independent. The argument rotation in `simulateResiduals` does it (see also `?getQuantile` for details about the rotation options):
 
@@ -895,7 +895,7 @@ Models fitted with gamm4 return a list that contains an lme4 object under the na
 
 ## glmmTMB
 
-glmmTMB is nearly fully supported since DHARMa 0.2.7 and glmmTMB 1.0.0. As of DHARMa 0.4.8 there is an implemented option to adjust whether simulations should be conditional on the fitted random effects or not by using the simulateREs argument in simulateResiduals. Conditional simulations are, however, not available for glmmTMB models with certain (spatial) covariance structures.
+glmmTMB is nearly fully supported since DHARMa 0.2.7 and glmmTMB 1.0.0. As of DHARMa 0.5.0 there is an implemented option to adjust whether simulations should be conditional on the fitted random effects or not by using the simulateREs argument in simulateResiduals. Conditional simulations are, however, not available for glmmTMB models with certain (spatial) covariance structures.
 
 ## spaMM
 
@@ -921,15 +921,15 @@ brms can be made to work together with DHARMa, see <https://github.com/florianha
 
 ## Unsupported packages
 
-If confronted with an unsupported package, DHARMa will try to use standard S3 functions such as coef(), simulate() etc. to perform simulations. If no error occurs, a residual object will be calculated, and a warning will be provided that this package has not been checked for full functionality. In many cases, the results can be used though (but no guarantee, maybe check with null simulations if the results are OK). Other than that, see my general comments about [adding new R packages to DHARMa](https://github.com/florianhartig/DHARMa/wiki/Adding-new-R-packages-to-DHARMA)
+If confronted with an unsupported package, `DHARMa` will try to use standard S3 functions such as `coef()`, `simulate()` etc. to perform simulations. If no error occurs, a residual object will be calculated, and a warning will be provided that this package has not been checked for full functionality. In many cases, the results can be used though (but no guarantee, maybe check with null simulations if the results are OK). Other than that, see my general comments about [adding new R packages to DHARMa](https://github.com/florianhartig/DHARMa/wiki/Adding-new-R-packages-to-DHARMA)
 
 ## Importing external simulations (e.g. from Bayesian software or unsupported packages)
 
-DHARMa can also import external simulations from a fitted model via createDHARMa(), which will be interesting for unsupported packages and for Bayesians.
+DHARMa can also import external simulations from a fitted model via `createDHARMa()`, which will be interesting for unsupported packages and for Bayesians.
 
 **Bayesians should note the extra Vignette on "DHARMa for Bayesians" regarding the interpretation of these residuals.**
 
-Here, an example for how to create simulations for a Poisson glm. Of course, it doesn't make sense to do this as glm is a supported model class, but you could do the same in case you want to check a model class that is currently not supported by DHARMa.
+Here, an example for how to create simulations for a Poisson glm. Of course, it doesn't make sense to do this as glm is a supported model class, but you could do the same in case you want to check a model class that is currently not supported by `DHARMa`.
 
 ```{r, eval = TRUE}
 testData = createData(sampleSize = 200, overdispersion = 0.5, family = poisson())
