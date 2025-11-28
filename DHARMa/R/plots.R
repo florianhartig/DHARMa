@@ -170,7 +170,7 @@ plotQQunif <- function(simulationOutput, testUniformity = TRUE, testOutliers = T
 #'
 #' The quantile regression can take some time to calculate, especially for larger datasets. For this reason, quantreg = F can be set to generate a smooth spline instead. This is the default for n > 2000.
 #'
-#' If form is specified as a formula, e.g. form = ~ your_predictor, NAs will be handled automatically (recommended). If a grouping variable is specified, e.g. form = ~ your_predictor|your_group, a residual plot for every grouping level will be created. If form is not a formula, e.g. form = your_data$your_predictor, NAs are not handled automatically. For phyr and gamm4$mer models, you need to specify form in this way. If the predictor is a factor, a boxplot will be plotted instead of a scatter plot. The distribution for each factor level should be uniformly distributed, so the box should go from 0.25 to 0.75, with the median line at 0.5 (within-group). To test if deviations from those expectations are significant, KS-tests per group and a Levene test for homogeneity of variances is performed. See [testCategorical] for details.
+#' If form is specified as a formula, e.g. form = ~ your_predictor, NAs will be handled automatically (recommended). If a grouping variable is specified, e.g. form = ~ predictor|group == "group_level", a residual plot for the specified grouping level will be created. If form is not a formula, e.g. form = data$predictor, NAs are not handled automatically. For phyr and gamm4$mer models, you need to specify form in this way. If the predictor is a factor, a boxplot will be plotted instead of a scatter plot. The distribution for each factor level should be uniformly distributed, so the box should go from 0.25 to 0.75, with the median line at 0.5 (within-group). To test if deviations from those expectations are significant, KS-tests per group and a Levene test for homogeneity of variances is performed. See [testCategorical] for details.
 #'
 #' @note If nObs > 10,000, the scatter plot is replaced by graphics::smoothScatter().
 #'
@@ -180,7 +180,6 @@ plotQQunif <- function(simulationOutput, testUniformity = TRUE, testOutliers = T
 #'
 #' @seealso [plotQQunif], [testQuantiles], [testOutliers]
 #' @example inst/examples/plotsHelp.R
-#' @importFrom lattice xyplot bwplot
 #' @export
 plotResiduals <- function(simulationOutput, form = NULL, quantreg = NULL,
                           rank = TRUE, asFactor = NULL, smoothScatter = NULL,
@@ -240,9 +239,7 @@ plotResiduals <- function(simulationOutput, form = NULL, quantreg = NULL,
 
       if(is.null(predictor)) stop("DHARMA: unable to extract specified predictor variable from the data frame that was used to fit the model. Further note: if you are using a gamm4 model, please use form = your_data$your_predictor instead of form = ~ your_predictor.")
     }
-  }
-
-  else {
+  } else {
     predictor = NULL
     group = NULL
   }
@@ -250,37 +247,15 @@ plotResiduals <- function(simulationOutput, form = NULL, quantreg = NULL,
   pred = ensurePredictor(simulationOutput, predictor)
   group = if(!is.null(group)) {ensurePredictor(simulationOutput, group)}
 
-  ##### grid for random effects #####
+  # if group is not NULL, get predictor and residuals belonging to specified group level
   if(!is.null(group)) {
-    if(!is.factor(pred)) {
-      # scatterplots for numeric predictors
-      plot = lattice::xyplot(res ~ pred | group,
-                             xlab = allV[[1]],
-                             ylab = "Scaled Residuals",
-                             panel = function(x, y, subscripts) {
-                               lattice::panel.xyplot(x, y, col = "black")
-                               lattice::panel.abline(h = 0.5, lty = 2)
-                             })
-
-    } else {
-      # boxplots for categorical predictors
-      plot = lattice::bwplot(res ~ pred | group,
-                             xlab = allV[[1]],
-                             ylab = "Scaled Residuals",
-                             par.settings = list(
-                               box.rectangle = list(col = "black"),
-                               box.umbrella  = list(col = "black"),
-                               box.dot       = list(col = "black"),
-                               plot.symbol   = list(col = "black"),
-                               plot.line     = list(col = "black")
-                             ),
-                             panel = function(x, y, subscripts) {
-                               lattice::panel.bwplot(x, y, horizontal = F, pch="|")
-                               lattice::panel.abline(h = 0.5, lty = 2)
-                             })
-    }
-    return(plot)
+    tryCatch({groupLevel = eval(form[[2]][[3]][[3]])}, error = function(e) stop("DHARMa: Please specify a certain group level to be plotted."))
+    pred = pred[group == groupLevel]
+    if(length(pred) == 0) {stop("DHARMa: Unable to find specified group level.")}
+    res = simulationOutput$scaledResiduals[group == groupLevel]
   }
+
+
 
 
   ##### Rank transform and factor conversion#####
@@ -311,8 +286,15 @@ plotResiduals <- function(simulationOutput, form = NULL, quantreg = NULL,
 
   # categorical plot
   if(is.factor(pred)){
-    testCategorical(simulationOutput = simulationOutput, catPred = pred,
-                    quantiles = quantiles)
+    if(is.null(group)) {
+      testCategorical(simulationOutput = simulationOutput, catPred = pred,
+                      quantiles = quantiles)
+    } else {
+      simulationOutput$scaledResiduals = res
+      testCategorical(simulationOutput = simulationOutput, catPred = pred,
+                      quantiles = quantiles)
+    }
+
   } else{
 
     # color/shape outliers according to significance of outlier test, related to issue #453

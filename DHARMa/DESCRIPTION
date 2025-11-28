@@ -28,8 +28,7 @@ Imports:
     lmtest,
     ape,
     qgam (>= 1.3.2),
-    lme4,
-    lattice
+    lme4
 Suggests:
     knitr,
     testthat (>= 3.0.0),

@@ -28,7 +28,7 @@ A significant p-value for the splines means the fitted spline deviates from a fl
 
 The p-values of the intercept and splines are combined into a total p-value via Benjamini & Hochberg adjustment to control the FDR.
 
-Predictor needs to be a variable in your environment (e.g. predictor = your_data$your_predictor). For more details see also the help of form in \link{plotResiduals}.
+Predictor needs to be a variable in your environment (e.g. predictor = data$predictor). For more details see also the help of form in \link{plotResiduals}.
 
 When plotting (plot = TRUE), the shaded gray areas indicate 95\% confidence intervals of the quantile estimates (1.96 * standard error).
 }

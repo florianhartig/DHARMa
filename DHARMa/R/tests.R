@@ -86,7 +86,7 @@ testBivariateUniformity <- function(simulationOutput, alternative = c("two.sided
 #'
 #' The p-values of the intercept and splines are combined into a total p-value via Benjamini & Hochberg adjustment to control the FDR.
 #'
-#' Predictor needs to be a variable in your environment (e.g. predictor = your_data$your_predictor). For more details see also the help of form in [plotResiduals].
+#' Predictor needs to be a variable in your environment (e.g. predictor = data$predictor). For more details see also the help of form in [plotResiduals].
 #'
 #' When plotting (plot = TRUE), the shaded gray areas indicate 95% confidence intervals of the quantile estimates (1.96 * standard error).
 #'

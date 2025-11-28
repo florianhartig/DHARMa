@@ -72,8 +72,15 @@ plotResiduals(simulationOutput, form = testData$Environment1,
 # if pred is a factor, or if asFactor = TRUE, will produce a boxplot
 plotResiduals(simulationOutput, form = ~group)
 
-# plot residuals against a predictor, separate for group levels
-plotResiduals(simulationOutput, form = ~Environment1|group)
+# plot residuals against a predictor for a specific group level, here group 1
+plotResiduals(simulationOutput, form = ~Environment1|group == "1")
+
+# or in a grid for multiple group levels, e.g. groups 1 to 4
+par(mfrow= c(2,2))
+for(g in unique(testData$group)[1:4]) {
+  plotResiduals(simulationOutput, form = ~Environment1|group == g, xlab = paste("group", g))
+}
+par(mfrow= c(1,1))
 
 # to diagnose overdispersion and heteroskedasticity it can be useful to
 # display residuals as absolute deviation from the expected mean 0.5

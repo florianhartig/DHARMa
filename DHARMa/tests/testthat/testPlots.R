@@ -82,7 +82,7 @@ test_that("different form arguments in plotResiduals work",
             simulationOutput <- simulateResiduals(fittedModel = fittedModel)
 
             expect_no_error(plotResiduals(simulationOutput, form = ~Environment1))
-            expect_no_error(plotResiduals(simulationOutput, form = ~Environment1|group))
+            expect_no_error(plotResiduals(simulationOutput, form = ~Environment1|group=="1"))
             expect_no_error(plotResiduals(simulationOutput, form = ~x))
             expect_error(plotResiduals(simulationOutput, form = testData$Environment1))
           }
