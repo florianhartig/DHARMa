@@ -1,7 +1,7 @@
 ---
 title: Diagnóstico de resíduos de modelos lineares com pacote DHARMa
-author: "Melina Leite & Florian Hartig"
-date: "2024-11-25"
+author: "Melina Leite"
+date: "2025-12-01"
 output: 
   rmdformats::readthedown:
     highlight: kate
@@ -14,23 +14,23 @@ editor_options:
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE, warning = F)
 ```
 
 
-Roteiro preparado para aula sobre diagnóstico de modelos da disciplina [BIE5781 Modelagem Estatística para Ecologia e Recursos Naturais](http://insilvaarbores.com.br/BIE5781/doku.php?id=historico:2024:programacao) do Programa de Pós-Graduação em Ecologia da Universidade de São Paulo. 
+Roteiro preparado para aula sobre diagnóstico de modelos lineares generalizados (mistos). 
 
-Comentários e questões, por favor fale com [Melina](https://melinaleite.weebly.com/contact.html). 
+Comentários e questões, por favor fale com [a autora](https://melinaleite.weebly.com/contact.html). 
 
 Para mais detalhes, veja a [vinheta do pacote](https://cran.r-project.org/web/packages/DHARMa/vignettes/DHARMa.html).
 
 
-Primeiro, carregando os pacotes que serão usados:
+Carregando os pacotes que serão usados:
 ```{r, message=F}
-library(DHARMa)
-library(lme4)
-library(glmmTMB)
-library(ggplot2)
+library(DHARMa)  # diagnóstico de modelos
+library(lme4)    # ajuste de modelos mistos  
+library(glmmTMB) # ajuste de modelos (mistos)
+library(ggplot2) # gráficos
 ```
 
 # Visão geral das funções do DHARMa
@@ -43,14 +43,14 @@ testData = createData(sampleSize = 200, intercept = 0, fixedEffects = 1,
                       family = poisson())
 ```
 
-Olhando a cara dos dados:
+Olhando os dados:
 ```{r}
 head(testData) 
 ```
 
 -   `observedResponse` é a variável resposta, vindo de uma Poisson variando entre 0 e `r max(testData$observedResponse)`.\
--   `Environment1` é a variável preditora ambiental.\
--   `group` é a variável de agrupamento, digamos locais amostrados, regiões, blocos de experimentos, etc.\
+-   `Environment1` é a variável preditora ambiental, simulada de uma distribuição uniforme entre -1 e 1.\
+-   `group` é a variável de agrupamento, que podem ser locais amostrados, regiões, blocos de experimentos, etc.\
 -   `time` seria uma variável que indica tempo, mas não estamos usando neste exemplo. Logo esse tempo é aleatóriamente definido nos dados (valores de 1 a 200).\
 -   `x` e `y` seriam as coordenadas espaciais das observações, mas também não estamos usando nesse exemplo. Logo os valores são tirados de uma distribuição uniforme entre 0 e 1).
 
@@ -69,7 +69,7 @@ fittedModel <- glmer(observedResponse ~ Environment1 + (1|group),
 
 ## Calculando os resíduos padronizados
 
-Usamos a função `simulateResiduals`, que por padrão vai gerar 250 simulações^[para alguns casos vale apena aumentar o número de simulações], para calcular os resíduos quantílicos para cada observação:
+Usamos a função `simulateResiduals`, que por padrão vai gerar 250 simulações^[para alguns casos vale apena aumentar o número de simulações], para calcular os **resíduos quantílicos**  para cada observação. Esses são os resíduos gerados pelo pacote DHARMa, para mais informações sobre como são calculados, veja a [vinheta do pacote](https://cran.r-project.org/web/packages/DHARMa/vignettes/DHARMa.html).
 
 ```{r}
 res <- simulateResiduals(fittedModel)
@@ -81,38 +81,38 @@ res <- simulateResiduals(fittedModel)
 plot(res)
 ```
 
-Interpretação do **painel esquerdo**:
+Interpretação do **gráfico da esquerda**:
 
 -   **Gráfico quantil-quantil** dos resíduos (Observed) e de uma distribuição uniforme (Expected).
 -   Teste de **uniformidade** KS (Kolmogorov-Smirnov). Essencialmente, a mesma informação que o QQ, mas em forma de teste e com p-valor para os que gostam.\
 -   Teste de **dispersão** (padrão): compara a variância das observações com a variância das simulações.\
 -   Testes de **valores extremos/outliers**: testa se o número de outliers (ou seja, observações fora do envelope da simulação) é maior/menor do que seria esperado sob H0 (modelo corretamente especificado). 
 
-Interpretação do **painel direito**:
+Interpretação do **gráfico da direita**:
 
--   DHARMa **resíduos \~ preditos**. Esperamos uma distribuição completamente uniforme na direção _y_. Para isso, são feitas linhas de tendência com GAMs (generalized additive models) dos quantis ajustados nos resíduos em 0,25, 0,5, 0,75. Se for detectada alguma tendência, as linhas serão destacados em vermelho.
+-   DHARMa **resíduos \~ preditos**. Esperamos uma distribuição completamente uniforme na direção _y_. Para isso, são feitas linhas de tendência com GAMs (generalized additive models) dos quantis ajustados nos resíduos em 0,25, 0,5, 0,75. Se for detectada alguma tendência, as linhas serão destacadas em vermelho (se você tiver dificuldade sem distinguir o vermelho, veja o help da função para mudar a cor de destaque).
 
-Esses gráfico também podem ser criados separadamente com as seguintes funções :
+Esses gráfico também podem ser criados separadamente com as seguintes funções:
 ```{r}
 # testes podem ser omitidos, se preferir
 plotQQunif(res,testUniformity = F,testOutliers = F,testDispersion = F) 
 ```
 
 ```{r}
-# predições são geralmente tranformadas em ranking para facilitar observação,
-# principalmente para distribuições cujas predições são distorcidas (skewed)
-# mas podemos desligar se quisermos:
 plotResiduals(res, rank=F)
 ```
 
+Em `plotResiduals`, os valores preditos (eixo X), são geralmente transformados em ranking para facilitar observação de padrões, principalmente para distribuições cujas predições são distorcidas ("skewed"), mas podemos desligar se quisermos com o argumenton `rank=F`.
+
+
 ## Testes disponíveis
 
-Os testes acima também pode ser realizados separadamente e com mais profundidade (e gráficos adicionais) a partir das funções de cada teste.
+Os testes acima também pode ser realizados separadamente e com mais profundidade (+ gráficos adicionais) a partir das funções de cada teste.
 Lembrando que, segundo nossa hipótese H0 de que o modelo está corretamente especificado, esperamos que os valores de _p_ **não sejam significativos**.
 
 ### Uniformidade
 
-Avaliando se os resíduos se conformam como uma distribuição normal. Teste de Kolmogorov-Smirnov (KS).
+Avaliando se os resíduos se conformam como uma distribuição uniforme (que é o resultado esperado para os resíduos quantílicos do `DHARMa`). Teste de Kolmogorov-Smirnov (KS).
 ```{r}
 testUniformity(res, plot=F) # o plot é o meso do plotQQunif, vc pode desligá-lo
 ```
@@ -120,26 +120,28 @@ testUniformity(res, plot=F) # o plot é o meso do plotQQunif, vc pode desligá-l
 ### Sobre ou subdispersão
 
 Sobre/subdispersão significa que os dados observados são mais/menos dispersos do que o esperado de acordo com o modelo ajustado. 
-Nesse teste, avaliando se a variância dos resíduos é consistente com a variância esperada. Essa função oferece diferentes testes a partir dos argumentos escolhidos, veja o help `?testDispersion` para mais detalhes. O histograma apresentado pelo teste é o da distribuição das variâncias dos resíduos simulados e a variância dos resíduos observados (linha horizontal vermelha).
-A estatística D é a razão entre o observado e esperado, com valores acima de 1 indicando sobredispersão e abaixo de 1 indicando subdispersão.
+
+A função `testDispersion` no `DHARMa` possui diferentes teste de dispersão para diferentes tipos de modelos. Se quiser saber mais sobre testes de dispersão, leia [Leite et al. 2025](https://doi.org/10.32942/X23M14), e veja o help `?testDispersion` para mais detalhes.
+
+O teste padrão do DHARMa, avalia se a variância dos valores observados da variável resposta é consistente com a variância esperada desta variável a partir de muitas simulações a partir do modelo. O histograma apresentado pelo teste é o da distribuição das variâncias dos valores simulados e a variância dos valores observados (linha horizontal vermelha). A estatística D é a razão entre o observado e esperado, com valores acima de 1 indicando sobredispersão e abaixo de 1 indicando subdispersão.
 
 ```{r}
 testDispersion(res)
 ```
 
-### Valores extremos / outliers
+### Valores extremos / _outliers_
 
-Testa se o número de outliers (observações fora do envelope de simulação) é maior/menor do que seria esperado sob H0 (modelo corretamente especificado).
+Testa se o número de _outliers_ (observações fora do envelope de simulação) é maior/menor do que seria esperado sob H0 (modelo corretamente especificado).
 Importante ressaltar que **a interpretação destes outliers não é a mesma para outliers em modelos lineares gaussianos.**
 Aqui estamos comparando se o valor observado é maior ou menor do que todos os valores simulados para aquela observação. Pode acontecer que todos os valores simulados para aquela observação são maiores do que o valor observado, recebendo então o resíduo desta observação o valor 0. Se todos os valores simulados são menores do que o valor observado, o resíduo desta observação recebe o valor 1. Logo, o teste depende do número de simulações que você estipulou na função `simulateResiduals()`; quanto mais simulações, menor a chance de outliers. 
 
-O gráfico mostra a distribuição dos resíduos e se houver outliers, eles serão destacados nos cantos 0 e 1 do eixo x.
+O gráfico mostra a distribuição dos resíduos e se houver outliers, eles serão destacados nos extremos 0 e 1 do eixo y.
 
 ```{r}
 testOutliers(res)
 ```
 
-### Teste quantis Resíduo ~ predito
+### Teste quantis: Resíduo ~ predito
 
 Testa se existe alguma relação não esperada entre os resíduos e as predições. Para avaliar essa ausência de relação, são ajustadas 3 GAMs (generalized additive models) nos quantis 0,25, 0,5, 0,75. Se esses GAMs se desviarem significativamente de uma linha reta nesses valores, eles serão destacados (em vermelho). O valor de _p_ do teste abaixo, sem o plot, é uma combinação dos 3 valores de _p_ com correção para múltiplos testes.
 
@@ -149,7 +151,7 @@ testQuantiles(res, plot=F)
 
 ### Dados zero-inflado
 
-Verificar se há mais zeros nos dados do que o esperado pela distribuição. O histograma mostra a quantidade de zeros vindo das simulações e a quantidade de zeros observada (linha vermelha vertical). O teste de zero-inflação é um teste de diferença entre a quantidade de zeros observada e a quantidade de zeros esperada.
+Verificar se há mais zeros nos dados do que o esperado pela distribuição. O histograma mostra a quantidade de zeros vindo das simulações e a quantidade de zeros observada (linha vermelha vertical). O teste de zero-inflação é um teste de diferença entre a quantidade de zeros observada e a quantidade de zeros esperada pelo modelo.
 
 ```{r}
 testZeroInflation(res)
@@ -157,15 +159,16 @@ testZeroInflation(res)
 
 ### Autocorrelação espacial
 
-Detecta se há indícios de autocorrelação espacial nos resíduos. Para isso, precisa prover os valores das coordenadas dos dados. Aqui estamos usando as variáveis `x` e `y` do nosso conjunto de dados, mas elas são aleatoriamente geradas e não representam uma estrutura espacial real.
+Detecta se há indícios de autocorrelação espacial nos resíduos. Para isso, precisamos prover os valores das coordenadas dos dados. Aqui estamos usando as variáveis `x` e `y` do nosso conjunto de dados:
 
 ```{r}
-testSpatialAutocorrelation(res, x = testData$x, y = testData$y )
+testSpatialAutocorrelation(res, x = testData$x, y = testData$y)
 ```
 
 ### Teste de autocorrelação temporal
 
-O mesmo para autocorrelação temporal, mas aqui precisamos de uma variável temporal (sequencia de acontecimentos). Vamos usar a variável `time` do nosso conjunto de dados, mas ela é aleatoriamente gerada e não representa uma estrutura temporal real.
+O mesmo para autocorrelação temporal, mas aqui precisamos de uma variável temporal (sequencia de acontecimentos). Vamos usar a variável `time` do nosso conjunto de dados:
+
 ```{r}
 testTemporalAutocorrelation(res, time = testData$time)
 ```
@@ -173,10 +176,30 @@ testTemporalAutocorrelation(res, time = testData$time)
 ## Teste de autocorrelação filogenética
 
 Caso você tenha dados filogeneticamente estruturado, você pode prover uma matriz de distâncias filogenéticas para testar se há autocorrelação filogenética nos resíduos.
-Veja exemplos no help da função.
-Abaixo, apenas mostro um exemplo, mas nao funciona porque não tempos uma matriz filogenética
+
+Abaixo, apenas mostro um exemplo com outro conjunto de dados com autocorrelação filogenética gerados pelo pacote `phylolm`:
+
 ```{r, eval=F}
-testPhylogeneticAutocorrelation(res, phylo = phylo) # nao funciona aqui, pois não temos uma matriz filogenética.
+library(phylolm) # pacote de análise filogenética
+
+  set.seed(123)
+  tre = rcoal(60) # gerando uma árvore filogenética com 60 espécies
+  # criando dados com autocorrelação filogenética:
+  b0 = 0; b1 = 1;
+  x <- runif(length(tre$tip.label), 0, 1) 
+  y <- b0 + b1*x +
+    rTrait(n = 1, phy = tre,model="BM",
+           parameters = list(ancestral.state = 0, sigma2 = 10))
+  dat = data.frame(trait = y, pred = x)
+
+  # ajustando modelo que ignora essa autocorrelação
+  fit = lm(trait ~ pred, data = dat)
+  
+  # simulando resíduos do modelo
+  res = simulateResiduals(fit, plot = T)
+
+  # testando autocorrelação espacial dos resíduos
+  testPhylogeneticAutocorrelation(res, tree = tre)
 ```
 
 
@@ -186,16 +209,12 @@ testPhylogeneticAutocorrelation(res, phylo = phylo) # nao funciona aqui, pois n�
 
 Fazer o histograma dos resíduos `hist()`; ver os resíduos `residuals()`; e plotar os resíduos contra uma variável preditora `plotResiduals()`*.
 
-*Essa última função `plotResiduals()` é a mesma que apresentamos acima, mas agora motramos a opção de plotar os resíduos contra uma variável preditora. O que pode ser muit útil para verificar heterocedasticidade, por exemplo.
-
-```{r, eval=F}
-residuals(res)
-(res)
-```
+*Essa última função `plotResiduals()` é a mesma que apresentamos acima, mas agora motramos a opção de plotar os resíduos contra uma variável preditora. O que pode ser muit útil para verificar heterocedasticidade, por exemplo:
 
 ```{r}
 plotResiduals(res, form = testData$Environment1)
 ```
+
 
 # Alguns exemplos e possíveis problemas
 
@@ -246,7 +265,7 @@ Agora a gente vê a falta do ajuste do modelo quanto à variável ambiental, já
 
 # Exemplo das corujas
 
-Estes dados estão disponíveis no pacote `glmmTMB` (veja o help dos dados `?Olws` ).
+Estes dados estão disponíveis no pacote `glmmTMB` (veja o help dos dados `?Olws`).
 
 Vamos ajustar um modelo que segue a hipótese de que existe diferença no número de negociação dos filhotes entre os tratamentos de comida e o sexo do adulto alimentando (pai/mãe).
 
@@ -259,7 +278,7 @@ ggplot(Owls, aes(x = FoodTreatment, y = SiblingNegotiation, fill=SexParent)) +
 ```
 
 
-O modelo mais simples de todos é um glm poisson (dados de contagem) com interação entre os preditores e um offset para corrigir para o tamanho da ninhada.
+O modelo mais simples de todos é um glm Poisson (dados de contagem) com interação entre os preditores e um _offset_ para corrigir para o tamanho da ninhada.
 
 ```{r}
 m1 <- glm(SiblingNegotiation ~ FoodTreatment*SexParent + offset(log(BroodSize)), data=Owls , family = poisson)
@@ -267,7 +286,7 @@ m1 <- glm(SiblingNegotiation ~ FoodTreatment*SexParent + offset(log(BroodSize)),
 
 **OBS:** Para saber mais sobre o uso de "offsets" nos modelos, [essa discussão](https://stats.stackexchange.com/questions/11182/when-to-use-an-offset-in-a-poisson-regression) pode ser útil e esse Preprint pode ajudar a entender melhor quando usar: [Smith. 2024. Offset or not: guidance on accounting for sampling effort in generalized linear models. EcoEvoRxiv](https://ecoevorxiv.org/repository/view/7835/)
 
-Calculando os resíduos 
+Calculando os resíduos:
 
 ```{r}
 res <- simulateResiduals(m1)
