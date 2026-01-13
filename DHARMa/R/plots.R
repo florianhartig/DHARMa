@@ -389,33 +389,6 @@ plotResiduals <- function(simulationOutput, form = NULL, quantreg = NULL,
 }
 
 
-
-
-#' Ensures the existence of a valid predictor to plot residuals against
-#'
-#' @param simulationOutput a DHARMa simulation output or an object that can be converted into a DHARMa simulation output.
-#' @param predictor an optional predictor. If no predictor is provided, will try to extract the fitted value.
-#' @keywords internal
-ensurePredictor <- function(simulationOutput,
-                            predictor = NULL){
-  if(!is.null(predictor)){
-
-    if(length(predictor) != length(simulationOutput$scaledResiduals)) stop("DHARMa: residuals and predictor do not have the same length. The issue is possibly that you have NAs in your predictor that were removed during the model fit. Remove the NA values from your predictor.")
-
-    if(is.character(predictor)) {
-      predictor = factor(predictor)
-      warning("DHARMa:::ensurePredictor: character string was provided as predictor. DHARMa has converted to factor automatically. To remove this warning, please convert to factor before attempting to plot with DHARMa.")
-    }
-
-  } else {
-
-    predictor = simulationOutput$fittedPredictedResponse
-    if(is.null(predictor)) stop("DHARMa: can't extract predictor from simulationOutput, and no predictor provided.")
-  }
-  return(predictor)
-}
-
-
 #plotConventionalResiduals(fittedModel)
 
 
