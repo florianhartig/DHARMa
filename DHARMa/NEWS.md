@@ -7,7 +7,6 @@ NOTE: for more news about the package, see https://github.com/florianhartig/DHAR
 
 * For hierarchical models (GLMMs), we changed the default simulations from the supported model's default (mostly unconditional) to conditional simulations (for most of the supported models and packages). This represents a major change in the calculated scaled residuals and is implemented to ensure higher power in dispersion and other tests. We expect different results for calculated residuals using this or older `DHARMa` versions. For compatibility you can use the argument `simulateREs  = "user-specified"` to change back to the model's default (older `DHARMa` versions). See package vignette for more details.  
 
-
 * In `plotResiduals`, we increased the threshold for the automatic change from quantile regression lines to the spline: from 2,000 to 10,000 data points. When it happens, a message is displayed to warn users. Also, when `quantreg = F`, the color of the spline was changed to black because there is no test associated with the line (as there is for quantile regression). 
 
 * In `plotResiduals`, the argument `form` has a new functionality. Beyond the syntax `data$predictor`, it allows now to use the formula structure  `~predictor` or `~predictor|group == "group_level"` to plot the residuals against specific predictors and grouping variable. This works for most of the supported model functions. It solves problems with NAs in datasets that were excluded by the model. #407 / #425 
