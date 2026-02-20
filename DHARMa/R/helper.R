@@ -112,16 +112,20 @@ getQuantile <- function(simulations, observed, integerResponse,
       observed <- forwardsolve(L, observed)
       simulations = forwardsolve(L, simulations)
     }
-
-    scaledResiduals = rep(NA, n)
-    for (i in 1:n){
-      minSim <- mean(simulations[i,] < observed[i])
-      maxSim <- mean(simulations[i,] <= observed[i])
-      if (minSim == maxSim) scaledResiduals[i] = minSim
-      else scaledResiduals[i] = runif(1, minSim, maxSim)
-    }
+    
+    # calculation of PIT residual - idea is that we check the lower quantile as 
+    # well as lower or equal - if they are not identical we need to randomize then
+    
+    lower <- unname(rowMeans(simulations < observed))
+    lowerOrEqual <- unname(rowMeans(simulations <= observed))
+    needsRandomization <- lower != lowerOrEqual
+    
+    if(any(needsRandomization)) {
+      scaledResiduals <- ifelse(needsRandomization, 
+                                runif(length(lower), lower, lowerOrEqual), 
+                                lower)
+    } else scaledResiduals = lower
   }
-
   return(scaledResiduals)
 }
 
