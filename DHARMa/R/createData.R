@@ -137,8 +137,15 @@ createData <- function(sampleSize = 100, intercept = 0, fixedEffects = 1,
 
     # add spatialError?
 
-    out[[i]] <- data.frame(ID = 1:sampleSize, observedResponse, predictors, group = as.factor(group), time, x, y)
+    out[[i]] <- data.frame(ID = 1:sampleSize, 
+                           observedResponse, 
+                           predictors, 
+                           group = as.factor(group), 
+                           time, 
+                           x, y, 
+                           expectedMean = linkResponse)
   }
+  
   if(length(out) == 1) out = out[[1]]
 
   if(hasNA) out[1,3] = NA
