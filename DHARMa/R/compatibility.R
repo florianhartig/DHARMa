@@ -244,6 +244,26 @@ getData <- function (object, ...) {
   UseMethod("getData", object)
 }
 
+
+
+#' Get predictor names
+#'
+#' Wrapper to get the names of the predictors used in the model
+#'
+#' @param object a fitted model.
+#' @param ... additional parameters to be passed on.
+#'
+#' @seealso [getObservedResponse], [getSimulations], [getRefit], [getFixedEffects], [getFitted]
+#'
+#' @author Florian Hartig
+#' @export
+getPredictorNames <- function (object, ...) {
+  UseMethod("getPredictorNames", object)
+}
+
+
+
+
 # nObs
 
 # default -----------------------------------------------------------------
@@ -390,6 +410,11 @@ getData.default <- function (object,...){
   eval(object$call$data, envir = environment(formula(object)))
 }
 
+#' @rdname getPredictorNames
+#' @export
+getPredictorNames.default <- function (object,...){
+  colnames(model.frame(fittedModel))[-1]
+}
 
 
 ######### LM #############

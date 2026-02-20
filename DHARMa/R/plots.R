@@ -406,3 +406,26 @@ plotConventionalResiduals <- function(fittedModel){
   plot(predict(fittedModel), resid(fittedModel, type = "response") , main = "Raw residuals" , ylab = "Residual", xlab = "Predicted")
   mtext("Conventional residual plots", outer = TRUE)
 }
+
+
+
+#' Conventional residual plot
+#'
+#' Convenience function to draw conventional residual plots
+#'
+#' @param fittedModel a fitted model object
+plotResidualsAll<- function(simulationOutput, ){ # need to forward all arguments
+  
+  predictors = getPredictorNames(simulationOutput$fittedModel)
+  par(mfrow = c(1,2)) # there is a function for this in BayesianTools - you can copy it from there
+  for(i in 1:length(predictors)){
+    plotResiduals(simulationOutput, 
+                  form= eval(formula(paste("~", predictors[i]))),
+                  quantreg = FALSE,
+                  main = predictors[i], # todo Cosmina - can we improve this behavior without breaking other things
+                  xlab = "",
+                  ylab = "")
+  } 
+  
+}
+
