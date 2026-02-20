@@ -30,11 +30,11 @@ The testDispersion function implements several dispersion tests:
 
 If type = "DHARMa" (default and recommended), simulation-based dispersion tests are performed. Their behavior differs depending on whether simulations are done with refit = F, or refit = T.
 
-\strong{Important:} for either refit = T or F, the results of type = "DHARMa" dispersion test will differ depending on whether simulations are done conditional (= conditional on fitted random effects) or unconditional (= REs are re-simulated). The default as of DHARMa 0.4.8 is conditional simulations, which substantially increase the power and sensitivity of the dispersion test  (for details see \link{simulateResiduals} and the DHARMa vignette).
+\strong{Important:} for either refit = T or F, the results of type = "DHARMa" dispersion test will differ depending on whether simulations are done conditional (= conditional on fitted random effects) or unconditional (= REs are re-simulated). The default as of DHARMa 0.5.0 is conditional simulations, which substantially increase the power and sensitivity of the dispersion test (for details see \link{simulateResiduals} and the DHARMa vignette).
 
 If refit = F, the function uses \link{testGeneric} to compare the variance of the observed raw residuals (i.e. var(observed - predicted), displayed as a red line) against the variance of the simulated residuals (i.e. var(simulated - predicted), histogram). The variances are scaled to the mean simulated variance. A significant ratio > 1 indicates overdispersion, a significant ratio < 1 underdispersion.
 
-If refit = T, the function compares the approximate deviance (via squared pearson residuals) with the same quantity from the models refitted with simulated data. Applying this is much slower than the previous alternative. Given the computational cost, I would suggest that most users will be satisfied with the standard dispersion test.
+If refit = T, the function compares the approximate deviance (via squared Pearson residuals) with the same quantity from the models refitted with simulated data. Applying this is much slower than the previous alternative. Given the computational cost, I would suggest that most users will be satisfied with the standard dispersion test.
 
 \strong{Analytical dispersion tests (type == "PearsonChisq")}
 
@@ -77,6 +77,9 @@ testDispersion(simulationOutputAggregated)
 
 
 
+}
+\references{
+Leite, MS, Rettelbach, D. & Hartig, F. 2025. Dispersion tests in generalised linear mixed-effects models - a methods comparison and practical guide. EcoEvoRxiv Preprint: https://doi.org/10.32942/X23M14.
 }
 \seealso{
 \link{testResiduals}, \link{testUniformity}, \link{testOutliers}, \link{testDispersion}, \link{testZeroInflation}, \link{testGeneric}, \link{testTemporalAutocorrelation}, \link{testSpatialAutocorrelation}, \link{testQuantiles}, \link{testCategorical}

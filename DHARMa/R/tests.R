@@ -397,11 +397,11 @@ testCategorical <- function(simulationOutput, catPred,
 #'
 #' If type = "DHARMa" (default and recommended), simulation-based dispersion tests are performed. Their behavior differs depending on whether simulations are done with refit = F, or refit = T.
 #'
-#' **Important:** for either refit = T or F, the results of type = "DHARMa" dispersion test will differ depending on whether simulations are done conditional (= conditional on fitted random effects) or unconditional (= REs are re-simulated). The default as of DHARMa 0.4.8 is conditional simulations, which substantially increase the power and sensitivity of the dispersion test  (for details see [simulateResiduals] and the DHARMa vignette).
+#' **Important:** for either refit = T or F, the results of type = "DHARMa" dispersion test will differ depending on whether simulations are done conditional (= conditional on fitted random effects) or unconditional (= REs are re-simulated). The default as of DHARMa 0.5.0 is conditional simulations, which substantially increase the power and sensitivity of the dispersion test (for details see [simulateResiduals] and the DHARMa vignette).
 #'
 #' If refit = F, the function uses [testGeneric] to compare the variance of the observed raw residuals (i.e. var(observed - predicted), displayed as a red line) against the variance of the simulated residuals (i.e. var(simulated - predicted), histogram). The variances are scaled to the mean simulated variance. A significant ratio > 1 indicates overdispersion, a significant ratio < 1 underdispersion.
 #'
-#' If refit = T, the function compares the approximate deviance (via squared pearson residuals) with the same quantity from the models refitted with simulated data. Applying this is much slower than the previous alternative. Given the computational cost, I would suggest that most users will be satisfied with the standard dispersion test.
+#' If refit = T, the function compares the approximate deviance (via squared Pearson residuals) with the same quantity from the models refitted with simulated data. Applying this is much slower than the previous alternative. Given the computational cost, I would suggest that most users will be satisfied with the standard dispersion test.
 #'
 #' **Analytical dispersion tests (type == "PearsonChisq")**
 #'
@@ -412,6 +412,7 @@ testCategorical <- function(simulationOutput, catPred,
 #' @note For particular model classes / situations, there may be more powerful and thus preferable options over the DHARMa test. The advantage of the DHARMa test is that it directly targets the spread of the data (unlike other tests such as dispersion/df, which essentially measure fit and may thus be triggered by problems other than dispersion as well), and it makes practically no assumptions about the fitted model, other than the availability of simulations.
 #'
 #' @author Florian Hartig
+#' @references Leite, MS, Rettelbach, D. & Hartig, F. 2025. Dispersion tests in generalised linear mixed-effects models - a methods comparison and practical guide. EcoEvoRxiv Preprint: https://doi.org/10.32942/X23M14.
 #' @seealso [testResiduals], [testUniformity], [testOutliers], [testDispersion], [testZeroInflation], [testGeneric], [testTemporalAutocorrelation], [testSpatialAutocorrelation], [testQuantiles], [testCategorical]
 #' @example inst/examples/testDispersionHelp.R
 #' @export
@@ -427,10 +428,6 @@ testDispersion <- function(simulationOutput, alternative = c("two.sided", "great
 
     simulationOutput = ensureDHARMa(simulationOutput, convert = "Model")
 
-  # if(class(simulationOutput$fittedModel) %in% c("glmerMod", "lmerMod"){
-  #   if(!"re.form" %in% names(simulationOutput$additionalParameters) & is.null(simulationOutput$additionalParameters$re.form)) message("recommended to run conditional simulations for dispersion test, see help")
-  #}
-
   if(simulationOutput$refit == F){
 
       expectedVar = sd(simulationOutput$simulatedResponse)^2
@@ -440,7 +437,7 @@ testDispersion <- function(simulationOutput, alternative = c("two.sided", "great
     } else {
 
       observed = tryCatch(sum(residuals(simulationOutput$fittedModel, type = "pearson")^2), error = function(e) {
-        message(paste("DHARMa: the requested tests requires pearson residuals, but your model does not implement these calculations. Test will return NA. Error message:", e))
+        message(paste("DHARMa: the requested tests requires Pearson residuals, but your model does not implement these calculations. Test will return NA. Error message:", e))
         return(NA)
       })
       if(is.na(observed)) return(NA)

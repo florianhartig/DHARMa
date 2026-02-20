@@ -338,13 +338,13 @@ plot(simulationOutput)
 
 If you see this pattern, note that a common reason for underdispersion is overfitting, i.e. your model is too complex. Other possible explanations to check for include zero-inflation (best to check by comparing to a ZIP model, but see also `testZeroInflation`), non-independence of the data (e.g. temporal autocorrelation, check via  `testTemporalAutocorrelation`) that your predictors can use to overfit, or that your data-generating process is simply not a Poisson process.
 
-From a technical side, underdispersion is not as concerning as overdispersion, as it will usually bias p-values to the conservative side, but if your goal is to get a good power, you may want to consider a simpler model. If that is not helping, you can move to a distribution for underdispersed count data (e.g. Conway-Maxwell-Poisson, generalized Poisson).
+From a technical side, underdispersion is not as concerning as overdispersion, as it will usually bias p-values to the conservative side, but if your goal is to get a good power, you may want to consider a simpler model. If that is not helping, you can move to a distribution that takes into account underdispersed count data (e.g. Conway-Maxwell-Poisson, generalized Poisson).
 
 ### Formal tests for over/underdispersion
 
-Although, as discussed above, over/underdispersion will show up in the residuals, and it's possible to detect it with the testUniformity function, simulations show that this test is less powerful than more targeted tests. DHARMa contains several overdispersion tests that compare the dispersion of simulated residuals to the observed residuals.
+Although, as discussed above, over/underdispersion will show up in the residuals, and it's possible to detect it with the testUniformity function, simulations show that this test is less powerful than more targeted tests. DHARMa contains several dispersion tests that compare the dispersion of simulated residuals to the observed residuals.
 
-1.  *default: the simulation0-based response variance test* is a non-parametric test that compares the variance of the observed response variable to the variances of the simulated response variable (default).
+1.  *default: the simulation-based response variance test* is a non-parametric test that compares the variance of the observed response variable to the variances of the simulated response variable (default).
 2.  *PearsonChisq:* alternatively, DHARMa implements the Pearson-Chi2 test that is popular in the literature, suggested in the glmm Wiki, and implemented in some other R packages such as `performance::check_overdispersion`.
 3.  *refit:* if residual simulations are done via refit and the test is **PearsonChisq**, DHARMa will compare the Pearson residuals of the re-fitted simulations to the original Pearson residuals. This is essentially a non-parametric version of test 2.
 
