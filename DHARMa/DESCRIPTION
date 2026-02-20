@@ -51,7 +51,7 @@ License: GPL (>= 3)
 URL: http://florianhartig.github.io/DHARMa/
 LazyData: TRUE
 BugReports: https://github.com/florianhartig/DHARMa/issues
-RoxygenNote: 7.3.2
+RoxygenNote: 7.3.3
 Roxygen: list(old_usage = TRUE, markdown = TRUE)
 VignetteBuilder: knitr
 Encoding: UTF-8

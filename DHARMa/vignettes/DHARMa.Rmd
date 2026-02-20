@@ -180,13 +180,19 @@ To provide a visual aid in detecting deviations from uniformity in y-direction, 
 By default, plotResiduals plots against predicted values. However, you can also use it to plot residuals against a specific other predictors (highly recommended).
 
 ```{r, eval = FALSE}
-plotResiduals(simulationOutput, form = YOURPREDICTOR)
+plotResiduals(simulationOutput, form = ~ predictor)
+```
+
+Additionally, you can plot residuals against a specific predictor for a specific group, e.g. a random effect level.
+
+```{r, eval = FALSE}
+plotResiduals(simulationOutput, form = ~ predictor | group == "group_level")
 ```
 
 If the predictor is a factor, or if there is just a small number of observations on the x axis, plotResiduals will plot a box plot with additional tests instead of a scatter plot.
 
 ```{r, eval = FALSE}
-plotResiduals(simulationOutput, form = testData$group)
+plotResiduals(simulationOutput, form = ~ factor)
 ```
 
 See ?plotResiduals for details, but very shortly: under H0 (perfect model), we would expect those boxes to range homogeneously from 0.25-0.75. To see whether there are deviations from this expectation, the plot calculates a test for uniformity per box, and a test for homogeneity of variances between boxes. A positive test will be highlighted in red.\
@@ -501,8 +507,8 @@ It is difficult to see that there is a problem at all in the general plot, but i
 
 ```{r}
 par(mfrow = c(1,2))
-plotResiduals(simulationOutput, testData$Environment1)
-plotResiduals(simulationOutput, testData$Environment2)
+plotResiduals(simulationOutput, form = ~ Environment1)
+plotResiduals(simulationOutput, form = ~ Environment2)
 ```
 
 ## Residual correlation structures (temporal, spatial, phylogenetic)
@@ -670,7 +676,7 @@ m3 <- glmmTMB(SiblingNegotiation ~ FoodTreatment*SexParent + offset(log(BroodSiz
 res <- simulateResiduals(m3, plot = TRUE)
 par(mfrow = c(1,2))
 testDispersion(res)
-plotResiduals(res, Owls$FoodTreatment)
+plotResiduals(res, form = ~ FoodTreatment)
 ```
 
 We see underdispersion now. In a model with variable dispersion, this is often the signal that some other distributional assumptions are violated. Let's check for zero-inflation:
@@ -691,7 +697,7 @@ res <- simulateResiduals(m4, plot = TRUE)
 
 ```{r, error=TRUE, fig.width=7}
 par(mfrow = c(1,3))
-plotResiduals(res, Owls$FoodTreatment)
+plotResiduals(res, form = ~ FoodTreatment)
 testDispersion(res)
 testZeroInflation(res)
 ```
@@ -709,7 +715,7 @@ res <- simulateResiduals(m5, plot = TRUE)
 
 ```{r, error=TRUE, fig.width=7}
 par(mfrow = c(1,3))
-plotResiduals(res, Owls$FoodTreatment)
+plotResiduals(res, form = ~ FoodTreatment)
 testDispersion(res)
 testZeroInflation(res)
 ```
@@ -759,7 +765,7 @@ plot(simulationOutput, asFactor = TRUE)
 Even though the misfit is clearly visible if we plot the residuals against the missing predictor.
 
 ```{r, fig.width=4, fig.height=4}
-plotResiduals(simulationOutput, testData$Environment1, quantreg = TRUE)
+plotResiduals(simulationOutput, form = ~ Environment1, quantreg = TRUE)
 ```
 
 However, we can see the overdispersion arising from the misfit if we group our residuals, which basically transforms the 0/1 response to a k/n response.
