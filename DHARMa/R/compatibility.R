@@ -413,7 +413,7 @@ getData.default <- function (object,...){
 #' @rdname getPredictorNames
 #' @export
 getPredictorNames.default <- function (object,...){
-  colnames(model.frame(fittedModel))[-1]
+  colnames(model.frame(object))[-1]
 }
 
 
@@ -835,6 +835,14 @@ getFitted.MixMod <- function (object,...){
 getResiduals.MixMod <- function (object,...){
   residuals(object, type = "subject_specific")
 }
+
+
+#' @rdname getPredictorNames
+#' @export
+getPredictorNames.MixMod <- function (object,...){
+  c(colnames(model.frame(object))[-1], colnames(object$id))
+}
+
 
 ####### phylolm / phyloglm #########
 

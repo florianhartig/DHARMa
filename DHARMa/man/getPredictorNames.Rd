@@ -3,11 +3,14 @@
 \name{getPredictorNames}
 \alias{getPredictorNames}
 \alias{getPredictorNames.default}
+\alias{getPredictorNames.MixMod}
 \title{Get predictor names}
 \usage{
 getPredictorNames(object, ...)
 
 \method{getPredictorNames}{default}(object, ...)
+
+\method{getPredictorNames}{MixMod}(object, ...)
 }
 \arguments{
 \item{object}{a fitted model.}

@@ -11,9 +11,9 @@ plotResiduals(simulationOutput, form = NULL, quantreg = NULL,
 \arguments{
 \item{simulationOutput}{an object, usually a DHARMa object, from which residual values can be extracted. Alternatively, a vector with residuals or a fitted model can be provided, which will then be transformed into a DHARMa object.}
 
-\item{form}{optional predictor (and grouping variable) against which the residuals should be plotted. Default is to use the predicted(simulationOutput). See details.}
+\item{form}{optional predictor (and grouping variable) against which the residuals should be plotted. Default is to use the predicted(simulationOutput). Use form = ~. to plot against all predictors. See details.}
 
-\item{quantreg}{whether to perform a quantile regression based on \link{testQuantiles} or a smooth spline around the mean. Default NULL chooses T for nObs < 2000, and F otherwise.}
+\item{quantreg}{whether to perform a quantile regression based on \link{testQuantiles} or a smooth spline around the mean. Default NULL chooses T for nObs < 10000, and F otherwise.}
 
 \item{rank}{if T, the values provided in form will be rank transformed. This will usually make patterns easier to spot visually, especially if the distribution of the predictor is skewed. If form is a factor, this has no effect.}
 
@@ -42,9 +42,9 @@ To provide a visual aid for detecting deviations from uniformity in the y-direct
 
 Overdispersion typically manifests itself as Q1 (0.25) deviating towards 0 and Q3 (0.75) deviating towards 1. Heteroskedasticity manifests itself as non-parallel quantile lines. To diagnose heteroskedasticity and overdispersion, it can be helpful to additionally plot the absolute deviation of the residuals from the mean expectation of 0.5, using the option absoluteDeviation = T. In this case, we would again expect Q1-Q3 quantile lines at 0.25, 0.5, 0.75, but greater dispersion (also locally in the case of heteroskedasticity) always manifests itself in deviations towards 1.
 
-The quantile regression can take some time to calculate, especially for larger datasets. For this reason, quantreg = F can be set to generate a smooth spline instead. This is the default for n > 2000.
+The quantile regression can take some time to calculate, especially for larger datasets. For this reason, quantreg = F can be set to generate a smooth spline instead. This is the default for n > 10000.
 
-If form is specified as a formula, e.g. form = ~ your_predictor, NAs will be handled automatically (recommended). If a grouping variable is specified, e.g. form = ~ predictor|group == "group_level", a residual plot for the specified grouping level will be created. If form is not a formula, e.g. form = data$predictor, NAs are not handled automatically. For phyr and gamm4$mer models, you need to specify form in this way. If the predictor is a factor, a boxplot will be plotted instead of a scatter plot. The distribution for each factor level should be uniformly distributed, so the box should go from 0.25 to 0.75, with the median line at 0.5 (within-group). To test if deviations from those expectations are significant, KS-tests per group and a Levene test for homogeneity of variances is performed. See \link{testCategorical} for details.
+If form = ~. a separate plot for each predictor in the model is produced. If form is specified as a formula, e.g. form = ~ your_predictor, NAs will be handled automatically (recommended). If a grouping variable is specified, e.g. form = ~ predictor|group == "group_level", a residual plot for the specified grouping level will be created. If form is not a formula, e.g. form = data$predictor, NAs are not handled automatically. For phyr and gamm4$mer models, you need to specify form in this way. If the predictor is a factor, a boxplot will be plotted instead of a scatter plot. The distribution for each factor level should be uniformly distributed, so the box should go from 0.25 to 0.75, with the median line at 0.5 (within-group). To test if deviations from those expectations are significant, KS-tests per group and a Levene test for homogeneity of variances is performed. See \link{testCategorical} for details.
 }
 \note{
 If nObs > 10,000, the scatter plot is replaced by graphics::smoothScatter().
@@ -90,13 +90,10 @@ plotResiduals(simulationOutput, rank = TRUE, quantreg = FALSE, smoothScatter = T
 plotResiduals(simulationOutput, form = ~ Environment1,
               quantreg = FALSE)
 
-predictors = getPredictorNames(fittedModel)
-par(mfrow = c(1,2))
-for(i in predictors) plotResiduals(simulationOutput, form = eval~ predictors,
-                                  quantreg = FALSE)
 
-plotResiduals(simulationOutput, form = eval(formula(paste("~", pred))))
-
+# plot against all predictors
+plotResiduals(simulationOutput, form = ~.,
+              quantreg = FALSE)
 
 # if pred is a factor, or if asFactor = TRUE, will produce a boxplot
 plotResiduals(simulationOutput, form = ~group)

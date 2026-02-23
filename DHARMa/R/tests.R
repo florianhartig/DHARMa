@@ -350,9 +350,12 @@ testOutliers <- function(simulationOutput, alternative = c("two.sided", "greater
 #' @example inst/examples/testsHelp.R
 #' @export
 testCategorical <- function(simulationOutput, catPred,
-                            quantiles = c(0.25, 0.5, 0.75), plot = TRUE){
+                            quantiles = c(0.25, 0.5, 0.75), plot = TRUE, ...){
 
   simulationOutput = ensureDHARMa(simulationOutput, convert = T)
+
+  a = list(...)
+  a$xlab = paste(checkDots("xlab", deparse(substitute(catPred)), ...), "(catPred)")
 
   catPred = as.factor(catPred)
   out = list()
@@ -367,7 +370,7 @@ testCategorical <- function(simulationOutput, catPred,
   if(nlevels(catPred) > 1) out$homogeneity = leveneTest_formula(simulationOutput$scaledResiduals ~ catPred)
 
   if(plot == T){
-    boxplot(simulationOutput$scaledResiduals ~ catPred, ylim = c(0,1), axes = FALSE, col = ifelse(out$uniformity$p.value.cor < 0.05, "red", "lightgrey"))
+    boxplot(simulationOutput$scaledResiduals ~ catPred, ylim = c(0,1), xlab = a$xlab, axes = FALSE, col = ifelse(out$uniformity$p.value.cor < 0.05, "red", "lightgrey"))
     axis(1, at = 1:nlevels(catPred), levels(catPred))
     axis(2, at=c(0, quantiles, 1))
     abline(h = quantiles, lty = 2)

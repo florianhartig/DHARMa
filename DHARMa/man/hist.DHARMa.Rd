@@ -69,13 +69,10 @@ plotResiduals(simulationOutput, rank = TRUE, quantreg = FALSE, smoothScatter = T
 plotResiduals(simulationOutput, form = ~ Environment1,
               quantreg = FALSE)
 
-predictors = getPredictorNames(fittedModel)
-par(mfrow = c(1,2))
-for(i in predictors) plotResiduals(simulationOutput, form = eval~ predictors,
-                                  quantreg = FALSE)
 
-plotResiduals(simulationOutput, form = eval(formula(paste("~", pred))))
-
+# plot against all predictors
+plotResiduals(simulationOutput, form = ~.,
+              quantreg = FALSE)
 
 # if pred is a factor, or if asFactor = TRUE, will produce a boxplot
 plotResiduals(simulationOutput, form = ~group)
