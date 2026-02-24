@@ -80,7 +80,7 @@ hist(simulationOutput )
 
 # Default in DHARMa is to show predictions rank transformed
 # if you want plots based on raw predictions, use rank = F
-plotResiduals(simulationOutput, rank = F, quantreg = FALSE)
+plotResiduals(simulationOutput, rank = FALSE, quantreg = FALSE)
 
 # smooth scatter plot - default for large datasets with n > 10000
 plotResiduals(simulationOutput, rank = TRUE, quantreg = FALSE, smoothScatter = TRUE)
@@ -106,7 +106,7 @@ par(mfrow= c(2,2))
 for(g in unique(testData$group)[1:4]) {
   plotResiduals(simulationOutput, form = ~Environment1|group == g, xlab = paste("group", g))
 }
-par(mfrow= c(1,1)) 
+par(mfrow= c(1,1))
 
 
 
@@ -115,7 +115,7 @@ par(mfrow= c(1,1))
 # in this case, the model function automatically removed one row of observations
 # because there was an NA in Environment2. When using the variable Environment1
 # from the global environment, we have to remove this observation as well
-plotResiduals(simulationOutput, 
+plotResiduals(simulationOutput,
               form = testData$Environment1[complete.cases(testData)],
               quantreg = FALSE)
 

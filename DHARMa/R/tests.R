@@ -339,6 +339,7 @@ testOutliers <- function(simulationOutput, alternative = c("two.sided", "greater
 #' @param catPred a categorical predictor with the same dimensions as the residuals in simulationOutput.
 #' @param quantiles whether to draw the quantile lines.
 #' @param plot if TRUE, the function will create an additional plot.
+#' @param ... additional arguments to boxplot.
 #' @details The function tests for two common problems: are residuals within each group distributed according to model assumptions, and is the variance between groups heterogeneous.
 #'
 #'  The test for within-group uniformity is performed via multiple KS-tests, with adjustment of p-values for multiple testing. If the plot is drawn, problematic groups are highlighted in red, and a corresponding message is displayed in the plot.
@@ -400,7 +401,7 @@ testCategorical <- function(simulationOutput, catPred,
 #' @param type which test to run. Default is DHARMa, other options are PearsonChisq (see details).
 #' @param ... arguments to pass on to [testGeneric].
 #'
-#' @details Over / underdispersion means that the observed data is more / less dispersed than expected under the fitted model. There is no unique way to test for dispersion problems, and there are a number of different dispersion tests implemented in various R packages.
+#' @details Over / underdispersion means that the observed data is more / less dispersed than expected under the fitted model. There is no unique way to test for dispersion problems, and there are a number of different dispersion tests implemented in various R packages. For detailed recommendations see also Leite M.S., Rettelbach, D. and Hartig, F. (2025), preprint available at https://doi.org/10.32942/X23M14.
 #'
 #' The testDispersion function implements several dispersion tests:
 #'

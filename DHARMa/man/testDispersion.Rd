@@ -22,7 +22,7 @@ testDispersion(simulationOutput, alternative = c("two.sided", "greater",
 This function performs simulation-based tests for over / underdispersion. If type = "DHARMa" (default and recommended), simulation-based dispersion tests are performed. Their behavior differs depending on whether simulations are done with refit = F, or refit = T, and whether data is simulated conditional (see below). If type = "PearsonChisq", a chi2 test on Pearson residuals is performed.
 }
 \details{
-Over / underdispersion means that the observed data is more / less dispersed than expected under the fitted model. There is no unique way to test for dispersion problems, and there are a number of different dispersion tests implemented in various R packages.
+Over / underdispersion means that the observed data is more / less dispersed than expected under the fitted model. There is no unique way to test for dispersion problems, and there are a number of different dispersion tests implemented in various R packages. For detailed recommendations see also Leite M.S., Rettelbach, D. and Hartig, F. (2025), preprint available at https://doi.org/10.32942/X23M14.
 
 The testDispersion function implements several dispersion tests:
 

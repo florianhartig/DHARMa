@@ -360,7 +360,7 @@ All of these tests are included in the testDispersion function, see ?testDispers
 testDispersion(simulationOutput)
 ```
 
-**IMPORTANT INFO:** we have made extensive simulations (see Leite M.S., Rettelbach, D. and Hartig, F. (2025)), which have shown that the various tests have certain advantages and disadvantages. The basic results are that:
+**IMPORTANT INFO:** we have made extensive simulations (see Leite M.S., Rettelbach, D. and Hartig, F. (2025), preprint available at https://doi.org/10.32942/X23M14), which have shown that the various tests have certain advantages and disadvantages. The basic results are that:
 
 -   The most powerful and reliable test is option 3, but this costs a lot of time and is not available for all regression packages, as it requires that Pearson residuals are available.
 -   Option 2, the parametric Pearson-chi2, is fast if Pearson residuals are available, but based on a naive expectation of df (counts RE as 1 df) and the test statistic is thus biased towards underdispersion for mixed models. Similar to the df approximation, bias increases with the number of RE levels. When testing only for overdispersion (alternative = "greater"), this makes the test more conservative, but it also costs power.

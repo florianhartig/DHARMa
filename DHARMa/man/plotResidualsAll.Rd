@@ -9,8 +9,27 @@ plotResidualsAll(simulationOutput, form = NULL, quantreg = NULL,
   quantiles = c(0.25, 0.5, 0.75), absoluteDeviation = FALSE, ...)
 }
 \arguments{
-\item{simulationOutput}{an object with simulated residuals created by \link{simulateResiduals}. For further parameters see plotResiduals().}
+\item{simulationOutput}{an object with simulated residuals created by \link{simulateResiduals}.}
+
+\item{form}{optional predictor (and grouping variable) against which the residuals should be plotted.}
+
+\item{quantreg}{whether to perform a quantile regression or a smooth spline around the mean.}
+
+\item{rank}{if T, the values provided in form will be rank transformed.}
+
+\item{asFactor}{should a numeric predictor provided in form be treated as a factor.}
+
+\item{smoothScatter}{if T, a smooth scatter plot will plotted instead of a normal scatter plot.}
+
+\item{quantiles}{for a quantile regression, which quantiles should be plotted.}
+
+\item{absoluteDeviation}{if T, switch from displaying normal quantile residuals to absolute deviation from the mean expectation of 0.5 (calculated as 2 * abs(res - 0.5)).}
+
+\item{...}{additional arguments to plot / boxplot.}
 }
 \description{
-Internal function to plot residuals against all predictors of the model.
+Convenience function to plot residuals against all predictors of the model.
+}
+\details{
+For further details on the parameters see \link{plotResiduals}.
 }

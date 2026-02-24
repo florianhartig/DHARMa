@@ -431,9 +431,20 @@ plotConventionalResiduals <- function(fittedModel){
 
 #' Plot residuals against all predictors of the model.
 #'
-#' Internal function to plot residuals against all predictors of the model.
+#' Convenience function to plot residuals against all predictors of the model.
 #'
-#' @param simulationOutput an object with simulated residuals created by [simulateResiduals]. For further parameters see plotResiduals().
+#' @param simulationOutput an object with simulated residuals created by [simulateResiduals].
+#' @param form optional predictor (and grouping variable) against which the residuals should be plotted.
+#' @param quantreg whether to perform a quantile regression or a smooth spline around the mean.
+#' @param rank if T, the values provided in form will be rank transformed.
+#' @param asFactor should a numeric predictor provided in form be treated as a factor.
+#' @param smoothScatter if T, a smooth scatter plot will plotted instead of a normal scatter plot.
+#' @param quantiles for a quantile regression, which quantiles should be plotted.
+#' @param absoluteDeviation if T, switch from displaying normal quantile residuals to absolute deviation from the mean expectation of 0.5 (calculated as 2 * abs(res - 0.5)).
+#' @param ... additional arguments to plot / boxplot.
+#' @details For further details on the parameters see [plotResiduals].
+#' @export
+#'
 plotResidualsAll <- function(simulationOutput, form = NULL, quantreg = NULL,
                              rank = TRUE, asFactor = NULL, smoothScatter = NULL,
                              quantiles = c(0.25, 0.5, 0.75),
