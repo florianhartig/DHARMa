@@ -60,7 +60,9 @@ residuals(simulationOutput1, quantileFunction = qnorm, outlierValues = c(-7,7))
 outliers(simulationOutput1)
 
 # calculating aggregated residuals per group
-simulationOutput4 = recalculateResiduals(simulationOutput1, group = testData$group)
+# group here specified as formula (recommended)
+# but you can also use a variable from your environment, e.g. testData$group
+simulationOutput4 = recalculateResiduals(simulationOutput1, group = ~group)
 plot(simulationOutput4, quantreg = FALSE)
 
 # calculating residuals only for subset of the data

@@ -38,6 +38,10 @@ testResiduals(simulationOutput)
 testUniformity(simulationOutput)
 
 # KS test for correct distribution within and between groups
+# group specified as formula (recommended)
+testCategorical(simulationOutput, ~group)
+
+# group specified as variable in your environment
 testCategorical(simulationOutput, testData$group)
 
 # Dispersion test - for details see ?testDispersion

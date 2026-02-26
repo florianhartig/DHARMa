@@ -213,7 +213,7 @@ checkSimulations <- function(simulatedResponse, nObs, nSim){
 #' The purpose of this function is to recalculate scaled residuals per group, based on the simulations done by [simulateResiduals].
 #'
 #' @param simulationOutput an object with simulated residuals created by [simulateResiduals].
-#' @param group group of each data point.
+#' @param group a grouping variable with the same dimensions as the residuals in simulationOutput. If specified as formula, e.g. group = ~group, NAs are handled automatically (recommended).
 #' @param aggregateBy function for the aggregation. Default is sum. This should only be changed if you know what you are doing. Note in particular that the expected residual distribution might not be flat anymore if you choose general functions, such as sd etc.
 #' @param sel an optional vector for selecting the data to be aggregated.
 #' @param seed the random seed to be used within DHARMa. The default setting, recommended for most users, is to keep the random seed on a fixed value of 123. This means that you will always get the same randomization and thus the same result when running the same code. NULL = no new seed is set, but previous random state will be restored after simulation. FALSE = no seed is set, and random state will not be restored. The latter two options are only recommended for simulation experiments. See vignette for details.
@@ -239,16 +239,47 @@ recalculateResiduals <- function(simulationOutput, group = NULL, aggregateBy = s
 
   out = list()
   out$original = simulationOutput
-  out$group = group
   out$method = method
   out$aggregateBy = aggregateBy
 
-  if(is.null(group) & is.null(sel)) return(simulationOutput)
+  # group
+  if(is.null(group) & is.null(sel)) {return(simulationOutput)}
   else {
-    if(is.null(group)) group = 1:simulationOutput$nObs
+    if(is.null(group)) {group = 1:simulationOutput$nObs}
+    else {
+      if(!inherits(group, "formula")){
+        # old default
+        group = group
+        if(length(group) != length(simulationOutput$scaledResiduals)) stop("DHARMa: residuals and group do not have the same length. Remove rows with NAs or use formula syntax for group to handle NAs automatically.")
+      } else {
+        group = getFormulaPredictors(simulationOutput, formula = group)[[1]] # formula syntax
+      }
+    }
+    out$group = group
     group = as.factor(group)
     out$nGroups = nlevels(group)
-    if(is.null(sel)) sel = 1:simulationOutput$nObs
+
+    # sel
+    if(is.null(sel)) {
+      sel = 1:simulationOutput$nObs
+    } else {
+      # if sel is a formula (e.g. ~ Environment1<0.5)
+      if(inherits(sel, "formula")){
+        predictor = getFormulaPredictors(simulationOutput, formula = sel)
+        sel = eval(sel[[2]], envir = predictor)
+      }
+
+      # if sel is logical (e.g. testData$group == 1)
+      if(is.logical(sel)){
+        if(length(sel)!=length(simulationOutput$scaledResiduals)) stop("DHARMa: residuals and variable for sel do not have the same length. Remove rows with NAs or use formula syntax for sel to handle NAs automatically.")
+      }
+
+      # if sel is numeric (e.g. 1:20)
+      if(is.numeric(sel)){
+        if(nrow(getData(simulationOutput$fittedModel)) != length(simulationOutput$scaledResiduals)) warning("DHARMa: data used to fit the model and DHARMa residuals don't have the same length, probably due to NAs in your data. sel will select rows based on the residuals and their order.")
+      }
+    }
+
     out$sel = sel
 
     aggregateByGroup <- function(x) aggregate(x[sel], by = list(group[sel]),

@@ -79,6 +79,9 @@ plotResiduals(simulationOutput, form = ~.,
 # if pred is a factor, or if asFactor = TRUE, will produce a boxplot
 plotResiduals(simulationOutput, form = ~group)
 
+# plot residuals against multiple predictors at once
+plotResiduals(simulationOutput, form = ~Environment1 + Environment2)
+
 # plot residuals against a predictor for a specific group level, here group 1
 plotResiduals(simulationOutput, form = ~Environment1|group == "1")
 
@@ -108,10 +111,31 @@ plotResiduals(simulationOutput, absoluteDeviation = TRUE, quantreg = FALSE)
 
 # All these options can also be provided to the main plotting function
 
-# If you want to plot summaries per group, use
-simulationOutput = recalculateResiduals(simulationOutput, group = testData$group)
+# If you want to plot summaries per group, use recalculateResiduals
+# with group as a formula (recommended, handles NAs automatically)
+simulationOutput = recalculateResiduals(simulationOutput, group = ~group)
 plot(simulationOutput, quantreg = FALSE)
 # we see one residual point per RE
+
+# with group as variable in your environment
+# but then you need to exclude NAs by hand
+simulationOutput = recalculateResiduals(simulationOutput, group = ~testData$group[-1])
+
+# you can also select subsets of the data using sel
+# with formula syntax (recommended, handles NAs automatically)
+simulationOutput = recalculateResiduals(simulationOutput, sel = ~Environment1<0.5)
+
+# as condition based on a variable in your environment (exclude NAs by hand)
+simulationOutput = recalculateResiduals(simulationOutput, sel = ~testData$Environment1[-1]<0.5)
+
+# or combine group and sel
+simulationOutput = recalculateResiduals(simulationOutput, group = ~group, sel = ~Environment1<0.5)
+
+# or as subset of rows
+# (note: order of rows is based on residuals, not on original dataframe)
+# not run, because of warning:
+# simulationOutput = recalculateResiduals(simulationOutput, sel = 1:20)
+
 
 
 }

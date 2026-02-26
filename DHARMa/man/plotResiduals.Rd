@@ -11,7 +11,7 @@ plotResiduals(simulationOutput, form = NULL, quantreg = NULL,
 \arguments{
 \item{simulationOutput}{an object, usually a DHARMa object, from which residual values can be extracted. Alternatively, a vector with residuals or a fitted model can be provided, which will then be transformed into a DHARMa object.}
 
-\item{form}{optional predictor (and grouping variable) against which the residuals should be plotted. Default is to use the predicted(simulationOutput). Use form = ~. to plot against all predictors. See details.}
+\item{form}{optional predictor(s) against which the residuals should be plotted. Default is to use the predicted(simulationOutput). Recommended to specify as formula. Use \code{form = ~.} to plot against all predictors. See details.}
 
 \item{quantreg}{whether to perform a quantile regression based on \link{testQuantiles} or a smooth spline around the mean. Default NULL chooses T for nObs < 10000, and F otherwise.}
 
@@ -44,7 +44,7 @@ Overdispersion typically manifests itself as Q1 (0.25) deviating towards 0 and Q
 
 The quantile regression can take some time to calculate, especially for larger datasets. For this reason, quantreg = F can be set to generate a smooth spline instead. This is the default for n > 10000.
 
-If form = ~. a separate plot for each predictor in the model is produced. If form is specified as a formula, e.g. form = ~ your_predictor, NAs will be handled automatically (recommended). If a grouping variable is specified, e.g. form = ~ predictor|group == "group_level", a residual plot for the specified grouping level will be created. If form is not a formula, e.g. form = data$predictor, NAs are not handled automatically. For phyr and gamm4$mer models, you need to specify form in this way. If the predictor is a factor, a boxplot will be plotted instead of a scatter plot. The distribution for each factor level should be uniformly distributed, so the box should go from 0.25 to 0.75, with the median line at 0.5 (within-group). To test if deviations from those expectations are significant, KS-tests per group and a Levene test for homogeneity of variances is performed. See \link{testCategorical} for details.
+If form is specified as a formula, e.g. \code{form = ~ your_predictor}, NAs will be handled automatically (recommended). If \code{form = ~.} a separate plot for each predictor in the model is produced. If \code{form = ~ predictor1 + predictor2}, a separate plot for each predictor is produced. If an additional grouping variable is specified, e.g. \code{form = ~ predictor|group == "group_level"}, a residual plot for the specified grouping level will be created. If form is \strong{not} a formula, e.g. \code{form = data$predictor}, NAs are \strong{not} handled automatically. For phyr and gamm4$mer models, you need to specify form in this way. If the predictor is a factor, a boxplot will be plotted instead of a scatter plot. The distribution for each factor level should be uniformly distributed, so the box should go from 0.25 to 0.75, with the median line at 0.5 (within-group). To test if deviations from those expectations are significant, KS-tests per group and a Levene test for homogeneity of variances is performed. See \link{testCategorical} for details.
 }
 \note{
 If nObs > 10,000, the scatter plot is replaced by graphics::smoothScatter().
@@ -98,6 +98,9 @@ plotResiduals(simulationOutput, form = ~.,
 # if pred is a factor, or if asFactor = TRUE, will produce a boxplot
 plotResiduals(simulationOutput, form = ~group)
 
+# plot residuals against multiple predictors at once
+plotResiduals(simulationOutput, form = ~Environment1 + Environment2)
+
 # plot residuals against a predictor for a specific group level, here group 1
 plotResiduals(simulationOutput, form = ~Environment1|group == "1")
 
@@ -127,10 +130,31 @@ plotResiduals(simulationOutput, absoluteDeviation = TRUE, quantreg = FALSE)
 
 # All these options can also be provided to the main plotting function
 
-# If you want to plot summaries per group, use
-simulationOutput = recalculateResiduals(simulationOutput, group = testData$group)
+# If you want to plot summaries per group, use recalculateResiduals
+# with group as a formula (recommended, handles NAs automatically)
+simulationOutput = recalculateResiduals(simulationOutput, group = ~group)
 plot(simulationOutput, quantreg = FALSE)
 # we see one residual point per RE
+
+# with group as variable in your environment
+# but then you need to exclude NAs by hand
+simulationOutput = recalculateResiduals(simulationOutput, group = ~testData$group[-1])
+
+# you can also select subsets of the data using sel
+# with formula syntax (recommended, handles NAs automatically)
+simulationOutput = recalculateResiduals(simulationOutput, sel = ~Environment1<0.5)
+
+# as condition based on a variable in your environment (exclude NAs by hand)
+simulationOutput = recalculateResiduals(simulationOutput, sel = ~testData$Environment1[-1]<0.5)
+
+# or combine group and sel
+simulationOutput = recalculateResiduals(simulationOutput, group = ~group, sel = ~Environment1<0.5)
+
+# or as subset of rows
+# (note: order of rows is based on residuals, not on original dataframe)
+# not run, because of warning:
+# simulationOutput = recalculateResiduals(simulationOutput, sel = 1:20)
+
 
 
 }

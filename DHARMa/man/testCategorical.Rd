@@ -10,7 +10,7 @@ testCategorical(simulationOutput, catPred, quantiles = c(0.25, 0.5, 0.75),
 \arguments{
 \item{simulationOutput}{an object of class DHARMa, either created via \link{simulateResiduals} for supported models or by \link{createDHARMa} for simulations created outside DHARMa, or a supported model. Providing a supported model directly is discouraged, because simulation settings cannot be changed in this case.}
 
-\item{catPred}{a categorical predictor with the same dimensions as the residuals in simulationOutput.}
+\item{catPred}{a categorical predictor with the same dimensions as the residuals in simulationOutput. If specified as formula, e.g. catPred = ~group, NAs are handled automatically (recommended).}
 
 \item{quantiles}{whether to draw the quantile lines.}
 
@@ -46,6 +46,10 @@ testResiduals(simulationOutput)
 testUniformity(simulationOutput)
 
 # KS test for correct distribution within and between groups
+# group specified as formula (recommended)
+testCategorical(simulationOutput, ~group)
+
+# group specified as variable in your environment
 testCategorical(simulationOutput, testData$group)
 
 # Dispersion test - for details see ?testDispersion

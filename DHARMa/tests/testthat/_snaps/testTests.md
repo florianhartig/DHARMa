@@ -505,10 +505,8 @@
       testSpatialAutocorrelation(simulationOutput, plot = FALSE, x = testData$x[1:10],
       y = testData$y[1:9])
     Condition
-      Warning in `cbind()`:
-      number of rows of result is not a multiple of vector length (arg 2)
       Error in `testSpatialAutocorrelation()`:
-      ! Dimensions of x / y coordinates don't match the dimension of the residuals.
+      ! Dimensions of x / y coordinates don't match the dimension of the residuals. Remove rows with NAs or specify x,y as formula to handle NAs automatically.
 
 ---
 
@@ -525,7 +523,7 @@
       testSpatialAutocorrelation(simulationOutput, distMat = dM, plot = FALSE, x = testData$
         x)
     Message
-      Both coordinates and distMat provided, calculations will be done based on the distance matrix, coordinates will only be used for plotting.
+      Both coordinates and distMat provided, calculations will be done based on the distance matrix, coordinates will be ignored.
     Output
       
       	DHARMa Moran's I test for distance-based autocorrelation
@@ -542,7 +540,7 @@
       testSpatialAutocorrelation(simulationOutput, distMat = dM, plot = FALSE, y = testData$
         y)
     Message
-      Both coordinates and distMat provided, calculations will be done based on the distance matrix, coordinates will only be used for plotting.
+      Both coordinates and distMat provided, calculations will be done based on the distance matrix, coordinates will be ignored.
     Output
       
       	DHARMa Moran's I test for distance-based autocorrelation

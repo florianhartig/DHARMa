@@ -28,7 +28,7 @@ A significant p-value for the splines means the fitted spline deviates from a fl
 
 The p-values of the intercept and splines are combined into a total p-value via Benjamini & Hochberg adjustment to control the FDR.
 
-Predictor needs to be a variable in your environment (e.g. predictor = data$predictor). For more details and a more flexible syntax for predictors, see the help of the argument \code{form} in \link{plotResiduals}.
+Predictor can be a formula (e.g. predictor = ~predictor), in which case NAs are handled automatically (recommended). Predictor can also be a variable in your environment (e.g. predictor = data$predictor), but then you need to remove rows that were excluded by the model due to NAs by hand. For more details and a more flexible syntax for predictors, see the help of the argument \code{form} in \link{plotResiduals}.
 
 When plotting (plot = TRUE), the shaded gray areas indicate 95\% confidence intervals of the quantile estimates (1.96 * standard error).
 }
@@ -44,7 +44,7 @@ x # the test shows a combined p-value, corrected for multiple testing
 \dontrun{
 # accessing results of the test
 x$pvals # pvalues for the individual quantiles
-x$qgamFits # access the fitted quantile regression 
+x$qgamFits # access the fitted quantile regression
 summary(x$qgamFits[[1]]) # summary of the first fitted quantile
 
 # possible to test user-defined quantiles
@@ -53,6 +53,11 @@ testQuantiles(simulationOutput, quantiles = c(0.7))
 #  example with missing environmental predictor
 fittedModel <- glm(observedResponse ~ 1 , family = "poisson", data = testData)
 simulationOutput <- simulateResiduals(fittedModel = fittedModel)
+
+# specified as formula (recommended)
+testQuantiles(simulationOutput, predictor = ~Environment1)
+
+# or as variable in your environment
 testQuantiles(simulationOutput, predictor = testData$Environment1)
 
 plot(simulationOutput)

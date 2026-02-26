@@ -4,12 +4,14 @@
 \alias{plotResidualsAll}
 \title{Plot residuals against all predictors of the model.}
 \usage{
-plotResidualsAll(simulationOutput, form = NULL, quantreg = NULL,
-  rank = TRUE, asFactor = NULL, smoothScatter = NULL,
+plotResidualsAll(simulationOutput, predictorNames, form = NULL,
+  quantreg = NULL, rank = TRUE, asFactor = NULL, smoothScatter = NULL,
   quantiles = c(0.25, 0.5, 0.75), absoluteDeviation = FALSE, ...)
 }
 \arguments{
 \item{simulationOutput}{an object with simulated residuals created by \link{simulateResiduals}.}
+
+\item{predictorNames}{names of the predictors to be plotted.}
 
 \item{form}{optional predictor (and grouping variable) against which the residuals should be plotted.}
 

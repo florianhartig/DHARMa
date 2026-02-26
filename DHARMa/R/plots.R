@@ -152,7 +152,7 @@ plotQQunif <- function(simulationOutput, testUniformity = TRUE, testOutliers = T
 #' The function creates a generic residual plot with either spline or quantile regression to highlight patterns in the residuals. Outliers are marked in star/asterisk form and highlighted in red if the outlier test is significant.
 #'
 #' @param simulationOutput an object, usually a DHARMa object, from which residual values can be extracted. Alternatively, a vector with residuals or a fitted model can be provided, which will then be transformed into a DHARMa object.
-#' @param form optional predictor (and grouping variable) against which the residuals should be plotted. Default is to use the predicted(simulationOutput). Use form = ~. to plot against all predictors. See details.
+#' @param form optional predictor(s) against which the residuals should be plotted. Default is to use the predicted(simulationOutput). Recommended to specify as formula. Use \code{form = ~.} to plot against all predictors. See details.
 #' @param quantreg whether to perform a quantile regression based on [testQuantiles] or a smooth spline around the mean. Default NULL chooses T for nObs < 10000, and F otherwise.
 #' @param rank if T, the values provided in form will be rank transformed. This will usually make patterns easier to spot visually, especially if the distribution of the predictor is skewed. If form is a factor, this has no effect.
 #' @param asFactor should a numeric predictor provided in form be treated as a factor. Default is to choose this for < 10 unique values, as long as enough predictions are available to draw a boxplot.
@@ -170,7 +170,7 @@ plotQQunif <- function(simulationOutput, testUniformity = TRUE, testOutliers = T
 #'
 #' The quantile regression can take some time to calculate, especially for larger datasets. For this reason, quantreg = F can be set to generate a smooth spline instead. This is the default for n > 10000.
 #'
-#' If form = ~. a separate plot for each predictor in the model is produced. If form is specified as a formula, e.g. form = ~ your_predictor, NAs will be handled automatically (recommended). If a grouping variable is specified, e.g. form = ~ predictor|group == "group_level", a residual plot for the specified grouping level will be created. If form is not a formula, e.g. form = data$predictor, NAs are not handled automatically. For phyr and gamm4$mer models, you need to specify form in this way. If the predictor is a factor, a boxplot will be plotted instead of a scatter plot. The distribution for each factor level should be uniformly distributed, so the box should go from 0.25 to 0.75, with the median line at 0.5 (within-group). To test if deviations from those expectations are significant, KS-tests per group and a Levene test for homogeneity of variances is performed. See [testCategorical] for details.
+#' If form is specified as a formula, e.g. \code{form = ~ your_predictor}, NAs will be handled automatically (recommended). If \code{form = ~.} a separate plot for each predictor in the model is produced. If \code{form = ~ predictor1 + predictor2}, a separate plot for each predictor is produced. If an additional grouping variable is specified, e.g. \code{form = ~ predictor|group == "group_level"}, a residual plot for the specified grouping level will be created. If form is **not** a formula, e.g. \code{form = data$predictor}, NAs are **not** handled automatically. For phyr and gamm4$mer models, you need to specify form in this way. If the predictor is a factor, a boxplot will be plotted instead of a scatter plot. The distribution for each factor level should be uniformly distributed, so the box should go from 0.25 to 0.75, with the median line at 0.5 (within-group). To test if deviations from those expectations are significant, KS-tests per group and a Levene test for homogeneity of variances is performed. See [testCategorical] for details.
 #'
 #' @note If nObs > 10,000, the scatter plot is replaced by graphics::smoothScatter().
 #'
@@ -196,8 +196,6 @@ plotResiduals <- function(simulationOutput, form = NULL, quantreg = NULL,
                                     gsub(".*[$]|^~","",deparse(substitute(form)))), ...)
   a$main = checkDots("main", NULL, ...)
 
-  if(rank == TRUE) a$xlab = paste(a$xlab, "(rank transformed)")
-
   simOut <- simulationOutput
   simulationOutput = ensureDHARMa(simulationOutput, convert = TRUE)
   res = simulationOutput$scaledResiduals
@@ -220,35 +218,59 @@ plotResiduals <- function(simulationOutput, form = NULL, quantreg = NULL,
 
       if(simulationOutput$modelClass == "communityPGLMM") stop("DHARMa: to use plotResiduals with phyr models, please return to the old DHARMa default, e.g. form = your_data$your_predictor.")
 
-      if(form == "~.") {return(plotResidualsAll(
-        simulationOutput = simulationOutput,
-        form = form,
-        quantreg = quantreg,
-        rank = rank,
-        asFactor = asFactor,
-        smoothScatter = smoothScatter,
-        quantiles = quantiles,
-        absoluteDeviation = absoluteDeviation,
-        ...
-      ))}
+      if(form == "~.") {
+        predictorNames = getPredictorNames(simulationOutput$fittedModel)
+        return(plotResidualsAll(
+          simulationOutput = simulationOutput,
+          predictorNames = predictorNames,
+          form = form,
+          quantreg = quantreg,
+          rank = rank,
+          asFactor = asFactor,
+          smoothScatter = smoothScatter,
+          quantiles = quantiles,
+          absoluteDeviation = absoluteDeviation,
+          ...
+          ))}
 
-      allV = all.vars(form)
-      predictorName = allV[[1]]
-      groupName = tryCatch(allV[[2]], error = function(e) NULL)
+      # if there is more than 1 predictor, check if form is specified either
+      # with "|" (plot residuals within a certain group)
+      # or "+" (plot residuals for multiple predictors in separate panels via plotResidualsAll)
 
-      modelData = getData(simulationOutput$fittedModel)
-      predictor = modelData[[predictorName]]
-      group = if(!is.null(groupName)) modelData[[groupName]]
+      predictors = getFormulaPredictors(simulationOutput = simulationOutput, formula = form)
 
-      # make predictor (and group) the same length as scaledResiduals
-      rownames = rownames(model.frame(simulationOutput$fittedModel))
+      if(length(predictors) > 1) {
+        operators = unlist(strsplit(as.character(form[[2]]), split = character(0)))
 
-      if(length(predictor) != length(simulationOutput$scaledResiduals)) {
-        predictor = predictor[(rownames(modelData) %in% rownames)]
-      }
+        if("|" %in% operators && "+" %in% operators) stop("DHARMa: Detected both + and | as operators. Please choose one or the other. See ?plotResiduals.")
 
-      if(!is.null(group) && length(group) != length(simulationOutput$scaledResiduals)) {
-        group = group[(rownames(modelData) %in% rownames)]
+        # for formulas with +, create a separate residual plot for each predictor
+        if("+" %in% operators) {
+          predictorNames = names(predictors)
+
+          return(plotResidualsAll(
+            simulationOutput = simulationOutput,
+            predictorNames = predictorNames,
+            form = form,
+            quantreg = quantreg,
+            rank = rank,
+            asFactor = asFactor,
+            smoothScatter = smoothScatter,
+            quantiles = quantiles,
+            absoluteDeviation = absoluteDeviation,
+            ...
+          ))
+
+        }
+
+        # for formulas with |, create a residual plot for the specified grouping level
+        predictor = predictors[[1]]
+        group = predictors[[2]]
+
+        # if form has just one predictor, make the standard plot for that predictor
+      } else {
+        predictor = predictors[[1]]
+        group = NULL
       }
 
       if(is.null(predictor)) stop("DHARMA: unable to extract specified predictor variable from the data frame that was used to fit the model. Further note: if you are using a gamm4 model, please use form = your_data$your_predictor instead of form = ~ your_predictor.")
@@ -279,6 +301,7 @@ plotResiduals <- function(simulationOutput, form = NULL, quantreg = NULL,
     if (rank == TRUE){
       pred = rankTransform(pred)
       a$xlim = checkDots("xlim", c(0,1), ...)
+      a$xlab = paste(a$xlab, "(rank transformed)")
     }
 
     nuniq = length(unique(pred))
@@ -308,11 +331,11 @@ plotResiduals <- function(simulationOutput, form = NULL, quantreg = NULL,
   if(is.factor(pred)){
     if(is.null(group)) {
       testCategorical(simulationOutput = simulationOutput, catPred = pred,
-                      quantiles = quantiles, xlab = substitute(predictorName), ...)
+                      quantiles = quantiles, xlab = a$xlab, ...)
     } else {
       simulationOutput$scaledResiduals = res
       testCategorical(simulationOutput = simulationOutput, catPred = pred,
-                      quantiles = quantiles, xlab = substitute(predictorName), ...)
+                      quantiles = quantiles, xlab = a$xlab, ...)
     }
 
   } else{
@@ -335,7 +358,7 @@ plotResiduals <- function(simulationOutput, form = NULL, quantreg = NULL,
     if (smoothScatter == TRUE) {
       do.call(graphics::smoothScatter, append(list(x = pred, y = res ,
                                                    ylim = c(0,1), axes = FALSE,
-                                                   colramp = colorRampPalette(c("white", "darkgrey"))),a))
+                                                   colramp = colorRampPalette(c("white", "darkgrey"))),a[names(a) != "main"]))
       points(pred[outlier], res[outlier],
              col = .Options$DHARMaSignalColor, cex = 0.5)
 
@@ -346,7 +369,7 @@ plotResiduals <- function(simulationOutput, form = NULL, quantreg = NULL,
     else{
       a$col = checkDots("col", defaultCol, ...)
       a$pch = checkDots("pch", defaultPch, ...)
-      do.call(plot, append(list(res ~ pred, ylim = c(0,1), axes = FALSE), a))
+      do.call(plot, append(list(res ~ pred, ylim = c(0,1), axes = FALSE), a[names(a) != "main"]))
 
       axis(1)
       axis(2, at=c(0, quantiles, 1))
@@ -354,7 +377,7 @@ plotResiduals <- function(simulationOutput, form = NULL, quantreg = NULL,
 }
   ##### Quantile regressions #####
 
-  if(is.null(a$main)) {main = ifelse(is.null(form), paste(yAxis, "vs. predicted"), paste(yAxis, "Residual vs. predictor"))}
+  if(is.null(a$main)) {main = ifelse(is.null(form), paste(yAxis, "vs. predicted"), paste(yAxis, "Residual vs. predictor"))} else {main = a$main}
   out = NULL
 
   if(is.numeric(pred)){
@@ -434,6 +457,7 @@ plotConventionalResiduals <- function(fittedModel){
 #' Convenience function to plot residuals against all predictors of the model.
 #'
 #' @param simulationOutput an object with simulated residuals created by [simulateResiduals].
+#' @param predictorNames names of the predictors to be plotted.
 #' @param form optional predictor (and grouping variable) against which the residuals should be plotted.
 #' @param quantreg whether to perform a quantile regression or a smooth spline around the mean.
 #' @param rank if T, the values provided in form will be rank transformed.
@@ -445,17 +469,16 @@ plotConventionalResiduals <- function(fittedModel){
 #' @details For further details on the parameters see [plotResiduals].
 #' @export
 #'
-plotResidualsAll <- function(simulationOutput, form = NULL, quantreg = NULL,
+plotResidualsAll <- function(simulationOutput, predictorNames, form = NULL, quantreg = NULL,
                              rank = TRUE, asFactor = NULL, smoothScatter = NULL,
                              quantiles = c(0.25, 0.5, 0.75),
                              absoluteDeviation = FALSE, ...){
 
   opar = par(no.readonly = TRUE)
   on.exit(par(opar))
-  predictors = getPredictorNames(simulationOutput$fittedModel)
 
   # get number of panels needed (copied from BayesianTools)
-  numPredictors = length(predictors)
+  numPredictors = length(predictorNames)
   if (numPredictors <= 0) stop("Unable to extract predictor names from model.")
   lower = floor(sqrt(numPredictors))
   upper = ceiling(sqrt(numPredictors))
@@ -471,16 +494,16 @@ plotResidualsAll <- function(simulationOutput, form = NULL, quantreg = NULL,
   par(mfrow = mfrow)
 
   # create residual plot for each predictor in the model (additional arguments in ... are ignored here)
-  for(i in 1:length(predictors)){
+  for(i in 1:length(predictorNames)){
     plotResiduals(simulationOutput,
-                  form = eval(formula(paste("~", predictors[i]))),
+                  form = eval(formula(paste("~", predictorNames[i]))),
                   quantreg = quantreg,
                   rank = rank,
                   asFactor = asFactor,
                   smoothScatter = smoothScatter,
                   quantiles = quantiles,
                   absoluteDeviation = absoluteDeviation,
-                  xlab = predictors[i])
+                  xlab = predictorNames[i])
   }
 
 }

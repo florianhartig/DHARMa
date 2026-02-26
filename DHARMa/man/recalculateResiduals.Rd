@@ -11,7 +11,7 @@ recalculateResiduals(simulationOutput, group = NULL, aggregateBy = sum,
 \arguments{
 \item{simulationOutput}{an object with simulated residuals created by \link{simulateResiduals}.}
 
-\item{group}{group of each data point.}
+\item{group}{a grouping variable with the same dimensions as the residuals in simulationOutput. If specified as formula, e.g. group = ~group, NAs are handled automatically (recommended).}
 
 \item{aggregateBy}{function for the aggregation. Default is sum. This should only be changed if you know what you are doing. Note in particular that the expected residual distribution might not be flat anymore if you choose general functions, such as sd etc.}
 
@@ -67,7 +67,9 @@ residuals(simulationOutput1, quantileFunction = qnorm, outlierValues = c(-7,7))
 outliers(simulationOutput1)
 
 # calculating aggregated residuals per group
-simulationOutput4 = recalculateResiduals(simulationOutput1, group = testData$group)
+# group here specified as formula (recommended)
+# but you can also use a variable from your environment, e.g. testData$group
+simulationOutput4 = recalculateResiduals(simulationOutput1, group = ~group)
 plot(simulationOutput4, quantreg = FALSE)
 
 # calculating residuals only for subset of the data

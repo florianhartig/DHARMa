@@ -212,4 +212,38 @@ ensurePredictor <- function(simulationOutput,
 }
 
 
+#' Get predictors specified in a formula.
+#'
+#' Gets additional predictor(s) specified as a formula for plotResiduals, recalculateResiduals, testCategorical, testQuantiles, testTemporalAutocorrelation, testSpatialAutocorrelation. Predictors are extracted from the data frame stored in the model object. If observations were removed during model fitting due to NAs, these rows are excluded automatically by getFormulaPredictors.
+#'
+#' @param simulationOutput simulationOutput (DHARMa object).
+#' @param formula the formula to be evaluated, typically consisting of one variable except for plotResiduals (optional multiple variables) and testSpatialAutocorrelation (mandatory x and y).
+#'
+#'
+#' @keywords internal
+#'
+
+getFormulaPredictors <- function(simulationOutput, formula) {
+
+  allV = all.vars(formula)
+
+  modelData = getData(simulationOutput$fittedModel)
+  rownames = rownames(model.frame(simulationOutput$fittedModel))
+
+  predictors = list()
+
+  for(i in 1:length(allV)) {
+    predictors[[allV[i]]] = modelData[[allV[[i]]]]
+    if(length(predictors[[allV[i]]]) != length(simulationOutput$scaledResiduals)) {
+      predictors[[allV[i]]] = predictors[[allV[i]]][(rownames(modelData) %in% rownames)]
+    }
+
+  }
+
+  return(predictors)
+
+}
+
+
+
 
