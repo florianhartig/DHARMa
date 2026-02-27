@@ -23,6 +23,7 @@ NOTE: for more news about the package, see https://github.com/florianhartig/DHAR
 ## Minor changes
 
 * Using 95% confidence intervals for confidence bands in plots for testQuantiles(). Before, we were using standard errors (~ 68% CI).
+* Vectorize randomization of residuals to improve speed - PR#493 contributed by StaffanBetner
 
 * Adding color legend to testSpatialAutocorrelation().
 
