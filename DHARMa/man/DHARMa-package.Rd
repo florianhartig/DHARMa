@@ -29,6 +29,7 @@ Other contributors:
 \itemize{
   \item Lukas Lohse [contributor]
   \item Melina de Souza leite [contributor]
+  \item Cosmina Werneke [contributor]
 }
 
 }
