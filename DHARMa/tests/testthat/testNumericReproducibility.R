@@ -11,7 +11,7 @@ test_that("residuals are numerically reproducible", {
   
   simulationOutput <- simulateResiduals(fittedModel = fittedModel)
 
-  load(file = "./manualTests/referenceData.RData")
+  load(file = "../manualTests/referenceData.RData")
   
   testthat::expect_identical( referenceData$mod1$residuals, residuals(simulationOutput))
   
