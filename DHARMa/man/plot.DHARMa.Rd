@@ -61,20 +61,18 @@ hist(simulationOutput )
 
 # Default in DHARMa is to show predictions rank transformed
 # if you want plots based on raw predictions, use rank = F
-plotResiduals(simulationOutput, rank = FALSE, quantreg = FALSE)
+plotResiduals(simulationOutput, rank = FALSE)
 
-# smooth scatter plot - default for large datasets with n > 10000
-plotResiduals(simulationOutput, rank = TRUE, quantreg = FALSE, smoothScatter = TRUE)
+# smooth scatter plot - default for large datasets with n > 10,000
+plotResiduals(simulationOutput, rank = TRUE, smoothScatter = TRUE)
 
 # It is very advisable to plot the residual against all predictors
 # the following syntax uses the predictor values from the fitted model
-plotResiduals(simulationOutput, form = ~ Environment1,
-              quantreg = FALSE)
+plotResiduals(simulationOutput, form = ~ Environment1)
 
 
 # plot against all predictors
-plotResiduals(simulationOutput, form = ~.,
-              quantreg = FALSE)
+plotResiduals(simulationOutput, form = ~.)
 
 # if pred is a factor, or if asFactor = TRUE, will produce a boxplot
 plotResiduals(simulationOutput, form = ~group)
@@ -100,33 +98,32 @@ par(mfrow= c(1,1))
 # because there was an NA in Environment2. When using the variable Environment1
 # from the global environment, we have to remove this observation as well
 plotResiduals(simulationOutput,
-              form = testData$Environment1[complete.cases(testData)],
-              quantreg = FALSE)
+              form = testData$Environment1[complete.cases(testData)])
 
 
 
 # to diagnose overdispersion and heteroskedasticity it can be useful to
 # display residuals as absolute deviation from the expected mean 0.5
-plotResiduals(simulationOutput, absoluteDeviation = TRUE, quantreg = FALSE)
+plotResiduals(simulationOutput, absoluteDeviation = TRUE)
 
 # All these options can also be provided to the main plotting function
 
 # If you want to plot summaries per group, use recalculateResiduals
 # with group as a formula (recommended, handles NAs automatically)
 simulationOutput = recalculateResiduals(simulationOutput, group = ~group)
-plot(simulationOutput, quantreg = FALSE)
+plot(simulationOutput)
 # we see one residual point per RE
 
 # with group as variable in your environment
 # but then you need to exclude NAs by hand
-simulationOutput = recalculateResiduals(simulationOutput, group = ~testData$group[-1])
+simulationOutput = recalculateResiduals(simulationOutput, group = testData$group[-1])
 
 # you can also select subsets of the data using sel
 # with formula syntax (recommended, handles NAs automatically)
 simulationOutput = recalculateResiduals(simulationOutput, sel = ~Environment1<0.5)
 
 # as condition based on a variable in your environment (exclude NAs by hand)
-simulationOutput = recalculateResiduals(simulationOutput, sel = ~testData$Environment1[-1]<0.5)
+simulationOutput = recalculateResiduals(simulationOutput, sel = testData$Environment1[-1]<0.5)
 
 # or combine group and sel
 simulationOutput = recalculateResiduals(simulationOutput, group = ~group, sel = ~Environment1<0.5)
