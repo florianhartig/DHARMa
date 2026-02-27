@@ -30,7 +30,7 @@ plot.DHARMa <- function(x, title = "DHARMa residual", ...){
   oldpar <- par(mfrow = c(1,2), oma = c(0,1,2,1))
   on.exit(par(oldpar))
 
-  plotQQunif(x)
+  plotQQunif(x, ...)
   plotResiduals(x, ...)
 
   mtext(title, outer = TRUE)
