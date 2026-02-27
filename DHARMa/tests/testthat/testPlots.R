@@ -73,3 +73,18 @@ test_that("Plots work",
             plotResiduals(simulationOutput, testData$group)
           }
 )
+
+test_that("different form arguments in plotResiduals work",
+          {
+            testData = createData(100, hasNA = TRUE, randomEffectVariance = 2, numGroups = 10)
+            fittedModel <- lme4::glmer(observedResponse ~ Environment1 + (Environment1|group),
+                               family = "poisson", data = testData)
+            simulationOutput <- simulateResiduals(fittedModel = fittedModel)
+
+            expect_no_error(plotResiduals(simulationOutput, form = ~Environment1))
+            expect_no_error(plotResiduals(simulationOutput, form = ~Environment1|group=="1"))
+            expect_no_error(plotResiduals(simulationOutput, form = ~x))
+            expect_no_error(plotResiduals(simulationOutput, form = ~.))
+            expect_error(plotResiduals(simulationOutput, form = testData$Environment1))
+          }
+)

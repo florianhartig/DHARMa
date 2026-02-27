@@ -3,6 +3,10 @@ fittedModel <- lm(observedResponse ~ Environment1, data = testData)
 res = simulateResiduals(fittedModel)
 
 # Standard use
+# specify x,y as formulas (recommended)
+testSpatialAutocorrelation(res, x = ~x, y = ~y)
+
+# or as variables in your environment
 testSpatialAutocorrelation(res, x =  testData$x, y = testData$y)
 
 # Alternatively, one can provide a distance matrix
@@ -30,7 +34,7 @@ testData$y = as.numeric(testData$group)
 groupLocations = aggregate(testData[, 6:7], list(testData$group), mean)
 
 # calculating residuals per group
-res2 = recalculateResiduals(res, group = testData$group)
+res2 = recalculateResiduals(res, group = ~group)
 
 # running the spatial test on grouped residuals
 testSpatialAutocorrelation(res2, groupLocations$x, groupLocations$y)
@@ -60,12 +64,12 @@ fittedModel <- lmer(observedResponse ~ Environment1 + (1|group), data = testData
 # because residuals are still clustered
 
 res = simulateResiduals(fittedModel, simulateREs = "unconditional")
-testSpatialAutocorrelation(res, x =  testData$x, y = testData$y)
+testSpatialAutocorrelation(res, x = ~x, y = ~y)
 
 # However, it should disappear if you just calculate an aggregate residuals per cluster
 # Because at least how the data are simulated, cluster are spatially independent
 
-res2 = recalculateResiduals(res, group = testData$group)
+res2 = recalculateResiduals(res, group = ~group)
 testSpatialAutocorrelation(res2,
                            x =  aggregate(testData$x, list(testData$group), mean)$x,
                            y = aggregate(testData$y, list(testData$group), mean)$x)
@@ -76,6 +80,6 @@ testSpatialAutocorrelation(res2,
 # probably due to the RE shrinkage
 
 res = simulateResiduals(fittedModel, simulateREs = "conditional")
-testSpatialAutocorrelation(res, x =  testData$x, y = testData$y)
+testSpatialAutocorrelation(res, x = ~x, y = ~y)
 
 

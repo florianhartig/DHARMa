@@ -49,6 +49,9 @@ x = getSimulations(fittedModel, nsim = 2, type = "refit")
 getRefit(fittedModel, x[[1]])
 
 getRefit(fittedModel, getObservedResponse(fittedModel))
+
+# get data frame that was used to fit the model
+getData(fittedModel)
 }
 \seealso{
 \link{getRefit}, \link{getSimulations}, \link{getFixedEffects}, \link{getFitted}

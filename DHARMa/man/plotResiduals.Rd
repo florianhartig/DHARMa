@@ -11,9 +11,9 @@ plotResiduals(simulationOutput, form = NULL, quantreg = NULL,
 \arguments{
 \item{simulationOutput}{an object, usually a DHARMa object, from which residual values can be extracted. Alternatively, a vector with residuals or a fitted model can be provided, which will then be transformed into a DHARMa object.}
 
-\item{form}{optional predictor against which the residuals should be plotted. Default is to use the predicted(simulationOutput).}
+\item{form}{optional predictor(s) against which the residuals should be plotted. Default is to use the predicted(simulationOutput). Recommended to specify as formula. Use \code{form = ~.} to plot against all predictors. See details.}
 
-\item{quantreg}{whether to perform a quantile regression based on \link{testQuantiles} or a smooth spline around the mean. Default NULL chooses T for nObs < 2000, and F otherwise.}
+\item{quantreg}{whether to perform a quantile regression based on \link{testQuantiles} or a smooth spline around the mean. Default NULL chooses T for nObs < 10000, and F otherwise.}
 
 \item{rank}{if T, the values provided in form will be rank transformed. This will usually make patterns easier to spot visually, especially if the distribution of the predictor is skewed. If form is a factor, this has no effect.}
 
@@ -42,9 +42,9 @@ To provide a visual aid for detecting deviations from uniformity in the y-direct
 
 Overdispersion typically manifests itself as Q1 (0.25) deviating towards 0 and Q3 (0.75) deviating towards 1. Heteroskedasticity manifests itself as non-parallel quantile lines. To diagnose heteroskedasticity and overdispersion, it can be helpful to additionally plot the absolute deviation of the residuals from the mean expectation of 0.5, using the option absoluteDeviation = T. In this case, we would again expect Q1-Q3 quantile lines at 0.25, 0.5, 0.75, but greater dispersion (also locally in the case of heteroskedasticity) always manifests itself in deviations towards 1.
 
-The quantile regression can take some time to calculate, especially for larger datasets. For this reason, quantreg = F can be set to generate a smooth spline instead. This is the default for n > 2000.
+The quantile regression can take some time to calculate, especially for larger datasets. For this reason, quantreg = F can be set to generate a smooth spline instead. This is the default for n > 10000.
 
-If form is a factor, a boxplot will be plotted instead of a scatter plot. The distribution for each factor level should be uniformly distributed, so the box should go from 0.25 to 0.75, with the median line at 0.5 (within-group). To test if deviations from those expectations are significant, KS-tests per group and a Levene test for homogeneity of variances is performed. See \link{testCategorical} for details.
+If form is specified as a formula, e.g. \code{form = ~ your_predictor}, NAs will be handled automatically (recommended). If \code{form = ~.} a separate plot for each predictor in the model is produced. If \code{form = ~ predictor1 + predictor2}, a separate plot for each predictor is produced. If an additional grouping variable is specified, e.g. \code{form = ~ predictor|group == "group_level"}, a residual plot for the specified grouping level will be created. If form is \strong{not} a formula, e.g. \code{form = data$predictor}, NAs are \strong{not} handled automatically. For phyr and gamm4$mer models, you need to specify form in this way. If the predictor is a factor, a boxplot will be plotted instead of a scatter plot. The distribution for each factor level should be uniformly distributed, so the box should go from 0.25 to 0.75, with the median line at 0.5 (within-group). To test if deviations from those expectations are significant, KS-tests per group and a Levene test for homogeneity of variances is performed. See \link{testCategorical} for details.
 }
 \note{
 If nObs > 10,000, the scatter plot is replaced by graphics::smoothScatter().
@@ -52,9 +52,11 @@ If nObs > 10,000, the scatter plot is replaced by graphics::smoothScatter().
 The color for highlighting outliers and quantile lines/splines with significant tests can be changed by setting \code{options(DHARMaSignalColor = "red")} to a different color. See \code{getOption("DHARMaSignalColor")} for the current setting. This is convenient for a color-blind friendly display, since red and black are difficult for some people to distinguish.
 }
 \examples{
-testData = createData(sampleSize = 200, family = poisson(), 
+testData = createData(sampleSize = 200, family = poisson(),
+                      fixedEffects = c(1,1),
                       randomEffectVariance = 1, numGroups = 10)
-fittedModel <- glm(observedResponse ~ Environment1, 
+testData$Environment2[1] = NA
+fittedModel <- glm(observedResponse ~ Environment1 + Environment2,
                    family = "poisson", data = testData)
 simulationOutput <- simulateResiduals(fittedModel = fittedModel)
 
@@ -67,7 +69,7 @@ plot(simulationOutput, quantreg = FALSE)
 
 #############  Distribution  ######################
 
-plotQQunif(simulationOutput = simulationOutput, 
+plotQQunif(simulationOutput = simulationOutput,
            testDispersion = FALSE,
            testUniformity = FALSE,
            testOutliers = FALSE)
@@ -76,29 +78,83 @@ hist(simulationOutput )
 
 #############  residual plots  ###############
 
-# rank transformation, using a simulationOutput
-plotResiduals(simulationOutput, rank = TRUE, quantreg = FALSE)
+# Default in DHARMa is to show predictions rank transformed
+# if you want plots based on raw predictions, use rank = F
+plotResiduals(simulationOutput, rank = FALSE, quantreg = FALSE)
 
-# smooth scatter plot - usually used for large datasets, default for n > 10000
+# smooth scatter plot - default for large datasets with n > 10000
 plotResiduals(simulationOutput, rank = TRUE, quantreg = FALSE, smoothScatter = TRUE)
 
-# residual vs predictors, using explicit values for pred, residual 
-plotResiduals(simulationOutput, form = testData$Environment1, 
+# It is very advisable to plot the residual against all predictors
+# the following syntax uses the predictor values from the fitted model
+plotResiduals(simulationOutput, form = ~ Environment1,
+              quantreg = FALSE)
+
+
+# plot against all predictors
+plotResiduals(simulationOutput, form = ~.,
               quantreg = FALSE)
 
 # if pred is a factor, or if asFactor = TRUE, will produce a boxplot
-plotResiduals(simulationOutput, form = testData$group)
+plotResiduals(simulationOutput, form = ~group)
 
-# to diagnose overdispersion and heteroskedasticity it can be useful to 
+# plot residuals against multiple predictors at once
+plotResiduals(simulationOutput, form = ~Environment1 + Environment2)
+
+# plot residuals against a predictor for a specific group level, here group 1
+plotResiduals(simulationOutput, form = ~Environment1|group == "1")
+
+# or in a grid for multiple group levels, e.g. groups 1 to 4
+par(mfrow= c(2,2))
+for(g in unique(testData$group)[1:4]) {
+  plotResiduals(simulationOutput, form = ~Environment1|group == g, xlab = paste("group", g))
+}
+par(mfrow= c(1,1))
+
+
+
+
+# alternatively, you can plot against a variable from the global environment
+# in this case, the model function automatically removed one row of observations
+# because there was an NA in Environment2. When using the variable Environment1
+# from the global environment, we have to remove this observation as well
+plotResiduals(simulationOutput,
+              form = testData$Environment1[complete.cases(testData)],
+              quantreg = FALSE)
+
+
+
+# to diagnose overdispersion and heteroskedasticity it can be useful to
 # display residuals as absolute deviation from the expected mean 0.5
 plotResiduals(simulationOutput, absoluteDeviation = TRUE, quantreg = FALSE)
 
 # All these options can also be provided to the main plotting function
 
-# If you want to plot summaries per group, use
-simulationOutput = recalculateResiduals(simulationOutput, group = testData$group)
-plot(simulationOutput, quantreg = FALSE) 
+# If you want to plot summaries per group, use recalculateResiduals
+# with group as a formula (recommended, handles NAs automatically)
+simulationOutput = recalculateResiduals(simulationOutput, group = ~group)
+plot(simulationOutput, quantreg = FALSE)
 # we see one residual point per RE
+
+# with group as variable in your environment
+# but then you need to exclude NAs by hand
+simulationOutput = recalculateResiduals(simulationOutput, group = ~testData$group[-1])
+
+# you can also select subsets of the data using sel
+# with formula syntax (recommended, handles NAs automatically)
+simulationOutput = recalculateResiduals(simulationOutput, sel = ~Environment1<0.5)
+
+# as condition based on a variable in your environment (exclude NAs by hand)
+simulationOutput = recalculateResiduals(simulationOutput, sel = ~testData$Environment1[-1]<0.5)
+
+# or combine group and sel
+simulationOutput = recalculateResiduals(simulationOutput, group = ~group, sel = ~Environment1<0.5)
+
+# or as subset of rows
+# (note: order of rows is based on residuals, not on original dataframe)
+# not run, because of warning:
+# simulationOutput = recalculateResiduals(simulationOutput, sel = 1:20)
+
 
 
 }

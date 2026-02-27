@@ -76,7 +76,7 @@ testBivariateUniformity <- function(simulationOutput, alternative = c("two.sided
 #' This function fits quantile regressions on the residuals, and compares their location to the expected location.
 #'
 #' @param simulationOutput an object of class DHARMa, either created via [simulateResiduals] for supported models or by [createDHARMa] for simulations created outside DHARMa, or a supported model. Providing a supported model directly is discouraged, because simulation settings cannot be changed in this case.
-#' @param predictor an optional predictor variable to be used, instead of the predicted response (default).
+#' @param predictor an optional predictor variable to be used, instead of the predicted response (default). See details.
 #' @param rank if TRUE, the values provided in predictor will be rank transformed. This will usually make patterns easier to spot visually, especially if the distribution of the predictor is skewed. If form is a factor, this has no effect.
 #' @param quantiles the quantiles to be tested.
 #' @param plot if TRUE, the function will create an additional plot.
@@ -85,6 +85,8 @@ testBivariateUniformity <- function(simulationOutput, alternative = c("two.sided
 #' A significant p-value for the splines means the fitted spline deviates from a flat line at the expected location.
 #'
 #' The p-values of the intercept and splines are combined into a total p-value via Benjamini & Hochberg adjustment to control the FDR.
+#'
+#' Predictor can be a formula (e.g. predictor = ~predictor), in which case NAs are handled automatically (recommended). Predictor can also be a variable in your environment (e.g. predictor = data$predictor), but then you need to remove rows that were excluded by the model due to NAs by hand. For more details and a more flexible syntax for predictors, see the help of the argument `form` in [plotResiduals].
 #'
 #' When plotting (plot = TRUE), the shaded gray areas indicate 95% confidence intervals of the quantile estimates (1.96 * standard error).
 #'
@@ -102,6 +104,8 @@ testQuantiles <- function(simulationOutput, predictor = NULL, rank = TRUE,
 
     simulationOutput = ensureDHARMa(simulationOutput, convert = T)
     res = simulationOutput$scaledResiduals
+
+    if(inherits(predictor, "formula")) predictor = getFormulaPredictors(simulationOutput, predictor)[[1]]
     pred = ensurePredictor(simulationOutput, predictor)
     if (rank == TRUE) pred = rankTransform(pred)
 
@@ -145,8 +149,14 @@ testQuantiles <- function(simulationOutput, predictor = NULL, rank = TRUE,
     class(out) = "htest"
 
   } else if(plot == T) {
-    out <- plotResiduals(simulationOutput = simulationOutput, form = predictor,
-                         rank = rank, quantiles = quantiles, quantreg = TRUE)
+    if(is.null(predictor)) {
+      out <- plotResiduals(simulationOutput = simulationOutput, form = NULL,
+                           rank = rank, quantiles = quantiles, quantreg = TRUE)
+    } else {
+      out <- plotResiduals(simulationOutput = simulationOutput, form = predictor,
+                           rank = rank, quantiles = quantiles, quantreg = TRUE)
+      }
+
   }
   return(out)
 }
@@ -328,9 +338,10 @@ testOutliers <- function(simulationOutput, alternative = c("two.sided", "greater
 #' This function tests if there are problems in a res ~ group structure. It performs two tests: test for within-group uniformity, and test for between-group homogeneity of variances.
 #'
 #' @param simulationOutput an object of class DHARMa, either created via [simulateResiduals] for supported models or by [createDHARMa] for simulations created outside DHARMa, or a supported model. Providing a supported model directly is discouraged, because simulation settings cannot be changed in this case.
-#' @param catPred a categorical predictor with the same dimensions as the residuals in simulationOutput.
+#' @param catPred a categorical predictor with the same dimensions as the residuals in simulationOutput. If specified as formula, e.g. catPred = ~group, NAs are handled automatically (recommended).
 #' @param quantiles whether to draw the quantile lines.
 #' @param plot if TRUE, the function will create an additional plot.
+#' @param ... additional arguments to boxplot.
 #' @details The function tests for two common problems: are residuals within each group distributed according to model assumptions, and is the variance between groups heterogeneous.
 #'
 #'  The test for within-group uniformity is performed via multiple KS-tests, with adjustment of p-values for multiple testing. If the plot is drawn, problematic groups are highlighted in red, and a corresponding message is displayed in the plot.
@@ -342,9 +353,18 @@ testOutliers <- function(simulationOutput, alternative = c("two.sided", "greater
 #' @example inst/examples/testsHelp.R
 #' @export
 testCategorical <- function(simulationOutput, catPred,
-                            quantiles = c(0.25, 0.5, 0.75), plot = TRUE){
+                            quantiles = c(0.25, 0.5, 0.75), plot = TRUE, ...){
 
   simulationOutput = ensureDHARMa(simulationOutput, convert = T)
+
+  a = list(...)
+  a$xlab = paste(checkDots("xlab", deparse(substitute(catPred)), ...), "(catPred)")
+
+  if(!inherits(catPred, "formula")) {
+    catPred = catPred # old default
+  } else {
+    catPred = getFormulaPredictors(simulationOutput, formula = catPred)[[1]] # formula syntax
+  }
 
   catPred = as.factor(catPred)
   out = list()
@@ -359,7 +379,7 @@ testCategorical <- function(simulationOutput, catPred,
   if(nlevels(catPred) > 1) out$homogeneity = leveneTest_formula(simulationOutput$scaledResiduals ~ catPred)
 
   if(plot == T){
-    boxplot(simulationOutput$scaledResiduals ~ catPred, ylim = c(0,1), axes = FALSE, col = ifelse(out$uniformity$p.value.cor < 0.05, "red", "lightgrey"))
+    boxplot(simulationOutput$scaledResiduals ~ catPred, ylim = c(0,1), xlab = a$xlab, axes = FALSE, col = ifelse(out$uniformity$p.value.cor < 0.05, "red", "lightgrey"))
     axis(1, at = 1:nlevels(catPred), levels(catPred))
     axis(2, at=c(0, quantiles, 1))
     abline(h = quantiles, lty = 2)
@@ -389,7 +409,7 @@ testCategorical <- function(simulationOutput, catPred,
 #' @param type which test to run. Default is DHARMa, other options are PearsonChisq (see details).
 #' @param ... arguments to pass on to [testGeneric].
 #'
-#' @details Over / underdispersion means that the observed data is more / less dispersed than expected under the fitted model. There is no unique way to test for dispersion problems, and there are a number of different dispersion tests implemented in various R packages.
+#' @details Over / underdispersion means that the observed data is more / less dispersed than expected under the fitted model. There is no unique way to test for dispersion problems, and there are a number of different dispersion tests implemented in various R packages. For detailed recommendations see also Leite M.S., Rettelbach, D. and Hartig, F. (2025), preprint available at https://doi.org/10.32942/X23M14.
 #'
 #' The testDispersion function implements several dispersion tests:
 #'
@@ -610,7 +630,7 @@ testGeneric <- function(simulationOutput, summary, alternative = c("two.sided", 
 #' This function performs a standard test for temporal autocorrelation on the simulated residuals.
 #'
 #' @param simulationOutput an object of class DHARMa, either created via [simulateResiduals] for supported models or by [createDHARMa] for simulations created outside DHARMa, or a supported model. Providing a supported model directly is discouraged, because simulation settings cannot be changed in this case.
-#' @param time the time, in the same order as the data points.
+#' @param time time variable in the same order as the datapoints and with the same length as the residuals in simulationOutput. If specified as formula, e.g. time = ~time, NAs are handled automatically (recommended).
 #' @param alternative a character string specifying whether the test should test if observations are "greater", "less" or "two.sided" compared to the simulated null hypothesis.
 #' @param plot whether to plot output.
 #' @details The function performs a Durbin-Watson test on the uniformly scaled residuals, and plots the residuals against time. The DB test was originally designed for normal residuals. In simulations, I didn't see a problem with this setting though. The alternative is to transform the uniform residuals to normal residuals and perform the DB test on those.
@@ -639,9 +659,6 @@ testTemporalAutocorrelation <- function(simulationOutput, time, alternative = c(
 
   simulationOutput = ensureDHARMa(simulationOutput, convert = T)
 
-  # actually not sure if this is neccessary for dwtest, but seems better to aggregate
-  if(any(duplicated(time))) stop("testing for temporal autocorrelation requires unique time values - if you have several observations per time value, either use the recalculateResiduals function to aggregate residuals per time step, or extract the residuals from the fitted object, and plot / test each of them independently for temporally repeated subgroups (typical choices would be location / subject etc.). Note that the latter must be done by hand, outside testTemporalAutocorrelation.")
-
   alternative <- match.arg(alternative)
 
   if(is.null(time)){
@@ -649,8 +666,16 @@ testTemporalAutocorrelation <- function(simulationOutput, time, alternative = c(
     message("DHARMa::testTemporalAutocorrelation - no time argument provided, using random times for each data point")
   }
 
-  # To avoid Issue #190
-  if (length(time) != length(residuals(simulationOutput))) stop("Dimensions of time don't match the dimension of the residuals")
+  if(!inherits(time, "formula")){
+    # old default
+    # To avoid Issue #190
+    if (length(time) != length(residuals(simulationOutput))) stop("Dimensions of time don't match the dimension of the residuals. Remove rows with NAs or use formula syntax for group to handle NAs automatically.")
+  } else {
+    time = getFormulaPredictors(simulationOutput, formula = time)[[1]] # formula syntax
+  }
+
+  # actually not sure if this is neccessary for dwtest, but seems better to aggregate
+  if(any(duplicated(time))) stop("testing for temporal autocorrelation requires unique time values - if you have several observations per time value, either use the recalculateResiduals function to aggregate residuals per time step, or extract the residuals from the fitted object, and plot / test each of them independently for temporally repeated subgroups (typical choices would be location / subject etc.). Note that the latter must be done by hand, outside testTemporalAutocorrelation.")
 
   out = lmtest::dwtest(simulationOutput$scaledResiduals ~ 1, order.by = time, alternative = alternative)
 
@@ -720,16 +745,33 @@ testSpatialAutocorrelation <- function(simulationOutput, x = NULL, y  = NULL, di
 
   # Assertions
 
+  if( (!is.null(x) | !is.null(y)) & !is.null(distMat) ){
+    if(isTRUE(plot)) {message("Both coordinates and distMat provided, calculations will be done based on the distance matrix, coordinates will only be used for plotting.")}
+
+    else { # set x,y to NULL so they don't cause errors if wrong dimensions
+      x = NULL
+      y = NULL
+      message("Both coordinates and distMat provided, calculations will be done based on the distance matrix, coordinates will be ignored.")
+      }
+  }
+
+  if( (is.null(x) | is.null(y)) & is.null(distMat) ) stop("You need to provide either x,y coordinates or a distMatrix.")
+
+  # check if x,y are formulas
+  if(!inherits(x, "formula") | !inherits(y, "formula")) {
+    # old default
+    # To avoid Issue #190
+    if (is.null(distMat) & !is.null(x) & length(x) != length(residuals(simulationOutput)) | is.null(distMat) & !is.null(y) & length(y) != length(residuals(simulationOutput))) stop("Dimensions of x / y coordinates don't match the dimension of the residuals. Remove rows with NAs or specify x,y as formula to handle NAs automatically.")
+
+    if(inherits(x, "formula") != inherits(y, "formula")) stop("Please specify x and y the same way, either both as formula (e.g.x = ~x) or both as vector (e.g. x = data$x).")
+  } else {
+    # formula syntax
+    x = getFormulaPredictors(simulationOutput, formula = x)[[1]]
+    y = getFormulaPredictors(simulationOutput, formula = y)[[1]]
+  }
+
+
   if(any(duplicated(cbind(x,y)))) stop("Testing for spatial autocorrelation requires unique x,y values - if you have several observations per location, either use the recalculateResiduals function to aggregate residuals per location, or extract the residuals from the fitted object, and plot / test each of them independently for spatially repeated subgroups (a typical scenario would be repeated spatial observation, in which case one could plot / test each time step separately for temporal autocorrelation). Note that the latter must be done by hand, outside testSpatialAutocorrelation.")
-
-  if( (!is.null(x) | !is.null(y)) & !is.null(distMat) ) message("Both coordinates and distMat provided, calculations will be done based on the distance matrix, coordinates will only be used for plotting.")
-
-  if( (is.null(x) | is.null(y)) & is.null(distMat) ) stop("You need to provide either x,y, coordinates or a distMatrix.")
-
-  if(is.null(distMat) & (length(x) != length(residuals(simulationOutput)) | length(y) != length(residuals(simulationOutput))))
-
-  # To avoid Issue #190
-  if (!is.null(x) & length(x) != length(residuals(simulationOutput)) | !is.null(y) & length(y) != length(residuals(simulationOutput))) stop("Dimensions of x / y coordinates don't match the dimension of the residuals.")
 
   # if not provided, create distance matrix based on x and y
   if(is.null(distMat)) distMat <- as.matrix(dist(cbind(x, y)))
@@ -753,7 +795,26 @@ testSpatialAutocorrelation <- function(simulationOutput, x = NULL, y  = NULL, di
     on.exit(par(opar))
 
     col = colorRamp(c("red", "white", "blue"))(simulationOutput$scaledResiduals)
-    plot(x,y, col = rgb(col, maxColorValue = 255), main = out$method, cex.main = 0.8 )
+    layout(matrix(c(1, 2), ncol = 2), widths = c(6, 1))
+
+    # scatterplot
+    par(mar = c(5, 4, 4, 1))
+    plot(x, y,
+         col = rgb(col, maxColorValue = 255),
+         main = out$method, cex.main = 0.8)
+
+    # legend
+    par(mar = c(1, 0.5, 2, 2))
+    plot.new()
+    plot.window(xlim = c(0, 1), ylim = c(-1, 1))
+
+    legend_image = as.raster(matrix(colorRampPalette(c("blue", "white", "red"))(200), ncol = 1))
+    rasterImage(legend_image,
+                xleft = -0.5, xright = 1,
+                ybottom = 0.3, ytop = 0.9)
+
+    axis(4, at = c(0.3, 0.9), labels = c("-1", "1"), las = 1)
+    mtext("Correlation", side = 3, line = -1)
 
     # TODO implement correlogram
   }

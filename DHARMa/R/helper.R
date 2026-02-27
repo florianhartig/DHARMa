@@ -191,6 +191,63 @@ rankTransform <- function(x){
 #prs <- rankTransform(rnorm(10))
 
 
+#' Ensures the existence of a valid predictor to plot residuals against
+#'
+#' @param simulationOutput a DHARMa simulation output or an object that can be converted into a DHARMa simulation output.
+#' @param predictor an optional predictor. If no predictor is provided, will try to extract the fitted value.
+#' @keywords internal
+ensurePredictor <- function(simulationOutput,
+                            predictor = NULL){
+  if(!is.null(predictor)){
+
+    if(length(predictor) != length(simulationOutput$scaledResiduals)) stop("DHARMa: residuals and predictor do not have the same length. The issue is possibly that you have NAs in your predictor that were removed during the model fit. Remove the NA values from your predictor.")
+
+    if(is.character(predictor)) {
+      predictor = factor(predictor)
+      warning("DHARMa:::ensurePredictor: character string was provided as predictor. DHARMa has converted to factor automatically. To remove this warning, please convert to factor before attempting to plot with DHARMa.")
+    }
+
+  } else {
+
+    predictor = simulationOutput$fittedPredictedResponse
+    if(is.null(predictor)) stop("DHARMa: can't extract predictor from simulationOutput, and no predictor provided.")
+  }
+  return(predictor)
+}
+
+
+#' Get predictors specified in a formula.
+#'
+#' Gets additional predictor(s) specified as a formula for plotResiduals, recalculateResiduals, testCategorical, testQuantiles, testTemporalAutocorrelation, testSpatialAutocorrelation. Predictors are extracted from the data frame stored in the model object. If observations were removed during model fitting due to NAs, these rows are excluded automatically by getFormulaPredictors.
+#'
+#' @param simulationOutput simulationOutput (DHARMa object).
+#' @param formula the formula to be evaluated, typically consisting of one variable except for plotResiduals (optional multiple variables) and testSpatialAutocorrelation (mandatory x and y).
+#'
+#'
+#' @keywords internal
+#'
+
+getFormulaPredictors <- function(simulationOutput, formula) {
+
+  allV = all.vars(formula)
+
+  modelData = getData(simulationOutput$fittedModel)
+  rownames = rownames(model.frame(simulationOutput$fittedModel))
+
+  predictors = list()
+
+  for(i in 1:length(allV)) {
+    predictors[[allV[i]]] = modelData[[allV[[i]]]]
+    if(length(predictors[[allV[i]]]) != length(simulationOutput$scaledResiduals)) {
+      predictors[[allV[i]]] = predictors[[allV[i]]][(rownames(modelData) %in% rownames)]
+    }
+
+  }
+
+  return(predictors)
+
+}
+
 
 
 

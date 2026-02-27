@@ -10,7 +10,7 @@ testQuantiles(simulationOutput, predictor = NULL, rank = TRUE,
 \arguments{
 \item{simulationOutput}{an object of class DHARMa, either created via \link{simulateResiduals} for supported models or by \link{createDHARMa} for simulations created outside DHARMa, or a supported model. Providing a supported model directly is discouraged, because simulation settings cannot be changed in this case.}
 
-\item{predictor}{an optional predictor variable to be used, instead of the predicted response (default).}
+\item{predictor}{an optional predictor variable to be used, instead of the predicted response (default). See details.}
 
 \item{rank}{if TRUE, the values provided in predictor will be rank transformed. This will usually make patterns easier to spot visually, especially if the distribution of the predictor is skewed. If form is a factor, this has no effect.}
 
@@ -28,6 +28,8 @@ A significant p-value for the splines means the fitted spline deviates from a fl
 
 The p-values of the intercept and splines are combined into a total p-value via Benjamini & Hochberg adjustment to control the FDR.
 
+Predictor can be a formula (e.g. predictor = ~predictor), in which case NAs are handled automatically (recommended). Predictor can also be a variable in your environment (e.g. predictor = data$predictor), but then you need to remove rows that were excluded by the model due to NAs by hand. For more details and a more flexible syntax for predictors, see the help of the argument \code{form} in \link{plotResiduals}.
+
 When plotting (plot = TRUE), the shaded gray areas indicate 95\% confidence intervals of the quantile estimates (1.96 * standard error).
 }
 \examples{
@@ -42,7 +44,7 @@ x # the test shows a combined p-value, corrected for multiple testing
 \dontrun{
 # accessing results of the test
 x$pvals # pvalues for the individual quantiles
-x$qgamFits # access the fitted quantile regression 
+x$qgamFits # access the fitted quantile regression
 summary(x$qgamFits[[1]]) # summary of the first fitted quantile
 
 # possible to test user-defined quantiles
@@ -51,6 +53,11 @@ testQuantiles(simulationOutput, quantiles = c(0.7))
 #  example with missing environmental predictor
 fittedModel <- glm(observedResponse ~ 1 , family = "poisson", data = testData)
 simulationOutput <- simulateResiduals(fittedModel = fittedModel)
+
+# specified as formula (recommended)
+testQuantiles(simulationOutput, predictor = ~Environment1)
+
+# or as variable in your environment
 testQuantiles(simulationOutput, predictor = testData$Environment1)
 
 plot(simulationOutput)

@@ -180,13 +180,19 @@ To provide a visual aid in detecting deviations from uniformity in y-direction, 
 By default, `plotResiduals` plots against predicted values. However, you can also use it to plot residuals against a specific other predictors (highly recommended).
 
 ```{r, eval = FALSE}
-plotResiduals(simulationOutput, form = YOURPREDICTOR)
+plotResiduals(simulationOutput, form = ~ predictor)
+```
+
+Additionally, you can plot residuals against a specific predictor for a specific group, e.g. a random effect level.
+
+```{r, eval = FALSE}
+plotResiduals(simulationOutput, form = ~ predictor | group == "group_level")
 ```
 
 If the predictor is a factor, or if there is just a small number of observations on the x axis, plotResiduals will plot a box plot with additional tests instead of a scatter plot.
 
 ```{r, eval = FALSE}
-plotResiduals(simulationOutput, form = testData$group)
+plotResiduals(simulationOutput, form = ~ factor)
 ```
 
 See `?plotResiduals` for details, but very shortly: under H0 (perfect model), we would expect those boxes to range homogeneously from 0.25-0.75. To see whether there are deviations from this expectation, the plot calculates a test for uniformity per box, and a test for homogeneity of variances between boxes. A positive test will be highlighted in red.\
@@ -268,7 +274,7 @@ DHARMa currently implements two procedures for randomization. The default proced
 In many situations, it can be useful to look at residuals per group, e.g. to see how much the model over / underpredicts per plot, year or subject. To do this, use the `recalculateResiduals()` function, together with a grouping variable (group) or a subsetting variable (sel), which can also be used in combination.
 
 ```{r, eval= FALSE}
-simulationOutput = recalculateResiduals(simulationOutput, group = testData$group)
+simulationOutput = recalculateResiduals(simulationOutput, group = ~group)
 ```
 
 Note, however, that you will have to change the selection of variables that you provide to plots and tests (e.g. in `plotResiduals` or `testSpatialAutocorrelation`) accordingly when you group or subset residuals.
@@ -455,7 +461,7 @@ testQuantiles(simulationOutput)
 As mentioned above, the equivalent test for categorical predictors (plot function will switch automatically) would be
 
 ```{r, eval = FALSE}
-testCategorical(simulationOutput, catPred = testData$group)
+testCategorical(simulationOutput, catPred = ~group)
 ```
 
 Adding a simple overdispersion correction will try to find a compromise between the different levels of dispersion in the model. The qq plot looks better now, but there is still a pattern in the residuals
@@ -501,8 +507,8 @@ It is difficult to see that there is a problem at all in the general plot, but i
 
 ```{r}
 par(mfrow = c(1,2))
-plotResiduals(simulationOutput, testData$Environment1)
-plotResiduals(simulationOutput, testData$Environment2)
+plotResiduals(simulationOutput, form = ~ Environment1)
+plotResiduals(simulationOutput, form = ~ Environment2)
 ```
 
 ## Residual correlation structures (temporal, spatial, phylogenetic)
@@ -524,8 +530,8 @@ testData = createData(sampleSize = 100, family = poisson(),
 fittedModel <- glm(observedResponse ~ Environment1 , data = testData, 
                    family = poisson() )
 simulationOutput <- simulateResiduals(fittedModel = fittedModel)
-testSpatialAutocorrelation(simulationOutput = simulationOutput, x = testData$x,
-                           y= testData$y)
+testSpatialAutocorrelation(simulationOutput = simulationOutput, x = ~x,
+                           y= ~y)
 # plot(simulationOutput)
 ```
 
@@ -539,8 +545,8 @@ testData$pos <- numFactor(testData$x, testData$y)
 fittedModel2 <- glmmTMB(observedResponse ~ Environment1 + exp(pos + 0|group), 
                         data = testData, family = poisson())
 simulationOutput2 <- simulateResiduals(fittedModel = fittedModel2, simulateREs = "unconditional")
-testSpatialAutocorrelation(simulationOutput = simulationOutput2, x = testData$x, 
-                           y= testData$y)
+testSpatialAutocorrelation(simulationOutput = simulationOutput2, x = ~x, 
+                           y= ~y)
 # plot(simulationOutput2)
 ```
 
@@ -552,8 +558,8 @@ One of the options to solve it and get correct tests and no residual pattern (if
 # rotation of the residuals 
 simulationOutput3 <- simulateResiduals(fittedModel = fittedModel2, simulateREs = "unconditional",
                                        rotation = "estimated")
-testSpatialAutocorrelation(simulationOutput = simulationOutput3, x = testData$x, 
-                           y= testData$y)
+testSpatialAutocorrelation(simulationOutput = simulationOutput3, x = ~x, 
+                           y= ~y)
 # plot(simulationOutput3)
 ```
 
@@ -670,7 +676,7 @@ m3 <- glmmTMB(SiblingNegotiation ~ FoodTreatment*SexParent + offset(log(BroodSiz
 res <- simulateResiduals(m3, plot = TRUE)
 par(mfrow = c(1,2))
 testDispersion(res)
-plotResiduals(res, Owls$FoodTreatment)
+plotResiduals(res, form = ~ FoodTreatment)
 ```
 
 We see underdispersion now. In a model with variable dispersion, this is often the signal that some other distributional assumptions are violated. Let's check for zero-inflation:
@@ -691,7 +697,7 @@ res <- simulateResiduals(m4, plot = TRUE)
 
 ```{r, error=TRUE, fig.width=7}
 par(mfrow = c(1,3))
-plotResiduals(res, Owls$FoodTreatment)
+plotResiduals(res, form = ~ FoodTreatment)
 testDispersion(res)
 testZeroInflation(res)
 ```
@@ -709,7 +715,7 @@ res <- simulateResiduals(m5, plot = TRUE)
 
 ```{r, error=TRUE, fig.width=7}
 par(mfrow = c(1,3))
-plotResiduals(res, Owls$FoodTreatment)
+plotResiduals(res, form = ~ FoodTreatment)
 testDispersion(res)
 testZeroInflation(res)
 ```
@@ -759,7 +765,7 @@ plot(simulationOutput, asFactor = TRUE)
 Even though the misfit is clearly visible if we plot the residuals against the missing predictor.
 
 ```{r, fig.width=4, fig.height=4}
-plotResiduals(simulationOutput, testData$Environment1, quantreg = TRUE)
+plotResiduals(simulationOutput, form = ~ Environment1, quantreg = TRUE)
 ```
 
 However, we can see the overdispersion arising from the misfit if we group our residuals, which basically transforms the 0/1 response to a k/n response.
@@ -770,7 +776,7 @@ To show this, let's look at the dispersion test for the same model, once ungroup
 par(mfrow = c(1,2))
 testDispersion(simulationOutput)
 
-simulationOutput2 = recalculateResiduals(simulationOutput, group = testData$group)
+simulationOutput2 = recalculateResiduals(simulationOutput, group = ~group)
 testDispersion(simulationOutput2)
 ```
 
@@ -793,7 +799,8 @@ res <- simulateResiduals(fit, plot = TRUE) # nothing to see
 We see no misfit, and neither do we see a misfit when we group the data points randomly, as the mean of a random group is still fit well by the overall mean.
 
 ```{r}
-res2 <- recalculateResiduals(res, group = rep(1:20, each = 10))
+grouping = rep(1:100, each = 10)
+res2 <- recalculateResiduals(res, group = grouping)
 plot(res2) 
 ```
 
@@ -829,7 +836,7 @@ plot(res)
 1.  Grouping according to the RE produces overdispersion because RE is missing in the first model:
 
 ```{r}
-res2 = recalculateResiduals(res , group = testData$group)
+res2 = recalculateResiduals(res , group = ~group)
 plot(res2)
 ```
 
