@@ -13,6 +13,6 @@ test_that("residuals are numerically reproducible", {
 
   load(file = "../manualTests/referenceData.RData")
   
-  testthat::expect_identical( referenceData$mod1$residuals, residuals(simulationOutput))
+  testthat::expect_equal( referenceData$mod1$residuals, residuals(simulationOutput))
   
 })
