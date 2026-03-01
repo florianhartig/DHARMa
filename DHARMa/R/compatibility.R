@@ -59,7 +59,7 @@ checkModel <- function(fittedModel, stop = F){
 #' returns a list of supported model classes
 #'
 #' @keywords internal
-getPossibleModels<-function()c("lm", "glm", "negbin", "lmerMod", "lmerModLmerTest", "glmerMod", "gam", "bam", "glmmTMB", "HLfit", "MixMod", "phylolm", "phyloglm")
+getPossibleModels <- function(){c("lm", "glm", "negbin", "lmerMod", "lmerModLmerTest", "glmerMod", "gam", "bam", "glmmTMB", "HLfit", "MixMod", "phylolm", "phyloglm")}
 
 
 weightsWarning = "Model was fit with prior weights. These will be ignored in the simulation. See ?getSimulations for details."

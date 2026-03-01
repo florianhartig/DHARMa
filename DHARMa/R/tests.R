@@ -495,7 +495,10 @@ testDispersion <- function(simulationOutput, alternative = c("two.sided", "great
     }
     else model = simulationOutput
 
-    if(! alternative == "greater") message("Note that the chi2 test on Pearson residuals is biased for MIXED models towards underdispersion. Tests with alternative = two.sided or less are therefore not reliable. If you have random effects in your model, I recommend to test only with alternative = 'greater', i.e. test for overdispersion, or else use the DHARMa default tests which are unbiased. See help for details.")
+    if(!alternative == "greater" & class(simulationOutput$fittedModel)[1] %in% c("lmerMod", "lmerModLmerTest", "glmerMod", "bam", "glmmTMB", "HLfit", "MixMod")) {
+      message("Note that the Chi2 test on Pearson residuals is biased for MIXED models towards underdispersion. Tests with alternative = two.sided or less are therefore not reliable. If you have random effects in your model, we recommend to test only with alternative = 'greater', i.e. test for overdispersion, or else use the DHARMa default tests which are unbiased. See help for details.")}
+
+
 
     rdf <- df.residual(model)
     rp <- getPearsonResiduals(model)
