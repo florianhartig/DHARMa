@@ -348,10 +348,12 @@ From a technical side, underdispersion is not as concerning as overdispersion, a
 
 ### Formal tests for over/underdispersion
 
-Although, as discussed above, over/underdispersion will show up in the residuals, and it's possible to detect it with the testUniformity function, simulations show that this test is less powerful than more targeted tests. DHARMa contains several dispersion tests that compare the dispersion of simulated residuals to the observed residuals.
+Although, as discussed above, over/underdispersion will show up in the residuals, and it's possible to detect it with the testUniformity function, simulations show that this test is less powerful than more targeted tests. DHARMa contains several dispersion tests:
 
-1.  *default: the simulation-based response variance test* is a non-parametric test that compares the variance of the observed response variable to the variances of the simulated response variable (default).
-2.  *PearsonChisq:* alternatively, DHARMa implements the Pearson-Chi2 test that is popular in the literature, suggested in the glmm Wiki, and implemented in some other R packages such as `performance::check_overdispersion`.
+1.  *default: the simulation-based residual variance test* is a non-parametric test that compares the variance of the observed raw residuals to the variances of the simulated residuals.
+
+2.  *PearsonChisq:* the Pearson-Chi2 test that is popular in the literature, suggested in the glmm Wiki, and implemented in some other R packages such as `performance::check_overdispersion`.
+
 3.  *refit:* if residual simulations are done via refit and the test is **PearsonChisq**, DHARMa will compare the Pearson residuals of the re-fitted simulations to the original Pearson residuals. This is essentially a non-parametric version of test 2.
 
 All of these tests are included in the `testDispersion` function, see `?testDispersion` for details.
@@ -362,7 +364,7 @@ testDispersion(simulationOutput)
 
 **IMPORTANT INFO:** we have made extensive simulations (see [Leite M.S., Rettelbach, D. and Hartig, F. (2025)](https://ecoevorxiv.org/repository/view/10807/)), which have shown that the various tests have certain advantages and disadvantages. The figure below shows the general performance of the dispersion tests for Poisson and binomial models for: GLMs in general, GLMs with small sample size or intercept (“small data”), GLMMs with one random effect with few groups/levels, GLMMs with many groups/levels in a random effect, and computational time for calculating the test (speed). The symbols mean: “-” bad performance, “+” good performance, “++” very good performance. 
 
-![](testDispersion.jpeg){.center width="600"}
+![](testDispersion.jpeg){.center width="600"} 
 
 The basic results are that:
 
