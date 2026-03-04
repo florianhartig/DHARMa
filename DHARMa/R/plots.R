@@ -290,6 +290,8 @@ plotResiduals <- function(simulationOutput, form = NULL, quantreg = NULL,
     groupLevel = tryCatch(eval(form[[2]][[3]][[3]]), error = function(e) NULL)
 
     if(is.null(groupLevel)) {
+      predictorNames = levels(group)
+
       return(plotResidualsAll(
         simulationOutput = simulationOutput,
         predictorNames = predictorNames,
