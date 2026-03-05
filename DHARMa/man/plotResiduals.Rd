@@ -44,7 +44,7 @@ Overdispersion typically manifests itself as Q1 (0.25) deviating towards 0 and Q
 
 The quantile regression can take some time to calculate, especially for larger datasets. For this reason, quantreg = F can be set to generate a smooth spline instead. This is the default for n > 10000.
 
-If form is specified as a formula, e.g. \code{form = ~ your_predictor}, NAs will be handled automatically (recommended). If \code{form = ~.} a separate plot for each predictor in the model is produced. If \code{form = ~ predictor1 + predictor2}, a separate plot for each predictor is produced. If an additional grouping variable is specified, e.g. \code{form = ~ predictor|group == "group_level"}, a residual plot for the specified grouping level will be created. If form is \strong{not} a formula, e.g. \code{form = data$predictor}, NAs are \strong{not} handled automatically. For phyr and gamm4$mer models, you need to specify form in this way. If the predictor is a factor, a boxplot will be plotted instead of a scatter plot. The distribution for each factor level should be uniformly distributed, so the box should go from 0.25 to 0.75, with the median line at 0.5 (within-group). To test if deviations from those expectations are significant, KS-tests per group and a Levene test for homogeneity of variances is performed. See \link{testCategorical} for details.
+If form is specified as a formula, e.g. \code{form = ~ your_predictor}, NAs will be handled automatically (recommended). If \code{form = ~.} a separate plot for each predictor in the model is produced. If \code{form = ~ predictor1 + predictor2}, a separate plot for each predictor is produced. If an additional grouping variable is specified, e.g. \code{form = ~ predictor|group}, a separate plot for the predictor within each grouping level is produced. If you are interested in a specific group, you can use \code{form = ~ predictor|group == "group_level"}. If form is \strong{not} a formula, e.g. \code{form = data$predictor}, NAs are \strong{not} handled automatically. For phyr and gamm4$mer models, you need to specify form in this way. If the predictor is a factor, a boxplot will be plotted instead of a scatter plot. The distribution for each factor level should be uniformly distributed, so the box should go from 0.25 to 0.75, with the median line at 0.5 (within-group). To test if deviations from those expectations are significant, KS-tests per group and a Levene test for homogeneity of variances is performed. See \link{testCategorical} for details.
 }
 \note{
 If nObs > 10,000, the scatter plot is replaced by graphics::smoothScatter().
@@ -99,10 +99,13 @@ plotResiduals(simulationOutput, form = ~group)
 # plot residuals against multiple predictors at once
 plotResiduals(simulationOutput, form = ~Environment1 + Environment2)
 
+# plot residuals against a predictor for all respective group levels
+plotResiduals(simulationOutput, form = ~Environment1|group)
+
 # plot residuals against a predictor for a specific group level, here group 1
 plotResiduals(simulationOutput, form = ~Environment1|group == "1")
 
-# or in a grid for multiple group levels, e.g. groups 1 to 4
+# or in a grid for multiple specific group levels, e.g. 1-4
 par(mfrow= c(2,2))
 for(g in unique(testData$group)[1:4]) {
   plotResiduals(simulationOutput, form = ~Environment1|group == g, xlab = paste("group", g))
