@@ -385,13 +385,13 @@ testCategorical <- function(simulationOutput, catPred,
     abline(h = quantiles, lty = 2)
   }
 
-  mtext(ifelse(any(out$uniformity$p.value.cor < 0.05), "Within-group deviations from uniformity significant (red)", "Within-group deviation from uniformity n.s."),
-        col = ifelse(any(out$uniformity$p.value.cor < 0.05), "red", "black"),
-        line = 1)
+  title(ifelse(any(out$uniformity$p.value.cor < 0.05), "Within-group deviations from uniformity significant (red)", "Within-group deviation from uniformity n.s."),
+        col.main = ifelse(any(out$uniformity$p.value.cor < 0.05), "red", "black"),
+        line = 1, cex.main = 0.8)
 
   if(length(out) > 1) {
-    mtext(ifelse(out$homogeneity$`Pr(>F)`[1] < 0.05, "Levene Test for homogeneity of variance significant", "Levene Test for homogeneity of variance n.s."),
-          col = ifelse(out$homogeneity$`Pr(>F)`[1] < 0.05, "red", "black"))
+    title(ifelse(out$homogeneity$`Pr(>F)`[1] < 0.05, "Levene Test for homogeneity of variance significant", "Levene Test for homogeneity of variance n.s."),
+          col.main = ifelse(out$homogeneity$`Pr(>F)`[1] < 0.05, "red", "black"), cex.main = 0.8)
   }
 
   return(out)
