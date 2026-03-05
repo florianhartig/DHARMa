@@ -231,7 +231,7 @@ plotResiduals <- function(simulationOutput, form = NULL, quantreg = NULL,
           quantiles = quantiles,
           absoluteDeviation = absoluteDeviation,
           ...
-          ))}
+        ))}
 
       # if there is more than 1 predictor, check if form is specified either
       # with "|" (plot residuals within a certain group)
@@ -316,7 +316,7 @@ plotResiduals <- function(simulationOutput, form = NULL, quantreg = NULL,
     if (length(res) > 10000) {
       quantreg = FALSE
       message("plotResiduals() for datasets larger than 10,000 displays a spline instead of quantile regression lines for the sake of speed. To switch back to quantile regression lines, use the argument quantreg = T and have in mind that the function may take a while to compute and display the lines.")
-      }
+    }
     else quantreg = TRUE
   }
 
@@ -341,27 +341,29 @@ plotResiduals <- function(simulationOutput, form = NULL, quantreg = NULL,
   } else{
 
     # color/shape outliers according to significance of outlier test, related to issue #453
+    outlier <- res == 0 | res == 1
     if(is.vector(simOut)) {
       message("Outliers will be not displayed in the plot when simulationOutput is not a DHARMa object.")
       defaultCol = blackcol
       defaultPch = 1
     } else {
-      p.outliers <- testOutliers(simulationOutput, plot = F)$p.value
-      defaultPch = ifelse(res == 0 | res == 1, 8, 1)
+      p.outliers <- testOutliers(simOut, plot = F)$p.value
+      defaultPch = ifelse(outlier==TRUE, 8, 1)
       if(p.outliers < 0.05){
-      outlier <- res == 0 | res == 1
-      defaultCol <- ifelse(outlier == TRUE, .Options$DHARMaSignalColor, blackcol)
-      } else{ defaultCol = blackcol}
+        defaultCol <- ifelse(outlier == TRUE, .Options$DHARMaSignalColor, blackcol)
+      } else{defaultCol = blackcol}
     }
 
     # smooth scatter
     if (smoothScatter == TRUE) {
       do.call(graphics::smoothScatter, append(list(x = pred, y = res ,
                                                    ylim = c(0,1), axes = FALSE,
-                                                   colramp = colorRampPalette(c("white", "darkgrey"))),a[names(a) != "main"]))
-      points(pred[outlier], res[outlier],
-             col = .Options$DHARMaSignalColor, cex = 0.5)
-
+                                                   colramp = colorRampPalette(c("white", "darkgrey"))),
+                                              a[names(a) != "main"]))
+      if(!is.vector(simOut)){
+      points(pred[outlier], res[outlier], pch = 8, cex = 0.5,
+             col = ifelse(p.outliers < 0.05, .Options$DHARMaSignalColor, "black"))
+    }
       axis(1)
       axis(2, at=c(0, quantiles, 1))
     }
@@ -374,7 +376,7 @@ plotResiduals <- function(simulationOutput, form = NULL, quantreg = NULL,
       axis(1)
       axis(2, at=c(0, quantiles, 1))
     }
-}
+  }
   ##### Quantile regressions #####
 
   if(is.null(a$main)) {main = ifelse(is.null(form), paste(yAxis, "vs. predicted"), paste(yAxis, "Residual vs. predictor"))} else {main = a$main}
@@ -383,6 +385,7 @@ plotResiduals <- function(simulationOutput, form = NULL, quantreg = NULL,
   if(is.numeric(pred)){
     if(quantreg == FALSE){
       title(main = main, cex.main = 0.8)
+      abline(h = 0.5, col = "black", lwd = 0.5, lty = 2)
       try({
         lines(smooth.spline(pred, res, df = 10), lty = 2, lwd = 2,
               col = "black")
