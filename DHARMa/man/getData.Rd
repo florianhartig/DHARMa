@@ -4,6 +4,7 @@
 \alias{getData}
 \alias{getData.default}
 \alias{getData.merMod}
+\alias{getData.brmsfit}
 \title{Get model data}
 \usage{
 getData(object, ...)
@@ -11,6 +12,8 @@ getData(object, ...)
 \method{getData}{default}(object, ...)
 
 \method{getData}{merMod}(object, ...)
+
+\method{getData}{brmsfit}(object, ...)
 }
 \arguments{
 \item{object}{a fitted model.}

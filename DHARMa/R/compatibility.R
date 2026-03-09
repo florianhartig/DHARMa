@@ -42,6 +42,8 @@ checkModel <- function(fittedModel, stop = F){
 
   }
 
+  if(class(fittedModel)[1] == "brmsfit") warning("DHARMa: brms models are supported but not fully tested as of DHARMa version 0.5.0.")
+
   # if(hasNA(fittedModel)) message("It seems there were NA values in the data used for fitting the model. This can create problems if you supply additional data to DHARMa functions. See ?checkModel for details")
 
   # TODO: check as implemented does not work reliably, check if there is any other option to check for NA
@@ -59,7 +61,7 @@ checkModel <- function(fittedModel, stop = F){
 #' returns a list of supported model classes
 #'
 #' @keywords internal
-getPossibleModels <- function(){c("lm", "glm", "negbin", "lmerMod", "lmerModLmerTest", "glmerMod", "gam", "bam", "glmmTMB", "HLfit", "MixMod", "phylolm", "phyloglm")}
+getPossibleModels <- function(){c("lm", "glm", "negbin", "lmerMod", "lmerModLmerTest", "glmerMod", "gam", "bam", "glmmTMB", "HLfit", "MixMod", "phylolm", "phyloglm", "brmsfit")}
 
 
 weightsWarning = "Model was fit with prior weights. These will be ignored in the simulation. See ?getSimulations for details."
@@ -349,7 +351,7 @@ getFixedEffects.default <- function(object, ...){
 
   if(class(object)[1] %in% c("glm", "lm", "gam", "bam", "negbin") ){
     out  = coef(object)
-  } else if(class(object)[1] %in% c("glmerMod", "lmerMod", "HLfit", "lmerTest")){
+  } else if(class(object)[1] %in% c("glmerMod", "lmerMod", "HLfit", "lmerTest", "brmsfit")){
     out = fixef(object)
   } else if(class(object)[1] %in% c("glmmTMB")){
     out = glmmTMB::fixef(object)
@@ -960,3 +962,73 @@ getFamily.phyloglm <- function (object,...){
   return(out)
 }
 
+
+
+####### brms #########
+
+
+#' @rdname getRefit
+#' @export
+getRefit.brmsfit <- function(object, newresp, ...){
+  newData = model.frame(object)
+  newData[,1] = newresp
+  refittedModel = update(object, newdata = newData, ...)
+}
+
+
+#' @rdname getSimulations
+#' @export
+
+getSimulations.brmsfit <- function (object, nsim = 1, simulateREs = c("conditional", "unconditional", "user-specified"), type = c("normal", "refit"), ...){
+
+  simulateREs <- match.arg(simulateREs)
+  type <- match.arg(type)
+
+  out = NULL
+
+  # user-specified (as before)
+  if (simulateREs == "user-specified") {
+    out = t(brms::posterior_predict(object = object, ndraws = nsim, ...))
+  }
+
+  # conditional
+  if (simulateREs == "conditional") {
+    out = t(brms::posterior_predict(object = object, re_formula = NULL, ndraws = nsim, ...))
+  }
+
+  # unconditional
+  if (simulateREs == "unconditional") {
+    out = t(brms::posterior_predict(object = object, re_formula = NA, ndraws = nsim, ...))
+  }
+
+  if(type == "normal"){
+    if(!is.matrix(out)) out = data.matrix(out)
+  }else{
+    out = as.data.frame(out)
+  }
+  return(out)
+
+}
+
+
+#' @rdname getFitted
+#' @export
+getFitted.brmsfit  <- function (object,...){
+  return(apply(t(posterior_epred(object, re_formula = NA, ...)), 1, median))
+}
+
+
+
+#' @rdname getResiduals
+#' @export
+getResiduals.brmsfit <- function (object,...){
+  residuals(object, type = "ordinary", ...)[,1]
+}
+
+
+#' @rdname getData
+#' @export
+getData.brmsfit <- function (object, ...){
+  message("DHARMa: for brms, if you want to use predictors that were NOT used to fit the model, please specify them as variables in your environment, e.g. data$predictor. This is likely the reason for any error message that may occur below.")
+  eval(object$data, envir = environment(formula(object)))
+}

@@ -794,7 +794,7 @@ testSpatialAutocorrelation <- function(simulationOutput, x = NULL, y  = NULL, di
   class(out) = "htest"
 
   if(plot == T & !is.null(x) & !is.null(y)) {
-    opar <- par(mfrow = c(1,1))
+    opar = par(no.readonly = TRUE)
     on.exit(par(opar))
 
     col = colorRamp(c("red", "white", "blue"))(simulationOutput$scaledResiduals)
