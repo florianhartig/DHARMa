@@ -7,19 +7,21 @@ Submission Checklist
   * All new features / changes have help files, examples and appropriate unit tests? 
   * Is the NEWS.md file updated?
   * Are all documentation files, including README.MD, vignettes, updated?
-* Make sure RStudio check / test function produce no errors
-* Make sure CI via GH Actions produces no errors
+* Make sure RStudio check / test on your computer produce no errors, warnings or notes
+* Make sure CI via GH Actions produces no errors, warnings or notes
+* Check package in http://win-builder.r-project.org/upload.aspx
 * Update DESCRIPTION files -> date, version number, etc.
 
 ## Test release
 
 * Make sure that help files / tests don't take too long (5s on slow computer max for CRAN)
-* Check again GH ations
+* Check again GH ations of the final files
 * Check package in http://win-builder.r-project.org/upload.aspx
   * Results go to maintainer
 * Check Reverse dependencies
   * https://github.com/yihui/crandalf
   * [revdepcheck](https://github.com/r-lib/revdepcheck) package, see code below
+* Update CRAN.md file with text for submission
   
 ## CRAN upload
 
