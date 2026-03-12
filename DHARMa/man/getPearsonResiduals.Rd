@@ -4,7 +4,6 @@
 \alias{getPearsonResiduals}
 \alias{getPearsonResiduals.default}
 \alias{getPearsonResiduals.gam}
-\alias{getPearsonResiduals.brmsfit}
 \title{Get Pearson residuals}
 \usage{
 getPearsonResiduals(object, ...)
@@ -12,8 +11,6 @@ getPearsonResiduals(object, ...)
 \method{getPearsonResiduals}{default}(object, ...)
 
 \method{getPearsonResiduals}{gam}(object, ...)
-
-\method{getPearsonResiduals}{brmsfit}(object, ...)
 }
 \arguments{
 \item{object}{a fitted model.}

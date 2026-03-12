@@ -382,7 +382,11 @@ getResiduals.default <- function (object, ...){
 #' @rdname getPearsonResiduals
 #' @export
 getPearsonResiduals.default <- function (object, ...){
-  residuals(object, type = "pearson", ...)
+  if(class(object)[1] == "brmsfit"){
+    stop("brms doesn't provide Pearson residuals (deprecated).")
+    } else{
+    residuals(object, type = "pearson", ...)
+  }
 }
 
 # #' has NA
@@ -1039,11 +1043,6 @@ getResiduals.brmsfit <- function (object,...){
   residuals(object, type = "ordinary", ...)[,1]
 }
 
-#' @rdname getPearsonResiduals
-# #' @export # not exporting because this doesn't work!
-getPearsonResiduals.brmsfit <- function (object, ...){
-  stop("brms doesn't provide Pearson residuals (deprecated).")
-}
 
 
 #' @rdname getData
