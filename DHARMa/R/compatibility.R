@@ -1029,6 +1029,6 @@ getResiduals.brmsfit <- function (object,...){
 #' @rdname getData
 #' @export
 getData.brmsfit <- function (object, ...){
-  message("DHARMa: for brms, if you want to use predictors that were NOT used to fit the model, please specify them as variables in your environment, e.g. data$predictor. This is likely the reason for any error message that may occur below.")
-  eval(object$data, envir = environment(formula(object)))
+  eval(as.name(attr(object$data, "data_name", TRUE)), envir = environment(formula(object$formula)))
+  #could also use as.name(brms:::get_data_name(fit1$data)) #returns NULL if is NULL
 }
