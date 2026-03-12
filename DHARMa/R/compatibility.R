@@ -231,12 +231,15 @@ getFamily <- function (object, ...) {
   UseMethod("getFamily", object)
 }
 
+
 #' Get model data
 #'
 #' Wrapper to get the data that was used to fit a model.
 #'
 #' @param object a fitted model.
 #' @param ... additional parameters to be passed on.
+#'
+#' @note  The data is retrieved from the environment where the model was fit, which is usually your current environment. If you delete the data from the environment or change it after fitting the model this function will probably not work or get the wrong dataset, respectively.
 #'
 #' @seealso [getObservedResponse], [getSimulations], [getRefit], [getFixedEffects], [getFitted]
 #'
@@ -481,8 +484,8 @@ getFitted.gam <- function(object, ...){
 
 #' @rdname getPearsonResiduals
 #' @export
-#' @details This needed to be adopted because for some reason, mgcv uses the argument "scaled.pearson" for what most packages define as "pearson". See comments in ?residuals.gam.
-#'
+
+# This needed to be adopted because for some reason, mgcv uses the argument "scaled.pearson" for what most packages define as "pearson". See comments in ?residuals.gam.
 getPearsonResiduals.gam <- function (object, ...){
   residuals(object, type = "scaled.pearson", ...)
 }
@@ -1014,7 +1017,7 @@ getSimulations.brmsfit <- function (object, nsim = 1, simulateREs = c("condition
 #' @rdname getFitted
 #' @export
 getFitted.brmsfit  <- function (object,...){
-  return(apply(t(posterior_epred(object, re_formula = NA, ...)), 1, median))
+  return(apply(t(brms::posterior_epred(object, re_formula = NA, ...)), 1, median))
 }
 
 
@@ -1023,6 +1026,12 @@ getFitted.brmsfit  <- function (object,...){
 #' @export
 getResiduals.brmsfit <- function (object,...){
   residuals(object, type = "ordinary", ...)[,1]
+}
+
+#' @rdname getPearsonResiduals
+# #' @export # not exporting because this doesn't work!
+getPearsonResiduals.brmsfit <- function (object, ...){
+  stop("brms doesn't provide Pearson residuals (deprecated).")
 }
 
 
