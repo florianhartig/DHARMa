@@ -354,7 +354,7 @@ getFixedEffects.default <- function(object, ...){
 
   if(class(object)[1] %in% c("glm", "lm", "gam", "bam", "negbin") ){
     out  = coef(object)
-  } else if(class(object)[1] %in% c("glmerMod", "lmerMod", "HLfit", "lmerTest", "brmsfit")){
+  } else if(class(object)[1] %in% c("glmerMod", "lmerMod", "HLfit", "lmerTest")){
     out = fixef(object)
   } else if(class(object)[1] %in% c("glmmTMB")){
     out = glmmTMB::fixef(object)
@@ -977,6 +977,17 @@ getRefit.brmsfit <- function(object, newresp, ...){
   newData[,1] = newresp
   refittedModel = update(object, newdata = newData, ...)
 }
+
+
+#' @rdname getFixedEffects
+#' @export
+#' @note Note that for brms models, the mean is used as the measure of central tendency for the fixed effects as in brms::fixef.
+getFixedEffects.brmsfit <- function(object, ...){
+    out = fixef(object)[,1]
+  return(out)
+}
+
+
 
 
 #' @rdname getSimulations
