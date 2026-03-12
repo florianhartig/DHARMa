@@ -65,6 +65,22 @@ getPossibleModels <- function(){c("lm", "glm", "negbin", "lmerMod", "lmerModLmer
 weightsWarning = "Model was fit with prior weights. These will be ignored in the simulation. See ?getSimulations for details."
 
 
+# Helper function to strip scale() matrix attributes from data frame columns.
+# scale() returns a 1-column matrix; in prediction mode poly.default() does not
+# call as.vector(x), causing outer() to produce a 3D array that leads to
+# subscript-out-of-bounds errors. Converting such columns to plain vectors
+# avoids the problem. See https://github.com/florianhartig/DHARMa/issues/516.
+stripScaleAttrs <- function(data) {
+  for (i in seq_along(data)) {
+    col <- data[[i]]
+    if (is.matrix(col) && is.numeric(col) && ncol(col) == 1L) {
+      data[[i]] <- as.vector(col)
+    }
+  }
+  return(data)
+}
+
+
 ######### Generic S3 Wrappers #############
 
 #' Get model response
@@ -407,7 +423,8 @@ getFamily.default <- function (object,...){
 #' @rdname getData
 #' @export
 getData.default <- function (object,...){
-  eval(object$call$data, envir = environment(formula(object)))
+  data <- eval(object$call$data, envir = environment(formula(object)))
+  stripScaleAttrs(data)
 }
 
 #' @rdname getPredictorNames
@@ -549,6 +566,30 @@ getSimulations.gam <- function(object, nsim = 1, simulateREs = c("conditional", 
 
 ######## lme4 ############
 
+#' @rdname getFitted
+#' @importFrom lme4 getME
+#' @export
+getFitted.merMod <- function(object, ...) {
+  # Use the stored model matrix and fixed effects directly to compute
+  # fixed-effects-only predictions (equivalent to re.form = ~0).
+  # This avoids calling predict.merMod(), which re-evaluates the model
+  # formula with the original data when re.form != NA. Re-evaluation fails
+  # when predictor columns have scale() matrix attributes because
+  # poly.default() in prediction mode does not call as.vector(x),
+  # so outer(x, 0:degree, "^") produces a 3-D array that causes
+  # subscript-out-of-bounds errors. See issue #516.
+  X   <- getME(object, "X")
+  beta <- fixef(object)
+  eta  <- as.vector(X %*% beta)
+  off  <- model.offset(model.frame(object))  # model.frame returns stored frame
+  if (!is.null(off)) eta <- eta + off
+  out  <- family(object)$linkinv(eta)
+  return(out)
+}
+
+
+
+
 
 #' @rdname getSimulations
 #' @export
@@ -585,7 +626,8 @@ getSimulations.merMod <- function (object, nsim = 1, simulateREs = c("conditiona
 #' @rdname getData
 #' @export
 getData.merMod <- function (object, ...){
-  eval(object@call$data, envir = environment(formula(object)))
+  data <- eval(object@call$data, envir = environment(formula(object)))
+  stripScaleAttrs(data)
 }
 
 

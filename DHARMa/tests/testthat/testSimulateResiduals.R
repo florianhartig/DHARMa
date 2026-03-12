@@ -90,3 +90,31 @@ test_that("Simulations work for mgcv::gam", {
   expect_no_error(res3 <- simulateResiduals(fittedModel, simulateREs = "user-specified"))
 
 })
+
+
+test_that("simulateResiduals works for lme4 models with poly() and scale() attributes (issue #516)", {
+
+  # scale() returns a 1-column matrix, not a plain vector. When poly() is used
+  # on such a matrix in prediction mode (poly.default() with coefs != NULL),
+  # outer(x, 0:degree, "^") produces a 3-D array instead of a 2-D matrix,
+  # causing subscript-out-of-bounds errors inside predict.merMod(). The fix
+  # is to (a) strip scale attributes in getData.merMod/getData.default, and
+  # (b) add getFitted.merMod that uses the stored model matrix directly.
+
+  set.seed(123)
+  testData = createData(sampleSize = 100, fixedEffects = c(1, 2), family = poisson())
+  testData$cat = rep(c("cat1", "cat2"), each = 50)
+  testData$env1_s = scale(testData$Environment1)  # returns a matrix, not a vector
+
+  fittedModel = lme4::glmer(
+    observedResponse ~ Environment2 + poly(env1_s, 2) * cat +
+      (1 + Environment1 | group),
+    data = testData,
+    family = poisson()
+  )
+
+  expect_no_error(res <- simulateResiduals(fittedModel))
+  expect_no_error(plot(res))
+  expect_no_error(plotResiduals(res, form = ~ Environment1))
+
+})
