@@ -14,7 +14,7 @@ vignette: >
 abstract: "The 'DHARMa' package uses a simulation-based approach to create  readily
   interpretable scaled (quantile) residuals for fitted generalized linear (mixed)
   models. Currently supported are linear and generalized linear (mixed) models from
-  'lme4' (classes 'lmerMod', 'glmerMod'), 'glmmTMB', 'GLMMadaptive' and 'spaMM'; phylogenetic
+  'lme4' (classes 'lmerMod', 'glmerMod'), 'glmmTMB', 'GLMMadaptive', 'spaMM' and 'brms'; phylogenetic
   linear models from 'phylolm' (classes 'phylolm' and 'phyloglm'); generalized additive
   models ('gam' from 'mgcv'); 'glm' (including 'negbin' from 'MASS', but excluding
   quasi-distributions) and 'lm' model classes. Moreover, externally created simulations,
@@ -254,6 +254,7 @@ Summary of the syntax for supported packages (this is only relevant for simulate
 | glmmTMB            | `set_simcodes(model$obj, val = "random", terms = "ALL")`, then `simulate(model)` (default)| `set_simcodes(model$obj, val = "fix", terms = "ALL")`, then `simulate(model)`            | not available|
 | GLMMadaptive       | `type = "subject_specific"`, `new_RE = T` | `type = "subject_specific"` (default) |not available|
 | mgcv               | not available           | default                      |not available|
+| brms                | `re.form = NA`          | `re.form = NULL` (default)    | not available               |
 
 
 
@@ -898,6 +899,8 @@ When using mgcv with DHARMa, it is highly recommended to also install mgcViz. Si
 
 If you absolutely want to use DHARMa without mgcViz, you should make sure that simulate(model) works correctly for the model object for which you want to calculate DHARMa residuals.
 
+Note that mgcv::gam models allow simulations only conditional on the fitted random effects; unconditional simulations are not possible.
+
 ## gamm4
 
 Models fitted with gamm4 return a list that contains an lme4 object under the name "mer". You can test this object like an lme4 model, so e.g. simulateResiduals(myGamm4Model\$mer). All remarks regarding lme4 objects apply.
@@ -926,7 +929,8 @@ DHARMa residuals work with phyr, but the correct implementation is not fully tes
 
 ## brms
 
-brms can be made to work together with DHARMa, see <https://github.com/florianhartig/DHARMa/issues/33>
+Simple brms models are supported as of DHARMa version 0.5.0. This means that essentially, all models you could also fit with glmmTMB are possible to check with DHARMa. Multivariate models (multi-response, structural equation models, multinomial) are not supported. Note that predictions are based on the median of the posterior. See also vignette "DHARMa for Bayesians" and <https://github.com/florianhartig/DHARMa/issues/33>
+As brms doesn't provide Pearson residuals, testDispersion with type = "PearsonCisq" will not work. Furthermore think carefully if using simulateResiduals with refit = TRUE makes sense for brms models (for example, for testDispersion it doesn't make sense because the test will be a nonparametric Pearson residuals test but brms doesn't provide Pearson residuals.)
 
 ## Unsupported packages
 

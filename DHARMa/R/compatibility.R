@@ -42,7 +42,7 @@ checkModel <- function(fittedModel, stop = F){
 
   }
 
-  if(class(fittedModel)[1] == "brmsfit") warning("DHARMa: brms models are supported but not fully tested as of DHARMa version 0.5.0.")
+  if(class(fittedModel)[1] == "brmsfit") warning("DHARMa: only simple brms models are supported as of DHARMa version 0.5.0. This includes all models you could also fit with glmmTMB. Multivariate models (multi-response, structural equation models, multinomial) are not supported. DHARMa doesn't check if your model can reliably be checked or not. ")
 
   # if(hasNA(fittedModel)) message("It seems there were NA values in the data used for fitting the model. This can create problems if you supply additional data to DHARMa functions. See ?checkModel for details")
 
@@ -1014,7 +1014,15 @@ getSimulations.brmsfit <- function (object, nsim = 1, simulateREs = c("condition
 #' @rdname getFitted
 #' @export
 getFitted.brmsfit  <- function (object,...){
-  return(apply(t(posterior_epred(object, re_formula = NA, ...)), 1, median))
+  out = apply(t(posterior_epred(object, re_formula = NA, ...)), 1, median)
+
+  # for k/n models, posterior_epred does not predict proportions
+  # divide predictions by number of trials
+  if(object$family$family == "binomial" && suppressMessages(any(brms::standata(object)$trials > 1))) {
+    out = out/suppressMessages(brms::standata(object)$trials)
+  }
+
+  return(out)
 }
 
 

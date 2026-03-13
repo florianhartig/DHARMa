@@ -13,6 +13,8 @@ NOTE: for more news about the package, see https://github.com/florianhartig/DHAR
 
 * In `testCategorical`, `recalculateResiduals`, `testQuantiles`, `testSpatialAutocorrelation` and `testTemporalAutocorrelation`, additional predictors (`catPred`, `group, sel`, `predictor`, `time`, `x,y`- respectively) can now be specified as a formula (similar to `plotResiduals`). This handles rows with NAs that were excluded by the model automatically.
 
+* brms is now supported by DHARMa for simple models, i.e. models that could also be fit using glmmTMB (no multi-response, multinomial or structural equation models)
+
 
 ## Bugfixes
 
