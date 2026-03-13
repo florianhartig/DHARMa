@@ -231,12 +231,15 @@ getFamily <- function (object, ...) {
   UseMethod("getFamily", object)
 }
 
+
 #' Get model data
 #'
 #' Wrapper to get the data that was used to fit a model.
 #'
 #' @param object a fitted model.
 #' @param ... additional parameters to be passed on.
+#'
+#' @note  The data is retrieved from the environment where the model was fit, which is usually your current environment. If you delete the data from the environment or change it after fitting the model this function will probably not work or get the wrong dataset, respectively.
 #'
 #' @seealso [getObservedResponse], [getSimulations], [getRefit], [getFixedEffects], [getFitted]
 #'
@@ -351,7 +354,7 @@ getFixedEffects.default <- function(object, ...){
 
   if(class(object)[1] %in% c("glm", "lm", "gam", "bam", "negbin") ){
     out  = coef(object)
-  } else if(class(object)[1] %in% c("glmerMod", "lmerMod", "HLfit", "lmerTest", "brmsfit")){
+  } else if(class(object)[1] %in% c("glmerMod", "lmerMod", "HLfit", "lmerTest")){
     out = fixef(object)
   } else if(class(object)[1] %in% c("glmmTMB")){
     out = glmmTMB::fixef(object)
@@ -379,7 +382,11 @@ getResiduals.default <- function (object, ...){
 #' @rdname getPearsonResiduals
 #' @export
 getPearsonResiduals.default <- function (object, ...){
-  residuals(object, type = "pearson", ...)
+  if(class(object)[1] == "brmsfit"){
+    stop("brms doesn't provide Pearson residuals (deprecated).")
+    } else{
+    residuals(object, type = "pearson", ...)
+  }
 }
 
 # #' has NA
@@ -481,8 +488,8 @@ getFitted.gam <- function(object, ...){
 
 #' @rdname getPearsonResiduals
 #' @export
-#' @details This needed to be adopted because for some reason, mgcv uses the argument "scaled.pearson" for what most packages define as "pearson". See comments in ?residuals.gam.
-#'
+
+# This needed to be adopted because for some reason, mgcv uses the argument "scaled.pearson" for what most packages define as "pearson". See comments in ?residuals.gam.
 getPearsonResiduals.gam <- function (object, ...){
   residuals(object, type = "scaled.pearson", ...)
 }
@@ -976,6 +983,17 @@ getRefit.brmsfit <- function(object, newresp, ...){
 }
 
 
+#' @rdname getFixedEffects
+#' @export
+#' @note Note that for brms models, the mean is used as the measure of central tendency for the fixed effects as in brms::fixef.
+getFixedEffects.brmsfit <- function(object, ...){
+    out = fixef(object)[,1]
+  return(out)
+}
+
+
+
+
 #' @rdname getSimulations
 #' @export
 
@@ -1014,7 +1032,7 @@ getSimulations.brmsfit <- function (object, nsim = 1, simulateREs = c("condition
 #' @rdname getFitted
 #' @export
 getFitted.brmsfit  <- function (object,...){
-  out = apply(t(posterior_epred(object, re_formula = NA, ...)), 1, median)
+  out = apply(t(brms::posterior_epred(object, re_formula = NA, ...)), 1, median)
 
   # for k/n models, posterior_epred does not predict proportions
   # divide predictions by number of trials
@@ -1032,6 +1050,7 @@ getFitted.brmsfit  <- function (object,...){
 getResiduals.brmsfit <- function (object,...){
   residuals(object, type = "ordinary", ...)[,1]
 }
+
 
 
 #' @rdname getData
