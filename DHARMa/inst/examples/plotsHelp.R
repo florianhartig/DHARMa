@@ -45,17 +45,11 @@ plotResiduals(simulationOutput, form = ~group)
 # plot residuals against multiple predictors at once
 plotResiduals(simulationOutput, form = ~Environment1 + Environment2)
 
+# plot residuals against a predictor for all respective group levels
+plotResiduals(simulationOutput, form = ~Environment1|group)
+
 # plot residuals against a predictor for a specific group level, here group 1
 plotResiduals(simulationOutput, form = ~Environment1|group == "1")
-
-# or in a grid for multiple group levels, e.g. groups 1 to 4
-par(mfrow= c(2,2))
-for(g in unique(testData$group)[1:4]) {
-  plotResiduals(simulationOutput, form = ~Environment1|group == g, xlab = paste("group", g))
-}
-par(mfrow= c(1,1))
-
-
 
 
 # alternatively, you can plot against a variable from the global environment
