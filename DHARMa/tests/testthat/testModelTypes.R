@@ -28,7 +28,7 @@ expectDispersion <- function(x, answer = T){
 }
 
 runEverything = function(fittedModel, testData, DHARMaData = T, phy = NULL,
-                         expectOverdispersion = F){
+                         expectOverdispersion = F, doRefit = TRUE){
 
   t = getObservedResponse(fittedModel)
   expect_true(is.vector(t))
@@ -75,19 +75,22 @@ runEverything = function(fittedModel, testData, DHARMaData = T, phy = NULL,
   simulationOutput <- recalculateResiduals(simulationOutput, group = testData$group)
   expect_gt(testDispersion(simulationOutput, plot = doPlots)$p.value, 0.001)
 
-  simulationOutput2 <- simulateResiduals(fittedModel = fittedModel,
+  if(doRefit == TRUE) {
+    simulationOutput2 <- simulateResiduals(fittedModel = fittedModel,
                                                           refit = T, n = 100)
+    checkOutput(simulationOutput2)
+    if(doPlots) plot(simulationOutput2, quantreg = F)
 
-  checkOutput(simulationOutput2)
-  if(doPlots) plot(simulationOutput2, quantreg = F)
+    # note that the pearson test is biased, therefore have to test greater
+    #expect_gt(testDispersion(simulationOutput2, plot = doPlots, alternative = "greater")$p.value, 0.001)
+    x = testDispersion(simulationOutput2, plot = doPlots)
 
-  # note that the pearson test is biased, therefore have to test greater
-  #expect_gt(testDispersion(simulationOutput2, plot = doPlots, alternative = "greater")$p.value, 0.001)
-  x = testDispersion(simulationOutput2, plot = doPlots)
+    simulationOutput3 <- recalculateResiduals(simulationOutput2, group = testData$group)
+    #expect_gt(testDispersion(simulationOutput3, plot = doPlots, alternative = "greater")$p.value, 0.001)
+    x = testDispersion(simulationOutput3, plot = doPlots)
+  }
 
-  simulationOutput3 <- recalculateResiduals(simulationOutput2, group = testData$group)
-  #expect_gt(testDispersion(simulationOutput3, plot = doPlots, alternative = "greater")$p.value, 0.001)
-  x = testDispersion(simulationOutput3, plot = doPlots)
+
 
 }
 
@@ -558,6 +561,45 @@ test_that("phyloglm works",
 
             runEverything(fittedModel,  testData = testData, phy = tre)
           })
+
+
+
+# brms --------------------------------------------------------------
+
+test_that("brms works",
+          {
+
+            fittedModel <- brms::brm(observedResponse ~ Environment1 +
+                                              (1|group), data = testData$lmm)
+            runEverything(fittedModel, testData$lmm, doRefit = FALSE)
+
+            fittedModel <-  brms::brm(observedResponse|trials(1) ~ Environment1 +
+                                              (1|group), family = "binomial",
+                                            data = testData$binomial_10)
+            runEverything(fittedModel, testData$binomial_10, doRefit = FALSE)
+
+            fittedModel <- brms::brm(observedResponse ~ Environment1 +
+                                              (1|group), family = "bernoulli",
+                                            data = testData$binomial_yn)
+            runEverything(fittedModel, testData$binomial_yn, doRefit = FALSE)
+
+            fittedModel <- brms::brm(observedResponse1|trials(observedResponse1 + observedResponse0)~
+                                              Environment1 + (1|group),
+                                            family = "binomial",
+                                            data = testData$binomial_nk_matrix)
+            runEverything(fittedModel, testData$binomial_nk_matrix, doRefit = FALSE)
+
+            fittedModel <- brms::brm(observedResponse~
+                                       Environment1 + (1|group),
+                                     family = "poisson",
+                                     data = testData$poisson1)
+            runEverything(fittedModel, testData$poisson1, doRefit = FALSE)
+          }
+)
+
+
+
+
 
 
 # isNA works? ------------------------------------------------------------------
