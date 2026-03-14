@@ -513,6 +513,38 @@ test_that("GLMMadaptive works",
           }
 )
 
+
+# brms --------------------------------------------------------------
+
+test_that("brms works",
+          {
+            fittedModel <- brms::brm(observedResponse ~ Environment1 + (1|group), data = testData$lmm)
+            runEverything(fittedModel, testData$lmm, doRefit = FALSE)
+
+            fittedModel <-  brms::brm(observedResponse|trials(1) ~ Environment1 +
+                                        (1|group), family = "binomial",
+                                      data = testData$binomial_10)
+            runEverything(fittedModel, testData$binomial_10, doRefit = FALSE)
+
+            fittedModel <- brms::brm(observedResponse ~ Environment1 +
+                                       (1|group), family = "bernoulli",
+                                     data = testData$binomial_yn)
+            runEverything(fittedModel, testData$binomial_yn, doRefit = FALSE)
+
+            fittedModel <- brms::brm(observedResponse1|trials(observedResponse1 + observedResponse0)~
+                                       Environment1 + (1|group),
+                                     family = "binomial",
+                                     data = testData$binomial_nk_matrix)
+            runEverything(fittedModel, testData$binomial_nk_matrix, doRefit = FALSE)
+
+            fittedModel <- brms::brm(observedResponse~
+                                       Environment1 + (1|group),
+                                     family = "poisson",
+                                     data = testData$poisson1)
+            runEverything(fittedModel, testData$poisson1, doRefit = FALSE)
+          }
+)
+
 rm(testData)
 
 
@@ -561,44 +593,6 @@ test_that("phyloglm works",
 
             runEverything(fittedModel,  testData = testData, phy = tre)
           })
-
-
-
-# brms --------------------------------------------------------------
-
-test_that("brms works",
-          {
-
-            fittedModel <- brms::brm(observedResponse ~ Environment1 +
-                                              (1|group), data = testData$lmm)
-            runEverything(fittedModel, testData$lmm, doRefit = FALSE)
-
-            fittedModel <-  brms::brm(observedResponse|trials(1) ~ Environment1 +
-                                              (1|group), family = "binomial",
-                                            data = testData$binomial_10)
-            runEverything(fittedModel, testData$binomial_10, doRefit = FALSE)
-
-            fittedModel <- brms::brm(observedResponse ~ Environment1 +
-                                              (1|group), family = "bernoulli",
-                                            data = testData$binomial_yn)
-            runEverything(fittedModel, testData$binomial_yn, doRefit = FALSE)
-
-            fittedModel <- brms::brm(observedResponse1|trials(observedResponse1 + observedResponse0)~
-                                              Environment1 + (1|group),
-                                            family = "binomial",
-                                            data = testData$binomial_nk_matrix)
-            runEverything(fittedModel, testData$binomial_nk_matrix, doRefit = FALSE)
-
-            fittedModel <- brms::brm(observedResponse~
-                                       Environment1 + (1|group),
-                                     family = "poisson",
-                                     data = testData$poisson1)
-            runEverything(fittedModel, testData$poisson1, doRefit = FALSE)
-          }
-)
-
-
-
 
 
 
