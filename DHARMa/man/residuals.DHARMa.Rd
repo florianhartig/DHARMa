@@ -64,8 +64,27 @@ outliers(simulationOutput1)
 # but you can also use a variable from your environment, e.g. testData$group
 simulationOutput4 = recalculateResiduals(simulationOutput1, group = ~group)
 plot(simulationOutput4, quantreg = FALSE)
+# we see one residual point per RE
+
+# with group as variable in your environment
+# but then you need to exclude NAs by hand
+simulationOutput5 = recalculateResiduals(simulationOutput1, group = testData$group)
 
 # calculating residuals only for subset of the data
-simulationOutput5 = recalculateResiduals(simulationOutput1, sel = testData$group == 1 )
-plot(simulationOutput5, quantreg = FALSE)
+simulationOutput6 = recalculateResiduals(simulationOutput1, sel = testData$group == 1)
+plot(simulationOutput6, quantreg = FALSE)
+
+# or with sel as formula
+simulationOutput7 = recalculateResiduals(simulationOutput1, sel = ~Environment1<0.5)
+
+# as condition based on a variable in your environment
+simulationOutput8 = recalculateResiduals(simulationOutput1, sel = testData$Environment1<0.5)
+
+# or combine group and sel
+simulationOutput9 = recalculateResiduals(simulationOutput1, group = ~group, sel = ~Environment1<0.5)
+
+# or as subset of rows
+# (note: order of rows is based on residuals, not on original dataframe)
+# so be careful with NAs!
+simulationOutput10 = recalculateResiduals(simulationOutput1, sel = 1:20)
 }
