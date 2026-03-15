@@ -179,7 +179,7 @@ plotQQunif <- function(simulationOutput, testUniformity = TRUE, testOutliers = T
 #' @return If quantile tests are performed, the function returns them invisibly.
 #'
 #' @seealso [plotQQunif], [testQuantiles], [testOutliers]
-#' @example inst/examples/plotsHelp.R
+#' @example inst/examples/plotResidualsHelp.R
 #' @export
 plotResiduals <- function(simulationOutput, form = NULL, quantreg = NULL,
                           rank = TRUE, asFactor = NULL, smoothScatter = NULL,
