@@ -9,7 +9,7 @@ NOTE: for more news about the package, see https://github.com/florianhartig/DHAR
 
 * In `plotResiduals`, we increased the threshold for the automatic change from quantile regression lines to the spline: from 2,000 to 10,000 data points. When it happens, a message is displayed to warn users. Also, when `quantreg = F`, the color of the spline was changed to black because there is no test associated with the line (as there is for quantile regression). 
 
-* In `plotResiduals`, the argument `form` has a new functionality. Beyond the syntax `data$predictor`, it allows now to use the formula structure  `~predictor`, `~predictor1+predictor2`, `~.` and `~predictor|group == "group_level"` to plot the residuals against specific/all predictors and grouping variables. This works for most of the supported model functions. It solves problems with NAs in datasets that were excluded by the model. #407 / #425 
+* In `plotResiduals`, the argument `form` has a new functionality. Beyond the syntax `data$predictor`, it allows now to use the formula structure  `~predictor`, `~predictor1+predictor2`, `~.`,  `~predictor|group`and `~predictor|group == "group_level"` to plot the residuals against specific/all predictors and grouping variables/levels. This works for most of the supported model functions. It solves problems with NAs in datasets that were excluded by the model. #407 / #425 
 
 * In `testCategorical`, `recalculateResiduals`, `testQuantiles`, `testSpatialAutocorrelation` and `testTemporalAutocorrelation`, additional predictors (`catPred`, `group, sel`, `predictor`, `time`, `x,y`- respectively) can now be specified as a formula (similar to `plotResiduals`). This handles rows with NAs that were excluded by the model automatically.
 
