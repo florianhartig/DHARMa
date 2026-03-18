@@ -48,6 +48,7 @@ jobs:
             any::rcmdcheck
             any::BH
             any::StanHeaders
+            any::RcppEigen
           needs: check
           working-directory: DHARMa
 
