@@ -10,6 +10,23 @@ The 'DHARMa' package uses a simulation-based approach to create readily interpre
 }
 \details{
 To get started with the package, look at the vignette and start with \link{simulateResiduals}
+#' @section Funding:
+This package has been funded by the \strong{Deutsche Forschungsgemeinschaft (DFG)}, project number 528747641 (2024-now).
+}
+\examples{
+# simulating a dataset
+testData = createData(sampleSize = 200, family = poisson(),
+                      fixedEffects = c(1,1),
+                      randomEffectVariance = 1, numGroups = 10)
+# fitting glm model
+fittedModel <- glm(observedResponse ~ Environment1 + Environment2,
+                   family = "poisson", data = testData)
+
+# simulating residuals
+simulationOutput <- simulateResiduals(fittedModel = fittedModel)
+
+#plotting residuals
+plot(simulationOutput, quantreg = FALSE)
 }
 \references{
 vignette("DHARMa", package="DHARMa")
@@ -33,4 +50,3 @@ Other contributors:
 }
 
 }
-\keyword{internal}

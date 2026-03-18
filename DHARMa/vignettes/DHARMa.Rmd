@@ -171,7 +171,7 @@ plotQQunif(simulationOutput) # left plot in plot.DHARMa()
 plotResiduals(simulationOutput) # right plot in plot.DHARMa()
 ```
 
--   `plotQQunif` (left panel) creates a qq-plot to detect overall deviations from the expected distribution, by default with added tests for correct distribution (KS test), dispersion and outliers. Note that outliers in DHARMa are values that are by default defined as values outside the simulation envelope, not in terms of a particular quantile. Thus, which values will appear as outliers will depend on the number of simulations. If you want outliers in terms of a particular quantile, you can use the `outliers()` `function.
+-   `plotQQunif` (left panel) creates a qq-plot to detect overall deviations from the expected distribution, by default with added tests for correct distribution (KS test), dispersion and outliers. Note that outliers in DHARMa are values that are by default defined as values outside the simulation envelope, not in terms of a particular quantile. Thus, which values will appear as outliers will depend on the number of simulations. If you want outliers in terms of a particular quantile, you can use the `outliers()` \`function.
 
 -   `plotResiduals` (right panel) produces a plot of the residuals against the predicted value (or alternatively, other variable). Simulation outliers (data points that are outside the range of simulated values) are highlighted as red stars. These points should be carefully interpreted, because we actually don't know "how much" these values deviate from the model expectation. Note also that the probability of an outlier depends on the number of simulations, so whether the existence of outliers is a reason for concern depends also on the number of simulations.
 
@@ -246,16 +246,14 @@ As of DHARMa 0.5.0, the default is conditional simulation on all random effects 
 
 Summary of the syntax for supported packages (this is only relevant for simulateREs = "user-specified"):
 
-|                    |                         |                              |                               |
-|:-------------------|:------------------------|:-----------------------------|:------------------------------|
-| **Package**        | **Unconditional**       | **Conditional on all REs**   |**Conditional on specific REs**|
-| lme4               | `re.form = NA` (default)| `re.form = NULL`             | `re.form = ~(1 | group)`      |
-| spaMM              | `re.form = NA` (default)| `re.form = NULL`             | `re.form = ~(1 | group)`      |
-| glmmTMB            | `set_simcodes(model$obj, val = "random", terms = "ALL")`, then `simulate(model)` (default)| `set_simcodes(model$obj, val = "fix", terms = "ALL")`, then `simulate(model)`            | not available|
-| GLMMadaptive       | `type = "subject_specific"`, `new_RE = T` | `type = "subject_specific"` (default) |not available|
-| mgcv               | not available           | default                      |not available|
-
-
+|  |  |  |  |
+|:---|:---|:---|:---|
+| **Package** | **Unconditional** | **Conditional on all REs** | **Conditional on specific REs** |
+| lme4 | `re.form = NA` (default) | `re.form = NULL` | `re.form = ~(1 | group)` |
+| spaMM | `re.form = NA` (default) | `re.form = NULL` | `re.form = ~(1 | group)` |
+| glmmTMB | `set_simcodes(model$obj, val = "random", terms = "ALL")`, then `simulate(model)` (default) | `set_simcodes(model$obj, val = "fix", terms = "ALL")`, then `simulate(model)` | not available |
+| GLMMadaptive | `type = "subject_specific"`, `new_RE = T` | `type = "subject_specific"` (default) | not available |
+| mgcv | not available | default | not available |
 
 If the model is correctly specified and the fitting procedure is unbiased (disclaimer: GLMM estimators are not always unbiased), the simulated residuals should be flat regardless how many hierarchical levels we re-simulate. The most thorough procedure would be therefore to test all possible options. Re-simulating all levels (unconditional) can be advantageous because it tests the model structure as a whole. A potential drawback is that re-simulating the lower-level random effects creates more variability, which may reduce power for detecting problems in the upper-level stochastic processes, in particular overdispersion (see section on dispersion tests below). In particular dispersion tests may produce different results when switching from conditional to unconditional simulations, and often the conditional simulation is more sensitive.
 
@@ -342,7 +340,7 @@ simulationOutput <- simulateResiduals(fittedModel = fittedModel)
 plot(simulationOutput)
 ```
 
-If you see this pattern, note that a common reason for underdispersion is overfitting, i.e. your model is too complex. Other possible explanations to check for include zero-inflation (best to check by comparing to a ZIP model, but see also `testZeroInflation`), non-independence of the data (e.g. temporal autocorrelation, check via  `testTemporalAutocorrelation`) that your predictors can use to overfit, or that your data-generating process is simply not a Poisson process.
+If you see this pattern, note that a common reason for underdispersion is overfitting, i.e. your model is too complex. Other possible explanations to check for include zero-inflation (best to check by comparing to a ZIP model, but see also `testZeroInflation`), non-independence of the data (e.g. temporal autocorrelation, check via `testTemporalAutocorrelation`) that your predictors can use to overfit, or that your data-generating process is simply not a Poisson process.
 
 From a technical side, underdispersion is not as concerning as overdispersion, as it will usually bias p-values to the conservative side, but if your goal is to get a good power, you may want to consider a simpler model. If that is not helping, you can move to a distribution that takes into account underdispersed count data (e.g. Conway-Maxwell-Poisson, generalized Poisson).
 
@@ -362,9 +360,9 @@ All of these tests are included in the `testDispersion` function, see `?testDisp
 testDispersion(simulationOutput)
 ```
 
-**IMPORTANT INFO:** we have made extensive simulations (see [Leite M.S., Rettelbach, D. and Hartig, F. (2025)](https://ecoevorxiv.org/repository/view/10807/)), which have shown that the various tests have certain advantages and disadvantages. The figure below shows the general performance of the dispersion tests for Poisson and binomial models for: GLMs in general, GLMs with small sample size or intercept (“small data”), GLMMs with one random effect with few groups/levels, GLMMs with many groups/levels in a random effect, and computational time for calculating the test (speed). The symbols mean: “-” bad performance, “+” good performance, “++” very good performance. 
+**IMPORTANT INFO:** we have made extensive simulations (see [Leite M.S., Rettelbach, D. and Hartig, F. (2025)](https://ecoevorxiv.org/repository/view/10807/)), which have shown that the various tests have certain advantages and disadvantages. The figure below shows the general performance of the dispersion tests for Poisson and binomial models for: GLMs in general, GLMs with small sample size or intercept (“small data”), GLMMs with one random effect with few groups/levels, GLMMs with many groups/levels in a random effect, and computational time for calculating the test (speed). The symbols mean: “-” bad performance, “+” good performance, “++” very good performance.
 
-![](testDispersion.jpeg){.center width="600"} 
+![](testDispersion.jpeg){.center width="600"}
 
 The basic results are that:
 
@@ -372,9 +370,7 @@ The basic results are that:
 -   Option 2, the parametric Pearson-chi2, is fast if Pearson residuals are available, but based on a naive expectation of residual degrees of freedom (df, counts RE as 1 df) and the test statistic is thus biased towards underdispersion for mixed-effects models. Similar to the df approximation, bias increases with the number of RE levels. When testing only for overdispersion (`alternative = "greater"`), this makes the test more conservative, but it also costs power.
 -   The DHARMa default option 1 is fast, nearly unbiased (i.e. you can test under- and overdispersion), and only slightly less powerful than test 3, PROVIDED that simulations are made conditional on the fitted REs. Power compared to the parametric Pearson-chi2 test depends on the number of RE levels, it will be more powerful for a typical number of RE levels.
 
-
 **Note:** Conditional simulations are the default as of DHARMa v0.5.0. The problem with unconditional simulations is that they introduce additional variance in the simulated response by also re-simulating the lower-level stochastic process (random effects). This variability strongly reduces the power of the dispersion test. Re-simulating conditional on the fitted random effects acts only at the higher-level stochastic process, the distribution (e.g. Poisson or binomial proportion). As over/underdispersion is a problem at the distribution-level, conditional simulations are the more adequate basis for dispersion tests, and results in substantially higher test power and sensitivity.
-
 
 ## Zero-inflation / k-inflation or deficits
 
