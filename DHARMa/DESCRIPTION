@@ -43,11 +43,9 @@ Suggests:
     GLMMadaptive,
     glmmTMB (>= 1.1.2.3),
     phylolm (>= 2.6.5),
-    brms,
-    rstan,
-    BH,
-    StanHeaders
+    brms
 Enhances:
+    rstan,
     phyr,
     rjags,
     BayesianTools
