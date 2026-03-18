@@ -41,8 +41,9 @@ simulationOutput <- simulateResiduals(fittedModel = fittedModel)
 
 ######### main plotting function #############
 
-# for all functions, quantreg = T will be more
-# informative, but slower
+plot(simulationOutput)
+# for all functions, quantreg = T (default) will be more informative
+# but slower. Alternative:
 
 plot(simulationOutput, quantreg = FALSE)
 
@@ -53,12 +54,12 @@ plotQQunif(simulationOutput = simulationOutput,
            testUniformity = FALSE,
            testOutliers = FALSE)
 
-hist(simulationOutput )
+hist(simulationOutput)
 
 
 
 
 }
 \seealso{
-\link{plotSimulatedResiduals}, \link{plotResiduals}
+\link{plot.DHARMa}, \link{plotResiduals}
 }

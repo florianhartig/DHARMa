@@ -77,7 +77,6 @@ plotResiduals(simulationOutput, rank = TRUE, smoothScatter = TRUE)
   # the following syntax uses the predictor values from the fitted model
   plotResiduals(simulationOutput, form = ~ Environment1)
 
-
   # plot against all predictors
   plotResiduals(simulationOutput, form = ~.)
 
@@ -94,16 +93,12 @@ plotResiduals(simulationOutput, rank = TRUE, smoothScatter = TRUE)
   plotResiduals(simulationOutput, form = ~Environment1|group == "1")
 
 
-
-
-
   # alternatively, you can plot against a variable from the global environment
   # in this case, the model function automatically removed one row of observations
   # because there was an NA in Environment2. When using the variable Environment1
   # from the global environment, we have to remove this observation as well
   plotResiduals(simulationOutput,
                 form = testData$Environment1[complete.cases(testData)])
-
 
 
   # to diagnose overdispersion and heteroskedasticity it can be useful to
