@@ -5,11 +5,11 @@ NOTE: for more news about the package, see https://github.com/florianhartig/DHAR
 
 ## Major changes
 
-* For hierarchical models (GLMMs), we changed the default simulations from the supported model's default (mostly unconditional) to conditional simulations (for most of the supported models and packages). This represents a major change in the calculated scaled residuals and is implemented to ensure higher power in dispersion and other tests. We expect different results for calculated residuals using this or older `DHARMa` versions. For compatibility you can use the argument `simulateREs  = "user-specified"` to change back to the model's default (older `DHARMa` versions). See package vignette for more details.  
+* For hierarchical models (GLMMs), we changed the default simulations from the supported model's default (mostly unconditional) to conditional simulations (for most of the supported models and packages). This represents a major change in the calculated scaled residuals and is implemented to ensure higher power in dispersion and other tests. We expect different results for calculated residuals using this or older `DHARMa` versions. For compatibility, you can use the argument `simulateREs  = "user-specified"` to change back to the model's default (older `DHARMa` versions). See package vignette for more details.
 
 * In `plotResiduals`, we increased the threshold for the automatic change from quantile regression lines to the spline: from 2,000 to 10,000 data points. When it happens, a message is displayed to warn users. Also, when `quantreg = F`, the color of the spline was changed to black because there is no test associated with the line (as there is for quantile regression). 
 
-* In `plotResiduals`, the argument `form` has a new functionality. Beyond the syntax `data$predictor`, it allows now to use the formula structure  `~predictor`, `~predictor1+predictor2`, `~.` and `~predictor|group == "group_level"` to plot the residuals against specific/all predictors and grouping variables. This works for most of the supported model functions. It solves problems with NAs in datasets that were excluded by the model. #407 / #425 
+* In `plotResiduals`, the argument `form` has a new functionality. Beyond the syntax `data$predictor`, it allows now to use the formula structure  `~predictor`, `~predictor1+predictor2`, `~.`,  `~predictor|group` and `~predictor|group == "group_level"` to plot the residuals against specific/all predictors and grouping variables/levels. This works for most of the supported model functions. It solves problems with NAs in datasets that were excluded by the model. #407 / #425 
 
 * In `testCategorical`, `recalculateResiduals`, `testQuantiles`, `testSpatialAutocorrelation` and `testTemporalAutocorrelation`, additional predictors (`catPred`, `group, sel`, `predictor`, `time`, `x,y`- respectively) can now be specified as a formula (similar to `plotResiduals`). This handles rows with NAs that were excluded by the model automatically.
 
@@ -17,13 +17,15 @@ NOTE: for more news about the package, see https://github.com/florianhartig/DHAR
 ## Bugfixes
 
 * Fixing error in runBenchmarks.  
+
 * Fixing inconsistency in testQuantiles() #465. Including rankTransform() help function.  
 
 
 ## Minor changes
 
 * Using 95% confidence intervals for confidence bands in plots for testQuantiles(). Before, we were using standard errors (~ 68% CI).
-* Vectorize randomization of residuals to improve speed - PR#493 contributed by StaffanBetner
+
+* Vectorize randomization of residuals to improve speed - PR#493 contributed by StaffanBetner.
 
 * Adding color legend to testSpatialAutocorrelation().
 
