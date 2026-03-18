@@ -29,7 +29,8 @@ editor_options:
 ---
 
 ```{r global_options, include=FALSE}
-knitr::opts_chunk$set(fig.width=6.5, fig.height=4.5, fig.align='center', warning=FALSE, message=FALSE, cache = TRUE)
+knitr::opts_chunk$set(fig.width=6.5, fig.height=4.5, fig.align='center',
+                      warning=FALSE, message=FALSE, cache = TRUE)
 ```
 
 ```{r, echo = FALSE, message = FALSE}
@@ -44,15 +45,18 @@ The interpretation of conventional residuals for generalized linear (mixed) and 
 ```{r, echo = FALSE, fig.width=6, fig.height=3}
 library(lme4)
 
-overdispersedData = createData(sampleSize = 250, overdispersion = 0, quadraticFixedEffects = -2, family = poisson())
-fittedModelOverdispersed <- glmer(observedResponse ~ Environment1 + (1|group) , family = "poisson", data = overdispersedData)
+overdispersedData = createData(sampleSize = 250, overdispersion = 0, 
+                               quadraticFixedEffects = -2, family = poisson())
+fittedModelOverdispersed <- glmer(observedResponse ~ Environment1 + (1|group),
+                                  family = "poisson", data = overdispersedData)
 
 plotConventionalResiduals(fittedModelOverdispersed)
 
-testData = createData(sampleSize = 250, intercept = 0, overdispersion = 0, family = poisson(), randomEffectVariance = 0)
-fittedModel <- glmer(observedResponse ~ Environment1 + (1|group) , family = "poisson", data = testData)
+testData = createData(sampleSize = 250, intercept = 0, overdispersion = 0, 
+                      family = poisson(), randomEffectVariance = 0)
+fittedModel <- glmer(observedResponse ~ Environment1 + (1|group) , 
+                     family = "poisson", data = testData)
 plotConventionalResiduals(fittedModel)
-
 ```
 
 Just for completeness - it was the second one. But don't get too excited if you got it right. Probably you were just lucky - I can't really tell a difference. But even so, would you have added a quadratic effect, instead of adding an overdispersion correction? The point here is that misspecifications in GL(M)Ms cannot reliably be diagnosed with standard residual plots, and thus GLMMs are often not as thoroughly checked as they should.
@@ -197,7 +201,7 @@ plotResiduals(simulationOutput, form = ~ factor)
 
 See `?plotResiduals` for details, but very shortly: under H0 (perfect model), we would expect those boxes to range homogeneously from 0.25-0.75. To see whether there are deviations from this expectation, the plot calculates a test for uniformity per box, and a test for homogeneity of variances between boxes. A positive test will be highlighted in red.\
 \
-**NOTE on plots**: The default color for highlighting outliers and significant tests is **red**. However, it can be changed by setting \code{options(DHARMaSignalColor = "red")} to a different color. This is convenient for a color-blind friendly display, since red and black are difficult for some people to disentangle.
+**NOTE on plots**: The default color for highlighting outliers and significant tests is **red**. However, it can be changed by setting `options(DHARMaSignalColor = "red")` to a different color. This is convenient for a color-blind friendly display, since red and black are difficult for some people to disentangle.
 
 ## Goodness-of-fit tests on the scaled residuals
 
@@ -247,7 +251,7 @@ As of DHARMa 0.5.0, the default is conditional simulation on all random effects 
 Summary of the syntax for supported packages (this is only relevant for simulateREs = "user-specified"):
 
 |  |  |  |  |
-|:---|:---|:---|:---|
+|:----------------|:----------------|:------------------|:-------------------|
 | **Package** | **Unconditional** | **Conditional on all REs** | **Conditional on specific REs** |
 | lme4 | `re.form = NA` (default) | `re.form = NULL` | `re.form = ~(1 | group)` |
 | spaMM | `re.form = NA` (default) | `re.form = NULL` | `re.form = ~(1 | group)` |
@@ -387,7 +391,8 @@ testData = createData(sampleSize = 500, intercept = 2, fixedEffects = c(1),
                       pZeroInflation = 0.6)
 
 par(mfrow = c(1,2))
-plot(testData$Environment1, testData$observedResponse, xlab = "Environmental Predictor", 
+plot(testData$Environment1, testData$observedResponse, 
+     xlab = "Environmental Predictor", 
      ylab = "Response")
 hist(testData$observedResponse, xlab = "Response", main = "")
 ```
@@ -395,8 +400,8 @@ hist(testData$observedResponse, xlab = "Response", main = "")
 We see a hump-shaped dependence of the environment, but with too many zeros. In the normal DHARMa residual plots, zero-inflation will look pretty much like overdispersion
 
 ```{r, fig.height=5.5}
-fittedModel <- glmer(observedResponse ~ Environment1 + I(Environment1^2) + (1|group) , 
-                     family = "poisson", data = testData)
+fittedModel <- glmer(observedResponse ~ Environment1 + I(Environment1^2) + 
+                       (1|group), family = "poisson", data = testData)
 
 simulationOutput <- simulateResiduals(fittedModel = fittedModel)
 plot(simulationOutput)
@@ -416,7 +421,9 @@ This test is likely better suited for detecting zero-inflation than the standard
 
 ```{r, eval= FALSE}
 # requires glmmTMB
-fittedModel <- glmmTMB(observedResponse ~ Environment1 + I(Environment1^2) + (1|group), ziformula = ~1 , family = "poisson", data = testData)
+fittedModel <- glmmTMB(observedResponse ~ Environment1 + I(Environment1^2) + 
+                         (1|group), ziformula = ~1 , family = "poisson", 
+                       data = testData)
 summary(fittedModel)
 
 simulationOutput <- simulateResiduals(fittedModel = fittedModel)
@@ -431,7 +438,8 @@ Choose one of alternative = c("greater", "two.sided", "less") to test for inflat
 
 ```{r, fig.width=4.5, fig.height=4.5}
 countOnes <- function(x) sum(x == 1)  # testing for number of 1s
-testGeneric(simulationOutput, summary = countOnes, alternative = "greater") # 1-inflation
+# 1-inflation:
+testGeneric(simulationOutput, summary = countOnes, alternative = "greater") 
 ```
 
 ## Heteroscedasticity
@@ -442,9 +450,11 @@ Heteroscedasticity means that there is a systematic dependency of the dispersion
 
 ```{r}
 testData = createData(sampleSize = 500, intercept = -1.5,  
-                      overdispersion = function(x){return(rnorm(length(x), sd = 1 * abs(x)))}, 
+                      overdispersion = function(x){return(rnorm(length(x), 
+                                                             sd = 1 * abs(x)))}, 
                       family = poisson(), randomEffectVariance = 0)
-fittedModel <- glm(observedResponse ~ Environment1 , family = "poisson", data = testData)
+fittedModel <- glm(observedResponse ~ Environment1 , family = "poisson", 
+                   data = testData)
 
 simulationOutput <- simulateResiduals(fittedModel = fittedModel)
 plot(simulationOutput)
@@ -465,7 +475,9 @@ testCategorical(simulationOutput, catPred = ~group)
 Adding a simple overdispersion correction will try to find a compromise between the different levels of dispersion in the model. The qq plot looks better now, but there is still a pattern in the residuals
 
 ```{r}
-testData = createData(sampleSize = 500, intercept = 0, overdispersion = function(x){return(rnorm(length(x), sd = 2*abs(x)))}, 
+testData = createData(sampleSize = 500, intercept = 0, 
+                      overdispersion = function(x){return(rnorm(length(x), 
+                                                                sd = 2*abs(x)))}, 
                       family = poisson(), randomEffectVariance = 0)
 fittedModel <- glmer(observedResponse ~ Environment1 + (1|group) + (1|ID), 
                      family = "poisson", data = testData)
@@ -542,7 +554,8 @@ library(glmmTMB)
 testData$pos <- numFactor(testData$x, testData$y)
 fittedModel2 <- glmmTMB(observedResponse ~ Environment1 + exp(pos + 0|group), 
                         data = testData, family = poisson())
-simulationOutput2 <- simulateResiduals(fittedModel = fittedModel2, simulateREs = "unconditional")
+simulationOutput2 <- simulateResiduals(fittedModel = fittedModel2, 
+                                       simulateREs = "unconditional")
 testSpatialAutocorrelation(simulationOutput = simulationOutput2, x = ~x, 
                            y= ~y)
 # plot(simulationOutput2)
@@ -554,7 +567,8 @@ One of the options to solve it and get correct tests and no residual pattern (if
 
 ```{r, fig.width=4, fig.height=4}
 # rotation of the residuals 
-simulationOutput3 <- simulateResiduals(fittedModel = fittedModel2, simulateREs = "unconditional",
+simulationOutput3 <- simulateResiduals(fittedModel = fittedModel2, 
+                                       simulateREs = "unconditional",
                                        rotation = "estimated")
 testSpatialAutocorrelation(simulationOutput = simulationOutput3, x = ~x, 
                            y= ~y)
@@ -573,7 +587,8 @@ This example comes from [Jochen Fruend](https://jochenfruend.wordpress.com/). Me
 data = structure(list(N_parasitized = c(226, 689, 481, 960, 1177, 266, 
 46, 4, 884, 310, 19, 4, 7, 1, 3, 0, 365, 388, 369, 829, 532, 
 5), N_adult = c(1415, 2227, 2854, 3699, 2094, 376, 8, 1, 1379, 
-323, 2, 2, 11, 2, 0, 1, 1394, 1392, 1138, 719, 685, 3), density.attack = c(216.461273226486, 
+323, 2, 2, 11, 2, 0, 1, 1394, 1392, 1138, 719, 685, 3), density.attack = 
+  c(216.461273226486, 
 214.662143448767, 251.881252132684, 400.993643475831, 207.897856251888, 
 57.0335141562012, 6.1642552100285, 0.503930659141302, 124.673812637575, 
 27.3764667492035, 0.923453215863429, 0.399890030241684, 0.829818131526174, 
@@ -604,7 +619,8 @@ plot(N_parasitized / (N_adult + N_parasitized ) ~ logDensity,
 Let's fit the data with a regular binomial n/k glm
 
 ```{r}
-mod1 <- glm(cbind(N_parasitized, N_adult) ~ logDensity, data = data, family=binomial)
+mod1 <- glm(cbind(N_parasitized, N_adult) ~ logDensity, data = data, 
+            family = binomial)
 simulationOutput <- simulateResiduals(fittedModel = mod1)
 plot(simulationOutput)
 ```
@@ -619,7 +635,8 @@ We see various signals of overdispersion
 OK, so let's add overdispersion through an observation-level random effect
 
 ```{r}
-mod2 <- glmer(cbind(N_parasitized, N_adult) ~ logDensity + (1|ID), data = data, family=binomial)
+mod2 <- glmer(cbind(N_parasitized, N_adult) ~ logDensity + (1|ID), data = data,
+              family=binomial)
 simulationOutput <- simulateResiduals(fittedModel = mod2)
 plot(simulationOutput)
 ```
@@ -627,7 +644,8 @@ plot(simulationOutput)
 The overdispersion looks better, but you can see that the residuals still look a bit irregular (although tests are n.s.). The raw data looks a bit hump-shaped, so we might be tempted to add a quadratic effect.
 
 ```{r}
-mod3 <- glmer(cbind(N_parasitized, N_adult) ~ logDensity + I(logDensity^2) + (1|ID), data = data, family=binomial)
+mod3 <- glmer(cbind(N_parasitized, N_adult) ~ logDensity + I(logDensity^2) +
+                (1|ID), data = data, family=binomial)
 simulationOutput <- simulateResiduals(fittedModel = mod3)
 plot(simulationOutput)
 ```
@@ -653,7 +671,8 @@ The next example uses the fairly well known Owl dataset which is provided in glm
 
 ```{r, error=TRUE}
 library(glmmTMB)
-m1 <- glm(SiblingNegotiation ~ FoodTreatment*SexParent + offset(log(BroodSize)), data=Owls , family = poisson)
+m1 <- glm(SiblingNegotiation ~ FoodTreatment*SexParent + offset(log(BroodSize)),
+          data = Owls, family = poisson)
 res <- simulateResiduals(m1)
 plot(res)
 ```
@@ -661,7 +680,8 @@ plot(res)
 OK, this is highly overdispersed. Let's add a RE on nest:
 
 ```{r, error=TRUE}
-m2 <- glmmTMB(SiblingNegotiation ~ FoodTreatment*SexParent + offset(log(BroodSize)) + (1|Nest), data=Owls , family = poisson)
+m2 <- glmmTMB(SiblingNegotiation ~ FoodTreatment*SexParent + 
+                offset(log(BroodSize)) + (1|Nest), data=Owls , family = poisson)
 res <- simulateResiduals(m2)
 plot(res)
 ```
@@ -669,7 +689,8 @@ plot(res)
 Somewhat better, but not good. Move to neg binom, to adjust dispersion, and checking dispersion and residuals against FoodTreatment predictor:
 
 ```{r, error=TRUE}
-m3 <- glmmTMB(SiblingNegotiation ~ FoodTreatment*SexParent + offset(log(BroodSize)) + (1|Nest), data=Owls , family = nbinom1)
+m3 <- glmmTMB(SiblingNegotiation ~ FoodTreatment*SexParent + 
+                offset(log(BroodSize)) + (1|Nest), data=Owls , family = nbinom1)
 
 res <- simulateResiduals(m3, plot = TRUE)
 par(mfrow = c(1,2))
@@ -686,9 +707,10 @@ testZeroInflation(res)
 It looks as if there is some zero-inflation, although non-significant. Fitting a zero-inflated model:
 
 ```{r, error=TRUE}
-m4 <- glmmTMB(SiblingNegotiation ~ FoodTreatment*SexParent + offset(log(BroodSize)) +
-                (1|Nest), 
-              ziformula = ~ FoodTreatment + SexParent,  data=Owls , family = nbinom1)
+m4 <- glmmTMB(SiblingNegotiation ~ FoodTreatment*SexParent + 
+                offset(log(BroodSize)) + (1|Nest), 
+              ziformula = ~ FoodTreatment + SexParent,  data=Owls, 
+              family = nbinom1)
 
 res <- simulateResiduals(m4, plot = TRUE)
 ```
@@ -703,10 +725,11 @@ testZeroInflation(res)
 This looks a lot better. Trying a slightly different model specification, adding a dispersion model as well:
 
 ```{r, error=TRUE}
-m5 <- glmmTMB(SiblingNegotiation ~ FoodTreatment*SexParent + offset(log(BroodSize)) +
-                (1|Nest), 
+m5 <- glmmTMB(SiblingNegotiation ~ FoodTreatment*SexParent + 
+                offset(log(BroodSize)) + (1|Nest), 
               dispformula = ~ FoodTreatment + SexParent , 
-              ziformula = ~ FoodTreatment + SexParent,  data=Owls , family = nbinom1)
+              ziformula = ~ FoodTreatment + SexParent,  data = Owls, 
+              family = nbinom1)
 
 res <- simulateResiduals(m5, plot = TRUE)
 ```
@@ -819,7 +842,9 @@ We create data and fit a model with a missing predictor (Environment2):
 ```{r}
 set.seed(123)
 
-testData = createData(sampleSize = 500, overdispersion = 0, fixedEffects = c(0,3), family = binomial(), randomEffectVariance = 3, numGroups = 50)
+testData = createData(sampleSize = 500, overdispersion = 0, 
+                      fixedEffects = c(0,3), family = binomial(), 
+                      randomEffectVariance = 3, numGroups = 50)
 ```
 
 Apparently, no problem with the residuals for the misfitted model:
@@ -938,7 +963,8 @@ Here, an example for how to create simulations for a Poisson glm. Of course, it 
 
 ```{r, eval = TRUE}
 testData = createData(sampleSize = 200, overdispersion = 0.5, family = poisson())
-fittedModel <- glm(observedResponse ~ Environment1, family = "poisson", data = testData)
+fittedModel <- glm(observedResponse ~ Environment1, family = "poisson", 
+                   data = testData)
 
 simulatePoissonGLM <- function(fittedModel, n){
   pred = predict(fittedModel, type = "response")
@@ -950,7 +976,9 @@ simulatePoissonGLM <- function(fittedModel, n){
 
 sim = simulatePoissonGLM(fittedModel, 100)
 
-DHARMaRes = createDHARMa(simulatedResponse = sim, observedResponse = testData$observedResponse, 
-             fittedPredictedResponse = predict(fittedModel), integerResponse = TRUE)
+DHARMaRes = createDHARMa(simulatedResponse = sim, 
+                         observedResponse = testData$observedResponse, 
+                         fittedPredictedResponse = predict(fittedModel), 
+                         integerResponse = TRUE)
 plot(DHARMaRes, quantreg = FALSE)
 ```
