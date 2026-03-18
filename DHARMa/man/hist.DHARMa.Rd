@@ -84,15 +84,6 @@ plotResiduals(simulationOutput, form = ~Environment1|group)
 # plot residuals against a predictor for a specific group level, here group 1
 plotResiduals(simulationOutput, form = ~Environment1|group == "1")
 
-# or in a grid for multiple specific group levels, e.g. 1-4
-par(mfrow= c(2,2))
-for(g in unique(testData$group)[1:4]) {
-  plotResiduals(simulationOutput, form = ~Environment1|group == g, xlab = paste("group", g))
-}
-par(mfrow= c(1,1))
-
-
-
 
 # alternatively, you can plot against a variable from the global environment
 # in this case, the model function automatically removed one row of observations
