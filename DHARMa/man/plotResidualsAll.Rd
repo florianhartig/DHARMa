@@ -2,16 +2,19 @@
 % Please edit documentation in R/plots.R
 \name{plotResidualsAll}
 \alias{plotResidualsAll}
-\title{Plot residuals against all predictors of the model.}
+\title{Create multiple residual plots simultaneously.}
 \usage{
-plotResidualsAll(simulationOutput, predictorNames, form = NULL,
+plotResidualsAll(simulationOutput, predictorNames,
+  predictorType = c("predictor", "groupLevel"), form = NULL,
   quantreg = NULL, rank = TRUE, asFactor = NULL, smoothScatter = NULL,
   quantiles = c(0.25, 0.5, 0.75), absoluteDeviation = FALSE, ...)
 }
 \arguments{
 \item{simulationOutput}{an object with simulated residuals created by \link{simulateResiduals}.}
 
-\item{predictorNames}{names of the predictors to be plotted.}
+\item{predictorNames}{names of the predictors / group levels to be plotted.}
+
+\item{predictorType}{whether multiple plots should be created based on different predictor variables (predictor) or a single predictor and each corresponding group level (groupLevel).}
 
 \item{form}{optional predictor (and grouping variable) against which the residuals should be plotted.}
 
@@ -30,7 +33,7 @@ plotResidualsAll(simulationOutput, predictorNames, form = NULL,
 \item{...}{additional arguments to plot / boxplot.}
 }
 \description{
-Convenience function to plot residuals against all predictors of the model.
+Convenience function to plot residuals against all predictors of the model / against certain predictors of the model / against a predictor and all levels of a grouping variable.
 }
 \details{
 For further details on the parameters see \link{plotResiduals}.

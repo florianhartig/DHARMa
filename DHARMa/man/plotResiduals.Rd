@@ -44,7 +44,9 @@ Overdispersion typically manifests itself as Q1 (0.25) deviating towards 0 and Q
 
 The quantile regression can take some time to calculate, especially for larger datasets. For this reason, quantreg = F can be set to generate a smooth spline instead. This is the default for n > 10000.
 
-If form is specified as a formula, e.g. \code{form = ~ your_predictor}, NAs will be handled automatically (recommended). If \code{form = ~.} a separate plot for each predictor in the model is produced. If \code{form = ~ predictor1 + predictor2}, a separate plot for each predictor is produced. If an additional grouping variable is specified, e.g. \code{form = ~ predictor|group == "group_level"}, a residual plot for the specified grouping level will be created. If form is \strong{not} a formula, e.g. \code{form = data$predictor}, NAs are \strong{not} handled automatically. For phyr and gamm4$mer models, you need to specify form in this way. If the predictor is a factor, a boxplot will be plotted instead of a scatter plot. The distribution for each factor level should be uniformly distributed, so the box should go from 0.25 to 0.75, with the median line at 0.5 (within-group). To test if deviations from those expectations are significant, KS-tests per group and a Levene test for homogeneity of variances is performed. See \link{testCategorical} for details.
+If form is specified as a formula, e.g. \code{form = ~ your_predictor}, NAs will be handled automatically (recommended). If \code{form = ~.}, separate plots for all predictors in the model are produced. If \code{form = ~ predictor1 + predictor2}, a separate plot for each specified predictor is produced. If an additional grouping variable is specified, e.g. \code{form = ~ predictor|group}, a separate plot for the predictor within each grouping level is produced. Be careful with this command: if you have many levels, the plot may not display nicely. If you are interested in a specific group, you can use \code{form = ~ predictor|group == "group_level"}. If form is \strong{not} a formula, e.g. \code{form = data$predictor}, NAs are \strong{not} handled automatically. For phyr and gamm4$mer models, you need to specify form in this way.
+
+If the predictor is a factor, a boxplot will be plotted instead of a scatter plot. The distribution for each factor level should be uniformly distributed, so the box should go from 0.25 to 0.75, with the median line at 0.5 (within-group). To test if deviations from those expectations are significant, KS-tests per group and a Levene test for homogeneity of variances are performed. See \link{testCategorical} for details.
 }
 \note{
 If nObs > 10,000, the scatter plot is replaced by graphics::smoothScatter().
@@ -60,22 +62,6 @@ fittedModel <- glm(observedResponse ~ Environment1 + Environment2,
                    family = "poisson", data = testData)
 simulationOutput <- simulateResiduals(fittedModel = fittedModel)
 
-######### main plotting function #############
-
-# for all functions, quantreg = T will be more
-# informative, but slower
-
-plot(simulationOutput, quantreg = FALSE)
-
-#############  Distribution  ######################
-
-plotQQunif(simulationOutput = simulationOutput,
-           testDispersion = FALSE,
-           testUniformity = FALSE,
-           testOutliers = FALSE)
-
-hist(simulationOutput )
-
 #############  residual plots  ###############
 
 # Default in DHARMa is to show predictions rank transformed
@@ -85,75 +71,45 @@ plotResiduals(simulationOutput, rank = FALSE)
 # smooth scatter plot - default for large datasets with n > 10,000
 plotResiduals(simulationOutput, rank = TRUE, smoothScatter = TRUE)
 
-# It is very advisable to plot the residual against all predictors
-# the following syntax uses the predictor values from the fitted model
-plotResiduals(simulationOutput, form = ~ Environment1)
+\dontrun{
+
+  # It is very advisable to plot the residual against all predictors
+  # the following syntax uses the predictor values from the fitted model
+  plotResiduals(simulationOutput, form = ~ Environment1)
+
+  # plot against all predictors
+  plotResiduals(simulationOutput, form = ~.)
+
+  # if pred is a factor, or if asFactor = TRUE, will produce a boxplot
+  plotResiduals(simulationOutput, form = ~group)
+
+  # plot residuals against multiple predictors at once
+  plotResiduals(simulationOutput, form = ~Environment1 + Environment2)
+
+  # plot residuals against a predictor for all respective group levels
+  plotResiduals(simulationOutput, form = ~Environment1|group)
+
+  # plot residuals against a predictor for a specific group level, here group 1
+  plotResiduals(simulationOutput, form = ~Environment1|group == "1")
 
 
-# plot against all predictors
-plotResiduals(simulationOutput, form = ~.)
+  # alternatively, you can plot against a variable from the global environment
+  # in this case, the model function automatically removed one row of observations
+  # because there was an NA in Environment2. When using the variable Environment1
+  # from the global environment, we have to remove this observation as well
+  plotResiduals(simulationOutput,
+                form = testData$Environment1[complete.cases(testData)])
 
-# if pred is a factor, or if asFactor = TRUE, will produce a boxplot
-plotResiduals(simulationOutput, form = ~group)
 
-# plot residuals against multiple predictors at once
-plotResiduals(simulationOutput, form = ~Environment1 + Environment2)
+  # to diagnose overdispersion and heteroskedasticity it can be useful to
+  # display residuals as absolute deviation from the expected mean 0.5
+  plotResiduals(simulationOutput, absoluteDeviation = TRUE)
 
-# plot residuals against a predictor for a specific group level, here group 1
-plotResiduals(simulationOutput, form = ~Environment1|group == "1")
+  # All these options can also be provided to the main plotting function
 
-# or in a grid for multiple group levels, e.g. groups 1 to 4
-par(mfrow= c(2,2))
-for(g in unique(testData$group)[1:4]) {
-  plotResiduals(simulationOutput, form = ~Environment1|group == g, xlab = paste("group", g))
+  # If you want to plot summaries per group, use recalculateResiduals
+  # for details see help of recalculateResiduals
 }
-par(mfrow= c(1,1))
-
-
-
-
-# alternatively, you can plot against a variable from the global environment
-# in this case, the model function automatically removed one row of observations
-# because there was an NA in Environment2. When using the variable Environment1
-# from the global environment, we have to remove this observation as well
-plotResiduals(simulationOutput,
-              form = testData$Environment1[complete.cases(testData)])
-
-
-
-# to diagnose overdispersion and heteroskedasticity it can be useful to
-# display residuals as absolute deviation from the expected mean 0.5
-plotResiduals(simulationOutput, absoluteDeviation = TRUE)
-
-# All these options can also be provided to the main plotting function
-
-# If you want to plot summaries per group, use recalculateResiduals
-# with group as a formula (recommended, handles NAs automatically)
-simulationOutput = recalculateResiduals(simulationOutput, group = ~group)
-plot(simulationOutput)
-# we see one residual point per RE
-
-# with group as variable in your environment
-# but then you need to exclude NAs by hand
-simulationOutput = recalculateResiduals(simulationOutput, group = testData$group[-1])
-
-# you can also select subsets of the data using sel
-# with formula syntax (recommended, handles NAs automatically)
-simulationOutput = recalculateResiduals(simulationOutput, sel = ~Environment1<0.5)
-
-# as condition based on a variable in your environment (exclude NAs by hand)
-simulationOutput = recalculateResiduals(simulationOutput, sel = testData$Environment1[-1]<0.5)
-
-# or combine group and sel
-simulationOutput = recalculateResiduals(simulationOutput, group = ~group, sel = ~Environment1<0.5)
-
-# or as subset of rows
-# (note: order of rows is based on residuals, not on original dataframe)
-# not run, because of warning:
-# simulationOutput = recalculateResiduals(simulationOutput, sel = 1:20)
-
-
-
 }
 \seealso{
 \link{plotQQunif}, \link{testQuantiles}, \link{testOutliers}

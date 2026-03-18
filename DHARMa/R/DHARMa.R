@@ -1,10 +1,12 @@
 
 
-#' @keywords internal
+#' @export
 #' @references vignette("DHARMa", package="DHARMa")
 #' @details
 #' To get started with the package, look at the vignette and start with [simulateResiduals]
-#'
+#'#' @section Funding:
+#' This package has been funded by the **Deutsche Forschungsgemeinschaft (DFG)**, project number 528747641 (2024-now).
+#' @example inst/examples/dharma-package.R
 "_PACKAGE"
 
 

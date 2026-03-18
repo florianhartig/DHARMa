@@ -85,7 +85,9 @@ The development of DHARMA and all its surrounding activities is based on the val
 
 # Acknowledgements
 
-A question by Catalina Gutiérrez Chacón provided me with the motivation write the first version of DHARMa. Thanks for useful suggestions to improve DHARMa by Jochen Fründ, Tomer J. Czaczkes, Luis Cayuela Delgado, Alexandre Courtiol, Jim Thorson, Lukas Lohse, jmniehaus, justintimm and many other people that made comments on GitHub, Crossvalidated or via email. 
+The DHARMa package has been funded by the **Deutsche Forschungsgemeinschaft (DFG)**, project number 528747641 (2024-now).
+
+A question by Catalina Gutiérrez Chacón provided Florian with the motivation to write the first version of DHARMa. Thanks for useful suggestions to improve DHARMa by Jochen Fründ, Tomer J. Czaczkes, Luis Cayuela Delgado, Alexandre Courtiol, Jim Thorson, Lukas Lohse, jmniehaus, justintimm and many other people that made comments on GitHub, Crossvalidated or via email. 
 
 
 
