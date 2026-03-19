@@ -436,7 +436,7 @@ getRefit.lm <- function(object, newresp, ...){
     newData = cbind(newresp, newData)
   }
 
-  refittedModel = update(object, data = newData)
+  refittedModel = update(object, data = newData, ...)
   return(refittedModel)
 }
 
@@ -605,7 +605,7 @@ getRefit.glmmTMB <- function(object, newresp, ...){
   } else {
     newData[[1]] = newresp
   }
-  refittedModel = update(object, data = newData)
+  refittedModel = update(object, data = newData, ...)
   return(refittedModel)
 }
 
@@ -755,7 +755,7 @@ getSimulations.HLfit <- function(object, nsim = 1, simulateREs = c("conditional"
 #' @rdname getRefit
 #' @export
 getRefit.HLfit <- function(object, newresp, ...) {
-  spaMM::update_resp(object, newresp, evaluate = TRUE)
+  spaMM::update_resp(object, newresp, evaluate = TRUE, ...)
 }
 
 #' @rdname getFitted
@@ -821,7 +821,7 @@ getRefit.MixMod <- function(object, newresp, ...) {
   responsename = colnames(model.frame(object))[1]
   newDat = object$data
   newDat[, match(responsename,names(newDat))] = newresp
-  update(object, data = newDat)
+  update(object, data = newDat, ...)
 }
 
 #' @rdname getFitted
