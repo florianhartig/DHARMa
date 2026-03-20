@@ -27,7 +27,7 @@ set.seed(123)
 
 In principle, DHARMa residuals can be calculated and interpreted for Bayesian models in very much the same way as for frequentist models. Therefore, all comments regarding tests, residual interpretation etc. from the main vignette are equally valid for Bayesian model checks. There are some minor differences regarding the expected null distribution of the residuals, in particular in the low data limit, but I believe that for most people, these are of less concern. 
 
-The main difference for a Bayesian user is that, unlike for users of directly supported regression packages such as lme4 or glmmTMB, most Bayesian users will have to create the simulations for the fitted model themselves and then feed them into DHARMa by hand. The basic workflow for Bayesians that work with BUGS, JAGS, STAN or similar is:
+The main difference for a Bayesian user is that, unlike for users of directly supported regression packages such as lme4 or glmmTMB, most Bayesian users will have to create the simulations for the fitted model themselves and then feed them into DHARMa by hand. The exception are simple models (no multi-response, multinomial or structural equation models) from the brms package, which is supported since DHARMa version 0.5.0. The basic workflow for Bayesians that work with BUGS, JAGS, STAN or similar is:
 
 1. Create posterior predictive simulations for your model
 2. Read these in with the createDHARMa function
