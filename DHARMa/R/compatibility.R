@@ -42,6 +42,8 @@ checkModel <- function(fittedModel, stop = F){
 
   }
 
+  if(class(fittedModel)[1] == "brmsfit") warning("DHARMa: only simple brms models are supported as of DHARMa version 0.5.0. This includes all models you could also fit with glmmTMB. Multivariate models (multi-response, structural equation models, multinomial) are not supported. DHARMa doesn't check if your model can reliably be checked or not. ")
+
   # if(hasNA(fittedModel)) message("It seems there were NA values in the data used for fitting the model. This can create problems if you supply additional data to DHARMa functions. See ?checkModel for details")
 
   # TODO: check as implemented does not work reliably, check if there is any other option to check for NA
@@ -59,7 +61,7 @@ checkModel <- function(fittedModel, stop = F){
 #' returns a list of supported model classes
 #'
 #' @keywords internal
-getPossibleModels <- function(){c("lm", "glm", "negbin", "lmerMod", "lmerModLmerTest", "glmerMod", "gam", "bam", "glmmTMB", "HLfit", "MixMod", "phylolm", "phyloglm")}
+getPossibleModels <- function(){c("lm", "glm", "negbin", "lmerMod", "lmerModLmerTest", "glmerMod", "gam", "bam", "glmmTMB", "HLfit", "MixMod", "phylolm", "phyloglm", "brmsfit")}
 
 
 weightsWarning = "Model was fit with prior weights. These will be ignored in the simulation. See ?getSimulations for details."
@@ -229,12 +231,15 @@ getFamily <- function (object, ...) {
   UseMethod("getFamily", object)
 }
 
+
 #' Get model data
 #'
 #' Wrapper to get the data that was used to fit a model.
 #'
 #' @param object a fitted model.
 #' @param ... additional parameters to be passed on.
+#'
+#' @note  The data is retrieved from the environment where the model was fit, which is usually your current environment. If you delete the data from the environment or change it after fitting the model this function will probably not work or get the wrong dataset, respectively.
 #'
 #' @seealso [getObservedResponse], [getSimulations], [getRefit], [getFixedEffects], [getFitted]
 #'
@@ -377,7 +382,11 @@ getResiduals.default <- function (object, ...){
 #' @rdname getPearsonResiduals
 #' @export
 getPearsonResiduals.default <- function (object, ...){
-  residuals(object, type = "pearson", ...)
+  if(class(object)[1] == "brmsfit"){
+    stop("brms doesn't provide Pearson residuals (deprecated).")
+    } else{
+    residuals(object, type = "pearson", ...)
+  }
 }
 
 # #' has NA
@@ -479,8 +488,8 @@ getFitted.gam <- function(object, ...){
 
 #' @rdname getPearsonResiduals
 #' @export
-#' @details This needed to be adopted because for some reason, mgcv uses the argument "scaled.pearson" for what most packages define as "pearson". See comments in ?residuals.gam.
-#'
+
+# This needed to be adopted because for some reason, mgcv uses the argument "scaled.pearson" for what most packages define as "pearson". See comments in ?residuals.gam.
 getPearsonResiduals.gam <- function (object, ...){
   residuals(object, type = "scaled.pearson", ...)
 }
@@ -960,3 +969,93 @@ getFamily.phyloglm <- function (object,...){
   return(out)
 }
 
+
+
+####### brms #########
+
+
+#' @rdname getRefit
+#' @export
+getRefit.brmsfit <- function(object, newresp, ...){
+  newData = model.frame(object)
+  newData[,1] = newresp
+  refittedModel = update(object, newdata = newData, ...)
+}
+
+
+#' @rdname getFixedEffects
+#' @export
+#' @note Note that for brms models, the mean is used as the measure of central tendency for the fixed effects as in brms::fixef.
+getFixedEffects.brmsfit <- function(object, ...){
+    out = fixef(object)[,1]
+  return(out)
+}
+
+
+
+
+#' @rdname getSimulations
+#' @export
+
+getSimulations.brmsfit <- function (object, nsim = 1, simulateREs = c("conditional", "unconditional", "user-specified"), type = c("normal", "refit"), ...){
+
+  simulateREs <- match.arg(simulateREs)
+  type <- match.arg(type)
+
+  out = NULL
+
+  # user-specified (as before)
+  if (simulateREs == "user-specified") {
+    out = t(brms::posterior_predict(object = object, ndraws = nsim, ...))
+  }
+
+  # conditional
+  if (simulateREs == "conditional") {
+    out = t(brms::posterior_predict(object = object, re_formula = NULL, ndraws = nsim, ...))
+  }
+
+  # unconditional
+  if (simulateREs == "unconditional") {
+    out = t(brms::posterior_predict(object = object, re_formula = NA, ndraws = nsim, ...))
+  }
+
+  if(type == "normal"){
+    if(!is.matrix(out)) out = data.matrix(out)
+  }else{
+    out = as.data.frame(out)
+  }
+  return(out)
+
+}
+
+
+#' @rdname getFitted
+#' @export
+getFitted.brmsfit  <- function (object,...){
+  out = apply(t(brms::posterior_epred(object, re_formula = NA, ...)), 1, median)
+
+  # for k/n models, posterior_epred does not predict proportions
+  # divide predictions by number of trials
+  if(object$family$family == "binomial" && suppressMessages(any(brms::standata(object)$trials > 1))) {
+    out = out/suppressMessages(brms::standata(object)$trials)
+  }
+
+  return(out)
+}
+
+
+
+#' @rdname getResiduals
+#' @export
+getResiduals.brmsfit <- function (object,...){
+  residuals(object, type = "ordinary", ...)[,1]
+}
+
+
+
+#' @rdname getData
+#' @export
+getData.brmsfit <- function (object, ...){
+  eval(as.name(attr(object$data, "data_name", TRUE)), envir = environment(formula(object$formula)))
+  #could also use as.name(brms:::get_data_name(fit1$data)) #returns NULL if is NULL
+}

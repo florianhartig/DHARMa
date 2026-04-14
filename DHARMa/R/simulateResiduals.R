@@ -139,8 +139,7 @@ simulateResiduals <- function(fittedModel, n = 250, simulateREs = c("conditional
         out$refittedPredictedResponse[,i] <- getFitted(refittedModel)
         out$refittedFixedEffects[,i] <- getFixedEffects(refittedModel)
         out$refittedResiduals[,i] <- getResiduals(refittedModel)
-        out$refittedPearsonResiduals[,i] <- residuals(refittedModel,
-                                                     type = "pearson")
+        out$refittedPearsonResiduals[,i] <- getPearsonResiduals(refittedModel)
         #out$refittedRandomEffects[,i]  <- ranef(refittedModel)
       }, silent = TRUE)
     }

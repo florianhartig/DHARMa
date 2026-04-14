@@ -4,6 +4,7 @@
 \alias{getFixedEffects}
 \alias{getFixedEffects.default}
 \alias{getFixedEffects.MixMod}
+\alias{getFixedEffects.brmsfit}
 \title{Extract fixed effects of a supported model}
 \usage{
 getFixedEffects(object, ...)
@@ -11,6 +12,8 @@ getFixedEffects(object, ...)
 \method{getFixedEffects}{default}(object, ...)
 
 \method{getFixedEffects}{MixMod}(object, ...)
+
+\method{getFixedEffects}{brmsfit}(object, ...)
 }
 \arguments{
 \item{object}{a fitted model.}
@@ -19,6 +22,9 @@ getFixedEffects(object, ...)
 }
 \description{
 A wrapper to extract fixed effects of a supported model.
+}
+\note{
+Note that for brms models, the mean is used as the measure of central tendency for the fixed effects as in brms::fixef.
 }
 \examples{
 testData = createData(sampleSize = 400, family = gaussian())
