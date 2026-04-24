@@ -541,7 +541,7 @@ getSimulations.gam <- function(object, nsim = 1, simulateREs = c("conditional", 
       }
     }
   } else {
-    message("It seems you don't have mgcViz installed on this computer. When using DHARMa with mgcv objects, it is highly recommended to also install mgcViz, which will extend the ability of DHARMa to simulate from various gam objects. Withoug mgcViz, simulations will fail in various situations. See vignette for details!")
+    message("It seems you don't have mgcViz installed on this computer. When using DHARMa with mgcv objects, it is highly recommended to also install mgcViz, which will extend the ability of DHARMa to simulate from various gam objects. Without mgcViz, simulations will fail in various situations. See vignette for details!")
     out = getSimulations.default(object, nsim, type, ...)
   }
   return(out)
