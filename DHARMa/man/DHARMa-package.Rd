@@ -45,7 +45,7 @@ Useful links:
 Other contributors:
 \itemize{
   \item Lukas Lohse [contributor]
-  \item Melina de Souza leite [contributor]
+  \item Melina de Souza Leite [contributor]
   \item Cosmina Werneke [contributor]
 }
 
