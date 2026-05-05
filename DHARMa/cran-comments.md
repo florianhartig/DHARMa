@@ -1,3 +1,14 @@
+# Version 0.5.0
+
+## Submission 1, 6.05.2026
+
+This is an update of DHARMa, including major change in the default simulation for GLMMs from the supported model's default (mostly unconditional) to conditional simulations (for most of the supported models and packages),  support for brms package, improve in plotting functions, various smaller improvements, and bugfixes. See NEWS for details.
+
+This release was tested without apparent problems under:
+
+* local MAC OS 14.6.1 (Sonoma), R 4.4.1
+* GitHub Actions - Windows / Mac / Ubuntu (release), Ubuntu (devel)
+* http://win-builder.r-project.org/ - oldrelease / devel / release
 # Version 0.4.7
 
 ## Submission 1, 16.10.2024
