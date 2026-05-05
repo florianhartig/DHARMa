@@ -456,11 +456,9 @@ testDispersion <- function(simulationOutput, alternative = c("two.sided", "great
       names(out$statistic) = "dispersion"
     } else {
 
-      observed = tryCatch(sum(getPearsonResiduals(simulationOutput$fittedModel)^2), error = function(e) {
-        message(paste("DHARMa: the requested tests requires Pearson residuals, but your model does not implement these calculations. Test will return NA. Error message:", e))
-        return(NA)
-      })
-      if(is.na(observed)) return(NA)
+      rp <- getPearsonResiduals(simulationOutput$fittedModel)
+      if(is.na(rp)[1]) return(NA)
+      observed = sum(rp^2)
       expected = apply(simulationOutput$refittedPearsonResiduals^2 , 2, sum)
       out$statistic = c(dispersion = observed / mean(expected))
       names(out$statistic) = "dispersion"
@@ -498,11 +496,7 @@ testDispersion <- function(simulationOutput, alternative = c("two.sided", "great
     if(!alternative == "greater" & class(model)[1] %in% c("lmerMod", "lmerModLmerTest", "glmerMod", "bam", "glmmTMB", "HLfit", "MixMod")) {
       message("Note that the Chi2 test on Pearson residuals is biased for MIXED models towards underdispersion. Tests with alternative = two.sided or less are therefore not reliable. If you have random effects in your model, we recommend to test only with alternative = 'greater', i.e. test for overdispersion, or else use the DHARMa default tests which are unbiased. See help for details.")}
 
-    #rp <- getPearsonResiduals(model)
-    rp = tryCatch(getPearsonResiduals(model), error = function(e) {
-      message(paste("DHARMa: the requested tests requires Pearson residuals, but your model does not implement these calculations. Test will return NA. Error message:", e))
-      return(NA)
-    })
+    rp <- getPearsonResiduals(model)
     if(is.na(rp)[1]) return(NA)
 
     rdf <- df.residual(model)

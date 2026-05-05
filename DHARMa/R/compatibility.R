@@ -384,8 +384,13 @@ getResiduals.default <- function (object, ...){
 getPearsonResiduals.default <- function (object, ...){
   if(class(object)[1] == "brmsfit"){
     stop("brms doesn't provide Pearson residuals (deprecated).")
-    } else{
-    residuals(object, type = "pearson", ...)
+    } else {
+     residuals <- tryCatch(residuals(object, type = "pearson", ...),
+               error = function(e) {
+        message(paste("DHARMa: the requested tests requires Pearson residuals, but your model does not implement these calculations. Test will return NA. Error message:", e))
+        return(NA)
+      })
+     return(residuals)
   }
 }
 
@@ -491,7 +496,12 @@ getFitted.gam <- function(object, ...){
 
 # This needed to be adopted because for some reason, mgcv uses the argument "scaled.pearson" for what most packages define as "pearson". See comments in ?residuals.gam.
 getPearsonResiduals.gam <- function (object, ...){
-  residuals(object, type = "scaled.pearson", ...)
+ residuals <- tryCatch(residuals(object, type = "scaled.pearson", ...),
+                       error = function(e) {
+                       message(paste("DHARMa: the requested tests requires Pearson residuals, but your model does not implement these calculations. Test will return NA. Error message:", e))
+                      return(NA)
+           })
+ return(residuals)
 }
 
 # Get Simulations of gam object

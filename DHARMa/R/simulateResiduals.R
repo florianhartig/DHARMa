@@ -139,12 +139,14 @@ simulateResiduals <- function(fittedModel, n = 250, simulateREs = c("conditional
         out$refittedPredictedResponse[,i] <- getFitted(refittedModel)
         out$refittedFixedEffects[,i] <- getFixedEffects(refittedModel)
         out$refittedResiduals[,i] <- getResiduals(refittedModel)
-        out$refittedPearsonResiduals[,i] <- getPearsonResiduals(refittedModel)
+        out$refittedPearsonResiduals[,i] <- suppressMessages(getPearsonResiduals(refittedModel))
         #out$refittedRandomEffects[,i]  <- ranef(refittedModel)
       }, silent = TRUE)
     }
 
     ######### residual checks ###########
+
+    if(all(is.na(out$refittedPearsonResiduals))) message("DHARMa::simulateResiduals: Pearson residuals could not be calculated for the refitted models (all NA). Dispersion tests using refit = TRUE will not be available for this model family.")
 
     if(anyNA(out$refittedResiduals)) warning("DHARMa::simulateResiduals warning: on refit = TRUE, at least one of the refitted models produced an error. Inspect the refitted model values. Results may not be reliable.")
 
