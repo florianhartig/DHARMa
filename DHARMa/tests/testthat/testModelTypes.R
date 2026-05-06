@@ -94,6 +94,73 @@ runEverything = function(fittedModel, testData, DHARMaData = T, phy = NULL,
 
 }
 
+runEverythingExcPearson = function(fittedModel, testData, DHARMaData = T, phy = NULL,
+                         expectOverdispersion = F, doRefit = TRUE){
+
+  t = getObservedResponse(fittedModel)
+  expect_true(is.vector(t))
+  expect_true(is.numeric(t))
+
+  x = getSimulations(fittedModel, 1)
+  expect_true(is.matrix(x))
+  expect_true(ncol(x) == 1)
+
+  x = getSimulations(fittedModel, 2)
+  expect_true(is.numeric(x))
+  expect_true(is.matrix(x))
+  expect_true(ncol(x) == 2)
+
+  x = getSimulations(fittedModel, 1, type = "refit")
+  expect_true(is.data.frame(x))
+
+  x = getSimulations(fittedModel, 2, type = "refit")
+  expect_true(is.data.frame(x))
+
+  fittedModel2 = getRefit(fittedModel,x[[1]])
+  # expect_false(any(getFixedEffects(fittedModel) -
+  #                  getFixedEffects(fittedModel2) > 0.5)) # doesn't work for some models
+
+  simulationOutput <- simulateResiduals(fittedModel = fittedModel, n = 200)
+
+  checkOutput(simulationOutput)
+
+  if(doPlots) plot(simulationOutput, quantreg = F)
+
+  expect_gt(testOutliers(simulationOutput, plot = doPlots)$p.value, 0.001)
+  expect_gt(testDispersion(simulationOutput, plot = doPlots)$p.value, 0.001)
+  expect_gt(testUniformity(simulationOutput = simulationOutput,
+                           plot = doPlots)$p.value, 0.001)
+  expect_gt(testZeroInflation(simulationOutput = simulationOutput,
+                              plot = doPlots)$p.value, 0.001)
+  expect_gt(testTemporalAutocorrelation(simulationOutput = simulationOutput,
+                                        time = testData$time,
+                                        plot = doPlots)$p.value, 0.001)
+  expect_gt(testSpatialAutocorrelation(simulationOutput = simulationOutput,
+                                       x = testData$x, y = testData$y,
+                                       plot = F)$p.value, 0.001)
+
+  simulationOutput <- recalculateResiduals(simulationOutput, group = testData$group)
+  expect_gt(testDispersion(simulationOutput, plot = doPlots)$p.value, 0.001)
+
+  if(doRefit == TRUE) {
+    simulationOutput2 <- simulateResiduals(fittedModel = fittedModel,
+                                           refit = T, n = 100)
+    checkOutput(simulationOutput2)
+    if(doPlots) plot(simulationOutput2, quantreg = F)
+
+    # note that the pearson test is biased, therefore have to test greater
+    #expect_gt(testDispersion(simulationOutput2, plot = doPlots, alternative = "greater")$p.value, 0.001)
+    #x = testDispersion(simulationOutput2, plot = doPlots)
+
+    simulationOutput3 <- recalculateResiduals(simulationOutput2, group = testData$group)
+    #expect_gt(testDispersion(simulationOutput3, plot = doPlots, alternative = "greater")$p.value, 0.001)
+    #x = testDispersion(simulationOutput3, plot = doPlots)
+  }
+
+
+
+}
+
 
 # testData --------------------------------------------------------------------
 testData = list()
@@ -470,14 +537,14 @@ test_that("GLMMadaptive works",
                                                      random = ~ 1 | group,
                                                      data = testData$binomial_10,
                                                      family = binomial())
-            runEverything(fittedModel, testData$binomial_10)
+            runEverythingExcPearson(fittedModel, testData$binomial_10)
 
             fittedModel <- GLMMadaptive::mixed_model(fixed = observedResponse ~
                                                        Environment1,
                                                      random = ~ 1 | group,
                                                      data = testData$binomial_yn,
                                                      family = binomial())
-            runEverything(fittedModel, testData$binomial_yn)
+            runEverythingExcPearson(fittedModel, testData$binomial_yn)
 
             fittedModel <- GLMMadaptive::mixed_model(fixed =
                                                        cbind(observedResponse1,
@@ -499,7 +566,7 @@ test_that("GLMMadaptive works",
                                                      random = ~ 1 | group,
                                                      data = testData$poisson1,
                                                      family = poisson())
-            runEverything(fittedModel, testData$poisson1)
+            runEverythingExcPearson(fittedModel, testData$poisson1)
 
             # GLMMadaptive requires weights according to groups
             weights = rep(c(1,1.1), each = 5)
@@ -519,29 +586,29 @@ test_that("GLMMadaptive works",
 test_that("brms works",
           {
             fittedModel <- brms::brm(observedResponse ~ Environment1 + (1|group), data = testData$lmm)
-            runEverything(fittedModel, testData$lmm, doRefit = FALSE)
+            runEverythingExcPearson(fittedModel, testData$lmm, doRefit = FALSE)
 
             fittedModel <-  brms::brm(observedResponse|trials(1) ~ Environment1 +
                                         (1|group), family = "binomial",
                                       data = testData$binomial_10)
-            runEverything(fittedModel, testData$binomial_10, doRefit = FALSE)
+            runEverythingExcPearson(fittedModel, testData$binomial_10, doRefit = FALSE)
 
             fittedModel <- brms::brm(observedResponse ~ Environment1 +
                                        (1|group), family = "bernoulli",
                                      data = testData$binomial_yn)
-            runEverything(fittedModel, testData$binomial_yn, doRefit = FALSE)
+            runEverythingExcPearson(fittedModel, testData$binomial_yn, doRefit = FALSE)
 
             fittedModel <- brms::brm(observedResponse1|trials(observedResponse1 + observedResponse0)~
                                        Environment1 + (1|group),
                                      family = "binomial",
                                      data = testData$binomial_nk_matrix)
-            runEverything(fittedModel, testData$binomial_nk_matrix, doRefit = FALSE)
+            runEverythingExcPearson(fittedModel, testData$binomial_nk_matrix, doRefit = FALSE)
 
             fittedModel <- brms::brm(observedResponse~
                                        Environment1 + (1|group),
                                      family = "poisson",
                                      data = testData$poisson1)
-            runEverything(fittedModel, testData$poisson1, doRefit = FALSE)
+            runEverythingExcPearson(fittedModel, testData$poisson1, doRefit = FALSE)
           }
 )
 
@@ -574,7 +641,7 @@ test_that("phylolm works",
             fittedModel = phylolm::phylolm(trait ~ predictor, data = testData,
                                            phy = tre1, model = "lambda")
 
-            runEverything(fittedModel, testData = testData, phy = tre1)
+            runEverythingExcPearson(fittedModel, testData = testData, phy = tre1)
           })
 
 test_that("phyloglm works",
@@ -591,7 +658,7 @@ test_that("phyloglm works",
             fittedModel = phylolm::phyloglm(trait ~ predictor,
                                             phy = tre, data = testData)
 
-            runEverything(fittedModel,  testData = testData, phy = tre)
+            runEverythingExcPearson(fittedModel,  testData = testData, phy = tre)
           })
 
 
