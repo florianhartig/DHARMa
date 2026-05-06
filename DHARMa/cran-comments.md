@@ -6,9 +6,11 @@ This is an update of DHARMa, including major change in the default simulation fo
 
 This release was tested without apparent problems under:
 
-* local MAC OS 14.6.1 (Sonoma), R 4.4.1
+* local MAC OS 26.3.1 (Tahoe), R 4.5.1
 * GitHub Actions - Windows / Mac / Ubuntu (release), Ubuntu (devel)
 * http://win-builder.r-project.org/ - oldrelease / devel / release
+
+
 # Version 0.4.7
 
 ## Submission 1, 16.10.2024
