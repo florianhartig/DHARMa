@@ -206,6 +206,7 @@ getResiduals <- function (object, ...) {
 #' @param object a fitted model.
 #' @param ... additional parameters to be passed on, usually to the residual function of the respective model class.
 #'
+#' @note  Package `brms` doesn't provide Pearson residuals (deprecated).
 #' @example inst/examples/wrappersHelp.R
 #'
 #' @seealso [getObservedResponse], [getSimulations], [getRefit], [getFixedEffects], [getFitted]
@@ -381,17 +382,13 @@ getResiduals.default <- function (object, ...){
 
 #' @rdname getPearsonResiduals
 #' @export
-getPearsonResiduals.default <- function (object, ...){
-  if(class(object)[1] == "brmsfit"){
-    stop("brms doesn't provide Pearson residuals (deprecated).")
-    } else {
-     residuals <- tryCatch(residuals(object, type = "pearson", ...),
-               error = function(e) {
-        message(paste("DHARMa: the requested tests requires Pearson residuals, but your model does not implement these calculations. Test will return NA. Error message:", e))
-        return(NA)
-      })
-     return(residuals)
-  }
+getPearsonResiduals.default <- function(object, ...) {
+  tryCatch(
+    residuals(object, type = "pearson", ...),
+    error = function(e) {
+      stop("DHARMa: the requested test requires Pearson residuals, but your model does not implement these. Error message: ", e$message)
+    }
+  )
 }
 
 # #' has NA
@@ -495,14 +492,15 @@ getFitted.gam <- function(object, ...){
 #' @export
 
 # This needed to be adopted because for some reason, mgcv uses the argument "scaled.pearson" for what most packages define as "pearson". See comments in ?residuals.gam.
-getPearsonResiduals.gam <- function (object, ...){
- residuals <- tryCatch(residuals(object, type = "scaled.pearson", ...),
-                       error = function(e) {
-                       message(paste("DHARMa: the requested tests requires Pearson residuals, but your model does not implement these calculations. Test will return NA. Error message:", e))
-                      return(NA)
-           })
- return(residuals)
+getPearsonResiduals.gam <- function(object, ...) {
+  tryCatch(
+    residuals(object, type = "scaled.pearson", ...),
+    error = function(e) {
+      stop("DHARMa: the requested test requires Pearson residuals, but your model does not implement these. Error message: ", e$message)
+    }
+  )
 }
+
 
 # Get Simulations of gam object
 
@@ -1061,6 +1059,11 @@ getResiduals.brmsfit <- function (object,...){
   residuals(object, type = "ordinary", ...)[,1]
 }
 
+#' @rdname getPearsonResiduals
+#' @export
+getPearsonResiduals.brms <- function (object, ...){
+   stop("brms doesn't provide Pearson residuals (deprecated).")
+}
 
 
 #' @rdname getData

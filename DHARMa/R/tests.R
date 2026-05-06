@@ -457,7 +457,6 @@ testDispersion <- function(simulationOutput, alternative = c("two.sided", "great
     } else {
 
       rp <- getPearsonResiduals(simulationOutput$fittedModel)
-      if(is.na(rp)[1]) return(NA)
       observed = sum(rp^2)
       expected = apply(simulationOutput$refittedPearsonResiduals^2 , 2, sum)
       out$statistic = c(dispersion = observed / mean(expected))
@@ -497,7 +496,6 @@ testDispersion <- function(simulationOutput, alternative = c("two.sided", "great
       message("Note that the Chi2 test on Pearson residuals is biased for MIXED models towards underdispersion. Tests with alternative = two.sided or less are therefore not reliable. If you have random effects in your model, we recommend to test only with alternative = 'greater', i.e. test for overdispersion, or else use the DHARMa default tests which are unbiased. See help for details.")}
 
     rp <- getPearsonResiduals(model)
-    if(is.na(rp)[1]) return(NA)
 
     rdf <- df.residual(model)
     Pearson.chisq <- sum(rp^2)
