@@ -1,6 +1,6 @@
 ---
 title: "DHARMa for Bayesians"
-author: "Florian Hartig, Theoretical Ecology, University of Regensburg [website](https://www.uni-regensburg.de/biologie-vorklinische-medizin/theoretische-oekologie/mitarbeiter/hartig/)"
+author: "Florian Hartig, Theoretical Ecology, University of Regensburg [website](https://www.uni-regensburg.de/biologie-vorklinische-medizin/forschen/arbeitsgruppen/ag-hartig/team/prof-dr-florian-hartig)"
 date: "`r Sys.Date()`"
 output: 
   rmarkdown::html_vignette:
