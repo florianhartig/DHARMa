@@ -12,11 +12,23 @@ fittedModel = lme4::glmer(observedResponse ~ Environment1 + Environment2 + categ
 simulationOutput = simulateResiduals(fittedModel)
 
 # plotResiduals
+
+testData$'te$tes' = 1
+testData$`te$tes`
+
+plotResiduals(simulationOutput, quantreg  = NULL)
+
+
+plotResiduals(simulationOutput, form = residuals(fittedModel)) 
+
 plotResiduals(simulationOutput, quantreg  = NULL)
 plotResiduals(simulationOutput, form = testData$Environment1) # expect error
+plotResiduals(simulationOutput, form = ~ testData$Environment1) # expect error
+
 plotResiduals(simulationOutput, form = testData$Environment1[-1])
 plotResiduals(simulationOutput, form = ~Environment1)
-plotResiduals(simulationOutput, form = ~categorPred|group == 2)
+plotResiduals(simulationOutput, form = ~Environment1 * Environment2)
+plotResiduals(simulationOutput, form = ~categorPred|group)
 plotResiduals(simulationOutput, form = ~categorPred)
 plotResiduals(simulationOutput, form = ~.)
 plotResiduals(simulationOutput, main = "MY TITLE")
@@ -41,12 +53,20 @@ fittedModel = lme4::glmer(observedResponse ~ Environment1 + Environment2 + categ
                           family = "poisson", data = testData)
 simulationOutput = simulateResiduals(fittedModel)
 
+
 recalculateResiduals(simulationOutput, sel = testData$group == 1) # expect error
+
+
+recalculateResiduals(simulationOutput, sel = testData$group == 1 & ) # expect error
 recalculateResiduals(simulationOutput, sel = ~group == 1) # expect error because there is no group 1
-recalculateResiduals(simulationOutput, sel = ~group == 2)
+recalculateResiduals(simulationOutput, sel = group == 2)
 recalculateResiduals(simulationOutput, sel = ~Environment1<0.5)
 recalculateResiduals(simulationOutput, sel = ~Environment1<0.5, group = ~group)
 recalculateResiduals(simulationOutput, sel = 1:20) # expect warning
+
+sel = group == 2
+sel
+
 
 
 # testTemporal
