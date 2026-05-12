@@ -12,3 +12,5 @@ vignettes/DHARMa_cache
 ^revdep$
 ^doc$
 ^Meta$
+^\.positai$
+^\.claude$

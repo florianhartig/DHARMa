@@ -4,6 +4,7 @@
 \alias{getPearsonResiduals}
 \alias{getPearsonResiduals.default}
 \alias{getPearsonResiduals.gam}
+\alias{getPearsonResiduals.brms}
 \title{Get Pearson residuals}
 \usage{
 getPearsonResiduals(object, ...)
@@ -11,6 +12,8 @@ getPearsonResiduals(object, ...)
 \method{getPearsonResiduals}{default}(object, ...)
 
 \method{getPearsonResiduals}{gam}(object, ...)
+
+\method{getPearsonResiduals}{brms}(object, ...)
 }
 \arguments{
 \item{object}{a fitted model.}
@@ -22,8 +25,9 @@ Wrapper to get the Pearson residuals of a fitted model.
 }
 \details{
 The purpose of this wrapper is to extract the Pearson residuals of a fitted model.
-
-This needed to be adopted because for some reason, mgcv uses the argument "scaled.pearson" for what most packages define as "pearson". See comments in ?residuals.gam.
+}
+\note{
+Package \code{brms} doesn't provide Pearson residuals (deprecated).
 }
 \examples{
 testData = createData(sampleSize = 400, family = gaussian())

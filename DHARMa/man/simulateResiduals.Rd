@@ -28,7 +28,7 @@ simulateResiduals(fittedModel, n = 250, simulateREs = c("conditional",
 
 \item{rotation}{optional rotation of the residual space prior to calculating the quantile residuals. The main purpose of this is to account for residual covariance as created by temporal, spatial or phylogenetic autocorrelation. See details below, section \emph{residual autocorrelation} as well as the help of \link{getQuantile} and, for a practical example, \link{testTemporalAutocorrelation}.}
 
-\item{...}{further parameters to pass on to the simulate function of the model object. If simulateREs = "user-specified", an important use of this is to specify whether simulations should be conditional on all, some or none of the current random effect estimates, e.g. via re.form. Note that not all models support syntax to specify conditional or unconditional simulations. See details and \link{getSimulations}.}
+\item{...}{further parameters to pass on to the simulate and update function of the model object (via DHARMa::getSimulations and DHARMa::getRefit). If simulateREs = "user-specified", an important use of this is to specify whether simulations should be conditional on all, some or none of the current random effect estimates, e.g. via re.form. Note that not all models support syntax to specify conditional or unconditional simulations. See details and \link{getSimulations}.}
 }
 \value{
 an S3 class of type "DHARMa". Implemented S3 functions include \link{plot.DHARMa}, \link{print.DHARMa} and \link{residuals.DHARMa}. For other functions that can be used on a DHARMa object, see section "See Also" below.

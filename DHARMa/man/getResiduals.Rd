@@ -4,6 +4,7 @@
 \alias{getResiduals}
 \alias{getResiduals.default}
 \alias{getResiduals.MixMod}
+\alias{getResiduals.brmsfit}
 \title{Get model residuals}
 \usage{
 getResiduals(object, ...)
@@ -11,6 +12,8 @@ getResiduals(object, ...)
 \method{getResiduals}{default}(object, ...)
 
 \method{getResiduals}{MixMod}(object, ...)
+
+\method{getResiduals}{brmsfit}(object, ...)
 }
 \arguments{
 \item{object}{a fitted model.}

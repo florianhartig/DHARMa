@@ -11,6 +11,7 @@
 \alias{getSimulations.MixMod}
 \alias{getSimulations.phylolm}
 \alias{getSimulations.phyloglm}
+\alias{getSimulations.brmsfit}
 \title{Get model simulations}
 \usage{
 getSimulations(object, nsim = 1, simulateREs = c("conditional",
@@ -49,6 +50,10 @@ getSimulations(object, nsim = 1, simulateREs = c("conditional",
   type = c("normal", "refit"), ...)
 
 \method{getSimulations}{phyloglm}(object, nsim = 1,
+  simulateREs = c("conditional", "unconditional", "user-specified"),
+  type = c("normal", "refit"), ...)
+
+\method{getSimulations}{brmsfit}(object, nsim = 1,
   simulateREs = c("conditional", "unconditional", "user-specified"),
   type = c("normal", "refit"), ...)
 }
