@@ -10,9 +10,11 @@
 }
 \details{
 To get started with the package, look at the vignette and start with \link{simulateResiduals}
-#' @section Funding:
-This package has been funded by the \strong{Deutsche Forschungsgemeinschaft (DFG)}, project number 528747641 (2024-now).
 }
+\section{Funding}{
+ Development and maintenance of the DHARMa package has been supported by the \strong{Deutsche Forschungsgemeinschaft (DFG)}, project number \href{https://gepris.dfg.de/gepris/projekt/528747641}{528747641} (2024-now).
+}
+
 \examples{
 # simulating a dataset
 testData = createData(sampleSize = 200, family = poisson(),

@@ -6,18 +6,18 @@ fittedModel <- glmer(observedResponse ~ Environment1 + (1|group),
 
 # simulate residuals (default behavior, conditional on the fitted random effects)
 simulationOutput1 <- simulateResiduals(fittedModel = fittedModel)
-plot(simulationOutput1)
+plot(simulationOutput1, quantreg = FALSE)
 
 # simulate residuals unconditional on the fitted random effects (REs are re-simulated)
 simulationOutput2 <- simulateResiduals(fittedModel = fittedModel,
                                        simulateREs = "unconditional")
-plot(simulationOutput2)
+plot(simulationOutput2, quantreg = FALSE)
 
 # simulate residuals user-specified using lme4 syntax (e.g. conditional only on a specific RE)
 simulationOutput3 <- simulateResiduals(fittedModel = fittedModel,
                                        simulateREs = "user-specified",
                                        re.form = ~(1|group))
-plot(simulationOutput3)
+plot(simulationOutput3, quantreg = FALSE)
 
 # one of the possible test, for other options see ?testResiduals / vignette
 testDispersion(simulationOutput1)

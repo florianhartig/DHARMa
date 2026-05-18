@@ -986,5 +986,5 @@ DHARMaRes = createDHARMa(simulatedResponse = sim,
                          observedResponse = testData$observedResponse, 
                          fittedPredictedResponse = predict(fittedModel), 
                          integerResponse = TRUE)
-plot(DHARMaRes, quantreg = FALSE)
+#plot(DHARMaRes, quantreg = FALSE)
 ```

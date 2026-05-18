@@ -14,7 +14,7 @@ simulateResiduals(fittedModel, n = 250, simulateREs = c("conditional",
 
 \item{n}{number of simulations. The smaller the number, the higher the stochastic error on the residuals. Also, for very small n, discretization artefacts can influence the tests. Default is 250, which is a relatively safe value. You can consider increasing to 1000 to stabilize the simulated values.}
 
-\item{simulateREs}{which hierarchical levels should be re-simulated. If \code{conditional}, the simulations are done conditional on all fitted random effects (default). If \code{unconditional}, all hierarchical levels are re-simulated, including the random effects. With \code{user-specified}, the default simulate function of the respective fitted model object is used. See details and \link{getSimulations}.}
+\item{simulateREs}{decides which REs / hierarchical levels should be re-simulated. If \code{conditional}, simulations are done conditional on all fitted random effects (default). If \code{unconditional}, all REs or hierchical levels are re-simulated. Setting \code{user-specified} allows supplying package-specific arguments to decide which REs are to be re-simulated. If none are supplied, the defaults of the respective fitted model object is used. See details and further comments in \link{getSimulations}.}
 
 \item{refit}{if FALSE, new data will be simulated and scaled residuals will be created by comparing observed data with new data. If TRUE, the model will be refitted on the simulated data (parametric bootstrap), and scaled residuals will be created by comparing observed with refitted residuals.}
 
@@ -39,13 +39,9 @@ The function creates scaled residuals by simulating from the fitted model. Resid
 \details{
 There are a number of important considerations when simulating from a more complex (hierarchical) model:
 
-\strong{Re-simulating random effects / hierarchical structure}: in a hierarchical model, we have several stochastic processes aligned on top of each other. Specifically, in a GLMM, we have a lower level stochastic process (random effect), whose result enters into a higher level (e.g. Poisson distribution). For other hierarchical models such as state-space models, similar considerations apply.
+\strong{Re-simulating random effects / hierarchical structure}: in a hierarchical or RE model, we have several stochastic processes on top of each other. For example, in a typical Poisson GLMM, we have a lower level normal distribution (random effect), whose result enters at the next hierarchical level into a Poisson distribution. For other hierarchical models such as state-space models, similar considerations apply. When simulating new data in such a situation, we have to decide if we want to re-simulate all stochastic levels (unconditional), only the top level conditional on all other levels (conditional), or if we want to re-simulate a specific subset of REs while conditioning on the others. As of DHARMa 0.5.0, the default was changed to simulating conditionally on all fitted REs. If this is not what you want, you can switch simulateREs to either "unconditional", or "user-specified", which allows to condition on a user-specified set of REs. With "user-specified", if no additional arguments are set, this results in the package behavior previous to version 0.5.0. Note that the syntax to change the behavior is different for each package. Also, specific packages may lack certain functionalities. For further details, please see vignette, \link{getSimulations} and refer to the help of the different simulate functions (e.g. ?simulate.merMod). #'
 
-In such a situation, we have to decide if we want to re-simulate all stochastic levels, or only a subset of those. For example, in a GLMM, it is common to only simulate the last stochastic level (e.g. Poisson) conditional on the fitted random effects. This is often referred to as a conditional simulation. As of DHARMa 0.4.8, the default is conditional simulation on all random effects of the fitted model. Setting simulateREs = "user-specified" allows you to return to the previous DHARMa default, which used the respective default setting for the simulate function of your model class. Then the simulateResiduals function allows to pass on parameters to the simulate function of the fitted model object, using its respective syntax. It further allows to specify only a subset of random effects to be conditioned on, but note that this is not possible for all model classes.
-
-For further details, please see vignette, \link{getSimulations} and refer to the help of the different simulate functions (e.g. ?simulate.merMod).
-
-If the model is correctly specified, the simulated residuals should be flat regardless how many hierarchical levels we re-simulate. The most thorough procedure would therefore be to test all possible options. Re-simulating all levels (unconditional) can be advantageous because it tests the model structure as a whole. A potential drawback is that re-simulating the lower-level random effects creates more variability, which may reduce power for detecting problems in the upper-level stochastic processes. In particular dispersion tests may produce different results when switching from conditional to unconditional simulations, and often the conditional simulation is more sensitive.
+\strong{When to use conditional and unconditional simulations}: If the model is correctly specified, the simulated residuals should be flat regardless which hierarchical levels you re-simulate. Re-simulating all levels (unconditional) can be advantageous because it tests the model structure as a whole. If REs are correlated with a predictor, for example, this will show up in the residuals. A potential drawback is that re-simulating the lower-level random effects creates more variability and correlation structures in the residuals, which may reduce power for detecting problems in the upper-level stochastic processes and, in some cases, can lead to inflated type I error rates through the induces correlations. In particular dispersion tests may produce different results when switching from conditional to unconditional simulations, and often the conditional simulation is more sensitive. The default was therefore switched to conditional in DHARMa 0.5.0 which we consider to be more safe, but it can make sense to overrule this default for specific tests.
 
 \strong{Refitting or not}: a third issue is how residuals are calculated. simulateResiduals has two options that are controlled by the refit parameter:
 \enumerate{
@@ -70,18 +66,18 @@ fittedModel <- glmer(observedResponse ~ Environment1 + (1|group),
 
 # simulate residuals (default behavior, conditional on the fitted random effects)
 simulationOutput1 <- simulateResiduals(fittedModel = fittedModel)
-plot(simulationOutput1)
+plot(simulationOutput1, quantreg = FALSE)
 
 # simulate residuals unconditional on the fitted random effects (REs are re-simulated)
 simulationOutput2 <- simulateResiduals(fittedModel = fittedModel,
                                        simulateREs = "unconditional")
-plot(simulationOutput2)
+plot(simulationOutput2, quantreg = FALSE)
 
 # simulate residuals user-specified using lme4 syntax (e.g. conditional only on a specific RE)
 simulationOutput3 <- simulateResiduals(fittedModel = fittedModel,
                                        simulateREs = "user-specified",
                                        re.form = ~(1|group))
-plot(simulationOutput3)
+plot(simulationOutput3, quantreg = FALSE)
 
 # one of the possible test, for other options see ?testResiduals / vignette
 testDispersion(simulationOutput1)

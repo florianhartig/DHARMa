@@ -77,11 +77,11 @@ a matrix with simulations.
 Wrapper to simulate from a fitted model.
 }
 \details{
-The purpose of this function is to wrap or implement the simulate function of different model classes and thus return simulations from fitted models in a standardized way.
+The purpose of this function is to wrap or implement the simulate function of different model classes to return simulations from fitted models in a standardized way.
 
-Note: GLMM and other regression packages often differ in how simulations are produced, and which parameters can be used to modify this behavior.
+One important parameter is simulateRE, which controls which hierarchical levels are held constant (conditioned on), and which are re-simulated. The default as of DHARMa 0.5.0 is to simulate "conditional" on all fitted random effects. The setting "unconditional" re-simulates all REs.
 
-One important difference is how to modify which hierarchical levels are held constant, and which are re-simulated. The default as of DHARMa 0.4.8 is to simulate conditional on all fitted random effects. To return to the previous DHARMa default, please set simulateREs = "user-specified". This allows you to use the syntax of the simulate function of the respective model class when switching between conditional and unconditional simulations. For details, please see vignette, \link{simulateResiduals} or consult the help of the different packages.
+With simulateREs = "user-specified", users can supply additional parameters to the simulate function of the respective model class and thus condition on specific REs or structures. The exact behavior will depdend on the regression package. For details, please see vignette, or consult the help of the different packages. If choosing simulateREs = "user-specified" with no additional parameters, the default simulation function of the respective regression package is used. This corresponds to the DHARMa behavior prior to 0.5.0.
 
 If the model was fit with weights and the respective model class does not include the weights in the simulations, getSimulations will throw a warning. The background is if weights are used on the likelihood directly, then what is fitted is effectively a pseudo likelihood, and there is no way to directly simulate from the specified likelihood. Whether or not residuals can be used in this case depends very much on what is tested and how weights are used. I'm sorry to say that it is hard to give a general recommendation, you have to consult someone that understands how weights are processed in the respective model class.
 }
