@@ -71,7 +71,7 @@ But even experienced statistical analysts currently have few options to diagnose
 
 -   Dispersion frequently varies with predictors (heteroscedasticity). This can have a significant effect on the inference. While it is standard to test for heteroscedasticity in linear regressions, heteroscedasticity is currently hardly ever tested for in GLMMs, although it is likely as frequent and influential.
 
--   Moreover, if residuals are checked, they are usually checked conditional on the fitted random effect estimates. Thus, standard checks only check the final level of the random structure in a GLMM. One can perform extra checks on the random effects, but it is somewhat unsatisfactory that there is no check on the entire model structure.
+-   Moreover, if residuals are checked, they are usually checked conditional on the fitted random effect estimates. Thus, standard checks only check the final level of the random structure in a GLMM. One can perform extra checks on the random effects, but it is somewhat unsatisfactory that there is no check on the entire model structure (unconditional).
 
 DHARMa aims at solving these problems by creating readily interpretable residuals for generalized linear (mixed) models that are standardized to values between 0 and 1, and that can be interpreted as intuitively as residuals for the linear model. This is achieved by a simulation-based approach, similar to the Bayesian p-value or the parametric bootstrap, that transforms the residuals to a standardized scale. The basic steps are:
 
@@ -353,7 +353,7 @@ From a technical side, underdispersion is not as concerning as overdispersion, a
 
 ### Formal tests for over/underdispersion
 
-Although, as discussed above, over/underdispersion will show up in the residuals, and it's possible to detect it with the testUniformity function, simulations show that this test is less powerful than more targeted tests. DHARMa contains several dispersion tests:
+Although, as discussed above, over/underdispersion will show up in the residuals, and it's possible to detect it with the `testUniformity` function, simulations show that this test is less powerful than more targeted tests. DHARMa contains several dispersion tests:
 
 1.  *default: the simulation-based residual variance test* is a non-parametric test that compares the variance of the observed raw residuals to the variances of the simulated residuals.
 
@@ -400,11 +400,11 @@ plot(testData$Environment1, testData$observedResponse,
 hist(testData$observedResponse, xlab = "Response", main = "")
 ```
 
-We see a hump-shaped dependence of the environment, but with too many zeros. In the normal DHARMa residual plots, zero-inflation will look pretty much like overdispersion
+We see a hump-shaped dependence of the environment, but with too many zeros. In the normal DHARMa residual plots, zero-inflation will look pretty much like overdispersion:
 
 ```{r, fig.height=5.5}
-fittedModel <- glmer(observedResponse ~ Environment1 + I(Environment1^2) + 
-                       (1|group), family = "poisson", data = testData)
+fittedModel <- glm(observedResponse ~ Environment1 + I(Environment1^2),
+                   family = "poisson", data = testData)
 
 simulationOutput <- simulateResiduals(fittedModel = fittedModel)
 plot(simulationOutput)
@@ -414,7 +414,7 @@ The reason is that the model will usually try to find a compromise between the z
 
 ### Formal tests for zero-inflation
 
-DHARMa also has a special test for zero-inflation, which compares the distribution of expected zeros in the data against the observed zeros
+DHARMa also has a special test for zero-inflation, which compares the distribution of expected zeros in the data against the observed zeros:
 
 ```{r, fig.width=4, fig.height=4}
 testZeroInflation(simulationOutput)
@@ -424,8 +424,8 @@ This test is likely better suited for detecting zero-inflation than the standard
 
 ```{r, eval= FALSE}
 # requires glmmTMB
-fittedModel <- glmmTMB(observedResponse ~ Environment1 + I(Environment1^2) + 
-                         (1|group), ziformula = ~1 , family = "poisson", 
+fittedModel <- glmmTMB(observedResponse ~ Environment1 + I(Environment1^2),
+                       ziformula = ~1 , family = "poisson", 
                        data = testData)
 summary(fittedModel)
 
@@ -435,7 +435,7 @@ plot(simulationOutput)
 
 ### Testing generic summary statistics, e.g. for k-inflation or deficits
 
-To test for generic excess / deficits of particular values, we have the function testGeneric, which compares the values of a generic, user-provided summary statistics
+To test for generic excess / deficits of particular values, we have the function `testGeneric`, which compares the values of a generic, user-provided summary statistics.
 
 Choose one of alternative = c("greater", "two.sided", "less") to test for inflation / deficit or both. Default is "greater" = inflation.
 
@@ -449,7 +449,7 @@ testGeneric(simulationOutput, summary = countOnes, alternative = "greater")
 
 So far, most of the things that we have tested could also have been detected with parametric tests. Here, we come to the first issue that is difficult to detect with current tests, and that is usually neglected.
 
-Heteroscedasticity means that there is a systematic dependency of the dispersion / variance on another variable in the model. It is not sufficiently appreciated that also binomial or Poisson models can show heteroscedasticity. Basically, it means that the level of over/underdispersion depends on another parameter. Here an example where we create such data
+Heteroscedasticity means that there is a systematic dependency of the dispersion / variance on another variable in the model. It is not sufficiently appreciated that also binomial or Poisson models can show heteroscedasticity. Basically, it means that the level of over/underdispersion depends on another parameter. Here an example where we create such data:
 
 ```{r}
 testData = createData(sampleSize = 500, intercept = -1.5,  
@@ -463,35 +463,37 @@ simulationOutput <- simulateResiduals(fittedModel = fittedModel)
 plot(simulationOutput)
 ```
 
-The exact p-values for the quantile lines in the plot can be displayed via
+The exact p-values for the quantile lines in the plot can be displayed via:
 
 ```{r, eval = FALSE}
 testQuantiles(simulationOutput)
 ```
 
-As mentioned above, the equivalent test for categorical predictors (plot function will switch automatically) would be
+As mentioned above, the equivalent test for categorical predictors (plot function will switch automatically) would be:
 
 ```{r, eval = FALSE}
 testCategorical(simulationOutput, catPred = ~group)
 ```
 
-Adding a simple overdispersion correction will try to find a compromise between the different levels of dispersion in the model. The qq plot looks better now, but there is still a pattern in the residuals
+Another way to visualize potential heteroscedasticity is to plot the residuals against the model predictors, using the `absoluteDeviation = TRUE`: it switches from displaying normal quantile residuals to absolute deviation from the mean expectation of 0.5 (calculated as `2 * abs(res - 0.5)`). 
 
 ```{r}
-testData = createData(sampleSize = 500, intercept = 0, 
-                      overdispersion = function(x){return(rnorm(length(x), 
-                                                                sd = 2*abs(x)))}, 
-                      family = poisson(), randomEffectVariance = 0)
-fittedModel <- glmer(observedResponse ~ Environment1 + (1|group) + (1|ID), 
-                     family = "poisson", data = testData)
-
-# plotConventionalResiduals(fittedModel)
-
-simulationOutput <- simulateResiduals(fittedModel = fittedModel)
-plot(simulationOutput)
+plotResiduals(simulationOutput, form= ~Environment1, absoluteDeviation = T)
 ```
 
-To remove this pattern, you would need to make the dispersion parameter dependent on a predictor (e.g. in JAGS), or apply a transformation on the data.
+To remove this pattern, you would need to apply a tranformation to the data or make the dispersion parameter dependent on a predictor, which can be done in `glmmTMB` with the `dispformula`:
+```{r}
+fittedModel2 <- glmmTMB(observedResponse ~ Environment1, 
+                        dispformula = ~Environment1,
+                        family = nbinom2(), 
+                   data = testData)
+simulationOutput2 <- simulateResiduals(fittedModel2)
+plot(simulationOutput2)
+plotResiduals(simulationOutput2, form= ~Environment1, absoluteDeviation = T)
+```
+
+
+
 
 ## Detecting missing predictors or wrong functional assumptions
 
@@ -513,7 +515,6 @@ fittedModel <- glmer(observedResponse ~ Environment1 + Environment2 + (1|group),
                      family = "poisson", data = testData)
 simulationOutput <- simulateResiduals(fittedModel = fittedModel)
 plot(simulationOutput, quantreg = TRUE)
-# testUniformity(simulationOutput = simulationOutput)
 ```
 
 It is difficult to see that there is a problem at all in the general plot, but it becomes clear if we plot against the environment
