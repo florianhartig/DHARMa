@@ -483,6 +483,7 @@ plotResiduals(simulationOutput, form= ~Environment1, absoluteDeviation = T)
 
 To remove this pattern, you would need to apply a tranformation to the data or make the dispersion parameter dependent on a predictor, which can be done in `glmmTMB` with the `dispformula`:
 ```{r}
+library(glmmTMB)
 fittedModel2 <- glmmTMB(observedResponse ~ Environment1, 
                         dispformula = ~Environment1,
                         family = nbinom2(), 
