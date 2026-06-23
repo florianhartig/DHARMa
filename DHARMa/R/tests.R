@@ -885,7 +885,7 @@ getP <- function(simulated, observed, alternative, plot = FALSE, ...){
   if(alternative == "two.sided") p = min(min(mean(simulated <= observed), mean(simulated >= observed) ) * 2,1)
 
   if(plot == T){
-    hist(simulated, xlim = range(simulated, observed), col = "lightgrey", main = "Distribution of test statistic \n grey = simulated, red = observed", ...)
+    hist(simulated, xlim = range(simulated, observed), col = "lightgrey", main = "Distribution of test statistic \n grey = simulated, red = observed, black = average", ...)
     abline(v = mean(simulated), col = 1, lwd = 2)
     abline(v = observed, col = "red", lwd = 2)
   }
