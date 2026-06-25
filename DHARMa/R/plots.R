@@ -195,7 +195,7 @@ plotResiduals <- function(simulationOutput, form = NULL, quantreg = NULL,
   yAxis = ifelse(absoluteDeviation == TRUE, "Residual spread [2*abs(res - 0.5)]", "DHARMa residual")
   a$ylab = checkDots("ylab", yAxis , ...)
   a$xlab = checkDots("xlab", ifelse(is.null(form), "Model predictions",
-                                    gsub(".*[$]|^~","",deparse(substitute(form)))), ...)
+                                    paste(unique(all.vars(form)), collapse = ", ")), ...)
   a$main = checkDots("main", NULL, ...)
 
   simOut <- simulationOutput
@@ -504,6 +504,10 @@ plotResidualsAll <- function(simulationOutput, predictorNames, predictorType = c
   opar = par(no.readonly = TRUE)
   on.exit(par(opar))
 
+  # remove duplicate predictors, e.g. due to quadratic effects (fixes issue #536)
+  Vars = unname(sapply(predictorNames, function(x) all.vars(formula(paste("~", x)))[1]))
+  predictorNames = predictorNames[!duplicated(Vars)]
+
   # get number of panels needed (copied from BayesianTools)
   numPredictors = length(predictorNames)
   if (numPredictors <= 0) stop("Unable to extract predictor names from model.")
@@ -523,15 +527,17 @@ plotResidualsAll <- function(simulationOutput, predictorNames, predictorType = c
   if(predictorType == "predictor"){
     # create residual plot for multiple predictors (additional arguments in ... are ignored here)
     for(i in 1:length(predictorNames)){
+      form = eval(formula(paste("~", predictorNames[i])))
       plotResiduals(simulationOutput,
-                    form = eval(formula(paste("~", predictorNames[i]))),
+                    form = form,
                     quantreg = quantreg,
                     rank = rank,
                     asFactor = asFactor,
                     smoothScatter = smoothScatter,
                     quantiles = quantiles,
                     absoluteDeviation = absoluteDeviation,
-                    xlab = predictorNames[i])
+                    # create the correct xlab for poly()-syntax (related to issue #536)
+                    xlab = paste(unique(all.vars(form)), collapse = ", "))
     }
   }
 
