@@ -656,7 +656,7 @@ getSimulations.glmmTMB <- function (object, nsim = 1, simulateREs = c("condition
   on.exit(for (i in seq_len(nSimcodes)) {
       object$obj$env$data$terms[[i]]$simCode = originalSimcodes[[i]]
     }, add = TRUE)
-
+  #end restore simcodes
 
   # user-specified (as before)
   if(simulateREs == "user-specified") {
