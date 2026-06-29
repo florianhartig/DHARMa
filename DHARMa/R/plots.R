@@ -222,6 +222,9 @@ plotResiduals <- function(simulationOutput, form = NULL, quantreg = NULL,
 
       if(form == "~.") {
         predictorNames = getPredictorNames(simulationOutput$fittedModel)
+
+        # issue #536: remove "(weights)" from predictorNames
+        if("(weights)" %in% predictorNames) {predictorNames = predictorNames[!predictorNames %in% "(weights)"]}
         return(plotResidualsAll(
           simulationOutput = simulationOutput,
           predictorNames = predictorNames,
@@ -268,12 +271,12 @@ plotResiduals <- function(simulationOutput, form = NULL, quantreg = NULL,
         }
 
         # for formulas with |, get predictor and group variables
-        predictor = predictors[[1]]
-        group = predictors[[2]]
+        predictor = if (length(predictors) >= 1) predictors[[1]] else NULL
+        group = if (length(predictors) >= 2) predictors[[2]] else NULL
 
         # if form has just one predictor, make the standard plot for that predictor
       } else {
-        predictor = predictors[[1]]
+        predictor = if (length(predictors) >= 1) predictors[[1]] else NULL
         group = NULL
       }
 
