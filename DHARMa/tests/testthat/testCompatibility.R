@@ -5,7 +5,7 @@ test_that("Conditional simulations have a smaller spread than unconditional simu
   set.seed(123)
   testData = createData(100, randomEffectVariance = 2)
 
-  # fit models
+  # fit models (mgcv not included here, because simulations are always conditional for gam)
   mglmer = lme4::glmer(observedResponse ~ Environment1 + (1|group), data = testData, family = poisson())
   mglmmTMB = glmmTMB::glmmTMB(observedResponse ~ Environment1 + (1|group), data = testData, family = poisson())
   mspaMM = spaMM::HLfit(observedResponse ~ Environment1 + (1|group), data = testData, family = poisson())
@@ -47,6 +47,7 @@ test_that("Unconditional predictions are the default in DHARMa", {
   mglmmTMB = glmmTMB::glmmTMB(observedResponse ~ Environment1 + (1|group), data = testData, family = poisson())
   mspaMM = spaMM::HLfit(observedResponse ~ Environment1 + (1|group), data = testData, family = poisson())
   mGLMMadaptive = GLMMadaptive::mixed_model(fixed = observedResponse ~ Environment1, random = ~ 1 |group, data = testData, family = poisson())
+  mmgcv = mgcv::gam(observedResponse ~ s(Environment1) + s(group, bs="re"), data = testData, family = poisson())
 
   # compare default getFitted() and unconditional predictions
   # following the package-specific syntax and using predict()
@@ -65,6 +66,10 @@ test_that("Unconditional predictions are the default in DHARMa", {
   GLMMadaptive_fitted = getFitted(mGLMMadaptive)
   GLMMadaptive_predict = predict(mGLMMadaptive, type = "mean_subject")
   expect_equal(GLMMadaptive_fitted, GLMMadaptive_predict)
+
+  mmgcv_fitted = getFitted(mmgcv)
+  mmgcv_predict = predict(mmgcv, type = "response", exclude = "s(group)")
+  expect_equal(mmgcv_fitted, mmgcv_predict)
 
 })
 
