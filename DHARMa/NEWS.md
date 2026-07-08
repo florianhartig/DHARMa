@@ -1,5 +1,14 @@
 NOTE: for more news about the package, see https://github.com/florianhartig/DHARMa/releases
 
+# DHARMa 0.5.1
+
+
+## Bugfixes
+
+* Version 0.5.0 was changing the `glmmTMB` model object "simcode" when using simulateResiduals. We fixed this problem by restoring the original simcode to the model object.
+
+
+
 # DHARMa 0.5.0
 
 
