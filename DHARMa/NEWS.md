@@ -7,7 +7,7 @@ NOTE: for more news about the package, see https://github.com/florianhartig/DHAR
 
 * Version 0.5.0 was changing the `glmmTMB` model object "simcode" when using simulateResiduals. We fixed this problem by restoring the original simcode to the model object.
 
-
+* Solving duplicated plots in `plotResiduals`: (1) when having quadratic effects written with I(variable) in the formula, and (2) for brms with transformed variables in the formula, e.g. `log(variable)`. 
 
 # DHARMa 0.5.0
 
