@@ -707,7 +707,7 @@ testTemporalAutocorrelation <- function(simulationOutput, time, alternative = c(
 #' @param simulationOutput an object of class DHARMa, either created via [simulateResiduals] for supported models or via [createDHARMa] for simulations created outside DHARMa, or a supported model. Providing a supported model directly is discouraged, because simulation settings cannot be changed in this case.
 #' @param x the x coordinate, in the same order as the data points. Must be specified unless distMat is provided.
 #' @param y the y coordinate, in the same order as the data points. Must be specified unless distMat is provided.
-#' @param distMat optional distance matrix. If not provided, euclidean distances based on x and y will be calculated. See details for explanation.
+#' @param distMat optional distance matrix. Must be provided as class "matrix/array" (class "dist" is not supported). If distMat is not provided, euclidean distances based on x and y will be calculated. See details for explanation.
 #' @param alternative a character string specifying whether the test should test if observations are "greater", "less" or "two.sided" compared to the simulated null hypothesis.
 #' @param plot if T, and if x and y is provided, plot the output (see details).
 #'
@@ -769,11 +769,13 @@ testSpatialAutocorrelation <- function(simulationOutput, x = NULL, y  = NULL, di
     y = getFormulaPredictors(simulationOutput, formula = y)[[1]]
   }
 
-
-  if(any(duplicated(cbind(x,y)))) stop("Testing for spatial autocorrelation requires unique x,y values - if you have several observations per location, either use the recalculateResiduals function to aggregate residuals per location, or extract the residuals from the fitted object, and plot / test each of them independently for spatially repeated subgroups (a typical scenario would be repeated spatial observation, in which case one could plot / test each time step separately for temporal autocorrelation). Note that the latter must be done by hand, outside testSpatialAutocorrelation.")
-
   # if not provided, create distance matrix based on x and y
   if(is.null(distMat)) distMat <- as.matrix(dist(cbind(x, y)))
+
+  # check for duplicates in x,y and distMat (off-diagonal zero values) (#73)
+  testDistMat = distMat
+  diag(testDistMat) = NA # set diagonal to NA
+  if(any(duplicated(cbind(x,y))) | any(testDistMat == 0, na.rm = TRUE)) stop("Testing for spatial autocorrelation requires unique x,y values - if you have several observations per location, either use the recalculateResiduals function to aggregate residuals per location, or extract the residuals from the fitted object, and plot / test each of them independently for spatially repeated subgroups (a typical scenario would be repeated spatial observation, in which case one could plot / test each time step separately for temporal autocorrelation). Note that the latter must be done by hand, outside testSpatialAutocorrelation.")
 
   invDistMat <- 1/distMat
   diag(invDistMat) <- 0
@@ -800,7 +802,14 @@ testSpatialAutocorrelation <- function(simulationOutput, x = NULL, y  = NULL, di
     par(mar = c(5, 4, 4, 1))
     plot(x, y,
          col = rgb(col, maxColorValue = 255),
-         main = out$method, cex.main = 0.8)
+         main = "Standardized residuals in space",
+         cex.main = 0.8)
+
+    mtext(paste0(out$method, "\n",
+                  " p = ", round(out$p.value, digits = 5), ", Deviation ", ifelse(out$p.value < 0.05, "significant", "n.s.")),
+          col = ifelse(out$p.value < 0.05, "red", "black"),
+          cex = 0.8,
+          side = 3, line = 0)
 
     # legend
     par(mar = c(1, 0.5, 2, 2))
@@ -813,7 +822,7 @@ testSpatialAutocorrelation <- function(simulationOutput, x = NULL, y  = NULL, di
                 ybottom = 0.3, ytop = 0.9)
 
     axis(4, at = c(0.3, 0.9), labels = c("-1", "1"), las = 1)
-    mtext("Correlation", side = 3, line = -1)
+    mtext("Standardized residual", side = 3, line = -1)
 
     # TODO implement correlogram
   }
