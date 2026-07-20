@@ -246,7 +246,29 @@ Note also that `refit = TRUE` can sometimes run into numerical problems, if the 
 
 The second option is the treatment of the stochastic hierarchy. In a hierarchical model, several layers of stochasticity are placed on top of each other. Specifically, in a GLMM, we have a lower level stochastic process (random effect), whose result enters into a higher level (e.g. Poisson distribution). For other hierarchical models, such as state-space models, similar considerations apply, but the hierarchy can be more complex. When simulating, we have to decide if we want to re-simulate all stochastic levels, or only a subset of those. For example, in a GLMM, it is common to only simulate the last stochastic level (e.g. Poisson) conditional on the fitted random effects, meaning that the random effects are set on the fitted values.
 
-As of DHARMa 0.5.0, the default is conditional simulation on all random effects of the fitted model. Setting `simulateREs = "user-specified"` allows you to return to the previous DHARMa default, which used the respective default setting for the simulate function of your model class. Then the simulateResiduals function allows users to pass on parameters to the simulate function of the fitted model object, using its respective syntax. It further allows to specify only a subset of random effects to be conditioned on, but note that this is not possible for all model classes.
+**Advantages and disadvantages of unconditional / conditional simulations** 
+
+|                                                    |                                                         |
+|:---------------------------------------------------|:---------------------------------------------------|
+| **Unconditional**                                  | **Conditional**                                       |
+|✓ re-simulating all levels tests model structure as a whole |✗ residual checks do not check the entire model structure, only the final stochastic level; REs can absorb misfit, which will not be visible in conditional residuals |
+|✓ implicitly test the normal distribution of REs |✗ do not test the normal distribution of REs | 
+|✗ re-simulating lower-level REs creates more variability, which can reduce power for detecting problems in in upper-level stochastic processes (especially overdispersion, see below)         |✓ more sensitive for dispersion tests |
+
+_For models with residual covariance structures (temporal, spatial, phylogenetic):_
+
+|                                             |                                                         |
+|:---------------------------------------------------|:---------------------------------------------------|
+|✗ residuals will still show autocorrelation, even if the model has accounted for it correctly (solution: rotation, but this may take a long time and needs a high number of simulations for estimated rotation; see [here](https://github.com/florianhartig/DHARMa/issues/489)) |✓ allow to check directly whether residual autocorrelation structures have correctly been accounted for by the model; faster to compute  |
+|✓ models with pure AR1 / OU processes do not produce patterns in unconditional residuals | ✗ for pure AR1 / OU processes, models may estimate very low residual variance, which can result in extreme patterns of the conditional residuals (see [here](https://github.com/florianhartig/DHARMa/issues/527)) | 
+|                                             |                                                         | 
+
+If the model is correctly specified and the fitting procedure is unbiased (disclaimer: GLMM estimators are not always unbiased), the simulated residuals should be flat regardless how many hierarchical levels we re-simulate. The most thorough procedure would be therefore to test all possible options. In particular dispersion tests may produce different results when switching from conditional to unconditional simulations.
+
+*Note:* Although unconditional residuals implicitly also test the normal distribution of the REs, it is probably not a bad idea to additionally check for normality of the RE distribution. As this is not based on quantile residuals, there is no special DHARMa function for this, so you should just extract the REs, and then run e.g. a Shapiro test.
+
+
+As of DHARMa 0.5.0, the default is conditional simulation on all random effects of the fitted model. Setting `simulateREs = "user-specified"` allows you to return to the previous DHARMa default, which used the respective default setting for the simulate function of your model class. Then the simulateResiduals function allows users to pass on parameters to the simulate function of the fitted model object, using its respective syntax. It further allows to specify only a subset of random effects to be conditioned on, but note that this is not possible for all model classes. Conditional simulations are also currently not available for certain residual covariance structures (see vignette "Residual covariance structures").
 
 Summary of the syntax for supported packages (this is only relevant for simulateREs = "user-specified"):
 
@@ -261,10 +283,6 @@ Summary of the syntax for supported packages (this is only relevant for simulate
 | brms                | `re.form = NA`          | `re.form = NULL` (default)    | not available               |
 
 
-
-If the model is correctly specified and the fitting procedure is unbiased (disclaimer: GLMM estimators are not always unbiased), the simulated residuals should be flat regardless how many hierarchical levels we re-simulate. The most thorough procedure would be therefore to test all possible options. Re-simulating all levels (unconditional) can be advantageous because it tests the model structure as a whole. A potential drawback is that re-simulating the lower-level random effects creates more variability, which may reduce power for detecting problems in the upper-level stochastic processes, in particular overdispersion (see section on dispersion tests below). In particular dispersion tests may produce different results when switching from conditional to unconditional simulations, and often the conditional simulation is more sensitive.
-
-*Note:* Although unconditional residuals implicitly also test the normal distribution of the REs, it is probably not a bad idea to additionally check for normality of the RE distribution. As this is not based on quantile residuals, there is no special DHARMa function for this, so you should just extract the REs, and then run e.g. a Shapiro test.
 
 #### Integer treatment / randomization
 
