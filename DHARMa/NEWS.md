@@ -7,7 +7,7 @@ NOTE: for more news about the package, see https://github.com/florianhartig/DHAR
 
 * Version 0.5.0 was changing the `glmmTMB` model object "simcode" when using simulateResiduals. We fixed this problem by restoring the original simcode to the model object.
 
-
+* Fixing bug in predictions via getFitted for `gam` and `bam` models. Predictions are now unconditional on random effects and factor smooth interactions (previously they were conditional, see #544).
 
 # DHARMa 0.5.0
 
