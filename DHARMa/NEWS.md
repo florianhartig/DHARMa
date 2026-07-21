@@ -9,6 +9,8 @@ NOTE: for more news about the package, see https://github.com/florianhartig/DHAR
 
 * Fixing bug in predictions via getFitted for `gam` and `bam` models. Predictions are now unconditional on random effects and factor smooth interactions (previously they were conditional, see #544).
 
+* Solving duplicated plots in `plotResiduals`: (1) when having quadratic effects written with I(variable) in the formula, and (2) for brms with transformed variables in the formula, e.g. `log(variable)`. 
+
 # DHARMa 0.5.0
 
 

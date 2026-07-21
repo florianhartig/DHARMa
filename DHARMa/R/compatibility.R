@@ -1089,3 +1089,15 @@ getData.brmsfit <- function (object, ...){
   eval(as.name(attr(object$data, "data_name", TRUE)), envir = environment(formula(object$formula)))
   #could also use as.name(brms:::get_data_name(fit1$data)) #returns NULL if is NULL
 }
+
+#' @rdname getPredictorNames
+#' @export
+getPredictorNames.brmsfit <- function (object,...){
+  # fixes issue #542
+  modelFrame = model.frame(object)
+  responseName = names(modelFrame)[attr(attr(modelFrame, "terms"), "response")]
+  predictorNames = colnames(modelFrame)
+  predictorNames = predictorNames[predictorNames != responseName][-1]
+  return(predictorNames)
+}
+
