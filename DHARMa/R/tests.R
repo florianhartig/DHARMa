@@ -819,10 +819,10 @@ testSpatialAutocorrelation <- function(simulationOutput, x = NULL, y  = NULL, di
     legend_image = as.raster(matrix(colorRampPalette(c("blue", "white", "red"))(200), ncol = 1))
     rasterImage(legend_image,
                 xleft = -0.5, xright = 1,
-                ybottom = 0.3, ytop = 0.9)
+                ybottom = -0.1, ytop = 0.5)
 
-    axis(4, at = c(0.3, 0.9), labels = c("-1", "1"), las = 1)
-    mtext("Standardized residual", side = 3, line = -1)
+    axis(4, at = c(-0.1, 0.5), labels = c("0", "1"), las = 1)
+    mtext("Standardized \n residuals", side = 3, line = -5,cex = 0.8,)
 
     # TODO implement correlogram
   }
