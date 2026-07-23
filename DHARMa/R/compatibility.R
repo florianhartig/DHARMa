@@ -475,13 +475,13 @@ getSimulations.negbin<- function (object, nsim = 1, simulateREs = c("conditional
 
 ######## MGCV ############
 
-# This function overwrites the standard fitted function for GAM
-
 #' @rdname getFitted
 #' @export
 getFitted.gam <- function(object, ...){
-  class(object) = "glm"
-  out = stats::fitted(object, ...)
+  # unconditional predictions, excluding random effects and factor smooth interactions (fixes issue #544)
+  isRE = sapply(object$smooth, function(x) any(class(x) %in% c("random.effect", "fs.interaction")))
+  if(any(isRE)) excludeREs = sapply(object$smooth[isRE], `[[`, "label") else excludeREs =  NULL
+  out = predict(object, type = "response", exclude = excludeREs, ...)
   names(out) = as.character(1:length(out))
   out
 }
