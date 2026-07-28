@@ -11,7 +11,9 @@ NOTE: for more news about the package, see https://github.com/florianhartig/DHAR
 
 * Solving duplicated plots in `plotResiduals`: (1) when having quadratic effects written with I(variable) in the formula, and (2) for brms with transformed variables in the formula, e.g. `log(variable)`. 
 
-* Minor fixes in testSpatialAutocorrelation: DHARMa errors if repeated values for space in distMat, extended help, improved plot titles and legend
+* Minor fixes in testSpatialAutocorrelation: DHARMa errors if repeated values for space in distMat, extended help, improved plot titles and legend.
+
+* Revised weights handling (issue #230, #540): introduced more robust check for prior weights (especially in n/k models) with new helper function `hasWeights`.
 
 # DHARMa 0.5.0
 

@@ -453,10 +453,10 @@ getRefit.lm <- function(object, newresp, ...){
 }
 
 
-hasWeigths.lm <- function(object, ...){
-  if(length(unique(object$prior.weights)) != 1) return(TRUE)
-  else return(FALSE)
-}
+# hasWeigths.lm <- function(object, ...){
+#   if(length(unique(object$prior.weights)) != 1) return(TRUE)
+#   else return(FALSE)
+# }
 
 
 ######### GLM #############
