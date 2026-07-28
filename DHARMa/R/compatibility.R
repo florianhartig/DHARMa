@@ -475,13 +475,13 @@ getSimulations.negbin<- function (object, nsim = 1, simulateREs = c("conditional
 
 ######## MGCV ############
 
-# This function overwrites the standard fitted function for GAM
-
 #' @rdname getFitted
 #' @export
 getFitted.gam <- function(object, ...){
-  class(object) = "glm"
-  out = stats::fitted(object, ...)
+  # unconditional predictions, excluding random effects and factor smooth interactions (fixes issue #544)
+  isRE = sapply(object$smooth, function(x) any(class(x) %in% c("random.effect", "fs.interaction")))
+  if(any(isRE)) excludeREs = sapply(object$smooth[isRE], `[[`, "label") else excludeREs =  NULL
+  out = predict(object, type = "response", exclude = excludeREs, ...)
   names(out) = as.character(1:length(out))
   out
 }
@@ -644,6 +644,19 @@ getSimulations.glmmTMB <- function (object, nsim = 1, simulateREs = c("condition
   if(hasWeights(object)) warning(weightsWarning)
 
   out = NULL
+
+  # fixes #538 (restore simcodes of model object)
+  nSimcodes = length(object$obj$env$data$terms)
+  originalSimcodes = vector("list", nSimcodes)
+
+  for(i in seq_len(nSimcodes)) {
+    originalSimcodes[[i]] = object$obj$env$data$terms[[i]]$simCode
+  }
+
+  on.exit(for (i in seq_len(nSimcodes)) {
+      object$obj$env$data$terms[[i]]$simCode = originalSimcodes[[i]]
+    }, add = TRUE)
+  #end restore simcodes
 
   # user-specified (as before)
   if(simulateREs == "user-specified") {
@@ -1078,3 +1091,15 @@ getData.brmsfit <- function (object, ...){
   eval(as.name(attr(object$data, "data_name", TRUE)), envir = environment(formula(object$formula)))
   #could also use as.name(brms:::get_data_name(fit1$data)) #returns NULL if is NULL
 }
+
+#' @rdname getPredictorNames
+#' @export
+getPredictorNames.brmsfit <- function (object,...){
+  # fixes issue #542
+  modelFrame = model.frame(object)
+  responseName = names(modelFrame)[attr(attr(modelFrame, "terms"), "response")]
+  predictorNames = colnames(modelFrame)
+  predictorNames = predictorNames[predictorNames != responseName][-1]
+  return(predictorNames)
+}
+

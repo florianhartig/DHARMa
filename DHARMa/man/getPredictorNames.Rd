@@ -4,6 +4,7 @@
 \alias{getPredictorNames}
 \alias{getPredictorNames.default}
 \alias{getPredictorNames.MixMod}
+\alias{getPredictorNames.brmsfit}
 \title{Get predictor names}
 \usage{
 getPredictorNames(object, ...)
@@ -11,6 +12,8 @@ getPredictorNames(object, ...)
 \method{getPredictorNames}{default}(object, ...)
 
 \method{getPredictorNames}{MixMod}(object, ...)
+
+\method{getPredictorNames}{brmsfit}(object, ...)
 }
 \arguments{
 \item{object}{a fitted model.}
