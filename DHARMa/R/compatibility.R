@@ -761,8 +761,6 @@ getSimulations.HLfit <- function(object, nsim = 1, simulateREs = c("conditional"
   type <- match.arg(type)
   simulateREs <- match.arg(simulateREs)
 
-  if(hasWeights(object)) warning(weightsWarning)
-
   if(simulateREs != "user-specified" & "re.form" %in% names(list(...))) stop("DHARMa: If you want to specify certain random effects to condition on, you need to set simulateREs = \"user-specified\".")
 
   # user-specified (as before)
