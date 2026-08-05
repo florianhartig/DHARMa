@@ -435,16 +435,18 @@ getPredictorNames.default <- function (object,...){
 #' @export
 getRefit.lm <- function(object, newresp, ...){
 
-  newData <-model.frame(object)
+  # fixes issue #351 (refit problems with models with offset)
+  newData = getData(object)[rownames(model.frame(object)),]
+  responseName = all.vars(formula(object))[1]
 
   if(is.vector(newresp)){
-    newData[,1] = newresp
+    newData[[responseName]] = newresp
   } else if (is.factor(newresp)){
     # Hack to make the factor binomial case work
-    newData[,1] = as.numeric(newresp) - 1
+    newData[[responseName]] = as.numeric(newresp) - 1
   } else {
     # Hack to make the binomial n/k case work
-    newData[[1]] = NULL
+    newData[[responseName]] = NULL
     newData = cbind(newresp, newData)
   }
 
@@ -568,6 +570,18 @@ getSimulations.gam <- function(object, nsim = 1, simulateREs = c("conditional", 
   return(out)
 }
 
+#' @rdname getData
+#' @export
+# introduced this function because mgcv always overwrites environment(formula(object)) to .GlobalEnv. This caused issues when running the model inside a function, e.g. in testModelTypes.R (related to issue #351)
+getData.gam <- function (object, ...){
+  for (e in c(list(environment(formula(object))), rev(sys.frames()))) {
+    out = tryCatch(eval(object$call$data, envir = e), error = function(e) NULL)
+    if (!is.null(out)) return(out)
+  }
+  stop("DHARMa::getData: cannot locate the original data of the fitted gam model, probably because you are fitting your model inside a function.")
+}
+
+
 ######## lme4 ############
 
 
@@ -615,16 +629,18 @@ getData.merMod <- function (object, ...){
 #' @rdname getRefit
 #' @export
 getRefit.glmmTMB <- function(object, newresp, ...){
-  newData <-model.frame(object)
+
+  # fixes issue #351 (refit problems with models with offset)
+  newData = getData(object)[rownames(model.frame(object)),]
+  responseName = all.vars(formula(object))[1]
 
   # hack to make update work - for some reason, glmmTMB wants the matrix embedded in the df for update to work  ... should be solved ideally, see https://github.com/glmmTMB/glmmTMB/issues/549
   if(is.matrix(newresp)){
-    tmp = colnames(newData[[1]])
-    newData[[1]] = NULL
-    newData = cbind(newresp, newData)
-    colnames(newData)[1:2] = tmp
+    responseName = all.vars(formula(object)[[2]])
+    newData[[responseName[1]]] = newresp[,1]
+    newData[[responseName[2]]] = newresp[,2]
   } else {
-    newData[[1]] = newresp
+    newData[[responseName]] = newresp
   }
   refittedModel = update(object, data = newData, ...)
   return(refittedModel)
@@ -911,8 +927,11 @@ getSimulations.phylolm <- function(object, nsim = 1, simulateREs = c("conditiona
 #' @rdname getRefit
 #' @export
 getRefit.phylolm <- function(object, newresp, ...){
-  newData <- model.frame(object)
-  newData[,1] = newresp
+  # fixes issue #351 (refit problems with models with offset)
+  newData = getData(object)[rownames(model.frame(object)),]
+  responseName = all.vars(formula(object))[1]
+
+  newData[[responseName]] = newresp
   refittedModel = update(object, data = newData, ...)
 }
 
@@ -966,11 +985,11 @@ getSimulations.phyloglm <- function(object, nsim = 1,
 #' @rdname getRefit
 #' @export
 getRefit.phyloglm <- function(object, newresp, ...){
+  # fixes issue #351 (refit problems with models with offset)
   #object phyloglm doesn't have a model.frame object
-  terms <-  as.character(formula(object))[-1]
-  newData <- model.frame(object$y ~ object$X[,-1])
-  names(newData) <- terms
-  newData[,1] = newresp
+  newData = getData(object)[rownames(model.frame(object$y ~ object$X[,-1])),]
+  responseName = all.vars(formula(object))[1]
+  newData[[responseName]] = newresp
 
   refittedModel = update(object, data = newData, ...)
   return(refittedModel)
