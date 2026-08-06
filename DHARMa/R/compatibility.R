@@ -578,6 +578,14 @@ getSimulations.gam <- function(object, nsim = 1, simulateREs = c("conditional", 
 
 ######## lme4 ############
 
+#' @rdname getRefit
+#' @importFrom lme4 refit
+#' @export
+getRefit.merMod <- function(object, newresp, ...) {
+  # assign na.action attribute to newresp, otherwise refit fails on models which had NAs in data
+  attr(newresp, "na.action") = attr(model.frame(object), "na.action")
+  refit(object, newresp, ...)
+}
 
 #' @rdname getSimulations
 #' @export
