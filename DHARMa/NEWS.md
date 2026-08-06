@@ -13,7 +13,7 @@ NOTE: for more news about the package, see https://github.com/florianhartig/DHAR
 
 * Minor fixes in testSpatialAutocorrelation: DHARMa errors if repeated values for space in distMat, extended help, improved plot titles and legend
 
-* Fix in behavior of `update()` on models with transformed predictors (e.g. `offset()`). This fixes behavior of `getRefit` and related functions such as `simulateLRT`. 
+* Fix in behavior of `update()` on models with transformed predictors (e.g. `offset()`). This fixes behavior of `getRefit` and related functions such as `simulateLRT` (issue #351). 
 
 # DHARMa 0.5.0
 
