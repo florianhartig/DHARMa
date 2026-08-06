@@ -419,7 +419,11 @@ getFamily.default <- function (object,...){
 #' @rdname getData
 #' @export
 getData.default <- function (object,...){
-  eval(object$call$data, envir = environment(formula(object)))
+  for (e in c(list(environment(formula(object))), rev(sys.frames()))) {
+    out = tryCatch(eval(object$call$data, envir = e), error = function(e) NULL)
+    if (!is.null(out)) return(out)
+  }
+  stop("DHARMa::getData: cannot locate the original data of the fitted model, probably because you are fitting your model inside a function.")
 }
 
 #' @rdname getPredictorNames
@@ -570,16 +574,6 @@ getSimulations.gam <- function(object, nsim = 1, simulateREs = c("conditional", 
   return(out)
 }
 
-#' @rdname getData
-#' @export
-# introduced this function because mgcv always overwrites environment(formula(object)) to .GlobalEnv. This caused issues when running the model inside a function, e.g. in testModelTypes.R (related to issue #351)
-getData.gam <- function (object, ...){
-  for (e in c(list(environment(formula(object))), rev(sys.frames()))) {
-    out = tryCatch(eval(object$call$data, envir = e), error = function(e) NULL)
-    if (!is.null(out)) return(out)
-  }
-  stop("DHARMa::getData: cannot locate the original data of the fitted gam model, probably because you are fitting your model inside a function.")
-}
 
 
 ######## lme4 ############
@@ -869,9 +863,9 @@ getFixedEffects.MixMod <- function(object, ...){
 #' @export
 getRefit.MixMod <- function(object, newresp, ...) {
   responsename = colnames(model.frame(object))[1]
-  newDat = object$data
-  newDat[, match(responsename,names(newDat))] = newresp
-  update(object, data = newDat, ...)
+  newData = getData(object)[rownames(model.frame(object)),]
+  newData[, match(responsename,names(newData))] = newresp
+  update(object, data = newData, ...)
 }
 
 #' @rdname getFitted
