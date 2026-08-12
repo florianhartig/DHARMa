@@ -228,7 +228,7 @@ There are a few important technical details regarding how the simulations are pe
 ?simulateResiduals
 ```
 
-#### Refit
+### Refit
 
 ```{r, eval= FALSE}
 simulationOutput <- simulateResiduals(fittedModel = fittedModel, refit = TRUE)
@@ -242,7 +242,7 @@ The second option is much much slower, and also seemed to have lower power in so
 
 Note also that `refit = TRUE` can sometimes run into numerical problems, if the fitted model does not converge on the newly simulated data.
 
-#### Conditional vs. unconditional simulations
+### Conditional vs. unconditional simulations
 
 The second option is the treatment of the stochastic hierarchy. In a hierarchical model, several layers of stochasticity are placed on top of each other. Specifically, in a GLMM, we have a lower level stochastic process (random effect), whose result enters into a higher level (e.g. Poisson distribution). For other hierarchical models, such as state-space models, similar considerations apply, but the hierarchy can be more complex. When simulating, we have to decide if we want to re-simulate all stochastic levels (**unconditional**), or only a subset of those. For example, in a GLMM, it is common to only simulate the last stochastic level (e.g. Poisson) conditional on the fitted random effects, meaning that the random effects are set on the fitted values (**conditional**).
 
@@ -284,7 +284,7 @@ Summary of the syntax for supported packages (this is only relevant for simulate
 
 
 
-#### Integer treatment / randomization
+### Integer treatment / randomization
 
 A third option is the treatment of integer responses. The background of this option is that, for integer-valued variables, some additional steps are necessary to make sure that the residual distribution becomes flat (essentially, we have to smooth away the integer nature of the data). The idea is explained in
 
@@ -292,7 +292,7 @@ A third option is the treatment of integer responses. The background of this opt
 
 DHARMa currently implements two procedures for randomization. The default procedure will randomize automatically. The second option requires knowledge about whether the model is integer-valued, which is usually implemented automatically. See ?simulateResiduals for details. Usually, these options should simply be kept at their defaults.
 
-#### Calculating residuals for groups or subsets
+### Calculating residuals for groups or subsets
 
 In many situations, it can be useful to look at residuals per group, e.g. to see how much the model over / underpredicts per plot, year or subject. To do this, use the `recalculateResiduals()` function, together with a grouping variable (group) or a subsetting variable (sel), which can also be used in combination.
 
@@ -302,7 +302,7 @@ simulationOutput = recalculateResiduals(simulationOutput, group = ~group)
 
 Note, however, that you will have to change the selection of variables that you provide to plots and tests (e.g. in `plotResiduals` or `testSpatialAutocorrelation`) accordingly when you group or subset residuals.
 
-#### Reproducibility notes, random seed and random state
+### Reproducibility notes, random seed and random state
 
 As DHARMa uses simulations to calculate the residuals, a naive implementation of the algorithm would mean that residuals would look slightly different each time a DHARMa calculation is executed. This might both be confusing and bear the danger that a user would run the simulation several times and take the result that looks better (which would amount to multiple testing / p-hacking). By default, DHARMa therefore fixes the random seed to the same value every time a simulation is run, and afterwards restores the random state to the old value. This means that you will get exactly the same residual plot each time. If you want to avoid this behavior, for example for simulation experiments on DHARMa, use `seed = NULL` -\> no seed set, but random state will be restored, or `seed = FALSE` -\> no seed set, and random state will not be restored. Whether or not you fix the seed, the setting for the random seed and the random state are stored in
 
