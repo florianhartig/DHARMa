@@ -13,6 +13,12 @@ NOTE: for more news about the package, see https://github.com/florianhartig/DHAR
 
 * Minor fixes in testSpatialAutocorrelation: DHARMa errors if repeated values for space in distMat, extended help, improved plot titles and legend
 
+
+## Minor changes
+
+* Documentation: improved vignette (more explanations for conditional vs unconditional simulations).
+
+
 # DHARMa 0.5.0
 
 
