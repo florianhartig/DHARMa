@@ -263,7 +263,7 @@ _For models with residual covariance structures (temporal, spatial, phylogenetic
 |✓ models with pure AR1 / OU processes do not produce patterns in unconditional residuals | ✗ for pure AR1 / OU processes, models may estimate very low residual variance, which can result in extreme patterns of the conditional residuals (see [here](https://github.com/florianhartig/DHARMa/issues/527)) | 
 |                                             |                                                         | 
 
-If the model is correctly specified and the fitting procedure is unbiased (disclaimer: GLMM estimators are not always unbiased), the simulated residuals should be flat regardless how many hierarchical levels we re-simulate. The most thorough procedure would be therefore to test all possible options. In particular dispersion tests may produce different results when switching from conditional to unconditional simulations.
+If the model is correctly specified and the fitting procedure is unbiased (disclaimer: GLMM estimators are not always unbiased), the simulated residuals should be flat regardless of how many hierarchical levels we re-simulate. The most thorough procedure would therefore be to test all possible options. In particular, we recommend dispersion tests to be used only for conditional simulations.
 
 *Note:* Although unconditional residuals implicitly also test the normal distribution of the REs, it is probably not a bad idea to additionally check for normality of the RE distribution. As this is not based on quantile residuals, there is no special DHARMa function for this, so you should just extract the REs, and then run e.g. a Shapiro test.
 
