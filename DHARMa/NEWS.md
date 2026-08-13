@@ -16,7 +16,7 @@ NOTE: for more news about the package, see https://github.com/florianhartig/DHAR
 
 ## Minor changes
 
-* Documentation: improved vignette.
+* Documentation: improved vignette (more explanations for conditional vs unconditional simulations).
 
 
 # DHARMa 0.5.0
