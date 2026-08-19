@@ -112,17 +112,17 @@ getQuantile <- function(simulations, observed, integerResponse,
       observed <- forwardsolve(L, observed)
       simulations = forwardsolve(L, simulations)
     }
-    
-    # calculation of PIT residual - idea is that we check the lower quantile as 
+
+    # calculation of PIT residual - idea is that we check the lower quantile as
     # well as lower or equal - if they are not identical we need to randomize then
-    
+
     lower <- unname(rowMeans(simulations < observed))
     lowerOrEqual <- unname(rowMeans(simulations <= observed))
     needsRandomization <- lower != lowerOrEqual
-    
+
     if(any(needsRandomization)) {
-      scaledResiduals <- ifelse(needsRandomization, 
-                                runif(length(lower), lower, lowerOrEqual), 
+      scaledResiduals <- ifelse(needsRandomization,
+                                runif(length(lower), lower, lowerOrEqual),
                                 lower)
     } else scaledResiduals = lower
   }
@@ -249,5 +249,26 @@ getFormulaPredictors <- function(simulationOutput, formula) {
 }
 
 
+#' Check if a model has (problematic) prior weights
+#'
+#' For n/k models, weights can either represent the number of trials or actual prior weights on the likelihood. This function distinguishes the two cases and only gives a warning for the latter.
+#'
+#' @param fittedModel a fitted model
+#' @keywords internal
+hasWeights <- function(fittedModel){
 
+  modelFrame = model.frame(fittedModel)
 
+  if(!("(weights)" %in% colnames(modelFrame))) return(FALSE)
+
+  if(family(fittedModel)$family %in% c("binomial", "betabinomial")){
+    response = modelFrame[[1]]
+    # if response is a 2-column matrix (cbind-syntax) AND there are weights, give warning
+    if(is.matrix(response) && ncol(response) == 2) return(TRUE)
+    # otherwise, weights most likely represent the trials
+    return(FALSE)
+  }
+
+  # for all other families, any "(weights)" is a true prior weight
+  return(TRUE)
+}
