@@ -15,6 +15,12 @@ NOTE: for more news about the package, see https://github.com/florianhartig/DHAR
 
 * Fix in behavior of `update()` on models with transformed predictors (e.g. `offset()`). This fixes behavior of `getRefit` and related functions such as `simulateLRT` (issue #351). 
 
+
+## Minor changes
+
+* Documentation: improved vignette (more explanations for conditional vs unconditional simulations).
+
+
 # DHARMa 0.5.0
 
 
