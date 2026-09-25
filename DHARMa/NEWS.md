@@ -13,6 +13,7 @@ NOTE: for more news about the package, see https://github.com/florianhartig/DHAR
 
 * Minor fixes in testSpatialAutocorrelation: DHARMa errors if repeated values for space in distMat, extended help, improved plot titles and legend
 
+* Predictions from `GLMMadaptive` models are now created using `fitted()`, which avoids errors on models with transformations (e.g. offset, log)
 
 ## Minor changes
 
