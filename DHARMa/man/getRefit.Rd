@@ -4,6 +4,7 @@
 \alias{getRefit}
 \alias{getRefit.default}
 \alias{getRefit.lm}
+\alias{getRefit.merMod}
 \alias{getRefit.glmmTMB}
 \alias{getRefit.HLfit}
 \alias{getRefit.MixMod}
@@ -17,6 +18,8 @@ getRefit(object, newresp, ...)
 \method{getRefit}{default}(object, newresp, ...)
 
 \method{getRefit}{lm}(object, newresp, ...)
+
+\method{getRefit}{merMod}(object, newresp, ...)
 
 \method{getRefit}{glmmTMB}(object, newresp, ...)
 
