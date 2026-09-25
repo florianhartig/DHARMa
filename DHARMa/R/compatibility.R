@@ -879,7 +879,7 @@ getRefit.MixMod <- function(object, newresp, ...) {
 #' @rdname getFitted
 #' @export
 getFitted.MixMod <- function (object,...){
-  predict(object, type = "mean_subject")
+  fitted(object, type = "mean_subject")
 }
 
 #' @rdname getResiduals
