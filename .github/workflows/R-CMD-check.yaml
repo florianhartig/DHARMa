@@ -47,7 +47,7 @@ jobs:
           extra-packages: |
             any::rcmdcheck
             any::BH
-            any::StanHeaders
+            StanHeaders@2.32.10
             any::RcppEigen
           needs: check
           working-directory: DHARMa
