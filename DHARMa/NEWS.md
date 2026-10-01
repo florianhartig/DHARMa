@@ -5,8 +5,6 @@ NOTE: for more news about the package, see https://github.com/florianhartig/DHAR
 
 ## Bugfixes
 
-* `testDispersion` (type = "DHARMa", refit = FALSE) was biased for binomial models with more than one trial (k/n models, specified via `cbind(k, n - k)` or as proportions with the number of trials given in `weights`): residuals were calculated as observed / simulated number of successes minus the fitted *proportion*. Residuals are now calculated with the fitted values on the scale of the observed response (expected number of successes), provided by the new function `getFittedResponse`. Poisson, Bernoulli (0/1) and all other models are not affected.
-
 * Version 0.5.0 was changing the `glmmTMB` model object "simcode" when using simulateResiduals. We fixed this problem by restoring the original simcode to the model object.
 
 * Fixing bug in predictions via getFitted for `gam` and `bam` models. Predictions are now unconditional on random effects and factor smooth interactions (previously they were conditional, see #544).
@@ -21,8 +19,6 @@ NOTE: for more news about the package, see https://github.com/florianhartig/DHAR
 
 
 ## Minor changes
-
-* New compatibility function `getFittedResponse`, which returns the fitted values on the scale of the observed response, i.e. the expected number of successes for k/n binomial models (`getFitted` returns proportions). It is used in `testDispersion`.
 
 * Documentation: improved vignette (more explanations for conditional vs unconditional simulations).
 

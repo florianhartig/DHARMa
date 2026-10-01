@@ -40,10 +40,6 @@ getObservedResponse(fittedModel)
 # predictions of the model for these points
 getFitted(fittedModel)
 
-# predictions on the scale of the observed response
-# (differs from getFitted only for k/n binomial models)
-getFittedResponse(fittedModel)
-
 # extract simulations from the model as matrix
 getSimulations(fittedModel, nsim = 2)
 
