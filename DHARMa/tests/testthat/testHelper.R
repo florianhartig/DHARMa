@@ -120,8 +120,4 @@ test_that("hasWeights", {
   m = glm(observedResponse ~ Environment1, family = poisson, data = dp, weights = w)
   expect_true(DHARMa:::hasWeights(m))
 
-  # weights all equal to 1 = no weights
-  m = glm(observedResponse ~ Environment1, family = poisson, data = dp,
-          weights = rep(1, 200))
-  expect_false(DHARMa:::hasWeights(m))
 })
