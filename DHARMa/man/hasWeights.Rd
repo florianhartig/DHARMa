@@ -10,6 +10,6 @@ hasWeights(fittedModel)
 \item{fittedModel}{a fitted model}
 }
 \description{
-For n/k models, weights can either represent the number of trials or actual prior weights on the likelihood. This function distinguishes the two cases and only gives a warning for the latter.
+For n/k models, weights can either represent the number of trials or actual prior weights on the likelihood. This function distinguishes the two cases and returns TRUE if the model has prior weights that are not the number of trials.
 }
 \keyword{internal}

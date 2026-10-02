@@ -251,7 +251,7 @@ getFormulaPredictors <- function(simulationOutput, formula) {
 
 #' Check if a model has (problematic) prior weights
 #'
-#' For n/k models, weights can either represent the number of trials or actual prior weights on the likelihood. This function distinguishes the two cases and only gives a warning for the latter.
+#' For n/k models, weights can either represent the number of trials or actual prior weights on the likelihood. This function distinguishes the two cases and returns TRUE if the model has prior weights that are not the number of trials.
 #'
 #' @param fittedModel a fitted model
 #' @keywords internal
@@ -261,10 +261,27 @@ hasWeights <- function(fittedModel){
 
   if(!("(weights)" %in% colnames(modelFrame))) return(FALSE)
 
+  w = modelFrame[["(weights)"]]
+
+  # weights all equal to 1 are equivalent to no weights
+  if(all(w == 1)) return(FALSE)
+
+
   if(family(fittedModel)$family %in% c("binomial", "betabinomial")){
     response = modelFrame[[1]]
-    # if response is a 2-column matrix (cbind-syntax) AND there are weights, give warning
+
+    # if response is factor instead of 0/1
+    if(is.factor(response)) response = as.numeric(response) - 1
+
+    # if response is a 2-column matrix (cbind-syntax) AND there are weights:
     if(is.matrix(response) && ncol(response) == 2) return(TRUE)
+
+    # non-integer weights cannot be numbers of trials
+    if(any(w %% 1 != 0)) return(TRUE)
+
+    # 0/1 response with weights != 1: ambiguous, likely prior weights
+    if(all(response %in% c(0, 1)) && any(w != 1)) return(TRUE)
+
     # otherwise, weights most likely represent the trials
     return(FALSE)
   }
@@ -272,3 +289,7 @@ hasWeights <- function(fittedModel){
   # for all other families, any "(weights)" is a true prior weight
   return(TRUE)
 }
+
+
+
+
