@@ -74,3 +74,54 @@ test_that("randomSeed", {
   expect_true(all(.Random.seed == currentSeed))
 
 })
+
+
+
+test_that("hasWeights", {
+
+  set.seed(123)
+
+  # k/n binomial data: observedResponse1 = successes out of 20
+  d = createData(sampleSize = 200, overdispersion = 0, randomEffectVariance = 0,
+                 family = binomial(), binomialTrials = 20)
+  d$prop = d$observedResponse1 / 20
+  d$y01 = as.numeric(d$prop > 0.5)
+  w = rep(c(1, 2), each = 100)
+
+  # no weights
+  m = glm(prop ~ Environment1, family = binomial, data = d)
+  expect_false(DHARMa:::hasWeights(m))
+
+  # proportion response + number of trials as weights: no warning (issue #540)
+  m = glm(prop ~ Environment1, family = binomial, data = d, weights = rep(20, 200))
+  expect_false(DHARMa:::hasWeights(m))
+
+  # 0/1 response with prior weights
+  m = glm(y01 ~ Environment1, family = binomial, data = d, weights = w)
+  expect_true(DHARMa:::hasWeights(m))
+
+  # factor response with prior weights
+  d$yFactor = factor(ifelse(d$y01 == 1, "yes", "no"))
+  m = glm(yFactor ~ Environment1, family = binomial, data = d, weights = w)
+  expect_true(DHARMa:::hasWeights(m))
+
+  # cbind response + weights
+  m = glm(cbind(observedResponse1, observedResponse0) ~ Environment1,
+          family = binomial, data = d, weights = w)
+  expect_true(DHARMa:::hasWeights(m))
+
+  # non-integer weights in binomial (glm warns about non-integer #successes)
+  m = suppressWarnings(glm(prop ~ Environment1, family = binomial, data = d,
+                           weights = rep(c(20, 20.5), each = 100)))
+  expect_true(DHARMa:::hasWeights(m))
+
+  # poisson with prior weights
+  dp = createData(sampleSize = 200, randomEffectVariance = 0, family = poisson())
+  m = glm(observedResponse ~ Environment1, family = poisson, data = dp, weights = w)
+  expect_true(DHARMa:::hasWeights(m))
+
+  # weights all equal to 1 = no weights
+  m = glm(observedResponse ~ Environment1, family = poisson, data = dp,
+          weights = rep(1, 200))
+  expect_false(DHARMa:::hasWeights(m))
+})

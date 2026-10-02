@@ -490,12 +490,6 @@ getRefit.lm <- function(object, newresp, ...){
 }
 
 
-hasWeigths.lm <- function(object, ...){
-  if(length(unique(object$prior.weights)) != 1) return(TRUE)
-  else return(FALSE)
-}
-
-
 ######### GLM #############
 
 #' @rdname getSimulations
@@ -505,7 +499,7 @@ getSimulations.negbin<- function (object, nsim = 1, simulateREs = c("conditional
   type <- match.arg(type)
   simulateREs <- match.arg(simulateREs)
 
-  if("(weights)" %in% colnames(model.frame(object))) warning(weightsWarning)
+  if(hasWeights(object)) warning(weightsWarning)
   getSimulations.default(object = object, nsim = nsim, type = type, ...)
 }
 
@@ -557,7 +551,7 @@ getSimulations.gam <- function(object, nsim = 1, simulateREs = c("conditional", 
 
   if(length(find.package("mgcViz")) > 0 & mgcViz == T){
 
-    if("(weights)" %in% colnames(model.frame(object)) & ! family(object)$family %in% c("binomial", "betabinomial")) warning(weightsWarning)
+    if(hasWeights(object)) warning(weightsWarning)
 
     # use mgcViz if available
     out = mgcViz::simulate.gam(object, nsim = nsim , ...)
@@ -625,7 +619,7 @@ getSimulations.merMod <- function (object, nsim = 1, simulateREs = c("conditiona
 
   simulateREs <- match.arg(simulateREs)
 
-  if("(weights)" %in% colnames(model.frame(object))) warning(weightsWarning)
+  if(hasWeights(object)) warning(weightsWarning)
 
   if(simulateREs != "user-specified" & "re.form" %in% names(list(...))) stop("DHARMa: If you want to specify certain random effects to condition on, you need to set simulateREs = \"user-specified\".")
 
@@ -690,7 +684,7 @@ getSimulations.glmmTMB <- function (object, nsim = 1, simulateREs = c("condition
   type <- match.arg(type)
   simulateREs <- match.arg(simulateREs)
 
-  if("(weights)" %in% colnames(model.frame(object)) & ! family(object)$family %in% c("binomial", "betabinomial")) warning(weightsWarning)
+  if(hasWeights(object)) warning(weightsWarning)
 
   out = NULL
 
