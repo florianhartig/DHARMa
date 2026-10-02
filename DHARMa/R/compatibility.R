@@ -172,7 +172,24 @@ getFitted <- function (object, ...) {
   UseMethod("getFitted", object)
 }
 
-# NOTE - a bit unclear if fitted or predict should be used
+#' Get fitted/predicted values on the scale of the observed response
+#'
+#' Wrapper to get the fitted/predicted values of the model on the same scale as the observed response ([getObservedResponse]) and the simulations ([getSimulations]).
+#'
+#' For most models, this is identical to [getFitted]. The exception are binomial and beta-binomial models with more than one trial per observation (k/n models), specified either as cbind(successes, failures) or as proportions with the number of trials provided via weights. For these models, [getObservedResponse] and [getSimulations] return the number of successes, whereas [getFitted] returns the predicted proportions. getFittedResponse returns the predicted proportions multiplied by the number of trials, i.e. the expected number of successes.
+#'
+#' The fitted response is used by [testDispersion] (refit = FALSE) to calculate the raw residuals (observed or simulated response minus fitted response).
+#'
+#' @param object a fitted model.
+#' @param ... additional parameters to be passed on, usually to [getFitted].
+#'
+#' @example inst/examples/wrappersHelp.R
+#'
+#' @seealso [getFitted], [getObservedResponse], [getSimulations]
+#' @export
+getFittedResponse <- function (object, ...) {
+  UseMethod("getFittedResponse", object)
+}
 
 
 #' Get model residuals
@@ -193,8 +210,6 @@ getFitted <- function (object, ...) {
 getResiduals <- function (object, ...) {
   UseMethod("getResiduals", object)
 }
-
-# NOTE - a bit unclear if fitted or predict should be used
 
 
 #' Get Pearson residuals
@@ -373,6 +388,22 @@ getFixedEffects.default <- function(object, ...){
 getFitted.default <- function (object,...){
   out = predict(object, type = "response", re.form = ~0)
   out = as.vector(out) # introduced because of phyr error
+}
+
+#' @rdname getFittedResponse
+#' @export
+getFittedResponse.default <- function (object, ...){
+  out = getFitted(object, ...)
+
+  # k/n binomial: getFitted returns proportions, here we return number of success
+  if(getFamily(object)$family %in% c("binomial", "betabinomial")){
+    x = model.frame(object)
+    # number of trials given via cbind(successes, failures)
+    if(is.matrix(x[[1]]) && ncol(x[[1]]) == 2) out = out * rowSums(x[[1]])
+    # number of trials given via weights (response = proportion)
+    if("(weights)" %in% colnames(x)) out = out * x$`(weights)`
+  }
+  return(out)
 }
 
 #' @rdname getResiduals
@@ -1081,6 +1112,13 @@ getFitted.brmsfit  <- function (object,...){
   }
 
   return(out)
+}
+
+#' @rdname getFittedResponse
+#' @export
+getFittedResponse.brmsfit  <- function (object,...){
+  # posterior_epred predicts on the scale of the observed response, i.e. the expected number of successes for k/n binomial models (see getFitted.brmsfit)
+  apply(t(brms::posterior_epred(object, re_formula = NA, ...)), 1, median)
 }
 
 

@@ -74,3 +74,46 @@ test_that("Unconditional predictions are the default in DHARMa", {
 })
 
 
+test_that("getFittedResponse returns fitted values on the scale of the observed response", {
+
+  set.seed(123)
+  nTrials = 20
+  testData = createData(200, randomEffectVariance = 0.5, family = binomial(), binomialTrials = nTrials)
+  testData$prop = testData$observedResponse1 / nTrials
+  w = rep(nTrials, 200)
+
+  # k/n binomial models, number of trials via cbind(successes, failures) or via weights
+  models = list(
+    glm_cbind = glm(cbind(observedResponse1, observedResponse0) ~ Environment1, data = testData, family = binomial()),
+    glm_weights = glm(prop ~ Environment1, weights = w, data = testData, family = binomial()),
+    gam_cbind = mgcv::gam(cbind(observedResponse1, observedResponse0) ~ s(Environment1), data = testData, family = binomial()),
+    gam_weights = mgcv::gam(prop ~ s(Environment1), weights = w, data = testData, family = binomial()),
+    glmer_cbind = lme4::glmer(cbind(observedResponse1, observedResponse0) ~ Environment1 + (1|group), data = testData, family = binomial()),
+    glmer_weights = lme4::glmer(prop ~ Environment1 + (1|group), weights = w, data = testData, family = binomial()),
+    glmmTMB_cbind = glmmTMB::glmmTMB(cbind(observedResponse1, observedResponse0) ~ Environment1 + (1|group), data = testData, family = binomial()),
+    glmmTMB_weights = glmmTMB::glmmTMB(prop ~ Environment1 + (1|group), weights = w, data = testData, family = binomial()),
+    glmmTMB_betabinomial = glmmTMB::glmmTMB(cbind(observedResponse1, observedResponse0) ~ Environment1, data = testData, family = glmmTMB::betabinomial()),
+    spaMM_cbind = spaMM::HLfit(cbind(observedResponse1, observedResponse0) ~ Environment1 + (1|group), data = testData, family = binomial()),
+    GLMMadaptive_cbind = GLMMadaptive::mixed_model(cbind(observedResponse1, observedResponse0) ~ Environment1, random = ~ 1 |group, data = testData, family = binomial())
+  )
+
+  for(i in names(models)){
+    fittedResponse = getFittedResponse(models[[i]])
+    # fitted proportions times number of trials
+    expect_equal(fittedResponse, getFitted(models[[i]]) * nTrials, ignore_attr = TRUE, info = i)
+    # same scale as the observed response (number of successes, not proportions). Loose tolerance, because predictions are unconditional on the random effects
+    expect_equal(mean(fittedResponse), mean(getObservedResponse(models[[i]])), tolerance = 0.5, info = i)
+  }
+
+  # all other models: identical to getFitted
+  models = list(
+    bernoulli = glm(observedResponse1 > 10 ~ Environment1, data = testData, family = binomial()),
+    poisson = glm(observedResponse1 ~ Environment1, data = testData, family = poisson()),
+    gaussian = lm(observedResponse1 ~ Environment1, data = testData)
+  )
+
+  for(i in names(models)){
+    expect_equal(getFittedResponse(models[[i]]), getFitted(models[[i]]), info = i)
+  }
+})
+
