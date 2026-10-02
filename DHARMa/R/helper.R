@@ -263,10 +263,6 @@ hasWeights <- function(fittedModel){
 
   w = modelFrame[["(weights)"]]
 
-  # weights all equal to 1 are equivalent to no weights
-  if(all(w == 1)) return(FALSE)
-
-
   if(family(fittedModel)$family %in% c("binomial", "betabinomial")){
     response = modelFrame[[1]]
 
@@ -289,7 +285,3 @@ hasWeights <- function(fittedModel){
   # for all other families, any "(weights)" is a true prior weight
   return(TRUE)
 }
-
-
-
-
