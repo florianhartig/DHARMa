@@ -19,6 +19,8 @@ NOTE: for more news about the package, see https://github.com/florianhartig/DHAR
 
 * Fix in behavior of `update()` on models with transformed predictors (e.g. `offset()`). This fixes behavior of `getRefit` and related functions such as `simulateLRT` (issue #351). 
 
+* Minor fix in testthat/testNumericReproducibility.R: increased the tolerance for expect_equal due to small numeric differences in lme4 v2.1-0 
+
 
 ## Minor changes
 
