@@ -341,10 +341,11 @@ testOutliers <- function(simulationOutput, alternative = c("two.sided", "greater
 #' @param catPred a categorical predictor with the same dimensions as the residuals in simulationOutput. If specified as formula, e.g. catPred = ~group, NAs are handled automatically (recommended).
 #' @param quantiles whether to draw the quantile lines.
 #' @param plot if TRUE, the function will create an additional plot.
+#' @param smoothScatter if TRUE, individual residual jitter points will not be plotted. This makes sense when the number of residuals is very large. Default NULL chooses T for nObs > 10000, and F otherwise.
 #' @param ... additional arguments to boxplot.
 #' @details The function tests for two common problems: are residuals within each group distributed according to model assumptions, and is the variance between groups heterogeneous.
 #'
-#'  The test for within-group uniformity is performed via multiple KS-tests, with adjustment of p-values for multiple testing. If the plot is drawn, problematic groups are highlighted in red, and a corresponding message is displayed in the plot.
+#'  The test for within-group uniformity is performed via multiple KS-tests, with adjustment of p-values for multiple testing. If the plot is drawn, problematic groups are highlighted in red, and a corresponding message is displayed in the plot. Outliers are marked in star/asterisk form and highlighted in red if the outlier test is significant. For information on definition and interpretation of outliers, see [testOutliers].
 #'
 #'  The test for homogeneity of variances is done with a Levene test. A significant p-value means that group variances are not constant. In this case, you should consider modelling variances, e.g. via ~dispformula in glmmTMB.
 #'
@@ -353,12 +354,13 @@ testOutliers <- function(simulationOutput, alternative = c("two.sided", "greater
 #' @example inst/examples/testsHelp.R
 #' @export
 testCategorical <- function(simulationOutput, catPred,
-                            quantiles = c(0.25, 0.5, 0.75), plot = TRUE, ...){
+                            quantiles = c(0.25, 0.5, 0.75), plot = TRUE, smoothScatter = NULL, ...){
 
   simulationOutput = ensureDHARMa(simulationOutput, convert = T)
 
   a = list(...)
-  a$xlab = paste(checkDots("xlab", deparse(substitute(catPred)), ...), "(catPred)")
+  if(is.null(a$xlab)) a$xlab = paste(deparse(substitute(catPred)), "(catPred)")
+  a$ylab = checkDots("ylab", "DHARMa residual", ...)
 
   if(!inherits(catPred, "formula")) {
     catPred = catPred # old default
@@ -367,32 +369,81 @@ testCategorical <- function(simulationOutput, catPred,
   }
 
   catPred = as.factor(catPred)
+  res = simulationOutput$scaledResiduals
   out = list()
 
-  out$uniformity$details = suppressWarnings(by(simulationOutput$scaledResiduals,
+  out$uniformity$details = suppressWarnings(by(res,
                                                catPred, ks.test, 'punif',
                                                simplify = TRUE))
   out$uniformity$p.value = rep(NA, nlevels(catPred))
   for(i in 1:nlevels(catPred)) out$uniformity$p.value[i] = out$uniformity$details[[i]]$p.value
   out$uniformity$p.value.cor = p.adjust(out$uniformity$p.value)
 
-  if(nlevels(catPred) > 1) out$homogeneity = leveneTest_formula(simulationOutput$scaledResiduals ~ catPred)
+  if(nlevels(catPred) > 1) out$homogeneity = leveneTest_formula(res ~ catPred)
+
+  switchScatter = 10000
+  if(is.null(smoothScatter)) smoothScatter = length(res) > switchScatter
 
   if(plot == T){
-    boxplot(simulationOutput$scaledResiduals ~ catPred, ylim = c(0,1), xlab = a$xlab, axes = FALSE, col = ifelse(out$uniformity$p.value.cor < 0.05, "red", "lightgrey"))
+    if(is.null(a$p.outliers)) {
+      a$p.outliers = if(is.null(simulationOutput$nSim)) NA
+      else testOutliers(simulationOutput, plot = FALSE)$p.value
+    }
+
+    do.call(boxplot, append(list(formula = res ~ catPred, ylim = c(0,1), axes = FALSE,
+                                 outline = smoothScatter, col = ifelse(out$uniformity$p.value.cor < 0.05, "red", "lightgrey")),
+                            a[!names(a) %in% c("main", "col", "pch", "xlim", "p.outliers")]))
+
+    # add jitter points onto boxplots (issue #562)
+    randomState = getRandomState(123)
+    on.exit(randomState$restoreCurrent(), add = TRUE)
+    x = jitter(as.numeric(catPred), amount = 0.3)
+    blackcol = rgb(0, 0, 0, alpha = max(0.1, 1 - 3 * length(res) / switchScatter))
+
+    # color outliers similar to scatterplot
+    outlier = res == 0 | res == 1
+
+    if(is.na(a$p.outliers)) {
+      message("Outliers will be not displayed in the plot when simulationOutput is not a DHARMa object.")
+      defaultCol = blackcol
+      defaultPch = 16
+      defaultCex = 0.5
+    } else {
+      defaultPch = ifelse(outlier==TRUE, 8, 16)
+      defaultCex = ifelse(outlier, 1, 0.5)
+      if(a$p.outliers < 0.05){
+        defaultCol = ifelse(outlier == TRUE, .Options$DHARMaSignalColor, blackcol)
+      } else{defaultCol = blackcol}
+    }
+
+      if (smoothScatter == FALSE) {
+        points(x, res,
+             pch = defaultPch,
+             cex = defaultCex,
+             col = defaultCol)
+        # add median on top
+        do.call(boxplot, append(list(formula = res ~ catPred, add = TRUE, col = NA,
+                                   axes = FALSE, outline = FALSE), a[!names(a) %in% c("main", "col", "pch", "xlim", "p.outliers")]))
+
+      } else {
+        if(!is.na(a$p.outliers)) {points(x[outlier], res[outlier], pch = 8, cex = 1,
+               col = ifelse(!is.na(a$p.outliers) && a$p.outliers < 0.05, .Options$DHARMaSignalColor, "black"))}
+      }
+
     axis(1, at = 1:nlevels(catPred), levels(catPred))
     axis(2, at=c(0, quantiles, 1))
     abline(h = quantiles, lty = 2)
+
+    title(ifelse(any(out$uniformity$p.value.cor < 0.05), "Within-group deviations from uniformity significant (red)", "Within-group deviation from uniformity n.s."),
+          col.main = ifelse(any(out$uniformity$p.value.cor < 0.05), "red", "black"),
+          line = 1, cex.main = 0.8)
+
+    if(length(out) > 1) {
+      title(ifelse(out$homogeneity$`Pr(>F)`[1] < 0.05, "Levene Test for homogeneity of variance significant", "Levene Test for homogeneity of variance n.s."),
+            col.main = ifelse(out$homogeneity$`Pr(>F)`[1] < 0.05, "red", "black"), cex.main = 0.8)
+    }
   }
 
-  title(ifelse(any(out$uniformity$p.value.cor < 0.05), "Within-group deviations from uniformity significant (red)", "Within-group deviation from uniformity n.s."),
-        col.main = ifelse(any(out$uniformity$p.value.cor < 0.05), "red", "black"),
-        line = 1, cex.main = 0.8)
-
-  if(length(out) > 1) {
-    title(ifelse(out$homogeneity$`Pr(>F)`[1] < 0.05, "Levene Test for homogeneity of variance significant", "Levene Test for homogeneity of variance n.s."),
-          col.main = ifelse(out$homogeneity$`Pr(>F)`[1] < 0.05, "red", "black"), cex.main = 0.8)
-  }
 
   return(out)
 

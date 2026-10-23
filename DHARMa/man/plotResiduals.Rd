@@ -19,7 +19,7 @@ plotResiduals(simulationOutput, form = NULL, quantreg = NULL,
 
 \item{asFactor}{should a numeric predictor provided in form be treated as a factor. Default is to choose this for < 10 unique values, as long as enough predictions are available to draw a boxplot.}
 
-\item{smoothScatter}{if T, a smooth scatter plot will plotted instead of a normal scatter plot. This makes sense when the number of residuals is very large. Default NULL chooses T for nObs > 10000, and F otherwise.}
+\item{smoothScatter}{if T: for numeric predictors, a smooth scatter plot will plotted instead of a normal scatter plot; for categorical predictors, individual residuals will not be plotted. This makes sense when the number of residuals is very large. Default NULL chooses T for nObs > 10000, and F otherwise.}
 
 \item{quantiles}{for a quantile regression, which quantiles should be plotted. Default is 0.25, 0.5, 0.75.}
 
@@ -46,10 +46,10 @@ The quantile regression can take some time to calculate, especially for larger d
 
 If form is specified as a formula, e.g. \code{form = ~ your_predictor}, NAs will be handled automatically (recommended). If \code{form = ~.}, separate plots for all predictors in the model are produced. If \code{form = ~ predictor1 + predictor2}, a separate plot for each specified predictor is produced. If an additional grouping variable is specified, e.g. \code{form = ~ predictor|group}, a separate plot for the predictor within each grouping level is produced. Be careful with this command: if you have many levels, the plot may not display nicely. If you are interested in a specific group, you can use \code{form = ~ predictor|group == "group_level"}. If form is \strong{not} a formula, e.g. \code{form = data$predictor}, NAs are \strong{not} handled automatically. For phyr and gamm4$mer models, you need to specify form in this way.
 
-If the predictor is a factor, a boxplot will be plotted instead of a scatter plot. The distribution for each factor level should be uniformly distributed, so the box should go from 0.25 to 0.75, with the median line at 0.5 (within-group). To test if deviations from those expectations are significant, KS-tests per group and a Levene test for homogeneity of variances are performed. See \link{testCategorical} for details.
+If the predictor is a factor, a boxplot will be plotted instead of a scatter plot. Individual residuals are added as jittered points (unless smoothScatter = TRUE). The distribution for each factor level should be uniformly distributed, so the box should go from 0.25 to 0.75, with the median line at 0.5 (within-group). To test if deviations from those expectations are significant, KS-tests per group and a Levene test for homogeneity of variances are performed. See \link{testCategorical} for details.
 }
 \note{
-If nObs > 10,000, the scatter plot is replaced by graphics::smoothScatter().
+If nObs > 10,000, the scatter plot is replaced by graphics::smoothScatter();for categorical predictors, individual residuals are not plotted.
 
 The color for highlighting outliers and quantile lines/splines with significant tests can be changed by setting \code{options(DHARMaSignalColor = "red")} to a different color. See \code{getOption("DHARMaSignalColor")} for the current setting. This is convenient for a color-blind friendly display, since red and black are difficult for some people to distinguish.
 }

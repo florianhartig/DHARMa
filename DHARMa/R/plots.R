@@ -156,7 +156,7 @@ plotQQunif <- function(simulationOutput, testUniformity = TRUE, testOutliers = T
 #' @param quantreg whether to perform a quantile regression based on [testQuantiles] or a smooth spline around the mean. Default NULL chooses T for nObs < 10000, and F otherwise.
 #' @param rank if T, the values provided in form will be rank transformed. This will usually make patterns easier to spot visually, especially if the distribution of the predictor is skewed. If form is a factor, this has no effect.
 #' @param asFactor should a numeric predictor provided in form be treated as a factor. Default is to choose this for < 10 unique values, as long as enough predictions are available to draw a boxplot.
-#' @param smoothScatter if T, a smooth scatter plot will plotted instead of a normal scatter plot. This makes sense when the number of residuals is very large. Default NULL chooses T for nObs > 10000, and F otherwise.
+#' @param smoothScatter if T: for numeric predictors, a smooth scatter plot will plotted instead of a normal scatter plot; for categorical predictors, individual residuals will not be plotted. This makes sense when the number of residuals is very large. Default NULL chooses T for nObs > 10000, and F otherwise.
 #' @param quantiles for a quantile regression, which quantiles should be plotted. Default is 0.25, 0.5, 0.75.
 #' @param absoluteDeviation if T, switch from displaying normal quantile residuals to absolute deviation from the mean expectation of 0.5 (calculated as 2 * abs(res - 0.5)). The purpose of this is to test explicitly for heteroskedasticity, see details.
 #' @param ... additional arguments to plot / boxplot.
@@ -172,9 +172,9 @@ plotQQunif <- function(simulationOutput, testUniformity = TRUE, testOutliers = T
 #'
 #' If form is specified as a formula, e.g. \code{form = ~ your_predictor}, NAs will be handled automatically (recommended). If \code{form = ~.}, separate plots for all predictors in the model are produced. If \code{form = ~ predictor1 + predictor2}, a separate plot for each specified predictor is produced. If an additional grouping variable is specified, e.g. \code{form = ~ predictor|group}, a separate plot for the predictor within each grouping level is produced. Be careful with this command: if you have many levels, the plot may not display nicely. If you are interested in a specific group, you can use \code{form = ~ predictor|group == "group_level"}. If form is **not** a formula, e.g. \code{form = data$predictor}, NAs are **not** handled automatically. For phyr and gamm4$mer models, you need to specify form in this way.
 #'
-#' If the predictor is a factor, a boxplot will be plotted instead of a scatter plot. The distribution for each factor level should be uniformly distributed, so the box should go from 0.25 to 0.75, with the median line at 0.5 (within-group). To test if deviations from those expectations are significant, KS-tests per group and a Levene test for homogeneity of variances are performed. See [testCategorical] for details.
+#' If the predictor is a factor, a boxplot will be plotted instead of a scatter plot. Individual residuals are added as jittered points (unless smoothScatter = TRUE). The distribution for each factor level should be uniformly distributed, so the box should go from 0.25 to 0.75, with the median line at 0.5 (within-group). To test if deviations from those expectations are significant, KS-tests per group and a Levene test for homogeneity of variances are performed. See [testCategorical] for details.
 #'
-#' @note If nObs > 10,000, the scatter plot is replaced by graphics::smoothScatter().
+#' @note If nObs > 10,000, the scatter plot is replaced by graphics::smoothScatter();for categorical predictors, individual residuals are not plotted.
 #'
 #' The color for highlighting outliers and quantile lines/splines with significant tests can be changed by setting \code{options(DHARMaSignalColor = "red")} to a different color. See \code{getOption("DHARMaSignalColor")} for the current setting. This is convenient for a color-blind friendly display, since red and black are difficult for some people to distinguish.
 #'
@@ -214,6 +214,7 @@ plotResiduals <- function(simulationOutput, form = NULL, quantreg = NULL,
     if (!inherits(form, "formula")) {
       predictor = form # go back to old default
       group = NULL
+      a$xlab = checkDots("xlab", paste(deparse(checkForm), collapse = ""), ...)
       if(is.null(predictor)) stop("DHARMA: unable to find specified predictor variable.")
 
     } else {
@@ -341,7 +342,7 @@ plotResiduals <- function(simulationOutput, form = NULL, quantreg = NULL,
   if(is.null(quantreg)) {
     if (length(res) > 10000) {
       quantreg = FALSE
-      message("plotResiduals() for datasets larger than 10,000 displays a spline instead of quantile regression lines for the sake of speed. To switch back to quantile regression lines, use the argument quantreg = T and have in mind that the function may take a while to compute and display the lines.")
+      if(!is.factor(pred)) message("plotResiduals() for datasets larger than 10,000 displays a spline instead of quantile regression lines for the sake of speed. To switch back to quantile regression lines, use the argument quantreg = T and have in mind that the function may take a while to compute and display the lines.")
     }
     else quantreg = TRUE
   }
@@ -355,14 +356,11 @@ plotResiduals <- function(simulationOutput, form = NULL, quantreg = NULL,
 
   # categorical plot
   if(is.factor(pred)){
-    if(is.null(group)) {
-      testCategorical(simulationOutput = simulationOutput, catPred = pred,
-                      quantiles = quantiles, xlab = a$xlab, ...)
-    } else {
-      simulationOutput$scaledResiduals = res
-      testCategorical(simulationOutput = simulationOutput, catPred = pred,
-                      quantiles = quantiles, xlab = a$xlab, ...)
-    }
+    a$p.outliers = if(is.vector(simOut)) NA else testOutliers(simOut, plot = FALSE)$p.value
+    simulationOutput$scaledResiduals = res
+    do.call(testCategorical,
+            append(list(simulationOutput = simulationOutput, catPred = pred,
+                        quantiles = quantiles, smoothScatter = smoothScatter), a))
 
   } else{
 
@@ -373,7 +371,7 @@ plotResiduals <- function(simulationOutput, form = NULL, quantreg = NULL,
       defaultCol = blackcol
       defaultPch = 1
     } else {
-      p.outliers <- testOutliers(simOut, plot = F)$p.value
+      p.outliers <- testOutliers(simOut, plot = FALSE)$p.value
       defaultPch = ifelse(outlier==TRUE, 8, 1)
       if(p.outliers < 0.05){
         defaultCol <- ifelse(outlier == TRUE, .Options$DHARMaSignalColor, blackcol)
