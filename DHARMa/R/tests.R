@@ -419,7 +419,7 @@ testCategorical <- function(simulationOutput, catPred,
 #'
 #' **Important:** for either refit = T or F, the results of type = "DHARMa" dispersion test will differ depending on whether simulations are done conditional (= conditional on fitted random effects) or unconditional (= REs are re-simulated). The default as of DHARMa 0.5.0 is conditional simulations, which substantially increase the power and sensitivity of the dispersion test (for details see [simulateResiduals] and the DHARMa vignette).
 #'
-#' If refit = F, the function uses [testGeneric] to compare the variance of the observed raw residuals (i.e. var(observed - predicted), displayed as a red line) against the variance of the simulated residuals (i.e. var(simulated - predicted), histogram). The variances are scaled to the mean simulated variance. A significant ratio > 1 indicates overdispersion, a significant ratio < 1 underdispersion.
+#' If refit = F, the function uses [testGeneric] to compare the variance of the observed raw residuals (i.e. var(observed - predicted), displayed as a red line) against the variance of the simulated residuals (i.e. var(simulated - predicted), histogram). Predictions are taken on the scale of the observed response (see [getFittedResponse]), i.e. for binomial models with more than one trial, as the expected number of successes. For objects created with [createDHARMa], the provided fittedPredictedResponse is used. The variances are scaled to the mean simulated variance. A significant ratio > 1 indicates overdispersion, a significant ratio < 1 underdispersion.
 #'
 #' If refit = T, the function compares the approximate deviance (via squared Pearson residuals) with the same quantity from the models refitted with simulated data. Applying this is much slower than the previous alternative. Given the computational cost, I would suggest that most users will be satisfied with the standard dispersion test.
 #'
@@ -450,8 +450,18 @@ testDispersion <- function(simulationOutput, alternative = c("two.sided", "great
 
   if(simulationOutput$refit == F){
 
+      # fitted values on the scale of the observed / simulated response (expected number of successes for k/n binomial models), see getFittedResponse
+      if(is.null(simulationOutput$fittedModel)){
+        # objects created with createDHARMa
+        fitted = simulationOutput$fittedPredictedResponse
+      } else {
+        fitted = getFittedResponse(simulationOutput$fittedModel)
+        # residuals grouped with recalculateResiduals
+        if(!is.null(simulationOutput$aggregateByGroup)) fitted = simulationOutput$aggregateByGroup(fitted)
+      }
+
       expectedVar = sd(simulationOutput$simulatedResponse)^2
-      spread <- function(x) var(x - simulationOutput$fittedPredictedResponse) / expectedVar
+      spread <- function(x) var(x - fitted) / expectedVar
       out = testGeneric(simulationOutput, summary = spread, alternative = alternative, methodName = "DHARMa nonparametric dispersion test via sd of residuals fitted vs. simulated", plot = plot, ...)
       names(out$statistic) = "dispersion"
     } else {
