@@ -1,6 +1,6 @@
 # Version 0.5.1
 
-## Submission 1
+## Submission 1, 27.10.2026
 
 This is a minor update of DHARMa, including various smaller improvements and bugfixes. See NEWS for details.
 
