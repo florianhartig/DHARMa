@@ -1,3 +1,12 @@
+# Version 0.5.1
+
+## Submission 1
+
+This is a minor update of DHARMa, including various smaller improvements and bugfixes. See NEWS for details.
+
+This update also fixes the failing check in tests/testthat/testNumericReproducibility.R reported by CRAN, caused by small numerical differences introduced by lme4 2.1-0. We relaxed the tolerance of the reference comparison. 
+
+
 # Version 0.5.0
 
 ## Submission 1, 18.05.2026
