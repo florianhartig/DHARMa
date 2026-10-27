@@ -396,7 +396,7 @@ getFittedResponse.default <- function (object, ...){
   out = getFitted(object, ...)
 
   # k/n binomial: getFitted returns proportions, here we return number of success
-  if(getFamily(object)$family %in% c("binomial", "betabinomial")){
+  if(getFamily(object)$family %in% c("binomial", "betabinomial", "betabin", "beta binomial")){
     x = model.frame(object)
     # number of trials given via cbind(successes, failures)
     if(is.matrix(x[[1]]) && ncol(x[[1]]) == 2) out = out * rowSums(x[[1]])

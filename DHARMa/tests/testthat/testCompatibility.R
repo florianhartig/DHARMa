@@ -94,7 +94,9 @@ test_that("getFittedResponse returns fitted values on the scale of the observed 
     glmmTMB_weights = glmmTMB::glmmTMB(prop ~ Environment1 + (1|group), weights = w, data = testData, family = binomial()),
     glmmTMB_betabinomial = glmmTMB::glmmTMB(cbind(observedResponse1, observedResponse0) ~ Environment1, data = testData, family = glmmTMB::betabinomial()),
     spaMM_cbind = spaMM::HLfit(cbind(observedResponse1, observedResponse0) ~ Environment1 + (1|group), data = testData, family = binomial()),
-    GLMMadaptive_cbind = GLMMadaptive::mixed_model(cbind(observedResponse1, observedResponse0) ~ Environment1, random = ~ 1 |group, data = testData, family = binomial())
+    spaMM_betabin = spaMM::fitme(cbind(observedResponse1, observedResponse0) ~ Environment1 + (1|group), data = testData, family = spaMM::betabin()),
+    GLMMadaptive_cbind = GLMMadaptive::mixed_model(cbind(observedResponse1, observedResponse0) ~ Environment1, random = ~ 1 |group, data = testData, family = binomial()) #,
+    # GLMMadaptive_betabinomial = mixed_model(fixed = cbind(observedResponse1, observedResponse0) ~ Environment1, random = ~ 1 |group, data = testData, family = beta.binomial())
   )
 
   for(i in names(models)){
