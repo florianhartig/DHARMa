@@ -50,7 +50,7 @@ Enhances:
     rjags,
     BayesianTools
 License: GPL (>= 3)
-URL: http://florianhartig.github.io/DHARMa/
+URL: https://florianhartig.github.io/DHARMa/
 LazyData: TRUE
 BugReports: https://github.com/florianhartig/DHARMa/issues
 RoxygenNote: 7.3.3
