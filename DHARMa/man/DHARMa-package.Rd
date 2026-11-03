@@ -12,7 +12,7 @@
 To get started with the package, look at the vignette and start with \link{simulateResiduals}
 }
 \section{Funding}{
- Development and maintenance of the DHARMa package has been supported by the \strong{Deutsche Forschungsgemeinschaft (DFG)}, project number \href{https://gepris.dfg.de/gepris/projekt/528747641}{528747641} (2024-now).
+ Development and maintenance of the DHARMa package has been supported by the \strong{Deutsche Forschungsgemeinschaft (DFG)}, project number \href{https://gepris.dfg.de/project/528747641}{528747641} (2024-now).
 }
 
 \examples{
@@ -36,7 +36,7 @@ vignette("DHARMa", package="DHARMa")
 \seealso{
 Useful links:
 \itemize{
-  \item \url{http://florianhartig.github.io/DHARMa/}
+  \item \url{https://florianhartig.github.io/DHARMa/}
   \item Report bugs at \url{https://github.com/florianhartig/DHARMa/issues}
 }
 
