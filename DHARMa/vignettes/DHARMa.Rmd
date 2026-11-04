@@ -280,7 +280,7 @@ Summary of the syntax for supported packages (this is only relevant for simulate
 | glmmTMB            | `set_simcodes(model$obj, val = "random", terms = "ALL")`, then `simulate(model)` (default)| `set_simcodes(model$obj, val = "fix", terms = "ALL")`, then `simulate(model)`            | not available|
 | GLMMadaptive       | `type = "subject_specific"`, `new_RE = T` | `type = "subject_specific"` (default) |not available|
 | mgcv               | not available           | default                      |not available|
-| brms                | `re_formula = NA`          | `re_formula = NULL` (default)    | not available               |
+| brms                | `newdata` with new levels of all grouping variables, `allow_new_levels = TRUE, sample_new_levels = "gaussian"` | `re_formula = NULL` (default)    | not available               |
 
 
 
@@ -973,7 +973,7 @@ DHARMa residuals work with phyr, but the correct implementation is not fully tes
 ## brms
 
 Simple brms models are supported as of DHARMa version 0.5.0. This means that essentially, all models you could also fit with glmmTMB are possible to check with DHARMa. Multivariate models (multi-response, structural equation models, multinomial) are not supported. Note that predictions are based on the median of the posterior. See also vignette "DHARMa for Bayesians" and <https://github.com/florianhartig/DHARMa/issues/33>
-As brms doesn't provide Pearson residuals, testDispersion with type = "PearsonChisq" will not work. Furthermore think carefully if using simulateResiduals with refit = TRUE makes sense for brms models (for example, for testDispersion it doesn't make sense because the test will be a nonparametric Pearson residuals test but brms doesn't provide Pearson residuals.)
+Pearson residuals are not supported for brms models, so testDispersion with type = "PearsonChisq" will not work. Furthermore think carefully if using simulateResiduals with refit = TRUE makes sense for brms models (for example, for testDispersion it doesn't make sense because the test will be a nonparametric Pearson residuals test, and Pearson residuals are not supported for brms models.)
 
 ## Unsupported packages
 

@@ -621,6 +621,11 @@ test_that("brms works",
                                      family = "poisson",
                                      data = testData$poisson1)
             runEverythingExcPearson(fittedModel, testData$poisson1, doRefit = FALSE)
+
+            # unconditional simulations re-simulate the REs, so they vary more per observation (issue #574)
+            simCond = getSimulations(fittedModel, nsim = 50, simulateREs = "conditional")
+            simUncond = getSimulations(fittedModel, nsim = 50, simulateREs = "unconditional")
+            expect_gt(mean(apply(simUncond, 1, sd)), mean(apply(simCond, 1, sd)))
           }
 )
 

@@ -221,7 +221,7 @@ getResiduals <- function (object, ...) {
 #' @param object a fitted model.
 #' @param ... additional parameters to be passed on, usually to the residual function of the respective model class.
 #'
-#' @note  Package `brms` doesn't provide Pearson residuals (deprecated).
+#' @note Pearson residuals are not supported for `brms` models: `residuals(type = "pearson")` of brms returns a summary matrix (Estimate, Est.Error, Q2.5, Q97.5) instead of a single residual per observation.
 #' @example inst/examples/wrappersHelp.R
 #'
 #' @seealso [getObservedResponse], [getSimulations], [getRefit], [getFixedEffects], [getFitted]
@@ -1087,7 +1087,15 @@ getSimulations.brmsfit <- function (object, nsim = 1, simulateREs = c("condition
 
   # unconditional
   if (simulateREs == "unconditional") {
-    out = t(brms::posterior_predict(object = object, re_formula = NA, ndraws = nsim, ...))
+    # re-simulate the REs: predictions for new levels of all grouping variables, with RE values drawn from the fitted RE distribution (re_formula = NA would set the REs to zero, issue #574)
+    if(any(object$ranef$gtype == "mm")) stop("DHARMa: unconditional simulations are not available for brms models with multi-membership terms (mm()). Use simulateREs = \"conditional\".")
+    groupVars = unique(unlist(lapply(names(brms::ngrps(object)), function(x) all.vars(parse(text = gsub(":", "*", x))[[1]]))))
+    # new levels would also change the fixed effects if a grouping variable is used there
+    sharedVars = intersect(groupVars, all.vars(lme4::nobars(object$formula$formula[[3]])))
+    if(length(sharedVars) > 0) stop("DHARMa: unconditional simulations are not available for brms models in which a grouping variable is also used outside the random effects (", paste(sharedVars, collapse = ", "), "). Use simulateREs = \"conditional\".")
+    newData = object$data
+    for(v in groupVars) newData[[v]] = paste0("DHARMa_new_", newData[[v]])
+    out = t(brms::posterior_predict(object = object, newdata = newData, re_formula = NULL, allow_new_levels = TRUE, sample_new_levels = "gaussian", ndraws = nsim, ...))
   }
 
   if(type == "normal"){
@@ -1131,8 +1139,9 @@ getResiduals.brmsfit <- function (object,...){
 
 #' @rdname getPearsonResiduals
 #' @export
-getPearsonResiduals.brms <- function (object, ...){
-   stop("brms doesn't provide Pearson residuals (deprecated).")
+getPearsonResiduals.brmsfit <- function (object, ...){
+   # class is brmsfit, the method was registered for brms before (issue #574)
+   stop("DHARMa: Pearson residuals are not supported for brms models (residuals(type = \"pearson\") returns a summary matrix instead of a single residual per observation).")
 }
 
 

@@ -19,6 +19,8 @@ NOTE: for more news about the package, see https://github.com/florianhartig/DHAR
 
 * Predictions from `GLMMadaptive` models are now created using `fitted()`, which avoids errors on models with transformations (e.g. offset, log)
 
+* brms: `getPearsonResiduals()` now stops with an informative error, and unconditional simulations re-simulate the random effects instead of setting them to zero (#574).
+
 * Fix in behavior of `update()` on models with transformed predictors (e.g. `offset()`). This fixes behavior of `getRefit` and related functions such as `simulateLRT` (issue #351). 
 
 * Small output fixes in `testCategorical()`, `testOutliers()` and `print.DHARMa` (#569).

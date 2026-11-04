@@ -1,3 +1,18 @@
+test_that("getPearsonResiduals stops for brms models", {
+  skip_on_cran()
+  skip_if_not_installed("brms")
+  d = data.frame(y = rpois(30, 3), x = rnorm(30))
+  # empty = TRUE: model object without compilation / sampling
+  m = suppressMessages(brms::brm(y ~ x, data = d, family = poisson, empty = TRUE))
+  expect_error(getPearsonResiduals(m), "Pearson residuals are not supported for brms models")
+
+  # unconditional simulations need new levels of the grouping variables, not possible if these are also fixed effects
+  d$a = factor(rep(1:3, 10)); d$b = factor(rep(1:10, 3))
+  m = suppressMessages(brms::brm(y ~ a + (1|a:b), data = d, family = poisson, empty = TRUE))
+  expect_error(getSimulations(m, simulateREs = "unconditional"), "also used outside the random effects")
+})
+
+
 test_that("Conditional simulations have a smaller spread than unconditional simulations", {
 
   # create data
