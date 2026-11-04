@@ -231,29 +231,17 @@ getFormulaPredictors <- function(simulationOutput, formula) {
 
   allV = all.vars(formula)
 
-  fittedModel = simulationOutput$fittedModel
-  modelData = tryCatch(getData(fittedModel), error = function(e) NULL)
-  rownames = rownames(model.frame(fittedModel))
+  modelData = getData(simulationOutput$fittedModel)
+  rownames = rownames(model.frame(simulationOutput$fittedModel))
 
   predictors = list()
 
   for(i in 1:length(allV)) {
-    if(!is.null(modelData)) {
-      predictors[[allV[i]]] = modelData[[allV[[i]]]]
-      if(length(predictors[[allV[i]]]) != length(simulationOutput$scaledResiduals)) {
-        predictors[[allV[i]]] = predictors[[allV[i]]][(rownames(modelData) %in% rownames)]
-      }
-    } else {
-      # models fitted without data argument: variables from the model frame or the environment of the model formula (issue #571)
-      modelFrame = model.frame(fittedModel)
-      if(allV[i] %in% colnames(modelFrame)) predictors[[allV[i]]] = modelFrame[[allV[i]]]
-      else {
-        # rows used in the fit: positions from the na.action, as rownames can be names of the response
-        naAction = attr(modelFrame, "na.action")
-        rows = if(is.null(naAction)) seq_len(nrow(modelFrame)) else seq_len(nrow(modelFrame) + length(naAction))[-naAction]
-        predictors[[allV[i]]] = get(allV[i], envir = environment(formula(fittedModel)))[rows]
-      }
+    predictors[[allV[i]]] = modelData[[allV[[i]]]]
+    if(length(predictors[[allV[i]]]) != length(simulationOutput$scaledResiduals)) {
+      predictors[[allV[i]]] = predictors[[allV[i]]][(rownames(modelData) %in% rownames)]
     }
+
   }
 
   return(predictors)

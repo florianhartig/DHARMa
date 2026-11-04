@@ -469,24 +469,27 @@ getPredictorNames.default <- function (object,...){
 #' @rdname getRefit
 #' @export
 getRefit.lm <- function(object, newresp, ...){
-  newData = getRefitData(object, newresp)
-  # the new response replaces the left-hand side of the formula, see getRefitData
-  # subset = NULL: newData contains only the rows used in the fit
-  refittedModel = update(object, formula. = .DHARMa_response ~ ., data = newData, subset = NULL, ...)
+  refitData = getRefitData(object, newresp)
+  # subset = NULL: the data contain only the rows used in the fit
+  refittedModel = update(object, formula. = refitData$formula, data = refitData$data, subset = NULL, ...)
   return(refittedModel)
 }
 
-# Creates the data for refitting a model to a new response.
+# Creates the data and formula for refitting a model to a new response.
 #
-# Uses the original data, so that variables in offsets or transformations are found (fixes issue #351). Models fitted without a data argument use the model frame; variables not in the model frame are then taken from the formula environment, which works only if no rows were removed because of NAs. The new response is added as a separate column, which is then used as the left-hand side of the formula. This works for transformed responses such as log(y) and for cbind(k, N - k) responses, without overwriting data columns (issue #571).
+# Uses the original data, so that variables in offsets or transformations are found (fixes issue #351). Models fitted without a data argument use the model frame; variables not in the model frame are then taken from the formula environment, which works only if no rows were removed because of NAs. The new response is added as a separate column, which replaces the left-hand side of the formula. This works for transformed responses such as log(y) and for cbind(k, N - k) responses, without overwriting data columns (issue #571).
 getRefitData <- function(object, newresp, rows = rownames(model.frame(object))){
-  if(is.null(object$call$data)) newData = model.frame(object)
+  if(is.null(getCall(object)$data)) newData = model.frame(object)
   else newData = getData(object)
   newData = as.data.frame(newData)[rows, , drop = FALSE]
+  f = formula(object)
+  # expand '.' before the new response is added; update() cannot expand it without data
+  if("." %in% all.vars(f)) f = formula(terms(f, data = newData))
+  f[[2]] = quote(.DHARMa_response)
   # Hack to make the factor binomial case work
   if(is.factor(newresp)) newresp = as.numeric(newresp) - 1
   newData$.DHARMa_response = newresp
-  return(newData)
+  return(list(data = newData, formula = f))
 }
 
 
@@ -657,9 +660,9 @@ getData.merMod <- function (object, ...){
 #' @export
 getRefit.glmmTMB <- function(object, newresp, ...){
   # glmmTMB needs a matrix response embedded in the data, see https://github.com/glmmTMB/glmmTMB/issues/549; getRefitData does this
-  newData = getRefitData(object, newresp)
-  # subset = NULL: newData contains only the rows used in the fit
-  refittedModel = update(object, formula. = .DHARMa_response ~ ., data = newData, subset = NULL, ...)
+  refitData = getRefitData(object, newresp)
+  # subset = NULL: the data contain only the rows used in the fit
+  refittedModel = update(object, formula. = refitData$formula, data = refitData$data, subset = NULL, ...)
   return(refittedModel)
 }
 
@@ -881,9 +884,9 @@ getFixedEffects.MixMod <- function(object, ...){
 #' @rdname getRefit
 #' @export
 getRefit.MixMod <- function(object, newresp, ...) {
-  # mixed_model has the argument fixed instead of formula, see getRefitData
-  newData = getRefitData(object, newresp)
-  update(object, fixed = update(formula(object), .DHARMa_response ~ .), data = newData, ...)
+  # mixed_model has the argument fixed instead of formula
+  refitData = getRefitData(object, newresp)
+  update(object, fixed = refitData$formula, data = refitData$data, ...)
 }
 
 #' @rdname getFitted
@@ -939,9 +942,8 @@ getSimulations.phylolm <- function(object, nsim = 1, simulateREs = c("conditiona
 #' @rdname getRefit
 #' @export
 getRefit.phylolm <- function(object, newresp, ...){
-  newData = getRefitData(object, newresp)
-  refittedModel = update(object, formula. = .DHARMa_response ~ ., data = newData, ...)
-  return(refittedModel)
+  refitData = getRefitData(object, newresp)
+  refittedModel = update(object, formula. = refitData$formula, data = refitData$data, ...)
 }
 
 
@@ -995,8 +997,8 @@ getSimulations.phyloglm <- function(object, nsim = 1,
 #' @export
 getRefit.phyloglm <- function(object, newresp, ...){
   # phyloglm objects have no model.frame method
-  newData = getRefitData(object, newresp, rows = rownames(object$X))
-  refittedModel = update(object, formula. = .DHARMa_response ~ ., data = newData, ...)
+  refitData = getRefitData(object, newresp, rows = rownames(object$X))
+  refittedModel = update(object, formula. = refitData$formula, data = refitData$data, ...)
   return(refittedModel)
 }
 

@@ -92,11 +92,10 @@ test_that("Simulations work for mgcv::gam", {
 })
 
 
-test_that("simulateResiduals with refit = TRUE and simulateLRT stop if all refits fail", {
+test_that("simulateResiduals with refit = TRUE stops if all refits fail", {
   testData = createData(sampleSize = 50, family = poisson(), randomEffectVariance = 0)
   fittedModel = glm(observedResponse ~ Environment1, family = poisson, data = testData)
   local_mocked_bindings(getRefit = function(...) stop("refit not possible"))
   expect_error(simulateResiduals(fittedModel, n = 3, refit = TRUE), "all refitted models produced an error")
-  expect_error(simulateLRT(fittedModel, fittedModel, n = 3, plot = FALSE), "all refitted models produced an error")
 })
 

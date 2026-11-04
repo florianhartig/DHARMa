@@ -127,7 +127,12 @@ test_that("glmmTMB refit simulations for proportions with weights (issue #571)",
   m = glmmTMB::glmmTMB(p ~ x, weights = N, family = binomial, data = testData)
   sims = getSimulations(m, nsim = 3, type = "refit")
   expect_equal(ncol(sims), 3)
-  expect_true(all(as.matrix(sims) >= 0 & as.matrix(sims) <= 1))
+  # proportions of the number of trials
+  expect_equal(as.matrix(sims) * testData$N, round(as.matrix(sims) * testData$N))
+  # cbind() response with weights of 1: one simulation per column (weights warning before #568)
+  testData$k = round(testData$p * testData$N)
+  m = glmmTMB::glmmTMB(cbind(k, N - k) ~ x, weights = rep(1, 60), family = binomial, data = testData)
+  expect_equal(length(suppressWarnings(getSimulations(m, nsim = 3, type = "refit"))), 3)
 })
 
 
@@ -162,5 +167,8 @@ test_that("refitting to the observed response reproduces the fit (issue #571)", 
 
   testData$g = factor(sample(1:8, n, TRUE))
   m = GLMMadaptive::mixed_model(cbind(k, N - k) ~ x, random = ~1|g, data = testData, family = binomial())
+  expect_equal(refitCoef(m, GLMMadaptive::fixef), GLMMadaptive::fixef(m))
+  # formulas with '.'
+  m = GLMMadaptive::mixed_model(k ~ . - g, random = ~1|g, data = testData[, c("k", "x", "g")], family = poisson())
   expect_equal(refitCoef(m, GLMMadaptive::fixef), GLMMadaptive::fixef(m))
 })
