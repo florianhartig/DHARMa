@@ -20,7 +20,7 @@ testTemporalAutocorrelation(simulationOutput, time,
 This function performs a standard test for temporal autocorrelation on the simulated residuals.
 }
 \details{
-The function performs a Durbin-Watson test on the uniformly scaled residuals, and plots the residuals against time. The DW test was originally designed for normal residuals. In simulations, I didn't see a problem with this setting though. The alternative is to transform the uniform residuals to normal residuals and perform the DB test on those.
+The function performs a Durbin-Watson test on the uniformly scaled residuals, and plots the residuals against time. The DW test was originally designed for normal residuals. In simulations, I didn't see a problem with this setting though. The alternative is to transform the uniform residuals to normal residuals and perform the DW test on those.
 
 Testing for temporal autocorrelation requires unique time values - if you have several observations per time value, either use \link{recalculateResiduals} function to aggregate residuals per time step (note that the aggregated residuals are ordered by the sorted group levels, so time must be provided in the same order, e.g. sort(unique(time))), or extract the residuals from the fitted object, and plot / test each of them independently for temporally repeated subgroups (typical choices would be location / subject etc.). Note that the latter must be done by hand, outside testTemporalAutocorrelation.
 }
