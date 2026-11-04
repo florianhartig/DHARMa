@@ -27,7 +27,9 @@ NOTE: for more news about the package, see https://github.com/florianhartig/DHAR
 
 * `testDispersion()` with `refit = TRUE` now aggregates the observed Pearson residuals like the refitted ones after `recalculateResiduals()` (#575).
 
-* `testQuantiles()` stops for unordered categorical predictors, uses ordered factors in the order of their levels, and gives the same quantile regression with and without plot (#576).
+* `testQuantiles()` now stops for categorical predictors and formulas with several variables, evaluates transformations such as `~log(x)`, and gives the same results with and without plot (#576).
+
+* `recalculateResiduals()` now always uses the traditional randomization for residuals with `refit = TRUE`, as `simulateResiduals()` does (#589).
 
 ## Minor changes
 

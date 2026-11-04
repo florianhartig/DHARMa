@@ -300,18 +300,27 @@ test_that("testDispersion with refit = TRUE aggregates observed residuals for gr
   simulationOutput = simulateResiduals(fittedModel, n = 20, refit = TRUE)
   grouped = recalculateResiduals(simulationOutput, group = testData$group)
   x = testDispersion(grouped, plot = FALSE)
-  # observed and refitted Pearson residuals aggregated in the same way (issue #575)
-  observed = sum(grouped$aggregateByGroup(getPearsonResiduals(fittedModel))^2)
+  # observed Pearson residuals summed per group, as the refitted ones (issue #575)
+  observed = sum(rowsum(residuals(fittedModel, type = "pearson"), testData$group)^2)
   expected = mean(colSums(grouped$refittedPearsonResiduals^2))
   expect_equal(unname(x$statistic), observed / expected)
+  # refitted residuals always use the traditional randomization, as in simulateResiduals (issue #589)
+  expect_equal(grouped$scaledResiduals, recalculateResiduals(simulationOutput, group = testData$group, method = "traditional")$scaledResiduals)
 
   # selection with sel: observed residuals subset in the same way
   selected = recalculateResiduals(simulationOutput, sel = testData$Environment1 > 0)
   x = testDispersion(selected, plot = FALSE)
-  observed = sum(selected$aggregateByGroup(getPearsonResiduals(fittedModel))^2)
+  observed = sum(residuals(fittedModel, type = "pearson")[testData$Environment1 > 0]^2)
   expected = mean(colSums(selected$refittedPearsonResiduals^2))
   expect_equal(unname(x$statistic), observed / expected)
+
+  # grouping variable as only predictor: aggregated residuals are zero, the test stops
+  fittedModel = glm(observedResponse ~ group, family = poisson, data = testData)
+  simulationOutput = simulateResiduals(fittedModel, n = 5, refit = TRUE)
+  expect_error(testDispersion(recalculateResiduals(simulationOutput, group = testData$group), plot = FALSE), "close to\\) zero")
 })
+
+
 
 
 test_that("testQuantiles with categorical, ordered and few-valued predictors (issue #576)", {
@@ -330,11 +339,16 @@ test_that("testQuantiles with categorical, ordered and few-valued predictors (is
   # ordered factors and numeric predictors with few values: same quantile regression with and without plot
   testData$fewValues = round(testData$Environment1)
   testData$ordered = factor(testData$fewValues, ordered = TRUE)
+  # residuals passed as vector
+  expect_no_error(testQuantiles(simulationOutput$scaledResiduals, predictor = testData$Environment1, plot = TRUE))
   for(pred in list(testData$fewValues, testData$ordered)){
     p1 = testQuantiles(simulationOutput, predictor = pred, plot = FALSE)$p.value
     p2 = testQuantiles(simulationOutput, predictor = pred, plot = TRUE)$p.value
     expect_equal(p1, p2)
   }
-  # formulas with several variables are still passed on to plotResiduals
-  expect_no_error(testQuantiles(simulationOutput, predictor = ~Environment1 | group, plot = TRUE))
+  # formulas: transformations are evaluated, several or unknown variables stop
+  expect_equal(testQuantiles(simulationOutput, predictor = ~log(Environment1 + 3), rank = FALSE, plot = FALSE)$p.value,
+               testQuantiles(simulationOutput, predictor = log(testData$Environment1 + 3), rank = FALSE, plot = FALSE)$p.value)
+  expect_error(testQuantiles(simulationOutput, predictor = ~Environment1 | group), "exactly one variable")
+  expect_error(testQuantiles(simulationOutput, predictor = ~unknownVariable), "data used to fit the model")
 })
