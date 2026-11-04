@@ -27,7 +27,7 @@ Wrapper to get the Pearson residuals of a fitted model.
 The purpose of this wrapper is to extract the Pearson residuals of a fitted model.
 }
 \note{
-Pearson residuals are not supported for \code{brms} models: \code{residuals(type = "pearson")} of brms returns a summary matrix (Estimate, Est.Error, Q2.5, Q97.5) instead of a single residual per observation.
+Pearson residuals are not supported for \code{brms} models.
 }
 \examples{
 testData = createData(sampleSize = 400, family = gaussian())

@@ -599,6 +599,10 @@ test_that("brms works",
           {
             fittedModel <- brms::brm(observedResponse ~ Environment1 + (1|group), data = testData$lmm)
             runEverythingExcPearson(fittedModel, testData$lmm, doRefit = FALSE)
+            # unconditional simulations re-simulate the REs, so that simulations within a group are correlated (issue #574)
+            corr = cor(t(getSimulations(fittedModel, nsim = 50, simulateREs = "unconditional")))
+            sameGroup = outer(testData$lmm$group, testData$lmm$group, "==")
+            expect_gt(mean(corr[sameGroup & upper.tri(corr)], na.rm = TRUE), mean(corr[!sameGroup], na.rm = TRUE) + 0.1)
 
             fittedModel <-  brms::brm(observedResponse|trials(1) ~ Environment1 +
                                         (1|group), family = "binomial",
@@ -621,11 +625,6 @@ test_that("brms works",
                                      family = "poisson",
                                      data = testData$poisson1)
             runEverythingExcPearson(fittedModel, testData$poisson1, doRefit = FALSE)
-
-            # unconditional simulations re-simulate the REs, so they vary more per observation (issue #574)
-            simCond = getSimulations(fittedModel, nsim = 50, simulateREs = "conditional")
-            simUncond = getSimulations(fittedModel, nsim = 50, simulateREs = "unconditional")
-            expect_gt(mean(apply(simUncond, 1, sd)), mean(apply(simCond, 1, sd)))
           }
 )
 
