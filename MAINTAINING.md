@@ -1,6 +1,6 @@
 # Maintaining DHARMa
 
-This page is for the DHARMa team (maintainers and collaborators with write access to this repository). The [contributing guidelines](CONTRIBUTING.md) apply to the team as well; this page only adds the tasks that require write access. The policy on AI-generated contributions does not apply to the DHARMa team.
+This page is for the DHARMa team (maintainers and collaborators with write access to this repository). The [contributing guidelines](CONTRIBUTING.md) apply to the team as well; this page only adds the tasks that require write access. The policy on AI-generated contributions does not apply to the DHARMa team, except for the disclosure of substantial AI use.
 
 ## Issues and pull requests
 

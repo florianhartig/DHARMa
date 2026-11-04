@@ -23,13 +23,13 @@ If you have already diagnosed the problem or have ideas for a fix, including tha
 
 Please open or comment on an issue before you start working on a pull request, so that the approach can be discussed before you invest time in an implementation. This avoids situations where a pull request cannot be merged because of design conflicts that could have been resolved earlier. Only trivial fixes (e.g., typos or a factual error in the documentation) can go directly to a pull request. See [Pull request workflow](#pull-request-workflow) below.
 
-When working on changes, note that there is extensive code for tests and development purposes outside the package in the folder `Code/` of this repository. You may find useful context there, and development-oriented contributions may also target that section.
+When working on changes, note that there is extensive code for tests and development purposes outside the package in the folder `Code/` of this repository. You may find useful context there. Changes to `Code/` follow the same workflow.
 
 If you would like DHARMa to support a further R package or model class, see [Adding support for new R packages](ADDING_PACKAGES.md).
 
 ## Policy on AI-generated contributions
 
-This policy applies to contributors outside the DHARMa team.
+This policy applies to contributors outside the DHARMa team; only the disclosure of AI use (last paragraph) applies to everyone.
 
 **Issues, pull requests and comments created autonomously by AI agents or automated tools will not be accepted.** They will be closed or deleted without review.
 
@@ -37,11 +37,11 @@ The maintainer must be able to understand, evaluate, and take long-term responsi
 
 This policy covers issues, pull requests and comments submitted autonomously by AI agents, as well as contributions where the submitter does not have a full, independent understanding of the proposed changes. Having a tool post a contribution at your explicit request, after you have checked its content, does not count as autonomous.
 
-Using AI tools as a personal aid during development is a matter of individual choice. However, any contribution must be authored and understood by a human who can explain, defend, and iterate on the proposed changes. If AI tools wrote substantial parts of your code or text, please mention this briefly in your pull request (one sentence is enough, e.g., "Code drafted with an AI assistant, checked and tested by me.").
+Using AI tools as a personal aid during development is a matter of individual choice. However, any contribution must be authored and understood by a human who can explain, defend, and iterate on the proposed changes.
 
 If you are unsure whether your contribution complies with this policy, ask yourself: can you explain every line of your proposed change and its consequences for the rest of the codebase? If not, please do not submit it as a pull request — an issue describing the problem or idea is a better starting point.
 
-Instructions for AI coding agents, which apply to everyone, are in [AGENTS.md](AGENTS.md).
+For everyone, including the DHARMa team: if AI tools wrote substantial parts of your code or text, please mention this briefly in your issue, pull request, comment or commit (one sentence is enough, e.g., "Code drafted with an AI assistant, checked and tested by me."; in commits, use a trailer such as `Assisted-by: <tool> (<model>)`). Instructions for AI coding agents, which also apply to everyone, are in [AGENTS.md](AGENTS.md).
 
 ## Pull request workflow
 
@@ -53,7 +53,7 @@ Instructions for AI coding agents, which apply to everyone, are in [AGENTS.md](A
   - several closely related issues for the same release: `v<release>-<shortName>`, e.g., `v0.5.1-docFixes`.
   - trivial fixes without an issue: `<shortName>`, e.g., `fixTypoVignette`.
   - Do not name a branch exactly like a release tag (e.g., `v0.5.1`).
-- Keep each pull request focused on one issue, or on several closely related issues for the same release, and open it against `master`.
+- Keep each pull request focused on one issue, or on several closely related issues for the same release, and open it against `master`. Do not split one issue across several pull requests; follow-up work gets a new issue.
 - Once the approach is agreed in the issue, open the pull request early, as a draft if the work is not finished yet, so that work in progress is visible and linked to its issues. If the work is abandoned, close the pull request with a short explanation.
 - A pull request or commit that resolves an issue should contain `Fixes #351` or `Closes #351` (with your issue number) in its description or commit message, so that GitHub closes the issue automatically when it is merged into `master`. For several issues, repeat the keyword for each, e.g., `Fixes #567, fixes #568`.
 - The pull request template contains a checklist; please go through it before submitting. Pull requests from contributors outside the DHARMa team are reviewed before they are merged.
@@ -66,7 +66,7 @@ Instructions for AI coding agents, which apply to everyone, are in [AGENTS.md](A
   - Help files are written in American English; parameter descriptions start in lower case.
 - New or changed functions should include roxygen2 documentation. The help files in `DHARMa/man/` are generated from it; do not edit them by hand, but run `devtools::document("DHARMa")` from the repository root.
 - If your contribution changes or adds functionality, please include or update tests in the matching `test*.R` file in `DHARMa/tests/testthat/`. Tests should check behavior that matters, not cosmetic details.
-- Add a short entry to `DHARMa/NEWS.md` under the topmost version heading for every user-visible change, ending with the issue or pull request number(s) if there are any, e.g., `` * Plot titles of `simulateLRT()` and `testOutliers()` now explain the line colors (#535). ``. For substantial contributions from outside the DHARMa team (see [Attribution and authorship](#attribution-and-authorship)), add the author's GitHub username first, e.g., `(@BertvanderVeen, #535)`.
+- Add a short (ideally one-line) entry to `DHARMa/NEWS.md` under the topmost version heading for every user-visible change (no entry for bugs introduced after the last release), ending with the issue or pull request number(s) if there are any, e.g., `` * Small output fixes in `testCategorical()`, `testOutliers()` and `print.DHARMa` (#569). ``. For substantial contributions from outside the DHARMa team (see [Attribution and authorship](#attribution-and-authorship)), add the author's GitHub username first, e.g., `(@BertvanderVeen, #535)`.
 - `R CMD check` runs on pull requests to `master` (GitHub Actions; for first-time contributors after approval by the DHARMa team) and must pass. Locally, it is usually sufficient to run the tests related to your change, e.g., `testthat::test_file("DHARMa/tests/testthat/testTests.R")` after `devtools::load_all("DHARMa")`.
 
 ## Attribution and authorship
