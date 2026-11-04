@@ -27,9 +27,9 @@ NOTE: for more news about the package, see https://github.com/florianhartig/DHAR
 
 ## Minor changes
 
-* `testOutliers`: the argument `plotBoostrap` was renamed to `plotBootstrap` (issue #560). `plotBoostrap` still works, but gives a deprecation warning. `testOutliers` now also gives a message if `plotBootstrap = TRUE` is ignored because the binomial test is used.
+* `testOutliers()`: argument `plotBoostrap` renamed to `plotBootstrap`, old name deprecated (#560).
 
-* `simulateLRT` and `testOutliers` (`plotBootstrap = TRUE`): plot titles now explain the line colors (grey = simulated, red = observed, black = simulation mean).
+* Plot titles of `simulateLRT()` and `testOutliers()` now explain the line colors (#535).
 
 * New compatibility function `getFittedResponse`, which returns the fitted values on the scale of the observed response, i.e. the expected number of successes for k/n binomial models (`getFitted` returns proportions). It is used in `testDispersion`.
 
