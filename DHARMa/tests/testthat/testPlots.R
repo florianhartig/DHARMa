@@ -88,3 +88,20 @@ test_that("different form arguments in plotResiduals work",
             expect_error(plotResiduals(simulationOutput, form = testData$Environment1))
           }
 )
+
+
+test_that("plotResiduals default xlab for vector and formula form", {
+  set.seed(123)
+  testData = createData(sampleSize = 200, randomEffectVariance = 0)
+  fittedModel <- glm(observedResponse ~ Environment1 + group, family = "poisson", data = testData)
+  simulationOutput <- simulateResiduals(fittedModel, n = 50)
+  grDevices::pdf(NULL)
+  on.exit(grDevices::dev.off())
+  # factor predictors are plotted via testCategorical, which receives the xlab
+  lab = NULL
+  local_mocked_bindings(testCategorical = function(...) {lab <<- list(...)$xlab; invisible(NULL)})
+  plotResiduals(simulationOutput, form = testData$group)
+  expect_equal(lab, "group")
+  plotResiduals(simulationOutput, form = ~group)
+  expect_equal(lab, "group")
+})

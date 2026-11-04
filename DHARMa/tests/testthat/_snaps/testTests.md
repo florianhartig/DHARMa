@@ -124,7 +124,7 @@
       data:  simulationOutput
       outliers at both margin(s) = 1, observations = 200, p-value = 0.82
       alternative hypothesis: two.sided
-       percent confidence interval:
+      95 percent confidence interval:
        0.000000 0.012625
       sample estimates:
       outlier frequency (expected: 0.0028 ) 
@@ -338,7 +338,7 @@
       data:  simulationOutput
       outliers at both margin(s) = 20, observations = 200, p-value = 0.1
       alternative hypothesis: two.sided
-       percent confidence interval:
+      95 percent confidence interval:
        0.0 0.1
       sample estimates:
       outlier frequency (expected: 0.005 ) 

@@ -17,10 +17,11 @@
 #' @export
 print.DHARMa <- function(x, ...){
   cat(paste("Object of Class DHARMa with simulated residuals based on", x$nSim, "simulations with refit =", x$refit , ". See ?DHARMa::simulateResiduals for help."), "\n", "\n")
-  if (length(x$scaledResiduals) < 20) cat("Scaled residual values:", x$scaledResiduals)
+  if (length(x$scaledResiduals) < 20) cat("Scaled residual values:", x$scaledResiduals, "\n")
   else {
-    cat("Scaled residual values:", x$scaledResiduals[1:20], "...")
+    cat("Scaled residual values:", x$scaledResiduals[1:20], "...\n")
   }
+  invisible(x)
 }
 
 #' Return residuals of a DHARMa simulation

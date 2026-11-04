@@ -194,8 +194,10 @@ plotResiduals <- function(simulationOutput, form = NULL, quantreg = NULL,
   a <- list(...)
   yAxis = ifelse(absoluteDeviation == TRUE, "Residual spread [2*abs(res - 0.5)]", "DHARMa residual")
   a$ylab = checkDots("ylab", yAxis , ...)
-  a$xlab = checkDots("xlab", ifelse(is.null(form), "Model predictions",
-                                    paste(unique(all.vars(form)), collapse = ", ")), ...)
+  # all.vars only for formulas, as it returns character(0) for vectors
+  a$xlab = checkDots("xlab", if(is.null(form)) "Model predictions"
+                     else if(inherits(form, "formula")) paste(unique(all.vars(form)), collapse = ", ")
+                     else gsub(".*[$]|^~","", paste(deparse(substitute(form)), collapse = "")), ...)
   a$main = checkDots("main", NULL, ...)
 
   simOut <- simulationOutput

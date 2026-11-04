@@ -21,6 +21,7 @@ NOTE: for more news about the package, see https://github.com/florianhartig/DHAR
 
 * Fix in behavior of `update()` on models with transformed predictors (e.g. `offset()`). This fixes behavior of `getRefit` and related functions such as `simulateLRT` (issue #351). 
 
+* Small output fixes: `testCategorical(plot = FALSE)` no longer calls `title()` (it failed if no plot was open, or added titles to an existing plot), `testOutliers(type = "bootstrap")` now prints "95 percent confidence interval" (the level was missing; see `?testOutliers` for what this interval means for the bootstrap), and `print.DHARMa` ends with a newline.
 
 ## Minor changes
 
