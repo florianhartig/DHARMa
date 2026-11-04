@@ -12,7 +12,7 @@ The development of DHARMa and all associated activities — including discussion
 
 ## Human authorship
 
-Interactions in this repository — including issues, comments, and pull requests — are expected to originate from human contributors who take personal responsibility for their content. Submissions from outside the DHARMa team that were generated autonomously by AI agents or bots are not appropriate and will be closed without review. See [CONTRIBUTING.md](CONTRIBUTING.md) for details on the policy regarding AI-generated contributions.
+Interactions in this repository — including issues, comments, and pull requests — are expected to come from people who take personal responsibility for their content. Submissions from outside the DHARMa team that were generated autonomously by AI agents or automated tools are not appropriate and will be closed or deleted without review. See [CONTRIBUTING.md](CONTRIBUTING.md) for details on the policy regarding AI-generated contributions.
 
 ## Scope
 
@@ -20,4 +20,4 @@ This code of conduct applies within all spaces associated with DHARMa, including
 
 ## Reporting
 
-If you observe behavior that violates these values, please contact the maintainer directly via email (available on the [GitHub profile](https://github.com/florianhartig)). Reports will be handled with discretion.
+If you observe behavior that violates these values, please contact the maintainer directly by e-mail (run `maintainer("DHARMa")` in R to get the address). Reports will be handled with discretion.

@@ -2,7 +2,7 @@
 
 I receive a lot of [requests for supporting further R packages with DHARMa](https://github.com/florianhartig/DHARMa/labels/packageSupport), so here are a few general technical comments regarding this topic:
 
-First of all, if you have an unsupported model, there are two options to create DHARMa residual plots
+First of all, if you have an unsupported model, there are two options to create DHARMa residual plots:
 
 1. Making your package compatible with DHARMa
 2. Simulate new data from a fitted model by hand, and use the createDHARMa function to read those simulations into DHARMa 
@@ -27,14 +27,14 @@ For each wrapper, there is a default function. These default functions essential
 
 If your model class implements these points identically to lm/glm/lme4, chances are good that DHARMa will work out of the box, even if a warning is produced. 
 
-If that is not the case, you (or I) have to create a new S3 wrapper (e.g. getSimulations.YourClass) to extract simulations from the fitted model using your model syntax. Of course, this assumes that the respective functions / options are implemented by your model class in the first place. Regarding the latter, my strong preference is that:
+If that is not the case, you (or I) have to create a new S3 wrapper (e.g., `getSimulations.YourClass`) to extract simulations from the fitted model using your model syntax. Of course, this assumes that the respective functions / options are implemented by your model class in the first place. Regarding the latter, my strong preference is that:
 
-* I maintain the DHARMa wrappers, and DHARMa wrappers NEVER perform model-specific calculations, they only deal with the interface (i.e. variable / function names)
+* I maintain the DHARMa wrappers, and DHARMa wrappers NEVER perform model-specific calculations, they only deal with the interface (i.e., variable / function names)
 * If a certain functionality is not included in the original model class, or if the functionality is faulty, I will not fix it on the DHARMa side by writing new code, this needs to be fixed by the developers of the respective package.
 
 The sense of this separation of work is that functions related to a specific package should stay and be maintained with this package, not with DHARMa. 
 
-Usually I write the wrapper function myself, it's enough that you provide the S3 functions needed for DHARMa with your model, but of course you can also create a (tested) pull request with all the necessary wrapper functions, which would allow me to integrate your package seamlessly into DHARMa. 
+Usually I write the wrapper function myself, it's enough that you provide the S3 functions needed for DHARMa with your model, but of course you can also create a (tested) pull request with all the necessary wrapper functions, after discussing it in an issue (see [CONTRIBUTING.md](CONTRIBUTING.md)), which would allow me to integrate your package seamlessly into DHARMa. 
 
 ## Simulating new data by hand and reading this into DHARMa
 
@@ -84,6 +84,6 @@ sims = simulateMyfit(250, fittedModel)
 dharmaRes <- createDHARMa(simulatedResponse = sims, observedResponse = testData$observedResponse, fittedPredictedResponse = predict(fittedModel, type = "response"), integer = T)
 plot(dharmaRes)
 ```
-Another example [here](https://aosmith.rbind.io/2017/12/21/using-dharma-for-residual-checks-of-unsupported-models) 
+Another example is given in a [blog post on using DHARMa for residual checks of unsupported models](https://aosmith.rbind.io/2017/12/21/using-dharma-for-residual-checks-of-unsupported-models).
 
 Once you have an option to simulate, you can always read in the simulations via createDHARMa, which allows using most options of the DHARMa package.

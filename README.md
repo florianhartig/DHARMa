@@ -43,7 +43,7 @@ m1 <- glm(observedResponse ~ Environment1,
 res <- simulateResiduals(m1, plot = T)
 ```
 
-and read the help of ?simulateResiduals and the vignette to understand what you can do with the object `res`. If you want to ask questions about DHARMa, or report a bug, please use the [DHARMa GitHub issue page](https://github.com/florianhartig/DHARMa/issues). 
+and read the help of ?simulateResiduals and the vignette to understand what you can do with the object `res`. If you want to ask questions about DHARMa or report a bug, please first read [how to ask for help and report issues](CONTRIBUTING.md#asking-for-help-and-reporting-issues), then use the [DHARMa GitHub issue page](https://github.com/florianhartig/DHARMa/issues).
 
 ### Development release 
 
@@ -57,6 +57,8 @@ Below the status of the automatic tests via GitHub Actions
 
 [![R-CMD-check.yaml](https://github.com/florianhartig/DHARMa/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/florianhartig/DHARMa/actions/workflows/R-CMD-check.yaml)
 
+Changes between versions are listed in the [release notes (NEWS)](DHARMa/NEWS.md).
+
 ### Development branches / older releases
 
 To install a specific (older) release, or a particular branch, decide for the version number that you want to install in [https://github.com/florianhartig/DHARMa/releases](https://github.com/florianhartig/DHARMa/releases) (version numbering corresponds to CRAN, but there may be smaller releases that were not pushed to CRAN), or branch and run 
@@ -69,11 +71,13 @@ with the appropriate version number / branch as argument to ref.
 
 # Contributing to DHARMa
 
-Contributions to DHARMa are welcome. Please read the [contributing guidelines](CONTRIBUTING.md) before opening an issue or pull request. Note in particular the policy on AI-generated contributions and the criteria for author attribution.
+Contributions to DHARMa are welcome. Please read the [contributing guidelines](CONTRIBUTING.md) before opening an issue or pull request. Note in particular the policy on AI-generated contributions (see also the [instructions for AI coding agents](AGENTS.md)) and the criteria for acknowledgement.
 
-# Code of conduct
+See also:
 
-See [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md).
+* [Code of conduct](CODE_OF_CONDUCT.md)
+* [Adding support for new R packages](ADDING_PACKAGES.md)
+* [Maintaining DHARMa](MAINTAINING.md) (for the DHARMa team)
 
 # Acknowledgements
 
