@@ -295,7 +295,7 @@ plotResiduals <- function(simulationOutput, form = NULL, quantreg = NULL,
     groupLevel = tryCatch(eval(form[[2]][[3]][[3]]), error = function(e) NULL)
 
     if(is.null(groupLevel)) {
-      predictorNames = levels(group)
+      predictorNames = levels(as.factor(group))
 
       return(plotResidualsAll(
         simulationOutput = simulationOutput,
@@ -504,12 +504,16 @@ plotResidualsAll <- function(simulationOutput, predictorNames, predictorType = c
                              quantiles = c(0.25, 0.5, 0.75),
                              absoluteDeviation = FALSE, ...){
 
+  predictorType = match.arg(predictorType)
   opar = par(no.readonly = TRUE)
   on.exit(par(opar))
 
   # remove duplicate predictors, e.g. due to quadratic effects (fixes issue #536)
-  Vars = unname(sapply(predictorNames, function(x) all.vars(formula(paste("~", x)))[1]))
-  predictorNames = predictorNames[!duplicated(Vars)]
+  # only for predictors, group levels are not variable names (issue #573)
+  if(predictorType == "predictor"){
+    Vars = unname(sapply(predictorNames, function(x) all.vars(formula(paste("~", x)))[1]))
+    predictorNames = predictorNames[!duplicated(Vars)]
+  }
 
   # get number of panels needed (copied from BayesianTools)
   numPredictors = length(predictorNames)
@@ -547,7 +551,8 @@ plotResidualsAll <- function(simulationOutput, predictorNames, predictorType = c
   if(predictorType == "groupLevel"){
     # create residual plot for each group level of a predictor
     for(i in 1:length(predictorNames)){
-      newForm = paste("~", form, "==", predictorNames[i])[[2]]
+      # quote the level, so that non-numeric levels such as "a" work as well (issue #573)
+      newForm = paste("~", form, "==", deparse(predictorNames[i]))[[2]]
 
       plotResiduals(simulationOutput,
                     form = formula(newForm),

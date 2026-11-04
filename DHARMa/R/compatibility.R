@@ -1146,11 +1146,12 @@ getData.brmsfit <- function (object, ...){
 #' @rdname getPredictorNames
 #' @export
 getPredictorNames.brmsfit <- function (object,...){
-  # fixes issue #542
+  # remove the response and variables used only on the left-hand side, e.g. y for log(y) (issue #542) or w for y | weights(w) (issue #573)
   modelFrame = model.frame(object)
   responseName = names(modelFrame)[attr(attr(modelFrame, "terms"), "response")]
+  lhsVars = setdiff(all.vars(object$formula$formula[[2]]), all.vars(object$formula$formula[[3]]))
   predictorNames = colnames(modelFrame)
-  predictorNames = predictorNames[predictorNames != responseName][-1]
+  predictorNames = predictorNames[!predictorNames %in% c(responseName, lhsVars)]
   return(predictorNames)
 }
 
