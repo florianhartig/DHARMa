@@ -23,6 +23,8 @@ NOTE: for more news about the package, see https://github.com/florianhartig/DHAR
 
 * Small output fixes in `testCategorical()`, `testOutliers()` and `print.DHARMa`.
 
+* `runBenchmarks()` no longer warns about NA values when the output contains none.
+
 ## Minor changes
 
 * `testOutliers`: the argument `plotBoostrap` was renamed to `plotBootstrap` (issue #560). `plotBoostrap` still works, but gives a deprecation warning. `testOutliers` now also gives a message if `plotBootstrap = TRUE` is ignored because the binomial test is used.
