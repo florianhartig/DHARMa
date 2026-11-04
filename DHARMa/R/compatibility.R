@@ -112,6 +112,8 @@ getObservedResponse <- function (object, ...) {
 #'
 #' If the model was fit with weights and the respective model class does not include the weights in the simulations, getSimulations will throw a warning. The background is if weights are used on the likelihood directly, then what is fitted is effectively a pseudo likelihood, and there is no way to directly simulate from the specified likelihood. Whether or not residuals can be used in this case depends very much on what is tested and how weights are used. I'm sorry to say that it is hard to give a general recommendation, you have to consult someone that understands how weights are processed in the respective model class.
 #'
+#' Binomial models with a cbind(successes, failures) response and additional prior weights are not supported, because observed and simulated responses would be on different scales; getSimulations stops for this combination.
+#'
 #' @author Florian Hartig
 #' @export
 getSimulations <- function (object, nsim = 1, simulateREs = c("conditional", "unconditional", "user-specified"), type = c("normal", "refit"), ...) {
@@ -331,7 +333,14 @@ getSimulations.default <- function (object, nsim = 1, simulateREs = c("condition
   type <- match.arg(type)
   simulateREs <- match.arg(simulateREs)
 
-  out = simulate(object, nsim = nsim, ...)
+  checkBinomialMatrixWeights(object)
+
+  # for gam, always use the stats method: mgcViz registers its own simulate.gam, which returns a different format (issue #567, bug D)
+  if(inherits(object, "gam")) out = getS3method("simulate", "lm")(object, nsim = nsim, ...)
+  else out = simulate(object, nsim = nsim, ...)
+
+  # stats:::simulate.lm returns a data.frame with 0 rows if fitted() has no names, e.g. for gam with factor or cbind() responses (issue #567, bug C)
+  if(is.data.frame(out) && nrow(out) == 0 && length(out) > 0) attr(out, "row.names") = .set_row_names(NROW(out[[1]]))
 
   if (type == "normal"){
     if(family(object)$family %in% c("binomial", "betabinomial")){
@@ -345,19 +354,15 @@ getSimulations.default <- function (object, nsim = 1, simulateREs = c("condition
         }
       }
 
-      if("(weights)" %in% colnames(model.frame(object))){
+      if (is.matrix(out[[1]])){
+        # this is for the k/n binomial case, checked first so that weights = 1 do not affect it (issue #568)
+        out = as.matrix(out)[,seq(1, (2*nsim), by = 2)]
+      } else if("(weights)" %in% colnames(model.frame(object))){
         x = model.frame(object)
         out = out * x$`(weights)`
-      } else if (is.matrix(out[[1]])){
-        # this is for the k/n binomial case
-        out = as.matrix(out)[,seq(1, (2*nsim), by = 2)]
       }
     }
     if(!is.matrix(out)) out = data.matrix(out)
-  } else{
-    if(family(object)$family %in% c("binomial", "betabinomial")){
-      if (!is.matrix(out[[1]]) & !is.numeric(out)) data.frame(data.matrix(out)-1)
-    }
   }
 
   return(out)
@@ -511,15 +516,22 @@ getSimulations.negbin<- function (object, nsim = 1, simulateREs = c("conditional
 getFitted.gam <- function(object, ...){
   # unconditional predictions, excluding random effects and factor smooth interactions (fixes issue #544)
   isRE = sapply(object$smooth, function(x) any(class(x) %in% c("random.effect", "fs.interaction")))
-  if(any(isRE)) excludeREs = sapply(object$smooth[isRE], `[[`, "label") else excludeREs =  NULL
-  out = predict(object, type = "response", exclude = excludeREs, ...)
+  if(any(isRE)) excludeREs = sapply(object$smooth[isRE], `[[`, "label") else excludeREs = NULL
+  # families with several linear predictors or with their own prediction function (e.g. ziP, ocat), for which linkinv does not give the expected response
+  standardFamily = !is.matrix(object$linear.predictors) && is.null(family(object)$predict)
+  if(!standardFamily) {
+    # note: predict() drops offsets supplied via gam(..., offset = )
+    out = predict(object, type = "response", exclude = excludeREs, ...)
+  } else if(is.null(excludeREs)) {
+    out = fitted(object)
+  } else {
+    # remove the RE terms from the linear predictor. Unlike predict(), this keeps offsets supplied via gam(..., offset = ), see ?predict.gam (issue #572)
+    eta = napredict(object$na.action, object$linear.predictors) - rowSums(predict(object, type = "terms", terms = excludeREs))
+    out = family(object)$linkinv(eta)
+  }
   names(out) = as.character(1:length(out))
   out
 }
-
-# Check that this works
-# plot(fitted(fittedModelGAM), predict(fittedModelGAM, type = "response"))
-
 
 
 
@@ -549,7 +561,18 @@ getSimulations.gam <- function(object, nsim = 1, simulateREs = c("conditional", 
 
   if(simulateREs == "unconditional") warning("DHARMa: Unconditional simulations are not available for gam. Note that simulations from your model will be conditional on the fitted random effects.")
 
-  if(length(find.package("mgcViz")) > 0 & mgcViz == T){
+  checkBinomialMatrixWeights(object)
+
+  # for some bam models, mgcv excludes offsets supplied via bam(..., offset = ) from the fitted values, so that simulations would be on the wrong scale (issue #572). Checked directly on the linear predictor, as this depends on the bam settings
+  modelFrame = model.frame(object)
+  if(inherits(object, "bam") && "(offset)" %in% colnames(modelFrame) && any(modelFrame[["(offset)"]] != 0)){
+    i = seq_len(min(5, length(object$linear.predictors)))
+    eta = drop(predict(object, newdata = object$model[i, , drop = FALSE], type = "lpmatrix") %*% coef(object)) + object$offset[i]
+    if(!isTRUE(all.equal(unname(eta), unname(object$linear.predictors[i])))) stop("DHARMa: the fitted values of this bam model do not include the offset supplied via the offset argument (a problem in mgcv). Please specify the offset in the formula instead, e.g. y ~ s(x) + offset(log(a)).")
+  }
+
+  # find.package() without quiet = TRUE stops if mgcViz is not installed (issue #567, bug A)
+  if(isTRUE(mgcViz) && requireNamespace("mgcViz", quietly = TRUE)){
 
     if(hasWeights(object)) warning(weightsWarning)
 
@@ -557,16 +580,14 @@ getSimulations.gam <- function(object, nsim = 1, simulateREs = c("conditional", 
     out = mgcViz::simulate.gam(object, nsim = nsim , ...)
     out = as.data.frame(out)
 
-    # from here to end identical to default
-
     if (type == "normal"){
       if(family(object)$family %in% c("binomial", "betabinomial")){
-        if("(weights)" %in% colnames(model.frame(object))){
+        if (is.matrix(model.frame(object)[[1]])){
+          # this is for the k/n binomial case, checked first so that weights = 1 do not affect it (issue #568)
+          out = out * rowSums(model.frame(object)[[1]])
+        } else if("(weights)" %in% colnames(model.frame(object))){
           x = model.frame(object)
           out = out * x$`(weights)`
-        } else if (is.matrix(model.frame(object)[[1]])){
-          # this is for the k/n binomial case
-          out = out * rowSums(model.frame(object)[[1]])
         }
       }
       if(!is.matrix(out)) out = data.matrix(out)
@@ -593,8 +614,10 @@ getSimulations.gam <- function(object, nsim = 1, simulateREs = c("conditional", 
       }
     }
   } else {
-    message("It seems you don't have mgcViz installed on this computer. When using DHARMa with mgcv objects, it is highly recommended to also install mgcViz, which will extend the ability of DHARMa to simulate from various gam objects. Without mgcViz, simulations will fail in various situations. See vignette for details!")
-    out = getSimulations.default(object, nsim, type, ...)
+    if(isTRUE(mgcViz)) message("It seems you don't have mgcViz installed on this computer. When using DHARMa with mgcv objects, it is highly recommended to also install mgcViz, which will extend the ability of DHARMa to simulate from various gam objects. Without mgcViz, simulations will fail in various situations. See vignette for details!")
+    if(hasWeights(object)) warning(weightsWarning)
+    # named arguments, the third argument of getSimulations.default is simulateREs (issue #567, bug B)
+    out = getSimulations.default(object = object, nsim = nsim, type = type, ...)
   }
   return(out)
 }
@@ -619,6 +642,7 @@ getSimulations.merMod <- function (object, nsim = 1, simulateREs = c("conditiona
 
   simulateREs <- match.arg(simulateREs)
 
+  checkBinomialMatrixWeights(object)
   if(hasWeights(object)) warning(weightsWarning)
 
   if(simulateREs != "user-specified" & "re.form" %in% names(list(...))) stop("DHARMa: If you want to specify certain random effects to condition on, you need to set simulateREs = \"user-specified\".")
@@ -684,6 +708,7 @@ getSimulations.glmmTMB <- function (object, nsim = 1, simulateREs = c("condition
   type <- match.arg(type)
   simulateREs <- match.arg(simulateREs)
 
+  checkBinomialMatrixWeights(object)
   if(hasWeights(object)) warning(weightsWarning)
 
   out = NULL

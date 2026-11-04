@@ -249,9 +249,25 @@ getFormulaPredictors <- function(simulationOutput, formula) {
 }
 
 
+#' Stop for binomial models with cbind() response and prior weights
+#'
+#' For binomial models with a cbind(successes, failures) response, additional prior weights are handled differently by the regression packages (e.g. combined with the number of trials in glm), so that observed and simulated responses would be on different scales. DHARMa therefore stops for this combination.
+#'
+#' @param fittedModel a fitted model
+#' @keywords internal
+checkBinomialMatrixWeights <- function(fittedModel){
+  if(!(family(fittedModel)$family %in% c("binomial", "betabinomial"))) return(invisible(NULL))
+  modelFrame = model.frame(fittedModel)
+  if(is.matrix(modelFrame[[1]]) && "(weights)" %in% colnames(modelFrame) && any(modelFrame[["(weights)"]] != 1)){
+    stop("DHARMa: binomial models with a cbind(successes, failures) response and additional prior weights are not supported, because observed and simulated responses would be on different scales. Use a proportion response with the number of trials as weights, or a cbind() response without weights.")
+  }
+  invisible(NULL)
+}
+
+
 #' Check if a model has (problematic) prior weights
 #'
-#' For n/k models, weights can either represent the number of trials or actual prior weights on the likelihood. This function distinguishes the two cases and returns TRUE if the model has prior weights that are not the number of trials.
+#' For n/k models, weights can either represent the number of trials or actual prior weights on the likelihood. This function distinguishes the two cases and returns TRUE if the model has prior weights that are not the number of trials. For a cbind(successes, failures) response, weights other than 1 are prior weights; DHARMa stops for this case (see checkBinomialMatrixWeights).
 #'
 #' @param fittedModel a fitted model
 #' @keywords internal
@@ -269,8 +285,8 @@ hasWeights <- function(fittedModel){
     # if response is factor instead of 0/1
     if(is.factor(response)) response = as.numeric(response) - 1
 
-    # if response is a 2-column matrix (cbind-syntax) AND there are weights:
-    if(is.matrix(response) && ncol(response) == 2) return(TRUE)
+    # if response is a 2-column matrix (cbind-syntax), weights other than 1 are prior weights (not supported, see checkBinomialMatrixWeights)
+    if(is.matrix(response) && ncol(response) == 2) return(any(w != 1))
 
     # non-integer weights cannot be numbers of trials
     if(any(w %% 1 != 0)) return(TRUE)

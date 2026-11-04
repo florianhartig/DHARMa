@@ -11,6 +11,12 @@ NOTE: for more news about the package, see https://github.com/florianhartig/DHAR
 
 * Fixing bug in predictions via getFitted for `gam` and `bam` models. Predictions are now unconditional on random effects and factor smooth interactions (previously they were conditional, see #544).
 
+* Fixed `gam` simulations without mgcViz or with `mgcViz = FALSE` (#567).
+
+* Binomial models with `cbind()` response and additional prior weights now stop with an informative error (#568).
+
+* `bam` models whose fitted values exclude the `offset` argument (a problem in mgcv) now stop with an informative error; use `offset()` in the formula instead (#572).
+
 * Solving duplicated plots in `plotResiduals`: (1) when having quadratic effects written with I(variable) in the formula, and (2) for brms with transformed variables in the formula, e.g. `log(variable)`. 
 
 * Minor fixes in testSpatialAutocorrelation: DHARMa errors if repeated values for space in distMat, extended help, improved plot titles and legend.
