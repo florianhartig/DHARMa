@@ -44,6 +44,11 @@ Useful links:
 \author{
 \strong{Maintainer}: Florian Hartig \email{florian.hartig@biologie.uni-regensburg.de} (\href{https://orcid.org/0000-0002-6255-9059}{ORCID})
 
+Authors:
+\itemize{
+  \item Florian Hartig \email{florian.hartig@biologie.uni-regensburg.de} (\href{https://orcid.org/0000-0002-6255-9059}{ORCID})
+}
+
 Other contributors:
 \itemize{
   \item Lukas Lohse [contributor]

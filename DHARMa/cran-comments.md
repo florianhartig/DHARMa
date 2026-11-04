@@ -4,6 +4,12 @@
 
 This is a minor update of DHARMa, including various smaller improvements and bugfixes. See NEWS for details.
 
+This release was tested without apparent problems under:
+
+* local MAC OS 26.6.2 (Tahoe), R 4.6.1
+* GitHub Actions - Windows / Mac / Ubuntu (release), Ubuntu (devel)
+* http://win-builder.r-project.org/ - oldrelease / devel / release
+
 This update also fixes the failing check in tests/testthat/testNumericReproducibility.R reported by CRAN, caused by small numerical differences introduced by lme4 2.1-0. We relaxed the tolerance of the reference comparison. 
 
 
