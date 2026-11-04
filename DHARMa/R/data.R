@@ -17,7 +17,7 @@
 #'   \item{Minpressure_Updated_2014}{Updated minimum air pressure (909-1003).}
 #'   \item{Gender_MF}{Binary gender categorization based on MasFem (male = 0, female = 1).}
 #'   \item{Category}{Strength of the hurricane in categories (1:7). (1 = not at all, 7 = very intense).}
-#'   \item{alldeaths}{Human deaths occured (1:256).}
+#'   \item{alldeaths}{Human deaths occurred (1:256).}
 #'   \item{NDAM}{Normalized damage in millions (1:75.000). The raw (dollar) amounts of property damage caused by hurricanes were obtained, and the unadjusted dollar amounts were normalized to 2013 monetary values by adjusting them to inflation, wealth and population density.}
 #'   \item{Elapsed_Yrs}{Elapsed years since the occurrence of hurricanes (1:63).}
 #'   \item{Source}{MWR/wikipedia ()}

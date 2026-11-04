@@ -18,7 +18,7 @@ testPhylogeneticAutocorrelation(simulationOutput, tree,
 This function performs a Moran's I test for phylogenetic autocorrelation on the calculated quantile residuals.
 }
 \details{
-The function performs Moran.I test from the package ape on the DHARMa residuals, based on the phylogenetic distance matrix internally created from the provided tree. For custom distance matrices, you can use \link{testSpatialAutocorrelation}.
+The function performs Moran.I test from the package ape on the DHARMa residuals, based on the phylogenetic distance matrix internally created from the provided tree. The residuals are matched to the tree by position, so the observations (rows of the data used to fit the model) must be in the same order as tree$tip.label. For custom distance matrices, you can use \link{testSpatialAutocorrelation}.
 }
 \note{
 Standard DHARMa simulations from models with (temporal / spatial / phylogenetic) conditional autoregressive terms will still have the respective temporal / spatial / phylogenetic correlation in the DHARMa residuals, unless the package you are using is modelling the autoregressive terms as explicit REs and is able to simulate conditional on the fitted REs. This has two consequences:

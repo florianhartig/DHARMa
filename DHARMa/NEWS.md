@@ -28,6 +28,8 @@ NOTE: for more news about the package, see https://github.com/florianhartig/DHAR
 
 * Documentation: improved vignette (more explanations for conditional vs unconditional simulations).
 
+* Documentation: corrected several errors in help files, examples and vignette, in particular: `fittedPredictedResponse` in `createDHARMa` must be on the response scale (the vignette example used the link scale), test statistic in `simulateLRT`, expected number of outliers in `outliers`, default of `testGeneric` and order of `simulateResiduals` / `glm` in the vignette, brms syntax (`re_formula`) in the simulation table, time order in the `testTemporalAutocorrelation` examples, Dunn & Smyth reference, and typos.
+
 
 # DHARMa 0.5.0
 

@@ -16,7 +16,7 @@
 #' @details The function performs a simulated LRT, which works as follows:
 #'
 #' 1. H0: Model 0 is correct.
-#' 2. Our test statistic is the log LR of M0/M1. Empirical value will always be > 1 because in a nested setting, the more complex model cannot have a worse likelihood.
+#' 2. Our test statistic is the log LR of M1/M0, i.e. logLik(M1) - logLik(M0). Empirical value will always be >= 0 because in a nested setting, the more complex model cannot have a worse likelihood.
 #' 3. To generate an expected distribution of the test statistic under H0, we simulate new response data under M0, refit M0 and M1 on this data, and calculate the LRs.
 #' 4. Based on this, calculate p-values etc. in the usual way.
 #'
@@ -24,7 +24,7 @@
 #'
 #' Data simulations are performed by [getSimulations], which is a wrapper for the respective model functions. The default for all packages, wherever possible, is to generate marginal simulations (meaning that REs are re-simulated as well). I see no sensible reason to change this, but if you want to and if supported by the respective regression package, you could do so by supplying the necessary arguments via ...
 #'
-#' @note The logic of an LRT assumes that M0 is nested in M1, which guarantees that the L(M1) > L(M0). The function does not explicitly check if models are nested and will work as long as data can be simulated from M0 that can be refit with M0 and M1; however, I would strongly advise against using this for non-nested models unless you have a good statistical reason for doing so.
+#' @note The logic of an LRT assumes that M0 is nested in M1, which guarantees that L(M1) >= L(M0). The function does not explicitly check if models are nested and will work as long as data can be simulated from M0 that can be refit with M0 and M1; however, I would strongly advise against using this for non-nested models unless you have a good statistical reason for doing so.
 #'
 #' Also, note that LRTs may be unreliable when fit with REML or some other kind of penalized / restricted ML. Therefore, you should fit the model with ML for use in this function.
 #'

@@ -56,7 +56,7 @@ testCategorical(simulationOutput, testData$group)
 testDispersion(simulationOutput) # tests under and overdispersion
 
 # Outlier test (number of observations outside simulation envelope)
-# Use type = "boostrap" for exact values, see ?testOutliers
+# Use type = "bootstrap" for exact values, see ?testOutliers
 testOutliers(simulationOutput, type = "binomial")
 
 # testing zero inflation

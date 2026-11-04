@@ -20,7 +20,7 @@ outliers(object, lowerQuantile = 0, upperQuantile = 1,
 Returns the outliers of a DHARMa object.
 }
 \details{
-First of all, note that the standard definition of outlier in the DHARMa plots and outlier tests is an observation that is outside the simulation envelope. How far outside that is depends a lot on how many simulations you do. If you have 100 data points and to 100 simulations, you would expect to have one "outlier" on average, even with a perfectly fitting model. This is in fact what the outlier test tests.
+First of all, note that the standard definition of outlier in the DHARMa plots and outlier tests is an observation that is outside the simulation envelope. How far outside that is depends a lot on how many simulations you do. If you have 100 data points and do 100 simulations, you would expect to have about two "outliers" on average (one at each margin), even with a perfectly fitting model. This is in fact what the outlier test tests.
 
 Thus, keep in mind that for a small number of simulations, outliers are mostly a technical term: these are points that are outside our simulations, but we don't know how far away they are.
 
