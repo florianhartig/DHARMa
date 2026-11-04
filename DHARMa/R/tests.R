@@ -697,7 +697,10 @@ testTemporalAutocorrelation <- function(simulationOutput, time, alternative = c(
   # actually not sure if this is neccessary for dwtest, but seems better to aggregate
   if(any(duplicated(time))) stop("testing for temporal autocorrelation requires unique time values - if you have several observations per time value, either use the recalculateResiduals function to aggregate residuals per time step, or extract the residuals from the fitted object, and plot / test each of them independently for temporally repeated subgroups (typical choices would be location / subject etc.). Note that the latter must be done by hand, outside testTemporalAutocorrelation.")
 
-  out = lmtest::dwtest(simulationOutput$scaledResiduals ~ 1, order.by = time, alternative = alternative)
+  # data as data.frame, as AlgDesign's model.matrix.formula requires it (#504)
+  out = lmtest::dwtest(scaledResiduals ~ 1, data = data.frame(scaledResiduals = simulationOutput$scaledResiduals),
+                       order.by = time, alternative = alternative)
+  out$data.name = "simulationOutput$scaledResiduals ~ 1"
 
   if(plot == T) {
     oldpar <- par(mfrow = c(1,2))
