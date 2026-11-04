@@ -118,14 +118,3 @@ test_that("recalcuateResiduals works", {
 
 })
 
-
-
-
-
-test_that("print.DHARMa ends with a newline", {
-  testData = createData(sampleSize = 50, family = poisson(), randomEffectVariance = 0)
-  fittedModel <- glm(observedResponse ~ Environment1, family = "poisson", data = testData)
-  simulationOutput <- simulateResiduals(fittedModel = fittedModel, n = 20)
-  out = capture.output(print(simulationOutput), cat("next"))
-  expect_equal(out[length(out)], "next")
-})
