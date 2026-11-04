@@ -1,21 +1,21 @@
-Submission Checklist
+# Submission Checklist
 
 ## Prepare release
 
 * Check current CRAN issues at https://cran.r-project.org/web/checks/check_results_DHARMa.html
-* All GitHub issues for the release resolved?
+* All GitHub issues for the release resolved, or postponed to the next release?
   * All new features / changes have help files, examples and appropriate unit tests? 
   * Is the NEWS.md file updated?
   * Are all documentation files, including README.MD, vignettes, updated?
 * Make sure RStudio check / test on your computer produce no errors, warnings or notes
-* Make sure CI via GH Actions produces no errors, warnings or notes
-* Check package in http://win-builder.r-project.org/upload.aspx
+* Make sure CI via GH Actions (all OS) produces no errors, warnings or notes
+* Check package in http://win-builder.r-project.org/upload.aspx (all R versions)
 * Update DESCRIPTION files -> date, version number, etc.
 
 ## Test release
 
 * Make sure that help files / tests don't take too long (5s on slow computer max for CRAN)
-* Check again GH ations of the final files
+* Check again GH actions of the final files
 * Check package in http://win-builder.r-project.org/upload.aspx
   * Results go to maintainer
 * Check Reverse dependencies
@@ -38,7 +38,7 @@ Submission Checklist
 ### Code for reverse dependency checks
 
 ```{r}
-# from R Packages book Chapeter 22
+# from R Packages book Chapter 22
 
 usethis::use_revdep() # changes .gitignore and .Rbuildignore 
 revdepcheck::revdep_check(num_workers=4)

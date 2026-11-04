@@ -12,7 +12,7 @@ The development of DHARMa and all associated activities — including discussion
 
 ## Human authorship
 
-Interactions in this repository — including issues, comments, and pull requests — are expected to originate from human contributors who take personal responsibility for their content. Submissions generated autonomously by AI agents or bots are not appropriate and will be closed without review. See [CONTRIBUTING.md](CONTRIBUTING.md) for details on the policy regarding AI-generated pull requests.
+Interactions in this repository — including issues, comments, and pull requests — are expected to originate from human contributors who take personal responsibility for their content. Submissions from outside the DHARMa team that were generated autonomously by AI agents or bots are not appropriate and will be closed without review. See [CONTRIBUTING.md](CONTRIBUTING.md) for details on the policy regarding AI-generated contributions.
 
 ## Scope
 
