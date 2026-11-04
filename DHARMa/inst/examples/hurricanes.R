@@ -22,7 +22,7 @@ plotResiduals(res, hurricanes$NDAM)
 
 # we also find temporal autocorrelation
 res2 = recalculateResiduals(res, group = hurricanes$Year)
-testTemporalAutocorrelation(res2, time = unique(hurricanes$Year))
+testTemporalAutocorrelation(res2, time = sort(unique(hurricanes$Year)))
 
 # task: try to address these issues - in many instances, this will 
 # make the MasFem predictor n.s.

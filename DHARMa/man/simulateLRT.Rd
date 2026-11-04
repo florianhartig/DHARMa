@@ -22,7 +22,7 @@ simulateLRT(m0, m1, n = 250, seed = 123, plot = TRUE,
 
 \item{saveModels}{whether to save refitted models.}
 
-\item{...}{additional parameters to pass on to the simulate function of the model object. See \link{getSimulations} for details.}
+\item{...}{additional parameters to pass on to \link{getSimulations}, in particular simulateREs, and to the simulate function of the model object. See \link{getSimulations} for details.}
 }
 \description{
 This function uses the DHARMa model wrappers to generate simulated likelihood ratio tests (LRTs) for (generalized) linear mixed models based on a parametric bootstrap. The motivation for using a simulated LRT rather than a standard ANOVA or AIC for model selection in mixed models is that df for mixed models are not clearly defined, thus standard ANOVA based on Chi2 statistics or AIC are unreliable, in particular for models with large contributions of REs to the likelihood.
@@ -33,17 +33,17 @@ Interpretation of the results as in a normal LRT: the null hypothesis is that M0
 The function performs a simulated LRT, which works as follows:
 \enumerate{
 \item H0: Model 0 is correct.
-\item Our test statistic is the log LR of M0/M1. Empirical value will always be > 1 because in a nested setting, the more complex model cannot have a worse likelihood.
+\item Our test statistic is the log LR of M1/M0, i.e. logLik(M1) - logLik(M0). Empirical value will always be >= 0 because in a nested setting, the more complex model cannot have a worse likelihood.
 \item To generate an expected distribution of the test statistic under H0, we simulate new response data under M0, refit M0 and M1 on this data, and calculate the LRs.
 \item Based on this, calculate p-values etc. in the usual way.
 }
 
 About warnings: warnings such as "boundary (singular) fit: see ?isSingular" will likely occur in this function and are not necessarily the sign of a problem. lme4 warns if RE variances are fit to zero. This is desired / likely in this case, however, because we are simulating data with zero RE variances. Therefore, warnings are turned off per default. For diagnostic reasons, you can turn warnings on, and possibly also inspect fitted models via the parameter saveModels to see if there are any other problems in the re-fitted models.
 
-Data simulations are performed by \link{getSimulations}, which is a wrapper for the respective model functions. The default for all packages, wherever possible, is to generate marginal simulations (meaning that REs are re-simulated as well). I see no sensible reason to change this, but if you want to and if supported by the respective regression package, you could do so by supplying the necessary arguments via ...
+Data simulations are performed by \link{getSimulations}, which is a wrapper for the respective model functions. The simulations follow the same defaults and options as in \link{simulateResiduals}: since DHARMa 0.5.0, the default is simulateREs = "conditional", i.e. data are simulated conditional on the fitted random effects of M0. Use simulateREs = "unconditional" to re-simulate all random effects, or simulateREs = "user-specified" without further arguments to reproduce the behavior of DHARMa < 0.5.0 (the default of the simulate function of the respective package); arguments are supplied via ... (see \link{simulateResiduals} and \link{getSimulations} for details and for which packages support these options). This setting only matters if M0 contains random effects.
 }
 \note{
-The logic of an LRT assumes that M0 is nested in M1, which guarantees that the L(M1) > L(M0). The function does not explicitly check if models are nested and will work as long as data can be simulated from M0 that can be refit with M0 and M1; however, I would strongly advise against using this for non-nested models unless you have a good statistical reason for doing so.
+The logic of an LRT assumes that M0 is nested in M1, which guarantees that L(M1) >= L(M0). The function does not explicitly check if models are nested and will work as long as data can be simulated from M0 that can be refit with M0 and M1; however, I would strongly advise against using this for non-nested models unless you have a good statistical reason for doing so.
 
 Also, note that LRTs may be unreliable when fit with REML or some other kind of penalized / restricted ML. Therefore, you should fit the model with ML for use in this function.
 }

@@ -4,7 +4,7 @@
 #'
 #' @param res an object with simulated residuals created by [simulateResiduals]
 #' @param quantileFunction optional - a quantile function to transform the uniform 0/1 scaling of DHARMa to another distribution
-#' @param outlierValue if a quantile function with infinite support (such as dnorm) is used, residuals that are 0/1 are mapped to -Inf / Inf. outlierValues allows to convert -Inf / Inf values to an optional min / max value.
+#' @param outlierValue if a quantile function with infinite support (such as qnorm) is used, residuals that are 0/1 are mapped to -Inf / Inf. outlierValue allows to convert -Inf / Inf values to an optional min / max value.
 #'
 #' @export
 #'

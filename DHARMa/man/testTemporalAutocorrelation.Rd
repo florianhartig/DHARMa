@@ -20,9 +20,9 @@ testTemporalAutocorrelation(simulationOutput, time,
 This function performs a standard test for temporal autocorrelation on the simulated residuals.
 }
 \details{
-The function performs a Durbin-Watson test on the uniformly scaled residuals, and plots the residuals against time. The DB test was originally designed for normal residuals. In simulations, I didn't see a problem with this setting though. The alternative is to transform the uniform residuals to normal residuals and perform the DB test on those.
+The function performs a Durbin-Watson test on the uniformly scaled residuals, and plots the residuals against time. The DW test was originally designed for normal residuals. In simulations, I didn't see a problem with this setting though. The alternative is to transform the uniform residuals to normal residuals and perform the DW test on those.
 
-Testing for temporal autocorrelation requires unique time values - if you have several observations per time value, either use \link{recalculateResiduals} function to aggregate residuals per time step, or extract the residuals from the fitted object, and plot / test each of them independently for temporally repeated subgroups (typical choices would be location / subject etc.). Note that the latter must be done by hand, outside testTemporalAutocorrelation.
+Testing for temporal autocorrelation requires unique time values - if you have several observations per time value, either use \link{recalculateResiduals} function to aggregate residuals per time step (note that the aggregated residuals are ordered by the sorted group levels, so time must be provided in the same order, e.g. sort(unique(time))), or extract the residuals from the fitted object, and plot / test each of them independently for temporally repeated subgroups (typical choices would be location / subject etc.). Note that the latter must be done by hand, outside testTemporalAutocorrelation.
 }
 \note{
 Standard DHARMa simulations from models with (temporal / spatial / phylogenetic) conditional autoregressive terms will still have the respective temporal / spatial / phylogenetic correlation in the DHARMa residuals, unless the package you are using is modelling the autoregressive terms as explicit REs and is able to simulate conditional on the fitted REs. This has two consequences:
@@ -71,11 +71,12 @@ res = simulateResiduals(fittedModel)
 
 # aggregating residuals by time
 res = recalculateResiduals(res, group = ~time)
-testTemporalAutocorrelation(res, time = unique(testData$time))
+# the aggregated residuals are sorted by time, so time must be sorted as well
+testTemporalAutocorrelation(res, time = sort(unique(testData$time)))
 
 # testing only subgroup location 1, could do same with loc 2
 res = recalculateResiduals(res, sel = testData$location == 1)
-testTemporalAutocorrelation(res, time = unique(testData$time))
+testTemporalAutocorrelation(res, time = testData$time[testData$location == 1])
 
 # example to demonstrate problems with strong temporal correlations and
 # how to possibly remove them by rotating residuals
@@ -137,7 +138,7 @@ testTemporalAutocorrelation(res, time = unique(testData$time))
 
   res4 <- recalculateResiduals(res, group=dat0$times, rotation="estimated")
   plot(res4)
-  testTemporalAutocorrelation(res3, time = 1:length(res2$scaledResiduals))
+  testTemporalAutocorrelation(res4, time = 1:length(res2$scaledResiduals))
 
   # Alternatively, in glmmTMB, we can condition on the estimated correlated
   # residuals. Unfortunately, in this case, we will have to do simulations by
