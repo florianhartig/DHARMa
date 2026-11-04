@@ -291,3 +291,50 @@ test_that("testCategorical", {
   on.exit(grDevices::dev.off())
   expect_no_error(testCategorical(simulationOutput, catPred = testData$group, plot = F))
 })
+
+
+test_that("testDispersion with refit = TRUE aggregates observed residuals for grouped residuals", {
+  set.seed(123)
+  testData = createData(sampleSize = 100, family = poisson(), randomEffectVariance = 0)
+  fittedModel = glm(observedResponse ~ Environment1, family = poisson, data = testData)
+  simulationOutput = simulateResiduals(fittedModel, n = 20, refit = TRUE)
+  grouped = recalculateResiduals(simulationOutput, group = testData$group)
+  x = testDispersion(grouped, plot = FALSE)
+  # observed and refitted Pearson residuals aggregated in the same way (issue #575)
+  observed = sum(grouped$aggregateByGroup(getPearsonResiduals(fittedModel))^2)
+  expected = mean(colSums(grouped$refittedPearsonResiduals^2))
+  expect_equal(unname(x$statistic), observed / expected)
+
+  # selection with sel: observed residuals subset in the same way
+  selected = recalculateResiduals(simulationOutput, sel = testData$Environment1 > 0)
+  x = testDispersion(selected, plot = FALSE)
+  observed = sum(selected$aggregateByGroup(getPearsonResiduals(fittedModel))^2)
+  expected = mean(colSums(selected$refittedPearsonResiduals^2))
+  expect_equal(unname(x$statistic), observed / expected)
+})
+
+
+test_that("testQuantiles with categorical, ordered and few-valued predictors (issue #576)", {
+  set.seed(123)
+  testData = createData(sampleSize = 100, family = poisson(), randomEffectVariance = 0)
+  fittedModel = glm(observedResponse ~ Environment1, family = poisson, data = testData)
+  simulationOutput = simulateResiduals(fittedModel, n = 50)
+  grDevices::pdf(NULL)
+  on.exit(grDevices::dev.off())
+  # categorical predictors stop, for plot = TRUE and FALSE
+  for(plot in c(FALSE, TRUE)){
+    expect_error(testQuantiles(simulationOutput, predictor = testData$group, plot = plot), "testCategorical")
+    expect_error(testQuantiles(simulationOutput, predictor = ~group, plot = plot), "testCategorical")
+    expect_error(testQuantiles(simulationOutput, predictor = testData$Environment1 > 0, plot = plot), "testCategorical")
+  }
+  # ordered factors and numeric predictors with few values: same quantile regression with and without plot
+  testData$fewValues = round(testData$Environment1)
+  testData$ordered = factor(testData$fewValues, ordered = TRUE)
+  for(pred in list(testData$fewValues, testData$ordered)){
+    p1 = testQuantiles(simulationOutput, predictor = pred, plot = FALSE)$p.value
+    p2 = testQuantiles(simulationOutput, predictor = pred, plot = TRUE)$p.value
+    expect_equal(p1, p2)
+  }
+  # formulas with several variables are still passed on to plotResiduals
+  expect_no_error(testQuantiles(simulationOutput, predictor = ~Environment1 | group, plot = TRUE))
+})

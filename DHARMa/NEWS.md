@@ -25,6 +25,10 @@ NOTE: for more news about the package, see https://github.com/florianhartig/DHAR
 
 * `runBenchmarks()` no longer warns about NA values when the output contains none (#577).
 
+* `testDispersion()` with `refit = TRUE` now aggregates the observed Pearson residuals like the refitted ones after `recalculateResiduals()` (#575).
+
+* `testQuantiles()` stops for unordered categorical predictors, uses ordered factors in the order of their levels, and gives the same quantile regression with and without plot (#576).
+
 ## Minor changes
 
 * `testOutliers()`: argument `plotBoostrap` renamed to `plotBootstrap`, old name deprecated (#560).

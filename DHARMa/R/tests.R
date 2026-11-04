@@ -77,7 +77,7 @@ testBivariateUniformity <- function(simulationOutput, alternative = c("two.sided
 #'
 #' @param simulationOutput an object of class DHARMa, either created via [simulateResiduals] for supported models or by [createDHARMa] for simulations created outside DHARMa, or a supported model. Providing a supported model directly is discouraged, because simulation settings cannot be changed in this case.
 #' @param predictor an optional predictor variable to be used, instead of the predicted response (default). See details.
-#' @param rank if TRUE, the values provided in predictor will be rank transformed. This will usually make patterns easier to spot visually, especially if the distribution of the predictor is skewed. If predictor is a factor, this has no effect.
+#' @param rank if TRUE, the values provided in predictor will be rank transformed. This will usually make patterns easier to spot visually, especially if the distribution of the predictor is skewed. Ordered factors are first converted to the numbers of their levels.
 #' @param quantiles the quantiles to be tested.
 #' @param plot if TRUE, the function will create an additional plot.
 #' @details The function fits quantile regressions (via package qgam) on the residuals, and compares their location to the expected location (because of the uniform distribution, the expected location is 0.5 for the 0.5 quantile).
@@ -90,6 +90,8 @@ testBivariateUniformity <- function(simulationOutput, alternative = c("two.sided
 #'
 #' When plotting (plot = TRUE), the shaded gray areas indicate 95% confidence intervals of the quantile estimates (1.96 * standard error).
 #'
+#' Quantile regressions require ordered predictor values. Ordered factors are used in the order of their levels. For unordered factors, character or logical predictors, the function stops; use [testCategorical] for these. Unlike in [plotResiduals], numeric predictors with few unique values are not converted to factors.
+#'
 #' @author Florian Hartig
 #' @example inst/examples/testQuantilesHelp.R
 #' @seealso [testResiduals], [testUniformity], [testOutliers], [testDispersion], [testZeroInflation], [testGeneric], [testTemporalAutocorrelation], [testSpatialAutocorrelation], [testQuantiles], [testCategorical]
@@ -97,12 +99,22 @@ testBivariateUniformity <- function(simulationOutput, alternative = c("two.sided
 testQuantiles <- function(simulationOutput, predictor = NULL, rank = TRUE,
                           quantiles = c(0.25,0.5,0.75), plot = TRUE){
 
+  dataName = deparse(substitute(simulationOutput))
+  predictorName = gsub(".*[$]|^~", "", paste(deparse(substitute(predictor)), collapse = ""))
+  simulationOutput = ensureDHARMa(simulationOutput, convert = T)
+
+  # formulas with one variable are evaluated here; other formulas (e.g. ~x | group or ~.) are passed on to plotResiduals for plot = TRUE, as before
+  if(inherits(predictor, "formula") && length(all.vars(predictor)) == 1 && all.vars(predictor) != ".") predictor = getFormulaPredictors(simulationOutput, predictor)[[1]]
+
+  # quantile regressions need ordered predictor values: ordered factors are used in the order of their levels, categorical predictors are not supported (issue #576)
+  if(is.ordered(predictor)) predictor = as.numeric(predictor)
+  else if(is.factor(predictor) || is.character(predictor) || is.logical(predictor)) stop("DHARMa::testQuantiles: quantile regressions require a numeric predictor or an ordered factor. For categorical predictors, use testCategorical().")
+
   if(plot == F){
 
     out = list()
-    out$data.name = deparse(substitute(simulationOutput))
+    out$data.name = dataName
 
-    simulationOutput = ensureDHARMa(simulationOutput, convert = T)
     res = simulationOutput$scaledResiduals
 
     if(inherits(predictor, "formula")) predictor = getFormulaPredictors(simulationOutput, predictor)[[1]]
@@ -151,10 +163,13 @@ testQuantiles <- function(simulationOutput, predictor = NULL, rank = TRUE,
   } else if(plot == T) {
     if(is.null(predictor)) {
       out <- plotResiduals(simulationOutput = simulationOutput, form = NULL,
-                           rank = rank, quantiles = quantiles, quantreg = TRUE)
+                           rank = rank, quantiles = quantiles, quantreg = TRUE, asFactor = FALSE)
     } else {
-      out <- plotResiduals(simulationOutput = simulationOutput, form = predictor,
-                           rank = rank, quantiles = quantiles, quantreg = TRUE)
+      # asFactor = FALSE: also numeric predictors with few unique values get quantile regressions, as for plot = FALSE
+      if(inherits(predictor, "formula")) out <- plotResiduals(simulationOutput = simulationOutput, form = predictor,
+                           rank = rank, quantiles = quantiles, quantreg = TRUE, asFactor = FALSE)
+      else out <- plotResiduals(simulationOutput = simulationOutput, form = predictor,
+                           rank = rank, quantiles = quantiles, quantreg = TRUE, asFactor = FALSE, xlab = predictorName)
       }
 
   }
@@ -432,7 +447,7 @@ testCategorical <- function(simulationOutput, catPred,
 #'
 #' If refit = F, the function uses [testGeneric] to compare the variance of the observed raw residuals (i.e. var(observed - predicted), displayed as a red line) against the variance of the simulated residuals (i.e. var(simulated - predicted), histogram). Predictions are taken on the scale of the observed response (see [getFittedResponse]), i.e. for binomial models with more than one trial, as the expected number of successes. For objects created with [createDHARMa], the provided fittedPredictedResponse is used. The variances are scaled by the variance of all simulated values; this affects only the plotted values, not the reported ratio or p-value. A significant ratio > 1 indicates overdispersion, a significant ratio < 1 underdispersion.
 #'
-#' If refit = T, the function compares the approximate deviance (via squared Pearson residuals) with the same quantity from the models refitted with simulated data. Applying this is much slower than the previous alternative. Given the computational cost, I would suggest that most users will be satisfied with the standard dispersion test.
+#' If refit = T, the function compares the approximate deviance (via squared Pearson residuals) with the same quantity from the models refitted with simulated data. Applying this is much slower than the previous alternative. Given the computational cost, I would suggest that most users will be satisfied with the standard dispersion test. For residuals recalculated with [recalculateResiduals] (grouping or selection with sel), the observed and the refitted Pearson residuals are aggregated in the same way (by default summed per group) before squaring, so that the test then checks the dispersion at the level of the groups.
 #'
 #' **Analytical dispersion tests (type == "PearsonChisq")**
 #'
@@ -478,6 +493,8 @@ testDispersion <- function(simulationOutput, alternative = c("two.sided", "great
     } else {
 
       rp <- getPearsonResiduals(simulationOutput$fittedModel)
+      # residuals grouped with recalculateResiduals: aggregate the observed Pearson residuals in the same way as the refitted ones (issue #575)
+      if(!is.null(simulationOutput$aggregateByGroup)) rp = simulationOutput$aggregateByGroup(rp)
       observed = sum(rp^2)
       expected = apply(simulationOutput$refittedPearsonResiduals^2 , 2, sum)
       out$statistic = c(dispersion = observed / mean(expected))
