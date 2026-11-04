@@ -88,3 +88,5 @@ test_that("different form arguments in plotResiduals work",
             expect_error(plotResiduals(simulationOutput, form = testData$Environment1))
           }
 )
+
+

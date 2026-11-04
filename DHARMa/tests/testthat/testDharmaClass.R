@@ -118,5 +118,3 @@ test_that("recalcuateResiduals works", {
 
 })
 
-
-

@@ -187,6 +187,8 @@ testQuantiles <- function(simulationOutput, predictor = NULL, rank = TRUE,
 #'
 #' Both binomial and bootstrap generate a null expectation, and then test for an excess or lack of outliers. Per default, testOutliers() looks for both, so if you get a significant p-value, you have to check if you have too many or too few outliers. An excess of outliers is to be interpreted as too many values outside the simulation envelope. This could be caused by overdispersion, or by what we classically call outliers. A lack of outliers would be caused, for example, by underdispersion.
 #'
+#' Note that for type = "bootstrap", the reported confidence interval is the 2.5% - 97.5% quantile range of the outlier frequencies simulated under H0, not a confidence interval for the observed outlier frequency.
+#'
 #'
 #' @author Florian Hartig
 #' @seealso [testResiduals], [testUniformity], [testOutliers], [testDispersion], [testZeroInflation], [testGeneric], [testTemporalAutocorrelation], [testSpatialAutocorrelation], [testQuantiles], [testCategorical]
@@ -294,6 +296,7 @@ testOutliers <- function(simulationOutput, alternative = c("two.sided", "greater
     out$p.value = getP(frequBoot, outliers, alternative = alternative)
 
     out$conf.int = quantile(frequBoot, c(0.025, 0.975))
+    attr(out$conf.int, "conf.level") = 0.95
 
     out$data.name = data.name
     out$margin = margin
@@ -383,15 +386,15 @@ testCategorical <- function(simulationOutput, catPred,
     axis(1, at = 1:nlevels(catPred), levels(catPred))
     axis(2, at=c(0, quantiles, 1))
     abline(h = quantiles, lty = 2)
-  }
 
-  title(ifelse(any(out$uniformity$p.value.cor < 0.05), "Within-group deviations from uniformity significant (red)", "Within-group deviation from uniformity n.s."),
-        col.main = ifelse(any(out$uniformity$p.value.cor < 0.05), "red", "black"),
-        line = 1, cex.main = 0.8)
+    title(ifelse(any(out$uniformity$p.value.cor < 0.05), "Within-group deviations from uniformity significant (red)", "Within-group deviation from uniformity n.s."),
+          col.main = ifelse(any(out$uniformity$p.value.cor < 0.05), "red", "black"),
+          line = 1, cex.main = 0.8)
 
-  if(length(out) > 1) {
-    title(ifelse(out$homogeneity$`Pr(>F)`[1] < 0.05, "Levene Test for homogeneity of variance significant", "Levene Test for homogeneity of variance n.s."),
-          col.main = ifelse(out$homogeneity$`Pr(>F)`[1] < 0.05, "red", "black"), cex.main = 0.8)
+    if(length(out) > 1) {
+      title(ifelse(out$homogeneity$`Pr(>F)`[1] < 0.05, "Levene Test for homogeneity of variance significant", "Levene Test for homogeneity of variance n.s."),
+            col.main = ifelse(out$homogeneity$`Pr(>F)`[1] < 0.05, "red", "black"), cex.main = 0.8)
+    }
   }
 
   return(out)
