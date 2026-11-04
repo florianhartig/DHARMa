@@ -264,6 +264,14 @@ test_that("testOutliers", {
   expect_snapshot(testOutliers(simulationOutput, plot = F,
                                                margin = "upper"))
 
+  # deprecated argument name plotBoostrap, see #560
+  expect_warning(testOutliers(simulationOutput, plot = F, type = "bootstrap",
+                              nBoot = 10, plotBoostrap = F), "deprecated")
+  expect_error(testOutliers(simulationOutput, plot = F, plotBootstrap = F,
+                            plotBoostrap = F), "deprecated")
+  expect_message(testOutliers(simulationOutput, plot = F, type = "binomial",
+                              plotBootstrap = T), "ignored")
+
 })
 
 
