@@ -15,7 +15,7 @@ testSpatialAutocorrelation(simulationOutput, x = NULL, y = NULL,
 
 \item{y}{the y coordinate, in the same order as the data points. Must be specified unless distMat is provided.}
 
-\item{distMat}{optional distance matrix. If not provided, euclidean distances based on x and y will be calculated. See details for explanation.}
+\item{distMat}{optional distance matrix. Must be provided as class "matrix/array" (class "dist" is not supported). If distMat is not provided, euclidean distances based on x and y will be calculated. See details for explanation.}
 
 \item{alternative}{a character string specifying whether the test should test if observations are "greater", "less" or "two.sided" compared to the simulated null hypothesis.}
 

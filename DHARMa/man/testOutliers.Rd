@@ -7,7 +7,7 @@
 testOutliers(simulationOutput, alternative = c("two.sided", "greater",
   "less"), margin = c("both", "upper", "lower"), type = c("default",
   "bootstrap", "binomial"), nBoot = 100, plot = TRUE,
-  plotBoostrap = FALSE)
+  plotBootstrap = FALSE, plotBoostrap = NULL)
 }
 \arguments{
 \item{simulationOutput}{an object of class DHARMa, either created via \link{simulateResiduals} for supported models or by \link{createDHARMa} for simulations created outside DHARMa, or a supported model. Providing a supported model directly is discouraged, because simulation settings cannot be changed in this case.}
@@ -22,7 +22,9 @@ testOutliers(simulationOutput, alternative = c("two.sided", "greater",
 
 \item{plot}{if TRUE, the function will create an additional plot.}
 
-\item{plotBoostrap}{if plot should be produced of outlier frequencies calculated under the bootstrap.}
+\item{plotBootstrap}{if plot should be produced of outlier frequencies calculated under the bootstrap. Only used at type = "bootstrap".}
+
+\item{plotBoostrap}{deprecated, use plotBootstrap instead.}
 }
 \description{
 This function tests if the number of observations outside the simulation envelope are larger or smaller than expected
@@ -39,6 +41,8 @@ The binomial test considers that under the null hypothesis that the model is cor
 For this reason, the testOutlier function implements an alternative procedure that uses the bootstrap to generate a simulation-based expectation for the outliers. It is recommended to use the bootstrap for integer-valued distributions (and integer-valued only, because it has no advantage for continuous distributions, ideally with reasonably high values of nSim and nBoot (I recommend at least 1000 for both)). Because of the high runtime, however, this option is switched off for type = default when nObs > 500.
 
 Both binomial and bootstrap generate a null expectation, and then test for an excess or lack of outliers. Per default, testOutliers() looks for both, so if you get a significant p-value, you have to check if you have too many or too few outliers. An excess of outliers is to be interpreted as too many values outside the simulation envelope. This could be caused by overdispersion, or by what we classically call outliers. A lack of outliers would be caused, for example, by underdispersion.
+
+Note that for type = "bootstrap", the reported confidence interval is the 2.5\% - 97.5\% quantile range of the outlier frequencies simulated under H0, not a confidence interval for the observed outlier frequency.
 }
 \seealso{
 \link{testResiduals}, \link{testUniformity}, \link{testOutliers}, \link{testDispersion}, \link{testZeroInflation}, \link{testGeneric}, \link{testTemporalAutocorrelation}, \link{testSpatialAutocorrelation}, \link{testQuantiles}, \link{testCategorical}

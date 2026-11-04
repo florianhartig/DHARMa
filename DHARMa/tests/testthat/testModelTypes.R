@@ -34,6 +34,12 @@ runEverything = function(fittedModel, testData, DHARMaData = T, phy = NULL,
   expect_true(is.vector(t))
   expect_true(is.numeric(t))
 
+  # fitted values on the scale of the observed response (number of successes for k/n binomial models)
+  f = getFittedResponse(fittedModel)
+  expect_true(is.numeric(f))
+  expect_equal(length(f), length(t))
+  expect_lt(abs(mean(f) - mean(t)), 0.5 * sd(t))
+
   x = getSimulations(fittedModel, 1)
   expect_true(is.matrix(x))
   expect_true(ncol(x) == 1)
@@ -100,6 +106,12 @@ runEverythingExcPearson = function(fittedModel, testData, DHARMaData = T, phy = 
   t = getObservedResponse(fittedModel)
   expect_true(is.vector(t))
   expect_true(is.numeric(t))
+
+  # fitted values on the scale of the observed response (number of successes for k/n binomial models)
+  f = getFittedResponse(fittedModel)
+  expect_true(is.numeric(f))
+  expect_equal(length(f), length(t))
+  expect_lt(abs(mean(f) - mean(t)), 0.5 * sd(t))
 
   x = getSimulations(fittedModel, 1)
   expect_true(is.matrix(x))

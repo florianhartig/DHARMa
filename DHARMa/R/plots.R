@@ -3,7 +3,7 @@
 #' This S3 function creates standard plots for the simulated residuals contained in an object of class DHARMa, using [plotQQunif] (left panel) and [plotResiduals] (right panel).
 #'
 #' @param x an object of class DHARMa with simulated residuals created by [simulateResiduals].
-#' @param ... further options for [plotResiduals]. Consider in particular parameters quantreg, rank and asFactor. xlab, ylab and main cannot be changed when using plot.DHARMa, but can be changed when using [plotResiduals].
+#' @param ... further options for [plotResiduals]. Consider in particular parameters quantreg, rank and asFactor. xlab, ylab and main passed here only change the right panel (the residual plot); use [plotResiduals] and [plotQQunif] to fully control the labels of the individual plots.
 #' @param title the title for both panels (plotted via mtext, outer = TRUE).
 #'
 #' @details The function creates a plot with two panels. The left panel is a uniform qq plot (calling [plotQQunif]), and the right panel shows residuals against predicted values (calling [plotResiduals]), with outliers as a star/asterisk and highlighted in red if outlier test is significant (default color but see Note).
@@ -15,8 +15,6 @@
 #' b) visual homogeneity of residuals in both vertical and horizontal direction, as well as non-significance of quantile tests in the res ~ predictor plot (for more details on the interpretation of this plot, see [plotResiduals])
 #'
 #' Deviations from these expectations can be interpreted similar to a linear regression. See the vignette for detailed examples.
-#'
-#' Note that, unlike [plotResiduals], plot.DHARMa command uses the default rank = T.
 #'
 #' @note The color for highlighting outliers and significant tests can be changed by setting \code{options(DHARMaSignalColor = "red")} to a different color. See \code{getOption("DHARMaSignalColor")} for the current setting. This is convenient for a color-blind friendly display, since red and black are difficult for some people to separate.
 #'
@@ -75,7 +73,7 @@ hist.DHARMa <- function(x,
 #' DEPRECATED, use plot() instead
 #'
 #' @param simulationOutput an object with simulated residuals created by [simulateResiduals]
-#' @param ... further options for [plotResiduals]. Consider in particular parameters quantreg, rank and asFactor. xlab, ylab and main cannot be changed when using plotSimulatedResiduals, but can be changed when using plotResiduals.
+#' @param ... further options for [plotResiduals]. Consider in particular parameters quantreg, rank and asFactor. xlab, ylab and main passed here only change the right panel (the residual plot); use [plotResiduals] and [plotQQunif] to fully control the labels of the individual plots.
 #' @note This function is deprecated. Use [plot.DHARMa]
 #'
 #' @seealso [plotResiduals], [plotQQunif]
@@ -194,8 +192,10 @@ plotResiduals <- function(simulationOutput, form = NULL, quantreg = NULL,
   a <- list(...)
   yAxis = ifelse(absoluteDeviation == TRUE, "Residual spread [2*abs(res - 0.5)]", "DHARMa residual")
   a$ylab = checkDots("ylab", yAxis , ...)
-  a$xlab = checkDots("xlab", ifelse(is.null(form), "Model predictions",
-                                    gsub(".*[$]|^~","",deparse(substitute(form)))), ...)
+  # all.vars only for formulas, as it returns character(0) for vectors
+  a$xlab = checkDots("xlab", if(is.null(form)) "Model predictions"
+                     else if(inherits(form, "formula")) paste(unique(all.vars(form)), collapse = ", ")
+                     else gsub(".*[$]|^~","", paste(deparse(substitute(form)), collapse = "")), ...)
   a$main = checkDots("main", NULL, ...)
 
   simOut <- simulationOutput
@@ -222,6 +222,9 @@ plotResiduals <- function(simulationOutput, form = NULL, quantreg = NULL,
 
       if(form == "~.") {
         predictorNames = getPredictorNames(simulationOutput$fittedModel)
+
+        # issue #536: remove "(weights)" from predictorNames
+        if("(weights)" %in% predictorNames) {predictorNames = predictorNames[!predictorNames %in% "(weights)"]}
         return(plotResidualsAll(
           simulationOutput = simulationOutput,
           predictorNames = predictorNames,
@@ -268,12 +271,12 @@ plotResiduals <- function(simulationOutput, form = NULL, quantreg = NULL,
         }
 
         # for formulas with |, get predictor and group variables
-        predictor = predictors[[1]]
-        group = predictors[[2]]
+        predictor = if (length(predictors) >= 1) predictors[[1]] else NULL
+        group = if (length(predictors) >= 2) predictors[[2]] else NULL
 
         # if form has just one predictor, make the standard plot for that predictor
       } else {
-        predictor = predictors[[1]]
+        predictor = if (length(predictors) >= 1) predictors[[1]] else NULL
         group = NULL
       }
 
@@ -504,6 +507,10 @@ plotResidualsAll <- function(simulationOutput, predictorNames, predictorType = c
   opar = par(no.readonly = TRUE)
   on.exit(par(opar))
 
+  # remove duplicate predictors, e.g. due to quadratic effects (fixes issue #536)
+  Vars = unname(sapply(predictorNames, function(x) all.vars(formula(paste("~", x)))[1]))
+  predictorNames = predictorNames[!duplicated(Vars)]
+
   # get number of panels needed (copied from BayesianTools)
   numPredictors = length(predictorNames)
   if (numPredictors <= 0) stop("Unable to extract predictor names from model.")
@@ -523,15 +530,17 @@ plotResidualsAll <- function(simulationOutput, predictorNames, predictorType = c
   if(predictorType == "predictor"){
     # create residual plot for multiple predictors (additional arguments in ... are ignored here)
     for(i in 1:length(predictorNames)){
+      form = eval(formula(paste("~", predictorNames[i])))
       plotResiduals(simulationOutput,
-                    form = eval(formula(paste("~", predictorNames[i]))),
+                    form = form,
                     quantreg = quantreg,
                     rank = rank,
                     asFactor = asFactor,
                     smoothScatter = smoothScatter,
                     quantiles = quantiles,
                     absoluteDeviation = absoluteDeviation,
-                    xlab = predictorNames[i])
+                    # create the correct xlab for poly()-syntax (related to issue #536)
+                    xlab = paste(unique(all.vars(form)), collapse = ", "))
     }
   }
 

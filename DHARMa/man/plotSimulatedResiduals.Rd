@@ -9,7 +9,7 @@ plotSimulatedResiduals(simulationOutput, ...)
 \arguments{
 \item{simulationOutput}{an object with simulated residuals created by \link{simulateResiduals}}
 
-\item{...}{further options for \link{plotResiduals}. Consider in particular parameters quantreg, rank and asFactor. xlab, ylab and main cannot be changed when using plotSimulatedResiduals, but can be changed when using plotResiduals.}
+\item{...}{further options for \link{plotResiduals}. Consider in particular parameters quantreg, rank and asFactor. xlab, ylab and main passed here only change the right panel (the residual plot); use \link{plotResiduals} and \link{plotQQunif} to fully control the labels of the individual plots.}
 }
 \description{
 DEPRECATED, use plot() instead
