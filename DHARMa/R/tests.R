@@ -174,7 +174,8 @@ testQuantiles <- function(simulationOutput, predictor = NULL, rank = TRUE,
 #' @param type either default, bootstrap or binomial. See details.
 #' @param nBoot number of bootstrap replicates. Only used at type = "bootstrap".
 #' @param plot if TRUE, the function will create an additional plot.
-#' @param plotBoostrap if plot should be produced of outlier frequencies calculated under the bootstrap.
+#' @param plotBootstrap if plot should be produced of outlier frequencies calculated under the bootstrap. Only used at type = "bootstrap".
+#' @param plotBoostrap deprecated, use plotBootstrap instead.
 #' @details DHARMa residuals are created by simulating from the fitted model, and comparing the simulated values to the observed data. It can occur that all simulated values are higher or smaller than the observed data, in which case they get the residual value of 0 and 1, respectively. I refer to these values as simulation outliers, or simply outliers.
 #'
 #' Because no data was simulated in the range of the observed values, we don't know "how strongly" these values deviate from the model expectation, so the term "outlier" should be used with a grain of salt. It is not a judgment about the magnitude of the residual deviation, but simply a dichotomous sign that we are outside the simulated range. Moreover, the number of outliers will decrease as we increase the number of simulations.
@@ -193,9 +194,14 @@ testQuantiles <- function(simulationOutput, predictor = NULL, rank = TRUE,
 #' @author Florian Hartig
 #' @seealso [testResiduals], [testUniformity], [testOutliers], [testDispersion], [testZeroInflation], [testGeneric], [testTemporalAutocorrelation], [testSpatialAutocorrelation], [testQuantiles], [testCategorical]
 #' @export
-testOutliers <- function(simulationOutput, alternative = c("two.sided", "greater", "less"), margin = c("both", "upper", "lower"), type = c("default","bootstrap", "binomial"), nBoot = 100, plot = TRUE, plotBoostrap = FALSE){
+testOutliers <- function(simulationOutput, alternative = c("two.sided", "greater", "less"), margin = c("both", "upper", "lower"), type = c("default","bootstrap", "binomial"), nBoot = 100, plot = TRUE, plotBootstrap = FALSE, plotBoostrap = NULL){
 
   # check inputs
+  if(!is.null(plotBoostrap)){
+    if(!missing(plotBootstrap)) stop("DHARMa::testOutliers: plotBoostrap is the deprecated name of plotBootstrap, please provide only plotBootstrap.", call. = FALSE)
+    warning("DHARMa::testOutliers: argument plotBoostrap is deprecated, use plotBootstrap instead.", call. = FALSE)
+    plotBootstrap = plotBoostrap
+  }
   alternative = match.arg(alternative)
   margin = match.arg(margin)
   type = match.arg(type)
@@ -232,7 +238,9 @@ testOutliers <- function(simulationOutput, alternative = c("two.sided", "greater
     names(out$parameter) = "observations"
     names(out$estimate) = paste("frequency of outliers (expected:", out$null.value,")")
 
-    if (simulationOutput$integerResponse == T & out$p.value < 0.05) message("DHARMa:testOutliers with type = binomial may have inflated Type I error rates for integer-valued distributions. To get a more exact result, it is recommended to re-run testOutliers with type = 'bootstrap'. See ?testOutliers for details")
+    if (simulationOutput$integerResponse == T & out$p.value < 0.05) message("DHARMa::testOutliers: type = 'binomial' may have inflated Type I error rates for integer-valued distributions. To get a more exact result, it is recommended to re-run testOutliers with type = 'bootstrap'. See ?testOutliers for details")
+
+    if (plotBootstrap == T) message("DHARMa::testOutliers: plotBootstrap = TRUE is ignored because the binomial test is used (type = 'binomial', or type = 'default' with non-integer response or nObs > 500). Use type = 'bootstrap' to get the bootstrap plot.")
 
     if(plot == T) {
 
@@ -310,8 +318,8 @@ testOutliers <- function(simulationOutput, alternative = c("two.sided", "greater
     out$estimate = outliers
     names(out$estimate) = paste("outlier frequency (expected:", mean(frequBoot),")")
 
-    if(plotBoostrap == T){
-      hist(frequBoot, xlim = range(frequBoot, outliers), col = "lightgrey", main = "Bootstrapped outlier frequency")
+    if(plotBootstrap == T){
+      hist(frequBoot, xlim = range(frequBoot, outliers), col = "lightgrey", main = "Bootstrapped outlier frequency \n grey = simulated, red = observed, black = simulation mean", cex.main = 0.8)
       abline(v = mean(frequBoot), col = 1, lwd = 2)
       abline(v = outliers, col = "red", lwd = 2)
 
@@ -907,7 +915,7 @@ getP <- function(simulated, observed, alternative, plot = FALSE, ...){
   if(alternative == "two.sided") p = min(min(mean(simulated <= observed), mean(simulated >= observed) ) * 2,1)
 
   if(plot == T){
-    hist(simulated, xlim = range(simulated, observed), col = "lightgrey", main = "Distribution of test statistic \n grey = simulated, red = observed", ...)
+    hist(simulated, xlim = range(simulated, observed), col = "lightgrey", main = "Distribution of test statistic \n grey = simulated, red = observed, black = simulation mean", cex.main = 0.8, ...)
     abline(v = mean(simulated), col = 1, lwd = 2)
     abline(v = observed, col = "red", lwd = 2)
   }

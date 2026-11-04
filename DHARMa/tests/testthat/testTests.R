@@ -267,6 +267,14 @@ test_that("testOutliers", {
   x = testOutliers(simulationOutput, type = "bootstrap", nBoot = 5, plot = F)
   expect_equal(attr(x$conf.int, "conf.level"), 0.95)
 
+  # deprecated argument name plotBoostrap, see #560
+  expect_warning(testOutliers(simulationOutput, plot = F, type = "bootstrap",
+                              nBoot = 10, plotBoostrap = F), "deprecated")
+  expect_error(testOutliers(simulationOutput, plot = F, plotBootstrap = F,
+                            plotBoostrap = F), "deprecated")
+  expect_message(testOutliers(simulationOutput, plot = F, type = "binomial",
+                              plotBootstrap = T), "ignored")
+
 })
 
 

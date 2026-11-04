@@ -7,7 +7,7 @@
 testOutliers(simulationOutput, alternative = c("two.sided", "greater",
   "less"), margin = c("both", "upper", "lower"), type = c("default",
   "bootstrap", "binomial"), nBoot = 100, plot = TRUE,
-  plotBoostrap = FALSE)
+  plotBootstrap = FALSE, plotBoostrap = NULL)
 }
 \arguments{
 \item{simulationOutput}{an object of class DHARMa, either created via \link{simulateResiduals} for supported models or by \link{createDHARMa} for simulations created outside DHARMa, or a supported model. Providing a supported model directly is discouraged, because simulation settings cannot be changed in this case.}
@@ -22,7 +22,9 @@ testOutliers(simulationOutput, alternative = c("two.sided", "greater",
 
 \item{plot}{if TRUE, the function will create an additional plot.}
 
-\item{plotBoostrap}{if plot should be produced of outlier frequencies calculated under the bootstrap.}
+\item{plotBootstrap}{if plot should be produced of outlier frequencies calculated under the bootstrap. Only used at type = "bootstrap".}
+
+\item{plotBoostrap}{deprecated, use plotBootstrap instead.}
 }
 \description{
 This function tests if the number of observations outside the simulation envelope are larger or smaller than expected
