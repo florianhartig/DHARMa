@@ -130,3 +130,13 @@ test_that("runBenchmarks", {
   expect_warning(runBenchmarks(withNA, nRep = 3), "NA values")
 
 })
+
+
+test_that("getFormulaPredictors works for models fitted without data argument", {
+  set.seed(1)
+  x = runif(50); z = runif(50); yy = rpois(50, exp(1 + x)); x[3] = NA
+  simulationOutput = simulateResiduals(glm(yy ~ x + log(z), family = poisson), n = 20)
+  predictors = getFormulaPredictors(simulationOutput, ~ x + z)
+  expect_equal(unname(predictors$x), x[-3])
+  expect_equal(unname(predictors$z), z[-3])
+})

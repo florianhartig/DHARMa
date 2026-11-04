@@ -66,11 +66,12 @@ simulateLRT<-function(m0, m1, n = 250, seed = 123, plot = TRUE, suppressWarnings
 
   if(saveModels == TRUE) out$saveModels == list()
 
+  refitError = NULL
   for (i in 1:n){
 
     simObserved = out$simulatedResponse[[i]]
 
-    try({
+    refitTry = try({
 
       # for testing
       # if (i==3) stop("x")
@@ -92,7 +93,10 @@ simulateLRT<-function(m0, m1, n = 250, seed = 123, plot = TRUE, suppressWarnings
       out$simulatedLR[i] = logLik(refittedM1) - logLik(refittedM0)
 
     }, silent = TRUE)
+    if(inherits(refitTry, "try-error") && is.null(refitError)) refitError = conditionMessage(attr(refitTry, "condition"))
   }
+
+  if(all(is.na(out$simulatedLR))) stop("DHARMa::simulateLRT: all refitted models produced an error", if(!is.null(refitError)) paste0(". The first error was: ", refitError))
 
   out$statistic = out$observedLRT
   names(out$statistic) = "LogL(M1/M0)"

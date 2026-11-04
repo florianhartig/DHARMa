@@ -119,3 +119,48 @@ test_that("getFittedResponse returns fitted values on the scale of the observed 
   }
 })
 
+
+test_that("glmmTMB refit simulations for proportions with weights (issue #571)", {
+  set.seed(1)
+  testData = data.frame(x = runif(60), N = sample(5:15, 60, TRUE))
+  testData$p = rbinom(60, testData$N, plogis(testData$x)) / testData$N
+  m = glmmTMB::glmmTMB(p ~ x, weights = N, family = binomial, data = testData)
+  sims = getSimulations(m, nsim = 3, type = "refit")
+  expect_equal(ncol(sims), 3)
+  expect_true(all(as.matrix(sims) >= 0 & as.matrix(sims) <= 1))
+})
+
+
+test_that("refitting to the observed response reproduces the fit (issue #571)", {
+  set.seed(1)
+  n = 60
+  testData = data.frame(x = runif(n), N = sample(5:15, n, TRUE))
+  testData$k = rbinom(n, testData$N, plogis(testData$x))
+  testData$y = exp(1 + testData$x + rnorm(n, sd = 0.3))
+  yy = rpois(n, exp(1 + testData$x))
+  x = testData$x
+
+  refitCoef = function(m, fix = coef) unlist(fix(getRefit(m, model.response(model.frame(m)))))
+  fixTMB = function(m) glmmTMB::fixef(m)$cond
+
+  # transformed response
+  m = lm(log(y) ~ x, data = testData)
+  expect_equal(refitCoef(m), coef(m))
+  # model fitted without data argument
+  m = glm(yy ~ x, family = poisson)
+  expect_equal(refitCoef(m), coef(m))
+  # data with a single column
+  m = glm(z ~ 1, family = poisson, data = data.frame(z = rpois(n, 3)))
+  expect_equal(refitCoef(m), coef(m))
+  # cbind(k, N - k) response
+  m = glm(cbind(k, N - k) ~ x, family = binomial, data = testData)
+  expect_equal(refitCoef(m), coef(m))
+  m = glmmTMB::glmmTMB(cbind(k, N - k) ~ x, family = binomial, data = testData)
+  expect_equal(refitCoef(m, fixTMB), fixTMB(m))
+  m = glmmTMB::glmmTMB(log(y) ~ x, data = testData)
+  expect_equal(refitCoef(m, fixTMB), fixTMB(m))
+
+  testData$g = factor(sample(1:8, n, TRUE))
+  m = GLMMadaptive::mixed_model(cbind(k, N - k) ~ x, random = ~1|g, data = testData, family = binomial())
+  expect_equal(refitCoef(m, GLMMadaptive::fixef), GLMMadaptive::fixef(m))
+})

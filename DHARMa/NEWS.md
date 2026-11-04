@@ -21,6 +21,8 @@ NOTE: for more news about the package, see https://github.com/florianhartig/DHAR
 
 * Fix in behavior of `update()` on models with transformed predictors (e.g. `offset()`). This fixes behavior of `getRefit` and related functions such as `simulateLRT` (issue #351). 
 
+* Refits of lm, glm, gam, glmmTMB, GLMMadaptive and phylolm/phyloglm models now also work for transformed and `cbind()` responses; `simulateResiduals(refit = TRUE)` and `simulateLRT()` stop with an informative error if all refits fail (#571).
+
 * Small output fixes in `testCategorical()`, `testOutliers()` and `print.DHARMa` (#569).
 
 * `runBenchmarks()` no longer warns about NA values when the output contains none (#577).

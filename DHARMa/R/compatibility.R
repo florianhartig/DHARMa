@@ -469,24 +469,24 @@ getPredictorNames.default <- function (object,...){
 #' @rdname getRefit
 #' @export
 getRefit.lm <- function(object, newresp, ...){
-
-  # fixes issue #351 (refit problems with models with offset)
-  newData = getData(object)[rownames(model.frame(object)),]
-  responseName = all.vars(formula(object))[1]
-
-  if(is.vector(newresp)){
-    newData[[responseName]] = newresp
-  } else if (is.factor(newresp)){
-    # Hack to make the factor binomial case work
-    newData[[responseName]] = as.numeric(newresp) - 1
-  } else {
-    # Hack to make the binomial n/k case work
-    newData[[responseName]] = NULL
-    newData = cbind(newresp, newData)
-  }
-
-  refittedModel = update(object, data = newData, ...)
+  newData = getRefitData(object, newresp)
+  # the new response replaces the left-hand side of the formula, see getRefitData
+  # subset = NULL: newData contains only the rows used in the fit
+  refittedModel = update(object, formula. = .DHARMa_response ~ ., data = newData, subset = NULL, ...)
   return(refittedModel)
+}
+
+# Creates the data for refitting a model to a new response.
+#
+# Uses the original data, so that variables in offsets or transformations are found (fixes issue #351). Models fitted without a data argument use the model frame; variables not in the model frame are then taken from the formula environment, which works only if no rows were removed because of NAs. The new response is added as a separate column, which is then used as the left-hand side of the formula. This works for transformed responses such as log(y) and for cbind(k, N - k) responses, without overwriting data columns (issue #571).
+getRefitData <- function(object, newresp, rows = rownames(model.frame(object))){
+  if(is.null(object$call$data)) newData = model.frame(object)
+  else newData = getData(object)
+  newData = as.data.frame(newData)[rows, , drop = FALSE]
+  # Hack to make the factor binomial case work
+  if(is.factor(newresp)) newresp = as.numeric(newresp) - 1
+  newData$.DHARMa_response = newresp
+  return(newData)
 }
 
 
@@ -656,20 +656,10 @@ getData.merMod <- function (object, ...){
 #' @rdname getRefit
 #' @export
 getRefit.glmmTMB <- function(object, newresp, ...){
-
-  # fixes issue #351 (refit problems with models with offset)
-  newData = getData(object)[rownames(model.frame(object)),]
-  responseName = all.vars(formula(object))[1]
-
-  # hack to make update work - for some reason, glmmTMB wants the matrix embedded in the df for update to work  ... should be solved ideally, see https://github.com/glmmTMB/glmmTMB/issues/549
-  if(is.matrix(newresp)){
-    responseName = all.vars(formula(object)[[2]])
-    newData[[responseName[1]]] = newresp[,1]
-    newData[[responseName[2]]] = newresp[,2]
-  } else {
-    newData[[responseName]] = newresp
-  }
-  refittedModel = update(object, data = newData, ...)
+  # glmmTMB needs a matrix response embedded in the data, see https://github.com/glmmTMB/glmmTMB/issues/549; getRefitData does this
+  newData = getRefitData(object, newresp)
+  # subset = NULL: newData contains only the rows used in the fit
+  refittedModel = update(object, formula. = .DHARMa_response ~ ., data = newData, subset = NULL, ...)
   return(refittedModel)
 }
 
@@ -737,12 +727,11 @@ getSimulations.glmmTMB <- function (object, nsim = 1, simulateREs = c("condition
 
     # check for weights in k/n case
     if(family(object)$family %in% c("binomial", "betabinomial")){
-      if("(weights)" %in% colnames(model.frame(object))){
+      if("(weights)" %in% colnames(model.frame(object)) && !is.matrix(model.frame(object)[[1]])){
         w = model.frame(object)
         w = w$`(weights)`
-        tmp <- function(x)x/w
-        out = apply(out, 2, tmp)
-        out = as.data.frame(out)
+        # glmmTMB returns a 2-column matrix (successes, failures) per simulation, keep only the successes (issue #571)
+        out = as.data.frame(lapply(out, function(x) if(is.matrix(x)) x[,1] / w else x / w))
       }
       else if(is.matrix(out[[1]]) & !is.matrix(model.frame(object)[[1]])){
         out = as.data.frame(as.matrix(out)[,seq(1, (2*nsim), by = 2)])
@@ -889,16 +878,12 @@ getFixedEffects.MixMod <- function(object, ...){
   return(out)
 }
 
-# TODO: this could go wrong if the DF has no column names, although I guess then one couldn't use formula
-# TODO: goes wrong for k/n binomial with c(s,f) ~ pred syntax
-
 #' @rdname getRefit
 #' @export
 getRefit.MixMod <- function(object, newresp, ...) {
-  responsename = colnames(model.frame(object))[1]
-  newData = getData(object)[rownames(model.frame(object)),]
-  newData[, match(responsename,names(newData))] = newresp
-  update(object, data = newData, ...)
+  # mixed_model has the argument fixed instead of formula, see getRefitData
+  newData = getRefitData(object, newresp)
+  update(object, fixed = update(formula(object), .DHARMa_response ~ .), data = newData, ...)
 }
 
 #' @rdname getFitted
@@ -954,12 +939,9 @@ getSimulations.phylolm <- function(object, nsim = 1, simulateREs = c("conditiona
 #' @rdname getRefit
 #' @export
 getRefit.phylolm <- function(object, newresp, ...){
-  # fixes issue #351 (refit problems with models with offset)
-  newData = getData(object)[rownames(model.frame(object)),]
-  responseName = all.vars(formula(object))[1]
-
-  newData[[responseName]] = newresp
-  refittedModel = update(object, data = newData, ...)
+  newData = getRefitData(object, newresp)
+  refittedModel = update(object, formula. = .DHARMa_response ~ ., data = newData, ...)
+  return(refittedModel)
 }
 
 
@@ -1012,13 +994,9 @@ getSimulations.phyloglm <- function(object, nsim = 1,
 #' @rdname getRefit
 #' @export
 getRefit.phyloglm <- function(object, newresp, ...){
-  # fixes issue #351 (refit problems with models with offset)
-  #object phyloglm doesn't have a model.frame object
-  newData = getData(object)[rownames(model.frame(object$y ~ object$X[,-1])),]
-  responseName = all.vars(formula(object))[1]
-  newData[[responseName]] = newresp
-
-  refittedModel = update(object, data = newData, ...)
+  # phyloglm objects have no model.frame method
+  newData = getRefitData(object, newresp, rows = rownames(object$X))
+  refittedModel = update(object, formula. = .DHARMa_response ~ ., data = newData, ...)
   return(refittedModel)
 }
 
