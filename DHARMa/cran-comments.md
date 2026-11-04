@@ -12,6 +12,8 @@ This release was tested without apparent problems under:
 
 This update also fixes the failing check in tests/testthat/testNumericReproducibility.R reported by CRAN, caused by small numerical differences introduced by lme4 2.1-0. We relaxed the tolerance of the reference comparison. 
 
+Reverse dependencies: we checked all 30 CRAN packages that depend on, import or suggest DHARMa, comparing DHARMa 0.5.0 and 0.5.1 (using the r-devel/recheck GitHub Action, R 4.6.1 on Ubuntu). No new problems were found compared to 0.5.0.
+
 
 # Version 0.5.0
 
