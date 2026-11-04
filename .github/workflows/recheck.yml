@@ -1,0 +1,25 @@
+# Reverse dependency check, see https://github.com/r-devel/recheck
+# Runs only when triggered manually via the 'Run workflow' button in the Actions tab (a branch can be selected there).
+# 'most' also checks packages that list DHARMa in Suggests (e.g. lme4, glmmTMB, performance); 'strong' only Depends/Imports/LinkingTo.
+on:
+  workflow_dispatch:
+    inputs:
+      which:
+        type: choice
+        description: Which dependents to check
+        default: most
+        options:
+          - most
+          - strong
+
+name: Reverse dependency check
+
+permissions: read-all
+
+jobs:
+  revdep_check:
+    name: Reverse check ${{ inputs.which }} dependents
+    uses: r-devel/recheck/.github/workflows/recheck.yml@v1
+    with:
+      which: ${{ inputs.which }}
+      subdirectory: 'DHARMa' # the R package is in a subdir of the git repo

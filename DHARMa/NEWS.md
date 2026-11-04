@@ -1,5 +1,34 @@
 NOTE: for more news about the package, see https://github.com/florianhartig/DHARMa/releases
 
+# DHARMa 0.5.1
+
+
+## Bugfixes
+
+* `testDispersion` (type = "DHARMa", refit = FALSE) was biased for binomial models with more than one trial (k/n models, specified via `cbind(k, n - k)` or as proportions with the number of trials given in `weights`): residuals were calculated as observed / simulated number of successes minus the fitted *proportion*. Residuals are now calculated with the fitted values on the scale of the observed response (expected number of successes), provided by the new function `getFittedResponse`. Poisson, Bernoulli (0/1) and all other models are not affected.
+
+* Version 0.5.0 was changing the `glmmTMB` model object "simcode" when using simulateResiduals. We fixed this problem by restoring the original simcode to the model object.
+
+* Fixing bug in predictions via getFitted for `gam` and `bam` models. Predictions are now unconditional on random effects and factor smooth interactions (previously they were conditional, see #544).
+
+* Solving duplicated plots in `plotResiduals`: (1) when having quadratic effects written with I(variable) in the formula, and (2) for brms with transformed variables in the formula, e.g. `log(variable)`. 
+
+* Minor fixes in testSpatialAutocorrelation: DHARMa errors if repeated values for space in distMat, extended help, improved plot titles and legend.
+
+* Revised weights handling (issue #230, #540): introduced more robust check for prior weights (especially in n/k models) with new helper function `hasWeights`.
+
+* Predictions from `GLMMadaptive` models are now created using `fitted()`, which avoids errors on models with transformations (e.g. offset, log)
+
+* Fix in behavior of `update()` on models with transformed predictors (e.g. `offset()`). This fixes behavior of `getRefit` and related functions such as `simulateLRT` (issue #351). 
+
+
+## Minor changes
+
+* New compatibility function `getFittedResponse`, which returns the fitted values on the scale of the observed response, i.e. the expected number of successes for k/n binomial models (`getFitted` returns proportions). It is used in `testDispersion`.
+
+* Documentation: improved vignette (more explanations for conditional vs unconditional simulations).
+
+
 # DHARMa 0.5.0
 
 

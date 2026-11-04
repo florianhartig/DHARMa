@@ -106,8 +106,8 @@ getObservedResponse <- function (object, ...) {
 #'
 #' @details The purpose of this function is to wrap or implement the simulate function of different model classes to return simulations from fitted models in a standardized way.
 #'
-#' One important parameter is simulateRE, which controls which hierarchical levels are held constant (conditioned on), and which are re-simulated. The default as of DHARMa 0.5.0 is to simulate "conditional" on all fitted random effects. The setting "unconditional" re-simulates all REs. 
-#'  
+#' One important parameter is simulateRE, which controls which hierarchical levels are held constant (conditioned on), and which are re-simulated. The default as of DHARMa 0.5.0 is to simulate "conditional" on all fitted random effects. The setting "unconditional" re-simulates all REs.
+#'
 #' With simulateREs = "user-specified", users can supply additional parameters to the simulate function of the respective model class and thus condition on specific REs or structures. The exact behavior will depdend on the regression package. For details, please see vignette, or consult the help of the different packages. If choosing simulateREs = "user-specified" with no additional parameters, the default simulation function of the respective regression package is used. This corresponds to the DHARMa behavior prior to 0.5.0.
 #'
 #' If the model was fit with weights and the respective model class does not include the weights in the simulations, getSimulations will throw a warning. The background is if weights are used on the likelihood directly, then what is fitted is effectively a pseudo likelihood, and there is no way to directly simulate from the specified likelihood. Whether or not residuals can be used in this case depends very much on what is tested and how weights are used. I'm sorry to say that it is hard to give a general recommendation, you have to consult someone that understands how weights are processed in the respective model class.
@@ -172,7 +172,24 @@ getFitted <- function (object, ...) {
   UseMethod("getFitted", object)
 }
 
-# NOTE - a bit unclear if fitted or predict should be used
+#' Get fitted/predicted values on the scale of the observed response
+#'
+#' Wrapper to get the fitted/predicted values of the model on the same scale as the observed response ([getObservedResponse]) and the simulations ([getSimulations]).
+#'
+#' For most models, this is identical to [getFitted]. The exception are binomial and beta-binomial models with more than one trial per observation (k/n models), specified either as cbind(successes, failures) or as proportions with the number of trials provided via weights. For these models, [getObservedResponse] and [getSimulations] return the number of successes, whereas [getFitted] returns the predicted proportions. getFittedResponse returns the predicted proportions multiplied by the number of trials, i.e. the expected number of successes.
+#'
+#' The fitted response is used by [testDispersion] (refit = FALSE) to calculate the raw residuals (observed or simulated response minus fitted response).
+#'
+#' @param object a fitted model.
+#' @param ... additional parameters to be passed on, usually to [getFitted].
+#'
+#' @example inst/examples/wrappersHelp.R
+#'
+#' @seealso [getFitted], [getObservedResponse], [getSimulations]
+#' @export
+getFittedResponse <- function (object, ...) {
+  UseMethod("getFittedResponse", object)
+}
 
 
 #' Get model residuals
@@ -193,8 +210,6 @@ getFitted <- function (object, ...) {
 getResiduals <- function (object, ...) {
   UseMethod("getResiduals", object)
 }
-
-# NOTE - a bit unclear if fitted or predict should be used
 
 
 #' Get Pearson residuals
@@ -375,6 +390,22 @@ getFitted.default <- function (object,...){
   out = as.vector(out) # introduced because of phyr error
 }
 
+#' @rdname getFittedResponse
+#' @export
+getFittedResponse.default <- function (object, ...){
+  out = getFitted(object, ...)
+
+  # k/n binomial: getFitted returns proportions, here we return number of success
+  if(getFamily(object)$family %in% c("binomial", "betabinomial", "betabin", "beta binomial")){
+    x = model.frame(object)
+    # number of trials given via cbind(successes, failures)
+    if(is.matrix(x[[1]]) && ncol(x[[1]]) == 2) out = out * rowSums(x[[1]])
+    # number of trials given via weights (response = proportion)
+    if("(weights)" %in% colnames(x)) out = out * x$`(weights)`
+  }
+  return(out)
+}
+
 #' @rdname getResiduals
 #' @export
 getResiduals.default <- function (object, ...){
@@ -419,7 +450,11 @@ getFamily.default <- function (object,...){
 #' @rdname getData
 #' @export
 getData.default <- function (object,...){
-  eval(object$call$data, envir = environment(formula(object)))
+  for (e in c(list(environment(formula(object))), rev(sys.frames()))) {
+    out = tryCatch(eval(object$call$data, envir = e), error = function(e) NULL)
+    if (!is.null(out)) return(out)
+  }
+  stop("DHARMa::getData: cannot locate the original data of the fitted model, probably because you are fitting your model inside a function.")
 }
 
 #' @rdname getPredictorNames
@@ -435,16 +470,18 @@ getPredictorNames.default <- function (object,...){
 #' @export
 getRefit.lm <- function(object, newresp, ...){
 
-  newData <-model.frame(object)
+  # fixes issue #351 (refit problems with models with offset)
+  newData = getData(object)[rownames(model.frame(object)),]
+  responseName = all.vars(formula(object))[1]
 
   if(is.vector(newresp)){
-    newData[,1] = newresp
+    newData[[responseName]] = newresp
   } else if (is.factor(newresp)){
     # Hack to make the factor binomial case work
-    newData[,1] = as.numeric(newresp) - 1
+    newData[[responseName]] = as.numeric(newresp) - 1
   } else {
     # Hack to make the binomial n/k case work
-    newData[[1]] = NULL
+    newData[[responseName]] = NULL
     newData = cbind(newresp, newData)
   }
 
@@ -453,35 +490,29 @@ getRefit.lm <- function(object, newresp, ...){
 }
 
 
-hasWeigths.lm <- function(object, ...){
-  if(length(unique(object$prior.weights)) != 1) return(TRUE)
-  else return(FALSE)
-}
-
-
 ######### GLM #############
 
 #' @rdname getSimulations
 #' @export
 getSimulations.negbin<- function (object, nsim = 1, simulateREs = c("conditional", "unconditional", "user-specified"), type = c("normal", "refit"), ...){
-  
+
   type <- match.arg(type)
   simulateREs <- match.arg(simulateREs)
-  
-  if("(weights)" %in% colnames(model.frame(object))) warning(weightsWarning)
+
+  if(hasWeights(object)) warning(weightsWarning)
   getSimulations.default(object = object, nsim = nsim, type = type, ...)
 }
 
 
 ######## MGCV ############
 
-# This function overwrites the standard fitted function for GAM
-
 #' @rdname getFitted
 #' @export
 getFitted.gam <- function(object, ...){
-  class(object) = "glm"
-  out = stats::fitted(object, ...)
+  # unconditional predictions, excluding random effects and factor smooth interactions (fixes issue #544)
+  isRE = sapply(object$smooth, function(x) any(class(x) %in% c("random.effect", "fs.interaction")))
+  if(any(isRE)) excludeREs = sapply(object$smooth[isRE], `[[`, "label") else excludeREs =  NULL
+  out = predict(object, type = "response", exclude = excludeREs, ...)
   names(out) = as.character(1:length(out))
   out
 }
@@ -520,7 +551,7 @@ getSimulations.gam <- function(object, nsim = 1, simulateREs = c("conditional", 
 
   if(length(find.package("mgcViz")) > 0 & mgcViz == T){
 
-    if("(weights)" %in% colnames(model.frame(object)) & ! family(object)$family %in% c("binomial", "betabinomial")) warning(weightsWarning)
+    if(hasWeights(object)) warning(weightsWarning)
 
     # use mgcViz if available
     out = mgcViz::simulate.gam(object, nsim = nsim , ...)
@@ -562,14 +593,24 @@ getSimulations.gam <- function(object, nsim = 1, simulateREs = c("conditional", 
       }
     }
   } else {
-    message("It seems you don't have mgcViz installed on this computer. When using DHARMa with mgcv objects, it is highly recommended to also install mgcViz, which will extend the ability of DHARMa to simulate from various gam objects. Withoug mgcViz, simulations will fail in various situations. See vignette for details!")
+    message("It seems you don't have mgcViz installed on this computer. When using DHARMa with mgcv objects, it is highly recommended to also install mgcViz, which will extend the ability of DHARMa to simulate from various gam objects. Without mgcViz, simulations will fail in various situations. See vignette for details!")
     out = getSimulations.default(object, nsim, type, ...)
   }
   return(out)
 }
 
+
+
 ######## lme4 ############
 
+#' @rdname getRefit
+#' @importFrom lme4 refit
+#' @export
+getRefit.merMod <- function(object, newresp, ...) {
+  # assign na.action attribute to newresp, otherwise refit fails on models which had NAs in data
+  attr(newresp, "na.action") = attr(model.frame(object), "na.action")
+  refit(object, newresp, ...)
+}
 
 #' @rdname getSimulations
 #' @export
@@ -578,7 +619,7 @@ getSimulations.merMod <- function (object, nsim = 1, simulateREs = c("conditiona
 
   simulateREs <- match.arg(simulateREs)
 
-  if("(weights)" %in% colnames(model.frame(object))) warning(weightsWarning)
+  if(hasWeights(object)) warning(weightsWarning)
 
   if(simulateREs != "user-specified" & "re.form" %in% names(list(...))) stop("DHARMa: If you want to specify certain random effects to condition on, you need to set simulateREs = \"user-specified\".")
 
@@ -615,16 +656,18 @@ getData.merMod <- function (object, ...){
 #' @rdname getRefit
 #' @export
 getRefit.glmmTMB <- function(object, newresp, ...){
-  newData <-model.frame(object)
+
+  # fixes issue #351 (refit problems with models with offset)
+  newData = getData(object)[rownames(model.frame(object)),]
+  responseName = all.vars(formula(object))[1]
 
   # hack to make update work - for some reason, glmmTMB wants the matrix embedded in the df for update to work  ... should be solved ideally, see https://github.com/glmmTMB/glmmTMB/issues/549
   if(is.matrix(newresp)){
-    tmp = colnames(newData[[1]])
-    newData[[1]] = NULL
-    newData = cbind(newresp, newData)
-    colnames(newData)[1:2] = tmp
+    responseName = all.vars(formula(object)[[2]])
+    newData[[responseName[1]]] = newresp[,1]
+    newData[[responseName[2]]] = newresp[,2]
   } else {
-    newData[[1]] = newresp
+    newData[[responseName]] = newresp
   }
   refittedModel = update(object, data = newData, ...)
   return(refittedModel)
@@ -641,9 +684,22 @@ getSimulations.glmmTMB <- function (object, nsim = 1, simulateREs = c("condition
   type <- match.arg(type)
   simulateREs <- match.arg(simulateREs)
 
-  if("(weights)" %in% colnames(model.frame(object)) & ! family(object)$family %in% c("binomial", "betabinomial")) warning(weightsWarning)
+  if(hasWeights(object)) warning(weightsWarning)
 
   out = NULL
+
+  # fixes #538 (restore simcodes of model object)
+  nSimcodes = length(object$obj$env$data$terms)
+  originalSimcodes = vector("list", nSimcodes)
+
+  for(i in seq_len(nSimcodes)) {
+    originalSimcodes[[i]] = object$obj$env$data$terms[[i]]$simCode
+  }
+
+  on.exit(for (i in seq_len(nSimcodes)) {
+      object$obj$env$data$terms[[i]]$simCode = originalSimcodes[[i]]
+    }, add = TRUE)
+  #end restore simcodes
 
   # user-specified (as before)
   if(simulateREs == "user-specified") {
@@ -840,15 +896,15 @@ getFixedEffects.MixMod <- function(object, ...){
 #' @export
 getRefit.MixMod <- function(object, newresp, ...) {
   responsename = colnames(model.frame(object))[1]
-  newDat = object$data
-  newDat[, match(responsename,names(newDat))] = newresp
-  update(object, data = newDat, ...)
+  newData = getData(object)[rownames(model.frame(object)),]
+  newData[, match(responsename,names(newData))] = newresp
+  update(object, data = newData, ...)
 }
 
 #' @rdname getFitted
 #' @export
 getFitted.MixMod <- function (object,...){
-  predict(object, type = "mean_subject")
+  fitted(object, type = "mean_subject")
 }
 
 #' @rdname getResiduals
@@ -898,8 +954,11 @@ getSimulations.phylolm <- function(object, nsim = 1, simulateREs = c("conditiona
 #' @rdname getRefit
 #' @export
 getRefit.phylolm <- function(object, newresp, ...){
-  newData <- model.frame(object)
-  newData[,1] = newresp
+  # fixes issue #351 (refit problems with models with offset)
+  newData = getData(object)[rownames(model.frame(object)),]
+  responseName = all.vars(formula(object))[1]
+
+  newData[[responseName]] = newresp
   refittedModel = update(object, data = newData, ...)
 }
 
@@ -953,11 +1012,11 @@ getSimulations.phyloglm <- function(object, nsim = 1,
 #' @rdname getRefit
 #' @export
 getRefit.phyloglm <- function(object, newresp, ...){
+  # fixes issue #351 (refit problems with models with offset)
   #object phyloglm doesn't have a model.frame object
-  terms <-  as.character(formula(object))[-1]
-  newData <- model.frame(object$y ~ object$X[,-1])
-  names(newData) <- terms
-  newData[,1] = newresp
+  newData = getData(object)[rownames(model.frame(object$y ~ object$X[,-1])),]
+  responseName = all.vars(formula(object))[1]
+  newData[[responseName]] = newresp
 
   refittedModel = update(object, data = newData, ...)
   return(refittedModel)
@@ -1055,6 +1114,13 @@ getFitted.brmsfit  <- function (object,...){
   return(out)
 }
 
+#' @rdname getFittedResponse
+#' @export
+getFittedResponse.brmsfit  <- function (object,...){
+  # posterior_epred predicts on the scale of the observed response, i.e. the expected number of successes for k/n binomial models (see getFitted.brmsfit)
+  apply(t(brms::posterior_epred(object, re_formula = NA, ...)), 1, median)
+}
+
 
 
 #' @rdname getResiduals
@@ -1076,3 +1142,15 @@ getData.brmsfit <- function (object, ...){
   eval(as.name(attr(object$data, "data_name", TRUE)), envir = environment(formula(object$formula)))
   #could also use as.name(brms:::get_data_name(fit1$data)) #returns NULL if is NULL
 }
+
+#' @rdname getPredictorNames
+#' @export
+getPredictorNames.brmsfit <- function (object,...){
+  # fixes issue #542
+  modelFrame = model.frame(object)
+  responseName = names(modelFrame)[attr(attr(modelFrame, "terms"), "response")]
+  predictorNames = colnames(modelFrame)
+  predictorNames = predictorNames[predictorNames != responseName][-1]
+  return(predictorNames)
+}
+
