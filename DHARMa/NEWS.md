@@ -23,6 +23,8 @@ NOTE: for more news about the package, see https://github.com/florianhartig/DHAR
 
 * Small output fixes in `testCategorical()`, `testOutliers()` and `print.DHARMa`.
 
+* `runBenchmarks()` no longer warns about NA values when the output contains none.
+
 ## Minor changes
 
 * New compatibility function `getFittedResponse`, which returns the fitted values on the scale of the observed response, i.e. the expected number of successes for k/n binomial models (`getFitted` returns proportions). It is used in `testDispersion`.
