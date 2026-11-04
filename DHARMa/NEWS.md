@@ -21,9 +21,9 @@ NOTE: for more news about the package, see https://github.com/florianhartig/DHAR
 
 * Fix in behavior of `update()` on models with transformed predictors (e.g. `offset()`). This fixes behavior of `getRefit` and related functions such as `simulateLRT` (issue #351). 
 
-* Small output fixes in `testCategorical()`, `testOutliers()` and `print.DHARMa`.
+* Small output fixes in `testCategorical()`, `testOutliers()` and `print.DHARMa` (#569).
 
-* `runBenchmarks()` no longer warns about NA values when the output contains none.
+* `runBenchmarks()` no longer warns about NA values when the output contains none (#577).
 
 ## Minor changes
 
@@ -33,7 +33,7 @@ NOTE: for more news about the package, see https://github.com/florianhartig/DHAR
 
 * New compatibility function `getFittedResponse`, which returns the fitted values on the scale of the observed response, i.e. the expected number of successes for k/n binomial models (`getFitted` returns proportions). It is used in `testDispersion`.
 
-* Documentation: improved vignette (more explanations for conditional vs unconditional simulations); corrected several errors in help files, examples and vignette.
+* Documentation: improved vignette (more explanations for conditional vs unconditional simulations); corrected several errors in help files, examples and vignette (#570).
 
 
 
