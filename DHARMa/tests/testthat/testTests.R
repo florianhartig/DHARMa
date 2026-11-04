@@ -264,6 +264,9 @@ test_that("testOutliers", {
   expect_snapshot(testOutliers(simulationOutput, plot = F,
                                                margin = "upper"))
 
+  x = testOutliers(simulationOutput, type = "bootstrap", nBoot = 5, plot = F)
+  expect_equal(attr(x$conf.int, "conf.level"), 0.95)
+
   # deprecated argument name plotBoostrap, see #560
   expect_warning(testOutliers(simulationOutput, plot = F, type = "bootstrap",
                               nBoot = 10, plotBoostrap = F), "deprecated")
@@ -275,3 +278,16 @@ test_that("testOutliers", {
 })
 
 
+# Test Categorical
+test_that("testCategorical", {
+  set.seed(123)
+  testData = createData(sampleSize = 200, randomEffectVariance = 0)
+  fittedModel <- glm(observedResponse ~ Environment1 , family = "poisson",
+                     data = testData)
+  simulationOutput <- simulateResiduals(fittedModel = fittedModel, n = 50)
+
+  # plot = FALSE must not call title(), which fails if no plot was started
+  grDevices::pdf(NULL)
+  on.exit(grDevices::dev.off())
+  expect_no_error(testCategorical(simulationOutput, catPred = testData$group, plot = F))
+})
