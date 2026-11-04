@@ -26,11 +26,8 @@ NOTE: for more news about the package, see https://github.com/florianhartig/DHAR
 
 * New compatibility function `getFittedResponse`, which returns the fitted values on the scale of the observed response, i.e. the expected number of successes for k/n binomial models (`getFitted` returns proportions). It is used in `testDispersion`.
 
-* Documentation: improved vignette (more explanations for conditional vs unconditional simulations).
+* Documentation: improved vignette (more explanations for conditional vs unconditional simulations); corrected several errors in help files, examples and vignette.
 
-* `simulateLRT`: the help now states that simulations follow the `simulateREs` default of `simulateResiduals`. Since 0.5.0, data are therefore simulated conditional on the fitted REs of `m0` (the help previously said marginal). Use `simulateREs = "user-specified"` (no further arguments) to reproduce results of DHARMa < 0.5.0, or `"unconditional"` to re-simulate all REs.
-
-* Documentation: corrected several errors in help files, examples and vignette, in particular: `fittedPredictedResponse` in `createDHARMa` must be on the response scale (the vignette example used the link scale), test statistic in `simulateLRT`, expected number of outliers in `outliers`, default of `testGeneric` and order of `simulateResiduals` / `glm` in the vignette, brms syntax (`re_formula`) in the simulation table, time order in the `testTemporalAutocorrelation` examples, Dunn & Smyth reference, and typos.
 
 
 # DHARMa 0.5.0
