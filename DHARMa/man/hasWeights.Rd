@@ -10,6 +10,6 @@ hasWeights(fittedModel)
 \item{fittedModel}{a fitted model}
 }
 \description{
-For n/k models, weights can either represent the number of trials or actual prior weights on the likelihood. This function distinguishes the two cases and returns TRUE if the model has prior weights that are not the number of trials. For a cbind(successes, failures) response, weights other than 1 are prior weights; DHARMa stops for this case (see checkBinomialMatrixWeights).
+For n/k models, weights can either represent the number of trials or actual prior weights on the likelihood. This function distinguishes the two cases and returns TRUE if the model has prior weights that are not the number of trials. For a cbind(successes, failures) response, weights other than 1 are prior weights.
 }
 \keyword{internal}

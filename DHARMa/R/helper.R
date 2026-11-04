@@ -249,16 +249,9 @@ getFormulaPredictors <- function(simulationOutput, formula) {
 }
 
 
-#' Stop for binomial models with cbind() response and prior weights
-#'
-#' For binomial models with a cbind(successes, failures) response, additional prior weights are handled differently by the regression packages (e.g. combined with the number of trials in glm), so that observed and simulated responses would be on different scales. DHARMa therefore stops for this combination.
-#'
-#' @param fittedModel a fitted model
-#' @keywords internal
+# Stops for binomial models with a cbind(successes, failures) response and prior weights other than 1, which the regression packages combine with the number of trials in different ways (issue #568)
 checkBinomialMatrixWeights <- function(fittedModel){
-  if(!(family(fittedModel)$family %in% c("binomial", "betabinomial"))) return(invisible(NULL))
-  modelFrame = model.frame(fittedModel)
-  if(is.matrix(modelFrame[[1]]) && "(weights)" %in% colnames(modelFrame) && any(modelFrame[["(weights)"]] != 1)){
+  if(family(fittedModel)$family %in% c("binomial", "betabinomial") && is.matrix(model.frame(fittedModel)[[1]]) && hasWeights(fittedModel)){
     stop("DHARMa: binomial models with a cbind(successes, failures) response and additional prior weights are not supported, because observed and simulated responses would be on different scales. Use a proportion response with the number of trials as weights, or a cbind() response without weights.")
   }
   invisible(NULL)
@@ -267,7 +260,7 @@ checkBinomialMatrixWeights <- function(fittedModel){
 
 #' Check if a model has (problematic) prior weights
 #'
-#' For n/k models, weights can either represent the number of trials or actual prior weights on the likelihood. This function distinguishes the two cases and returns TRUE if the model has prior weights that are not the number of trials. For a cbind(successes, failures) response, weights other than 1 are prior weights; DHARMa stops for this case (see checkBinomialMatrixWeights).
+#' For n/k models, weights can either represent the number of trials or actual prior weights on the likelihood. This function distinguishes the two cases and returns TRUE if the model has prior weights that are not the number of trials. For a cbind(successes, failures) response, weights other than 1 are prior weights.
 #'
 #' @param fittedModel a fitted model
 #' @keywords internal

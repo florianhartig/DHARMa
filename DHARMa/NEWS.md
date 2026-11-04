@@ -17,6 +17,8 @@ NOTE: for more news about the package, see https://github.com/florianhartig/DHAR
 
 * `bam` models whose fitted values exclude the `offset` argument (a problem in mgcv) now stop with an informative error; use `offset()` in the formula instead (#572).
 
+* Simulated successes of `gam` models with `cbind()` response (mgcViz) are now integers, so that ties with the observed response are handled correctly (#590).
+
 * Solving duplicated plots in `plotResiduals`: (1) when having quadratic effects written with I(variable) in the formula, and (2) for brms with transformed variables in the formula, e.g. `log(variable)`. 
 
 * Minor fixes in testSpatialAutocorrelation: DHARMa errors if repeated values for space in distMat, extended help, improved plot titles and legend.

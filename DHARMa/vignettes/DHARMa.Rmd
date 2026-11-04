@@ -940,7 +940,7 @@ Possible to condition on specific REs via re.form, see help of predict.merMod, s
 
 When using mgcv with DHARMa, it is highly recommended to also install mgcViz. Since version 0.4.5, this will allow DHARMa to use the simulate.gam function in mgcViz, which is more general than the default simulate function. For example, without mgcViz, it will not be possible to simulate from mgcv::gam objects fitted with extended families.
 
-Without mgcViz (or with `mgcViz = FALSE`), DHARMa uses the simulate function for lm/glm objects from the stats package. This works for standard families (e.g. gaussian, poisson, binomial, Gamma), but not for the extended families of mgcv (e.g. `nb()`, `tw()`, `betar()`).
+Without mgcViz (or with `mgcViz = FALSE`), DHARMa uses the simulate function for lm/glm objects from the stats package. This works for standard families (e.g. gaussian, poisson, binomial, Gamma), but not for mgcv-specific families (e.g. `negbin()`, `nb()`, `tw()`, `betar()`).
 
 Note that mgcv::gam models allow simulations only conditional on the fitted random effects; unconditional simulations are not possible.
 

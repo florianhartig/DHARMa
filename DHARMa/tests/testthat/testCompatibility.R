@@ -89,13 +89,25 @@ test_that("getFitted for gam keeps offsets supplied via the offset argument", {
   m2 = mgcv::gam(y ~ s(x) + s(g, bs = "re"), offset = log(a), family = poisson, data = testData)
   m3 = mgcv::gam(y ~ s(x) + s(g, bs = "re") + offset(log(a)), family = poisson, data = testData)
   expect_equal(getFitted(m2), getFitted(m3))
-  expect_equal(getFitted(m3), c(predict(m3, type = "response", exclude = "s(g)")))
 
-  # bam: mgcv drops offsets supplied via the offset argument from fitted values, DHARMa stops
+  # bam (mgcv 1.9-4): non-discrete bam drops offsets supplied via the offset argument from the fitted values, DHARMa stops
   m4 = mgcv::bam(y ~ s(x), offset = log(a), family = poisson, data = testData)
   expect_error(simulateResiduals(m4), "offset")
   m5 = mgcv::bam(y ~ s(x) + offset(log(a)), family = poisson, data = testData)
   expect_no_error(simulateResiduals(m5, n = 10))
+  m6 = mgcv::bam(y ~ s(x), offset = log(a), family = poisson, data = testData, discrete = TRUE)
+  expect_no_error(simulateResiduals(m6, n = 10))
+
+  # ziP: offset as argument or in the formula, expected response as predict()
+  m7 = mgcv::gam(y ~ s(x) + s(g, bs = "re"), offset = log(a), family = mgcv::ziP(), data = testData)
+  m8 = mgcv::gam(y ~ s(x) + s(g, bs = "re") + offset(log(a)), family = mgcv::ziP(), data = testData)
+  expect_equal(getFitted(m7), getFitted(m8), tolerance = 1e-4)
+  expect_equal(unname(getFitted(m8)), as.vector(predict(m8, type = "response", exclude = "s(g)")))
+  # several linear predictors
+  expect_no_error(simulateResiduals(mgcv::gam(list(y ~ s(x), ~ 1), family = mgcv::gaulss(), data = testData), n = 10))
+  # ocat: one value per observation
+  testData$yo = as.integer(cut(testData$x + rnorm(n, sd = 0.2), 3))
+  expect_length(getFitted(mgcv::gam(yo ~ s(x), family = mgcv::ocat(R = 3), data = testData)), n)
 })
 
 
@@ -117,7 +129,8 @@ test_that("gam simulations without mgcViz work (issue #567)", {
 
 test_that("binomial models with cbind() response and prior weights stop (issue #568)", {
   set.seed(2)
-  testData = data.frame(x = rnorm(100), N = sample(5:15, 100, TRUE), g = factor(sample(1:10, 100, TRUE)), w = 2)
+  # N of 20 to 30: (k/N)*N is not always an exact integer (issue #590)
+  testData = data.frame(x = rnorm(100), N = sample(20:30, 100, TRUE), g = factor(sample(1:10, 100, TRUE)), w = 2)
   testData$k = rbinom(100, testData$N, plogis(testData$x))
   msg = "cbind\\(successes, failures\\) response and additional prior weights"
   expect_error(simulateResiduals(glm(cbind(k, N - k) ~ x, family = binomial, weights = w, data = testData)), msg)
@@ -130,7 +143,8 @@ test_that("binomial models with cbind() response and prior weights stop (issue #
   expect_equal(dim(s$simulatedResponse), c(100, 10))
   expect_no_warning(s <- simulateResiduals(mgcv::gam(cbind(k, N - k) ~ s(x), family = binomial, weights = w1, data = testData), n = 10))
   expect_equal(mean(s$simulatedResponse), mean(s$observedResponse), tolerance = 0.1)
-  expect_no_error(simulateResiduals(glm(k / N ~ x, family = binomial, weights = N, data = testData), n = 10))
+  # simulated numbers of successes are integers, also when simulated as proportions by mgcViz (issue #590)
+  expect_true(all(s$simulatedResponse %% 1 == 0))
 })
 
 
