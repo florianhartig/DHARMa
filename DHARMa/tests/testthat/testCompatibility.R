@@ -47,6 +47,8 @@ test_that("getPredictorNames for brms models", {
   expect_equal(getNames(y ~ x + z), c("x", "z"))
   expect_equal(getNames(log(y) ~ x + I(x^2)), c("x", "I(x^2)"))
   expect_equal(getNames(y | weights(w) ~ x + z), c("x", "z"))
+  expect_equal(getNames(y | weights(w) ~ x + w), c("w", "x"))
+  expect_equal(getNames(brms::bf(y | weights(w) ~ x, sigma ~ w)), c("w", "x"))
 })
 
 

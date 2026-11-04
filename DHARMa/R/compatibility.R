@@ -1146,10 +1146,11 @@ getData.brmsfit <- function (object, ...){
 #' @rdname getPredictorNames
 #' @export
 getPredictorNames.brmsfit <- function (object,...){
-  # remove the response and variables used only on the left-hand side, e.g. y for log(y) (issue #542) or w for y | weights(w) (issue #573)
+  # drop variables used only on the left-hand side, e.g. y in log(y) (#542), w in y | weights(w) (#573); distributional formulas (sigma ~ w) count as right-hand side
   modelFrame = model.frame(object)
   responseName = names(modelFrame)[attr(attr(modelFrame, "terms"), "response")]
-  lhsVars = setdiff(all.vars(object$formula$formula[[2]]), all.vars(object$formula$formula[[3]]))
+  rhsVars = unlist(lapply(c(list(object$formula$formula), object$formula$pforms), function(f) all.vars(f[[3]])))
+  lhsVars = setdiff(all.vars(object$formula$formula[[2]]), rhsVars)
   predictorNames = colnames(modelFrame)
   predictorNames = predictorNames[!predictorNames %in% c(responseName, lhsVars)]
   return(predictorNames)

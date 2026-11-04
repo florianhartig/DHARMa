@@ -246,7 +246,8 @@ plotResiduals <- function(simulationOutput, form = NULL, quantreg = NULL,
       predictors = getFormulaPredictors(simulationOutput = simulationOutput, formula = form)
 
       if(length(predictors) > 1) {
-        operators = unlist(strsplit(as.character(form[[2]]), split = character(0)))
+        # names only, not characters of values such as the group level 1e+05 (issue #573)
+        operators = all.names(form[[2]])
 
         if("|" %in% operators && "+" %in% operators) stop("DHARMa: Detected both + and | as operators. Please choose one or the other. See ?plotResiduals.")
 
@@ -295,7 +296,7 @@ plotResiduals <- function(simulationOutput, form = NULL, quantreg = NULL,
     groupLevel = tryCatch(eval(form[[2]][[3]][[3]]), error = function(e) NULL)
 
     if(is.null(groupLevel)) {
-      predictorNames = levels(as.factor(group))
+      predictorNames = levels(factor(group))
 
       return(plotResidualsAll(
         simulationOutput = simulationOutput,
@@ -504,7 +505,6 @@ plotResidualsAll <- function(simulationOutput, predictorNames, predictorType = c
                              quantiles = c(0.25, 0.5, 0.75),
                              absoluteDeviation = FALSE, ...){
 
-  predictorType = match.arg(predictorType)
   opar = par(no.readonly = TRUE)
   on.exit(par(opar))
 

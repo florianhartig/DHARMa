@@ -93,30 +93,22 @@ test_that("different form arguments in plotResiduals work",
 test_that("plotResiduals with form = ~ x | group plots each group level", {
   set.seed(123)
   testData = createData(sampleSize = 200, randomEffectVariance = 0, numGroups = 10)
-  fittedModel <- glm(observedResponse ~ Environment1, family = "poisson", data = testData)
-  simulationOutput <- simulateResiduals(fittedModel, n = 100)
-  grDevices::pdf(NULL)
-  on.exit(grDevices::dev.off())
-  # count the panels drawn by plotResidualsAll (issue #573)
-  n = 0
-  local_mocked_bindings(plotResiduals = function(...) {n <<- n + 1; invisible(NULL)})
-  plotResidualsAll(simulationOutput, predictorNames = levels(testData$group),
-                   predictorType = "groupLevel", form = ~Environment1 | group)
-  expect_equal(n, nlevels(testData$group))
-})
-
-test_that("plotResiduals with form = ~ x | group works for non-numeric group levels", {
-  set.seed(123)
-  testData = createData(sampleSize = 200, randomEffectVariance = 0, numGroups = 4)
+  testData$group = factor(testData$group, levels = c(levels(testData$group), "unused"))
   testData$group2 = factor(letters[as.integer(testData$group)])
   testData$group3 = as.integer(testData$group) * 1.5
+  testData$group4 = factor(as.integer(testData$group) * 1e5)
   fittedModel <- glm(observedResponse ~ Environment1, family = "poisson", data = testData)
   simulationOutput <- simulateResiduals(fittedModel, n = 100)
   grDevices::pdf(NULL)
   on.exit(grDevices::dev.off())
-  # group levels are quoted in the subsetting formula (issue #573)
-  expect_no_error(plotResiduals(simulationOutput, form = ~Environment1 | group2))
-  expect_no_error(plotResiduals(simulationOutput, form = ~Environment1 | group2 == "b"))
-  # numeric grouping variable
-  expect_no_error(plotResiduals(simulationOutput, form = ~Environment1 | group3))
+  # non-numeric levels, numeric grouping variables and levels containing "+" (issue #573)
+  expect_no_error(plotResiduals(simulationOutput, form = ~Environment1 | group2, quantreg = FALSE))
+  expect_no_error(plotResiduals(simulationOutput, form = ~Environment1 | group3, quantreg = FALSE))
+  expect_no_error(plotResiduals(simulationOutput, form = ~Environment1 | group4, quantreg = FALSE))
+  # count the panels: one call of plotResiduals per used group level
+  plotResidualsOriginal = plotResiduals
+  n = 0
+  local_mocked_bindings(plotResiduals = function(...) {n <<- n + 1; invisible(NULL)})
+  plotResidualsOriginal(simulationOutput, form = ~Environment1 | group)
+  expect_equal(n, 10)
 })
