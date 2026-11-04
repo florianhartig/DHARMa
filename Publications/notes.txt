@@ -1,0 +1,24 @@
+discuss relation to https://stat.ethz.ch/R-manual/R-devel/library/boot/html/glm.diag.html
+
+gamma shape http://stats.stackexchange.com/questions/58497/using-r-for-glm-with-gamma-distribution?rq=1
+
+https://www.jstor.org/stable/1391143?seq=1#page_scan_tab_contents
+
+Ben, M. G.; #xed; a; Yohai, V.; #xed & ctor J. (2004) Quantile-Quantile Plot for Deviance Residuals in the Generalized Linear Model. Journal of Computational and Graphical Statistics, [American Statistical Association, Taylor & Francis, Ltd., Institute of Mathematical Statistics, Interface Foundation of America], 13, 36-47.
+
+https://stat.ethz.ch/R-manual/R-devel/library/mgcv/html/qq.gam.html
+
+Test this - e.g. missing linear effect in binomial GLM
+
+* Unlike stated in many tutorials, binomial GL(M)Ms with 0/1 responses (k=1) can very well show dispersion problems. It is true that dispersion cannob be
+
+
+from http://stats.stackexchange.com/questions/206569/standardized-residuals-vs-fitted-values-for-poisson-regression
+
+McCullagh and Nelder's book on glm suggest to plot standardized deviance residuals against either the linear predictor (η̂ ) or the fitted values (μ̂ ) transformed to the constant information scale which for poisson errors is 2μ̂ ‾‾√, for model checking. Why most of the examples show a plot of deviance residuals vs untransformed fitted values (μ̂ )?
+
+Check http://rsta.royalsocietypublishing.org/content/367/1906/4361.long
+
+http://www.nowozin.net/sebastian/blog/bayesian-p-values.html
+
+https://cran.r-project.org/web/packages/bayesplot/vignettes/graphical-ppcs.html

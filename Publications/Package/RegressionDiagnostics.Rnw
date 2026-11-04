@@ -65,7 +65,7 @@ render_listings()
 \setcounter{tocdepth}{1}
 
 
-\title{DHARMa - an R package to create simulation-based standardized for residual diagnostics of generalized linear (mixed) models}
+\title{DHARMa: an R package to create simulation-based standardized for residual diagnostics of generalized linear (mixed) models}
 \author{Florian Hartig}
 
 
@@ -88,9 +88,23 @@ render_listings()
 
 \section{Introduction}
 
-In recent years, generalized linear mixed models (GLMMs) have become a standard tool ecology and evolution \citep{Bolker-Generalizedlinearmixed-2009}. Despite the immense popularity of the appraoch, fundamental questions remain regarding the inference
+In recent years, generalized linear mixed models (GLMMs) have become a standard tool ecology and evolution \citep{Bolker-Generalizedlinearmixed-2009}. Despite their immense popularity, practitioners are often faced 
+
+calculation of p-values, model selection, or the advantages or disadvantates of \citep{Warton}. 
+
+One of this problems is the treatment of residuals in GLMM. There are two issues here. Firstly, the gemeralized. Secondly, the mixed 
+
+
+
+
+
+
+
+
 
 In recent years, 
+
+
 
 
 
@@ -189,6 +203,8 @@ Fixing discrete case
 mention merTools
 
 
+IMPORTANT: mention that most diagnostics go on summary statistics, not on the individual data points. Why not is not clear to me!
+
 
 
 
@@ -207,8 +223,22 @@ Underdispersion \citep{Sellers-flexibleregressionmodel-2010}
 % notes about underdispersion http://opisthokonta.net/?p=1210
 
 
+\section{The DHARMa package}
 
-\section{Features of the scaled residuals}
+
+\subsection{Calculation of the residuals}
+
+general, note that also Bayesian posterior predictive
+
+
+\subsection{General diagnostics}
+
+
+\subsection{Special diagnostics}
+
+
+
+\section{Theory and features of the scaled residuals}
 
 DHARMa - Residual Diagnostics for HierArchical (Multi-level / Mixed) Regression Models
 
@@ -281,16 +311,24 @@ legend("bottomright", legend = c("Wiki", "DHARMa", "Blmeco "), col = c("black", 
 \end{figure}
 
 
-\section{Possible extensions}
+\section{Conclusions and future development}
 
-Although we concentrated here on generalized linear mixed models. 
+DHARMa provides a convenient way to check the residuals of a relatively broad class of generalized linear or additive models with or without random effects. I hope the practitioners will find 
+
+The name choice originated 
+
+The idea of comparing observed data with simulations from the fitted model is quite general and could be extedend to other common model structures, in particular 
 
 
 
 \section{Acknowledgements}
 
+Thanks to Catalina Gutiérrez Chacón for forcing me to write down 
 
 
+\section{Data accessibility}
+
+DHARMa is available on CRAN (https://cran.r-project.org/web/packages/DHARMa/index.html) and GitHub (http://florianhartig.github.io/DHARMa/). Source code for the simulations presented in this article are available on the GitHub page. 
 
 \bibliographystyle{chicago}
 \bibliography{/Users/Florian/Home/Bibliography/Databases/flo3 }
