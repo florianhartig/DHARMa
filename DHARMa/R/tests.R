@@ -308,7 +308,7 @@ testOutliers <- function(simulationOutput, alternative = c("two.sided", "greater
     names(out$estimate) = paste("outlier frequency (expected:", mean(frequBoot),")")
 
     if(plotBoostrap == T){
-      hist(frequBoot, xlim = range(frequBoot, outliers), col = "lightgrey", main = "Bootstrapped outlier frequency")
+      hist(frequBoot, xlim = range(frequBoot, outliers), col = "lightgrey", main = "Bootstrapped outlier frequency \n grey = bootstrapped, red = observed, black = mean", cex.main = 0.8)
       abline(v = mean(frequBoot), col = 1, lwd = 2)
       abline(v = outliers, col = "red", lwd = 2)
 
@@ -904,7 +904,7 @@ getP <- function(simulated, observed, alternative, plot = FALSE, ...){
   if(alternative == "two.sided") p = min(min(mean(simulated <= observed), mean(simulated >= observed) ) * 2,1)
 
   if(plot == T){
-    hist(simulated, xlim = range(simulated, observed), col = "lightgrey", main = "Distribution of test statistic \n grey = simulated, red = observed, black = average", ...)
+    hist(simulated, xlim = range(simulated, observed), col = "lightgrey", main = "Distribution of test statistic \n grey = simulated, red = observed, black = mean", cex.main = 0.8, ...)
     abline(v = mean(simulated), col = 1, lwd = 2)
     abline(v = observed, col = "red", lwd = 2)
   }
