@@ -13,7 +13,7 @@ createDHARMa(simulatedResponse, observedResponse,
 
 \item{observedResponse}{true observations.}
 
-\item{fittedPredictedResponse}{optional fitted predicted response. For Bayesian posterior predictive simulations, using the median posterior prediction as fittedPredictedResponse is recommended. If not provided, the mean simulatedResponse will be used.}
+\item{fittedPredictedResponse}{optional fitted predicted response, on the scale of the observed response (e.g. predict(..., type = "response"); for binomial models with more than one trial, the expected number of successes). This is used e.g. by \link{testDispersion}. For Bayesian posterior predictive simulations, using the median posterior prediction as fittedPredictedResponse is recommended. If not provided, the mean simulatedResponse will be used.}
 
 \item{integerResponse}{if T, noise will be added at to the residuals to maintain a uniform expectation for integer responses (such as Poisson or Binomial). Unlike in \link{simulateResiduals}, the nature of the data is not automatically detected, so this MUST be set by the user appropriately.}
 
@@ -28,9 +28,6 @@ Create a DHARMa object from hand-coded simulations or Bayesian posterior predict
 }
 \details{
 The use of this function is to convert simulated residuals (e.g. from a point estimate, or Bayesian p-values) to a DHARMa object, to make use of the plotting / test functions in DHARMa.
-}
-\note{
-Either scaled residuals or (simulatedResponse AND observed response) have to be provided.
 }
 \examples{
 ## READING IN HAND-CODED SIMULATIONS

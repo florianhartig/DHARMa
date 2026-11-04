@@ -11,7 +11,7 @@
 
 \item{title}{the title for both panels (plotted via mtext, outer = TRUE).}
 
-\item{...}{further options for \link{plotResiduals}. Consider in particular parameters quantreg, rank and asFactor. xlab, ylab and main cannot be changed when using plot.DHARMa, but can be changed when using \link{plotResiduals}.}
+\item{...}{further options for \link{plotResiduals}. Consider in particular parameters quantreg, rank and asFactor. xlab, ylab and main passed here only change the right panel (the residual plot); use \link{plotResiduals} and \link{plotQQunif} to fully control the labels of the individual plots.}
 }
 \description{
 This S3 function creates standard plots for the simulated residuals contained in an object of class DHARMa, using \link{plotQQunif} (left panel) and \link{plotResiduals} (right panel).
@@ -26,8 +26,6 @@ a) a straight 1-1 line, as well as non-significance of the displayed tests in th
 b) visual homogeneity of residuals in both vertical and horizontal direction, as well as non-significance of quantile tests in the res ~ predictor plot (for more details on the interpretation of this plot, see \link{plotResiduals})
 
 Deviations from these expectations can be interpreted similar to a linear regression. See the vignette for detailed examples.
-
-Note that, unlike \link{plotResiduals}, plot.DHARMa command uses the default rank = T.
 }
 \note{
 The color for highlighting outliers and significant tests can be changed by setting \code{options(DHARMaSignalColor = "red")} to a different color. See \code{getOption("DHARMaSignalColor")} for the current setting. This is convenient for a color-blind friendly display, since red and black are difficult for some people to separate.

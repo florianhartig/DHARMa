@@ -12,7 +12,7 @@ testQuantiles(simulationOutput, predictor = NULL, rank = TRUE,
 
 \item{predictor}{an optional predictor variable to be used, instead of the predicted response (default). See details.}
 
-\item{rank}{if TRUE, the values provided in predictor will be rank transformed. This will usually make patterns easier to spot visually, especially if the distribution of the predictor is skewed. If form is a factor, this has no effect.}
+\item{rank}{if TRUE, the values provided in predictor will be rank transformed. This will usually make patterns easier to spot visually, especially if the distribution of the predictor is skewed. If predictor is a factor, this has no effect.}
 
 \item{quantiles}{the quantiles to be tested.}
 
