@@ -6,7 +6,7 @@ Contributions to DHARMa are welcome! This document describes how to contribute e
 
 ### Asking for help and reporting issues
 
-DHARMa is open-source software, and in the spirit of open source, questions and answers should be public, so that other people can profit from them as well. Please ask questions, report problems and suggest features on the [DHARMa issue tracker](https://github.com/florianhartig/DHARMa/issues). Alternatively, you can post on [Cross Validated](https://stats.stackexchange.com) and e-mail the link to the maintainer, who can then comment there. If you have concerns posting to a public forum, you can also write to the maintainer by e-mail (run `maintainer("DHARMa")` in R to get the address).
+DHARMa is open-source software, and in the spirit of open source, questions and answers should be public, so that other people can profit from them as well. Please ask questions, report problems and suggest features on the [DHARMa issue tracker](https://github.com/florianhartig/DHARMa/issues), after searching the existing issues. Alternatively, you can post on [Cross Validated](https://stats.stackexchange.com) and e-mail the link to the maintainer, who can then comment there. If you have concerns posting to a public forum, you can also write to the maintainer by e-mail (run `maintainer("DHARMa")` in R to get the address).
 
 It is easier to help you if your question is well structured. Typically, it contains:
 
@@ -41,7 +41,7 @@ Using AI tools as a personal aid during development is a matter of individual ch
 
 If you are unsure whether your contribution complies with this policy, ask yourself: can you explain every line of your proposed change and its consequences for the rest of the codebase? If not, please do not submit it as a pull request — an issue describing the problem or idea is a better starting point.
 
-For everyone, including the DHARMa team: if AI tools wrote substantial parts of your code or text, please mention this briefly in your issue, pull request, comment or commit (one sentence is enough, e.g., "Code drafted with an AI assistant, checked and tested by me."; in commits, use a trailer such as `Assisted-by: <tool> (<model>)`). Instructions for AI coding agents, which also apply to everyone, are in [AGENTS.md](AGENTS.md).
+For everyone, including the DHARMa team: if AI tools wrote substantial parts of your code or text, please mention this briefly in your issue, pull request, comment or commit (one sentence is enough, e.g., "Code drafted with an AI assistant, checked and tested by me."; in commits, use a trailer such as `Assisted-by: <tool> (<model>)`). Instructions for AI coding agents, including those used by the DHARMa team, are in [AGENTS.md](AGENTS.md).
 
 ## Pull request workflow
 
@@ -58,7 +58,7 @@ For everyone, including the DHARMa team: if AI tools wrote substantial parts of 
 - Once the approach is agreed in the issue, open the pull request early, as a draft if the work is not finished yet, so that work in progress is visible and linked to its issues. If the work is abandoned, close the pull request with a short explanation.
 - A pull request or commit that resolves an issue should contain `Fixes #351` or `Closes #351` (with your issue number) in its description or commit message, so that GitHub closes the issue automatically when it is merged into `master`. For several issues, repeat the keyword for each, e.g., `Fixes #567, fixes #568`.
 - Fill in the sections of the pull request template and go through its checklist before submitting. Pull requests from contributors outside the DHARMa team are reviewed before they are merged.
-- Titles of issues and pull requests are plain text (no backticks) and name the function or area and the problem or change; the templates show examples.
+- Titles of issues and pull requests, and commit subject lines, are plain text (no backticks) and name the function or area and the problem or change; the issue and pull request templates show examples.
 - After the merge, branches in this repository are deleted automatically.
 
 ## Code and documentation standards
@@ -69,7 +69,7 @@ For everyone, including the DHARMa team: if AI tools wrote substantial parts of 
   - Code that addresses a specific problem described in an issue and is not self-explanatory (e.g., a workaround for another package) gets a short comment with the issue number and, if it fits in a few words, the problem it solves, e.g., `# fixes #538 (restore simcodes of model object)`. Use such comments sparingly, typically in one or two places per issue.
 - New or changed functions should include roxygen2 documentation. The help files in `DHARMa/man/` are generated from it; do not edit them by hand, but run `devtools::document("DHARMa")` from the repository root.
 - If your contribution changes or adds functionality, please include or update tests in the matching `test*.R` file in `DHARMa/tests/testthat/`. Tests should check behavior that matters, not cosmetic details.
-- Add a short entry to `DHARMa/NEWS.md` under the topmost version heading for every user-visible change (no entry for bugs introduced after the last release), ending with the issue or pull request number(s) if there are any, e.g., `` * Small output fixes in `testCategorical()`, `testOutliers()` and `print.DHARMa` (#569). ``. For substantial contributions from outside the DHARMa team (see [Attribution and authorship](#attribution-and-authorship)), add the author's GitHub username first, e.g., `(@BertvanderVeen, #535)`.
+- Add a short (ideally one-line) entry to `DHARMa/NEWS.md` under the topmost version heading for every user-visible change (no entry for bugs introduced after the last release), ending with the issue or pull request number(s) if there are any, e.g., `` * Small output fixes in `testCategorical()`, `testOutliers()` and `print.DHARMa` (#569). ``. For substantial contributions from outside the DHARMa team (see [Attribution and authorship](#attribution-and-authorship)), add the author's GitHub username first, e.g., `(@BertvanderVeen, #535)`.
 - `R CMD check` runs on pull requests to `master` (GitHub Actions; for first-time contributors after approval by the DHARMa team) and must pass. Locally, it is usually sufficient to run the tests related to your change, e.g., `testthat::test_file("DHARMa/tests/testthat/testTests.R")` after `devtools::load_all("DHARMa")`.
 
 ## Attribution and authorship

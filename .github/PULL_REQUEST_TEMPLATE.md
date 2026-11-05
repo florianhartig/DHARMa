@@ -23,7 +23,7 @@
 Before submitting, please confirm the following:
 
 - [ ] I have read the [contributing guidelines](https://github.com/florianhartig/DHARMa/blob/master/CONTRIBUTING.md).
-- [ ] I am the author of this contribution and take full responsibility for it. I have a full, independent understanding of every change proposed here and can explain and defend it.
+- [ ] I am the author of this contribution, take full responsibility for it and can explain and defend every change proposed here.
 - [ ] (Contributors outside the DHARMa team) This pull request was **not** created autonomously by an AI agent or automated tool. *(Using AI as a personal aid is acceptable, but the contribution must be authored and understood by a human.)*
 - [ ] Unless this is a trivial fix (e.g., a typo or a factual error in the documentation): the change was discussed in an issue before opening this pull request.
 - [ ] (DHARMa team) The branch name follows the [naming convention](https://github.com/florianhartig/DHARMa/blob/master/CONTRIBUTING.md#pull-request-workflow) (e.g., `i562-jitterPoints` or `v0.5.1-docFixes`).
