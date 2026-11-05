@@ -43,7 +43,7 @@ m1 <- glm(observedResponse ~ Environment1,
 res <- simulateResiduals(m1, plot = T)
 ```
 
-and read the help of ?simulateResiduals and the vignette to understand what you can do with the object `res`. If you want to ask questions about DHARMa, or report a bug, please use the [DHARMa GitHub issue page](https://github.com/florianhartig/DHARMa/issues). 
+and read the help of ?simulateResiduals and the vignette to understand what you can do with the object `res`. If you want to ask questions about DHARMa or report a bug, please first read [how to ask for help and report issues](CONTRIBUTING.md#asking-for-help-and-reporting-issues), then use the [DHARMa GitHub issue page](https://github.com/florianhartig/DHARMa/issues).
 
 ### Development release 
 
@@ -57,6 +57,8 @@ Below the status of the automatic tests via GitHub Actions
 
 [![R-CMD-check.yaml](https://github.com/florianhartig/DHARMa/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/florianhartig/DHARMa/actions/workflows/R-CMD-check.yaml)
 
+Changes between versions are listed in the [release notes (NEWS)](DHARMa/NEWS.md).
+
 ### Development branches / older releases
 
 To install a specific (older) release, or a particular branch, decide for the version number that you want to install in [https://github.com/florianhartig/DHARMa/releases](https://github.com/florianhartig/DHARMa/releases) (version numbering corresponds to CRAN, but there may be smaller releases that were not pushed to CRAN), or branch and run 
@@ -69,19 +71,13 @@ with the appropriate version number / branch as argument to ref.
 
 # Contributing to DHARMa
 
-Contributions to DHARMa are very welcome! There are several ways in which you can contribute:
+Contributions to DHARMa are welcome. Please read the [contributing guidelines](CONTRIBUTING.md) before opening an issue or pull request. Note in particular the policy on AI-generated contributions (see also the [instructions for AI coding agents](AGENTS.md)) and the criteria for acknowledgement.
 
-* A simple but nevertheless important way to contribute is to suggest problems / new features in DHARMa, and post them in our [issue tracker](https://github.com/florianhartig/DHARMa/issues). A good issue should at least have a clear reproducible example. If possible, it could also already contain an analysis of the problem, and / or ideas for a fix. Likewise, feel free to comment on existing issues, e.g. by adding examples or suggesting solutions. 
+See also:
 
-* If you want to propose a solution to an existing problem, for simple things (typos, etc.), the easiest would be to just create a PR that I can directly merge. For more complicated changes, however, I would suggest that it is more effective to first discuss the approach at the thread of the issue.
-
-When working on these issues, note that there is extensive code for tests / development purposes outside the core package in the folder ./Code/ on GH. You may find useful information there, and in case you have code intended for development to contribute, you may also create a PR intended for this section.
-
-Also, there are a few technical hints about DHARMa development on the [DHARMa GH wiki](https://github.com/florianhartig/DHARMa/wiki). 
-
-# Code of conduct
-
-The development of DHARMa and all its surrounding activities is based on the values of scientific integrity, free software and knowledge, and mutual respect, independent of background or world view. 
+* [Code of conduct](CODE_OF_CONDUCT.md)
+* [Adding support for new R packages](ADDING_PACKAGES.md)
+* [Maintaining DHARMa](MAINTAINING.md) (for the DHARMa team)
 
 # Acknowledgements
 
