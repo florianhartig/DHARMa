@@ -86,6 +86,14 @@ test_that("different form arguments in plotResiduals work",
             expect_no_error(plotResiduals(simulationOutput, form = ~x))
             expect_no_error(plotResiduals(simulationOutput, form = ~.))
             expect_error(plotResiduals(simulationOutput, form = testData$Environment1))
+
+            # one panel per group level (issue #573)
+            n = 0
+            setHook("plot.new", function() n <<- n + 1)
+            on.exit(setHook("plot.new", NULL, "replace"))
+            plotResiduals(simulationOutput, form = ~Environment1|group, quantreg = FALSE)
+            expect_equal(n, 10)
           }
 )
+
 
