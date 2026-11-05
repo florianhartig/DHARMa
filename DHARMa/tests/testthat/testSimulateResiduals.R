@@ -90,3 +90,11 @@ test_that("Simulations work for mgcv::gam", {
   expect_no_error(res3 <- simulateResiduals(fittedModel, simulateREs = "user-specified"))
 
 })
+
+
+test_that("simulateResiduals and recalculateResiduals store the matched method (#589)", {
+  testData = createData(sampleSize = 50, family = poisson(), randomEffectVariance = 0)
+  simulationOutput = simulateResiduals(glm(observedResponse ~ Environment1, family = poisson, data = testData), n = 10)
+  expect_equal(simulationOutput$method, "PIT")
+  expect_equal(recalculateResiduals(simulationOutput, group = testData$group)$method, "PIT")
+})

@@ -49,7 +49,7 @@ simulateResiduals <- function(fittedModel, n = 250, simulateREs = c("conditional
 
   if (n < 2) stop("error in DHARMa::simulateResiduals: n > 1 is required to calculate scaled residuals")
   checkModel(fittedModel)
-  match.arg(method)
+  method = match.arg(method)
   randomState <- getRandomState(seed)
   on.exit({randomState$restoreCurrent()})
   ptm <- proc.time()
@@ -229,7 +229,7 @@ recalculateResiduals <- function(simulationOutput, group = NULL, aggregateBy = s
 
   randomState <- getRandomState(seed)
   on.exit({randomState$restoreCurrent()})
-  match.arg(method)
+  method = match.arg(method)
 
   # ensures that the base simulation is always used for recalculate
   if(!is.null(simulationOutput$original)) simulationOutput = simulationOutput$original

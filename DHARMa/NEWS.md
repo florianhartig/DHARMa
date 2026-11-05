@@ -33,7 +33,7 @@ NOTE: for more news about the package, see https://github.com/florianhartig/DHAR
 
 * `testQuantiles()` now gives the same results with and without plot, evaluates transformations such as `~log(x)`, and stops for categorical predictors and formulas with several variables (#576).
 
-* `recalculateResiduals()` now always uses the traditional randomization for residuals with `refit = TRUE`, as `simulateResiduals()` does (#589).
+* `recalculateResiduals()` now always uses the traditional randomization for residuals with `refit = TRUE`, as `simulateResiduals()` does, and `$method` of both functions stores the method used (#589).
 
 ## Minor changes
 
