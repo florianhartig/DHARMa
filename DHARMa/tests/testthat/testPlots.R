@@ -101,6 +101,13 @@ test_that("different form arguments in plotResiduals work",
             expect_error(plotResiduals(simulationOutput, form = ~Environment1|group %in% c("1", "99")), "group level")
             expect_error(plotResiduals(simulationOutput, form = ~Environment1|group != "1"), "group levels")
             expect_message(plotResidualsAll(simulationOutput, predictorNames = "Environment1", quantreg = FALSE), "deprecated")
+
+            # absoluteDeviation also for a selected group level (issue #596)
+            set.seed(1)
+            testData = createData(200, numGroups = 2, randomEffectVariance = 0)
+            simulationOutput <- simulateResiduals(glm(observedResponse ~ Environment1, family = "poisson", data = testData))
+            expect_false(plotResiduals(simulationOutput, form = ~Environment1|group == "1")$p.value ==
+                           plotResiduals(simulationOutput, form = ~Environment1|group == "1", absoluteDeviation = TRUE)$p.value)
           }
 )
 

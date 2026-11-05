@@ -321,7 +321,7 @@ plotResiduals <- function(simulationOutput, form = NULL, quantreg = NULL,
 
     pred = pred[group == groupLevel]
     if(length(pred) == 0) {stop("DHARMa: Unable to find specified group level.")}
-    res = simulationOutput$scaledResiduals[group == groupLevel]
+    res = res[group == groupLevel]
   }
 
 

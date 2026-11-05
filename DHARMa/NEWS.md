@@ -31,6 +31,8 @@ NOTE: for more news about the package, see https://github.com/florianhartig/DHAR
 
 * `plotResiduals(form = ~x | group %in% c(...))` now plots one panel per selected group level instead of a wrong subset of the data; operators other than `==` and `%in%` give an error (#596).
 
+* `plotResiduals(absoluteDeviation = TRUE)` now also transforms the residuals for `form = ~x | group` and `~x | group == "level"` (#596).
+
 ## Minor changes
 
 * `testOutliers()`: argument `plotBoostrap` renamed to `plotBootstrap`, old name deprecated (@BertvanderVeen, #535, #560).
