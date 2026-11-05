@@ -1,1 +1,4 @@
 theme: jekyll-theme-minimal
+include:
+  - CONTRIBUTING.md
+  - CODE_OF_CONDUCT.md
