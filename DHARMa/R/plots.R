@@ -246,7 +246,6 @@ plotResiduals <- function(simulationOutput, form = NULL, quantreg = NULL,
       predictors = getFormulaPredictors(simulationOutput = simulationOutput, formula = form)
 
       if(length(predictors) > 1) {
-        # names only, not characters of values such as the group level 1e+05 (issue #573)
         operators = all.names(form[[2]])
 
         if("|" %in% operators && "+" %in% operators) stop("DHARMa: Detected both + and | as operators. Please choose one or the other. See ?plotResiduals.")
@@ -551,7 +550,6 @@ plotResidualsAll <- function(simulationOutput, predictorNames, predictorType = c
   if(predictorType == "groupLevel"){
     # create residual plot for each group level of a predictor
     for(i in 1:length(predictorNames)){
-      # quote the level, so that non-numeric levels such as "a" work as well (issue #573)
       newForm = paste("~", form, "==", deparse(predictorNames[i]))[[2]]
 
       plotResiduals(simulationOutput,
