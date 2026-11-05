@@ -1158,11 +1158,13 @@ getData.brmsfit <- function (object, ...){
 #' @rdname getPredictorNames
 #' @export
 getPredictorNames.brmsfit <- function (object,...){
-  # fixes issue #542
+  # drop response variables (#542, #573)
   modelFrame = model.frame(object)
   responseName = names(modelFrame)[attr(attr(modelFrame, "terms"), "response")]
+  rhsVars = unlist(lapply(c(list(object$formula$formula), object$formula$pforms), function(f) all.vars(f[[3]])))
+  lhsVars = setdiff(all.vars(object$formula$formula[[2]]), rhsVars)
   predictorNames = colnames(modelFrame)
-  predictorNames = predictorNames[predictorNames != responseName][-1]
+  predictorNames = predictorNames[!predictorNames %in% c(responseName, lhsVars)]
   return(predictorNames)
 }
 
