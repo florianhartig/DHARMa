@@ -15,9 +15,9 @@ NOTE: for more news about the package, see https://github.com/florianhartig/DHAR
 
 * Binomial models with `cbind()` response and additional prior weights now stop with an informative error (#568).
 
-* `bam` models whose fitted values exclude the `offset` argument (a problem in mgcv) now stop with an informative error; use `offset()` in the formula instead (#572).
+* `bam` models with the `offset` argument now stop with an error if mgcv excludes the offset from the fitted values (#572).
 
-* Simulated successes of `gam` models with `cbind()` response (mgcViz) are now integers, so that ties with the observed response are handled correctly (#590).
+* Simulations of `gam` models with `cbind()` response via mgcViz are now integers (#590).
 
 * Solving duplicated plots in `plotResiduals`: (1) when having quadratic effects written with I(variable) in the formula, and (2) for brms with transformed variables in the formula, e.g. `log(variable)`. 
 

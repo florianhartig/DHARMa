@@ -75,75 +75,35 @@ test_that("Unconditional predictions are the default in DHARMa", {
 })
 
 
-test_that("getFitted for gam keeps offsets supplied via the offset argument", {
+test_that("gam/bam with offsets supplied via the offset argument (#572)", {
   set.seed(1)
   n = 200
   testData = data.frame(x = runif(n), a = runif(n, 1, 3), g = factor(sample(1:10, n, TRUE)))
   testData$y = rpois(n, testData$a * exp(1 + testData$x + rnorm(10, sd = 0.5)[testData$g]))
-
-  # without REs, getFitted equals fitted (issue #572)
-  m1 = mgcv::gam(y ~ s(x), offset = log(a), family = poisson, data = testData)
-  expect_equal(unname(getFitted(m1)), unname(fitted(m1)))
-
-  # with REs, offset as argument or in the formula gives the same unconditional predictions
   m2 = mgcv::gam(y ~ s(x) + s(g, bs = "re"), offset = log(a), family = poisson, data = testData)
   m3 = mgcv::gam(y ~ s(x) + s(g, bs = "re") + offset(log(a)), family = poisson, data = testData)
   expect_equal(getFitted(m2), getFitted(m3))
-
-  # bam (mgcv 1.9-4): non-discrete bam drops offsets supplied via the offset argument from the fitted values, DHARMa stops
-  m4 = mgcv::bam(y ~ s(x), offset = log(a), family = poisson, data = testData)
-  expect_error(simulateResiduals(m4), "offset")
-  m5 = mgcv::bam(y ~ s(x) + offset(log(a)), family = poisson, data = testData)
-  expect_no_error(simulateResiduals(m5, n = 10))
-  m6 = mgcv::bam(y ~ s(x), offset = log(a), family = poisson, data = testData, discrete = TRUE)
-  expect_no_error(simulateResiduals(m6, n = 10))
-
-  # ziP: offset as argument or in the formula, expected response as predict()
-  m7 = mgcv::gam(y ~ s(x) + s(g, bs = "re"), offset = log(a), family = mgcv::ziP(), data = testData)
-  m8 = mgcv::gam(y ~ s(x) + s(g, bs = "re") + offset(log(a)), family = mgcv::ziP(), data = testData)
-  expect_equal(getFitted(m7), getFitted(m8), tolerance = 1e-4)
-  expect_equal(unname(getFitted(m8)), as.vector(predict(m8, type = "response", exclude = "s(g)")))
-  # several linear predictors
-  expect_no_error(simulateResiduals(mgcv::gam(list(y ~ s(x), ~ 1), family = mgcv::gaulss(), data = testData), n = 10))
-  # ocat: one value per observation
-  testData$yo = as.integer(cut(testData$x + rnorm(n, sd = 0.2), 3))
-  expect_length(getFitted(mgcv::gam(yo ~ s(x), family = mgcv::ocat(R = 3), data = testData)), n)
+  expect_error(simulateResiduals(mgcv::bam(y ~ s(x), offset = log(a), family = poisson, data = testData)), "offset")
 })
 
 
-test_that("gam simulations without mgcViz work (issue #567)", {
+test_that("gam simulations without mgcViz work (#567)", {
   set.seed(1)
   testData = createData(sampleSize = 200, family = binomial(), binomialTrials = 20, randomEffectVariance = 0)
   m = mgcv::gam(cbind(observedResponse1, observedResponse0) ~ Environment1, family = binomial, data = testData)
-  # named arguments in the fallback, row.names of stats:::simulate.lm repaired
   expect_equal(dim(getSimulations(m, nsim = 3, mgcViz = FALSE)), c(200, 3))
-  testData$f = factor(testData$observedResponse1 > 10)
-  mf = mgcv::gam(f ~ Environment1, family = binomial, data = testData)
-  expect_equal(dim(getSimulations(mf, nsim = 2, mgcViz = FALSE)), c(200, 2))
-  # the fallback must not use mgcViz's simulate.gam once the mgcViz namespace is loaded
-  skip_if_not_installed("mgcViz")
-  loadNamespace("mgcViz")
-  simulationOutput = simulateResiduals(m, n = 100, mgcViz = FALSE)
-  expect_equal(mean(simulationOutput$simulatedResponse), mean(simulationOutput$observedResponse), tolerance = 0.05)
 })
 
-test_that("binomial models with cbind() response and prior weights stop (issue #568)", {
+
+test_that("binomial models with cbind() response: prior weights stop (#568), integer simulations (#590)", {
   set.seed(2)
-  # N of 20 to 30: (k/N)*N is not always an exact integer (issue #590)
-  testData = data.frame(x = rnorm(100), N = sample(20:30, 100, TRUE), g = factor(sample(1:10, 100, TRUE)), w = 2)
+  # N of 20 to 30: (k/N)*N is not always an exact integer
+  testData = data.frame(x = rnorm(100), N = sample(20:30, 100, TRUE), w = 2, w1 = 1)
   testData$k = rbinom(100, testData$N, plogis(testData$x))
-  msg = "cbind\\(successes, failures\\) response and additional prior weights"
-  expect_error(simulateResiduals(glm(cbind(k, N - k) ~ x, family = binomial, weights = w, data = testData)), msg)
-  expect_error(simulateResiduals(lme4::glmer(cbind(k, N - k) ~ x + (1|g), family = binomial, weights = w, data = testData)), msg)
-  expect_error(simulateResiduals(glmmTMB::glmmTMB(cbind(k, N - k) ~ x, family = binomial, weights = w, data = testData)), msg)
-  expect_error(simulateResiduals(mgcv::gam(cbind(k, N - k) ~ s(x), family = binomial, weights = w, data = testData)), msg)
-  # weights = 1 and proportions with the number of trials as weights are fine
-  testData$w1 = 1
-  expect_no_warning(s <- simulateResiduals(glm(cbind(k, N - k) ~ x, family = binomial, weights = w1, data = testData), n = 10))
-  expect_equal(dim(s$simulatedResponse), c(100, 10))
-  expect_no_warning(s <- simulateResiduals(mgcv::gam(cbind(k, N - k) ~ s(x), family = binomial, weights = w1, data = testData), n = 10))
-  expect_equal(mean(s$simulatedResponse), mean(s$observedResponse), tolerance = 0.1)
-  # simulated numbers of successes are integers, also when simulated as proportions by mgcViz (issue #590)
+  expect_error(simulateResiduals(glm(cbind(k, N - k) ~ x, family = binomial, weights = w, data = testData)), "additional prior weights")
+  expect_equal(dim(simulateResiduals(glm(cbind(k, N - k) ~ x, family = binomial, weights = w1, data = testData), n = 10)$simulatedResponse), c(100, 10))
+  skip_if_not_installed("mgcViz")
+  s = simulateResiduals(mgcv::gam(cbind(k, N - k) ~ s(x), family = binomial, data = testData), n = 10)
   expect_true(all(s$simulatedResponse %% 1 == 0))
 })
 

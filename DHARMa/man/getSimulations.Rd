@@ -85,7 +85,7 @@ With simulateREs = "user-specified", users can supply additional parameters to t
 
 If the model was fit with weights and the respective model class does not include the weights in the simulations, getSimulations will throw a warning. The background is if weights are used on the likelihood directly, then what is fitted is effectively a pseudo likelihood, and there is no way to directly simulate from the specified likelihood. Whether or not residuals can be used in this case depends very much on what is tested and how weights are used. I'm sorry to say that it is hard to give a general recommendation, you have to consult someone that understands how weights are processed in the respective model class.
 
-Binomial models with a cbind(successes, failures) response and additional prior weights are not supported, because observed and simulated responses would be on different scales; getSimulations stops for this combination for glm, lme4, glmmTMB and mgcv models.
+Binomial models with a cbind(successes, failures) response and prior weights are not supported; getSimulations stops for them.
 }
 \examples{
 testData = createData(sampleSize = 400, family = gaussian())
