@@ -10,7 +10,7 @@
 #' @param plot if TRUE, [plot.DHARMa] will be directly run after the residuals have been calculated.
 #' @param ... further parameters to pass on to the simulate and update function of the model object (via DHARMa::getSimulations and DHARMa::getRefit). If simulateREs = "user-specified", an important use of this is to specify whether simulations should be conditional on all, some or none of the current random effect estimates, e.g. via re.form. Note that not all models support syntax to specify conditional or unconditional simulations. See details and [getSimulations].
 #' @param seed the random seed to be used within DHARMa. The default setting, recommended for most users, is to keep the random seed on a fixed value of 123. This means that you will always get the same randomization and thus the same result when running the same code. If NULL, no new seed is set, but previous random state will be restored after simulation. If FALSE, no seed is set, and random state will not be restored. The latter two options are only recommended for simulation experiments. See vignette for details.
-#' @param method for refit = FALSE, the quantile randomization method is used. The two options implemented at the moment are probability integral transform (PIT-) residuals (current default), and the "traditional" randomization procedure, that was used in DHARMa until version 0.3.0. refit = T will always use "traditional", regardless of the value of method. For details, see [getQuantile].
+#' @param method for refit = FALSE, the quantile randomization method is used. The two options implemented at the moment are probability integral transform (PIT-) residuals (current default), and the "traditional" randomization procedure, that was used in DHARMa until version 0.3.0. refit = T will always use "traditional", regardless of the value of method, and rotation is then not available. For details, see [getQuantile].
 #' @param rotation optional rotation of the residual space prior to calculating the quantile residuals. The main purpose of this is to account for residual covariance as created by temporal, spatial or phylogenetic autocorrelation. See details below, section *residual autocorrelation* as well as the help of [getQuantile] and, for a practical example, [testTemporalAutocorrelation].
 #'
 #' @details There are a number of important considerations when simulating from a more complex (hierarchical) model:
@@ -49,6 +49,8 @@ simulateResiduals <- function(fittedModel, n = 250, simulateREs = c("conditional
 
   if (n < 2) stop("error in DHARMa::simulateResiduals: n > 1 is required to calculate scaled residuals")
   checkModel(fittedModel)
+  if(isTRUE(refit) && !missing(method) && match.arg(method) != "traditional") message("DHARMa::simulateResiduals: residuals with refit = TRUE are always calculated with method = \"traditional\".")
+  if(isTRUE(refit) && !is.null(rotation)) stop("DHARMa::simulateResiduals: rotation is not available for residuals with refit = TRUE.")
   method = match.arg(method)
   randomState <- getRandomState(seed)
   on.exit({randomState$restoreCurrent()})
@@ -229,6 +231,8 @@ recalculateResiduals <- function(simulationOutput, group = NULL, aggregateBy = s
 
   randomState <- getRandomState(seed)
   on.exit({randomState$restoreCurrent()})
+  if(isTRUE(simulationOutput$refit) && !missing(method) && match.arg(method) != "traditional") message("DHARMa::recalculateResiduals: residuals with refit = TRUE are always calculated with method = \"traditional\".")
+  if(isTRUE(simulationOutput$refit) && !is.null(rotation)) stop("DHARMa::recalculateResiduals: rotation is not available for residuals with refit = TRUE.")
   method = match.arg(method)
 
   # ensures that the base simulation is always used for recalculate
