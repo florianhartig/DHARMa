@@ -1087,14 +1087,12 @@ getSimulations.brmsfit <- function (object, nsim = 1, simulateREs = c("condition
 
   # unconditional
   if (simulateREs == "unconditional") {
-    # re-simulate the REs: predictions for new levels of all grouping variables, with RE values drawn from the fitted RE distribution (re_formula = NA would set the REs to zero, issue #574)
+    # fixes #574 (re_formula = NA sets the REs to zero); for a:b, new levels of b suffice
     re = object$ranef
-    # brms draws new levels only from gaussian REs and ignores covariance matrices; mm() groups are not data columns; for gr(a:b, by = ), the labels below would not keep the order of the by-levels
     if(any(re$gtype == "mm" | nzchar(re$cov) | re$dist != "gaussian" | (nzchar(re$by) & grepl(":", re$group)))) stop("DHARMa: unconditional simulations are only available for brms models with gaussian random effects, without mm(), gr(..., cov = ) or interactions in gr(..., by = ). Use simulateREs = \"conditional\".")
-    # for interactions such as a:b, a new level of the last variable is enough; labels numbered in order of appearance and zero-padded, so that sorting keeps this order, as brms assigns new levels in this order for gr(..., by = )
+    # labels in order of appearance, zero-padded, as brms assigns new levels of gr(..., by = ) in sorted order
     newData = object$data
     for(v in unique(sub(".*:", "", re$group))) newData[[v]] = sprintf("DHARMa_new_%09d", match(newData[[v]], unique(newData[[v]])))
-    # the new levels must change only the RE indices, not the data of the fixed effects or of distributional parameters
     sdOld = brms::standata(object)
     sdNew = tryCatch(brms::standata(object, newdata = newData, allow_new_levels = TRUE), error = function(e) conditionMessage(e))
     sel = !grepl("^J_", names(sdOld))

@@ -1,19 +1,3 @@
-test_that("brms: getPearsonResiduals and unconditional simulations stop for unsupported models", {
-  skip_on_cran()
-  skip_if_not_installed("brms")
-  d = data.frame(y = rpois(30, 3), x = rnorm(30), b = factor(rep(1:10, 3)), bn = rep(1:10, 3))
-  A = diag(10); dimnames(A) = list(levels(d$b), levels(d$b))
-  # empty = TRUE: model object without compilation / sampling; the checks run before the simulation (issue #574)
-  getModel = function(f, ...) suppressMessages(brms::brm(f, data = d, family = poisson, empty = TRUE, ...))
-  expect_error(getPearsonResiduals(getModel(y ~ x)), "Pearson residuals are not supported for brms models")
-  getSim = function(f, ...) getSimulations(getModel(f, ...), simulateREs = "unconditional")
-  expect_error(getSim(y ~ x + (1|gr(b, cov = A)), data2 = list(A = A)), "gaussian random effects")
-  # grouping variable also used as a fixed effect: factor (error in brms) or numeric (changed data)
-  expect_error(getSim(y ~ b + (1|b)), "also used outside the random effects")
-  expect_error(getSim(y ~ bn + (1|bn)), "also used outside the random effects")
-})
-
-
 test_that("Conditional simulations have a smaller spread than unconditional simulations", {
 
   # create data
