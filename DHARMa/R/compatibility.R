@@ -470,14 +470,11 @@ getPredictorNames.default <- function (object,...){
 #' @export
 getRefit.lm <- function(object, newresp, ...){
   refitData = getRefitData(object, newresp)
-  # subset = NULL: the data contain only the rows used in the fit
-  refittedModel = update(object, formula. = refitData$formula, data = refitData$data, subset = NULL, ...)
+  refittedModel = update(object, formula. = refitData$formula, data = refitData$data, ...)
   return(refittedModel)
 }
 
-# Creates the data and formula for refitting a model to a new response.
-#
-# Uses the original data, so that variables in offsets or transformations are found (fixes issue #351). Models fitted without a data argument use the model frame; variables not in the model frame are then taken from the formula environment, which works only if no rows were removed because of NAs. The new response is added as a separate column, which replaces the left-hand side of the formula. This works for transformed responses such as log(y) and for cbind(k, N - k) responses, without overwriting data columns (issue #571).
+# fixes #351 (variables in offsets) and #571 (transformed and cbind() responses, models without data)
 getRefitData <- function(object, newresp, rows = rownames(model.frame(object))){
   if(is.null(getCall(object)$data)) newData = model.frame(object)
   else newData = getData(object)
@@ -658,13 +655,7 @@ getData.merMod <- function (object, ...){
 
 #' @rdname getRefit
 #' @export
-getRefit.glmmTMB <- function(object, newresp, ...){
-  # glmmTMB needs a matrix response embedded in the data, see https://github.com/glmmTMB/glmmTMB/issues/549; getRefitData does this
-  refitData = getRefitData(object, newresp)
-  # subset = NULL: the data contain only the rows used in the fit
-  refittedModel = update(object, formula. = refitData$formula, data = refitData$data, subset = NULL, ...)
-  return(refittedModel)
-}
+getRefit.glmmTMB <- function(object, newresp, ...) getRefit.lm(object, newresp, ...)
 
 
 # glmmTMB simulates normal counts (and not proportions in any case, so the check for the other models is not needed), see #158
@@ -730,11 +721,11 @@ getSimulations.glmmTMB <- function (object, nsim = 1, simulateREs = c("condition
 
     # check for weights in k/n case
     if(family(object)$family %in% c("binomial", "betabinomial")){
-      if("(weights)" %in% colnames(model.frame(object)) && !is.matrix(model.frame(object)[[1]])){
+      if("(weights)" %in% colnames(model.frame(object))){
         w = model.frame(object)
         w = w$`(weights)`
-        # glmmTMB returns a 2-column matrix (successes, failures) per simulation, keep only the successes (issue #571)
-        out = as.data.frame(lapply(out, function(x) if(is.matrix(x)) x[,1] / w else x / w))
+        # successes of the 2-column matrices (#571)
+        out = as.data.frame(lapply(out, function(x) as.matrix(x)[, 1] / w))
       }
       else if(is.matrix(out[[1]]) & !is.matrix(model.frame(object)[[1]])){
         out = as.data.frame(as.matrix(out)[,seq(1, (2*nsim), by = 2)])
@@ -884,7 +875,6 @@ getFixedEffects.MixMod <- function(object, ...){
 #' @rdname getRefit
 #' @export
 getRefit.MixMod <- function(object, newresp, ...) {
-  # mixed_model has the argument fixed instead of formula
   refitData = getRefitData(object, newresp)
   update(object, fixed = refitData$formula, data = refitData$data, ...)
 }
@@ -941,10 +931,7 @@ getSimulations.phylolm <- function(object, nsim = 1, simulateREs = c("conditiona
 
 #' @rdname getRefit
 #' @export
-getRefit.phylolm <- function(object, newresp, ...){
-  refitData = getRefitData(object, newresp)
-  refittedModel = update(object, formula. = refitData$formula, data = refitData$data, ...)
-}
+getRefit.phylolm <- function(object, newresp, ...) getRefit.lm(object, newresp, ...)
 
 
 
@@ -996,7 +983,7 @@ getSimulations.phyloglm <- function(object, nsim = 1,
 #' @rdname getRefit
 #' @export
 getRefit.phyloglm <- function(object, newresp, ...){
-  # phyloglm objects have no model.frame method
+  #object phyloglm doesn't have a model.frame object
   refitData = getRefitData(object, newresp, rows = rownames(object$X))
   refittedModel = update(object, formula. = refitData$formula, data = refitData$data, ...)
   return(refittedModel)

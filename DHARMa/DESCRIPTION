@@ -32,7 +32,7 @@ Imports:
     lme4
 Suggests:
     knitr,
-    testthat (>= 3.1.7),
+    testthat (>= 3.0.0),
     rmarkdown,
     KernSmooth,
     sfsmisc,

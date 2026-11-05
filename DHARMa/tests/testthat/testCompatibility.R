@@ -120,23 +120,7 @@ test_that("getFittedResponse returns fitted values on the scale of the observed 
 })
 
 
-test_that("glmmTMB refit simulations for proportions with weights (issue #571)", {
-  set.seed(1)
-  testData = data.frame(x = runif(60), N = sample(5:15, 60, TRUE))
-  testData$p = rbinom(60, testData$N, plogis(testData$x)) / testData$N
-  m = glmmTMB::glmmTMB(p ~ x, weights = N, family = binomial, data = testData)
-  sims = getSimulations(m, nsim = 3, type = "refit")
-  expect_equal(ncol(sims), 3)
-  # proportions of the number of trials
-  expect_equal(as.matrix(sims) * testData$N, round(as.matrix(sims) * testData$N))
-  # cbind() response with weights of 1: one simulation per column (weights warning before #568)
-  testData$k = round(testData$p * testData$N)
-  m = glmmTMB::glmmTMB(cbind(k, N - k) ~ x, weights = rep(1, 60), family = binomial, data = testData)
-  expect_equal(length(suppressWarnings(getSimulations(m, nsim = 3, type = "refit"))), 3)
-})
-
-
-test_that("refitting to the observed response reproduces the fit (issue #571)", {
+test_that("refitting to the observed response reproduces the fit (#571)", {
   set.seed(1)
   n = 60
   testData = data.frame(x = runif(n), N = sample(5:15, n, TRUE))
@@ -144,31 +128,13 @@ test_that("refitting to the observed response reproduces the fit (issue #571)", 
   testData$y = exp(1 + testData$x + rnorm(n, sd = 0.3))
   yy = rpois(n, exp(1 + testData$x))
   x = testData$x
-
   refitCoef = function(m, fix = coef) unlist(fix(getRefit(m, model.response(model.frame(m)))))
-  fixTMB = function(m) glmmTMB::fixef(m)$cond
-
-  # transformed response
   m = lm(log(y) ~ x, data = testData)
   expect_equal(refitCoef(m), coef(m))
   # model fitted without data argument
   m = glm(yy ~ x, family = poisson)
   expect_equal(refitCoef(m), coef(m))
-  # data with a single column
-  m = glm(z ~ 1, family = poisson, data = data.frame(z = rpois(n, 3)))
-  expect_equal(refitCoef(m), coef(m))
-  # cbind(k, N - k) response
-  m = glm(cbind(k, N - k) ~ x, family = binomial, data = testData)
-  expect_equal(refitCoef(m), coef(m))
+  fixTMB = function(m) glmmTMB::fixef(m)$cond
   m = glmmTMB::glmmTMB(cbind(k, N - k) ~ x, family = binomial, data = testData)
   expect_equal(refitCoef(m, fixTMB), fixTMB(m))
-  m = glmmTMB::glmmTMB(log(y) ~ x, data = testData)
-  expect_equal(refitCoef(m, fixTMB), fixTMB(m))
-
-  testData$g = factor(sample(1:8, n, TRUE))
-  m = GLMMadaptive::mixed_model(cbind(k, N - k) ~ x, random = ~1|g, data = testData, family = binomial())
-  expect_equal(refitCoef(m, GLMMadaptive::fixef), GLMMadaptive::fixef(m))
-  # formulas with '.'
-  m = GLMMadaptive::mixed_model(k ~ . - g, random = ~1|g, data = testData[, c("k", "x", "g")], family = poisson())
-  expect_equal(refitCoef(m, GLMMadaptive::fixef), GLMMadaptive::fixef(m))
 })

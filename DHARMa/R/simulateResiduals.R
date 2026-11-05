@@ -120,7 +120,6 @@ simulateResiduals <- function(fittedModel, n = 250, simulateREs = c("conditional
                                             simulateREs = simulateREs,
                                            type = "refit", ...)
 
-    refitError = NULL
     for (i in 1:n){
 
       simObserved <- out$simulatedResponse[[i]]
@@ -139,10 +138,9 @@ simulateResiduals <- function(fittedModel, n = 250, simulateREs = c("conditional
         out$refittedPearsonResiduals[,i] <- getPearsonResiduals(refittedModel)
         #out$refittedRandomEffects[,i]  <- ranef(refittedModel)
       }, silent = TRUE)
-      if(inherits(refitTry, "try-error") && is.null(refitError)) refitError = conditionMessage(attr(refitTry, "condition"))
     }
 
-    if(all(is.na(out$refittedResiduals))) stop("DHARMa::simulateResiduals: with refit = TRUE, all refitted models produced an error", if(!is.null(refitError)) paste0(". The first error was: ", refitError))
+    if(all(is.na(out$refittedResiduals))) stop("DHARMa::simulateResiduals: with refit = TRUE, all refits failed. Last error: ", attr(refitTry, "condition")$message)
 
     ######### residual checks ###########
 
