@@ -108,6 +108,14 @@ test_that("different form arguments in plotResiduals work",
             simulationOutput <- simulateResiduals(glm(observedResponse ~ Environment1, family = "poisson", data = testData))
             expect_false(plotResiduals(simulationOutput, form = ~Environment1|group == "1")$p.value ==
                            plotResiduals(simulationOutput, form = ~Environment1|group == "1", absoluteDeviation = TRUE)$p.value)
+
+            # absoluteDeviation also for factor predictors (issue #596): residuals passed to testCategorical
+            passed = new.env()
+            tracer = bquote(assign("res", simulationOutput$scaledResiduals, envir = .(passed)))
+            suppressMessages(trace("testCategorical", tracer, print = FALSE, where = asNamespace("DHARMa")))
+            on.exit(suppressMessages(untrace("testCategorical", where = asNamespace("DHARMa"))), add = TRUE)
+            plotResiduals(simulationOutput, form = ~group, absoluteDeviation = TRUE)
+            expect_equal(passed$res, 2 * abs(simulationOutput$scaledResiduals - 0.5))
           }
 )
 

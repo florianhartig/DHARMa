@@ -362,14 +362,9 @@ plotResiduals <- function(simulationOutput, form = NULL, quantreg = NULL,
 
   # categorical plot
   if(is.factor(pred)){
-    if(is.null(group)) {
-      testCategorical(simulationOutput = simulationOutput, catPred = pred,
-                      quantiles = quantiles, xlab = a$xlab, ...)
-    } else {
-      simulationOutput$scaledResiduals = res
-      testCategorical(simulationOutput = simulationOutput, catPred = pred,
-                      quantiles = quantiles, xlab = a$xlab, ...)
-    }
+    simulationOutput$scaledResiduals = res
+    testCategorical(simulationOutput = simulationOutput, catPred = pred,
+                    quantiles = quantiles, xlab = a$xlab, ...)
 
   } else{
 
