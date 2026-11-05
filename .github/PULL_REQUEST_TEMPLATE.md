@@ -1,7 +1,7 @@
 ## Description
 
 <!--
-Please describe what this pull request does and why. If it resolves an issue, write "Fixes #<issue number>" or "Closes #<issue number>" (for several issues "Fixes #<number>, fixes #<number>"), so that the issue is closed automatically when the pull request is merged.
+Please describe what this pull request does and why. If it resolves an issue/several issues, write "Fixes #<issue number>" or "Closes #<issue number>", so that the issue is closed automatically when the pull request is merged.
 
 If AI tools wrote substantial parts of the code or text, please mention this in one sentence.
 -->
