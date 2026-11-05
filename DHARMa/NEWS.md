@@ -25,6 +25,8 @@ NOTE: for more news about the package, see https://github.com/florianhartig/DHAR
 
 * `runBenchmarks()` no longer warns about NA values when the output contains none (#577).
 
+* `testTemporalAutocorrelation()` no longer fails if AlgDesign is loaded, e.g. via agricolae (#504).
+
 ## Minor changes
 
 * `testOutliers()`: argument `plotBoostrap` renamed to `plotBootstrap`, old name deprecated (@BertvanderVeen, #535, #560).
