@@ -54,9 +54,11 @@ For everyone, including the DHARMa team: if AI tools wrote substantial parts of 
   - trivial fixes without an issue: `<shortName>`, e.g., `fixTypoVignette`.
   - Do not name a branch exactly like a release tag (e.g., `v0.5.1`).
 - Keep each pull request focused on one issue, or on several closely related issues for the same release, and open it against `master`. Do not split one issue across several pull requests; follow-up work gets a new issue.
+- Keep the diff small: no unrelated reformatting or refactoring, and reuse existing helper functions instead of duplicating logic.
 - Once the approach is agreed in the issue, open the pull request early, as a draft if the work is not finished yet, so that work in progress is visible and linked to its issues. If the work is abandoned, close the pull request with a short explanation.
 - A pull request or commit that resolves an issue should contain `Fixes #351` or `Closes #351` (with your issue number) in its description or commit message, so that GitHub closes the issue automatically when it is merged into `master`. For several issues, repeat the keyword for each, e.g., `Fixes #567, fixes #568`.
-- The pull request template contains a checklist; please go through it before submitting. Pull requests from contributors outside the DHARMa team are reviewed before they are merged.
+- Fill in the sections of the pull request template and go through its checklist before submitting. Pull requests from contributors outside the DHARMa team are reviewed before they are merged.
+- Titles of issues and pull requests are plain text (no backticks) and name the function or area and the problem or change; the templates show examples.
 - After the merge, branches in this repository are deleted automatically.
 
 ## Code and documentation standards
