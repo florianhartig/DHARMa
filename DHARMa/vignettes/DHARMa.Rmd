@@ -193,6 +193,12 @@ Additionally, you can plot residuals against a specific predictor for a specific
 plotResiduals(simulationOutput, form = ~ predictor | group == "group_level")
 ```
 
+With `form = ~ predictor | group`, one plot per group level is produced; with `%in% c(...)`, one per selected level.
+
+```{r, eval = FALSE}
+plotResiduals(simulationOutput, form = ~ predictor | group %in% c("level_1", "level_2"))
+```
+
 If the predictor is a factor, or if there is just a small number of observations on the x axis, plotResiduals will plot a box plot with additional tests instead of a scatter plot.
 
 ```{r, eval = FALSE}

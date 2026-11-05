@@ -93,6 +93,14 @@ test_that("different form arguments in plotResiduals work",
             on.exit(setHook("plot.new", NULL, "replace"))
             plotResiduals(simulationOutput, form = ~Environment1|group, quantreg = FALSE)
             expect_equal(n, 10)
+
+            # one panel per selected group level (issue #596)
+            n = 0
+            plotResiduals(simulationOutput, form = ~Environment1|group %in% c("1", "3"), quantreg = FALSE)
+            expect_equal(n, 2)
+            expect_error(plotResiduals(simulationOutput, form = ~Environment1|group %in% c("1", "99")), "group level")
+            expect_error(plotResiduals(simulationOutput, form = ~Environment1|group != "1"), "group levels")
+            expect_message(plotResidualsAll(simulationOutput, predictorNames = "Environment1", quantreg = FALSE), "deprecated")
           }
 )
 
