@@ -101,7 +101,7 @@ testQuantiles <- function(simulationOutput, predictor = NULL, rank = TRUE,
 
   predictorName = gsub(".*[$]|^~", "", paste(deparse(substitute(predictor)), collapse = ""))
 
-  # formulas with one variable, e.g. ~x or ~log(x), are evaluated in the data of the model (as sel in recalculateResiduals); formulas with several variables are not supported (issue #576)
+  # issue #576
   if(inherits(predictor, "formula")){
     vars = all.vars(predictor)
     if(length(vars) != 1 || vars == ".") stop("DHARMa::testQuantiles: a formula predictor must contain exactly one variable, e.g. ~x. To plot residuals against several predictors or groups, use plotResiduals().")
@@ -110,7 +110,7 @@ testQuantiles <- function(simulationOutput, predictor = NULL, rank = TRUE,
     predictor = eval(predictor[[2]], envir = predictors)
   }
 
-  # quantile regressions need ordered predictor values: ordered factors are used in the order of their levels, categorical predictors are not supported (issue #576)
+  # support ordered factors
   if(is.ordered(predictor)) predictor = as.numeric(predictor)
   else if(is.factor(predictor) || is.character(predictor) || is.logical(predictor)) stop("DHARMa::testQuantiles: quantile regressions require a numeric predictor or an ordered factor. For categorical predictors, use testCategorical().")
 
@@ -169,7 +169,6 @@ testQuantiles <- function(simulationOutput, predictor = NULL, rank = TRUE,
       out <- plotResiduals(simulationOutput = simulationOutput, form = NULL,
                            rank = rank, quantiles = quantiles, quantreg = TRUE, asFactor = FALSE)
     } else {
-      # asFactor = FALSE: also numeric predictors with few unique values get quantile regressions, as for plot = FALSE
       out <- plotResiduals(simulationOutput = simulationOutput, form = predictor,
                            rank = rank, quantiles = quantiles, quantreg = TRUE, asFactor = FALSE, xlab = predictorName)
       }
