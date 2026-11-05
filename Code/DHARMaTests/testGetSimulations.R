@@ -3,6 +3,8 @@ test_that("gam simulations: bam offsets and several linear predictors (#572)", {
   n = 200
   testData = data.frame(x = runif(n), a = runif(n, 1, 3))
   testData$y = rpois(n, testData$a * exp(1 + testData$x))
+  # getSimulations called directly stops for non-discrete bam that drops the offset argument
+  expect_error(getSimulations(mgcv::bam(y ~ s(x), offset = log(a), family = poisson, data = testData)), "offset")
   # no false positives of the bam offset check
   expect_no_error(simulateResiduals(mgcv::bam(y ~ s(x) + offset(log(a)), family = poisson, data = testData), n = 10))
   expect_no_error(simulateResiduals(mgcv::bam(y ~ s(x), offset = log(a), family = poisson, data = testData, discrete = TRUE), n = 10))

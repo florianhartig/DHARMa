@@ -515,9 +515,18 @@ getSimulations.negbin<- function (object, nsim = 1, simulateREs = c("conditional
 
 ######## MGCV ############
 
+# fixes #572 (non-discrete bam drops offset = from fitted values)
+checkBamOffset <- function(object){
+  if(inherits(object, "bam") && !is.null(off <- model.frame(object)[["(offset)"]]) && any(off != 0)){
+    eta = predict(object, type = "link")
+    if(!isTRUE(all.equal(unname(object$linear.predictors - eta[!is.na(eta)]), unname(off)))) stop("DHARMa: the fitted values of this bam model do not include the offset supplied via the offset argument (a problem in mgcv). Please specify the offset in the formula instead, e.g. y ~ s(x) + offset(log(a)).")
+  }
+}
+
 #' @rdname getFitted
 #' @export
 getFitted.gam <- function(object, ...){
+  checkBamOffset(object)
   # unconditional predictions, excluding random effects and factor smooth interactions (fixes issue #544)
   isRE = sapply(object$smooth, function(x) any(class(x) %in% c("random.effect", "fs.interaction")))
   if(any(isRE)) excludeREs = sapply(object$smooth[isRE], `[[`, "label") else excludeREs =  NULL
@@ -571,11 +580,7 @@ getSimulations.gam <- function(object, nsim = 1, simulateREs = c("conditional", 
   checkBinomialMatrixWeights(object)
   if(hasWeights(object)) warning(weightsWarning)
 
-  # fixes #572 (non-discrete bam drops offset = from fitted values)
-  if(inherits(object, "bam") && !is.null(off <- model.frame(object)[["(offset)"]]) && any(off != 0)){
-    eta = predict(object, type = "link")
-    if(!isTRUE(all.equal(unname(object$linear.predictors - eta[!is.na(eta)]), unname(off)))) stop("DHARMa: the fitted values of this bam model do not include the offset supplied via the offset argument (a problem in mgcv). Please specify the offset in the formula instead, e.g. y ~ s(x) + offset(log(a)).")
-  }
+  checkBamOffset(object)
 
   if(isTRUE(mgcViz) && requireNamespace("mgcViz", quietly = TRUE)){
 
