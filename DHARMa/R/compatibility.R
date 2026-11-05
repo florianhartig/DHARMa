@@ -470,6 +470,7 @@ getPredictorNames.default <- function (object,...){
 #' @export
 getRefit.lm <- function(object, newresp, ...){
   refitData = getRefitData(object, newresp)
+  object$call$subset = NULL # fixes #599 (subset would be applied twice)
   refittedModel = update(object, formula. = refitData$formula, data = refitData$data, ...)
   return(refittedModel)
 }
