@@ -305,12 +305,11 @@ recalculateResiduals <- function(simulationOutput, group = NULL, aggregateBy = s
       out$refittedPearsonResiduals = apply(simulationOutput$refittedPearsonResiduals,
                                            2, aggregateByGroup)
 
-      # as in simulateResiduals, refitted residuals always use "traditional"
-      out$method = "traditional"
+      out$method = method = "traditional" # fixes #589 (as in simulateResiduals)
       out$scaledResiduals = getQuantile(simulations = out$refittedResiduals ,
                                         observed = out$fittedResiduals ,
                                         integerResponse = simulationOutput$integerResponse,
-                                        method = "traditional", rotation = rotation)
+                                        method = method, rotation = rotation)
     }
     # hack - the c here will result in both old and new outputs to be present resulting output, but a named access should refer to the new, grouped calculations
     # question to myself - what's the use of that, why not erase the old outputs? they are anyway saved in the old object

@@ -77,7 +77,7 @@ testBivariateUniformity <- function(simulationOutput, alternative = c("two.sided
 #'
 #' @param simulationOutput an object of class DHARMa, either created via [simulateResiduals] for supported models or by [createDHARMa] for simulations created outside DHARMa, or a supported model. Providing a supported model directly is discouraged, because simulation settings cannot be changed in this case.
 #' @param predictor an optional predictor variable to be used, instead of the predicted response (default). See details.
-#' @param rank if TRUE, the values provided in predictor will be rank transformed. This will usually make patterns easier to spot visually, especially if the distribution of the predictor is skewed. Ordered factors are first converted to the numbers of their levels.
+#' @param rank if TRUE, the values provided in predictor will be rank transformed. This will usually make patterns easier to spot visually, especially if the distribution of the predictor is skewed.
 #' @param quantiles the quantiles to be tested.
 #' @param plot if TRUE, the function will create an additional plot.
 #' @details The function fits quantile regressions (via package qgam) on the residuals, and compares their location to the expected location (because of the uniform distribution, the expected location is 0.5 for the 0.5 quantile).
@@ -86,11 +86,9 @@ testBivariateUniformity <- function(simulationOutput, alternative = c("two.sided
 #'
 #' The p-values of the intercept and splines are combined into a total p-value via Benjamini & Hochberg adjustment to control the FDR.
 #'
-#' Predictor can be a formula (e.g. predictor = ~predictor), in which case NAs are handled automatically (recommended). Predictor can also be a variable in your environment (e.g. predictor = data$predictor), but then you need to remove rows that were excluded by the model due to NAs by hand. A formula must contain exactly one variable, e.g. ~x or ~log(x); to plot residuals against several predictors or by group, see the argument `form` in [plotResiduals].
+#' Predictor can be a formula (e.g. predictor = ~predictor), in which case NAs are handled automatically (recommended). Predictor can also be a variable in your environment (e.g. predictor = data$predictor), but then you need to remove rows that were excluded by the model due to NAs by hand. A formula must contain exactly one variable, e.g. ~x or ~log(x); to plot residuals against several predictors or by group, see the argument `form` in [plotResiduals]. Predictor must be numeric or an ordered factor (used in the order of its levels); for categorical predictors, use [testCategorical].
 #'
 #' When plotting (plot = TRUE), the shaded gray areas indicate 95% confidence intervals of the quantile estimates (1.96 * standard error).
-#'
-#' Quantile regressions require ordered predictor values. Ordered factors are used in the order of their levels. For unordered factors, character or logical predictors, the function stops; use [testCategorical] for these. Unlike in [plotResiduals], numeric predictors with few unique values are not converted to factors.
 #'
 #' @author Florian Hartig
 #' @example inst/examples/testQuantilesHelp.R
@@ -101,16 +99,15 @@ testQuantiles <- function(simulationOutput, predictor = NULL, rank = TRUE,
 
   predictorName = gsub(".*[$]|^~", "", paste(deparse(substitute(predictor)), collapse = ""))
 
-  # issue #576
+  # fixes #576 (one-variable formulas)
   if(inherits(predictor, "formula")){
     vars = all.vars(predictor)
-    if(length(vars) != 1 || vars == ".") stop("DHARMa::testQuantiles: a formula predictor must contain exactly one variable, e.g. ~x. To plot residuals against several predictors or groups, use plotResiduals().")
+    if(length(vars) != 1) stop("DHARMa::testQuantiles: a formula predictor must contain exactly one variable, e.g. ~x. To plot residuals against several predictors or groups, use plotResiduals().")
     predictors = getFormulaPredictors(ensureDHARMa(simulationOutput, convert = T), predictor)
     if(is.null(predictors[[vars]])) stop("DHARMa::testQuantiles: unable to extract the predictor variable ", vars, " from the data used to fit the model.")
     predictor = eval(predictor[[2]], envir = predictors)
   }
 
-  # support ordered factors
   if(is.ordered(predictor)) predictor = as.numeric(predictor)
   else if(is.factor(predictor) || is.character(predictor) || is.logical(predictor)) stop("DHARMa::testQuantiles: quantile regressions require a numeric predictor or an ordered factor. For categorical predictors, use testCategorical().")
 
@@ -448,11 +445,11 @@ testCategorical <- function(simulationOutput, catPred,
 #'
 #' If refit = F, the function uses [testGeneric] to compare the variance of the observed raw residuals (i.e. var(observed - predicted), displayed as a red line) against the variance of the simulated residuals (i.e. var(simulated - predicted), histogram). Predictions are taken on the scale of the observed response (see [getFittedResponse]), i.e. for binomial models with more than one trial, as the expected number of successes. For objects created with [createDHARMa], the provided fittedPredictedResponse is used. The variances are scaled by the variance of all simulated values; this affects only the plotted values, not the reported ratio or p-value. A significant ratio > 1 indicates overdispersion, a significant ratio < 1 underdispersion.
 #'
-#' If refit = T, the function compares the approximate deviance (via squared Pearson residuals) with the same quantity from the models refitted with simulated data. Applying this is much slower than the previous alternative. Given the computational cost, I would suggest that most users will be satisfied with the standard dispersion test. For residuals recalculated with [recalculateResiduals] (grouping or selection with sel), the observed and the refitted Pearson residuals are aggregated in the same way (by default summed per group) before squaring, so that the test then checks the dispersion at the level of the groups. If the aggregated observed Pearson residuals are all (close to) zero, e.g. if the grouping variable is a fixed effect in a linear model or the only predictor in a GLM, the test is not informative, and the function stops.
+#' If refit = T, the function compares the approximate deviance (via squared Pearson residuals) with the same quantity from the models refitted with simulated data. Applying this is much slower than the previous alternative. Given the computational cost, I would suggest that most users will be satisfied with the standard dispersion test. After [recalculateResiduals], observed and refitted Pearson residuals are aggregated in the same way before squaring; the function stops if the aggregated observed residuals are all (close to) zero (e.g. grouping variable as fixed effect in a linear model, or as the only predictor in a GLM).
 #'
 #' **Analytical dispersion tests (type == "PearsonChisq")**
 #'
-#' This is the test described in https://bbolker.github.io/mixedmodels-misc/glmmFAQ.html#overdispersion, identical to performance::check_overdispersion. Works only if the fitted model provides df.residual and Pearson residuals. Grouping via [recalculateResiduals] is ignored.
+#' This is the test described in https://bbolker.github.io/mixedmodels-misc/glmmFAQ.html#overdispersion, identical to performance::check_overdispersion. Works only if the fitted model provides df.residual and Pearson residuals.
 #'
 #' The test statistic is biased to lower values under quite general conditions, and will therefore tend to test significant for underdispersion. It is recommended to use this test only for overdispersion, i.e. use alternative == "greater". Also, obviously, it requires that Pearson residuals are available for the chosen model, which will not be the case for all models / packages.
 #'
@@ -494,10 +491,10 @@ testDispersion <- function(simulationOutput, alternative = c("two.sided", "great
     } else {
 
       rp <- getPearsonResiduals(simulationOutput$fittedModel)
-      # residuals grouped with recalculateResiduals: aggregate the observed Pearson residuals in the same way as the refitted ones (issue #575)
+      # fixes #575 (aggregate like refitted residuals)
       if(!is.null(simulationOutput$aggregateByGroup)){
         rpGroup = simulationOutput$aggregateByGroup(rp)
-        if(max(abs(rpGroup)) < 1e-3 * max(simulationOutput$aggregateByGroup(abs(rp)))) stop("DHARMa::testDispersion: the aggregated Pearson residuals are all (close to) zero, e.g. because the grouping variable is a fixed effect in a linear model or the only predictor in a GLM. The test with refit = TRUE is not informative in this case.")
+        if(max(abs(rpGroup)) < 1e-3 * max(simulationOutput$aggregateByGroup(abs(rp)))) stop("DHARMa::testDispersion: aggregated Pearson residuals are all (close to) zero, e.g. if the grouping variable is a fixed effect in a linear model or the only predictor in a GLM; the test with refit = TRUE is not informative.")
         rp = rpGroup
       }
       observed = sum(rp^2)

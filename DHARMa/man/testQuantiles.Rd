@@ -12,7 +12,7 @@ testQuantiles(simulationOutput, predictor = NULL, rank = TRUE,
 
 \item{predictor}{an optional predictor variable to be used, instead of the predicted response (default). See details.}
 
-\item{rank}{if TRUE, the values provided in predictor will be rank transformed. This will usually make patterns easier to spot visually, especially if the distribution of the predictor is skewed. Ordered factors are first converted to the numbers of their levels.}
+\item{rank}{if TRUE, the values provided in predictor will be rank transformed. This will usually make patterns easier to spot visually, especially if the distribution of the predictor is skewed.}
 
 \item{quantiles}{the quantiles to be tested.}
 
@@ -28,11 +28,9 @@ A significant p-value for the splines means the fitted spline deviates from a fl
 
 The p-values of the intercept and splines are combined into a total p-value via Benjamini & Hochberg adjustment to control the FDR.
 
-Predictor can be a formula (e.g. predictor = ~predictor), in which case NAs are handled automatically (recommended). Predictor can also be a variable in your environment (e.g. predictor = data$predictor), but then you need to remove rows that were excluded by the model due to NAs by hand. A formula must contain exactly one variable, e.g. ~x or ~log(x); to plot residuals against several predictors or by group, see the argument \code{form} in \link{plotResiduals}.
+Predictor can be a formula (e.g. predictor = ~predictor), in which case NAs are handled automatically (recommended). Predictor can also be a variable in your environment (e.g. predictor = data$predictor), but then you need to remove rows that were excluded by the model due to NAs by hand. A formula must contain exactly one variable, e.g. ~x or ~log(x); to plot residuals against several predictors or by group, see the argument \code{form} in \link{plotResiduals}. Predictor must be numeric or an ordered factor (used in the order of its levels); for categorical predictors, use \link{testCategorical}.
 
 When plotting (plot = TRUE), the shaded gray areas indicate 95\% confidence intervals of the quantile estimates (1.96 * standard error).
-
-Quantile regressions require ordered predictor values. Ordered factors are used in the order of their levels. For unordered factors, character or logical predictors, the function stops; use \link{testCategorical} for these. Unlike in \link{plotResiduals}, numeric predictors with few unique values are not converted to factors.
 }
 \examples{
 testData = createData(sampleSize = 200, overdispersion = 0.0, randomEffectVariance = 0)
