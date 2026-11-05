@@ -700,7 +700,6 @@ testTemporalAutocorrelation <- function(simulationOutput, time, alternative = c(
   # data as data.frame, as AlgDesign's model.matrix.formula requires it (#504)
   out = lmtest::dwtest(scaledResiduals ~ 1, data = data.frame(scaledResiduals = simulationOutput$scaledResiduals),
                        order.by = time, alternative = alternative)
-  out$data.name = "simulationOutput$scaledResiduals ~ 1"
 
   if(plot == T) {
     oldpar <- par(mfrow = c(1,2))
