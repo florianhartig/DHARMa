@@ -977,7 +977,7 @@ As brms doesn't provide Pearson residuals, testDispersion with type = "PearsonCh
 
 ## Unsupported packages
 
-If confronted with an unsupported package, `DHARMa` will try to use standard S3 functions such as `coef()`, `simulate()` etc. to perform simulations. If no error occurs, a residual object will be calculated, and a warning will be provided that this package has not been checked for full functionality. In many cases, the results can be used though (but no guarantee, maybe check with null simulations if the results are OK). Other than that, see my general comments about [adding new R packages to DHARMa](https://github.com/florianhartig/DHARMa/wiki/Adding-new-R-packages-to-DHARMA)
+If confronted with an unsupported package, `DHARMa` will try to use standard S3 functions such as `coef()`, `simulate()` etc. to perform simulations. If no error occurs, a residual object will be calculated, and a warning will be provided that this package has not been checked for full functionality. In many cases, the results can be used though (but no guarantee, maybe check with null simulations if the results are OK). Other than that, see my general comments about [adding new R packages to DHARMa](https://github.com/florianhartig/DHARMa/blob/master/ADDING_PACKAGES.md)
 
 ## Importing external simulations (e.g. from Bayesian software or unsupported packages)
 

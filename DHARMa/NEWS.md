@@ -9,17 +9,19 @@ NOTE: for more news about the package, see https://github.com/florianhartig/DHAR
 
 * Version 0.5.0 was changing the `glmmTMB` model object "simcode" when using simulateResiduals. We fixed this problem by restoring the original simcode to the model object.
 
-* Fixing bug in predictions via getFitted for `gam` and `bam` models. Predictions are now unconditional on random effects and factor smooth interactions (previously they were conditional, see #544).
+* Fixing bug in predictions via getFitted for `gam` and `bam` models. Predictions are now unconditional on random effects and factor smooth interactions; previously they were conditional (#544).
 
 * Solving duplicated plots in `plotResiduals`: (1) when having quadratic effects written with I(variable) in the formula, and (2) for brms with transformed variables in the formula, e.g. `log(variable)`. 
 
+* Small fixes in `plotResiduals(form = ~x | group)` (#573).
+
 * Minor fixes in testSpatialAutocorrelation: DHARMa errors if repeated values for space in distMat, extended help, improved plot titles and legend.
 
-* Revised weights handling (issue #230, #540): introduced more robust check for prior weights (especially in n/k models) with new helper function `hasWeights`.
+* Revised weights handling: introduced more robust check for prior weights (especially in n/k models) with new helper function `hasWeights` (#230, #540).
 
 * Predictions from `GLMMadaptive` models are now created using `fitted()`, which avoids errors on models with transformations (e.g. offset, log)
 
-* Fix in behavior of `update()` on models with transformed predictors (e.g. `offset()`). This fixes behavior of `getRefit` and related functions such as `simulateLRT` (issue #351). 
+* Fix in behavior of `update()` on models with transformed predictors (e.g. `offset()`). This fixes behavior of `getRefit` and related functions such as `simulateLRT` (#351).
 
 * Refits of lm, glm, gam, glmmTMB and phylolm models now also work for transformed (e.g. `log(y)`) and `cbind()` responses; `simulateResiduals(refit = TRUE)` stops with an informative error if all refits fail (#571).
 
@@ -27,11 +29,13 @@ NOTE: for more news about the package, see https://github.com/florianhartig/DHAR
 
 * `runBenchmarks()` no longer warns about NA values when the output contains none (#577).
 
+* `testTemporalAutocorrelation()` no longer fails if AlgDesign is loaded, e.g. via agricolae (#504).
+
 ## Minor changes
 
-* `testOutliers()`: argument `plotBoostrap` renamed to `plotBootstrap`, old name deprecated (#560).
+* `testOutliers()`: argument `plotBoostrap` renamed to `plotBootstrap`, old name deprecated (@BertvanderVeen, #535, #560).
 
-* Plot titles of `simulateLRT()` and `testOutliers()` now explain the line colors (#535).
+* Plot titles of `simulateLRT()` and `testOutliers()` now explain the line colors (@BertvanderVeen, #535).
 
 * New compatibility function `getFittedResponse`, which returns the fitted values on the scale of the observed response, i.e. the expected number of successes for k/n binomial models (`getFitted` returns proportions). It is used in `testDispersion`.
 
@@ -48,7 +52,7 @@ NOTE: for more news about the package, see https://github.com/florianhartig/DHAR
 
 * In `plotResiduals`, we increased the threshold for the automatic change from quantile regression lines to the spline: from 2,000 to 10,000 data points. When it happens, a message is displayed to warn users. Also, when `quantreg = F`, the color of the spline was changed to black because there is no test associated with the line (as there is for quantile regression). 
 
-* In `plotResiduals`, the argument `form` has a new functionality. Beyond the syntax `data$predictor`, it allows now to use the formula structure  `~predictor`, `~predictor1+predictor2`, `~.`,  `~predictor|group` and `~predictor|group == "group_level"` to plot the residuals against specific/all predictors and grouping variables/levels. This works for most of the supported model functions. It solves problems with NAs in datasets that were excluded by the model. #407 / #425 
+* In `plotResiduals`, the argument `form` has a new functionality. Beyond the syntax `data$predictor`, it allows now to use the formula structure  `~predictor`, `~predictor1+predictor2`, `~.`,  `~predictor|group` and `~predictor|group == "group_level"` to plot the residuals against specific/all predictors and grouping variables/levels. This works for most of the supported model functions. It solves problems with NAs in datasets that were excluded by the model (#407, #425).
 
 * In `testCategorical`, `recalculateResiduals`, `testQuantiles`, `testSpatialAutocorrelation` and `testTemporalAutocorrelation`, additional predictors (`catPred`, `group, sel`, `predictor`, `time`, `x,y`- respectively) can now be specified as a formula (similar to `plotResiduals`). This handles rows with NAs that were excluded by the model automatically.
 
@@ -59,14 +63,18 @@ NOTE: for more news about the package, see https://github.com/florianhartig/DHAR
 
 * Fixing error in runBenchmarks.  
 
-* Fixing inconsistency in testQuantiles() #465. Including rankTransform() help function.  
+* Fixing inconsistency in testQuantiles(), including rankTransform() help function (#465).
 
 
 ## Minor changes
 
 * Using 95% confidence intervals for confidence bands in plots for testQuantiles(). Before, we were using standard errors (~ 68% CI).
 
-* Vectorize randomization of residuals to improve speed - PR#493 contributed by StaffanBetner.
+* Vectorized randomization of residuals to improve speed (@StaffanBetner, #493).
+
+* Faster rotation of residuals in `getQuantile()` (argument `rotation`), using `forwardsolve()` instead of `solve()` (@StaffanBetner, #492).
+
+* `getRefit()` now passes additional arguments (`...`) to `update()` (`update_resp()` for `spaMM`) also for `lm`/`glm`, `glmmTMB`, `spaMM` and `GLMMadaptive` models (@LuthanV, #515).
 
 * Adding color legend to testSpatialAutocorrelation().
 
