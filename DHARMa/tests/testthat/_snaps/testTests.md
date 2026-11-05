@@ -560,7 +560,7 @@
       
       	Durbin-Watson test
       
-      data:  simulationOutput$scaledResiduals ~ 1
+      data:  scaledResiduals ~ 1
       DW = 1.9703, p-value = 0.833
       alternative hypothesis: true autocorrelation is not 0
       
@@ -574,7 +574,7 @@
       
       	Durbin-Watson test
       
-      data:  simulationOutput$scaledResiduals ~ 1
+      data:  scaledResiduals ~ 1
       DW = 1.9703, p-value = 0.4165
       alternative hypothesis: true autocorrelation is greater than 0
       
