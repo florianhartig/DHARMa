@@ -29,7 +29,7 @@ NOTE: for more news about the package, see https://github.com/florianhartig/DHAR
 
 * `testTemporalAutocorrelation()` no longer fails if AlgDesign is loaded, e.g. via agricolae (#504).
 
-* `plotResiduals(form = ~x | group %in% c(...))` now plots one panel per selected group level instead of a wrong subset of the data; operators other than `==` and `%in%` give an error (#596).
+* `plotResiduals(form = ~x | group %in% c(...))` now plots one panel per selected group level instead of a wrong subset of the data; comparison operators other than `==`, such as `!=`, give an error (#596).
 
 * `plotResiduals(absoluteDeviation = TRUE)` now also transforms the residuals for `form = ~x | group` and `~x | group == "level"` (#596).
 

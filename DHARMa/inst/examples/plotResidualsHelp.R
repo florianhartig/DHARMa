@@ -37,7 +37,7 @@ plotResiduals(simulationOutput, rank = TRUE, smoothScatter = TRUE)
   plotResiduals(simulationOutput, form = ~Environment1|group == "1")
 
   # plot residuals against a predictor for selected group levels, here groups 1 and 2
-  plotResiduals(simulationOutput, form = ~Environment1|group %in% c("1", "2"))
+  plotResiduals(simulationOutput, form = ~Environment1|group %in% c("1", "2"), quantreg = FALSE)
 
 
   # alternatively, you can plot against a variable from the global environment
