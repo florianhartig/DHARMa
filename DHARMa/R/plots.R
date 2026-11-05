@@ -157,7 +157,7 @@ plotQQunif <- function(simulationOutput, testUniformity = TRUE, testOutliers = T
 #' @param smoothScatter if T, a smooth scatter plot will plotted instead of a normal scatter plot. This makes sense when the number of residuals is very large. Default NULL chooses T for nObs > 10000, and F otherwise.
 #' @param quantiles for a quantile regression, which quantiles should be plotted. Default is 0.25, 0.5, 0.75.
 #' @param absoluteDeviation if T, switch from displaying normal quantile residuals to absolute deviation from the mean expectation of 0.5 (calculated as 2 * abs(res - 0.5)). The purpose of this is to test explicitly for heteroskedasticity, see details.
-#' @param ... additional arguments to plot / boxplot. Ignored if several panels are plotted (see details).
+#' @param ... additional arguments to plot / boxplot. Ignored if several panels are plotted.
 #' @details The function plots residuals against a predictor (by default against the fitted value, extracted from the DHARMa object, or any other predictor). The shaded gray areas indicate 95% confidence intervals of the quantile estimates (1.96 * standard error).
 #'
 #' Outliers are drawn if simulationOutput is a DHARMa object and highlighted in red if the outlier test is significant (for information on definition and interpretation of outliers, see [testOutliers]). See the note below to change the highlighting color of the outliers.
@@ -294,12 +294,12 @@ plotResiduals <- function(simulationOutput, form = NULL, quantreg = NULL,
   if(!is.null(group)) {
     groupLevel = tryCatch(eval(form[[2]][[3]][[3]], environment(form)), error = function(e) NULL)
     if(!is.null(groupLevel) && !deparse(form[[2]][[3]][[1]]) %in% c("==", "%in%")) stop("DHARMa: to select group levels, use == or %in%, e.g. form = ~x | group %in% c(\"a\", \"b\").")
+    if(!is.null(groupLevel) && (length(groupLevel) == 0 || !all(groupLevel %in% levels(factor(group))))) stop("DHARMa: Unable to find specified group level(s).")
 
     # one panel per group level, for all or for several selected levels (#596)
-    if(is.null(groupLevel) || length(groupLevel) > 1) {
+    if(length(groupLevel) != 1) {
       predictorNames = levels(factor(group))
       if(!is.null(groupLevel)) {
-        if(!all(groupLevel %in% predictorNames)) stop("DHARMa: Unable to find specified group level(s).")
         predictorNames = predictorNames[predictorNames %in% groupLevel]
         form[[2]][[3]] = form[[2]][[3]][[2]] # ~x | group %in% c(...) -> ~x | group
       }
@@ -320,7 +320,6 @@ plotResiduals <- function(simulationOutput, form = NULL, quantreg = NULL,
     }
 
     pred = pred[group == groupLevel]
-    if(length(pred) == 0) {stop("DHARMa: Unable to find specified group level.")}
     res = res[group == groupLevel]
   }
 
@@ -495,7 +494,7 @@ plotConventionalResiduals <- function(fittedModel){
 #' @note This function is deprecated. Use [plotResiduals]
 #' @export
 plotResidualsAll <- function(simulationOutput, predictorNames, predictorType = c("predictor", "groupLevel"), form = NULL, ...){
-  message("plotResidualsAll is deprecated, please switch your code to plotResiduals() with form = ~., ~a + b, ~x | group or ~x | group %in% c(...)")
+  message("plotResidualsAll is deprecated, please switch your code to plotResiduals() with argument form, see ?plotResiduals")
   plotResidualsPanels(simulationOutput, predictorNames, match.arg(predictorType), form, ...)
 }
 

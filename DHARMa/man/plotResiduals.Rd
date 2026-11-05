@@ -25,7 +25,7 @@ plotResiduals(simulationOutput, form = NULL, quantreg = NULL,
 
 \item{absoluteDeviation}{if T, switch from displaying normal quantile residuals to absolute deviation from the mean expectation of 0.5 (calculated as 2 * abs(res - 0.5)). The purpose of this is to test explicitly for heteroskedasticity, see details.}
 
-\item{...}{additional arguments to plot / boxplot. Ignored if several panels are plotted (see details).}
+\item{...}{additional arguments to plot / boxplot. Ignored if several panels are plotted.}
 }
 \value{
 If quantile tests are performed, the function returns them invisibly. If several panels are plotted, the function returns NULL.

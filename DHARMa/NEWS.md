@@ -31,7 +31,7 @@ NOTE: for more news about the package, see https://github.com/florianhartig/DHAR
 
 * `plotResiduals(form = ~x | group %in% c(...))` now plots one panel per selected group level instead of a wrong subset of the data; comparison operators other than `==`, such as `!=`, give an error (#596).
 
-* `plotResiduals(absoluteDeviation = TRUE)` now also transforms the residuals for factor predictors, `form = ~x | group` and `~x | group == "level"` (#596).
+* `plotResiduals(absoluteDeviation = TRUE)` now also transforms the residuals for factor predictors, `form = ~x | group` and `~x | group == "level"` (#597).
 
 ## Minor changes
 
