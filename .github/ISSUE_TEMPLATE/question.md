@@ -8,7 +8,7 @@ Before submitting, please:
 
 - search existing issues, as many questions have been answered before
 - check the vignette and the package documentation
-- choose a plain-text title naming the function or area and the question, e.g., "testDispersion(): significant underdispersion in a binomial GLMM, what to do?"
+- choose a short plain-text title naming the function or area and the question, e.g., "testDispersion(): significant underdispersion in a binomial GLMM, what to do?"
 - read [Asking for help and reporting issues](https://github.com/florianhartig/DHARMa/blob/master/CONTRIBUTING.md#asking-for-help-and-reporting-issues) in the contributing guide
 -->
 
