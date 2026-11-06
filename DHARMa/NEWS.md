@@ -33,6 +33,8 @@ NOTE: for more news about the package, see https://github.com/florianhartig/DHAR
 
 * Predictions from `GLMMadaptive` models are now created using `fitted()`, which avoids errors on models with transformations (e.g. offset, log)
 
+* brms: `getPearsonResiduals()` stops with an informative error; unconditional simulations re-simulate the random effects instead of setting them to zero and stop for unsupported models (#574).
+
 * Fix in behavior of `update()` on models with transformed predictors (e.g. `offset()`). This fixes behavior of `getRefit` and related functions such as `simulateLRT` (#351).
 
 * `getRefit()` now works for transformed responses (e.g. `log(y)`) and glmmTMB `cbind()` responses, and `simulateResiduals(refit = TRUE)` works for glmmTMB proportions with weights and stops with an informative error if all refits fail (#571).
