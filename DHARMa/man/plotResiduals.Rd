@@ -25,10 +25,10 @@ plotResiduals(simulationOutput, form = NULL, quantreg = NULL,
 
 \item{absoluteDeviation}{if T, switch from displaying normal quantile residuals to absolute deviation from the mean expectation of 0.5 (calculated as 2 * abs(res - 0.5)). The purpose of this is to test explicitly for heteroskedasticity, see details.}
 
-\item{...}{additional arguments to plot / boxplot.}
+\item{...}{additional arguments to plot / boxplot. Ignored if several panels are plotted.}
 }
 \value{
-If quantile tests are performed, the function returns them invisibly.
+If quantile tests are performed, the function returns them invisibly. If several panels are plotted, the function returns NULL.
 }
 \description{
 The function creates a generic residual plot with either spline or quantile regression to highlight patterns in the residuals. Outliers are marked in star/asterisk form and highlighted in red if the outlier test is significant.
@@ -44,7 +44,7 @@ Overdispersion typically manifests itself as Q1 (0.25) deviating towards 0 and Q
 
 The quantile regression can take some time to calculate, especially for larger datasets. For this reason, quantreg = F can be set to generate a smooth spline instead. This is the default for n > 10000.
 
-If form is specified as a formula, e.g. \code{form = ~ your_predictor}, NAs will be handled automatically (recommended). If \code{form = ~.}, separate plots for all predictors in the model are produced. If \code{form = ~ predictor1 + predictor2}, a separate plot for each specified predictor is produced. If an additional grouping variable is specified, e.g. \code{form = ~ predictor|group}, a separate plot for the predictor within each grouping level is produced. Be careful with this command: if you have many levels, the plot may not display nicely. If you are interested in a specific group, you can use \code{form = ~ predictor|group == "group_level"}. If form is \strong{not} a formula, e.g. \code{form = data$predictor}, NAs are \strong{not} handled automatically. For phyr and gamm4$mer models, you need to specify form in this way.
+If form is specified as a formula, e.g. \code{form = ~ your_predictor}, NAs will be handled automatically (recommended). If \code{form = ~.}, separate plots for all predictors in the model are produced. If \code{form = ~ predictor1 + predictor2}, a separate plot for each specified predictor is produced. If an additional grouping variable is specified, e.g. \code{form = ~ predictor|group}, a separate plot for the predictor within each grouping level is produced. Be careful with this command: if you have many levels, the plot may not display nicely. If you are interested in a specific group, you can use \code{form = ~ predictor|group == "group_level"}, and for several groups \code{form = ~ predictor|group \%in\% c("level1", "level2")}, which produces a separate plot for each of these levels. If form is \strong{not} a formula, e.g. \code{form = data$predictor}, NAs are \strong{not} handled automatically. For phyr and gamm4$mer models, you need to specify form in this way.
 
 If the predictor is a factor, a boxplot will be plotted instead of a scatter plot. The distribution for each factor level should be uniformly distributed, so the box should go from 0.25 to 0.75, with the median line at 0.5 (within-group). To test if deviations from those expectations are significant, KS-tests per group and a Levene test for homogeneity of variances are performed. See \link{testCategorical} for details.
 }
@@ -71,7 +71,7 @@ plotResiduals(simulationOutput, rank = FALSE)
 # smooth scatter plot - default for large datasets with n > 10,000
 plotResiduals(simulationOutput, rank = TRUE, smoothScatter = TRUE)
 
-\dontrun{
+\donttest{
 
   # It is very advisable to plot the residual against all predictors
   # the following syntax uses the predictor values from the fitted model
@@ -87,10 +87,13 @@ plotResiduals(simulationOutput, rank = TRUE, smoothScatter = TRUE)
   plotResiduals(simulationOutput, form = ~Environment1 + Environment2)
 
   # plot residuals against a predictor for all respective group levels
-  plotResiduals(simulationOutput, form = ~Environment1|group)
+  plotResiduals(simulationOutput, form = ~Environment1|group, quantreg = FALSE)
 
   # plot residuals against a predictor for a specific group level, here group 1
   plotResiduals(simulationOutput, form = ~Environment1|group == "1")
+
+  # plot residuals against a predictor for selected group levels, here groups 1 and 2
+  plotResiduals(simulationOutput, form = ~Environment1|group \%in\% c("1", "2"), quantreg = FALSE)
 
 
   # alternatively, you can plot against a variable from the global environment
@@ -104,11 +107,6 @@ plotResiduals(simulationOutput, rank = TRUE, smoothScatter = TRUE)
   # to diagnose overdispersion and heteroskedasticity it can be useful to
   # display residuals as absolute deviation from the expected mean 0.5
   plotResiduals(simulationOutput, absoluteDeviation = TRUE)
-
-  # All these options can also be provided to the main plotting function
-
-  # If you want to plot summaries per group, use recalculateResiduals
-  # for details see help of recalculateResiduals
 }
 }
 \seealso{

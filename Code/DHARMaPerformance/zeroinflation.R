@@ -22,3 +22,5 @@ summary(fittedModel)
 simulationOutput <- simulateResiduals(fittedModel = fittedModel, n = 200)
 testZeroInflation(simulationOutput)
 
+
+# seems to work fine

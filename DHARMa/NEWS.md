@@ -29,6 +29,10 @@ NOTE: for more news about the package, see https://github.com/florianhartig/DHAR
 
 * `testTemporalAutocorrelation()` no longer fails if AlgDesign is loaded, e.g. via agricolae (#504).
 
+* `plotResiduals(form = ~x | group %in% c(...))` now plots one panel per selected group level instead of a wrong subset of the data; comparison operators other than `==`, such as `!=`, give an error (#596).
+
+* `plotResiduals(absoluteDeviation = TRUE)` now also transforms the residuals for factor predictors, `form = ~x | group` and `~x | group == "level"` (#597).
+
 * `testDispersion()` with `refit = TRUE` now aggregates the observed Pearson residuals like the refitted ones after `recalculateResiduals()` (#575).
 
 * `testQuantiles()` now gives the same results with and without plot, evaluates transformations such as `~log(x)`, and stops for categorical predictors and formulas with several variables (#576).
@@ -38,6 +42,8 @@ NOTE: for more news about the package, see https://github.com/florianhartig/DHAR
 ## Minor changes
 
 * `testOutliers()`: argument `plotBoostrap` renamed to `plotBootstrap`, old name deprecated (@BertvanderVeen, #535, #560).
+
+* `plotResidualsAll()` is deprecated, use `plotResiduals()` with `form` instead (#596).
 
 * Plot titles of `simulateLRT()` and `testOutliers()` now explain the line colors (@BertvanderVeen, #535).
 
