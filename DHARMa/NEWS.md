@@ -15,6 +15,10 @@ NOTE: for more news about the package, see https://github.com/florianhartig/DHAR
 
 * Small fixes in `plotResiduals(form = ~x | group)` (#573).
 
+* `recalculateResiduals()` now sets `nObs` and `nGroups` to the number of grouped residuals, which fixes `testOutliers()` and `testTemporalAutocorrelation(time = NULL)` for grouped residuals (#603, #605).
+
+* `recalculateResiduals()` now stops if fewer than 2 residuals remain after grouping and selection, and warns if fewer than 10 remain (#604).
+
 * Minor fixes in testSpatialAutocorrelation: DHARMa errors if repeated values for space in distMat, extended help, improved plot titles and legend.
 
 * Revised weights handling: introduced more robust check for prior weights (especially in n/k models) with new helper function `hasWeights` (#230, #540).
@@ -31,9 +35,15 @@ NOTE: for more news about the package, see https://github.com/florianhartig/DHAR
 
 * `testTemporalAutocorrelation()` no longer fails if AlgDesign is loaded, e.g. via agricolae (#504).
 
+* `plotResiduals(form = ~x | group %in% c(...))` now plots one panel per selected group level instead of a wrong subset of the data; comparison operators other than `==`, such as `!=`, give an error (#596).
+
+* `plotResiduals(absoluteDeviation = TRUE)` now also transforms the residuals for factor predictors, `form = ~x | group` and `~x | group == "level"` (#596).
+
 ## Minor changes
 
 * `testOutliers()`: argument `plotBoostrap` renamed to `plotBootstrap`, old name deprecated (@BertvanderVeen, #535, #560).
+
+* `plotResidualsAll()` is deprecated, use `plotResiduals()` with `form` instead (#596).
 
 * Plot titles of `simulateLRT()` and `testOutliers()` now explain the line colors (@BertvanderVeen, #535).
 

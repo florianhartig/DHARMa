@@ -218,7 +218,7 @@ checkSimulations <- function(simulatedResponse, nObs, nSim){
 #' @param rotation optional rotation of the residual space to remove residual autocorrelation. See details in [simulateResiduals], section *residual auto-correlation* for an extended explanation, and [getQuantile] for syntax.
 #' @return an object of class DHARMa, similar to what is returned by [simulateResiduals], but with additional outputs for the new grouped calculations. Note that the relevant outputs are 2x in the object, the first is the grouped calculations (which is returned by $name access), and later another time, under identical name, the original output. Moreover, there is a function 'aggregateByGroup', which can be used to aggregate predictor variables in the same way as the variables calculated here.
 #'
-#' @details The function aggregates the observed and simulated data per group according to the function provided by the aggregateBy option. DHARMa residuals are then calculated exactly as for a single data point (see [getQuantile] for details).
+#' @details The function aggregates the observed and simulated data per group according to the function provided by the aggregateBy option. DHARMa residuals are then calculated exactly as for a single data point (see [getQuantile] for details). The function stops if fewer than 2 residuals remain after grouping and selection, and warns if fewer than 10 remain.
 #'
 #' @example inst/examples/simulateResidualsHelp.R
 #' @export
@@ -254,7 +254,6 @@ recalculateResiduals <- function(simulationOutput, group = NULL, aggregateBy = s
     }
     out$group = group
     group = as.factor(group)
-    out$nGroups = nlevels(group)
 
     # sel
     if(is.null(sel)) {
@@ -283,6 +282,8 @@ recalculateResiduals <- function(simulationOutput, group = NULL, aggregateBy = s
                                               FUN=aggregateBy)[,2]
 
     out$observedResponse = aggregateByGroup(simulationOutput$observedResponse)
+    if (length(out$observedResponse) < 2) stop("Calculations stopped - number of residuals < 2")
+    if (length(out$observedResponse) < 10) warning("Residual calculations resulted in less than 10 residuals. Tests on such a low number of residuals rarely make sense.")
     out$fittedPredictedResponse = aggregateByGroup(simulationOutput$fittedPredictedResponse)
 
     if (simulationOutput$refit == FALSE){
@@ -314,6 +315,7 @@ recalculateResiduals <- function(simulationOutput, group = NULL, aggregateBy = s
     # question to myself - what's the use of that, why not erase the old outputs? they are anyway saved in the old object
 
     out$aggregateByGroup = aggregateByGroup
+    out$nObs = out$nGroups = length(out$scaledResiduals) # fixes #603, #605 (nObs, nGroups after grouping and sel)
     out = c(out, simulationOutput)
     out$randomState = randomState
     class(out) = "DHARMa"
