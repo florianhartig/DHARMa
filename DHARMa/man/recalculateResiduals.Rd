@@ -30,7 +30,7 @@ an object of class DHARMa, similar to what is returned by \link{simulateResidual
 The purpose of this function is to recalculate scaled residuals per group, based on the simulations done by \link{simulateResiduals}.
 }
 \details{
-The function aggregates the observed and simulated data per group according to the function provided by the aggregateBy option. DHARMa residuals are then calculated exactly as for a single data point (see \link{getQuantile} for details).
+The function aggregates the observed and simulated data per group according to the function provided by the aggregateBy option. DHARMa residuals are then calculated exactly as for a single data point (see \link{getQuantile} for details). The function stops if fewer than 2 residuals remain after grouping and selection, and warns if fewer than 10 remain.
 }
 \examples{
 library(lme4)
