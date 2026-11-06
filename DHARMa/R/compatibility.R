@@ -398,9 +398,13 @@ getFitted.default <- function (object,...){
 #' @rdname getFittedResponse
 #' @export
 getFittedResponse.default <- function (object, ...){
-  out = getFitted(object, ...)
-
   # k/n binomial: getFitted returns proportions, here we return number of success
+  getFitted(object, ...) * getTrials(object)
+}
+
+# number of trials per observation for k/n binomial models, 1 otherwise
+getTrials <- function(object){
+  out = 1
   if(getFamily(object)$family %in% c("binomial", "betabinomial", "betabin", "beta binomial")){
     x = model.frame(object)
     # number of trials given via cbind(successes, failures)

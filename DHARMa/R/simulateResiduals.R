@@ -164,6 +164,11 @@ simulateResiduals <- function(fittedModel, n = 250, simulateREs = c("conditional
 
     ######### residual calculations ###########
 
+    # fixes #598 (k/n binomial: randomize residuals on the scale of the number of successes)
+    trials = getTrials(fittedModel)
+    out$fittedResiduals = out$fittedResiduals * trials
+    out$refittedResiduals = out$refittedResiduals * trials
+
     out$scaledResiduals = getQuantile(simulations = out$refittedResiduals,
                                       observed = out$fittedResiduals,
                                       integerResponse = integerResponse,

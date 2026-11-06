@@ -57,6 +57,8 @@ NOTE: for more news about the package, see https://github.com/florianhartig/DHAR
 
 * `recalculateResiduals()` now always uses the traditional randomization for residuals with `refit = TRUE`, as `simulateResiduals()` does, so `rotation` is not available for them; `$method` of both functions stores the method used (#589).
 
+* `simulateResiduals(refit = TRUE)` now randomizes the residuals of binomial and beta-binomial models with more than one trial on the scale of the number of successes instead of proportions, which had removed most of the power (#598).
+
 ## Minor changes
 
 * `testOutliers()`: argument `plotBoostrap` renamed to `plotBootstrap`, old name deprecated (@BertvanderVeen, #535, #560).
