@@ -605,7 +605,7 @@ getSimulations.gam <- function(object, nsim = 1, simulateREs = c("conditional", 
           trials = rowSums(model.frame(object)[[1]])
           oldnames = names(out)
           oldrownames = row.names(out)
-          out = round(out * trials)
+          out = round(out * trials) # (k/n)*n is not always exactly k (#590)
           out = as.list(out)
           for(i in 1:length(out)){
             out[[i]] = cbind(out[[i]], trials - out[[i]])
