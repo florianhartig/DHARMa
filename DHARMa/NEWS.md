@@ -51,6 +51,12 @@ NOTE: for more news about the package, see https://github.com/florianhartig/DHAR
 
 * `plotResiduals(absoluteDeviation = TRUE)` now also transforms the residuals for factor predictors, `form = ~x | group` and `~x | group == "level"` (#596).
 
+* `testDispersion()` with `refit = TRUE` now aggregates the observed Pearson residuals like the refitted ones after `recalculateResiduals()`, and warns and returns NA if these are all (close to) zero (#575).
+
+* `testQuantiles()` now gives the same results with and without plot, evaluates transformations such as `~log(x)`, and stops for categorical predictors and formulas with several variables (#576).
+
+* `recalculateResiduals()` now always uses the traditional randomization for residuals with `refit = TRUE`, as `simulateResiduals()` does, so `rotation` is not available for them; `$method` of both functions stores the method used (#589).
+
 ## Minor changes
 
 * `testOutliers()`: argument `plotBoostrap` renamed to `plotBootstrap`, old name deprecated (@BertvanderVeen, #535, #560).

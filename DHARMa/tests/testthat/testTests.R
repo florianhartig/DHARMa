@@ -307,3 +307,30 @@ test_that("testCategorical", {
   on.exit(grDevices::dev.off())
   expect_no_error(testCategorical(simulationOutput, catPred = testData$group, plot = F))
 })
+
+
+test_that("testDispersion with refit = TRUE after grouping (#575)", {
+  set.seed(123)
+  testData = createData(sampleSize = 100, family = poisson(), randomEffectVariance = 0)
+  fittedModel = glm(observedResponse ~ Environment1, family = poisson, data = testData)
+  simulationOutput = simulateResiduals(fittedModel, n = 20, refit = TRUE)
+  grouped = recalculateResiduals(simulationOutput, group = testData$group)
+  x = testDispersion(grouped, plot = FALSE)
+  observed = sum(rowsum(residuals(fittedModel, type = "pearson"), testData$group)^2)
+  expect_equal(unname(x$statistic), observed / mean(colSums(grouped$refittedPearsonResiduals^2)))
+})
+
+
+test_that("testQuantiles with categorical, formula and few-valued predictors (#576)", {
+  set.seed(123)
+  testData = createData(sampleSize = 100, family = poisson(), randomEffectVariance = 0)
+  fittedModel = glm(observedResponse ~ Environment1, family = poisson, data = testData)
+  simulationOutput = simulateResiduals(fittedModel, n = 50)
+  expect_error(testQuantiles(simulationOutput, predictor = testData$group, plot = FALSE), "testCategorical")
+  expect_error(testQuantiles(simulationOutput, predictor = ~Environment1 | group), "exactly one variable")
+  grDevices::pdf(NULL)
+  on.exit(grDevices::dev.off())
+  pred = round(testData$Environment1)
+  expect_equal(testQuantiles(simulationOutput, predictor = pred, plot = FALSE)$p.value,
+               testQuantiles(simulationOutput, predictor = pred, plot = TRUE)$p.value)
+})
