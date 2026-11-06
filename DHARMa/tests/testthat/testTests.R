@@ -1,10 +1,9 @@
 
-# compares statistic and p-value instead of the printed output, not on CRAN (#595)
-expectTest = function(x, statistic, p.value) {
-  force(x)
-  if (!identical(Sys.getenv("NOT_CRAN"), "true")) return(invisible())
-  expect_equal(unname(x$statistic), statistic, tolerance = 1e-3)
-  expect_equal(x$p.value, p.value, tolerance = 1e-3)
+# snapshot of statistic and p-value only, robust to changes of the printed output;
+# full output via expect_snapshot() once per test with its own DHARMa method text (#595)
+expectTest = function(x) {
+  expect_snapshot_value(list(statistic = unname(x$statistic), p.value = x$p.value),
+                        style = "deparse", tolerance = 1e-3)
 }
 
 test_that("overdispersion recognized", {
@@ -41,21 +40,21 @@ test_that("tests work", {
 
   ###### Distribution tests #####
 
-  expectTest(testUniformity(simulationOutput, plot = FALSE), 0.0355771, 0.961904)
+  expectTest(testUniformity(simulationOutput, plot = FALSE))
   expectTest(testUniformity(simulationOutput, plot = FALSE,
-                                 alternative = "less"), 0.0355771, 0.602726)
+                                 alternative = "less"))
   expectTest(testUniformity(simulationOutput, plot = FALSE,
-                                 alternative = "greater"), 0.0344184, 0.622601)
+                                 alternative = "greater"))
 
   ###### Dispersion tests #######
 
-  expectTest(testDispersion(simulationOutput, plot = FALSE), 1.25778, 0.096)
+  expect_snapshot(testDispersion(simulationOutput, plot = FALSE))
   expectTest(testDispersion(simulationOutput, plot = FALSE,
-                  alternative = "less"), 1.25778, 0.952)
+                  alternative = "less"))
   expectTest(testDispersion(simulationOutput, plot = FALSE,
-                   alternative = "greater"), 1.25778, 0.048)
+                   alternative = "greater"))
   expectTest(testDispersion(simulationOutput, plot = FALSE,
-                                 alternative = "two.sided"), 1.25778, 0.096)
+                                 alternative = "two.sided"))
 
   expect_message(testOverdispersion(simulationOutput))
   expect_message(testOverdispersionParametric(simulationOutput))
@@ -63,35 +62,35 @@ test_that("tests work", {
   ###### Both together###########
 
   out = testResiduals(simulationOutput, plot = FALSE)
-  expectTest(out$uniformity, 0.0355771, 0.961904)
-  expectTest(out$dispersion, 1.25778, 0.096)
-  expectTest(out$outliers, 1, 0.82)
+  expectTest(out$uniformity)
+  expectTest(out$dispersion)
+  expectTest(out$outliers)
   expect_message(testSimulatedResiduals(simulationOutput))
 
   ###### zero-inflation ##########
 
   # testing zero inflation
-  expectTest(testZeroInflation(simulationOutput, plot = FALSE), 1.05652, 0.552)
+  expect_snapshot(testZeroInflation(simulationOutput, plot = FALSE))
   expectTest(testZeroInflation(simulationOutput, plot = FALSE,
-                                    alternative = "less"), 1.05652, 0.784)
+                                    alternative = "less"))
 
   # testing generic summaries
 
   # testing for number of 1s
   countOnes <- function(x) sum(x == 1)
   expectTest(testGeneric(simulationOutput, summary = countOnes,
-                              plot = FALSE), 0.974565, 0.808) # 1-inflation
+                              plot = FALSE)) # 1-inflation
   expectTest(testGeneric(simulationOutput, summary = countOnes,
                               plot = FALSE,
-                              alternative = "less"), 0.974565, 0.404) # 1-deficit
+                              alternative = "less")) # 1-deficit
 
   # testing if mean prediction fits
   means <- function(x) mean(x)
-  expectTest(testGeneric(simulationOutput, summary = means, plot = FALSE), 1.00767, 0.944)
+  expect_snapshot(testGeneric(simulationOutput, summary = means, plot = FALSE))
 
   # testing if mean sd fits
   spread <- function(x) sd(x)
-  expectTest(testGeneric(simulationOutput, summary = spread, plot = FALSE), 1.0834, 0.208)
+  expectTest(testGeneric(simulationOutput, summary = spread, plot = FALSE))
 
   ##################################################################
 
@@ -100,21 +99,21 @@ test_that("tests work", {
 
   ###### Distribution tests #####
 
-  expectTest(testUniformity(simulationOutput, plot = FALSE), 0.225467, 0.613005)
+  expectTest(testUniformity(simulationOutput, plot = FALSE))
   expectTest(testUniformity(simulationOutput, plot = FALSE,
-                                 alternative = "less"), 0.162787, 0.533776)
+                                 alternative = "less"))
   expectTest(testUniformity(simulationOutput, plot = FALSE,
-                                 alternative = "greater"), 0.225467, 0.315)
+                                 alternative = "greater"))
 
   ###### Dispersion tests #######
 
-  expectTest(testDispersion(simulationOutput, plot = FALSE), 2.10913, 0.048)
+  expectTest(testDispersion(simulationOutput, plot = FALSE))
   expectTest(testDispersion(simulationOutput, plot = FALSE,
-                  alternative = "less"), 2.10913, 0.976)
+                  alternative = "less"))
   expectTest(testDispersion(simulationOutput, plot = FALSE,
-                alternative = "greater"), 2.10913, 0.024)
+                alternative = "greater"))
   expectTest(testDispersion(simulationOutput, plot = FALSE,
-                               alternative = "two.sided"), 2.10913, 0.048)
+                               alternative = "two.sided"))
 
   expect_message(testOverdispersion(simulationOutput))
   expect_message(testOverdispersionParametric(simulationOutput))
@@ -122,35 +121,35 @@ test_that("tests work", {
   ###### Both together###########
 
   out = testResiduals(simulationOutput, plot = FALSE)
-  expectTest(out$uniformity, 0.225467, 0.613005)
-  expectTest(out$dispersion, 2.10913, 0.048)
-  expectTest(out$outliers, 20, 0.1)
+  expectTest(out$uniformity)
+  expectTest(out$dispersion)
+  expectTest(out$outliers)
   expect_message(testSimulatedResiduals(simulationOutput))
 
   ###### zero-inflation ##########
 
   # testing zero inflation
-  expectTest(testZeroInflation(simulationOutput, plot = FALSE), NaN, 1)
+  expectTest(testZeroInflation(simulationOutput, plot = FALSE))
   expectTest(testZeroInflation(simulationOutput, plot = FALSE,
-                                    alternative = "less"), NaN, 1)
+                                    alternative = "less"))
 
   # testing generic summaries
 
   # testing for number of 1s
   countOnes <- function(x) sum(x == 1)
   expectTest(testGeneric(simulationOutput, summary = countOnes,
-                              plot = FALSE), NaN, 1) # 1-inflation
+                              plot = FALSE)) # 1-inflation
   expectTest(testGeneric(simulationOutput, summary = countOnes,
                               plot = FALSE,
-                              alternative = "less"), NaN, 1) # 1-deficit
+                              alternative = "less")) # 1-deficit
 
   # testing if mean prediction fits
   means <- function(x) mean(x)
-  expectTest(testGeneric(simulationOutput, summary = means, plot = FALSE), 1.00767, 0.944)
+  expectTest(testGeneric(simulationOutput, summary = means, plot = FALSE))
 
   # testing if mean sd fits
   spread <- function(x) sd(x)
-  expectTest(testGeneric(simulationOutput, summary = spread, plot = FALSE), 1.47252, 0.04)
+  expectTest(testGeneric(simulationOutput, summary = spread, plot = FALSE))
 
 
   ###### Refited ##############
@@ -158,7 +157,7 @@ test_that("tests work", {
   # if model is refitted, a different test will be called
 
   simulationOutput <- simulateResiduals(fittedModel = fittedModel, refit = T)
-  expectTest(testDispersion(simulationOutput, plot = FALSE), 1.12305, 0.248)
+  expectTest(testDispersion(simulationOutput, plot = FALSE))
 
 })
 
@@ -180,14 +179,12 @@ test_that("correlation tests work", {
 
   ###### testSpatialAutocorrelation #####
 
-  moran = c(-0.0166319, -0.00502513, 0.011275)
-
   # Standard use
-  expectTest(testSpatialAutocorrelation(simulationOutput, x =  testData$x,
-                                             y = testData$y, plot = FALSE), moran, 0.303277)
+  expect_snapshot(testSpatialAutocorrelation(simulationOutput, x =  testData$x,
+                                             y = testData$y, plot = FALSE))
   expectTest(testSpatialAutocorrelation(simulationOutput, x =  testData$x,
                                              y = testData$y, plot = FALSE,
-                             alternative = "two.sided"), moran, 0.303277)
+                             alternative = "two.sided"))
 
   # If x and y is not provided, random values will be created
   expect_error(testSpatialAutocorrelation(simulationOutput))
@@ -195,10 +192,10 @@ test_that("correlation tests work", {
   # Alternatively, one can provide a distance matrix
   dM = as.matrix(dist(cbind(testData$x, testData$y)))
   expectTest(testSpatialAutocorrelation(simulationOutput, distMat = dM,
-                                             plot = FALSE), moran, 0.303277)
+                                             plot = FALSE))
   expectTest(testSpatialAutocorrelation(simulationOutput, distMat = dM,
                                              plot = FALSE,
-                                             alternative = "two.sided"), moran, 0.303277)
+                                             alternative = "two.sided"))
 
   # testting when x and y have different length
   # Error different length
@@ -217,21 +214,20 @@ test_that("correlation tests work", {
   expect_message(out <- testSpatialAutocorrelation(simulationOutput, distMat = dM,
                                              plot = FALSE, x = testData$x),
                  "coordinates will be ignored")
-  expectTest(out, moran, 0.303277)
+  expectTest(out)
   expect_message(out <- testSpatialAutocorrelation(simulationOutput, distMat = dM,
                                              plot = FALSE, y = testData$y),
                  "coordinates will be ignored")
-  expectTest(out, moran, 0.303277)
+  expectTest(out)
 
 
   ###### testTemporalAutocorrelation #####
 
   # Standard use
   expectTest(testTemporalAutocorrelation(simulationOutput, plot = FALSE,
-                                              time =  testData$time), 1.97032, 0.832966)
+                                              time =  testData$time))
   expectTest(testTemporalAutocorrelation(simulationOutput, plot = FALSE,
-                                              time =  testData$time, alternative = "greater"),
-             1.97032, 0.416483)
+                                              time =  testData$time, alternative = "greater"))
 
   # error if time is forgotten
   expect_error(testTemporalAutocorrelation(simulationOutput))
@@ -263,7 +259,7 @@ test_that("test phylogenetic autocorrelation", {
 
   restest2 <- testPhylogeneticAutocorrelation(res2, tree = tre)
 
-  expectTest(restest2, c(0.0474742, -0.0169492, 0.0882598), 0.465434)
+  expect_snapshot(restest2)
   expect_true(restest2$p.value > 0.05)
 })
 
@@ -278,11 +274,11 @@ test_that("testOutliers", {
                      data = testData)
   simulationOutput <- simulateResiduals(fittedModel = fittedModel)
 
-  expectTest(testOutliers(simulationOutput, plot = F, margin = "lower"), 4, 0.803659)
+  expect_snapshot(testOutliers(simulationOutput, plot = F, margin = "lower"))
   expectTest(testOutliers(simulationOutput, plot = F,
-                               alternative = "two.sided", margin = "lower"), 4, 0.803659)
+                               alternative = "two.sided", margin = "lower"))
   expectTest(testOutliers(simulationOutput, plot = F,
-                                               margin = "upper"), 4, 0.803659)
+                                               margin = "upper"))
 
   x = testOutliers(simulationOutput, type = "bootstrap", nBoot = 5, plot = F)
   expect_equal(attr(x$conf.int, "conf.level"), 0.95)
