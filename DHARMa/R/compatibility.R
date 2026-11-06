@@ -363,10 +363,6 @@ getSimulations.default <- function (object, nsim = 1, simulateREs = c("condition
       }
     }
     if(!is.matrix(out)) out = data.matrix(out)
-  } else{
-    if(family(object)$family %in% c("binomial", "betabinomial")){
-      if (!is.matrix(out[[1]]) & !is.numeric(out)) data.frame(data.matrix(out)-1)
-    }
   }
 
   return(out)
@@ -530,7 +526,7 @@ getFitted.gam <- function(object, ...){
   # unconditional predictions, excluding random effects and factor smooth interactions (fixes issue #544)
   isRE = sapply(object$smooth, function(x) any(class(x) %in% c("random.effect", "fs.interaction")))
   if(any(isRE)) excludeREs = sapply(object$smooth[isRE], `[[`, "label") else excludeREs =  NULL
-  fam = family(object)
+  fam = object$family # also for gamm()$gam, which has no family() method
   if(is.matrix(object$linear.predictors)){
     out = predict(object, type = "response", exclude = excludeREs, ...)
   } else {
@@ -587,8 +583,6 @@ getSimulations.gam <- function(object, nsim = 1, simulateREs = c("conditional", 
     # use mgcViz if available
     out = mgcViz::simulate.gam(object, nsim = nsim , ...)
     out = as.data.frame(out)
-
-    # from here to end identical to default
 
     if (type == "normal"){
       if(family(object)$family %in% c("binomial", "betabinomial")){

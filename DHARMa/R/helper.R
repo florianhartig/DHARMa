@@ -249,6 +249,12 @@ getFormulaPredictors <- function(simulationOutput, formula) {
 }
 
 
+#' Stop for binomial models with a cbind() response and prior weights
+#'
+#' For these models, observed and simulated responses would be on different scales (#568).
+#'
+#' @param fittedModel a fitted model
+#' @keywords internal
 checkBinomialMatrixWeights <- function(fittedModel){
   if(family(fittedModel)$family %in% c("binomial", "betabinomial") && is.matrix(model.frame(fittedModel)[[1]]) && hasWeights(fittedModel)){
     stop("DHARMa: binomial models with a cbind(successes, failures) response and additional prior weights are not supported, because observed and simulated responses would be on different scales. Use a proportion response with the number of trials as weights, or a cbind() response without weights.")

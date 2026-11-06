@@ -6,6 +6,9 @@ test_that("getFitted for gam with offsets, ziP and ocat (#572)", {
   # without REs, getFitted equals fitted
   m1 = mgcv::gam(y ~ s(x), offset = log(a), family = poisson, data = testData)
   expect_equal(unname(getFitted(m1)), unname(fitted(m1)))
+  # gamm()$gam has no family() method
+  mg = mgcv::gamm(y ~ s(x), random = list(g = ~1), family = poisson, data = testData)$gam
+  expect_equal(unname(getFitted(mg)), unname(fitted(mg)))
   # ziP: offset as argument or in the formula, expected response as predict()
   m7 = mgcv::gam(y ~ s(x) + s(g, bs = "re"), offset = log(a), family = mgcv::ziP(), data = testData)
   m8 = mgcv::gam(y ~ s(x) + s(g, bs = "re") + offset(log(a)), family = mgcv::ziP(), data = testData)
