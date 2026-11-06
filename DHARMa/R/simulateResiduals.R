@@ -236,6 +236,7 @@ recalculateResiduals <- function(simulationOutput, group = NULL, aggregateBy = s
                                  method = c("PIT", "traditional"),
                                  rotation = NULL){
 
+  simulationOutput = ensureDHARMa(simulationOutput, convert = FALSE)
   randomState <- getRandomState(seed)
   on.exit({randomState$restoreCurrent()})
   method = match.arg(method)

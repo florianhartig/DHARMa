@@ -5,9 +5,9 @@ NOTE: for more news about the package, see https://github.com/florianhartig/DHAR
 
 ## Bugfixes
 
-* `testDispersion` (type = "DHARMa", refit = FALSE) was biased for binomial models with more than one trial (k/n models, specified via `cbind(k, n - k)` or as proportions with the number of trials given in `weights`): residuals were calculated as observed / simulated number of successes minus the fitted *proportion*. Residuals are now calculated with the fitted values on the scale of the observed response (expected number of successes), provided by the new function `getFittedResponse`. Poisson, Bernoulli (0/1) and all other models are not affected.
+* `testDispersion` (type = "DHARMa", refit = FALSE) was biased for binomial models with more than one trial (k/n models, specified via `cbind(k, n - k)` or as proportions with the number of trials given in `weights`): residuals were calculated as observed / simulated number of successes minus the fitted *proportion*. Residuals are now calculated with the fitted values on the scale of the observed response (expected number of successes), provided by the new function `getFittedResponse`. Poisson, Bernoulli (0/1) and all other models are not affected (#557).
 
-* Version 0.5.0 was changing the `glmmTMB` model object "simcode" when using simulateResiduals. We fixed this problem by restoring the original simcode to the model object.
+* Version 0.5.0 was changing the `glmmTMB` model object "simcode" when using simulateResiduals. We fixed this problem by restoring the original simcode to the model object (#538).
 
 * Fixing bug in predictions via getFitted for `gam` and `bam` models. Predictions are now unconditional on random effects and factor smooth interactions; previously they were conditional (#544).
 
@@ -19,7 +19,7 @@ NOTE: for more news about the package, see https://github.com/florianhartig/DHAR
 
 * Simulations of `gam` models with `cbind()` response via mgcViz are now integers (#590).
 
-* Solving duplicated plots in `plotResiduals`: (1) when having quadratic effects written with I(variable) in the formula, and (2) for brms with transformed variables in the formula, e.g. `log(variable)`. 
+* Solving duplicated plots in `plotResiduals`: (1) when having quadratic effects written with I(variable) in the formula, and (2) for brms with transformed variables in the formula, e.g. `log(variable)` (#536, #542).
 
 * Small fixes in `plotResiduals(form = ~x | group)` (#573).
 
@@ -27,11 +27,13 @@ NOTE: for more news about the package, see https://github.com/florianhartig/DHAR
 
 * `recalculateResiduals()` now stops if fewer than 2 residuals remain after grouping and selection, and warns if fewer than 10 remain (#604).
 
-* Minor fixes in testSpatialAutocorrelation: DHARMa errors if repeated values for space in distMat, extended help, improved plot titles and legend.
+* `plotResiduals(form = ...)`: default title no longer reads "DHARMa residual Residual vs. predictor"; `recalculateResiduals()` gives an informative error if not called on a DHARMa object.
+
+* Minor fixes in testSpatialAutocorrelation: DHARMa errors if repeated values for space in distMat, extended help, improved plot titles and legend (#73, #546).
 
 * Revised weights handling: introduced more robust check for prior weights (especially in n/k models) with new helper function `hasWeights` (#230, #540).
 
-* Predictions from `GLMMadaptive` models are now created using `fitted()`, which avoids errors on models with transformations (e.g. offset, log)
+* Predictions from `GLMMadaptive` models are now created using `fitted()`, which avoids errors on models with transformations (e.g. offset, log) (#556).
 
 * brms: `getPearsonResiduals()` stops with an informative error; unconditional simulations re-simulate the random effects instead of setting them to zero and stop for unsupported models (#574).
 

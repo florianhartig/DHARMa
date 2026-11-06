@@ -162,7 +162,7 @@ ensureDHARMa <- function(simulationOutput,
       }
     }
   }
-  stop("wrong argument to function, simulationOutput must be a DHARMa object or a numeric vector of quantile residuals!")
+  stop("wrong argument to function, simulationOutput must be a DHARMa object (some functions also accept a numeric vector of quantile residuals)")
 }
 
 

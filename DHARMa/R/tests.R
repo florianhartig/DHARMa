@@ -867,7 +867,7 @@ testSpatialAutocorrelation <- function(simulationOutput, x = NULL, y  = NULL, di
                 ybottom = -0.1, ytop = 0.5)
 
     axis(4, at = c(-0.1, 0.5), labels = c("0", "1"), las = 1)
-    mtext("Standardized \n residuals", side = 3, line = -5,cex = 0.8,)
+    mtext("Standardized \n residuals", side = 3, line = -5, cex = 0.8)
 
     # TODO implement correlogram
   }

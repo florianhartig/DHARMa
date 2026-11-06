@@ -406,7 +406,7 @@ plotResiduals <- function(simulationOutput, form = NULL, quantreg = NULL,
   }
   ##### Quantile regressions #####
 
-  if(is.null(a$main)) {main = ifelse(is.null(form), paste(yAxis, "vs. predicted"), paste(yAxis, "Residual vs. predictor"))} else {main = a$main}
+  if(is.null(a$main)) {main = ifelse(is.null(form), paste(yAxis, "vs. predicted"), paste(yAxis, "vs. predictor"))} else {main = a$main}
   out = NULL
 
   if(is.numeric(pred)){

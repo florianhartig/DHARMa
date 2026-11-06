@@ -963,6 +963,8 @@ Possible to condition on specific REs via re.form, see help of simulate.HLfit an
 
 GLMMadaptive is supported by DHARMa since 0.3.4.
 
+Note that `mixed_model()` sorts the data by the grouping factor, and DHARMa residuals of GLMMadaptive models are returned in this sorted order. If you supply predictors to `plotResiduals()`, `testCategorical()`, `testQuantiles()` or a `group` to `recalculateResiduals()`, sort your data by the grouping factor before fitting the model; otherwise, residuals and predictors are silently misaligned.
+
 ## phylolm
 
 phylolm (version \>= 2.6.5) is supported by DHARMa since 0.4.7 for both model classes phylolm and phyloglm.
