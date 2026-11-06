@@ -153,3 +153,28 @@ test_that("getFittedResponse returns fitted values on the scale of the observed 
   }
 })
 
+
+test_that("refitting to the observed response reproduces the fit (#571, #599)", {
+  set.seed(1)
+  n = 60
+  testData = data.frame(x = runif(n), N = sample(5:15, n, TRUE))
+  testData$k = rbinom(n, testData$N, plogis(testData$x))
+  testData$y = exp(1 + testData$x + rnorm(n, sd = 0.3))
+  yy = rpois(n, exp(1 + testData$x))
+  x = testData$x
+  refitCoef = function(m, fix = coef) unlist(fix(getRefit(m, model.response(model.frame(m)))))
+  m = lm(log(y) ~ x, data = testData)
+  expect_equal(refitCoef(m), coef(m))
+  # model fitted without data argument
+  m = glm(yy ~ x, family = poisson)
+  expect_equal(refitCoef(m), coef(m))
+  fixTMB = function(m) glmmTMB::fixef(m)$cond
+  m = glmmTMB::glmmTMB(cbind(k, N - k) ~ x, family = binomial, data = testData)
+  expect_equal(refitCoef(m, fixTMB), fixTMB(m))
+  # models fitted with subset, as a logical vector outside the data or as row numbers (#599)
+  sel = testData$x > 0.3
+  m = glm(k ~ x, family = poisson, data = testData, subset = sel)
+  expect_equal(refitCoef(m), coef(m))
+  m = glm(k ~ x, family = poisson, data = testData, subset = 31:60)
+  expect_equal(refitCoef(m), coef(m))
+})
