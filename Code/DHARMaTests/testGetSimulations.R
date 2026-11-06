@@ -5,6 +5,7 @@ test_that("glmmTMB refit simulations for proportions with weights (#571)", {
   m = glmmTMB::glmmTMB(p ~ x, weights = N, family = binomial, data = testData)
   sims = getSimulations(m, nsim = 3, type = "refit")
   expect_equal(ncol(sims), 3)
+  expect_equal(mean(as.matrix(sims)), mean(testData$p), tolerance = 0.1)
 })
 
 

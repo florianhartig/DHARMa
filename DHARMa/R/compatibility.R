@@ -759,7 +759,7 @@ getSimulations.glmmTMB <- function (object, nsim = 1, simulateREs = c("condition
       if("(weights)" %in% colnames(model.frame(object)) && !is.matrix(model.frame(object)[[1]])){
         w = model.frame(object)
         w = w$`(weights)`
-        # successes of the 2-column matrices (#571)
+        # fixes #571 (both columns of the 2-column matrices were kept)
         out = as.data.frame(lapply(out, function(x) as.matrix(x)[, 1] / w))
       }
       else if(is.matrix(out[[1]]) & !is.matrix(model.frame(object)[[1]])){
