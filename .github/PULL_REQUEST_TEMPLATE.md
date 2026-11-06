@@ -1,14 +1,14 @@
-<!-- Title: name the function or area and the change, in plain text without backticks, e.g., "testTemporalAutocorrelation(): fix error when the AlgDesign package is loaded (#504)". -->
+<!-- Title: short plain text stating the general idea, without issue numbers, e.g., "Fixes to grouping calculations". -->
 
 <!-- If AI tools wrote substantial parts of the code or text, please mention this in one sentence under Changes. -->
 
 ## Problem addressed
 
-<!-- What problem does this solve? Summarize the issue(s) so that the pull request can be understood without reading them. -->
+<!-- One or two sentences on the problem, understandable without reading the issue(s). -->
 
 ## Changes
 
-<!-- List of changes, with "Fixes #<issue number>" for each issue this pull request resolves. -->
+<!-- One short bullet per change, with "Fixes #<issue number>" for each issue this pull request resolves. -->
 
 ## Open problems
 
@@ -16,7 +16,7 @@
 
 ## Checks and tests
 
-<!-- What you checked and how, with results: tests added and run (do they fail without the change?), reproducible examples or comparisons with the released version, and what you did not check. -->
+<!-- One short bullet per check: tests added and run (do they fail without the change?), manual checks or reproducible examples, and what you did not check. -->
 
 ## Checklist
 

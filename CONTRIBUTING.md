@@ -58,7 +58,8 @@ For everyone, including the DHARMa team: if AI tools wrote substantial parts of 
 - Once the approach is agreed in the issue, open the pull request early, as a draft if the work is not finished yet, so that work in progress is visible and linked to its issues. If the work is abandoned, close the pull request with a short explanation.
 - A pull request or commit that resolves an issue should contain `Fixes #351` or `Closes #351` (with your issue number) in its description or commit message, so that GitHub closes the issue automatically when it is merged into `master`. For several issues, repeat the keyword for each, e.g., `Fixes #567, fixes #568`.
 - Fill in the sections of the pull request template and go through its checklist before submitting. Pull requests from contributors outside the DHARMa team are reviewed before they are merged.
-- Titles of issues and pull requests, and commit subject lines, are plain text (no backticks) and name the function or area and the problem or change; the issue and pull request templates show examples.
+- Titles of issues and commit subject lines are short plain text (no backticks) naming the function or area and the problem or change; the issue templates show examples.
+- Pull request titles are short plain text stating the general idea, without issue numbers, e.g., "Fixes to grouping calculations". Keep pull request descriptions short; details belong in the issues.
 - After the merge, branches in this repository are deleted automatically.
 
 ## Code and documentation standards

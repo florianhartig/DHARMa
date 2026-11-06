@@ -112,6 +112,8 @@ getObservedResponse <- function (object, ...) {
 #'
 #' If the model was fit with weights and the respective model class does not include the weights in the simulations, getSimulations will throw a warning. The background is if weights are used on the likelihood directly, then what is fitted is effectively a pseudo likelihood, and there is no way to directly simulate from the specified likelihood. Whether or not residuals can be used in this case depends very much on what is tested and how weights are used. I'm sorry to say that it is hard to give a general recommendation, you have to consult someone that understands how weights are processed in the respective model class.
 #'
+#' Binomial models with a cbind(successes, failures) response and prior weights are not supported; getSimulations stops for them.
+#'
 #' @author Florian Hartig
 #' @export
 getSimulations <- function (object, nsim = 1, simulateREs = c("conditional", "unconditional", "user-specified"), type = c("normal", "refit"), ...) {
@@ -331,7 +333,14 @@ getSimulations.default <- function (object, nsim = 1, simulateREs = c("condition
   type <- match.arg(type)
   simulateREs <- match.arg(simulateREs)
 
-  out = simulate(object, nsim = nsim, ...)
+  checkBinomialMatrixWeights(object)
+
+  # fixes #567 (mgcViz's simulate.gam would be dispatched)
+  if(inherits(object, "gam")) out = getS3method("simulate", "lm")(object, nsim = nsim, ...)
+  else out = simulate(object, nsim = nsim, ...)
+
+  # fixes #567 (simulate.lm returns 0 rows for unnamed fitted())
+  if(is.data.frame(out) && nrow(out) == 0 && length(out) > 0) attr(out, "row.names") = .set_row_names(NROW(out[[1]]))
 
   if (type == "normal"){
     if(family(object)$family %in% c("binomial", "betabinomial")){
@@ -345,19 +354,15 @@ getSimulations.default <- function (object, nsim = 1, simulateREs = c("condition
         }
       }
 
-      if("(weights)" %in% colnames(model.frame(object))){
+      if (is.matrix(out[[1]])){
+        # k/n binomial case first (#568)
+        out = as.matrix(out)[,seq(1, (2*nsim), by = 2)]
+      } else if("(weights)" %in% colnames(model.frame(object))){
         x = model.frame(object)
         out = out * x$`(weights)`
-      } else if (is.matrix(out[[1]])){
-        # this is for the k/n binomial case
-        out = as.matrix(out)[,seq(1, (2*nsim), by = 2)]
       }
     }
     if(!is.matrix(out)) out = data.matrix(out)
-  } else{
-    if(family(object)$family %in% c("binomial", "betabinomial")){
-      if (!is.matrix(out[[1]]) & !is.numeric(out)) data.frame(data.matrix(out)-1)
-    }
   }
 
   return(out)
@@ -514,13 +519,32 @@ getSimulations.negbin<- function (object, nsim = 1, simulateREs = c("conditional
 
 ######## MGCV ############
 
+# fixes #572 (non-discrete bam drops offset = from fitted values)
+checkBamOffset <- function(object){
+  if(inherits(object, "bam") && !is.null(off <- model.frame(object)[["(offset)"]]) && any(off != 0)){
+    eta = predict(object, type = "link")
+    if(!isTRUE(all.equal(unname(object$linear.predictors - eta[!is.na(eta)]), unname(off)))) stop("DHARMa: the fitted values of this bam model do not include the offset supplied via the offset argument (a problem in mgcv). Please specify the offset in the formula instead, e.g. y ~ s(x) + offset(log(a)).")
+  }
+}
+
 #' @rdname getFitted
 #' @export
 getFitted.gam <- function(object, ...){
+  checkBamOffset(object)
   # unconditional predictions, excluding random effects and factor smooth interactions (fixes issue #544)
   isRE = sapply(object$smooth, function(x) any(class(x) %in% c("random.effect", "fs.interaction")))
   if(any(isRE)) excludeREs = sapply(object$smooth[isRE], `[[`, "label") else excludeREs =  NULL
-  out = predict(object, type = "response", exclude = excludeREs, ...)
+  fam = object$family # also for gamm()$gam, which has no family() method
+  if(is.matrix(object$linear.predictors)){
+    out = predict(object, type = "response", exclude = excludeREs, ...)
+  } else {
+    # fixes #572 (keep offsets passed via offset =)
+    eta = napredict(object$na.action, object$linear.predictors)
+    if(any(isRE)) eta = eta - rowSums(predict(object, type = "terms", terms = excludeREs))
+    out = fam$linkinv(eta)
+    # ziP: expected response
+    if(startsWith(fam$family, "Zero inflated Poisson")) out[!is.na(eta)] = fam$predict(fam, eta = matrix(eta[!is.na(eta)]))[[1]]
+  }
   names(out) = as.character(1:length(out))
   out
 }
@@ -557,24 +581,25 @@ getSimulations.gam <- function(object, nsim = 1, simulateREs = c("conditional", 
 
   if(simulateREs == "unconditional") warning("DHARMa: Unconditional simulations are not available for gam. Note that simulations from your model will be conditional on the fitted random effects.")
 
-  if(length(find.package("mgcViz")) > 0 & mgcViz == T){
+  checkBinomialMatrixWeights(object)
+  if(hasWeights(object)) warning(weightsWarning)
 
-    if(hasWeights(object)) warning(weightsWarning)
+  checkBamOffset(object)
+
+  if(isTRUE(mgcViz) && requireNamespace("mgcViz", quietly = TRUE)){
 
     # use mgcViz if available
     out = mgcViz::simulate.gam(object, nsim = nsim , ...)
     out = as.data.frame(out)
 
-    # from here to end identical to default
-
     if (type == "normal"){
       if(family(object)$family %in% c("binomial", "betabinomial")){
-        if("(weights)" %in% colnames(model.frame(object))){
+        if (is.matrix(model.frame(object)[[1]])){
+          # k/n binomial case first (#568), rounded (#590)
+          out = round(out * rowSums(model.frame(object)[[1]]))
+        } else if("(weights)" %in% colnames(model.frame(object))){
           x = model.frame(object)
           out = out * x$`(weights)`
-        } else if (is.matrix(model.frame(object)[[1]])){
-          # this is for the k/n binomial case
-          out = out * rowSums(model.frame(object)[[1]])
         }
       }
       if(!is.matrix(out)) out = data.matrix(out)
@@ -588,7 +613,7 @@ getSimulations.gam <- function(object, nsim = 1, simulateREs = c("conditional", 
           trials = rowSums(model.frame(object)[[1]])
           oldnames = names(out)
           oldrownames = row.names(out)
-          out = out * trials
+          out = round(out * trials) # (k/n)*n is not always exactly k (#590)
           out = as.list(out)
           for(i in 1:length(out)){
             out[[i]] = cbind(out[[i]], trials - out[[i]])
@@ -601,8 +626,8 @@ getSimulations.gam <- function(object, nsim = 1, simulateREs = c("conditional", 
       }
     }
   } else {
-    message("It seems you don't have mgcViz installed on this computer. When using DHARMa with mgcv objects, it is highly recommended to also install mgcViz, which will extend the ability of DHARMa to simulate from various gam objects. Without mgcViz, simulations will fail in various situations. See vignette for details!")
-    out = getSimulations.default(object, nsim, type, ...)
+    if(isTRUE(mgcViz)) message("It seems you don't have mgcViz installed on this computer. When using DHARMa with mgcv objects, it is highly recommended to also install mgcViz, which will extend the ability of DHARMa to simulate from various gam objects. Without mgcViz, simulations will fail in various situations. See vignette for details!")
+    out = getSimulations.default(object = object, nsim = nsim, type = type, ...)
   }
   return(out)
 }
@@ -627,6 +652,7 @@ getSimulations.merMod <- function (object, nsim = 1, simulateREs = c("conditiona
 
   simulateREs <- match.arg(simulateREs)
 
+  checkBinomialMatrixWeights(object)
   if(hasWeights(object)) warning(weightsWarning)
 
   if(simulateREs != "user-specified" & "re.form" %in% names(list(...))) stop("DHARMa: If you want to specify certain random effects to condition on, you need to set simulateREs = \"user-specified\".")
@@ -676,6 +702,7 @@ getSimulations.glmmTMB <- function (object, nsim = 1, simulateREs = c("condition
   type <- match.arg(type)
   simulateREs <- match.arg(simulateREs)
 
+  checkBinomialMatrixWeights(object)
   if(hasWeights(object)) warning(weightsWarning)
 
   out = NULL
@@ -729,7 +756,7 @@ getSimulations.glmmTMB <- function (object, nsim = 1, simulateREs = c("condition
 
     # check for weights in k/n case
     if(family(object)$family %in% c("binomial", "betabinomial")){
-      if("(weights)" %in% colnames(model.frame(object))){
+      if("(weights)" %in% colnames(model.frame(object)) && !is.matrix(model.frame(object)[[1]])){
         w = model.frame(object)
         w = w$`(weights)`
         # successes of the 2-column matrices (#571)
