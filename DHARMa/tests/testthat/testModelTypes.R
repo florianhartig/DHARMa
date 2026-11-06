@@ -599,6 +599,11 @@ test_that("brms works",
           {
             fittedModel <- brms::brm(observedResponse ~ Environment1 + (1|group), data = testData$lmm)
             runEverythingExcPearson(fittedModel, testData$lmm, doRefit = FALSE)
+            expect_error(getPearsonResiduals(fittedModel), "not supported")
+            # REs re-simulated (#574)
+            corr = cor(t(getSimulations(fittedModel, nsim = 50, simulateREs = "unconditional")))
+            sameGroup = outer(testData$lmm$group, testData$lmm$group, "==")
+            expect_gt(mean(corr[sameGroup & upper.tri(corr)], na.rm = TRUE), mean(corr[!sameGroup], na.rm = TRUE) + 0.1)
 
             fittedModel <-  brms::brm(observedResponse|trials(1) ~ Environment1 +
                                         (1|group), family = "binomial",
