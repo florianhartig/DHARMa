@@ -974,7 +974,7 @@ DHARMa residuals work with phyr, but the correct implementation is not fully tes
 ## brms
 
 Simple brms models are supported as of DHARMa version 0.5.0. This means that essentially, all models you could also fit with glmmTMB are possible to check with DHARMa. Multivariate models (multi-response, structural equation models, multinomial) are not supported. Note that predictions are based on the median of the posterior. See also vignette "DHARMa for Bayesians" and <https://github.com/florianhartig/DHARMa/issues/33>
-`simulateREs = "unconditional"` stops with an error for models with `mm()`, `gr(..., cov = )`, non-gaussian random effects, interactions in `gr(..., by = )` or grouping variables that are also used outside the random effects; use `simulateREs = "conditional"` for these. Pearson residuals are not supported for brms models, so testDispersion with type = "PearsonChisq" or after simulateResiduals(refit = TRUE) will not work.
+`simulateREs = "unconditional"` stops with an error for models with `mm()`, `gr(..., cov = )`, `gr(..., by = )`, non-gaussian random effects or grouping variables that are also used outside the random effects; use `simulateREs = "conditional"` for these. Pearson residuals are not supported for brms models, so testDispersion with type = "PearsonChisq" or after simulateResiduals(refit = TRUE) will not work.
 
 ## Unsupported packages
 
