@@ -15,7 +15,7 @@ plotResiduals(simulationOutput, rank = FALSE)
 # smooth scatter plot - default for large datasets with n > 10,000
 plotResiduals(simulationOutput, rank = TRUE, smoothScatter = TRUE)
 
-\dontrun{
+\donttest{
 
   # It is very advisable to plot the residual against all predictors
   # the following syntax uses the predictor values from the fitted model
@@ -31,10 +31,13 @@ plotResiduals(simulationOutput, rank = TRUE, smoothScatter = TRUE)
   plotResiduals(simulationOutput, form = ~Environment1 + Environment2)
 
   # plot residuals against a predictor for all respective group levels
-  plotResiduals(simulationOutput, form = ~Environment1|group)
+  plotResiduals(simulationOutput, form = ~Environment1|group, quantreg = FALSE)
 
   # plot residuals against a predictor for a specific group level, here group 1
   plotResiduals(simulationOutput, form = ~Environment1|group == "1")
+
+  # plot residuals against a predictor for selected group levels, here groups 1 and 2
+  plotResiduals(simulationOutput, form = ~Environment1|group %in% c("1", "2"), quantreg = FALSE)
 
 
   # alternatively, you can plot against a variable from the global environment
@@ -48,9 +51,4 @@ plotResiduals(simulationOutput, rank = TRUE, smoothScatter = TRUE)
   # to diagnose overdispersion and heteroskedasticity it can be useful to
   # display residuals as absolute deviation from the expected mean 0.5
   plotResiduals(simulationOutput, absoluteDeviation = TRUE)
-
-  # All these options can also be provided to the main plotting function
-
-  # If you want to plot summaries per group, use recalculateResiduals
-  # for details see help of recalculateResiduals
 }
