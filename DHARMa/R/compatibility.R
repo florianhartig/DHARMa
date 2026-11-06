@@ -475,6 +475,14 @@ getRefit.lm <- function(object, newresp, ...){
 }
 
 # fixes #351 (variables in offsets) and #571 (transformed and cbind() responses, models without data)
+#' Data and formula for refitting a model to a new response
+#'
+#' Internal helper for [getRefit]. Returns a list with the model data (the model frame for models fitted without data), restricted to the rows used in the fit, with the new response in column `.DHARMa_response`, and the formula with this column as response.
+#'
+#' @param object a fitted model.
+#' @param newresp the new response.
+#' @param rows the rows used in the fit.
+#' @keywords internal
 getRefitData <- function(object, newresp, rows = rownames(model.frame(object))){
   if(is.null(getCall(object)$data)) newData = model.frame(object)
   else newData = getData(object)
