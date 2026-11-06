@@ -90,3 +90,19 @@ test_that("Simulations work for mgcv::gam", {
   expect_no_error(res3 <- simulateResiduals(fittedModel, simulateREs = "user-specified"))
 
 })
+
+
+test_that("refit = TRUE: k/n binomial residuals are on the scale of the number of successes (#598)", {
+
+  set.seed(1)
+  testData = data.frame(x = runif(50), N = sample(5:15, 50, replace = TRUE))
+  testData$k = rbinom(50, testData$N, 0.5)
+  fittedModel <- glm(cbind(k, N - k) ~ x, family = binomial, data = testData)
+  res = simulateResiduals(fittedModel, n = 10, refit = TRUE)
+  expect_equal(res$fittedResiduals, residuals(fittedModel, type = "response") * testData$N, ignore_attr = TRUE)
+
+  testData$p = testData$k / testData$N
+  fittedModel2 <- glm(p ~ x, family = binomial, weights = N, data = testData)
+  res2 = simulateResiduals(fittedModel2, n = 10, refit = TRUE)
+  expect_equal(res2$fittedResiduals, res$fittedResiduals)
+})

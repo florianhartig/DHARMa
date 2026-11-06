@@ -1,5 +1,12 @@
 NOTE: for more news about the package, see https://github.com/florianhartig/DHARMa/releases
 
+# DHARMa 0.5.2
+
+## Bugfixes
+
+* `simulateResiduals(refit = TRUE)` now randomizes the residuals of binomial and beta-binomial models with more than one trial on the scale of the number of successes instead of proportions, which had removed most of the power (#598).
+
+
 # DHARMa 0.5.1
 
 
