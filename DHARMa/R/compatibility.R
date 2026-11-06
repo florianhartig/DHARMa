@@ -223,7 +223,7 @@ getResiduals <- function (object, ...) {
 #' @param object a fitted model.
 #' @param ... additional parameters to be passed on, usually to the residual function of the respective model class.
 #'
-#' @note  Package `brms` doesn't provide Pearson residuals (deprecated).
+#' @note Pearson residuals are not supported for `brms` models.
 #' @example inst/examples/wrappersHelp.R
 #'
 #' @seealso [getObservedResponse], [getSimulations], [getRefit], [getFixedEffects], [getFitted]
@@ -1114,7 +1114,26 @@ getSimulations.brmsfit <- function (object, nsim = 1, simulateREs = c("condition
 
   # unconditional
   if (simulateREs == "unconditional") {
-    out = t(brms::posterior_predict(object = object, re_formula = NA, ndraws = nsim, ...))
+    # fixes #574 (re_formula = NA sets the REs to zero): new levels for all groups, brms draws their REs
+    re = object$ranef
+    if(any(re$gtype == "mm" | nzchar(re$cov) | nzchar(re$by) | re$dist != "gaussian")) stop("DHARMa: unconditional simulations are not available for brms models with mm(), gr(..., cov = ), gr(..., by = ) or non-gaussian random effects. Use simulateREs = \"conditional\".")
+    msg = "DHARMa: unconditional simulations are not available for brms models in which a grouping variable is also used outside the random effects. Use simulateREs = \"conditional\"."
+    # per group, rename the grouping variables that are not used outside the random effects (e.g. block in treat + (1|block/treat))
+    fixedVars = unlist(lapply(c(object$formula$formula, object$formula$pforms), function(f) {
+      labels = attr(terms(f), "term.labels")
+      all.vars(reformulate(c("0", labels[!grepl("|", labels, fixed = TRUE)])))
+    }))
+    newVars = lapply(strsplit(unique(re$group), ":"), setdiff, fixedVars)
+    if(any(lengths(newVars) == 0)) stop(msg)
+    newData = object$data
+    for(v in unique(unlist(newVars))) newData[[v]] = paste0("DHARMa_new_", newData[[v]])
+    # safety net: the new levels may only change the RE indices (J_1, J_2, ...)
+    standataNoJ = function(d) {
+      s = tryCatch(brms::standata(object, newdata = d, allow_new_levels = TRUE), error = function(e) stop(msg))
+      unclass(s)[!grepl("^J_[0-9]", names(s))]
+    }
+    if(!isTRUE(all.equal(standataNoJ(object$data), standataNoJ(newData), check.attributes = FALSE))) stop(msg)
+    out = t(brms::posterior_predict(object, newdata = newData, allow_new_levels = TRUE, sample_new_levels = "gaussian", ndraws = nsim, ...))
   }
 
   if(type == "normal"){
@@ -1158,8 +1177,8 @@ getResiduals.brmsfit <- function (object,...){
 
 #' @rdname getPearsonResiduals
 #' @export
-getPearsonResiduals.brms <- function (object, ...){
-   stop("brms doesn't provide Pearson residuals (deprecated).")
+getPearsonResiduals.brmsfit <- function (object, ...){
+   stop("DHARMa: Pearson residuals are not supported for brms models.")
 }
 
 
