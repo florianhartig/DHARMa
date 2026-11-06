@@ -40,6 +40,7 @@ test_that("recalcuateResiduals works", {
   simulationOutput2 = recalculateResiduals(simulationOutput,
                                            group = testData$group)
   expect_true(length(residuals(simulationOutput2)) == simulationOutput2$nGroups)
+  expect_equal(simulationOutput2$nObs, 20)
 
 
   ##### only selection #####

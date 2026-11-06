@@ -314,6 +314,7 @@ recalculateResiduals <- function(simulationOutput, group = NULL, aggregateBy = s
     # question to myself - what's the use of that, why not erase the old outputs? they are anyway saved in the old object
 
     out$aggregateByGroup = aggregateByGroup
+    out$nObs = length(out$scaledResiduals) # fixes #603 (nObs of grouped residuals)
     out = c(out, simulationOutput)
     out$randomState = randomState
     class(out) = "DHARMa"
