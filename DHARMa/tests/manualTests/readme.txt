@@ -1,1 +1,0 @@
-manual tests moved to https://github.com/florianhartig/DHARMa/tree/master/Code/DHARMaManualTests

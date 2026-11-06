@@ -106,3 +106,18 @@ test_that("refit = TRUE: k/n binomial residuals are on the scale of the number o
   res2 = simulateResiduals(fittedModel2, n = 10, refit = TRUE)
   expect_equal(res2$fittedResiduals, res$fittedResiduals)
 })
+
+
+test_that("simulateResiduals and recalculateResiduals: matched method, refit = TRUE with method and rotation (#589)", {
+  testData = createData(sampleSize = 50, family = poisson(), randomEffectVariance = 0)
+  fittedModel = glm(observedResponse ~ Environment1, family = poisson, data = testData)
+  simulationOutput = simulateResiduals(fittedModel, n = 10)
+  expect_equal(simulationOutput$method, "PIT")
+  expect_equal(recalculateResiduals(simulationOutput, group = testData$group)$method, "PIT")
+  expect_message(simulationOutput <- simulateResiduals(fittedModel, n = 5, refit = TRUE, method = "PIT"), "traditional")
+  expect_error(simulateResiduals(fittedModel, refit = TRUE, rotation = "estimated"), "refit = TRUE")
+  grouped = recalculateResiduals(simulationOutput, group = testData$group, method = "PIT")
+  expect_equal(grouped$method, "traditional")
+  expect_equal(grouped$scaledResiduals, recalculateResiduals(simulationOutput, group = testData$group, method = "traditional")$scaledResiduals)
+  expect_error(recalculateResiduals(simulationOutput, group = testData$group, rotation = "estimated"), "rotation")
+})

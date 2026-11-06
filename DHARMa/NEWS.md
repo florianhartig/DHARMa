@@ -44,6 +44,10 @@ NOTE: for more news about the package, see https://github.com/florianhartig/DHAR
 
 * Fix in behavior of `update()` on models with transformed predictors (e.g. `offset()`). This fixes behavior of `getRefit` and related functions such as `simulateLRT` (#351).
 
+* `getRefit()` now works for transformed responses (e.g. `log(y)`) and glmmTMB `cbind()` responses, and `simulateResiduals(refit = TRUE)` works for glmmTMB proportions with weights and stops with an informative error if all refits fail (#571).
+
+* `getRefit()` now works for models fitted with `subset` given as row numbers or as a logical vector defined outside the data (#599).
+
 * Small output fixes in `testCategorical()`, `testOutliers()` and `print.DHARMa` (#569).
 
 * `runBenchmarks()` no longer warns about NA values when the output contains none (#577).
@@ -53,6 +57,12 @@ NOTE: for more news about the package, see https://github.com/florianhartig/DHAR
 * `plotResiduals(form = ~x | group %in% c(...))` now plots one panel per selected group level instead of a wrong subset of the data; comparison operators other than `==`, such as `!=`, give an error (#596).
 
 * `plotResiduals(absoluteDeviation = TRUE)` now also transforms the residuals for factor predictors, `form = ~x | group` and `~x | group == "level"` (#596).
+
+* `testDispersion()` with `refit = TRUE` now aggregates the observed Pearson residuals like the refitted ones after `recalculateResiduals()`, and warns and returns NA if these are all (close to) zero (#575).
+
+* `testQuantiles()` now gives the same results with and without plot, evaluates transformations such as `~log(x)`, and stops for categorical predictors and formulas with several variables (#576).
+
+* `recalculateResiduals()` now always uses the traditional randomization for residuals with `refit = TRUE`, as `simulateResiduals()` does, so `rotation` is not available for them; `$method` of both functions stores the method used (#589).
 
 ## Minor changes
 
