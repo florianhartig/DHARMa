@@ -124,7 +124,7 @@ simulateResiduals <- function(fittedModel, n = 250, simulateREs = c("conditional
 
       simObserved <- out$simulatedResponse[[i]]
 
-      try({
+      refitTry = try({
 
         # for testing
         # if (i==3) stop("x")
@@ -139,6 +139,8 @@ simulateResiduals <- function(fittedModel, n = 250, simulateREs = c("conditional
         #out$refittedRandomEffects[,i]  <- ranef(refittedModel)
       }, silent = TRUE)
     }
+
+    if(all(is.na(out$refittedResiduals))) stop("DHARMa::simulateResiduals: with refit = TRUE, all refits failed. Last error: ", attr(refitTry, "condition")$message)
 
     ######### residual checks ###########
 
