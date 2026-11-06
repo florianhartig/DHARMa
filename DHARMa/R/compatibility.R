@@ -471,8 +471,7 @@ getPredictorNames.default <- function (object,...){
 getRefit.lm <- function(object, newresp, ...){
   refitData = getRefitData(object, newresp)
   object$call$subset = NULL # fixes #599 (subset would be applied twice)
-  refittedModel = update(object, formula. = refitData$formula, data = refitData$data, ...)
-  return(refittedModel)
+  update(object, formula. = refitData$formula, data = refitData$data, ...)
 }
 
 # fixes #351 (variables in offsets) and #571 (transformed and cbind() responses, models without data)
@@ -481,7 +480,7 @@ getRefitData <- function(object, newresp, rows = rownames(model.frame(object))){
   else newData = getData(object)
   newData = as.data.frame(newData)[rows, , drop = FALSE]
   f = formula(object)
-  # expand '.' before the new response is added; update() cannot expand it without data
+  # expand '.' while the original response is on the left-hand side, so that it is not included in '.'
   if("." %in% all.vars(f)) f = formula(terms(f, data = newData))
   f[[2]] = quote(.DHARMa_response)
   # Hack to make the factor binomial case work
@@ -986,8 +985,7 @@ getSimulations.phyloglm <- function(object, nsim = 1,
 getRefit.phyloglm <- function(object, newresp, ...){
   #object phyloglm doesn't have a model.frame object
   refitData = getRefitData(object, newresp, rows = rownames(object$X))
-  refittedModel = update(object, formula. = refitData$formula, data = refitData$data, ...)
-  return(refittedModel)
+  update(object, formula. = refitData$formula, data = refitData$data, ...)
 }
 
 

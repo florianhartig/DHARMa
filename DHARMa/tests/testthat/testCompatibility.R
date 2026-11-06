@@ -120,7 +120,7 @@ test_that("getFittedResponse returns fitted values on the scale of the observed 
 })
 
 
-test_that("refitting to the observed response reproduces the fit (#571)", {
+test_that("refitting to the observed response reproduces the fit (#571, #599)", {
   set.seed(1)
   n = 60
   testData = data.frame(x = runif(n), N = sample(5:15, n, TRUE))
@@ -137,16 +137,10 @@ test_that("refitting to the observed response reproduces the fit (#571)", {
   fixTMB = function(m) glmmTMB::fixef(m)$cond
   m = glmmTMB::glmmTMB(cbind(k, N - k) ~ x, family = binomial, data = testData)
   expect_equal(refitCoef(m, fixTMB), fixTMB(m))
-})
-
-
-test_that("refitting models fitted with subset reproduces the fit (#599)", {
-  set.seed(1)
-  testData = data.frame(x = runif(100))
-  testData$y = rpois(100, exp(1 + testData$x))
+  # models fitted with subset, as a logical vector outside the data or as row numbers (#599)
   sel = testData$x > 0.3
-  for(m in list(glm(y ~ x, family = poisson, data = testData, subset = 51:100),
-                glm(y ~ x, family = poisson, data = testData, subset = sel))){
-    expect_equal(coef(getRefit(m, model.response(model.frame(m)))), coef(m))
-  }
+  m = glm(k ~ x, family = poisson, data = testData, subset = sel)
+  expect_equal(refitCoef(m), coef(m))
+  m = glm(k ~ x, family = poisson, data = testData, subset = 31:60)
+  expect_equal(refitCoef(m), coef(m))
 })
