@@ -17,6 +17,8 @@ NOTE: for more news about the package, see https://github.com/florianhartig/DHAR
 
 * `recalculateResiduals()` now sets `nObs` and `nGroups` to the number of grouped residuals, which fixes `testOutliers()` and `testTemporalAutocorrelation(time = NULL)` for grouped residuals (#603, #605).
 
+* `recalculateResiduals()` now stops if fewer than 2 residuals remain after grouping and selection, and warns if fewer than 10 remain (#604).
+
 * Minor fixes in testSpatialAutocorrelation: DHARMa errors if repeated values for space in distMat, extended help, improved plot titles and legend.
 
 * Revised weights handling: introduced more robust check for prior weights (especially in n/k models) with new helper function `hasWeights` (#230, #540).
