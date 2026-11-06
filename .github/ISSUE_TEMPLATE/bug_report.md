@@ -8,7 +8,7 @@ Before submitting, please:
 
 - search existing issues to avoid duplicates
 - check the vignette and the package documentation
-- choose a plain-text title naming the function or area and the problem, e.g., "simulateResiduals(refit = TRUE): failed refits are counted as duplicate parameter estimates"
+- choose a short plain-text title naming the function or area and the problem, e.g., "simulateResiduals(refit = TRUE): failed refits counted as duplicate estimates"
 - read [Asking for help and reporting issues](https://github.com/florianhartig/DHARMa/blob/master/CONTRIBUTING.md#asking-for-help-and-reporting-issues) in the contributing guide
 -->
 
