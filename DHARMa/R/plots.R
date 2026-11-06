@@ -137,8 +137,8 @@ plotQQunif <- function(simulationOutput, testUniformity = TRUE, testOutliers = T
     temp = testDispersion(simulationOutput, plot = FALSE)
     legend("center",
            c(paste("Dispersion test: p=", round(temp$p.value, digits = 5)),
-             paste("Deviation ", ifelse(temp$p.value < 0.05, "significant", "n.s."))),
-           text.col = ifelse(temp$p.value < 0.05, .Options$DHARMaSignalColor, "black" ), bty="n")
+             paste("Deviation ", if(is.na(temp$p.value)) "not available" else ifelse(temp$p.value < 0.05, "significant", "n.s."))),
+           text.col = ifelse(isTRUE(temp$p.value < 0.05), .Options$DHARMaSignalColor, "black" ), bty="n")
   }
 
 }

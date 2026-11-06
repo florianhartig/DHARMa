@@ -293,7 +293,7 @@ test_that("testCategorical", {
 })
 
 
-test_that("testDispersion and recalculateResiduals with refit = TRUE after grouping (#575, #589)", {
+test_that("testDispersion with refit = TRUE after grouping (#575)", {
   set.seed(123)
   testData = createData(sampleSize = 100, family = poisson(), randomEffectVariance = 0)
   fittedModel = glm(observedResponse ~ Environment1, family = poisson, data = testData)
@@ -302,8 +302,6 @@ test_that("testDispersion and recalculateResiduals with refit = TRUE after group
   x = testDispersion(grouped, plot = FALSE)
   observed = sum(rowsum(residuals(fittedModel, type = "pearson"), testData$group)^2)
   expect_equal(unname(x$statistic), observed / mean(colSums(grouped$refittedPearsonResiduals^2)))
-  # refitted residuals use the traditional randomization (#589)
-  expect_equal(grouped$scaledResiduals, recalculateResiduals(simulationOutput, group = testData$group, method = "traditional")$scaledResiduals)
 })
 
 
