@@ -2,12 +2,10 @@
 % Please edit documentation in R/plots.R
 \name{plotResidualsAll}
 \alias{plotResidualsAll}
-\title{Create multiple residual plots simultaneously.}
+\title{Create multiple residual plots simultaneously (deprecated)}
 \usage{
 plotResidualsAll(simulationOutput, predictorNames,
-  predictorType = c("predictor", "groupLevel"), form = NULL,
-  quantreg = NULL, rank = TRUE, asFactor = NULL, smoothScatter = NULL,
-  quantiles = c(0.25, 0.5, 0.75), absoluteDeviation = FALSE, ...)
+  predictorType = c("predictor", "groupLevel"), form = NULL, ...)
 }
 \arguments{
 \item{simulationOutput}{an object with simulated residuals created by \link{simulateResiduals}.}
@@ -18,23 +16,11 @@ plotResidualsAll(simulationOutput, predictorNames,
 
 \item{form}{optional predictor (and grouping variable) against which the residuals should be plotted.}
 
-\item{quantreg}{whether to perform a quantile regression or a smooth spline around the mean.}
-
-\item{rank}{if T, the values provided in form will be rank transformed.}
-
-\item{asFactor}{should a numeric predictor provided in form be treated as a factor.}
-
-\item{smoothScatter}{if T, a smooth scatter plot will plotted instead of a normal scatter plot.}
-
-\item{quantiles}{for a quantile regression, which quantiles should be plotted.}
-
-\item{absoluteDeviation}{if T, switch from displaying normal quantile residuals to absolute deviation from the mean expectation of 0.5 (calculated as 2 * abs(res - 0.5)).}
-
-\item{...}{additional arguments to plot / boxplot.}
+\item{...}{further options for \link{plotResiduals}.}
 }
 \description{
-Convenience function to plot residuals against all predictors of the model / against certain predictors of the model / against a predictor and all levels of a grouping variable.
+DEPRECATED, use \link{plotResiduals} with \code{form = ~.}, \code{~a + b}, \code{~x | group} or \code{~x | group \%in\% c(...)} instead
 }
-\details{
-For further details on the parameters see \link{plotResiduals}.
+\note{
+This function is deprecated. Use \link{plotResiduals}
 }

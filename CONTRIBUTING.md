@@ -23,7 +23,7 @@ If you have already diagnosed the problem or have ideas for a fix, including tha
 
 Please open or comment on an issue before you start working on a pull request, so that the approach can be discussed before you invest time in an implementation. This avoids situations where a pull request cannot be merged because of design conflicts that could have been resolved earlier. Only trivial fixes (e.g., typos or a factual error in the documentation) can go directly to a pull request. See [Pull request workflow](#pull-request-workflow) below.
 
-When working on changes, note that there is extensive code for tests and development purposes outside the package in the folder `Code/` of this repository. You may find useful context there. Changes to `Code/` follow the same workflow.
+When working on changes, note that there is extensive code for tests and development purposes outside the package in the folder `Code/` of this repository (see the [README](Code/README.md) there for its structure). You may find useful context there. Changes to `Code/` follow the same workflow.
 
 If you would like DHARMa to support a further R package or model class, see [Adding support for new R packages](ADDING_PACKAGES.md).
 
