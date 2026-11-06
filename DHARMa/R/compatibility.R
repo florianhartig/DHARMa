@@ -1090,7 +1090,7 @@ getSimulations.brmsfit <- function (object, nsim = 1, simulateREs = c("condition
     # fixes #574 (re_formula = NA sets the REs to zero); for a:b, new levels of b suffice
     re = object$ranef
     if(any(re$gtype == "mm" | nzchar(re$cov) | re$dist != "gaussian" | (nzchar(re$by) & grepl(":", re$group)))) stop("DHARMa: unconditional simulations are only available for brms models with gaussian random effects, without mm(), gr(..., cov = ) or interactions in gr(..., by = ). Use simulateREs = \"conditional\".")
-    # labels in order of appearance, zero-padded, as brms assigns new levels of gr(..., by = ) in sorted order
+    # zero-padded labels in order of appearance: brms sorts new levels lexicographically, otherwise the by levels of gr(..., by = ) would be mixed up
     newData = object$data
     for(v in unique(sub(".*:", "", re$group))) newData[[v]] = sprintf("DHARMa_new_%09d", match(newData[[v]], unique(newData[[v]])))
     sdOld = brms::standata(object)
