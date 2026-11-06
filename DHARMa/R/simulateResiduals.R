@@ -254,7 +254,6 @@ recalculateResiduals <- function(simulationOutput, group = NULL, aggregateBy = s
     }
     out$group = group
     group = as.factor(group)
-    out$nGroups = nlevels(group)
 
     # sel
     if(is.null(sel)) {
@@ -314,7 +313,7 @@ recalculateResiduals <- function(simulationOutput, group = NULL, aggregateBy = s
     # question to myself - what's the use of that, why not erase the old outputs? they are anyway saved in the old object
 
     out$aggregateByGroup = aggregateByGroup
-    out$nObs = length(out$scaledResiduals) # fixes #603 (nObs of grouped residuals)
+    out$nObs = out$nGroups = length(out$scaledResiduals) # fixes #603, #605 (nObs, nGroups after grouping and sel)
     out = c(out, simulationOutput)
     out$randomState = randomState
     class(out) = "DHARMa"

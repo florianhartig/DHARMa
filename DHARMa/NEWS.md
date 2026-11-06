@@ -15,7 +15,7 @@ NOTE: for more news about the package, see https://github.com/florianhartig/DHAR
 
 * Small fixes in `plotResiduals(form = ~x | group)` (#573).
 
-* `recalculateResiduals()` now sets `nObs` to the number of grouped residuals, which fixes `testOutliers()` and `testTemporalAutocorrelation(time = NULL)` for grouped residuals (#603).
+* `recalculateResiduals()` now sets `nObs` and `nGroups` to the number of grouped residuals, which fixes `testOutliers()` and `testTemporalAutocorrelation(time = NULL)` for grouped residuals (#603, #605).
 
 * Minor fixes in testSpatialAutocorrelation: DHARMa errors if repeated values for space in distMat, extended help, improved plot titles and legend.
 
