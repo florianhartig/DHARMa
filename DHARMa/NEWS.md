@@ -1,12 +1,5 @@
 NOTE: for more news about the package, see https://github.com/florianhartig/DHARMa/releases
 
-# DHARMa 0.5.2
-
-## Bugfixes
-
-* `simulateResiduals(refit = TRUE)` now randomizes the residuals of binomial and beta-binomial models with more than one trial on the scale of the number of successes instead of proportions, which had removed most of the power (#598).
-
-
 # DHARMa 0.5.1
 
 
@@ -63,6 +56,8 @@ NOTE: for more news about the package, see https://github.com/florianhartig/DHAR
 * `testQuantiles()` now gives the same results with and without plot, evaluates transformations such as `~log(x)`, and stops for categorical predictors and formulas with several variables (#576).
 
 * `recalculateResiduals()` now always uses the traditional randomization for residuals with `refit = TRUE`, as `simulateResiduals()` does, so `rotation` is not available for them; `$method` of both functions stores the method used (#589).
+
+* `simulateResiduals(refit = TRUE)` now randomizes the residuals of binomial and beta-binomial models with more than one trial on the scale of the number of successes instead of proportions, which had removed most of the power (#598).
 
 ## Minor changes
 
