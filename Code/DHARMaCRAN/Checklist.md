@@ -11,6 +11,8 @@ Steps marked [maintainer] need e-mails sent to the maintainer; all other steps c
   * All new features / changes have help files, examples and appropriate unit tests? 
   * Is the NEWS.md file updated?
   * Are all documentation files, including README.md, vignettes, updated?
+* Prepare the submission (the steps below up to the upload, and fixes requested by CRAN) on a branch `v<version>-cranSubmission` with a pull request. Do not merge other pull requests that change `DHARMa/` into `master` until the submission is accepted, so that the tagged version equals the submitted one
+* Run the user-perspective tests in Code/DHARMaUserTests (see the README there) and fix or file the problems found
 * Update DESCRIPTION files -> date, version number, etc.
 * Make sure a local `R CMD check --as-cran` on the tarball from `R CMD build DHARMa` (needs pandoc for the vignettes) produces no errors, warnings or notes
   * `devtools::document("DHARMa")` produces no new changes (check with `git status`)
@@ -19,22 +21,23 @@ Steps marked [maintainer] need e-mails sent to the maintainer; all other steps c
 ## Test release
 
 * Make sure that help files / tests don't take too long (5s on slow computer max for CRAN)
-* Make sure CI via GitHub Actions (all OS) on the final master produces no errors, warnings or notes
-* Re-run the reverse dependency check on the final master
+* Make sure CI via GitHub Actions (all OS) on the final submission branch produces no errors, warnings or notes
+* Re-run the reverse dependency check on the final submission branch
 * Check package in <https://win-builder.r-project.org/upload.aspx> (all R versions; or from R: `devtools::check_win_devel("DHARMa")`, `devtools::check_win_release("DHARMa")`, `devtools::check_win_oldrelease("DHARMa")`)
   * [maintainer] Read the results
 * Update DHARMa/cran-comments.md with text for submission (reverse dependency results, including affected packages whose maintainers were informed; explain any remaining notes)
   
 ## CRAN upload
 
-* Build the tarball from the final master and upload it at <https://cran.r-project.org/submit.html>, with the new section of DHARMa/cran-comments.md in "Optional comment" (if not uploaded by the maintainer, explain this there)
+* Build the tarball from the final submission branch and upload it at <https://cran.r-project.org/submit.html>, with the new section of DHARMa/cran-comments.md in "Optional comment" (if not uploaded by the maintainer, explain this there)
   * [maintainer] Confirm the upload via the link in CRAN's e-mail
   * [maintainer] Forward CRAN's reply to the team
   * If changes are requested: fix them, add a "Submission n" section to DHARMa/cran-comments.md that says how they were addressed, and upload again as above
 
 ## Package accepted
 
-* On GitHub: create a release with tag `v<version>` on `master` and close the release milestone
+* Squash-merge the submission branch into `master`
+* On GitHub: create a release with tag `v<version>` on `master` and close the release milestone. The release text starts with a short overview of the release (one to three sentences, based on DHARMa/cran-comments.md), followed by the NEWS section of the version
 * Set the version in DESCRIPTION to the next planned release and add a matching heading at the top of DHARMa/NEWS.md
 
 

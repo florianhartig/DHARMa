@@ -1,6 +1,6 @@
 # Code outside the package
 
-Scripts and material that are not part of the package. Except for `DHARMaTests/` and `DHARMaCRAN/`, they are not updated when the package changes, so older scripts may not run with the current version.
+Scripts and material that are not part of the package. Except for `DHARMaTests/`, `DHARMaUserTests/` and `DHARMaCRAN/`, they are not updated when the package changes, so older scripts may not run with the current version.
 
 | Folder | Content |
 |---|---|
@@ -13,6 +13,7 @@ Scripts and material that are not part of the package. Except for `DHARMaTests/`
 | `DHARMaPerformance/` | simulations of calibration and power of residuals and tests |
 | `DHARMaTeaching/` | course and workshop material |
 | `DHARMaTests/` | extended tests run with testthat, see the [README](DHARMaTests/README.md) there |
+| `DHARMaUserTests/` | user-perspective tests to run by hand before a release, see the [README](DHARMaUserTests/README.md) there |
 | `Visualization/` | script for a figure in the vignette |
 
 ## Adding files

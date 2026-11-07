@@ -1,5 +1,8 @@
 NOTE: for more news about the package, see https://github.com/florianhartig/DHARMa/releases
 
+# DHARMa 0.5.2
+
+
 # DHARMa 0.5.1
 
 

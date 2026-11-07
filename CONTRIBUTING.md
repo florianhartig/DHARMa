@@ -45,7 +45,7 @@ For everyone, including the DHARMa team: if AI tools wrote substantial parts of 
 
 ## Pull request workflow
 
-`master` is the development branch; CRAN releases are tagged on `master` (e.g., `v0.5.0`). There are no separate development or release branches.
+`master` is the development branch; CRAN releases are tagged on `master` (e.g., `v0.5.0`). There are no separate development or release branches, except a short-lived branch `v<version>-cranSubmission` for each CRAN submission (see the [CRAN submission checklist](Code/DHARMaCRAN/Checklist.md)).
 
 - Members of the DHARMa team create branches in this repository; other contributors work in a fork, where the branch name is up to them.
 - Every branch in this repository addresses at least one issue (except trivial fixes, see [Submitting pull requests](#submitting-pull-requests)). Create it from `master` and name it as follows, with `-` as separator and `<shortName>` in lowerCamelCase:
