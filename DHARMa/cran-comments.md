@@ -1,18 +1,18 @@
 # Version 0.5.1
 
-## Submission 1, 27.10.2026
+## Submission 1, 07.11.2026
 
-This is a minor update of DHARMa, including various smaller improvements and bugfixes. See NEWS for details.
+This is a minor update of DHARMa with various bugfixes and smaller improvements. See NEWS for details.
+
+This update fixes the ERROR in tests/testthat/testNumericReproducibility.R reported in the CRAN checks (small numerical differences after lme4 2.1-0; the stored reference residuals are now compared with a tolerance of 0.01) and the NOTE on deprecated special names in structure() in the vignette code.
 
 This release was tested without apparent problems under:
 
-* local MAC OS 26.6.2 (Tahoe), R 4.6.1
-* GitHub Actions - Windows / Mac / Ubuntu (release), Ubuntu (devel)
-* http://win-builder.r-project.org/ - oldrelease / devel / release
+* local macOS 26.6.2 (Tahoe), R 4.6.1
+* GitHub Actions - Windows / macOS / Ubuntu (release), Ubuntu (devel, oldrel-1), Windows (devel)
+* http://win-builder.r-project.org/ - devel / release / oldrelease
 
-This update also fixes the failing check in tests/testthat/testNumericReproducibility.R reported by CRAN, caused by small numerical differences introduced by lme4 2.1-0. We relaxed the tolerance of the reference comparison. 
-
-Reverse dependencies: we checked all 30 CRAN packages that depend on, import or suggest DHARMa, comparing DHARMa 0.5.0 and 0.5.1 (using the r-devel/recheck GitHub Action, R 4.6.1 on Ubuntu). No new problems were found compared to 0.5.0.
+Reverse dependencies: we checked all 30 CRAN packages that depend on, import or suggest DHARMa, comparing DHARMa 0.5.0 and 0.5.1 (using the r-devel/recheck GitHub Action on Ubuntu). No new problems were found compared to 0.5.0.
 
 
 # Version 0.5.0
