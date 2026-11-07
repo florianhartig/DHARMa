@@ -4,7 +4,7 @@
 
 This is a minor update of DHARMa with various bugfixes and smaller improvements. See NEWS for details.
 
-This update fixes the ERROR in tests/testthat/testNumericReproducibility.R reported in the CRAN checks (small numerical differences after lme4 2.1-0; the stored reference residuals are now compared with a tolerance of 0.01) and the NOTE on deprecated special names in structure() in the vignette code.
+Importantly, the update fixes the ERROR in tests/testthat/testNumericReproducibility.R reported in the CRAN checks due to the  lme4 2.1-0 update. 
 
 This release was tested without apparent problems under:
 
