@@ -362,9 +362,11 @@ plotResiduals <- function(simulationOutput, form = NULL, quantreg = NULL,
 
   # categorical plot
   if(is.factor(pred)){
+    a$p.outliers = if(is.vector(simOut)) NA else testOutliers(simOut, plot = FALSE)$p.value
     simulationOutput$scaledResiduals = res
-    testCategorical(simulationOutput = simulationOutput, catPred = pred,
-                    quantiles = quantiles, xlab = a$xlab, ...)
+    do.call(testCategorical,
+            append(list(simulationOutput = simulationOutput, catPred = pred,
+                        quantiles = quantiles, smoothScatter = smoothScatter), a))
 
   } else{
 
