@@ -108,6 +108,18 @@ test_that("different form arguments in plotResiduals work",
             simulationOutput <- simulateResiduals(glm(observedResponse ~ Environment1, family = "poisson", data = testData))
             expect_false(plotResiduals(simulationOutput, form = ~Environment1|group == "1")$p.value ==
                            plotResiduals(simulationOutput, form = ~Environment1|group == "1", absoluteDeviation = TRUE)$p.value)
+
+            # plots must not change the user's RNG stream (#616)
+            set.seed(1); expected = runif(1); set.seed(1)
+            plot(simulationOutput)
+            plotResiduals(simulationOutput, form = testData$group)
+            expect_identical(runif(1), expected)
+
+            # default xlab without data$ prefix for vector form (#616)
+            lab = NULL
+            local_mocked_bindings(testCategorical = function(...) lab <<- list(...)$xlab)
+            plotResiduals(simulationOutput, form = testData$group)
+            expect_equal(lab, "group")
           }
 )
 

@@ -125,6 +125,8 @@ plotQQunif <- function(simulationOutput, testUniformity = TRUE, testOutliers = T
   }
 
   if(testOutliers == TRUE){
+    randomState = getRandomState(123) # bootstrap must not change the user's RNG stream
+    on.exit(randomState$restoreCurrent(), add = TRUE)
     temp = testOutliers(simulationOutput, plot = FALSE)
     legend("bottomright",
            c(paste("Outlier test: p=", round(temp$p.value, digits = 5)),
@@ -154,7 +156,7 @@ plotQQunif <- function(simulationOutput, testUniformity = TRUE, testOutliers = T
 #' @param quantreg whether to perform a quantile regression based on [testQuantiles] or a smooth spline around the mean. Default NULL chooses T for nObs < 10000, and F otherwise.
 #' @param rank if T, the values provided in form will be rank transformed. This will usually make patterns easier to spot visually, especially if the distribution of the predictor is skewed. If form is a factor, this has no effect.
 #' @param asFactor should a numeric predictor provided in form be treated as a factor. Default is to choose this for < 10 unique values, as long as enough predictions are available to draw a boxplot.
-#' @param smoothScatter if T: for numeric predictors, a smooth scatter plot will plotted instead of a normal scatter plot; for categorical predictors, individual residuals will not be plotted. This makes sense when the number of residuals is very large. Default NULL chooses T for nObs > 10000, and F otherwise.
+#' @param smoothScatter if T: for numeric predictors, a smooth scatter plot will be plotted instead of a normal scatter plot; for categorical predictors, individual residuals will not be plotted. This makes sense when the number of residuals is very large. Default NULL chooses T for nObs > 10000, and F otherwise.
 #' @param quantiles for a quantile regression, which quantiles should be plotted. Default is 0.25, 0.5, 0.75.
 #' @param absoluteDeviation if T, switch from displaying normal quantile residuals to absolute deviation from the mean expectation of 0.5 (calculated as 2 * abs(res - 0.5)). The purpose of this is to test explicitly for heteroskedasticity, see details.
 #' @param ... additional arguments to plot / boxplot. Ignored if several panels are plotted.
@@ -172,7 +174,7 @@ plotQQunif <- function(simulationOutput, testUniformity = TRUE, testOutliers = T
 #'
 #' If the predictor is a factor, a boxplot will be plotted instead of a scatter plot. Individual residuals are added as jittered points (unless smoothScatter = TRUE). The distribution for each factor level should be uniformly distributed, so the box should go from 0.25 to 0.75, with the median line at 0.5 (within-group). To test if deviations from those expectations are significant, KS-tests per group and a Levene test for homogeneity of variances are performed. See [testCategorical] for details.
 #'
-#' @note If nObs > 10,000, the scatter plot is replaced by graphics::smoothScatter();for categorical predictors, individual residuals are not plotted.
+#' @note If nObs > 10,000, the scatter plot is replaced by graphics::smoothScatter(); for categorical predictors, individual residuals are not plotted.
 #'
 #' The color for highlighting outliers and quantile lines/splines with significant tests can be changed by setting \code{options(DHARMaSignalColor = "red")} to a different color. See \code{getOption("DHARMaSignalColor")} for the current setting. This is convenient for a color-blind friendly display, since red and black are difficult for some people to distinguish.
 #'
@@ -214,7 +216,6 @@ plotResiduals <- function(simulationOutput, form = NULL, quantreg = NULL,
     if (!inherits(form, "formula")) {
       predictor = form # go back to old default
       group = NULL
-      a$xlab = checkDots("xlab", paste(deparse(checkForm), collapse = ""), ...)
       if(is.null(predictor)) stop("DHARMA: unable to find specified predictor variable.")
 
     } else {
@@ -360,6 +361,10 @@ plotResiduals <- function(simulationOutput, form = NULL, quantreg = NULL,
 
   # Note to self: wrapped in do.call because of the check dots, needs to be consolidate, e.g. for testCategorical
 
+  # outlier test (bootstrap) and quantile regression must not change the user's RNG stream
+  randomState = getRandomState(123)
+  on.exit(randomState$restoreCurrent(), add = TRUE)
+
   # categorical plot
   if(is.factor(pred)){
     a$p.outliers = if(is.vector(simOut)) NA else testOutliers(simOut, plot = FALSE)$p.value
@@ -373,7 +378,7 @@ plotResiduals <- function(simulationOutput, form = NULL, quantreg = NULL,
     # color/shape outliers according to significance of outlier test, related to issue #453
     outlier <- res == 0 | res == 1
     if(is.vector(simOut)) {
-      message("Outliers will be not displayed in the plot when simulationOutput is not a DHARMa object.")
+      message("Outliers will not be displayed in the plot when simulationOutput is not a DHARMa object.")
       defaultCol = blackcol
       defaultPch = 1
     } else {

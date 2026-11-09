@@ -391,7 +391,7 @@ testCategorical <- function(simulationOutput, catPred,
     catPred = getFormulaPredictors(simulationOutput, formula = catPred)[[1]] # formula syntax
   }
 
-  catPred = as.factor(catPred)
+  catPred = droplevels(as.factor(catPred)) # unused levels have no residuals
   res = simulationOutput$scaledResiduals
   out = list()
 
@@ -408,65 +408,47 @@ testCategorical <- function(simulationOutput, catPred,
   if(is.null(smoothScatter)) smoothScatter = length(res) > switchScatter
 
   if(plot == T){
+    # seed before testOutliers (bootstrap) and jitter, so plotting does not change the user's RNG stream (#616)
+    randomState = getRandomState(123)
+    on.exit(randomState$restoreCurrent(), add = TRUE)
     if(is.null(a$p.outliers)) {
       a$p.outliers = if(is.null(simulationOutput$nSim)) NA
       else testOutliers(simulationOutput, plot = FALSE)$p.value
     }
 
-    do.call(boxplot, append(list(formula = res ~ catPred, ylim = c(0,1), axes = FALSE,
-                                 outline = smoothScatter, col = ifelse(out$uniformity$p.value.cor < 0.05, "red", "lightgrey")),
-                            a[!names(a) %in% c("main", "col", "pch", "xlim", "p.outliers")]))
+    # boxplot outliers are hidden, residuals are shown as points or outlier stars below
+    bxArgs = append(list(formula = res ~ catPred, ylim = c(0,1), axes = FALSE, outline = FALSE),
+                    a[!names(a) %in% c("main", "col", "pch", "xlim", "ylim", "horizontal", "p.outliers")])
+    do.call(boxplot, append(bxArgs, list(col = ifelse(out$uniformity$p.value.cor < 0.05, .Options$DHARMaSignalColor, "lightgrey"))))
 
     # add jitter points onto boxplots (issue #562)
-    randomState = getRandomState(123)
-    on.exit(randomState$restoreCurrent(), add = TRUE)
     x = jitter(as.numeric(catPred), amount = 0.3)
     blackcol = rgb(0, 0, 0, alpha = max(0.1, 1 - 3 * length(res) / switchScatter))
+    if(is.na(a$p.outliers)) message("Outliers will not be displayed in the plot when simulationOutput is not a DHARMa object.")
+    outlier = !is.na(a$p.outliers) & (res == 0 | res == 1)
+    sigOutliers = !is.na(a$p.outliers) && a$p.outliers < 0.05
 
-    # color outliers similar to scatterplot
-    outlier = res == 0 | res == 1
-
-    if(is.na(a$p.outliers)) {
-      message("Outliers will be not displayed in the plot when simulationOutput is not a DHARMa object.")
-      defaultCol = blackcol
-      defaultPch = 16
-      defaultCex = 0.5
+    if (smoothScatter == FALSE) {
+      points(x, res, pch = checkDots("pch", ifelse(outlier, 8, 16), ...), cex = ifelse(outlier, 1, 0.5),
+             col = checkDots("col", ifelse(outlier & sigOutliers, .Options$DHARMaSignalColor, blackcol), ...))
+      do.call(boxplot, append(bxArgs, list(add = TRUE, col = NA))) # median on top of points
     } else {
-      defaultPch = ifelse(outlier==TRUE, 8, 16)
-      defaultCex = ifelse(outlier, 1, 0.5)
-      if(a$p.outliers < 0.05){
-        defaultCol = ifelse(outlier == TRUE, .Options$DHARMaSignalColor, blackcol)
-      } else{defaultCol = blackcol}
+      points(x[outlier], res[outlier], pch = 8, col = ifelse(sigOutliers, .Options$DHARMaSignalColor, "black"))
     }
-
-      if (smoothScatter == FALSE) {
-        points(x, res,
-             pch = defaultPch,
-             cex = defaultCex,
-             col = defaultCol)
-        # add median on top
-        do.call(boxplot, append(list(formula = res ~ catPred, add = TRUE, col = NA,
-                                   axes = FALSE, outline = FALSE), a[!names(a) %in% c("main", "col", "pch", "xlim", "p.outliers")]))
-
-      } else {
-        if(!is.na(a$p.outliers)) {points(x[outlier], res[outlier], pch = 8, cex = 1,
-               col = ifelse(!is.na(a$p.outliers) && a$p.outliers < 0.05, .Options$DHARMaSignalColor, "black"))}
-      }
 
     axis(1, at = 1:nlevels(catPred), levels(catPred))
     axis(2, at=c(0, quantiles, 1))
     abline(h = quantiles, lty = 2)
 
-    title(ifelse(any(out$uniformity$p.value.cor < 0.05), "Within-group deviations from uniformity significant (red)", "Within-group deviation from uniformity n.s."),
-          col.main = ifelse(any(out$uniformity$p.value.cor < 0.05), "red", "black"),
+    title(ifelse(any(out$uniformity$p.value.cor < 0.05), "Within-group deviations from uniformity significant", "Within-group deviation from uniformity n.s."),
+          col.main = ifelse(any(out$uniformity$p.value.cor < 0.05), .Options$DHARMaSignalColor, "black"),
           line = 1, cex.main = 0.8)
 
     if(length(out) > 1) {
       title(ifelse(out$homogeneity$`Pr(>F)`[1] < 0.05, "Levene Test for homogeneity of variance significant", "Levene Test for homogeneity of variance n.s."),
-            col.main = ifelse(out$homogeneity$`Pr(>F)`[1] < 0.05, "red", "black"), cex.main = 0.8)
+            col.main = ifelse(out$homogeneity$`Pr(>F)`[1] < 0.05, .Options$DHARMaSignalColor, "black"), cex.main = 0.8)
     }
   }
-
 
   return(out)
 

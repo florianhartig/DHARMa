@@ -2,9 +2,17 @@ NOTE: for more news about the package, see https://github.com/florianhartig/DHAR
 
 # DHARMa 0.5.2
 
-# Minor changes
+## Bugfixes
 
-* `plotResiduals()` / `testCategorical()` now show individual residuals as jittered points in the boxplots for categorical predictors for <10,000 observations (issue #562), including outliers; jitter points can be suppressed using `smoothScatter = TRUE`. Additional arguments such as ylab are now passed to the boxplot.
+* `plotQQunif()` and `plotResiduals()` no longer change the user's random number stream (bootstrap outlier test, quantile regression) (#616).
+
+* `testCategorical()` no longer fails for factors with unused levels (#348, #616).
+
+## Minor changes
+
+* `plotResiduals()` / `testCategorical()`: boxplots for categorical predictors show residuals as jittered points with outliers marked (unless `smoothScatter = TRUE`, default for > 10,000 observations); further arguments such as `ylab` are passed to the boxplot (#562).
+
+* `testCategorical()`: significant boxes and titles use `DHARMaSignalColor` instead of red (#616).
 
 
 # DHARMa 0.5.1
