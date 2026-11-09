@@ -21,5 +21,4 @@ Follow [CONTRIBUTING.md](CONTRIBUTING.md). If your user is not a member of the D
 ## Working in the repository
 
 * To continue work on a branch that exists on the remote, run `git switch <branch>`, which creates a local branch tracking `origin/<branch>`. Do not create a second branch for the same work.
-* Write commit messages as a subject line, an empty line and a body.
 * Avoid resource-heavy runs (e.g., several R sessions in parallel, compiling Stan models) unless your user asks for them; for tests, see CONTRIBUTING.md.
