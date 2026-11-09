@@ -5,7 +5,7 @@
 \title{Test for categorical dependencies}
 \usage{
 testCategorical(simulationOutput, catPred, quantiles = c(0.25, 0.5, 0.75),
-  plot = TRUE, ...)
+  plot = TRUE, smoothScatter = NULL, ...)
 }
 \arguments{
 \item{simulationOutput}{an object of class DHARMa, either created via \link{simulateResiduals} for supported models or by \link{createDHARMa} for simulations created outside DHARMa, or a supported model. Providing a supported model directly is discouraged, because simulation settings cannot be changed in this case.}
@@ -16,6 +16,8 @@ testCategorical(simulationOutput, catPred, quantiles = c(0.25, 0.5, 0.75),
 
 \item{plot}{if TRUE, the function will create an additional plot.}
 
+\item{smoothScatter}{if TRUE, individual residual jitter points will not be plotted. This makes sense when the number of residuals is very large. Default NULL chooses T for nObs > 10000, and F otherwise.}
+
 \item{...}{additional arguments to boxplot.}
 }
 \description{
@@ -24,7 +26,7 @@ This function tests if there are problems in a res ~ group structure. It perform
 \details{
 The function tests for two common problems: are residuals within each group distributed according to model assumptions, and is the variance between groups heterogeneous.
 
-The test for within-group uniformity is performed via multiple KS-tests, with adjustment of p-values for multiple testing. If the plot is drawn, problematic groups are highlighted in red, and a corresponding message is displayed in the plot.
+The test for within-group uniformity is performed via multiple KS-tests, with adjustment of p-values for multiple testing. If the plot is drawn, problematic groups are highlighted in red, and a corresponding message is displayed in the plot. Outliers are marked in star/asterisk form and highlighted in red if the outlier test is significant. For information on definition and interpretation of outliers, see \link{testOutliers}.
 
 The test for homogeneity of variances is done with a Levene test. A significant p-value means that group variances are not constant. In this case, you should consider modelling variances, e.g. via ~dispformula in glmmTMB.
 }
