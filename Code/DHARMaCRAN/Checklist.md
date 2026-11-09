@@ -1,63 +1,52 @@
-Submission Checklist
+# Submission Checklist
+
+Steps marked [maintainer] need e-mails sent to the maintainer; all other steps can be done by any team member.
 
 ## Prepare release
 
-* Check current CRAN issues at https://cran.r-project.org/web/checks/check_results_DHARMa.html
-* All GitHub issues for the release resolved?
+* Run the GitHub Actions workflow "Reverse dependency check" early (Actions tab, "Run workflow")
+  * If an intended change breaks packages: inform their maintainers with suggested changes at least 2 weeks before submitting
+* Check current CRAN issues at <https://cran.r-project.org/web/checks/check_results_DHARMa.html>
+* All GitHub issues and pull requests in the release milestone resolved, or postponed to the next release?
   * All new features / changes have help files, examples and appropriate unit tests? 
   * Is the NEWS.md file updated?
-  * Are all documentation files, including README.MD, vignettes, updated?
-* Make sure RStudio check / test on your computer produce no errors, warnings or notes
-* Make sure CI via GH Actions produces no errors, warnings or notes
-* Check package in http://win-builder.r-project.org/upload.aspx
+  * Are all documentation files, including README.md, vignettes, updated?
+* Prepare the submission (the steps below up to the upload, and fixes requested by CRAN) on a branch `v<version>-cranSubmission` with a pull request. Do not merge other pull requests that change `DHARMa/` into `master` until the submission is accepted, so that the tagged version equals the submitted one
+* Run the user-perspective tests in Code/DHARMaUserTests (see the README there) and fix or file the problems found
 * Update DESCRIPTION files -> date, version number, etc.
+* Make sure a local `R CMD check --as-cran` on the tarball from `R CMD build DHARMa` (needs pandoc for the vignettes) produces no errors, warnings or notes
+  * `devtools::document("DHARMa")` produces no new changes (check with `git status`)
+* Go through stale branches (GitHub branches page, "Stale" view = no commits in the last three months), except `master` and `archive/` branches: for each branch without an open pull request, open a draft pull request, or archive it with a tag and delete it (see code below)
 
 ## Test release
 
 * Make sure that help files / tests don't take too long (5s on slow computer max for CRAN)
-* Check again GH ations of the final files
-* Check package in http://win-builder.r-project.org/upload.aspx
-  * Results go to maintainer
-* Check Reverse dependencies
-  * https://github.com/yihui/crandalf
-  * [revdepcheck](https://github.com/r-lib/revdepcheck) package, see code below
-* Update CRAN.md file with text for submission
+* Make sure CI via GitHub Actions (all OS) on the final submission branch produces no errors, warnings or notes
+* Re-run the reverse dependency check on the final submission branch
+* Check package in <https://win-builder.r-project.org/upload.aspx> (all R versions; or from R: `devtools::check_win_devel("DHARMa")`, `devtools::check_win_release("DHARMa")`, `devtools::check_win_oldrelease("DHARMa")`)
+  * [maintainer] Read the results
+* Update DHARMa/cran-comments.md with text for submission (reverse dependency results, including affected packages whose maintainers were informed; explain any remaining notes)
   
 ## CRAN upload
 
-* Upload release to CRAN 
-  * Can be done by anyone but upload confirmation goes to maintainer
-* Document upload text in DHARMa/cran-comments.md
+* Build the tarball from the final submission branch and upload it at <https://cran.r-project.org/submit.html>, with the new section of DHARMa/cran-comments.md in "Optional comment" (if not uploaded by the maintainer, explain this there)
+  * [maintainer] Confirm the upload via the link in CRAN's e-mail
+  * [maintainer] Forward CRAN's reply to the team
+  * If changes are requested: fix them, add a "Submission n" section to DHARMa/cran-comments.md that says how they were addressed, and upload again as above
 
 ## Package accepted
 
-* Create release / tag on GH
+* Squash-merge the submission branch into `master`
+* On GitHub: create a release with tag `v<version>` on `master` and close the release milestone. The release text starts with a short overview of the release (one to three sentences, based on DHARMa/cran-comments.md), followed by the NEWS section of the version
+* Set the version in DESCRIPTION to the next planned release and add a matching heading at the top of DHARMa/NEWS.md
 
 
 
-### Code for reverse dependency checks
+### Code for archiving a stale branch
 
-```{r}
-# from R Packages book Chapeter 22
-
-usethis::use_revdep() # changes .gitignore and .Rbuildignore 
-revdepcheck::revdep_check(num_workers=4)
-
-# it creates a folder revdep/ with the results of the checks
-# cran.md is a high-level summary aimed at CRAN. Copy and paste it to cran-comments.md.
-
-#OLD:
-install.packages("rhub")
-rhub::platforms()
-rhub::check_for_cran("")
-
-# check when a function was introduced to base
-newsDB <- news()
-print(news(grepl("startsWith",Text), db=newsDB), doBrowse=FALSE)
+```bash
+git fetch origin --prune
+git tag archive/<branch> origin/<branch>
+git push origin archive/<branch>
+git push origin --delete refs/heads/<branch>
 ```
-
-
-
-
-
-

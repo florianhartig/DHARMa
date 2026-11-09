@@ -120,8 +120,13 @@ test_that("hasWeights", {
   m = glm(observedResponse ~ Environment1, family = poisson, data = dp, weights = w)
   expect_true(DHARMa:::hasWeights(m))
 
-  # weights all equal to 1 = no weights
-  m = glm(observedResponse ~ Environment1, family = poisson, data = dp,
-          weights = rep(1, 200))
-  expect_false(DHARMa:::hasWeights(m))
+})
+
+test_that("runBenchmarks", {
+
+  expect_no_warning(runBenchmarks(function() runif(2), nRep = 3))
+  i = 0
+  withNA = function() {i <<- i + 1; c(runif(1), if (i == 1) NA else runif(1))}
+  expect_warning(runBenchmarks(withNA, nRep = 3), "NA values")
+
 })

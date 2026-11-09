@@ -3,7 +3,7 @@
 #' This S3 function creates standard plots for the simulated residuals contained in an object of class DHARMa, using [plotQQunif] (left panel) and [plotResiduals] (right panel).
 #'
 #' @param x an object of class DHARMa with simulated residuals created by [simulateResiduals].
-#' @param ... further options for [plotResiduals]. Consider in particular parameters quantreg, rank and asFactor. xlab, ylab and main cannot be changed when using plot.DHARMa, but can be changed when using [plotResiduals].
+#' @param ... further options for [plotResiduals]. Consider in particular parameters quantreg, rank and asFactor. xlab, ylab and main passed here only change the right panel (the residual plot); use [plotResiduals] and [plotQQunif] to fully control the labels of the individual plots.
 #' @param title the title for both panels (plotted via mtext, outer = TRUE).
 #'
 #' @details The function creates a plot with two panels. The left panel is a uniform qq plot (calling [plotQQunif]), and the right panel shows residuals against predicted values (calling [plotResiduals]), with outliers as a star/asterisk and highlighted in red if outlier test is significant (default color but see Note).
@@ -15,8 +15,6 @@
 #' b) visual homogeneity of residuals in both vertical and horizontal direction, as well as non-significance of quantile tests in the res ~ predictor plot (for more details on the interpretation of this plot, see [plotResiduals])
 #'
 #' Deviations from these expectations can be interpreted similar to a linear regression. See the vignette for detailed examples.
-#'
-#' Note that, unlike [plotResiduals], plot.DHARMa command uses the default rank = T.
 #'
 #' @note The color for highlighting outliers and significant tests can be changed by setting \code{options(DHARMaSignalColor = "red")} to a different color. See \code{getOption("DHARMaSignalColor")} for the current setting. This is convenient for a color-blind friendly display, since red and black are difficult for some people to separate.
 #'
@@ -75,7 +73,7 @@ hist.DHARMa <- function(x,
 #' DEPRECATED, use plot() instead
 #'
 #' @param simulationOutput an object with simulated residuals created by [simulateResiduals]
-#' @param ... further options for [plotResiduals]. Consider in particular parameters quantreg, rank and asFactor. xlab, ylab and main cannot be changed when using plotSimulatedResiduals, but can be changed when using plotResiduals.
+#' @param ... further options for [plotResiduals]. Consider in particular parameters quantreg, rank and asFactor. xlab, ylab and main passed here only change the right panel (the residual plot); use [plotResiduals] and [plotQQunif] to fully control the labels of the individual plots.
 #' @note This function is deprecated. Use [plot.DHARMa]
 #'
 #' @seealso [plotResiduals], [plotQQunif]
@@ -139,8 +137,8 @@ plotQQunif <- function(simulationOutput, testUniformity = TRUE, testOutliers = T
     temp = testDispersion(simulationOutput, plot = FALSE)
     legend("center",
            c(paste("Dispersion test: p=", round(temp$p.value, digits = 5)),
-             paste("Deviation ", ifelse(temp$p.value < 0.05, "significant", "n.s."))),
-           text.col = ifelse(temp$p.value < 0.05, .Options$DHARMaSignalColor, "black" ), bty="n")
+             paste("Deviation ", if(is.na(temp$p.value)) "not available" else ifelse(temp$p.value < 0.05, "significant", "n.s."))),
+           text.col = ifelse(isTRUE(temp$p.value < 0.05), .Options$DHARMaSignalColor, "black" ), bty="n")
   }
 
 }
@@ -159,7 +157,7 @@ plotQQunif <- function(simulationOutput, testUniformity = TRUE, testOutliers = T
 #' @param smoothScatter if T: for numeric predictors, a smooth scatter plot will plotted instead of a normal scatter plot; for categorical predictors, individual residuals will not be plotted. This makes sense when the number of residuals is very large. Default NULL chooses T for nObs > 10000, and F otherwise.
 #' @param quantiles for a quantile regression, which quantiles should be plotted. Default is 0.25, 0.5, 0.75.
 #' @param absoluteDeviation if T, switch from displaying normal quantile residuals to absolute deviation from the mean expectation of 0.5 (calculated as 2 * abs(res - 0.5)). The purpose of this is to test explicitly for heteroskedasticity, see details.
-#' @param ... additional arguments to plot / boxplot.
+#' @param ... additional arguments to plot / boxplot. Ignored if several panels are plotted.
 #' @details The function plots residuals against a predictor (by default against the fitted value, extracted from the DHARMa object, or any other predictor). The shaded gray areas indicate 95% confidence intervals of the quantile estimates (1.96 * standard error).
 #'
 #' Outliers are drawn if simulationOutput is a DHARMa object and highlighted in red if the outlier test is significant (for information on definition and interpretation of outliers, see [testOutliers]). See the note below to change the highlighting color of the outliers.
@@ -170,7 +168,7 @@ plotQQunif <- function(simulationOutput, testUniformity = TRUE, testOutliers = T
 #'
 #' The quantile regression can take some time to calculate, especially for larger datasets. For this reason, quantreg = F can be set to generate a smooth spline instead. This is the default for n > 10000.
 #'
-#' If form is specified as a formula, e.g. \code{form = ~ your_predictor}, NAs will be handled automatically (recommended). If \code{form = ~.}, separate plots for all predictors in the model are produced. If \code{form = ~ predictor1 + predictor2}, a separate plot for each specified predictor is produced. If an additional grouping variable is specified, e.g. \code{form = ~ predictor|group}, a separate plot for the predictor within each grouping level is produced. Be careful with this command: if you have many levels, the plot may not display nicely. If you are interested in a specific group, you can use \code{form = ~ predictor|group == "group_level"}. If form is **not** a formula, e.g. \code{form = data$predictor}, NAs are **not** handled automatically. For phyr and gamm4$mer models, you need to specify form in this way.
+#' If form is specified as a formula, e.g. \code{form = ~ your_predictor}, NAs will be handled automatically (recommended). If \code{form = ~.}, separate plots for all predictors in the model are produced. If \code{form = ~ predictor1 + predictor2}, a separate plot for each specified predictor is produced. If an additional grouping variable is specified, e.g. \code{form = ~ predictor|group}, a separate plot for the predictor within each grouping level is produced. Be careful with this command: if you have many levels, the plot may not display nicely. If you are interested in a specific group, you can use \code{form = ~ predictor|group == "group_level"}, and for several groups \code{form = ~ predictor|group \%in\% c("level1", "level2")}, which produces a separate plot for each of these levels. If form is **not** a formula, e.g. \code{form = data$predictor}, NAs are **not** handled automatically. For phyr and gamm4$mer models, you need to specify form in this way.
 #'
 #' If the predictor is a factor, a boxplot will be plotted instead of a scatter plot. Individual residuals are added as jittered points (unless smoothScatter = TRUE). The distribution for each factor level should be uniformly distributed, so the box should go from 0.25 to 0.75, with the median line at 0.5 (within-group). To test if deviations from those expectations are significant, KS-tests per group and a Levene test for homogeneity of variances are performed. See [testCategorical] for details.
 #'
@@ -178,7 +176,7 @@ plotQQunif <- function(simulationOutput, testUniformity = TRUE, testOutliers = T
 #'
 #' The color for highlighting outliers and quantile lines/splines with significant tests can be changed by setting \code{options(DHARMaSignalColor = "red")} to a different color. See \code{getOption("DHARMaSignalColor")} for the current setting. This is convenient for a color-blind friendly display, since red and black are difficult for some people to distinguish.
 #'
-#' @return If quantile tests are performed, the function returns them invisibly.
+#' @return If quantile tests are performed, the function returns them invisibly. If several panels are plotted, the function returns NULL.
 #'
 #' @seealso [plotQQunif], [testQuantiles], [testOutliers]
 #' @example inst/examples/plotResidualsHelp.R
@@ -194,8 +192,10 @@ plotResiduals <- function(simulationOutput, form = NULL, quantreg = NULL,
   a <- list(...)
   yAxis = ifelse(absoluteDeviation == TRUE, "Residual spread [2*abs(res - 0.5)]", "DHARMa residual")
   a$ylab = checkDots("ylab", yAxis , ...)
-  a$xlab = checkDots("xlab", ifelse(is.null(form), "Model predictions",
-                                    paste(unique(all.vars(form)), collapse = ", ")), ...)
+  # all.vars only for formulas, as it returns character(0) for vectors
+  a$xlab = checkDots("xlab", if(is.null(form)) "Model predictions"
+                     else if(inherits(form, "formula")) paste(unique(all.vars(form)), collapse = ", ")
+                     else gsub(".*[$]|^~","", paste(deparse(substitute(form)), collapse = "")), ...)
   a$main = checkDots("main", NULL, ...)
 
   simOut <- simulationOutput
@@ -226,7 +226,7 @@ plotResiduals <- function(simulationOutput, form = NULL, quantreg = NULL,
 
         # issue #536: remove "(weights)" from predictorNames
         if("(weights)" %in% predictorNames) {predictorNames = predictorNames[!predictorNames %in% "(weights)"]}
-        return(plotResidualsAll(
+        return(plotResidualsPanels(
           simulationOutput = simulationOutput,
           predictorNames = predictorNames,
           predictorType = "predictor",
@@ -242,12 +242,12 @@ plotResiduals <- function(simulationOutput, form = NULL, quantreg = NULL,
 
       # if there is more than 1 predictor, check if form is specified either
       # with "|" (plot residuals within a certain group)
-      # or "+" (plot residuals for multiple predictors in separate panels via plotResidualsAll)
+      # or "+" (plot residuals for multiple predictors in separate panels via plotResidualsPanels)
 
       predictors = getFormulaPredictors(simulationOutput = simulationOutput, formula = form)
 
       if(length(predictors) > 1) {
-        operators = unlist(strsplit(as.character(form[[2]]), split = character(0)))
+        operators = all.names(form[[2]])
 
         if("|" %in% operators && "+" %in% operators) stop("DHARMa: Detected both + and | as operators. Please choose one or the other. See ?plotResiduals.")
 
@@ -255,7 +255,7 @@ plotResiduals <- function(simulationOutput, form = NULL, quantreg = NULL,
         if("+" %in% operators) {
           predictorNames = names(predictors)
 
-          return(plotResidualsAll(
+          return(plotResidualsPanels(
             simulationOutput = simulationOutput,
             predictorNames = predictorNames,
             predictorType = "predictor",
@@ -293,12 +293,19 @@ plotResiduals <- function(simulationOutput, form = NULL, quantreg = NULL,
 
   # if group is not NULL, get predictor and residuals belonging to specified group level OR create residual plot for each group level
   if(!is.null(group)) {
-    groupLevel = tryCatch(eval(form[[2]][[3]][[3]]), error = function(e) NULL)
+    groupLevel = tryCatch(eval(form[[2]][[3]][[3]], environment(form)), error = function(e) NULL)
+    if(!is.null(groupLevel) && !deparse(form[[2]][[3]][[1]]) %in% c("==", "%in%")) stop("DHARMa: to select group levels, use == or %in%, e.g. form = ~x | group %in% c(\"a\", \"b\").")
+    if(!is.null(groupLevel) && (length(groupLevel) == 0 || !all(groupLevel %in% levels(factor(group))))) stop("DHARMa: Unable to find specified group level(s).")
 
-    if(is.null(groupLevel)) {
-      predictorNames = levels(group)
+    # one panel per group level, for all or for several selected levels (#596)
+    if(length(groupLevel) != 1) {
+      predictorNames = levels(factor(group))
+      if(!is.null(groupLevel)) {
+        predictorNames = predictorNames[predictorNames %in% groupLevel]
+        form[[2]][[3]] = form[[2]][[3]][[2]] # ~x | group %in% c(...) -> ~x | group
+      }
 
-      return(plotResidualsAll(
+      return(plotResidualsPanels(
         simulationOutput = simulationOutput,
         predictorNames = predictorNames,
         predictorType = "groupLevel",
@@ -314,8 +321,7 @@ plotResiduals <- function(simulationOutput, form = NULL, quantreg = NULL,
     }
 
     pred = pred[group == groupLevel]
-    if(length(pred) == 0) {stop("DHARMa: Unable to find specified group level.")}
-    res = simulationOutput$scaledResiduals[group == groupLevel]
+    res = res[group == groupLevel]
   }
 
 
@@ -356,11 +362,9 @@ plotResiduals <- function(simulationOutput, form = NULL, quantreg = NULL,
 
   # categorical plot
   if(is.factor(pred)){
-    a$p.outliers = if(is.vector(simOut)) NA else testOutliers(simOut, plot = FALSE)$p.value
     simulationOutput$scaledResiduals = res
-    do.call(testCategorical,
-            append(list(simulationOutput = simulationOutput, catPred = pred,
-                        quantiles = quantiles, smoothScatter = smoothScatter), a))
+    testCategorical(simulationOutput = simulationOutput, catPred = pred,
+                    quantiles = quantiles, xlab = a$xlab, ...)
 
   } else{
 
@@ -403,7 +407,7 @@ plotResiduals <- function(simulationOutput, form = NULL, quantreg = NULL,
   }
   ##### Quantile regressions #####
 
-  if(is.null(a$main)) {main = ifelse(is.null(form), paste(yAxis, "vs. predicted"), paste(yAxis, "Residual vs. predictor"))} else {main = a$main}
+  if(is.null(a$main)) {main = ifelse(is.null(form), paste(yAxis, "vs. predicted"), paste(yAxis, "vs. predictor"))} else {main = a$main}
   out = NULL
 
   if(is.numeric(pred)){
@@ -479,25 +483,24 @@ plotConventionalResiduals <- function(fittedModel){
 
 
 
-#' Create multiple residual plots simultaneously.
+#' Create multiple residual plots simultaneously (deprecated)
 #'
-#' Convenience function to plot residuals against all predictors of the model / against certain predictors of the model / against a predictor and all levels of a grouping variable.
+#' DEPRECATED, use [plotResiduals] with `form = ~.`, `~a + b`, `~x | group` or `~x | group %in% c(...)` instead
 #'
 #' @param simulationOutput an object with simulated residuals created by [simulateResiduals].
 #' @param predictorNames names of the predictors / group levels to be plotted.
 #' @param predictorType whether multiple plots should be created based on different predictor variables (predictor) or a single predictor and each corresponding group level (groupLevel).
 #' @param form optional predictor (and grouping variable) against which the residuals should be plotted.
-#' @param quantreg whether to perform a quantile regression or a smooth spline around the mean.
-#' @param rank if T, the values provided in form will be rank transformed.
-#' @param asFactor should a numeric predictor provided in form be treated as a factor.
-#' @param smoothScatter if T, a smooth scatter plot will plotted instead of a normal scatter plot.
-#' @param quantiles for a quantile regression, which quantiles should be plotted.
-#' @param absoluteDeviation if T, switch from displaying normal quantile residuals to absolute deviation from the mean expectation of 0.5 (calculated as 2 * abs(res - 0.5)).
-#' @param ... additional arguments to plot / boxplot.
-#' @details For further details on the parameters see [plotResiduals].
+#' @param ... further options for [plotResiduals].
+#' @note This function is deprecated. Use [plotResiduals]
 #' @export
-#'
-plotResidualsAll <- function(simulationOutput, predictorNames, predictorType = c("predictor", "groupLevel"), form = NULL, quantreg = NULL,
+plotResidualsAll <- function(simulationOutput, predictorNames, predictorType = c("predictor", "groupLevel"), form = NULL, ...){
+  message("plotResidualsAll is deprecated, please switch your code to plotResiduals() with argument form, see ?plotResiduals")
+  plotResidualsPanels(simulationOutput, predictorNames, match.arg(predictorType), form, ...)
+}
+
+# internal function of plotResiduals, plots one panel per predictor or group level
+plotResidualsPanels <- function(simulationOutput, predictorNames, predictorType = c("predictor", "groupLevel"), form = NULL, quantreg = NULL,
                              rank = TRUE, asFactor = NULL, smoothScatter = NULL,
                              quantiles = c(0.25, 0.5, 0.75),
                              absoluteDeviation = FALSE, ...){
@@ -506,8 +509,11 @@ plotResidualsAll <- function(simulationOutput, predictorNames, predictorType = c
   on.exit(par(opar))
 
   # remove duplicate predictors, e.g. due to quadratic effects (fixes issue #536)
-  Vars = unname(sapply(predictorNames, function(x) all.vars(formula(paste("~", x)))[1]))
-  predictorNames = predictorNames[!duplicated(Vars)]
+  # only for predictors, group levels are not variable names (issue #573)
+  if(predictorType == "predictor"){
+    Vars = unname(sapply(predictorNames, function(x) all.vars(formula(paste("~", x)))[1]))
+    predictorNames = predictorNames[!duplicated(Vars)]
+  }
 
   # get number of panels needed (copied from BayesianTools)
   numPredictors = length(predictorNames)
@@ -545,7 +551,7 @@ plotResidualsAll <- function(simulationOutput, predictorNames, predictorType = c
   if(predictorType == "groupLevel"){
     # create residual plot for each group level of a predictor
     for(i in 1:length(predictorNames)){
-      newForm = paste("~", form, "==", predictorNames[i])[[2]]
+      newForm = paste("~", form, "==", deparse(predictorNames[i]))[[2]]
 
       plotResiduals(simulationOutput,
                     form = formula(newForm),

@@ -1,28 +1,81 @@
 NOTE: for more news about the package, see https://github.com/florianhartig/DHARMa/releases
 
+# DHARMa 0.5.2
+
+
 # DHARMa 0.5.1
 
 
 ## Bugfixes
 
-* Version 0.5.0 was changing the `glmmTMB` model object "simcode" when using simulateResiduals. We fixed this problem by restoring the original simcode to the model object.
+* `testDispersion` (type = "DHARMa", refit = FALSE) was biased for binomial models with more than one trial (k/n models, specified via `cbind(k, n - k)` or as proportions with the number of trials given in `weights`): residuals were calculated as observed / simulated number of successes minus the fitted *proportion*. Residuals are now calculated with the fitted values on the scale of the observed response (expected number of successes), provided by the new function `getFittedResponse`. Poisson, Bernoulli (0/1) and all other models are not affected (#557).
 
-* Fixing bug in predictions via getFitted for `gam` and `bam` models. Predictions are now unconditional on random effects and factor smooth interactions (previously they were conditional, see #544).
+* Version 0.5.0 was changing the `glmmTMB` model object "simcode" when using simulateResiduals. We fixed this problem by restoring the original simcode to the model object (#538).
 
-* Solving duplicated plots in `plotResiduals`: (1) when having quadratic effects written with I(variable) in the formula, and (2) for brms with transformed variables in the formula, e.g. `log(variable)`. 
+* Fixing bug in predictions via getFitted for `gam` and `bam` models. Predictions are now unconditional on random effects and factor smooth interactions; previously they were conditional (#544).
 
-* Minor fixes in testSpatialAutocorrelation: DHARMa errors if repeated values for space in distMat, extended help, improved plot titles and legend.
+* Fixed `gam` simulations without mgcViz or with `mgcViz = FALSE` (#567).
 
-* Revised weights handling (issue #230, #540): introduced more robust check for prior weights (especially in n/k models) with new helper function `hasWeights`.
+* Binomial models with `cbind()` response and additional prior weights now stop with an informative error (#568).
 
-* Predictions from `GLMMadaptive` models are now created using `fitted()`, which avoids errors on models with transformations (e.g. offset, log)
+* `bam` models with the `offset` argument now stop with an error if mgcv excludes the offset from the fitted values (#572).
 
-* Fix in behavior of `update()` on models with transformed predictors (e.g. `offset()`). This fixes behavior of `getRefit` and related functions such as `simulateLRT` (issue #351). 
+* Simulations of `gam` models with `cbind()` response via mgcViz are now integers (#590).
 
+* Solving duplicated plots in `plotResiduals`: (1) when having quadratic effects written with I(variable) in the formula, and (2) for brms with transformed variables in the formula, e.g. `log(variable)` (#536, #542).
+
+* Small fixes in `plotResiduals(form = ~x | group)` (#573).
+
+* `recalculateResiduals()` now sets `nObs` and `nGroups` to the number of grouped residuals, which fixes `testOutliers()` and `testTemporalAutocorrelation(time = NULL)` for grouped residuals (#603, #605).
+
+* `recalculateResiduals()` now stops if fewer than 2 residuals remain after grouping and selection, and warns if fewer than 10 remain (#604).
+
+* `plotResiduals(form = ...)`: default title no longer reads "DHARMa residual Residual vs. predictor"; `recalculateResiduals()` gives an informative error if not called on a DHARMa object.
+
+* Minor fixes in testSpatialAutocorrelation: DHARMa errors if repeated values for space in distMat, extended help, improved plot titles and legend (#73, #546).
+
+* Revised weights handling: introduced more robust check for prior weights (especially in n/k models) with new helper function `hasWeights` (#230, #540).
+
+* Predictions from `GLMMadaptive` models are now created using `fitted()`, which avoids errors on models with transformations (e.g. offset, log) (#556).
+
+* brms: `getPearsonResiduals()` stops with an informative error; unconditional simulations re-simulate the random effects instead of setting them to zero and stop for unsupported models (#574).
+
+* Fix in behavior of `update()` on models with transformed predictors (e.g. `offset()`). This fixes behavior of `getRefit` and related functions such as `simulateLRT` (#351).
+
+* `getRefit()` now works for transformed responses (e.g. `log(y)`) and glmmTMB `cbind()` responses, and `simulateResiduals(refit = TRUE)` works for glmmTMB proportions with weights and stops with an informative error if all refits fail (#571).
+
+* `getRefit()` now works for models fitted with `subset` given as row numbers or as a logical vector defined outside the data (#599).
+
+* Small output fixes in `testCategorical()`, `testOutliers()` and `print.DHARMa` (#569).
+
+* `runBenchmarks()` no longer warns about NA values when the output contains none (#577).
+
+* `testTemporalAutocorrelation()` no longer fails if AlgDesign is loaded, e.g. via agricolae (#504).
+
+* `plotResiduals(form = ~x | group %in% c(...))` now plots one panel per selected group level instead of a wrong subset of the data; comparison operators other than `==`, such as `!=`, give an error (#596).
+
+* `plotResiduals(absoluteDeviation = TRUE)` now also transforms the residuals for factor predictors, `form = ~x | group` and `~x | group == "level"` (#596).
+
+* `testDispersion()` with `refit = TRUE` now aggregates the observed Pearson residuals like the refitted ones after `recalculateResiduals()`, and warns and returns NA if these are all (close to) zero (#575).
+
+* `testQuantiles()` now gives the same results with and without plot, evaluates transformations such as `~log(x)`, and stops for categorical predictors and formulas with several variables (#576).
+
+* `recalculateResiduals()` now always uses the traditional randomization for residuals with `refit = TRUE`, as `simulateResiduals()` does, so `rotation` is not available for them; `$method` of both functions stores the method used (#589).
+
+* `simulateResiduals(refit = TRUE)` now randomizes the residuals of binomial and beta-binomial models with more than one trial on the scale of the number of successes instead of proportions, which had removed most of the power (#598).
 
 ## Minor changes
 
-* Documentation: improved vignette (more explanations for conditional vs unconditional simulations).
+* `testOutliers()`: argument `plotBoostrap` renamed to `plotBootstrap`, old name deprecated (@BertvanderVeen, #535, #560).
+
+* `plotResidualsAll()` is deprecated, use `plotResiduals()` with `form` instead (#596).
+
+* Plot titles of `simulateLRT()` and `testOutliers()` now explain the line colors (@BertvanderVeen, #535).
+
+* New compatibility function `getFittedResponse`, which returns the fitted values on the scale of the observed response, i.e. the expected number of successes for k/n binomial models (`getFitted` returns proportions). It is used in `testDispersion`.
+
+* Documentation: improved vignette (more explanations for conditional vs unconditional simulations); corrected several errors in help files, examples and vignette (#570).
+
 
 * `plotResiduals()` / `testCategorical()` now show individual residuals as jittered points in the boxplots for categorical predictors for <10,000 observations (issue #562), including outliers; jitter points can be suppressed using `smoothScatter = TRUE`. Additional arguments such as ylab are now passed to the boxplot.
 
@@ -36,7 +89,7 @@ NOTE: for more news about the package, see https://github.com/florianhartig/DHAR
 
 * In `plotResiduals`, we increased the threshold for the automatic change from quantile regression lines to the spline: from 2,000 to 10,000 data points. When it happens, a message is displayed to warn users. Also, when `quantreg = F`, the color of the spline was changed to black because there is no test associated with the line (as there is for quantile regression). 
 
-* In `plotResiduals`, the argument `form` has a new functionality. Beyond the syntax `data$predictor`, it allows now to use the formula structure  `~predictor`, `~predictor1+predictor2`, `~.`,  `~predictor|group` and `~predictor|group == "group_level"` to plot the residuals against specific/all predictors and grouping variables/levels. This works for most of the supported model functions. It solves problems with NAs in datasets that were excluded by the model. #407 / #425 
+* In `plotResiduals`, the argument `form` has a new functionality. Beyond the syntax `data$predictor`, it allows now to use the formula structure  `~predictor`, `~predictor1+predictor2`, `~.`,  `~predictor|group` and `~predictor|group == "group_level"` to plot the residuals against specific/all predictors and grouping variables/levels. This works for most of the supported model functions. It solves problems with NAs in datasets that were excluded by the model (#407, #425).
 
 * In `testCategorical`, `recalculateResiduals`, `testQuantiles`, `testSpatialAutocorrelation` and `testTemporalAutocorrelation`, additional predictors (`catPred`, `group, sel`, `predictor`, `time`, `x,y`- respectively) can now be specified as a formula (similar to `plotResiduals`). This handles rows with NAs that were excluded by the model automatically.
 
@@ -47,14 +100,18 @@ NOTE: for more news about the package, see https://github.com/florianhartig/DHAR
 
 * Fixing error in runBenchmarks.  
 
-* Fixing inconsistency in testQuantiles() #465. Including rankTransform() help function.  
+* Fixing inconsistency in testQuantiles(), including rankTransform() help function (#465).
 
 
 ## Minor changes
 
 * Using 95% confidence intervals for confidence bands in plots for testQuantiles(). Before, we were using standard errors (~ 68% CI).
 
-* Vectorize randomization of residuals to improve speed - PR#493 contributed by StaffanBetner.
+* Vectorized randomization of residuals to improve speed (@StaffanBetner, #493).
+
+* Faster rotation of residuals in `getQuantile()` (argument `rotation`), using `forwardsolve()` instead of `solve()` (@StaffanBetner, #492).
+
+* `getRefit()` now passes additional arguments (`...`) to `update()` (`update_resp()` for `spaMM`) also for `lm`/`glm`, `glmmTMB`, `spaMM` and `GLMMadaptive` models (@LuthanV, #515).
 
 * Adding color legend to testSpatialAutocorrelation().
 

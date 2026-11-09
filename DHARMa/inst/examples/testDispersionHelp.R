@@ -23,7 +23,7 @@ simulationOutput2 <- simulateResiduals(fittedModel = fittedModel, refit = TRUE, 
 testDispersion(simulationOutput2)
 
 # often useful to test dispersion per group (in particular for binomial data, see vignette)
-simulationOutputAggregated = recalculateResiduals(simulationOutput2, group = testData$group)
+simulationOutputAggregated = recalculateResiduals(simulationOutput, group = testData$group)
 testDispersion(simulationOutputAggregated)
 
 

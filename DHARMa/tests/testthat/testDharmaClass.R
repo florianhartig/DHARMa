@@ -40,23 +40,27 @@ test_that("recalcuateResiduals works", {
   simulationOutput2 = recalculateResiduals(simulationOutput,
                                            group = testData$group)
   expect_true(length(residuals(simulationOutput2)) == simulationOutput2$nGroups)
+  expect_equal(simulationOutput2$nObs, 20)
+  expect_equal(suppressWarnings(recalculateResiduals(simulationOutput,
+    group = testData$group, sel = testData$group %in% 1:3))$nGroups, 3)
 
 
   ##### only selection #####
 
   #error
-  expect_error(recalculateResiduals(simulationOutput, sel = 1))
+  expect_error(recalculateResiduals(simulationOutput, sel = 1), "number of residuals < 2")
 
   #more than nObs in selection
   simulationOutput3 = recalculateResiduals(simulationOutput, sel = 1:400)
   expect_true(length(residuals(simulationOutput3))==simulationOutput3$nObs)
 
   #less than nObs in selection
-  expect_true(length(residuals(recalculateResiduals(simulationOutput,
-                                                    sel = 1:2))) == 2)
+  expect_warning(res2 <- recalculateResiduals(simulationOutput, sel = 1:2),
+                 "less than 10 residuals")
+  expect_true(length(residuals(res2)) == 2)
 
-  expect_true(length(residuals(recalculateResiduals(simulationOutput,
-                                                    sel = c(1,6,8)))) == 3)
+  expect_true(length(residuals(suppressWarnings(recalculateResiduals(
+    simulationOutput, sel = c(1,6,8))))) == 3)
 
   expect_true(length(residuals(recalculateResiduals(
     simulationOutput, sel = testData$group == 1))) == 10)
@@ -74,7 +78,7 @@ test_that("recalcuateResiduals works", {
     simulationOutput, sel = 1.0:20.0))) == 20)
   #just one group within the selection
   expect_error(recalculateResiduals(simulationOutput, group = testData$group,
-                                    sel = 1.0:10.0))
+                                    sel = 1.0:10.0), "number of residuals < 2")
 
 
   expect_true(length(residuals(recalculateResiduals(
@@ -96,12 +100,11 @@ test_that("recalcuateResiduals works", {
                                            sel = NULL)
   expect_true(length(residuals(simulationOutput3)) ==
                 simulationOutput3$nObs)
-  simulationOutput3 = recalculateResiduals(simulationOutput, group = NULL,
-                                           sel = c(1:5,8,9), method = "PIT")
+  simulationOutput3 = suppressWarnings(recalculateResiduals(simulationOutput,
+    group = NULL, sel = c(1:5,8,9), method = "PIT"))
 
-  simulationOutput3 = recalculateResiduals(simulationOutput, group = NULL,
-                                           sel = c(1:5,8,9),
-                                           method = "traditional")
+  simulationOutput3 = suppressWarnings(recalculateResiduals(simulationOutput,
+    group = NULL, sel = c(1:5,8,9), method = "traditional"))
   expect_true(length(residuals(simulationOutput3)) ==
                 length(simulationOutput3$sel))
 
@@ -117,6 +120,4 @@ test_that("recalcuateResiduals works", {
                       method = "PIT"))
 
 })
-
-
 

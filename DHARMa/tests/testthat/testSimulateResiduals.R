@@ -90,3 +90,34 @@ test_that("Simulations work for mgcv::gam", {
   expect_no_error(res3 <- simulateResiduals(fittedModel, simulateREs = "user-specified"))
 
 })
+
+
+test_that("refit = TRUE: k/n binomial residuals are on the scale of the number of successes (#598)", {
+
+  set.seed(1)
+  testData = data.frame(x = runif(50), N = sample(5:15, 50, replace = TRUE))
+  testData$k = rbinom(50, testData$N, 0.5)
+  fittedModel <- glm(cbind(k, N - k) ~ x, family = binomial, data = testData)
+  res = simulateResiduals(fittedModel, n = 10, refit = TRUE)
+  expect_equal(res$fittedResiduals, residuals(fittedModel, type = "response") * testData$N, ignore_attr = TRUE)
+
+  testData$p = testData$k / testData$N
+  fittedModel2 <- glm(p ~ x, family = binomial, weights = N, data = testData)
+  res2 = simulateResiduals(fittedModel2, n = 10, refit = TRUE)
+  expect_equal(res2$fittedResiduals, res$fittedResiduals)
+})
+
+
+test_that("simulateResiduals and recalculateResiduals: matched method, refit = TRUE with method and rotation (#589)", {
+  testData = createData(sampleSize = 50, family = poisson(), randomEffectVariance = 0)
+  fittedModel = glm(observedResponse ~ Environment1, family = poisson, data = testData)
+  simulationOutput = simulateResiduals(fittedModel, n = 10)
+  expect_equal(simulationOutput$method, "PIT")
+  expect_equal(recalculateResiduals(simulationOutput, group = testData$group)$method, "PIT")
+  expect_message(simulationOutput <- simulateResiduals(fittedModel, n = 5, refit = TRUE, method = "PIT"), "traditional")
+  expect_error(simulateResiduals(fittedModel, refit = TRUE, rotation = "estimated"), "refit = TRUE")
+  grouped = recalculateResiduals(simulationOutput, group = testData$group, method = "PIT")
+  expect_equal(grouped$method, "traditional")
+  expect_equal(grouped$scaledResiduals, recalculateResiduals(simulationOutput, group = testData$group, method = "traditional")$scaledResiduals)
+  expect_error(recalculateResiduals(simulationOutput, group = testData$group, rotation = "estimated"), "rotation")
+})

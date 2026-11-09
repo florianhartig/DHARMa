@@ -1,8 +1,38 @@
+# Version 0.5.1
+
+## Submission 1, 07.11.2026
+
+This is a minor update of DHARMa with various bugfixes and smaller improvements. See NEWS for details.
+
+Importantly, the update fixes the ERROR in tests/testthat/testNumericReproducibility.R reported in the CRAN checks due to the  lme4 2.1-0 update. 
+
+This release was tested without apparent problems under:
+
+* local macOS 26.6.2 (Tahoe), R 4.6.1
+* GitHub Actions - Windows / macOS / Ubuntu (release), Ubuntu (devel, oldrel-1), Windows (devel)
+* http://win-builder.r-project.org/ - devel / release / oldrelease
+
+Reverse dependencies: we checked all 30 CRAN packages that depend on, import or suggest DHARMa, comparing DHARMa 0.5.0 and 0.5.1 (using the r-devel/recheck GitHub Action on Ubuntu). No new problems were found compared to 0.5.0.
+
+
 # Version 0.5.0
+
+## Submission 2, 26.05.2026
+
+This is a major update of DHARMa, including a change in the default simulation settings of the residuals to conditional simulations (for most of the supported models and packages),  as well as added support for the brms package, improve in plotting functions, various smaller improvements, and bugfixes. See NEWS for more details.
+
+This release was tested without apparent problems under:
+
+* local MAC OS 26.3.1 (Tahoe), R 4.5.1
+* GitHub Actions - Windows / Mac / Ubuntu (release), Ubuntu (devel)
+* http://win-builder.r-project.org/ - oldrelease / devel / release
+
+RESPONSE TO CRAN COMMENTS OF A PREVIOUS SUBMISSION: we have removed redundant text in the description and corrected quotes as requested. 
+
 
 ## Submission 1, 18.05.2026
 
-This is an update of DHARMa, including major change in the default simulation for GLMMs from the supported model's default (mostly unconditional) to conditional simulations (for most of the supported models and packages),  support for brms package, improve in plotting functions, various smaller improvements, and bugfixes. See NEWS for details.
+This is a major update of DHARMa, including a change in the default simulation settings of the residuals to conditional simulations (for most of the supported models and packages),  as well as added support for the brms package, improve in plotting functions, various smaller improvements, and bugfixes. See NEWS for more details.
 
 This release was tested without apparent problems under:
 

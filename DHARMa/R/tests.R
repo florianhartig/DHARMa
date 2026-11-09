@@ -77,7 +77,7 @@ testBivariateUniformity <- function(simulationOutput, alternative = c("two.sided
 #'
 #' @param simulationOutput an object of class DHARMa, either created via [simulateResiduals] for supported models or by [createDHARMa] for simulations created outside DHARMa, or a supported model. Providing a supported model directly is discouraged, because simulation settings cannot be changed in this case.
 #' @param predictor an optional predictor variable to be used, instead of the predicted response (default). See details.
-#' @param rank if TRUE, the values provided in predictor will be rank transformed. This will usually make patterns easier to spot visually, especially if the distribution of the predictor is skewed. If form is a factor, this has no effect.
+#' @param rank if TRUE, the values provided in predictor will be rank transformed. This will usually make patterns easier to spot visually, especially if the distribution of the predictor is skewed.
 #' @param quantiles the quantiles to be tested.
 #' @param plot if TRUE, the function will create an additional plot.
 #' @details The function fits quantile regressions (via package qgam) on the residuals, and compares their location to the expected location (because of the uniform distribution, the expected location is 0.5 for the 0.5 quantile).
@@ -86,7 +86,7 @@ testBivariateUniformity <- function(simulationOutput, alternative = c("two.sided
 #'
 #' The p-values of the intercept and splines are combined into a total p-value via Benjamini & Hochberg adjustment to control the FDR.
 #'
-#' Predictor can be a formula (e.g. predictor = ~predictor), in which case NAs are handled automatically (recommended). Predictor can also be a variable in your environment (e.g. predictor = data$predictor), but then you need to remove rows that were excluded by the model due to NAs by hand. For more details and a more flexible syntax for predictors, see the help of the argument `form` in [plotResiduals].
+#' Predictor can be a formula (e.g. predictor = ~predictor), in which case NAs are handled automatically (recommended). Predictor can also be a variable in your environment (e.g. predictor = data$predictor), but then you need to remove rows that were excluded by the model due to NAs by hand. A formula must contain exactly one variable of the data used to fit the model, e.g. ~x or ~log(x); transformations such as log() are applied, and other objects in the formula (e.g. ~log(x + k)) are taken from the environment of the formula ([plotResiduals] currently ignores transformations and uses the untransformed variable). To plot residuals against several predictors or by group, see the argument `form` in [plotResiduals]. Predictor must be numeric or an ordered factor (used in the order of its levels); for categorical predictors, use [testCategorical].
 #'
 #' When plotting (plot = TRUE), the shaded gray areas indicate 95% confidence intervals of the quantile estimates (1.96 * standard error).
 #'
@@ -97,6 +97,19 @@ testBivariateUniformity <- function(simulationOutput, alternative = c("two.sided
 testQuantiles <- function(simulationOutput, predictor = NULL, rank = TRUE,
                           quantiles = c(0.25,0.5,0.75), plot = TRUE){
 
+  predictorName = gsub(".*[$]|^~", "", paste(deparse(substitute(predictor)), collapse = ""))
+
+  # fixes #576 (one-variable formulas)
+  if(inherits(predictor, "formula")){
+    # variables of the model data; other objects are taken from the environment of the formula
+    predictors = getFormulaPredictors(ensureDHARMa(simulationOutput, convert = T), predictor)
+    if(length(predictors) != 1) stop("DHARMa::testQuantiles: a formula predictor must contain exactly one variable of the data used to fit the model, e.g. ~x. To plot residuals against several predictors or groups, use plotResiduals().")
+    predictor = eval(predictor[[2]], envir = predictors, enclos = environment(predictor))
+  }
+
+  if(is.ordered(predictor)) predictor = as.numeric(predictor)
+  else if(is.factor(predictor) || is.character(predictor) || is.logical(predictor)) stop("DHARMa::testQuantiles: quantile regressions require a numeric predictor or an ordered factor. For categorical predictors, use testCategorical().")
+
   if(plot == F){
 
     out = list()
@@ -105,7 +118,6 @@ testQuantiles <- function(simulationOutput, predictor = NULL, rank = TRUE,
     simulationOutput = ensureDHARMa(simulationOutput, convert = T)
     res = simulationOutput$scaledResiduals
 
-    if(inherits(predictor, "formula")) predictor = getFormulaPredictors(simulationOutput, predictor)[[1]]
     pred = ensurePredictor(simulationOutput, predictor)
     if (rank == TRUE) pred = rankTransform(pred)
 
@@ -151,10 +163,10 @@ testQuantiles <- function(simulationOutput, predictor = NULL, rank = TRUE,
   } else if(plot == T) {
     if(is.null(predictor)) {
       out <- plotResiduals(simulationOutput = simulationOutput, form = NULL,
-                           rank = rank, quantiles = quantiles, quantreg = TRUE)
+                           rank = rank, quantiles = quantiles, quantreg = TRUE, asFactor = FALSE)
     } else {
       out <- plotResiduals(simulationOutput = simulationOutput, form = predictor,
-                           rank = rank, quantiles = quantiles, quantreg = TRUE)
+                           rank = rank, quantiles = quantiles, quantreg = TRUE, asFactor = FALSE, xlab = predictorName)
       }
 
   }
@@ -174,12 +186,13 @@ testQuantiles <- function(simulationOutput, predictor = NULL, rank = TRUE,
 #' @param type either default, bootstrap or binomial. See details.
 #' @param nBoot number of bootstrap replicates. Only used at type = "bootstrap".
 #' @param plot if TRUE, the function will create an additional plot.
-#' @param plotBoostrap if plot should be produced of outlier frequencies calculated under the bootstrap.
+#' @param plotBootstrap if plot should be produced of outlier frequencies calculated under the bootstrap. Only used at type = "bootstrap".
+#' @param plotBoostrap deprecated, use plotBootstrap instead.
 #' @details DHARMa residuals are created by simulating from the fitted model, and comparing the simulated values to the observed data. It can occur that all simulated values are higher or smaller than the observed data, in which case they get the residual value of 0 and 1, respectively. I refer to these values as simulation outliers, or simply outliers.
 #'
 #' Because no data was simulated in the range of the observed values, we don't know "how strongly" these values deviate from the model expectation, so the term "outlier" should be used with a grain of salt. It is not a judgment about the magnitude of the residual deviation, but simply a dichotomous sign that we are outside the simulated range. Moreover, the number of outliers will decrease as we increase the number of simulations.
 #'
-#' To test if the outliers are a concern, testOutliers implements 2 options (bootstrap, binomial), which can be chosen via the parameter "type". The third option (default) chooses bootstrap for integer-valued distributions with nObs < 500, and else binomial.
+#' To test if the outliers are a concern, testOutliers implements 2 options (bootstrap, binomial), which can be chosen via the parameter "type". The third option (default) chooses bootstrap for integer-valued distributions with nObs <= 500, and else binomial. For residuals recalculated with [recalculateResiduals], nObs is the number of recalculated residuals.
 #'
 #' The binomial test considers that under the null hypothesis that the model is correct, and for continuous distributions (i.e. data and the model distribution are identical and continuous), the probability that a given observation is higher than all simulations is 1/(nSim +1), and binomial distributed. The testOutlier function can test this null hypothesis via type = "binomial". In principle, it would be nice if we could extend this idea to integer-valued distributions, which are randomized via the PIT procedure (see [simulateResiduals]); the rate of "true" outliers is more difficult to calculate, and in general not 1/(nSim +1). The testOutlier function implements a small tweak that calculates the rate of residuals that are closer than 1/(nSim+1) to the 0/1 border, which roughly occur at a rate of nData /(nSim +1). This approximate value, however, is generally not exact, and may be particularly off non-bounded integer-valued distributions (such as Poisson or Negative Binomial).
 #'
@@ -187,13 +200,20 @@ testQuantiles <- function(simulationOutput, predictor = NULL, rank = TRUE,
 #'
 #' Both binomial and bootstrap generate a null expectation, and then test for an excess or lack of outliers. Per default, testOutliers() looks for both, so if you get a significant p-value, you have to check if you have too many or too few outliers. An excess of outliers is to be interpreted as too many values outside the simulation envelope. This could be caused by overdispersion, or by what we classically call outliers. A lack of outliers would be caused, for example, by underdispersion.
 #'
+#' Note that for type = "bootstrap", the reported confidence interval is the 2.5% - 97.5% quantile range of the outlier frequencies simulated under H0, not a confidence interval for the observed outlier frequency.
+#'
 #'
 #' @author Florian Hartig
 #' @seealso [testResiduals], [testUniformity], [testOutliers], [testDispersion], [testZeroInflation], [testGeneric], [testTemporalAutocorrelation], [testSpatialAutocorrelation], [testQuantiles], [testCategorical]
 #' @export
-testOutliers <- function(simulationOutput, alternative = c("two.sided", "greater", "less"), margin = c("both", "upper", "lower"), type = c("default","bootstrap", "binomial"), nBoot = 100, plot = TRUE, plotBoostrap = FALSE){
+testOutliers <- function(simulationOutput, alternative = c("two.sided", "greater", "less"), margin = c("both", "upper", "lower"), type = c("default","bootstrap", "binomial"), nBoot = 100, plot = TRUE, plotBootstrap = FALSE, plotBoostrap = NULL){
 
   # check inputs
+  if(!is.null(plotBoostrap)){
+    if(!missing(plotBootstrap)) stop("DHARMa::testOutliers: plotBoostrap is the deprecated name of plotBootstrap, please provide only plotBootstrap.", call. = FALSE)
+    warning("DHARMa::testOutliers: argument plotBoostrap is deprecated, use plotBootstrap instead.", call. = FALSE)
+    plotBootstrap = plotBoostrap
+  }
   alternative = match.arg(alternative)
   margin = match.arg(margin)
   type = match.arg(type)
@@ -230,7 +250,9 @@ testOutliers <- function(simulationOutput, alternative = c("two.sided", "greater
     names(out$parameter) = "observations"
     names(out$estimate) = paste("frequency of outliers (expected:", out$null.value,")")
 
-    if (simulationOutput$integerResponse == T & out$p.value < 0.05) message("DHARMa:testOutliers with type = binomial may have inflated Type I error rates for integer-valued distributions. To get a more exact result, it is recommended to re-run testOutliers with type = 'bootstrap'. See ?testOutliers for details")
+    if (simulationOutput$integerResponse == T & out$p.value < 0.05) message("DHARMa::testOutliers: type = 'binomial' may have inflated Type I error rates for integer-valued distributions. To get a more exact result, it is recommended to re-run testOutliers with type = 'bootstrap'. See ?testOutliers for details")
+
+    if (plotBootstrap == T) message("DHARMa::testOutliers: plotBootstrap = TRUE is ignored because the binomial test is used (type = 'binomial', or type = 'default' with non-integer response or nObs > 500). Use type = 'bootstrap' to get the bootstrap plot.")
 
     if(plot == T) {
 
@@ -294,6 +316,7 @@ testOutliers <- function(simulationOutput, alternative = c("two.sided", "greater
     out$p.value = getP(frequBoot, outliers, alternative = alternative)
 
     out$conf.int = quantile(frequBoot, c(0.025, 0.975))
+    attr(out$conf.int, "conf.level") = 0.95
 
     out$data.name = data.name
     out$margin = margin
@@ -307,8 +330,8 @@ testOutliers <- function(simulationOutput, alternative = c("two.sided", "greater
     out$estimate = outliers
     names(out$estimate) = paste("outlier frequency (expected:", mean(frequBoot),")")
 
-    if(plotBoostrap == T){
-      hist(frequBoot, xlim = range(frequBoot, outliers), col = "lightgrey", main = "Bootstrapped outlier frequency")
+    if(plotBootstrap == T){
+      hist(frequBoot, xlim = range(frequBoot, outliers), col = "lightgrey", main = "Bootstrapped outlier frequency \n grey = simulated, red = observed, black = simulation mean", cex.main = 0.8)
       abline(v = mean(frequBoot), col = 1, lwd = 2)
       abline(v = outliers, col = "red", lwd = 2)
 
@@ -470,9 +493,9 @@ testCategorical <- function(simulationOutput, catPred,
 #'
 #' **Important:** for either refit = T or F, the results of type = "DHARMa" dispersion test will differ depending on whether simulations are done conditional (= conditional on fitted random effects) or unconditional (= REs are re-simulated). The default as of DHARMa 0.5.0 is conditional simulations, which substantially increase the power and sensitivity of the dispersion test (for details see [simulateResiduals] and the DHARMa vignette).
 #'
-#' If refit = F, the function uses [testGeneric] to compare the variance of the observed raw residuals (i.e. var(observed - predicted), displayed as a red line) against the variance of the simulated residuals (i.e. var(simulated - predicted), histogram). The variances are scaled to the mean simulated variance. A significant ratio > 1 indicates overdispersion, a significant ratio < 1 underdispersion.
+#' If refit = F, the function uses [testGeneric] to compare the variance of the observed raw residuals (i.e. var(observed - predicted), displayed as a red line) against the variance of the simulated residuals (i.e. var(simulated - predicted), histogram). Predictions are taken on the scale of the observed response (see [getFittedResponse]), i.e. for binomial models with more than one trial, as the expected number of successes. For objects created with [createDHARMa], the provided fittedPredictedResponse is used. The variances are scaled by the variance of all simulated values; this affects only the plotted values, not the reported ratio or p-value. A significant ratio > 1 indicates overdispersion, a significant ratio < 1 underdispersion.
 #'
-#' If refit = T, the function compares the approximate deviance (via squared Pearson residuals) with the same quantity from the models refitted with simulated data. Applying this is much slower than the previous alternative. Given the computational cost, I would suggest that most users will be satisfied with the standard dispersion test.
+#' If refit = T, the function compares the approximate deviance (via squared Pearson residuals) with the same quantity from the models refitted with simulated data. Applying this is much slower than the previous alternative. Given the computational cost, I would suggest that most users will be satisfied with the standard dispersion test. After [recalculateResiduals], observed and refitted Pearson residuals are aggregated in the same way before squaring; if the aggregated observed residuals are all (close to) zero (e.g. grouping variable as fixed effect in a linear model, or as the only predictor in a GLM), the function warns and returns NA as statistic and p-value.
 #'
 #' **Analytical dispersion tests (type == "PearsonChisq")**
 #'
@@ -501,13 +524,32 @@ testDispersion <- function(simulationOutput, alternative = c("two.sided", "great
 
   if(simulationOutput$refit == F){
 
+      # fitted values on the scale of the observed / simulated response (expected number of successes for k/n binomial models), see getFittedResponse
+      if(is.null(simulationOutput$fittedModel)){
+        # objects created with createDHARMa
+        fitted = simulationOutput$fittedPredictedResponse
+      } else {
+        fitted = getFittedResponse(simulationOutput$fittedModel)
+        # residuals grouped with recalculateResiduals
+        if(!is.null(simulationOutput$aggregateByGroup)) fitted = simulationOutput$aggregateByGroup(fitted)
+      }
+
       expectedVar = sd(simulationOutput$simulatedResponse)^2
-      spread <- function(x) var(x - simulationOutput$fittedPredictedResponse) / expectedVar
+      spread <- function(x) var(x - fitted) / expectedVar
       out = testGeneric(simulationOutput, summary = spread, alternative = alternative, methodName = "DHARMa nonparametric dispersion test via sd of residuals fitted vs. simulated", plot = plot, ...)
       names(out$statistic) = "dispersion"
     } else {
 
       rp <- getPearsonResiduals(simulationOutput$fittedModel)
+      # fixes #575 (aggregate like refitted residuals)
+      if(!is.null(simulationOutput$aggregateByGroup)){
+        rpGroup = simulationOutput$aggregateByGroup(rp)
+        if(max(abs(rpGroup)) < 1e-3 * max(simulationOutput$aggregateByGroup(abs(rp)))){
+          warning("DHARMa::testDispersion: aggregated Pearson residuals are all (close to) zero, e.g. if the grouping variable is a fixed effect in a linear model or the only predictor in a GLM; the test with refit = TRUE is not informative, statistic and p-value are NA.")
+          rpGroup = NA_real_
+        }
+        rp = rpGroup
+      }
       observed = sum(rp^2)
       expected = apply(simulationOutput$refittedPearsonResiduals^2 , 2, sum)
       out$statistic = c(dispersion = observed / mean(expected))
@@ -527,12 +569,12 @@ testDispersion <- function(simulationOutput, alternative = c("two.sided", "great
         hist(expected, xlim = range(expected, observed, na.rm=T ), col = "lightgrey", main = "", xlab = xLabel, breaks = 20, cex.main = 1)
         abline(v = observed, lwd= 2, col = "red")
 
-        main = ifelse(out$p.value <= 0.05,
+        main = if(is.na(out$p.value)) "Dispersion test not available" else ifelse(out$p.value <= 0.05,
                       "Dispersion test significant",
                       "Dispersion test n.s.")
 
         title(main = main, cex.main = 1,
-              col.main = ifelse(out$p.value <= 0.05, "red", "black"))
+              col.main = ifelse(isTRUE(out$p.value <= 0.05), "red", "black"))
       }
     }
 
@@ -683,9 +725,9 @@ testGeneric <- function(simulationOutput, summary, alternative = c("two.sided", 
 #' @param time time variable in the same order as the datapoints and with the same length as the residuals in simulationOutput. If specified as formula, e.g. time = ~time, NAs are handled automatically (recommended).
 #' @param alternative a character string specifying whether the test should test if observations are "greater", "less" or "two.sided" compared to the simulated null hypothesis.
 #' @param plot whether to plot output.
-#' @details The function performs a Durbin-Watson test on the uniformly scaled residuals, and plots the residuals against time. The DB test was originally designed for normal residuals. In simulations, I didn't see a problem with this setting though. The alternative is to transform the uniform residuals to normal residuals and perform the DB test on those.
+#' @details The function performs a Durbin-Watson test on the uniformly scaled residuals, and plots the residuals against time. The DW test was originally designed for normal residuals. In simulations, I didn't see a problem with this setting though. The alternative is to transform the uniform residuals to normal residuals and perform the DW test on those.
 #'
-#' Testing for temporal autocorrelation requires unique time values - if you have several observations per time value, either use [recalculateResiduals] function to aggregate residuals per time step, or extract the residuals from the fitted object, and plot / test each of them independently for temporally repeated subgroups (typical choices would be location / subject etc.). Note that the latter must be done by hand, outside testTemporalAutocorrelation.
+#' Testing for temporal autocorrelation requires unique time values - if you have several observations per time value, either use [recalculateResiduals] function to aggregate residuals per time step (note that the aggregated residuals are ordered by the sorted group levels, so time must be provided in the same order, e.g. sort(unique(time))), or extract the residuals from the fitted object, and plot / test each of them independently for temporally repeated subgroups (typical choices would be location / subject etc.). Note that the latter must be done by hand, outside testTemporalAutocorrelation.
 #'
 #' @note Standard DHARMa simulations from models with (temporal / spatial / phylogenetic) conditional autoregressive terms will still have the respective temporal / spatial / phylogenetic correlation in the DHARMa residuals, unless the package you are using is modelling the autoregressive terms as explicit REs and is able to simulate conditional on the fitted REs. This has two consequences:
 #'
@@ -727,7 +769,10 @@ testTemporalAutocorrelation <- function(simulationOutput, time, alternative = c(
   # actually not sure if this is neccessary for dwtest, but seems better to aggregate
   if(any(duplicated(time))) stop("testing for temporal autocorrelation requires unique time values - if you have several observations per time value, either use the recalculateResiduals function to aggregate residuals per time step, or extract the residuals from the fitted object, and plot / test each of them independently for temporally repeated subgroups (typical choices would be location / subject etc.). Note that the latter must be done by hand, outside testTemporalAutocorrelation.")
 
-  out = lmtest::dwtest(simulationOutput$scaledResiduals ~ 1, order.by = time, alternative = alternative)
+  out = lmtest::dwtest(scaledResiduals ~ 1,
+                       # data.frame, as AlgDesign's model.matrix.formula requires it (#504)
+                       data = data.frame(scaledResiduals = simulationOutput$scaledResiduals),
+                       order.by = time, alternative = alternative)
 
   if(plot == T) {
     oldpar <- par(mfrow = c(1,2))
@@ -873,7 +918,7 @@ testSpatialAutocorrelation <- function(simulationOutput, x = NULL, y  = NULL, di
                 ybottom = -0.1, ytop = 0.5)
 
     axis(4, at = c(-0.1, 0.5), labels = c("0", "1"), las = 1)
-    mtext("Standardized \n residuals", side = 3, line = -5,cex = 0.8,)
+    mtext("Standardized \n residuals", side = 3, line = -5, cex = 0.8)
 
     # TODO implement correlogram
   }
@@ -890,7 +935,7 @@ testSpatialAutocorrelation <- function(simulationOutput, x = NULL, y  = NULL, di
 #' @param tree a phylogenetic tree object.
 #' @param alternative a character string specifying whether the test should test if observations are "greater", "less" or "two.sided" compared to the simulated null hypothesis of no phylogenetic correlation.
 #'
-#' @details The function performs Moran.I test from the package ape on the DHARMa residuals, based on the phylogenetic distance matrix internally created from the provided tree. For custom distance matrices, you can use [testSpatialAutocorrelation].
+#' @details The function performs Moran.I test from the package ape on the DHARMa residuals, based on the phylogenetic distance matrix internally created from the provided tree. The residuals are matched to the tree by position, so the observations (rows of the data used to fit the model) must be in the same order as tree$tip.label. For custom distance matrices, you can use [testSpatialAutocorrelation].
 #'
 #' @note Standard DHARMa simulations from models with (temporal / spatial / phylogenetic) conditional autoregressive terms will still have the respective temporal / spatial / phylogenetic correlation in the DHARMa residuals, unless the package you are using is modelling the autoregressive terms as explicit REs and is able to simulate conditional on the fitted REs. This has two consequences:
 #'
@@ -945,7 +990,7 @@ getP <- function(simulated, observed, alternative, plot = FALSE, ...){
   if(alternative == "two.sided") p = min(min(mean(simulated <= observed), mean(simulated >= observed) ) * 2,1)
 
   if(plot == T){
-    hist(simulated, xlim = range(simulated, observed), col = "lightgrey", main = "Distribution of test statistic \n grey = simulated, red = observed", ...)
+    hist(simulated, xlim = range(simulated, observed), col = "lightgrey", main = "Distribution of test statistic \n grey = simulated, red = observed, black = simulation mean", cex.main = 0.8, ...)
     abline(v = mean(simulated), col = 1, lwd = 2)
     abline(v = observed, col = "red", lwd = 2)
   }

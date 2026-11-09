@@ -4,7 +4,7 @@
 \alias{getPearsonResiduals}
 \alias{getPearsonResiduals.default}
 \alias{getPearsonResiduals.gam}
-\alias{getPearsonResiduals.brms}
+\alias{getPearsonResiduals.brmsfit}
 \title{Get Pearson residuals}
 \usage{
 getPearsonResiduals(object, ...)
@@ -13,7 +13,7 @@ getPearsonResiduals(object, ...)
 
 \method{getPearsonResiduals}{gam}(object, ...)
 
-\method{getPearsonResiduals}{brms}(object, ...)
+\method{getPearsonResiduals}{brmsfit}(object, ...)
 }
 \arguments{
 \item{object}{a fitted model.}
@@ -27,7 +27,7 @@ Wrapper to get the Pearson residuals of a fitted model.
 The purpose of this wrapper is to extract the Pearson residuals of a fitted model.
 }
 \note{
-Package \code{brms} doesn't provide Pearson residuals (deprecated).
+Pearson residuals are not supported for \code{brms} models.
 }
 \examples{
 testData = createData(sampleSize = 400, family = gaussian())
@@ -39,6 +39,10 @@ getObservedResponse(fittedModel)
 
 # predictions of the model for these points
 getFitted(fittedModel)
+
+# predictions on the scale of the observed response
+# (differs from getFitted only for k/n binomial models)
+getFittedResponse(fittedModel)
 
 # extract simulations from the model as matrix
 getSimulations(fittedModel, nsim = 2)

@@ -4,20 +4,20 @@
 #'
 #' @param fittedModel a fitted model of a class supported by DHARMa.
 #' @param n number of simulations. The smaller the number, the higher the stochastic error on the residuals. Also, for very small n, discretization artefacts can influence the tests. Default is 250, which is a relatively safe value. You can consider increasing to 1000 to stabilize the simulated values.
-#' @param simulateREs decides which REs / hierarchical levels should be re-simulated. If \code{conditional}, simulations are done conditional on all fitted random effects (default). If \code{unconditional}, all REs or hierchical levels are re-simulated. Setting \code{user-specified} allows supplying package-specific arguments to decide which REs are to be re-simulated. If none are supplied, the defaults of the respective fitted model object is used. See details and further comments in [getSimulations].
+#' @param simulateREs decides which REs / hierarchical levels should be re-simulated. If \code{conditional}, simulations are done conditional on all fitted random effects (default). If \code{unconditional}, all REs or hierarchical levels are re-simulated. Setting \code{user-specified} allows supplying package-specific arguments to decide which REs are to be re-simulated. If none are supplied, the defaults of the respective fitted model object is used. See details and further comments in [getSimulations].
 #' @param refit if FALSE, new data will be simulated and scaled residuals will be created by comparing observed data with new data. If TRUE, the model will be refitted on the simulated data (parametric bootstrap), and scaled residuals will be created by comparing observed with refitted residuals.
 #' @param integerResponse if TRUE, noise will be added to the residuals to maintain uniform expectations for integer responses (such as Poisson or Binomial). Usually, the model will automatically detect the appropriate setting, so there is no need to adjust this setting.
-#' @param plot if TRUE, [plotResiduals] will be directly run after the residuals have been calculated.
+#' @param plot if TRUE, [plot.DHARMa] will be directly run after the residuals have been calculated.
 #' @param ... further parameters to pass on to the simulate and update function of the model object (via DHARMa::getSimulations and DHARMa::getRefit). If simulateREs = "user-specified", an important use of this is to specify whether simulations should be conditional on all, some or none of the current random effect estimates, e.g. via re.form. Note that not all models support syntax to specify conditional or unconditional simulations. See details and [getSimulations].
 #' @param seed the random seed to be used within DHARMa. The default setting, recommended for most users, is to keep the random seed on a fixed value of 123. This means that you will always get the same randomization and thus the same result when running the same code. If NULL, no new seed is set, but previous random state will be restored after simulation. If FALSE, no seed is set, and random state will not be restored. The latter two options are only recommended for simulation experiments. See vignette for details.
-#' @param method for refit = FALSE, the quantile randomization method is used. The two options implemented at the moment are probability integral transform (PIT-) residuals (current default), and the "traditional" randomization procedure, that was used in DHARMa until version 0.3.0. refit = T will always use "traditional", regardless of the value of method. For details, see [getQuantile].
+#' @param method for refit = FALSE, the quantile randomization method is used. The two options implemented at the moment are probability integral transform (PIT-) residuals (current default), and the "traditional" randomization procedure, that was used in DHARMa until version 0.3.0. refit = T will always use "traditional", regardless of the value of method, and rotation is then not available. For details, see [getQuantile].
 #' @param rotation optional rotation of the residual space prior to calculating the quantile residuals. The main purpose of this is to account for residual covariance as created by temporal, spatial or phylogenetic autocorrelation. See details below, section *residual autocorrelation* as well as the help of [getQuantile] and, for a practical example, [testTemporalAutocorrelation].
 #'
 #' @details There are a number of important considerations when simulating from a more complex (hierarchical) model:
 #'
-#' \strong{Re-simulating random effects / hierarchical structure}: in a hierarchical or RE model, we have several stochastic processes on top of each other. For example, in a typical Poisson GLMM, we have a lower level normal distribution (random effect), whose result enters at the next hierarchical level into a Poisson distribution. For other hierarchical models such as state-space models, similar considerations apply. When simulating new data in such a situation, we have to decide if we want to re-simulate all stochastic levels (unconditional), only the top level conditional on all other levels (conditional), or if we want to re-simulate a specific subset of REs while conditioning on the others. As of DHARMa 0.5.0, the default was changed to simulating conditionally on all fitted REs. If this is not what you want, you can switch simulateREs to either "unconditional", or "user-specified", which allows to condition on a user-specified set of REs. With "user-specified", if no additional arguments are set, this results in the package behavior previous to version 0.5.0. Note that the syntax to change the behavior is different for each package. Also, specific packages may lack certain functionalities. For further details, please see vignette, [getSimulations] and refer to the help of the different simulate functions (e.g. ?simulate.merMod). #'
+#' \strong{Re-simulating random effects / hierarchical structure}: in a hierarchical or RE model, we have several stochastic processes on top of each other. For example, in a typical Poisson GLMM, we have a lower level normal distribution (random effect), whose result enters at the next hierarchical level into a Poisson distribution. For other hierarchical models such as state-space models, similar considerations apply. When simulating new data in such a situation, we have to decide if we want to re-simulate all stochastic levels (unconditional), only the top level conditional on all other levels (conditional), or if we want to re-simulate a specific subset of REs while conditioning on the others. As of DHARMa 0.5.0, the default was changed to simulating conditionally on all fitted REs. If this is not what you want, you can switch simulateREs to either "unconditional", or "user-specified", which allows to condition on a user-specified set of REs. With "user-specified", if no additional arguments are set, this results in the package behavior previous to version 0.5.0. Note that the syntax to change the behavior is different for each package. Also, specific packages may lack certain functionalities. For further details, please see vignette, [getSimulations] and refer to the help of the different simulate functions (e.g. ?simulate.merMod).
 #' 
-#' **When to use conditional and unconditional simulations**: If the model is correctly specified, the simulated residuals should be flat regardless which hierarchical levels you re-simulate. Re-simulating all levels (unconditional) can be advantageous because it tests the model structure as a whole. If REs are correlated with a predictor, for example, this will show up in the residuals. A potential drawback is that re-simulating the lower-level random effects creates more variability and correlation structures in the residuals, which may reduce power for detecting problems in the upper-level stochastic processes and, in some cases, can lead to inflated type I error rates through the induces correlations. In particular dispersion tests may produce different results when switching from conditional to unconditional simulations, and often the conditional simulation is more sensitive. The default was therefore switched to conditional in DHARMa 0.5.0 which we consider to be more safe, but it can make sense to overrule this default for specific tests.  
+#' **When to use conditional and unconditional simulations**: If the model is correctly specified, the simulated residuals should be flat regardless which hierarchical levels you re-simulate. Re-simulating all levels (unconditional) can be advantageous because it tests the model structure as a whole. If REs are correlated with a predictor, for example, this will show up in the residuals. A potential drawback is that re-simulating the lower-level random effects creates more variability and correlation structures in the residuals, which may reduce power for detecting problems in the upper-level stochastic processes and, in some cases, can lead to inflated type I error rates through the induced correlations. In particular dispersion tests may produce different results when switching from conditional to unconditional simulations, and often the conditional simulation is more sensitive. The default was therefore switched to conditional in DHARMa 0.5.0 which we consider to be more safe, but it can make sense to overrule this default for specific tests.  
 #' 
 #' \strong{Refitting or not}: a third issue is how residuals are calculated. simulateResiduals has two options that are controlled by the refit parameter:
 #'
@@ -49,7 +49,9 @@ simulateResiduals <- function(fittedModel, n = 250, simulateREs = c("conditional
 
   if (n < 2) stop("error in DHARMa::simulateResiduals: n > 1 is required to calculate scaled residuals")
   checkModel(fittedModel)
-  match.arg(method)
+  if(isTRUE(refit) && !missing(method) && match.arg(method) != "traditional") message("DHARMa::simulateResiduals: residuals with refit = TRUE are always calculated with method = \"traditional\".")
+  if(isTRUE(refit) && !is.null(rotation)) stop("DHARMa::simulateResiduals: rotation is not available for residuals with refit = TRUE.")
+  method = match.arg(method)
   randomState <- getRandomState(seed)
   on.exit({randomState$restoreCurrent()})
   ptm <- proc.time()
@@ -124,7 +126,7 @@ simulateResiduals <- function(fittedModel, n = 250, simulateREs = c("conditional
 
       simObserved <- out$simulatedResponse[[i]]
 
-      try({
+      refitTry = try({
 
         # for testing
         # if (i==3) stop("x")
@@ -139,6 +141,8 @@ simulateResiduals <- function(fittedModel, n = 250, simulateREs = c("conditional
         #out$refittedRandomEffects[,i]  <- ranef(refittedModel)
       }, silent = TRUE)
     }
+
+    if(all(is.na(out$refittedResiduals))) stop("DHARMa::simulateResiduals: with refit = TRUE, all refits failed. Last error: ", attr(refitTry, "condition")$message)
 
     ######### residual checks ###########
 
@@ -159,6 +163,11 @@ simulateResiduals <- function(fittedModel, n = 250, simulateREs = c("conditional
     }
 
     ######### residual calculations ###########
+
+    # fixes #598 (k/n binomial: randomize residuals on the scale of the number of successes)
+    trials = getTrials(fittedModel)
+    out$fittedResiduals = out$fittedResiduals * trials
+    out$refittedResiduals = out$refittedResiduals * trials
 
     out$scaledResiduals = getQuantile(simulations = out$refittedResiduals,
                                       observed = out$fittedResiduals,
@@ -214,11 +223,11 @@ checkSimulations <- function(simulatedResponse, nObs, nSim){
 #' @param aggregateBy function for the aggregation. Default is sum. This should only be changed if you know what you are doing. Note in particular that the expected residual distribution might not be flat anymore if you choose general functions, such as sd etc.
 #' @param sel an optional vector for selecting the data to be aggregated.
 #' @param seed the random seed to be used within DHARMa. The default setting, recommended for most users, is to keep the random seed on a fixed value of 123. This means that you will always get the same randomization and thus the same result when running the same code. NULL = no new seed is set, but previous random state will be restored after simulation. FALSE = no seed is set, and random state will not be restored. The latter two options are only recommended for simulation experiments. See vignette for details.
-#' @param method the quantile randomization method used. The two options implemented at the moment are probability integral transform (PIT-) residuals (current default), and the "traditional" randomization procedure, that was used in DHARMa until version 0.3.0. For details, see [getQuantile].
+#' @param method the quantile randomization method used. The two options implemented at the moment are probability integral transform (PIT-) residuals (current default), and the "traditional" randomization procedure, that was used in DHARMa until version 0.3.0. For residuals simulated with refit = TRUE, "traditional" is always used, as in [simulateResiduals]; rotation is then not available. For details, see [getQuantile].
 #' @param rotation optional rotation of the residual space to remove residual autocorrelation. See details in [simulateResiduals], section *residual auto-correlation* for an extended explanation, and [getQuantile] for syntax.
 #' @return an object of class DHARMa, similar to what is returned by [simulateResiduals], but with additional outputs for the new grouped calculations. Note that the relevant outputs are 2x in the object, the first is the grouped calculations (which is returned by $name access), and later another time, under identical name, the original output. Moreover, there is a function 'aggregateByGroup', which can be used to aggregate predictor variables in the same way as the variables calculated here.
 #'
-#' @details The function aggregates the observed and simulated data per group according to the function provided by the aggregateBy option. DHARMa residuals are then calculated exactly as for a single data point (see [getQuantile] for details).
+#' @details The function aggregates the observed and simulated data per group according to the function provided by the aggregateBy option. DHARMa residuals are then calculated exactly as for a single data point (see [getQuantile] for details). The function stops if fewer than 2 residuals remain after grouping and selection, and warns if fewer than 10 remain.
 #'
 #' @example inst/examples/simulateResidualsHelp.R
 #' @export
@@ -227,9 +236,11 @@ recalculateResiduals <- function(simulationOutput, group = NULL, aggregateBy = s
                                  method = c("PIT", "traditional"),
                                  rotation = NULL){
 
+  simulationOutput = ensureDHARMa(simulationOutput, convert = FALSE)
   randomState <- getRandomState(seed)
   on.exit({randomState$restoreCurrent()})
-  match.arg(method)
+  method = match.arg(method)
+  if(isTRUE(simulationOutput$refit)) method = "traditional" # fixes #589 (as in simulateResiduals)
 
   # ensures that the base simulation is always used for recalculate
   if(!is.null(simulationOutput$original)) simulationOutput = simulationOutput$original
@@ -254,7 +265,6 @@ recalculateResiduals <- function(simulationOutput, group = NULL, aggregateBy = s
     }
     out$group = group
     group = as.factor(group)
-    out$nGroups = nlevels(group)
 
     # sel
     if(is.null(sel)) {
@@ -263,7 +273,7 @@ recalculateResiduals <- function(simulationOutput, group = NULL, aggregateBy = s
       # if sel is a formula (e.g. ~ Environment1<0.5)
       if(inherits(sel, "formula")){
         predictor = getFormulaPredictors(simulationOutput, formula = sel)
-        sel = eval(sel[[2]], envir = predictor)
+        sel = eval(sel[[2]], envir = predictor, enclos = environment(sel))
       }
 
       # if sel is logical (e.g. testData$group == 1)
@@ -283,6 +293,8 @@ recalculateResiduals <- function(simulationOutput, group = NULL, aggregateBy = s
                                               FUN=aggregateBy)[,2]
 
     out$observedResponse = aggregateByGroup(simulationOutput$observedResponse)
+    if (length(out$observedResponse) < 2) stop("Calculations stopped - number of residuals < 2")
+    if (length(out$observedResponse) < 10) warning("Residual calculations resulted in less than 10 residuals. Tests on such a low number of residuals rarely make sense.")
     out$fittedPredictedResponse = aggregateByGroup(simulationOutput$fittedPredictedResponse)
 
     if (simulationOutput$refit == FALSE){
@@ -314,6 +326,7 @@ recalculateResiduals <- function(simulationOutput, group = NULL, aggregateBy = s
     # question to myself - what's the use of that, why not erase the old outputs? they are anyway saved in the old object
 
     out$aggregateByGroup = aggregateByGroup
+    out$nObs = out$nGroups = length(out$scaledResiduals) # fixes #603, #605 (nObs, nGroups after grouping and sel)
     out = c(out, simulationOutput)
     out$randomState = randomState
     class(out) = "DHARMa"

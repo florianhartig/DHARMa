@@ -30,11 +30,12 @@ res = simulateResiduals(fittedModel)
 
 # aggregating residuals by time
 res = recalculateResiduals(res, group = ~time)
-testTemporalAutocorrelation(res, time = unique(testData$time))
+# the aggregated residuals are sorted by time, so time must be sorted as well
+testTemporalAutocorrelation(res, time = sort(unique(testData$time)))
 
 # testing only subgroup location 1, could do same with loc 2
 res = recalculateResiduals(res, sel = testData$location == 1)
-testTemporalAutocorrelation(res, time = unique(testData$time))
+testTemporalAutocorrelation(res, time = testData$time[testData$location == 1])
 
 # example to demonstrate problems with strong temporal correlations and
 # how to possibly remove them by rotating residuals
@@ -96,7 +97,7 @@ testTemporalAutocorrelation(res, time = unique(testData$time))
 
   res4 <- recalculateResiduals(res, group=dat0$times, rotation="estimated")
   plot(res4)
-  testTemporalAutocorrelation(res3, time = 1:length(res2$scaledResiduals))
+  testTemporalAutocorrelation(res4, time = 1:length(res2$scaledResiduals))
 
   # Alternatively, in glmmTMB, we can condition on the estimated correlated
   # residuals. Unfortunately, in this case, we will have to do simulations by

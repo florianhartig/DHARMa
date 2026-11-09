@@ -19,7 +19,7 @@ recalculateResiduals(simulationOutput, group = NULL, aggregateBy = sum,
 
 \item{seed}{the random seed to be used within DHARMa. The default setting, recommended for most users, is to keep the random seed on a fixed value of 123. This means that you will always get the same randomization and thus the same result when running the same code. NULL = no new seed is set, but previous random state will be restored after simulation. FALSE = no seed is set, and random state will not be restored. The latter two options are only recommended for simulation experiments. See vignette for details.}
 
-\item{method}{the quantile randomization method used. The two options implemented at the moment are probability integral transform (PIT-) residuals (current default), and the "traditional" randomization procedure, that was used in DHARMa until version 0.3.0. For details, see \link{getQuantile}.}
+\item{method}{the quantile randomization method used. The two options implemented at the moment are probability integral transform (PIT-) residuals (current default), and the "traditional" randomization procedure, that was used in DHARMa until version 0.3.0. For residuals simulated with refit = TRUE, "traditional" is always used, as in \link{simulateResiduals}; rotation is then not available. For details, see \link{getQuantile}.}
 
 \item{rotation}{optional rotation of the residual space to remove residual autocorrelation. See details in \link{simulateResiduals}, section \emph{residual auto-correlation} for an extended explanation, and \link{getQuantile} for syntax.}
 }
@@ -30,7 +30,7 @@ an object of class DHARMa, similar to what is returned by \link{simulateResidual
 The purpose of this function is to recalculate scaled residuals per group, based on the simulations done by \link{simulateResiduals}.
 }
 \details{
-The function aggregates the observed and simulated data per group according to the function provided by the aggregateBy option. DHARMa residuals are then calculated exactly as for a single data point (see \link{getQuantile} for details).
+The function aggregates the observed and simulated data per group according to the function provided by the aggregateBy option. DHARMa residuals are then calculated exactly as for a single data point (see \link{getQuantile} for details). The function stops if fewer than 2 residuals remain after grouping and selection, and warns if fewer than 10 remain.
 }
 \examples{
 library(lme4)

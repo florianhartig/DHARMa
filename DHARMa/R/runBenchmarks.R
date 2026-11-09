@@ -44,37 +44,15 @@ runBenchmarks <- function(calculateStatistics, controlValues = NULL, nRep = 10, 
 
     cl <- parallel::makeCluster(cores)
 
-    # for each
-    # doParallel::registerDoParallel(cl)
-    #
-    # `%dopar%` <- foreach::`%dopar%`
-    #
-    # if(is.null(controlValues)) simulations[[1]] =  t(foreach::foreach(i=1:nRep, .packages=c("lme4", "DHARMa"), .combine = rbind) %dopar% calculateStatistics())
-    #
-    # else for(j in 1:length(controlValues)){
-    #   simulations[[j]] = t(foreach::foreach(i=1:nRep, .packages=c("lme4", "DHARMa"), .combine = rbind) %dopar% calculateStatistics(controlValues[j]))
-    # }
-    #
-    # End for each
-
-    # doesn't see to work properly
     loadedPackages = (.packages())
-    parExectuer = function(x = NULL, control = NULL) calculateStatistics(control)
+    parExecutor = function(x = NULL, control = NULL) calculateStatistics(control)
     if (exportGlobal == TRUE) parallel::clusterExport(cl = cl, varlist = ls(envir = .GlobalEnv))
-    parallel::clusterExport(cl = cl, c("parExectuer", "calculateStatistics", "loadedPackages"), envir = environment())
+    parallel::clusterExport(cl = cl, c("parExecutor", "calculateStatistics", "loadedPackages"), envir = environment())
     parallel::clusterEvalQ(cl, {for(p in loadedPackages) library(p, character.only=TRUE)})
 
-    # parallel::clusterExport(cl = cl, varlist = ls(envir = .GlobalEnv))
-
-    # parallel::clusterExport(cl=cl,varlist = c("calculateStatistics"), envir=environment())
-    # parallel::clusterExport(cl=cl,varlist = c("controlValues", "alpha", envir=environment())
-
-    # parallel::clusterExport(cl=cl,varlist = c("calculateStatistics"), envir=environment())
-    # parallel::clusterExport(cl=cl,varlist = c("controlValues", "alpha", envir=environment())
-
-    if(is.null(controlValues)) simulations[[1]] = parallel::parSapply(cl, 1:nRep, parExectuer)
+    if(is.null(controlValues)) simulations[[1]] = parallel::parSapply(cl, 1:nRep, parExecutor)
     else for(j in 1:length(controlValues)){
-      simulations[[j]] = parallel::parSapply(cl, 1:nRep, parExectuer, control = controlValues[j])
+      simulations[[j]] = parallel::parSapply(cl, 1:nRep, parExecutor, control = controlValues[j])
     }
 
     parallel::stopCluster(cl)
@@ -102,7 +80,7 @@ runBenchmarks <- function(calculateStatistics, controlValues = NULL, nRep = 10, 
     return(ret)
   }
 
-  if(length(is.na(x)>0)){
+  if(any(is.na(x))){
     warning("NA values in the output, this might be a problem for the summaries.")
   }
 

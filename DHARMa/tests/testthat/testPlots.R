@@ -86,5 +86,29 @@ test_that("different form arguments in plotResiduals work",
             expect_no_error(plotResiduals(simulationOutput, form = ~x))
             expect_no_error(plotResiduals(simulationOutput, form = ~.))
             expect_error(plotResiduals(simulationOutput, form = testData$Environment1))
+
+            # one panel per group level (issue #573)
+            n = 0
+            setHook("plot.new", function() n <<- n + 1)
+            on.exit(setHook("plot.new", NULL, "replace"))
+            plotResiduals(simulationOutput, form = ~Environment1|group, quantreg = FALSE)
+            expect_equal(n, 10)
+
+            # one panel per selected group level (issue #596)
+            n = 0
+            plotResiduals(simulationOutput, form = ~Environment1|group %in% c("1", "3"), quantreg = FALSE)
+            expect_equal(n, 2)
+            expect_error(plotResiduals(simulationOutput, form = ~Environment1|group %in% c("1", "99")), "find specified group level")
+            expect_error(plotResiduals(simulationOutput, form = ~Environment1|group != "1"), "group levels")
+            expect_message(plotResidualsAll(simulationOutput, predictorNames = "Environment1", quantreg = FALSE), "deprecated")
+
+            # absoluteDeviation also for a selected group level (#597)
+            set.seed(1)
+            testData = createData(200, numGroups = 2, randomEffectVariance = 0)
+            simulationOutput <- simulateResiduals(glm(observedResponse ~ Environment1, family = "poisson", data = testData))
+            expect_false(plotResiduals(simulationOutput, form = ~Environment1|group == "1")$p.value ==
+                           plotResiduals(simulationOutput, form = ~Environment1|group == "1", absoluteDeviation = TRUE)$p.value)
           }
 )
+
+

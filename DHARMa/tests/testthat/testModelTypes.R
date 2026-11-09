@@ -34,6 +34,12 @@ runEverything = function(fittedModel, testData, DHARMaData = T, phy = NULL,
   expect_true(is.vector(t))
   expect_true(is.numeric(t))
 
+  # fitted values on the scale of the observed response (number of successes for k/n binomial models)
+  f = getFittedResponse(fittedModel)
+  expect_true(is.numeric(f))
+  expect_equal(length(f), length(t))
+  expect_lt(abs(mean(f) - mean(t)), 0.5 * sd(t))
+
   x = getSimulations(fittedModel, 1)
   expect_true(is.matrix(x))
   expect_true(ncol(x) == 1)
@@ -100,6 +106,12 @@ runEverythingExcPearson = function(fittedModel, testData, DHARMaData = T, phy = 
   t = getObservedResponse(fittedModel)
   expect_true(is.vector(t))
   expect_true(is.numeric(t))
+
+  # fitted values on the scale of the observed response (number of successes for k/n binomial models)
+  f = getFittedResponse(fittedModel)
+  expect_true(is.numeric(f))
+  expect_equal(length(f), length(t))
+  expect_lt(abs(mean(f) - mean(t)), 0.5 * sd(t))
 
   x = getSimulations(fittedModel, 1)
   expect_true(is.matrix(x))
@@ -587,6 +599,11 @@ test_that("brms works",
           {
             fittedModel <- brms::brm(observedResponse ~ Environment1 + (1|group), data = testData$lmm)
             runEverythingExcPearson(fittedModel, testData$lmm, doRefit = FALSE)
+            expect_error(getPearsonResiduals(fittedModel), "not supported")
+            # REs re-simulated (#574)
+            corr = cor(t(getSimulations(fittedModel, nsim = 50, simulateREs = "unconditional")))
+            sameGroup = outer(testData$lmm$group, testData$lmm$group, "==")
+            expect_gt(mean(corr[sameGroup & upper.tri(corr)], na.rm = TRUE), mean(corr[!sameGroup], na.rm = TRUE) + 0.1)
 
             fittedModel <-  brms::brm(observedResponse|trials(1) ~ Environment1 +
                                         (1|group), family = "binomial",

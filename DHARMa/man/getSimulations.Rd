@@ -81,9 +81,11 @@ The purpose of this function is to wrap or implement the simulate function of di
 
 One important parameter is simulateRE, which controls which hierarchical levels are held constant (conditioned on), and which are re-simulated. The default as of DHARMa 0.5.0 is to simulate "conditional" on all fitted random effects. The setting "unconditional" re-simulates all REs.
 
-With simulateREs = "user-specified", users can supply additional parameters to the simulate function of the respective model class and thus condition on specific REs or structures. The exact behavior will depdend on the regression package. For details, please see vignette, or consult the help of the different packages. If choosing simulateREs = "user-specified" with no additional parameters, the default simulation function of the respective regression package is used. This corresponds to the DHARMa behavior prior to 0.5.0.
+With simulateREs = "user-specified", users can supply additional parameters to the simulate function of the respective model class and thus condition on specific REs or structures. The exact behavior will depend on the regression package. For details, please see vignette, or consult the help of the different packages. If choosing simulateREs = "user-specified" with no additional parameters, the default simulation function of the respective regression package is used. This corresponds to the DHARMa behavior prior to 0.5.0.
 
 If the model was fit with weights and the respective model class does not include the weights in the simulations, getSimulations will throw a warning. The background is if weights are used on the likelihood directly, then what is fitted is effectively a pseudo likelihood, and there is no way to directly simulate from the specified likelihood. Whether or not residuals can be used in this case depends very much on what is tested and how weights are used. I'm sorry to say that it is hard to give a general recommendation, you have to consult someone that understands how weights are processed in the respective model class.
+
+Binomial models with a cbind(successes, failures) response and prior weights are not supported; getSimulations stops for them.
 }
 \examples{
 testData = createData(sampleSize = 400, family = gaussian())
@@ -95,6 +97,10 @@ getObservedResponse(fittedModel)
 
 # predictions of the model for these points
 getFitted(fittedModel)
+
+# predictions on the scale of the observed response
+# (differs from getFitted only for k/n binomial models)
+getFittedResponse(fittedModel)
 
 # extract simulations from the model as matrix
 getSimulations(fittedModel, nsim = 2)

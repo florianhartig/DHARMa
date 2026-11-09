@@ -1,0 +1,68 @@
+test_that("glmmTMB refit simulations for proportions with weights (#571)", {
+  set.seed(1)
+  testData = data.frame(x = runif(60), N = sample(5:15, 60, TRUE))
+  testData$p = rbinom(60, testData$N, plogis(testData$x)) / testData$N
+  m = glmmTMB::glmmTMB(p ~ x, weights = N, family = binomial, data = testData)
+  sims = getSimulations(m, nsim = 3, type = "refit")
+  expect_equal(ncol(sims), 3)
+  expect_equal(mean(as.matrix(sims)), mean(testData$p), tolerance = 0.1)
+})
+
+
+test_that("gam simulations: bam offsets and several linear predictors (#572)", {
+  set.seed(1)
+  n = 200
+  testData = data.frame(x = runif(n), a = runif(n, 1, 3))
+  testData$y = rpois(n, testData$a * exp(1 + testData$x))
+  # getSimulations called directly stops for non-discrete bam that drops the offset argument
+  expect_error(getSimulations(mgcv::bam(y ~ s(x), offset = log(a), family = poisson, data = testData)), "offset")
+  # no false positives of the bam offset check
+  expect_no_error(simulateResiduals(mgcv::bam(y ~ s(x) + offset(log(a)), family = poisson, data = testData), n = 10))
+  expect_no_error(simulateResiduals(mgcv::bam(y ~ s(x), offset = log(a), family = poisson, data = testData, discrete = TRUE), n = 10))
+  expect_no_error(simulateResiduals(mgcv::gam(list(y ~ s(x), ~ 1), family = mgcv::gaulss(), data = testData), n = 10))
+})
+
+
+test_that("gam simulations without mgcViz for factor responses (#567)", {
+  set.seed(1)
+  testData = createData(sampleSize = 200, family = binomial(), binomialTrials = 20, randomEffectVariance = 0)
+  testData$f = factor(testData$observedResponse1 > 10)
+  mf = mgcv::gam(f ~ Environment1, family = binomial, data = testData)
+  expect_equal(dim(getSimulations(mf, nsim = 2, mgcViz = FALSE)), c(200, 2))
+  # the fallback must not use mgcViz's simulate.gam once the mgcViz namespace is loaded
+  skip_if_not_installed("mgcViz")
+  loadNamespace("mgcViz")
+  m = mgcv::gam(cbind(observedResponse1, observedResponse0) ~ Environment1, family = binomial, data = testData)
+  simulationOutput = simulateResiduals(m, n = 100, mgcViz = FALSE)
+  expect_equal(mean(simulationOutput$simulatedResponse), mean(simulationOutput$observedResponse), tolerance = 0.05)
+})
+
+
+test_that("binomial models with cbind() response and prior weights (#568)", {
+  set.seed(2)
+  testData = data.frame(x = rnorm(100), N = sample(20:30, 100, TRUE), g = factor(sample(1:10, 100, TRUE)), w = 2, w1 = 1)
+  testData$k = rbinom(100, testData$N, plogis(testData$x))
+  expect_error(simulateResiduals(lme4::glmer(cbind(k, N - k) ~ x + (1|g), family = binomial, weights = w, data = testData)), "additional prior weights")
+  expect_error(simulateResiduals(glmmTMB::glmmTMB(cbind(k, N - k) ~ x, family = binomial, weights = w, data = testData)), "additional prior weights")
+  expect_error(simulateResiduals(mgcv::gam(cbind(k, N - k) ~ s(x), family = binomial, weights = w, data = testData)), "additional prior weights")
+  # weights of 1 are fine
+  expect_no_warning(s <- simulateResiduals(mgcv::gam(cbind(k, N - k) ~ s(x), family = binomial, weights = w1, data = testData), n = 10))
+  expect_equal(mean(s$simulatedResponse), mean(s$observedResponse), tolerance = 0.1)
+  # glmmTMB refit simulations: cbind() response with weights of 1, one simulation per column
+  m = glmmTMB::glmmTMB(cbind(k, N - k) ~ x, weights = w1, family = binomial, data = testData)
+  expect_equal(length(getSimulations(m, nsim = 3, type = "refit")), 3)
+})
+
+test_that("brms: unconditional simulations stop for unsupported models (#574)", {
+  skip_if_not_installed("brms")
+  set.seed(1)
+  d = data.frame(y = rpois(30, 3), x = rnorm(30), b = factor(rep(1:10, 3)), bn = rep(1:10, 3), z = factor(rep(rep(1:2, each = 5), 3)))
+  A = diag(10); dimnames(A) = list(levels(d$b), levels(d$b))
+  # empty = TRUE: model object without compilation / sampling
+  getSim = function(f, ...) getSimulations(suppressMessages(brms::brm(f, data = d, family = poisson, empty = TRUE, ...)), simulateREs = "unconditional")
+  expect_error(getSim(y ~ x + (1|gr(b, cov = A)), data2 = list(A = A)), "gr\\(\\.\\.\\., cov")
+  expect_error(getSim(y ~ x + (1|gr(b, by = z))), "gr\\(\\.\\.\\., by")
+  # grouping variable also used as a fixed effect
+  expect_error(getSim(y ~ b + (1|b)), "also used outside the random effects")
+  expect_error(getSim(y ~ bn + (1|bn)), "also used outside the random effects")
+})
