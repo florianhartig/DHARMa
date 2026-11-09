@@ -2,6 +2,10 @@ NOTE: for more news about the package, see https://github.com/florianhartig/DHAR
 
 # DHARMa 0.5.2
 
+# Minor changes
+
+* `plotResiduals()` / `testCategorical()` now show individual residuals as jittered points in the boxplots for categorical predictors for <10,000 observations (issue #562), including outliers; jitter points can be suppressed using `smoothScatter = TRUE`. Additional arguments such as ylab are now passed to the boxplot.
+
 
 # DHARMa 0.5.1
 
@@ -77,7 +81,6 @@ NOTE: for more news about the package, see https://github.com/florianhartig/DHAR
 * Documentation: improved vignette (more explanations for conditional vs unconditional simulations); corrected several errors in help files, examples and vignette (#570).
 
 
-* `plotResiduals()` / `testCategorical()` now show individual residuals as jittered points in the boxplots for categorical predictors for <10,000 observations (issue #562), including outliers; jitter points can be suppressed using `smoothScatter = TRUE`. Additional arguments such as ylab are now passed to the boxplot.
 
 
 # DHARMa 0.5.0
