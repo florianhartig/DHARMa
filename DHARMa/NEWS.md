@@ -2,9 +2,11 @@ NOTE: for more news about the package, see https://github.com/florianhartig/DHAR
 
 # DHARMa 0.5.2
 
-# Minor changes
+## Minor changes
 
 * `plotResiduals()` / `testCategorical()` now show individual residuals as jittered points in the boxplots for categorical predictors for <10,000 observations (issue #562), including outliers; jitter points can be suppressed using `smoothScatter = TRUE`. Additional arguments such as ylab are now passed to the boxplot.
+
+* GEE models (class `gee`, e.g. `geepack::geeglm`) now give a warning that they are not supported (#339).
 
 
 # DHARMa 0.5.1
