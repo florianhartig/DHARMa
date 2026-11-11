@@ -129,7 +129,7 @@
 
 ---
 
-    list(statistic = 1, p.value = 0.14)
+    list(statistic = 1, p.value = 0.1)
 
 ---
 

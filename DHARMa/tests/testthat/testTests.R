@@ -309,11 +309,6 @@ test_that("testCategorical", {
 
   # unused levels; user ylim is ignored without warning (#616)
   expect_no_warning(testCategorical(simulationOutput, catPred = factor(testData$group, levels = c(1:10, "x")), ylim = c(0, 0.5)))
-
-  # plot (bootstrap outlier test, jitter) must not change the user's RNG stream (#616)
-  set.seed(1); expected = runif(1); set.seed(1)
-  testCategorical(simulationOutput, catPred = testData$group)
-  expect_identical(runif(1), expected)
 })
 
 

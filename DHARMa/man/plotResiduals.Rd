@@ -6,7 +6,8 @@
 \usage{
 plotResiduals(simulationOutput, form = NULL, quantreg = NULL,
   rank = TRUE, asFactor = NULL, smoothScatter = NULL,
-  quantiles = c(0.25, 0.5, 0.75), absoluteDeviation = FALSE, ...)
+  jitterPoints = NULL, quantiles = c(0.25, 0.5, 0.75),
+  absoluteDeviation = FALSE, ...)
 }
 \arguments{
 \item{simulationOutput}{an object, usually a DHARMa object, from which residual values can be extracted. Alternatively, a vector with residuals or a fitted model can be provided, which will then be transformed into a DHARMa object.}
@@ -19,7 +20,9 @@ plotResiduals(simulationOutput, form = NULL, quantreg = NULL,
 
 \item{asFactor}{should a numeric predictor provided in form be treated as a factor. Default is to choose this for < 10 unique values, as long as enough predictions are available to draw a boxplot.}
 
-\item{smoothScatter}{if T: for numeric predictors, a smooth scatter plot will be plotted instead of a normal scatter plot; for categorical predictors, individual residuals will not be plotted. This makes sense when the number of residuals is very large. Default NULL chooses T for nObs > 10000, and F otherwise.}
+\item{smoothScatter}{if T, individual residuals are not plotted: for numeric predictors, the scatter plot is replaced by a smooth scatter plot (graphics::smoothScatter()); for categorical predictors, only the boxplot and the outliers are shown. This makes sense when the number of residuals is very large. Default NULL chooses T for nObs > 10000, and F otherwise.}
+
+\item{jitterPoints}{horizontal jitter of the plotted residuals, to separate residuals with identical predictor values. TRUE = random shift of up to 0.3 times the smallest distance between two (rank-transformed, if rank = TRUE) predictor values to either side; for categorical predictors, 0.3 times the distance between neighbouring boxes. A positive number replaces the 0.3; FALSE = no jitter. Default NULL chooses TRUE for categorical and FALSE for numeric predictors. Only the plotted points are jittered, not the values used for tests and quantile regressions. The jitter uses a fixed random seed and does not change the user's random state.}
 
 \item{quantiles}{for a quantile regression, which quantiles should be plotted. Default is 0.25, 0.5, 0.75.}
 

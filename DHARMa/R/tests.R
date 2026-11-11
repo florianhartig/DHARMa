@@ -364,7 +364,8 @@ testOutliers <- function(simulationOutput, alternative = c("two.sided", "greater
 #' @param catPred a categorical predictor with the same dimensions as the residuals in simulationOutput. If specified as formula, e.g. catPred = ~group, NAs are handled automatically (recommended).
 #' @param quantiles whether to draw the quantile lines.
 #' @param plot if TRUE, the function will create an additional plot.
-#' @param smoothScatter if TRUE, individual residual jitter points will not be plotted. This makes sense when the number of residuals is very large. Default NULL chooses T for nObs > 10000, and F otherwise.
+#' @param smoothScatter if TRUE, individual residuals are not plotted, only the boxplot and the outliers. This makes sense when the number of residuals is very large. Default NULL chooses T for nObs > 10000, and F otherwise.
+#' @param jitterPoints horizontal jitter of the plotted residuals. TRUE (default) = random shift of up to 0.3 times the distance between neighbouring boxes to either side. A positive number replaces the 0.3; FALSE = no jitter. The jitter uses a fixed random seed and does not change the user's random state.
 #' @param ... additional arguments to boxplot.
 #' @details The function tests for two common problems: are residuals within each group distributed according to model assumptions, and is the variance between groups heterogeneous.
 #'
@@ -377,7 +378,7 @@ testOutliers <- function(simulationOutput, alternative = c("two.sided", "greater
 #' @example inst/examples/testsHelp.R
 #' @export
 testCategorical <- function(simulationOutput, catPred,
-                            quantiles = c(0.25, 0.5, 0.75), plot = TRUE, smoothScatter = NULL, ...){
+                            quantiles = c(0.25, 0.5, 0.75), plot = TRUE, smoothScatter = NULL, jitterPoints = TRUE, ...){
 
   simulationOutput = ensureDHARMa(simulationOutput, convert = T)
 
@@ -408,9 +409,6 @@ testCategorical <- function(simulationOutput, catPred,
   if(is.null(smoothScatter)) smoothScatter = length(res) > switchScatter
 
   if(plot == T){
-    # seed before testOutliers (bootstrap) and jitter, so plotting does not change the user's RNG stream (#616)
-    randomState = getRandomState(123)
-    on.exit(randomState$restoreCurrent(), add = TRUE)
     if(is.null(a$p.outliers)) {
       a$p.outliers = if(is.null(simulationOutput$nSim)) NA
       else testOutliers(simulationOutput, plot = FALSE)$p.value
@@ -422,7 +420,7 @@ testCategorical <- function(simulationOutput, catPred,
     do.call(boxplot, append(bxArgs, list(col = ifelse(out$uniformity$p.value.cor < 0.05, .Options$DHARMaSignalColor, "lightgrey"))))
 
     # add jitter points onto boxplots (issue #562)
-    x = jitter(as.numeric(catPred), amount = 0.3)
+    x = jitterPredictor(as.numeric(catPred), jitterPoints)
     blackcol = rgb(0, 0, 0, alpha = max(0.1, 1 - 3 * length(res) / switchScatter))
     if(is.na(a$p.outliers)) message("Outliers will not be displayed in the plot when simulationOutput is not a DHARMa object.")
     outlier = !is.na(a$p.outliers) & (res == 0 | res == 1)

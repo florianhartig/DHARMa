@@ -190,6 +190,16 @@ rankTransform <- function(x){
 #rankTransform(rnorm(10))
 #prs <- rankTransform(rnorm(10))
 
+# horizontal jitter of plotted points (jitterPoints, #616); fixed seed, user's random state restored
+jitterPredictor <- function(x, jitterPoints){
+  if(is.null(jitterPoints) || isFALSE(jitterPoints) || isTRUE(jitterPoints <= 0)) return(x)
+  f = if(isTRUE(jitterPoints)) 0.3 else jitterPoints
+  d = diff(sort(unique(x)))
+  randomState = getRandomState(123)
+  on.exit(randomState$restoreCurrent())
+  jitter(x, amount = f * if(length(d) > 0) min(d) else 1)
+}
+
 
 #' Ensures the existence of a valid predictor to plot residuals against
 #'
