@@ -982,6 +982,8 @@ Simple brms models are supported as of DHARMa version 0.5.0. This means that ess
 
 If confronted with an unsupported package, `DHARMa` will try to use standard S3 functions such as `coef()`, `simulate()` etc. to perform simulations. If no error occurs, a residual object will be calculated, and a warning will be provided that this package has not been checked for full functionality. In many cases, the results can be used though (but no guarantee, maybe check with null simulations if the results are OK). Other than that, see my general comments about [adding new R packages to DHARMa](https://github.com/florianhartig/DHARMa/blob/master/ADDING_PACKAGES.md)
 
+GEE models (e.g. `geepack::geeglm`) are not supported. For some families (e.g. Poisson, binomial), they run through DHARMa via inherited glm methods, but the simulations ignore the working correlation and the scale parameter. Plots of residuals against fitted values or predictors can show problems in the mean structure, but the tests assume independent data with the GLM dispersion and will therefore flag overdispersion and within-cluster correlation that the GEE accounts for. See <https://github.com/florianhartig/DHARMa/issues/339>.
+
 ## Importing external simulations (e.g. from Bayesian software or unsupported packages)
 
 DHARMa can also import external simulations from a fitted model via `createDHARMa()`, which will be interesting for unsupported packages and for Bayesians.

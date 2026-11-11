@@ -44,6 +44,9 @@ checkModel <- function(fittedModel, stop = F){
 
   if(class(fittedModel)[1] == "brmsfit") warning("DHARMa: only simple brms models are supported as of DHARMa version 0.5.0. This includes all models you could also fit with glmmTMB. Multivariate models (multi-response, structural equation models, multinomial) are not supported. DHARMa doesn't check if your model can reliably be checked or not. ")
 
+  # see #339 (GEE objects inherit glm methods, but simulations ignore the GEE structure)
+  if(inherits(fittedModel, "gee")) warning("DHARMa: GEE models are not supported. Simulations (if they run at all) are drawn from the marginal GLM and ignore the working correlation and the scale parameter. Plots of residuals against fitted values and predictors can show problems in the mean structure, but the tests assume independent data with the GLM dispersion and will therefore flag overdispersion and within-cluster correlation that the GEE accounts for. See https://github.com/florianhartig/DHARMa/issues/339")
+
   # if(hasNA(fittedModel)) message("It seems there were NA values in the data used for fitting the model. This can create problems if you supply additional data to DHARMa functions. See ?checkModel for details")
 
   # TODO: check as implemented does not work reliably, check if there is any other option to check for NA
