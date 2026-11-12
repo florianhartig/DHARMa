@@ -427,7 +427,7 @@ testCategorical <- function(simulationOutput, catPred,
     sigOutliers = !is.na(a$p.outliers) && a$p.outliers < 0.05
 
     if (smoothScatter == FALSE) {
-      points(x, res, pch = checkDots("pch", ifelse(outlier, 8, 16), ...), cex = ifelse(outlier, 1, 0.5),
+      points(x, res, pch = checkDots("pch", ifelse(outlier, 8, 1), ...), cex = checkDots("cex", 1, ...),
              col = checkDots("col", ifelse(outlier & sigOutliers, .Options$DHARMaSignalColor, blackcol), ...))
       do.call(boxplot, append(bxArgs, list(add = TRUE, col = NA))) # median on top of points
     } else {

@@ -197,7 +197,7 @@ jitterPredictor <- function(x, jitterPoints){
   d = diff(sort(unique(x)))
   randomState = getRandomState(123)
   on.exit(randomState$restoreCurrent())
-  jitter(x, amount = f * if(length(d) > 0) min(d) else 1)
+  jitter(x, amount = f * if(length(d) > 0) median(d) else 1)
 }
 
 
