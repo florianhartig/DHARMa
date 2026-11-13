@@ -179,6 +179,27 @@ test_that("refitting to the observed response reproduces the fit (#571, #599)", 
   expect_equal(refitCoef(m), coef(m))
 })
 
+test_that("refits stop if the data were changed after fitting (#611)", {
+  set.seed(1)
+  testData = data.frame(x = runif(60), area = runif(60, 1, 2), f = factor(sample(letters[1:3], 60, TRUE)))
+  testData$y = rpois(60, exp(1 + testData$x))
+  testData$x[3] = NA
+  m = glm(y ~ x + log(area) + f, offset = log(area), family = poisson, data = testData)
+  newresp = model.response(model.frame(m))
+  # unchanged data, also after converting the factor to character or changing the response
+  expect_equal(coef(getRefit(m, newresp)), coef(m))
+  testData$f = as.character(testData$f)
+  testData$y = testData$y + 1
+  expect_equal(coef(getRefit(m, newresp)), coef(m))
+  orig = testData
+  testData = orig[1:50, ]
+  expect_error(getRefit(m, newresp), "Rows used in the fit are missing")
+  testData = orig; testData$x = testData$x * 10
+  expect_error(getRefit(m, newresp), "Values differ for: x")
+  testData = orig; testData$area = testData$area + 1
+  expect_error(getRefit(m, newresp), "Values differ for: log\\(area\\)")
+})
+
 
 test_that("GEE models give a warning (#339)", {
   testData = createData(sampleSize = 50)
