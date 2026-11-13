@@ -5,7 +5,7 @@
 \title{Test for categorical dependencies}
 \usage{
 testCategorical(simulationOutput, catPred, quantiles = c(0.25, 0.5, 0.75),
-  plot = TRUE, smoothScatter = NULL, ...)
+  plot = TRUE, smoothScatter = NULL, jitterPoints = TRUE, ...)
 }
 \arguments{
 \item{simulationOutput}{an object of class DHARMa, either created via \link{simulateResiduals} for supported models or by \link{createDHARMa} for simulations created outside DHARMa, or a supported model. Providing a supported model directly is discouraged, because simulation settings cannot be changed in this case.}
@@ -16,7 +16,9 @@ testCategorical(simulationOutput, catPred, quantiles = c(0.25, 0.5, 0.75),
 
 \item{plot}{if TRUE, the function will create an additional plot.}
 
-\item{smoothScatter}{if TRUE, individual residual jitter points will not be plotted. This makes sense when the number of residuals is very large. Default NULL chooses T for nObs > 10000, and F otherwise.}
+\item{smoothScatter}{if TRUE, individual residuals are not plotted, only the boxplot and the outliers. This makes sense when the number of residuals is very large. Default NULL chooses T for nObs > 10000, and F otherwise.}
+
+\item{jitterPoints}{horizontal jitter of the plotted residuals. TRUE (default) = random shift of up to 0.3 times the distance between neighbouring boxes to either side. A positive number replaces the 0.3; FALSE = no jitter. The jitter uses a fixed random seed and does not change the user's random state.}
 
 \item{...}{additional arguments to boxplot.}
 }

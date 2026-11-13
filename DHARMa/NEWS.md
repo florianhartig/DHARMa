@@ -2,9 +2,15 @@ NOTE: for more news about the package, see https://github.com/florianhartig/DHAR
 
 # DHARMa 0.5.2
 
+## Bugfixes
+
+* `testCategorical()` no longer fails for factors with unused levels (#348, #616).
+
 ## Minor changes
 
-* `plotResiduals()` / `testCategorical()` now show individual residuals as jittered points in the boxplots for categorical predictors for <10,000 observations (issue #562), including outliers; jitter points can be suppressed using `smoothScatter = TRUE`. Additional arguments such as ylab are now passed to the boxplot.
+* `plotResiduals()` / `testCategorical()`: boxplots for categorical predictors show residuals as jittered points with outliers marked (unless `smoothScatter = TRUE`, default for > 10,000 observations; jitter set by the new argument `jitterPoints`, also for numeric predictors); further arguments such as `ylab` are passed to the boxplot (#562, #616).
+
+* `testCategorical()`: significant boxes and titles use `DHARMaSignalColor` instead of red (#616).
 
 * GEE models (class `gee`, e.g. `geepack::geeglm`) now give a warning that they are not supported (#339).
 

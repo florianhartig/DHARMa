@@ -306,6 +306,9 @@ test_that("testCategorical", {
   grDevices::pdf(NULL)
   on.exit(grDevices::dev.off())
   expect_no_error(testCategorical(simulationOutput, catPred = testData$group, plot = F))
+
+  # unused levels; user ylim is ignored without warning (#616)
+  expect_no_warning(testCategorical(simulationOutput, catPred = factor(testData$group, levels = c(1:10, "x")), ylim = c(0, 0.5)))
 })
 
 

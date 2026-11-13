@@ -154,7 +154,8 @@ plotQQunif <- function(simulationOutput, testUniformity = TRUE, testOutliers = T
 #' @param quantreg whether to perform a quantile regression based on [testQuantiles] or a smooth spline around the mean. Default NULL chooses T for nObs < 10000, and F otherwise.
 #' @param rank if T, the values provided in form will be rank transformed. This will usually make patterns easier to spot visually, especially if the distribution of the predictor is skewed. If form is a factor, this has no effect.
 #' @param asFactor should a numeric predictor provided in form be treated as a factor. Default is to choose this for < 10 unique values, as long as enough predictions are available to draw a boxplot.
-#' @param smoothScatter if T: for numeric predictors, a smooth scatter plot will plotted instead of a normal scatter plot; for categorical predictors, individual residuals will not be plotted. This makes sense when the number of residuals is very large. Default NULL chooses T for nObs > 10000, and F otherwise.
+#' @param smoothScatter if T, individual residuals are not plotted: for numeric predictors, the scatter plot is replaced by a smooth scatter plot (graphics::smoothScatter()); for categorical predictors, only the boxplot and the outliers are shown. This makes sense when the number of residuals is very large. Default NULL chooses T for nObs > 10000, and F otherwise.
+#' @param jitterPoints horizontal jitter of the plotted residuals, to separate residuals with identical predictor values. TRUE = random shift of up to 0.3 times the median distance between neighbouring (rank-transformed, if rank = TRUE) predictor values to either side; for categorical predictors, 0.3 times the distance between neighbouring boxes. A positive number replaces the 0.3; FALSE = no jitter. Default NULL chooses TRUE for categorical and FALSE for numeric predictors. Only the plotted points are jittered, not the values used for tests and quantile regressions. The jitter uses a fixed random seed and does not change the user's random state.
 #' @param quantiles for a quantile regression, which quantiles should be plotted. Default is 0.25, 0.5, 0.75.
 #' @param absoluteDeviation if T, switch from displaying normal quantile residuals to absolute deviation from the mean expectation of 0.5 (calculated as 2 * abs(res - 0.5)). The purpose of this is to test explicitly for heteroskedasticity, see details.
 #' @param ... additional arguments to plot / boxplot. Ignored if several panels are plotted.
@@ -172,7 +173,7 @@ plotQQunif <- function(simulationOutput, testUniformity = TRUE, testOutliers = T
 #'
 #' If the predictor is a factor, a boxplot will be plotted instead of a scatter plot. Individual residuals are added as jittered points (unless smoothScatter = TRUE). The distribution for each factor level should be uniformly distributed, so the box should go from 0.25 to 0.75, with the median line at 0.5 (within-group). To test if deviations from those expectations are significant, KS-tests per group and a Levene test for homogeneity of variances are performed. See [testCategorical] for details.
 #'
-#' @note If nObs > 10,000, the scatter plot is replaced by graphics::smoothScatter();for categorical predictors, individual residuals are not plotted.
+#' @note If nObs > 10,000, the scatter plot is replaced by graphics::smoothScatter(); for categorical predictors, individual residuals are not plotted.
 #'
 #' The color for highlighting outliers and quantile lines/splines with significant tests can be changed by setting \code{options(DHARMaSignalColor = "red")} to a different color. See \code{getOption("DHARMaSignalColor")} for the current setting. This is convenient for a color-blind friendly display, since red and black are difficult for some people to distinguish.
 #'
@@ -182,7 +183,7 @@ plotQQunif <- function(simulationOutput, testUniformity = TRUE, testOutliers = T
 #' @example inst/examples/plotResidualsHelp.R
 #' @export
 plotResiduals <- function(simulationOutput, form = NULL, quantreg = NULL,
-                          rank = TRUE, asFactor = NULL, smoothScatter = NULL,
+                          rank = TRUE, asFactor = NULL, smoothScatter = NULL, jitterPoints = NULL,
                           quantiles = c(0.25, 0.5, 0.75),
                           absoluteDeviation = FALSE, ...){
 
@@ -214,7 +215,6 @@ plotResiduals <- function(simulationOutput, form = NULL, quantreg = NULL,
     if (!inherits(form, "formula")) {
       predictor = form # go back to old default
       group = NULL
-      a$xlab = checkDots("xlab", paste(deparse(checkForm), collapse = ""), ...)
       if(is.null(predictor)) stop("DHARMA: unable to find specified predictor variable.")
 
     } else {
@@ -235,6 +235,7 @@ plotResiduals <- function(simulationOutput, form = NULL, quantreg = NULL,
           rank = rank,
           asFactor = asFactor,
           smoothScatter = smoothScatter,
+          jitterPoints = jitterPoints,
           quantiles = quantiles,
           absoluteDeviation = absoluteDeviation,
           ...
@@ -264,6 +265,7 @@ plotResiduals <- function(simulationOutput, form = NULL, quantreg = NULL,
             rank = rank,
             asFactor = asFactor,
             smoothScatter = smoothScatter,
+            jitterPoints = jitterPoints,
             quantiles = quantiles,
             absoluteDeviation = absoluteDeviation,
             ...
@@ -314,6 +316,7 @@ plotResiduals <- function(simulationOutput, form = NULL, quantreg = NULL,
         rank = rank,
         asFactor = asFactor,
         smoothScatter = smoothScatter,
+        jitterPoints = jitterPoints,
         quantiles = quantiles,
         absoluteDeviation = absoluteDeviation,
         ...
@@ -366,14 +369,15 @@ plotResiduals <- function(simulationOutput, form = NULL, quantreg = NULL,
     simulationOutput$scaledResiduals = res
     do.call(testCategorical,
             append(list(simulationOutput = simulationOutput, catPred = pred,
-                        quantiles = quantiles, smoothScatter = smoothScatter), a))
+                        quantiles = quantiles, smoothScatter = smoothScatter,
+                        jitterPoints = if(is.null(jitterPoints)) TRUE else jitterPoints), a))
 
   } else{
 
     # color/shape outliers according to significance of outlier test, related to issue #453
     outlier <- res == 0 | res == 1
     if(is.vector(simOut)) {
-      message("Outliers will be not displayed in the plot when simulationOutput is not a DHARMa object.")
+      message("Outliers will not be displayed in the plot when simulationOutput is not a DHARMa object.")
       defaultCol = blackcol
       defaultPch = 1
     } else {
@@ -384,14 +388,16 @@ plotResiduals <- function(simulationOutput, form = NULL, quantreg = NULL,
       } else{defaultCol = blackcol}
     }
 
+    xPlot = jitterPredictor(pred, jitterPoints) # only for the plotted points
+
     # smooth scatter
     if (smoothScatter == TRUE) {
-      do.call(graphics::smoothScatter, append(list(x = pred, y = res ,
+      do.call(graphics::smoothScatter, append(list(x = xPlot, y = res ,
                                                    ylim = c(0,1), axes = FALSE,
                                                    colramp = colorRampPalette(c("white", "darkgrey"))),
                                               a[names(a) != "main"]))
       if(!is.vector(simOut)){
-      points(pred[outlier], res[outlier], pch = 8, cex = 0.5,
+      points(xPlot[outlier], res[outlier], pch = 8, cex = 0.5,
              col = ifelse(p.outliers < 0.05, .Options$DHARMaSignalColor, "black"))
     }
       axis(1)
@@ -401,7 +407,7 @@ plotResiduals <- function(simulationOutput, form = NULL, quantreg = NULL,
     else{
       a$col = checkDots("col", defaultCol, ...)
       a$pch = checkDots("pch", defaultPch, ...)
-      do.call(plot, append(list(res ~ pred, ylim = c(0,1), axes = FALSE), a[names(a) != "main"]))
+      do.call(plot, append(list(res ~ xPlot, ylim = c(0,1), axes = FALSE), a[names(a) != "main"]))
 
       axis(1)
       axis(2, at=c(0, quantiles, 1))
@@ -503,7 +509,7 @@ plotResidualsAll <- function(simulationOutput, predictorNames, predictorType = c
 
 # internal function of plotResiduals, plots one panel per predictor or group level
 plotResidualsPanels <- function(simulationOutput, predictorNames, predictorType = c("predictor", "groupLevel"), form = NULL, quantreg = NULL,
-                             rank = TRUE, asFactor = NULL, smoothScatter = NULL,
+                             rank = TRUE, asFactor = NULL, smoothScatter = NULL, jitterPoints = NULL,
                              quantiles = c(0.25, 0.5, 0.75),
                              absoluteDeviation = FALSE, ...){
 
@@ -543,6 +549,7 @@ plotResidualsPanels <- function(simulationOutput, predictorNames, predictorType 
                     rank = rank,
                     asFactor = asFactor,
                     smoothScatter = smoothScatter,
+                    jitterPoints = jitterPoints,
                     quantiles = quantiles,
                     absoluteDeviation = absoluteDeviation,
                     # create the correct xlab for poly()-syntax (related to issue #536)
@@ -561,6 +568,7 @@ plotResidualsPanels <- function(simulationOutput, predictorNames, predictorType 
                     rank = rank,
                     asFactor = asFactor,
                     smoothScatter = smoothScatter,
+                    jitterPoints = jitterPoints,
                     quantiles = quantiles,
                     absoluteDeviation = absoluteDeviation,
                     xlab = newForm)

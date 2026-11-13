@@ -6,7 +6,8 @@
 \usage{
 plotResiduals(simulationOutput, form = NULL, quantreg = NULL,
   rank = TRUE, asFactor = NULL, smoothScatter = NULL,
-  quantiles = c(0.25, 0.5, 0.75), absoluteDeviation = FALSE, ...)
+  jitterPoints = NULL, quantiles = c(0.25, 0.5, 0.75),
+  absoluteDeviation = FALSE, ...)
 }
 \arguments{
 \item{simulationOutput}{an object, usually a DHARMa object, from which residual values can be extracted. Alternatively, a vector with residuals or a fitted model can be provided, which will then be transformed into a DHARMa object.}
@@ -19,7 +20,9 @@ plotResiduals(simulationOutput, form = NULL, quantreg = NULL,
 
 \item{asFactor}{should a numeric predictor provided in form be treated as a factor. Default is to choose this for < 10 unique values, as long as enough predictions are available to draw a boxplot.}
 
-\item{smoothScatter}{if T: for numeric predictors, a smooth scatter plot will plotted instead of a normal scatter plot; for categorical predictors, individual residuals will not be plotted. This makes sense when the number of residuals is very large. Default NULL chooses T for nObs > 10000, and F otherwise.}
+\item{smoothScatter}{if T, individual residuals are not plotted: for numeric predictors, the scatter plot is replaced by a smooth scatter plot (graphics::smoothScatter()); for categorical predictors, only the boxplot and the outliers are shown. This makes sense when the number of residuals is very large. Default NULL chooses T for nObs > 10000, and F otherwise.}
+
+\item{jitterPoints}{horizontal jitter of the plotted residuals, to separate residuals with identical predictor values. TRUE = random shift of up to 0.3 times the median distance between neighbouring (rank-transformed, if rank = TRUE) predictor values to either side; for categorical predictors, 0.3 times the distance between neighbouring boxes. A positive number replaces the 0.3; FALSE = no jitter. Default NULL chooses TRUE for categorical and FALSE for numeric predictors. Only the plotted points are jittered, not the values used for tests and quantile regressions. The jitter uses a fixed random seed and does not change the user's random state.}
 
 \item{quantiles}{for a quantile regression, which quantiles should be plotted. Default is 0.25, 0.5, 0.75.}
 
@@ -49,7 +52,7 @@ If form is specified as a formula, e.g. \code{form = ~ your_predictor}, NAs will
 If the predictor is a factor, a boxplot will be plotted instead of a scatter plot. Individual residuals are added as jittered points (unless smoothScatter = TRUE). The distribution for each factor level should be uniformly distributed, so the box should go from 0.25 to 0.75, with the median line at 0.5 (within-group). To test if deviations from those expectations are significant, KS-tests per group and a Levene test for homogeneity of variances are performed. See \link{testCategorical} for details.
 }
 \note{
-If nObs > 10,000, the scatter plot is replaced by graphics::smoothScatter();for categorical predictors, individual residuals are not plotted.
+If nObs > 10,000, the scatter plot is replaced by graphics::smoothScatter(); for categorical predictors, individual residuals are not plotted.
 
 The color for highlighting outliers and quantile lines/splines with significant tests can be changed by setting \code{options(DHARMaSignalColor = "red")} to a different color. See \code{getOption("DHARMaSignalColor")} for the current setting. This is convenient for a color-blind friendly display, since red and black are difficult for some people to distinguish.
 }

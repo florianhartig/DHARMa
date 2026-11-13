@@ -108,6 +108,23 @@ test_that("different form arguments in plotResiduals work",
             simulationOutput <- simulateResiduals(glm(observedResponse ~ Environment1, family = "poisson", data = testData))
             expect_false(plotResiduals(simulationOutput, form = ~Environment1|group == "1")$p.value ==
                            plotResiduals(simulationOutput, form = ~Environment1|group == "1", absoluteDeviation = TRUE)$p.value)
+
+            # jitterPoints for numeric and categorical predictors (#616)
+            x = c(1, 1, 3, 3)
+            expect_identical(jitterPredictor(x, FALSE), x)
+            expect_identical(jitterPredictor(x, 0), x)
+            set.seed(1); r = runif(1); set.seed(1)
+            j = jitterPredictor(x, 0.1)
+            expect_identical(runif(1), r) # user's random state unchanged
+            expect_true(all(j != x & abs(j - x) <= 0.2))
+            expect_no_error(plotResiduals(simulationOutput, form = ~Environment1, jitterPoints = TRUE, quantreg = FALSE))
+            expect_no_error(plotResiduals(simulationOutput, form = testData$group, jitterPoints = FALSE))
+
+            # default xlab without data$ prefix for vector form (#616)
+            lab = NULL
+            local_mocked_bindings(testCategorical = function(...) lab <<- list(...)$xlab)
+            plotResiduals(simulationOutput, form = testData$group)
+            expect_equal(lab, "group")
           }
 )
 
