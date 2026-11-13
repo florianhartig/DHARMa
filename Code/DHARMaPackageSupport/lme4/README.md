@@ -28,8 +28,8 @@ Checked on 2026-11-09 with DHARMa 0.5.2 (master), lme4 2.1-0, lmerTest 3.2-1, ga
 ## Known problems
 
 - lmerTest: `simulateResiduals(refit = TRUE)` fails ("all refits failed"), because `getFixedEffects()` checks for class `"lmerTest"` instead of `"lmerModLmerTest"` and returns the coefficients per group (no issue yet; related: #220). Workaround: fit with `lme4::lmer()`.
-- gamm4: `gamm4()` passes weights of 1 to `glmer()`, and DHARMa warns "Model was fit with prior weights", because `hasWeights()` treats any weights column of non-binomial families as prior weights (no issue yet; similar: #540). The warning can be ignored for gamm4 models fitted without weights. gamm4 itself also warns "modified RE names for gamm4 prediction".
-- `na.action = na.exclude`: `simulateResiduals()` stops with an error from `simulate.merMod` ("missing value where TRUE/FALSE needed"; #88, #134). Workaround: fit with `na.omit`.
+- gamm4: `gamm4()` passes weights of 1 to `glmer()`, and DHARMa warns "Model was fit with prior weights", because `hasWeights()` treats any weights column of non-binomial families as prior weights (no issue yet; similar: #540, #334). The warning can be ignored for gamm4 models fitted without weights. gamm4 itself also warns "modified RE names for gamm4 prediction".
+- `na.action = na.exclude`: `simulateResiduals()` stops; for `glmer()` with an error from `simulate.merMod` ("missing value where TRUE/FALSE needed"), for `lmer()` with "Simulations from your fitted model produce NA values" (#88, #134). Workaround: fit with `na.omit`.
 
 ## Not checked
 

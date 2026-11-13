@@ -14,7 +14,7 @@ Checked on 2026-11-09 with DHARMa 0.5.2 (master), phylolm 2.6.5 and R 4.6.2. Evi
 | `phyloglm(method = "poisson_GEE")` | not supported, `simulateResiduals()` stops (#478) | checks.R, *poisson_GEE* |
 | Simulations | parametric bootstrap of phylolm (`update(boot = nsim, save = TRUE)`), i.e. one model fit per simulation; phylolm warnings from these fits are passed on | checks.R, *Model classes*, *Simulations* |
 | `simulateREs` | no effect; the phylogenetic structure is always re-simulated | checks.R, *Simulations* |
-| Residual rotation (`rotation = "estimated"`) | supported (runs; uniformity of rotated residuals not checked) | checks.R, *Residual correlation* |
+| Residual correlation | residuals stay correlated (simulations re-simulate the phylogeny), so the uniformity test rejects too often for correct models. `rotation = m$sigma2 * vcv(tree)` (`model = "BM"`, tip order) fixes this; `rotation = "estimated"` runs, but with the default `n = 250` it is strongly anti-conservative (#489) | checks.R, *Residual correlation*; #489 |
 | `refit = TRUE` | supported; refit reproduces the fit when the response is given in tree tip order, as returned by `getObservedResponse()` | checks.R, *Model classes*, *Refit* |
 | Order of residuals | order of the tree tips, not of the data (see Known problems) | checks.R, *Order of residuals* |
 | Pearson residuals | not available: `testDispersion(type = "PearsonChisq")` stops; the default `testDispersion()` is supported | checks.R, *Pearson residuals and dispersion tests* |
@@ -22,8 +22,8 @@ Checked on 2026-11-09 with DHARMa 0.5.2 (master), phylolm 2.6.5 and R 4.6.2. Evi
 ## Known problems
 
 - Residuals are in the order of the tree tips (#609). Order predictors as `tree$tip.label` before passing them to `plotResiduals()`, `testCategorical()` etc.
-- `poisson_GEE` (#478).
-- Simulations and refit use `update()`, which according to a comment in testModelTypes.R finds the tree and the data only in the global environment; models fitted inside functions may therefore fail (not checked).
+- `phyloglm`: functions with formula predictors (`plotResiduals(form = )`, `recalculateResiduals(group = ~)`, `testQuantiles(predictor = ~)`, ...) stop, because phyloglm objects have no model frame (#609).
+- `poisson_GEE`, and models fitted inside a function: simulations and refit use `update()`, which fails if the objects named in the model call are not found outside the function (#478).
 
 ## Not checked
 

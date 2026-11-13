@@ -12,7 +12,7 @@ Checked on 2026-11-09 with DHARMa 0.5.2 (master), spaMM 4.7.17 and R 4.6.2. Evid
 |---|---|---|
 | Families: gaussian, poisson, binomial (0/1, k/n as `cbind()`), `betabin()`, `negbin2()`, Gamma; fitted with `fitme()` or `HLfit()` | supported | checks.R, *Families*; testModelTypes.R, *spaMM::HLfit* |
 | k/n binomial as proportion + prior weights | not supported by spaMM (fit stops) | checks.R, *k/n binomial with weights* |
-| Spatial models (`Matern()`) | supported, conditional and unconditional | checks.R, *Spatial models* |
+| Spatial models (`Matern()`) | supported, conditional and unconditional; with one observation per location, conditional residuals of correct Gaussian models are underdispersed (#527), and unconditional residuals stay spatially correlated (rotation, #489) | checks.R, *Spatial models*; #527, #489 |
 | Fitted values | without random effects (`re.form = NA`) | testCompatibility.R |
 | `simulateREs` | conditional (default) and unconditional supported | checks.R, *Conditional and unconditional simulations*; testCompatibility.R |
 | Conditioning on selected REs | supported with `simulateREs = "user-specified", re.form = ~(1\|group)`; `re.form` alone stops with an error | checks.R, *Conditioning on selected random effects* |
