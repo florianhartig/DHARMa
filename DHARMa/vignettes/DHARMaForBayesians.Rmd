@@ -9,7 +9,7 @@ vignette: >
   %\VignetteIndexEntry{DHARMa for Bayesians}
   \usepackage[utf8]{inputenc}
   %\VignetteEngine{knitr::rmarkdown}
-abstract: "The 'DHARMa' package uses a simulation-based approach to create  readily interpretable scaled (quantile) residuals for fitted (generalized) linear mixed models. This vignette describes how to use DHARMa for checking Bayesian models. It is recommended to read this AFTER the general DHARMa vignette, as all comments made there (in pacticular regarding the interpretation of the residuals) also apply to Bayesian models. \n \n \n"
+abstract: "The 'DHARMa' package uses a simulation-based approach to create  readily interpretable scaled (quantile) residuals for fitted (generalized) linear mixed models. This vignette describes how to use DHARMa for checking Bayesian models. It is recommended to read this AFTER the general DHARMa vignette, as all comments made there (in particular regarding the interpretation of the residuals) also apply to Bayesian models. \n \n \n"
 editor_options: 
   chunk_output_type: console
 ---
