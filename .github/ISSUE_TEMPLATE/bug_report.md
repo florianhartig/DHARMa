@@ -14,7 +14,7 @@ Before submitting, please:
 
 ### Problem
 
-<!-- What happens, and what did you expect instead? -->
+<!-- What happens, what did you expect instead, and why does it happen (if known)? -->
 
 ### Reproducible example
 
@@ -25,3 +25,7 @@ Your model and DHARMa code as a minimal reproducible example that runs as is in 
 ### Output and session info
 
 <!-- DHARMa results or error messages, and the output of `sessionInfo()` (shows the versions of R, DHARMa and the model package). -->
+
+### Proposed solution
+
+<!-- Optional: what would fix the problem, if you have an idea. -->

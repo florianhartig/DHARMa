@@ -12,6 +12,8 @@ NOTE: for more news about the package, see https://github.com/florianhartig/DHAR
 
 * `testCategorical()`: significant boxes and titles use `DHARMaSignalColor` instead of red (#616).
 
+* GEE models (class `gee`, e.g. `geepack::geeglm`) now give a warning that they are not supported (#339).
+
 
 # DHARMa 0.5.1
 

@@ -178,3 +178,11 @@ test_that("refitting to the observed response reproduces the fit (#571, #599)", 
   m = glm(k ~ x, family = poisson, data = testData, subset = 31:60)
   expect_equal(refitCoef(m), coef(m))
 })
+
+
+test_that("GEE models give a warning (#339)", {
+  testData = createData(sampleSize = 50)
+  m = glm(observedResponse ~ Environment1, family = poisson, data = testData)
+  class(m) = c("geeglm", "gee", class(m)) # class of geepack::geeglm, avoids a dependency on geepack
+  expect_warning(expect_warning(checkModel(m), "GEE models are not supported"), "not in class of supported models")
+})

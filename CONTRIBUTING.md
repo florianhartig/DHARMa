@@ -17,7 +17,7 @@ It is easier to help you if your question is well structured. Typically, it cont
 
 For problems and errors, please always include a minimal reproducible example: code that runs as is in a fresh R session and shows the problem. See [How to make a great R reproducible example](https://stackoverflow.com/questions/5963269/how-to-make-a-great-r-reproducible-example) and the [reprex](https://cran.r-project.org/package=reprex) package. Use data that everyone can access, if possible: a dataset that comes with R or a package (e.g., `data(mtcars)`), simulated data (e.g., with `DHARMa::createData()`), or a small or randomized part of your data pasted into the example with `dput(head(myData, 30))`. If you do not want to share your data in public, create the example in public and send the data privately by e-mail. Problem reports without a reproducible example may be closed.
 
-If you have already diagnosed the problem or have ideas for a fix, including that analysis is very helpful. You are also welcome to comment on existing issues, for example by adding examples or proposing solutions.
+Please write issues so that they are understandable without earlier discussions. If you have already diagnosed the problem or have ideas for a fix, including that analysis is very helpful. You are also welcome to comment on existing issues, for example by adding examples or proposing solutions.
 
 ### Submitting pull requests
 
@@ -57,8 +57,9 @@ For everyone, including the DHARMa team: if AI tools wrote substantial parts of 
 - Keep the diff small: no unrelated reformatting or refactoring, and reuse existing helper functions instead of duplicating logic.
 - Once the approach is agreed in the issue, open the pull request early, as a draft if the work is not finished yet, so that work in progress is visible and linked to its issues. If the work is abandoned, close the pull request with a short explanation.
 - A pull request or commit that resolves an issue should contain `Fixes #351` or `Closes #351` (with your issue number) in its description or commit message, so that GitHub closes the issue automatically when it is merged into `master`. For several issues, repeat the keyword for each, e.g., `Fixes #567, fixes #568`.
-- Fill in the sections of the pull request template and go through its checklist before submitting. Pull requests from contributors outside the DHARMa team are reviewed before they are merged.
-- Titles of issues and commit subject lines are short plain text (no backticks) naming the function or area and the problem or change; the issue templates show examples.
+- Fill in the sections of the pull request template and go through the checklist in its comment before submitting. Pull requests from contributors outside the DHARMa team are reviewed before they are merged.
+- Titles of issues and commit subject lines are short plain text (ideally under 70 characters, no backticks) naming the function or area and the problem or change, so that a list of titles is understandable without opening them; avoid vague titles such as "Small fixes" or "Revisions to X". The issue templates show examples.
+- In commit messages, separate the body (if any) from the subject line by an empty line.
 - Pull request titles are short plain text stating the general idea, without issue numbers, e.g., "Fixes to grouping calculations". Keep pull request descriptions short; details belong in the issues.
 - After the merge, branches in this repository are deleted automatically.
 
