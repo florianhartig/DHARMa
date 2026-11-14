@@ -20,6 +20,8 @@ NOTE: for more news about the package, see https://github.com/florianhartig/DHAR
 
 * `recalculateResiduals()` returns `groupLevels`, the group of each grouped residual (#359).
 
+* `recalculateResiduals()` gives a message if each group has one observation and the grouped residuals are not in the order of the observations (#624).
+
 * Formula arguments of `testCategorical()`, the autocorrelation tests and `recalculateResiduals(group = )` (e.g. `catPred = ~year > 10`, `group = ~interaction(a, b)`) are evaluated as written; previously only their first variable was used (#624).
 
 * `testSpatialAutocorrelation()` accepts `x` and `y` as a mix of formula and vector (#612).

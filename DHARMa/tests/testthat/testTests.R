@@ -389,10 +389,11 @@ test_that("formula predictors: transformations, grouped residuals, model order (
   expect_equal(getPredictor(resNA, testData$siteX), getPredictor(resNA, ~siteX))
   sel = testData$Environment1 > 0
   expect_equal(getPredictor(recalculateResiduals(simulationOutput, sel = sel), testData$year), testData$year[sel])
-  # one observation per group: vectors with one value per grouped residual are kept
+  # one observation per group: formulas are reordered to groupLevels, vectors with one value per grouped residual are kept
   perm = sample(100)
-  resPerm = recalculateResiduals(simulationOutput, group = perm)
-  expect_equal(getPredictor(resPerm, ~Environment1), testData$Environment1[order(perm)])
+  expect_message(resPerm <- recalculateResiduals(simulationOutput, group = perm), "each group has one observation")
+  expect_equal(testQuantiles(resPerm, ~Environment1, plot = FALSE)$p.value,
+               testQuantiles(resPerm, testData$Environment1[order(perm)], plot = FALSE)$p.value)
   expect_equal(getPredictor(resPerm, testData$Environment1[order(perm)]), testData$Environment1[order(perm)])
 
   # #609: formula predictors in the order of the residuals

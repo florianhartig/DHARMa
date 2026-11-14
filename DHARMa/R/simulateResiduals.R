@@ -311,6 +311,9 @@ recalculateResiduals <- function(simulationOutput, group = NULL, aggregateBy = s
 
     out$aggregateByGroup = aggregateByGroup
     out$groupLevels = levels(droplevels(group[sel])) # fixes #359 (group of each grouped residual)
+    # one observation per group: vectors are taken in the order of groupLevels (#624)
+    if(length(out$scaledResiduals) == simulationOutput$nObs && is.unsorted(match(out$groupLevels, as.character(group))))
+      message("DHARMa: each group has one observation, and the grouped residuals are in the order of simulationOutput$groupLevels, not of the observations. Predictors given as vectors must be in this order; formulas are reordered automatically.")
     out$nObs = out$nGroups = length(out$scaledResiduals) # fixes #603, #605 (nObs, nGroups after grouping and sel)
     out = c(out, simulationOutput)
     out$randomState = randomState
