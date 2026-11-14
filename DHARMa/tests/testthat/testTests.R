@@ -416,4 +416,5 @@ test_that("formula predictors: transformations, grouped residuals, model order (
   fittedModel = phylolm::phyloglm(y ~ x, data = phyloData, phy = phyloTree, method = "logistic_MPLE")
   simulationOutput = simulateResiduals(fittedModel, n = 50)
   expect_equal(getPredictor(simulationOutput, ~y), simulationOutput$observedResponse, ignore_attr = TRUE)
+  expect_no_error(plotResiduals(simulationOutput, form = ~.))
 })

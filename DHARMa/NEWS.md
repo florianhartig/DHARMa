@@ -10,7 +10,7 @@ NOTE: for more news about the package, see https://github.com/florianhartig/DHAR
 
 * After `recalculateResiduals()`, predictors given as formula or as vector with one value per observation are aggregated per group (#359, #298).
 
-* Predictors given as formula are in the order of the residuals for `GLMMadaptive` and `phylolm` models, and work for `phyloglm` models except `form = ~.` (#609).
+* Predictors given as formula are in the order of the residuals for `GLMMadaptive` and `phylolm` models, and work for `phyloglm` models, also with `plotResiduals(form = ~.)` (#609).
 
 * `plotResiduals(form = ~.)` no longer fails for models fitted with the `offset` argument (e.g. `glm(..., offset = log(area))`) (#624).
 
