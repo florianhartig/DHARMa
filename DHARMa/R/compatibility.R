@@ -503,7 +503,7 @@ getRefitData <- function(object, newresp, rows = rownames(model.frame(object))){
     newData = as.data.frame(getData(object))
     checkRefitData(object, newData, rows)
   }
-  newData = as.data.frame(newData)[rows, , drop = FALSE]
+  newData = newData[rows, , drop = FALSE]
   f = formula(object)
   # expand '.' while the original response is on the left-hand side, so that it is not included in '.'
   if("." %in% all.vars(f)) f = formula(terms(f, data = newData))
@@ -521,8 +521,11 @@ checkRefitData <- function(object, data, rows){
   i = match(rows, rownames(data))
   if(anyNA(i)) stop(msg, " Rows used in the fit are missing.", call. = FALSE)
   mf = tryCatch(model.frame(object), error = function(e) NULL)
+  # expressions of the model-frame columns, named as in model.frame.default()
+  vars = tryCatch(as.list(attr(terms(mf), "variables"))[-1], error = function(e) list())
+  names(vars) = vapply(vars, function(e) paste(deparse(e, width.cutoff = 500L, backtick = !is.symbol(e) && is.language(e)), collapse = " "), "")
   for(v in names(mf)[-1]){ # the response is replaced in the refit
-    ex = if(startsWith(v, "(")) getCall(object)[[substr(v, 2, nchar(v) - 1)]] else tryCatch(str2lang(v), error = function(e) NULL)
+    ex = if(startsWith(v, "(")) getCall(object)[[substr(v, 2, nchar(v) - 1)]] else vars[[v]]
     x = tryCatch(eval(ex, data, environment(formula(object))), error = function(e) NULL)
     if(is.null(x) || NROW(x) != nrow(data)) next # cannot be checked
     x = if(is.matrix(x)) x[i, , drop = FALSE] else x[i]

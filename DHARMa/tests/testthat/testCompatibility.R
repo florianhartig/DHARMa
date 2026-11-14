@@ -198,6 +198,10 @@ test_that("refits stop if the data were changed after fitting (#611)", {
   expect_error(getRefit(m, newresp), "Values differ for: x")
   testData = orig; testData$area = testData$area + 1
   expect_error(getRefit(m, newresp), "Values differ for: log\\(area\\)")
+  # `a-b` is a name, log(area) a call, also if columns a, b and `log(area)` exist
+  testData = orig; testData$`a-b` = testData$area; testData$a = 1; testData$b = 2; testData$`log(area)` = 0
+  m = glm(y ~ `a-b` + log(area), family = poisson, data = testData)
+  expect_equal(coef(getRefit(m, model.response(model.frame(m)))), coef(m))
 })
 
 
