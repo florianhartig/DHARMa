@@ -18,7 +18,7 @@ simulateResiduals(fittedModel, n = 250, simulateREs = c("conditional",
 
 \item{refit}{if FALSE, new data will be simulated and scaled residuals will be created by comparing observed data with new data. If TRUE, the model will be refitted on the simulated data (parametric bootstrap), and scaled residuals will be created by comparing observed with refitted residuals.}
 
-\item{integerResponse}{if TRUE, noise will be added to the residuals to maintain uniform expectations for integer responses (such as Poisson or Binomial). Usually, the model will automatically detect the appropriate setting, so there is no need to adjust this setting.}
+\item{integerResponse}{if TRUE, noise will be added to the residuals to maintain uniform expectations for integer responses (such as Poisson or Binomial). If NULL (default), it is TRUE if all simulated values are whole numbers (with refit = TRUE, after multiplying k/n binomial proportions by the number of trials).}
 
 \item{plot}{if TRUE, \link{plot.DHARMa} will be directly run after the residuals have been calculated.}
 
@@ -53,7 +53,7 @@ There are a number of important considerations when simulating from a more compl
 
 \strong{Transformation to other distributions}: DHARMa calculates residuals for which the theoretical expectation (assuming a correctly specified model) is uniform. To transform these residuals to another distribution (e.g. so that a correctly specified model will have normal residuals) see \link{residuals.DHARMa}.
 
-\strong{Integer responses}: this is only relevant if method = "traditional", in which case it activates the randomization of the residuals. Usually, this does not need to be changed, as DHARMa will try to automatically check if the fitted model has an integer or discrete distribution via the family argument. However, in some cases the family does not allow to uniquely identify the distribution type. For example, a tweedie distribution can be integer or continuous. Therefore, DHARMa will additionally check the simulation results for repeated values, and will change the distribution type if repeated values are found (a message is displayed in this case).
+\strong{Integer responses}: this is only relevant if method = "traditional", in which case it activates the randomization of the residuals. Usually, this does not need to be changed, as DHARMa sets integerResponse = TRUE if all simulated values are whole numbers. In addition, DHARMa checks the simulation results for repeated values, and will change the distribution type if repeated values are found (a message is displayed in this case).
 
 \strong{Residual autocorrelation}: a common problem is residual autocorrelation. Spatial, temporal and phylogenetic autocorrelation can be tested with \link{testSpatialAutocorrelation}, \link{testTemporalAutocorrelation} and \link{testPhylogeneticAutocorrelation}. If simulations are unconditional, residual correlations will be maintained, even if the autocorrelation is addressed by an appropriate CAR structure. This may be a problem, because autocorrelation may create apparently systematic patterns in plots or tests such as \link{testUniformity}. To reduce this problem, either simulate conditional on fitted correlated REs, or rotate residuals via the rotation parameter (the latter will likely only work in approximately linear models). See \link{getQuantile} for details on the rotation.
 }

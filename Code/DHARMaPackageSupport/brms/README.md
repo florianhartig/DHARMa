@@ -24,7 +24,7 @@ All statements are backed by sections of [checks.R](checks.R) (run from the repo
 | Order of residuals | data order | checks.R, *Order of residuals* |
 | Predictors in `plotResiduals(form = )` | from the data object named in the call; fails for some calls (see Known problems) | checks.R, *Predictors for plotResiduals(form = )*; testGetPredictorNames.R |
 | Pearson residuals, `testDispersion(type = "PearsonChisq")` | not supported, DHARMa stops with a message; the default dispersion test works | checks.R, *Pearson residuals and dispersion tests* |
-| Number of simulations `n` | at most the number of posterior draws (see Known problems) | checks.R, *Number of simulations and posterior draws* |
+| Number of simulations `n` | larger than the number of posterior draws: draws are reused, with a message (#591) | checks.R, *Number of simulations and posterior draws* |
 | Ordinal (`cumulative`), `categorical`, multivariate models | not supported; DHARMa stops, but with unclear messages (see Known problems) | checks.R, *Unsupported models* |
 | Own simulations via `posterior_predict()` + `createDHARMa()` | works | checks.R, *Posterior predictive simulations with createDHARMa()* |
 
@@ -42,7 +42,6 @@ Poisson GLMM with 10 groups, 40 data sets per row, `n = 250` simulations; share 
 
 ## Known problems
 
-- `n` larger than the number of posterior draws stops with the brms error "Argument 'ndraws' should be between 1 and the maximum number of draws", also with the default `n = 250` for models with fewer draws (#591). Workaround: `n <= ndraws(model)`.
 - Prior weights: `posterior_predict()` ignores `weights()`, so DHARMa simulates weighted models with the same variance for all weights, and does not warn (#7).
 - `getData()` evaluates the name of the `data` argument in the environment of the formula. It fails for `data = d[d$x > 0, ]` ("object 'd[d$x > 0, ]' not found"), and for a model fitted by a function with an argument `data`, with the formula passed as an argument, it returns `utils::data` (this also happens for `glm()`). `plotResiduals(form = )` then stops (#611). Workaround: fit the model with a data frame that has its own name, or pass the predictor as a vector.
 - Ordinal, categorical and multivariate models stop with "argument is not a matrix" or "argument is of length zero" instead of a message that the model type is not supported; ordinal models are not mentioned as unsupported in the documentation (#612).

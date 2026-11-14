@@ -105,6 +105,22 @@ test_that("refit = TRUE: k/n binomial residuals are on the scale of the number o
   fittedModel2 <- glm(p ~ x, family = binomial, weights = N, data = testData)
   res2 = simulateResiduals(fittedModel2, n = 10, refit = TRUE)
   expect_equal(res2$fittedResiduals, res$fittedResiduals)
+  expect_true(res2$integerResponse)
+})
+
+
+test_that("integerResponse is detected from the simulations; beta-binomial names count as binomial (#620)", {
+
+  testData = createData(sampleSize = 100, family = poisson())
+  fittedModel = glmmTMB::glmmTMB(observedResponse ~ Environment1, family = glmmTMB::nbinom12, data = testData)
+  expect_true(simulateResiduals(fittedModel, n = 10)$integerResponse)
+  expect_false(simulateResiduals(fittedModel, n = 10, integerResponse = FALSE)$integerResponse)
+  fittedModel = glm(observedResponse ~ Environment1, family = Gamma(link = "log"), data = testData[testData$observedResponse > 0, ])
+  expect_false(simulateResiduals(fittedModel, n = 10)$integerResponse)
+
+  testData = createData(sampleSize = 100, family = binomial(), binomialTrials = 10)
+  fittedModel = GLMMadaptive::mixed_model(cbind(observedResponse1, observedResponse0) ~ Environment1, random = ~ 1 | group, data = testData, family = GLMMadaptive::beta.binomial())
+  expect_no_warning(simulateResiduals(fittedModel, n = 10))
 })
 
 

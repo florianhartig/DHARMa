@@ -266,7 +266,7 @@ getFormulaPredictors <- function(simulationOutput, formula) {
 #' @param fittedModel a fitted model
 #' @keywords internal
 checkBinomialMatrixWeights <- function(fittedModel){
-  if(family(fittedModel)$family %in% c("binomial", "betabinomial") && is.matrix(model.frame(fittedModel)[[1]]) && hasWeights(fittedModel)){
+  if(isBinomialFamily(fittedModel) && is.matrix(model.frame(fittedModel)[[1]]) && hasWeights(fittedModel)){
     stop("DHARMa: binomial models with a cbind(successes, failures) response and additional prior weights are not supported, because observed and simulated responses would be on different scales. Use a proportion response with the number of trials as weights, or a cbind() response without weights.")
   }
 }
@@ -286,7 +286,7 @@ hasWeights <- function(fittedModel){
 
   w = modelFrame[["(weights)"]]
 
-  if(family(fittedModel)$family %in% c("binomial", "betabinomial")){
+  if(isBinomialFamily(fittedModel)){
     response = modelFrame[[1]]
 
     # if response is factor instead of 0/1
