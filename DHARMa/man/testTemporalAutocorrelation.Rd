@@ -10,7 +10,7 @@ testTemporalAutocorrelation(simulationOutput, time,
 \arguments{
 \item{simulationOutput}{an object of class DHARMa, either created via \link{simulateResiduals} for supported models or by \link{createDHARMa} for simulations created outside DHARMa, or a supported model. Providing a supported model directly is discouraged, because simulation settings cannot be changed in this case.}
 
-\item{time}{time variable in the same order as the datapoints and with the same length as the residuals in simulationOutput. If specified as formula, e.g. time = ~time, NAs are handled automatically (recommended).}
+\item{time}{time variable, one value per residual, in the order of the residuals (after recalculateResiduals: one value per group, in the order of groupLevels). If specified as formula, e.g. time = ~time, NAs are handled automatically (recommended).}
 
 \item{alternative}{a character string specifying whether the test should test if observations are "greater", "less" or "two.sided" compared to the simulated null hypothesis.}
 
@@ -22,7 +22,7 @@ This function performs a standard test for temporal autocorrelation on the simul
 \details{
 The function performs a Durbin-Watson test on the uniformly scaled residuals, and plots the residuals against time. The DW test was originally designed for normal residuals. In simulations, I didn't see a problem with this setting though. The alternative is to transform the uniform residuals to normal residuals and perform the DW test on those.
 
-Testing for temporal autocorrelation requires unique time values - if you have several observations per time value, either use \link{recalculateResiduals} function to aggregate residuals per time step (note that the aggregated residuals are ordered by the sorted group levels, so time must be provided in the same order, e.g. sort(unique(time))), or extract the residuals from the fitted object, and plot / test each of them independently for temporally repeated subgroups (typical choices would be location / subject etc.). Note that the latter must be done by hand, outside testTemporalAutocorrelation.
+Testing for temporal autocorrelation requires unique time values - if you have several observations per time value, either use \link{recalculateResiduals} function to aggregate residuals per time step (time given as formula, e.g. time = ~time, is then aggregated automatically; a vector with one value per time step must be in the order of the grouped residuals, see groupLevels in the output of \link{recalculateResiduals}), or extract the residuals from the fitted object, and plot / test each of them independently for temporally repeated subgroups (typical choices would be location / subject etc.). Note that the latter must be done by hand, outside testTemporalAutocorrelation.
 }
 \note{
 Standard DHARMa simulations from models with (temporal / spatial / phylogenetic) conditional autoregressive terms will still have the respective temporal / spatial / phylogenetic correlation in the DHARMa residuals, unless the package you are using is modelling the autoregressive terms as explicit REs and is able to simulate conditional on the fitted REs. This has two consequences:
@@ -71,8 +71,8 @@ res = simulateResiduals(fittedModel)
 
 # aggregating residuals by time
 res = recalculateResiduals(res, group = ~time)
-# the aggregated residuals are sorted by time, so time must be sorted as well
-testTemporalAutocorrelation(res, time = sort(unique(testData$time)))
+# time given as formula is aggregated in the same way
+testTemporalAutocorrelation(res, time = ~time)
 
 # testing only subgroup location 1, could do same with loc 2
 res = recalculateResiduals(res, sel = testData$location == 1)

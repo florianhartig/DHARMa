@@ -30,8 +30,8 @@ res = simulateResiduals(fittedModel)
 
 # aggregating residuals by time
 res = recalculateResiduals(res, group = ~time)
-# the aggregated residuals are sorted by time, so time must be sorted as well
-testTemporalAutocorrelation(res, time = sort(unique(testData$time)))
+# time given as formula is aggregated in the same way
+testTemporalAutocorrelation(res, time = ~time)
 
 # testing only subgroup location 1, could do same with loc 2
 res = recalculateResiduals(res, sel = testData$location == 1)

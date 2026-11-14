@@ -11,7 +11,7 @@ chk("temporal, formula time", testTemporalAutocorrelation(so, time = ~time, plot
 chk("spatial, vectors", testSpatialAutocorrelation(so, x = d$x, y = d$y), png = "SAC")
 chk("spatial, formulas", testSpatialAutocorrelation(so, x = ~x, y = ~y, plot = FALSE))
 chk("spatial, distMat", testSpatialAutocorrelation(so, distMat = as.matrix(dist(cbind(d$x, d$y))), plot = FALSE))
-chk("spatial, x formula and y vector", testSpatialAutocorrelation(so, x = ~x, y = d$y, plot = FALSE), expect = "error")
+chk("spatial, x formula and y vector", testSpatialAutocorrelation(so, x = ~x, y = d$y, plot = FALSE))
 
 # AR(1) residual pattern should be detected
 da = data.frame(t = 1:200, x = rnorm(200)); e = as.numeric(arima.sim(list(ar = 0.7), 200)) * 0.7
@@ -33,8 +33,7 @@ chk("ungrouped, duplicated times", testTemporalAutocorrelation(sog, time = dd$ye
 soY = chk("group = year (vector)", recalculateResiduals(sog, group = dd$year))
 chk("group = ~year (formula)", recalculateResiduals(sog, group = ~year))
 chk("grouped by year, time = sort(unique(year))", testTemporalAutocorrelation(soY, time = sort(unique(dd$year)), plot = FALSE), expect = "detect")
-# known problem #359: formula is not aggregated; this call should run once #359 is fixed
-chk("grouped by year, time = ~year", testTemporalAutocorrelation(soY, time = ~year, plot = FALSE), expect = "error")
+chk("grouped by year, time = ~year", testTemporalAutocorrelation(soY, time = ~year, plot = FALSE), expect = "detect")
 soS = recalculateResiduals(sog, group = dd$site)
 xs = aggregate(dd$sx, list(dd$site), mean)$x; ys = aggregate(dd$sy, list(dd$site), mean)$x
 chk("grouped by site, aggregated coordinates", testSpatialAutocorrelation(soS, x = xs, y = ys, plot = FALSE), expect = "detect")
