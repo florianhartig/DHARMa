@@ -14,6 +14,8 @@ NOTE: for more news about the package, see https://github.com/florianhartig/DHAR
 
 * `plotResiduals(form = ~.)` no longer fails for models fitted with the `offset` argument (e.g. `glm(..., offset = log(area))`) (#624).
 
+* `getRefit()` / `simulateResiduals(refit = TRUE)` now stop with an error if rows or values used in the fit were changed in the data after fitting; since 0.5.1, refits silently used the changed data (#611).
+
 ## Minor changes
 
 * `recalculateResiduals()` returns `groupLevels`, the group of each grouped residual (#359).

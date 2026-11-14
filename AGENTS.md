@@ -7,6 +7,7 @@ Follow [CONTRIBUTING.md](CONTRIBUTING.md). If your user is not a member of the D
 * Never open issues or pull requests, or post comments, on your own initiative. Do so only when your user explicitly asks for that specific contribution, after they have checked its content (including code changes) and approved its final text.
 * Approval of an action (e.g., "close this issue") does not cover text your user has not seen, such as the comment posted with it. Show the exact text first.
 * Do not commit or push anything without your user's explicit approval.
+* Exception: when a team member mentions `@claude` in a pull request, the workflow `.github/workflows/claude.yml` answers there without prior approval (see MAINTAINING.md).
 
 ## Accuracy
 
