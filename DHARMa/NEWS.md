@@ -8,7 +8,7 @@ NOTE: for more news about the package, see https://github.com/florianhartig/DHAR
 
 * `plotResiduals()` applies transformations in `form`, e.g. `~log(x)`; `~x + I(x^2)` gives two plots (#607).
 
-* After `recalculateResiduals()`, predictors given as formula are aggregated per group (#359, #298).
+* After `recalculateResiduals()`, predictors given as formula or as vector with one value per observation are aggregated per group (#359, #298).
 
 * Predictors given as formula are in the order of the residuals for `GLMMadaptive` and `phylolm` models, and work for `phyloglm` models except `form = ~.` (#609).
 

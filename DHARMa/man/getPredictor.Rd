@@ -20,6 +20,6 @@ Evaluates a predictor for plotResiduals, recalculateResiduals, testCategorical, 
 \details{
 A formula (e.g. ~x or ~log(x)) is evaluated in the data used to fit the model; other objects in the formula are taken from the environment of the formula. The data rows are taken in the order of the residuals, and rows that the model removed because of NAs are dropped.
 
-For residuals grouped by \link{recalculateResiduals}, a formula is aggregated per group, in the order of the grouped residuals. Values that are constant within groups are kept; numeric values that vary within groups are averaged (with a message); other values that vary within groups cause an error. Observations without group (NA) are dropped. A vector must have one value per grouped residual.
+For residuals grouped by \link{recalculateResiduals}, a formula or a vector with one value per observation is aggregated per group, in the order of the grouped residuals. Values that are constant within groups are kept; numeric values that vary within groups are averaged (with a message); other values that vary within groups cause an error. Observations without group (NA) are dropped. A vector with one value per group is used as given, in the order of groupLevels, also if there is only one observation per group.
 }
 \keyword{internal}

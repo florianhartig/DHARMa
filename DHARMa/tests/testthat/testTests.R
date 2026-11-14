@@ -377,12 +377,23 @@ test_that("formula predictors: transformations, grouped residuals, model order (
   site = testData[match(10:1, testData$group), ]
   expect_equal(testSpatialAutocorrelation(resSite, x = ~siteX, y = ~siteY, plot = FALSE)$p.value,
                testSpatialAutocorrelation(resSite, x = site$siteX, y = site$siteY, plot = FALSE)$p.value)
+  expect_equal(testSpatialAutocorrelation(resSite, x = testData$siteX, y = testData$siteY, plot = FALSE)$p.value,
+               testSpatialAutocorrelation(resSite, x = site$siteX, y = site$siteY, plot = FALSE)$p.value) # vectors per observation are aggregated too
   expect_message(plotResiduals(resSite, form = ~Environment1), "averaged per group")
+  expect_message(plotResiduals(resSite, form = testData$Environment1), "averaged per group")
   expect_error(testCategorical(resSite, catPred = ~factor(year), plot = FALSE), "not constant within the groups")
   groupNA = testData$group
   groupNA[1] = NA
   resNA = recalculateResiduals(simulationOutput, group = groupNA)
   expect_silent(getPredictor(resNA, ~siteX))
+  expect_equal(getPredictor(resNA, testData$siteX), getPredictor(resNA, ~siteX))
+  sel = testData$Environment1 > 0
+  expect_equal(getPredictor(recalculateResiduals(simulationOutput, sel = sel), testData$year), testData$year[sel])
+  # one observation per group: vectors with one value per grouped residual are kept
+  perm = sample(100)
+  resPerm = recalculateResiduals(simulationOutput, group = perm)
+  expect_equal(getPredictor(resPerm, ~Environment1), testData$Environment1[order(perm)])
+  expect_equal(getPredictor(resPerm, testData$Environment1[order(perm)]), testData$Environment1[order(perm)])
 
   # #609: formula predictors in the order of the residuals
   skip_if_not_installed("GLMMadaptive")

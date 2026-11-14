@@ -232,7 +232,7 @@ ensurePredictor <- function(simulationOutput,
 #'
 #' A formula (e.g. ~x or ~log(x)) is evaluated in the data used to fit the model; other objects in the formula are taken from the environment of the formula. The data rows are taken in the order of the residuals, and rows that the model removed because of NAs are dropped.
 #'
-#' For residuals grouped by [recalculateResiduals], a formula is aggregated per group, in the order of the grouped residuals. Values that are constant within groups are kept; numeric values that vary within groups are averaged (with a message); other values that vary within groups cause an error. Observations without group (NA) are dropped. A vector must have one value per grouped residual.
+#' For residuals grouped by [recalculateResiduals], a formula or a vector with one value per observation is aggregated per group, in the order of the grouped residuals. Values that are constant within groups are kept; numeric values that vary within groups are averaged (with a message); other values that vary within groups cause an error. Observations without group (NA) are dropped. A vector with one value per group is used as given, in the order of groupLevels, also if there is only one observation per group.
 #'
 #' @param simulationOutput a DHARMa object.
 #' @param predictor a vector, or a one-sided formula with one variable or expression.
@@ -263,7 +263,8 @@ getPredictor <- function(simulationOutput, predictor){
 
   # fixes #359 (aggregate predictors of grouped residuals)
   nRes = length(simulationOutput$scaledResiduals)
-  if(isFormula && !is.null(simulationOutput$original)){
+  # vectors with one value per grouped residual are kept (getPredictor() is also applied to its own output, e.g. in testQuantiles)
+  if(!is.null(simulationOutput$original) && (isFormula || (length(predictor) == original$nObs && length(predictor) != nRes))){
     group = factor(simulationOutput$group)[simulationOutput$sel]
     predictor = predictor[simulationOutput$sel][!is.na(group)] # observations without group are dropped, as in recalculateResiduals
     group = droplevels(group[!is.na(group)])
@@ -275,7 +276,7 @@ getPredictor <- function(simulationOutput, predictor){
     } else predictor = predictor[first]
   }
 
-  if(length(predictor) != nRes) stop("DHARMa: residuals and predictor do not have the same length. The issue is possibly that you have NAs in your predictor that were removed during the model fit. Remove the NA values from your predictor, or use formula syntax (e.g. ~x) to handle NAs automatically. After recalculateResiduals(), vectors need one value per group, in the order of simulationOutput$groupLevels.")
+  if(length(predictor) != nRes) stop("DHARMa: residuals and predictor do not have the same length. The issue is possibly that you have NAs in your predictor that were removed during the model fit. Remove the NA values from your predictor, or use formula syntax (e.g. ~x) to handle NAs automatically. After recalculateResiduals(), vectors need one value per observation or per group (in the order of simulationOutput$groupLevels).")
   return(predictor)
 }
 
