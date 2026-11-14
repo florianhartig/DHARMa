@@ -8,6 +8,12 @@ NOTE: for more news about the package, see https://github.com/florianhartig/DHAR
 
 * `getRefit()` / `simulateResiduals(refit = TRUE)` now stop with an error if rows or values used in the fit were changed in the data after fitting; since 0.5.1, refits silently used the changed data (#611).
 
+* `simulateResiduals(refit = TRUE)` no longer fails for `lmerTest` models and for `spaMM` models with a transformed response such as `log(y + 1)` (#626).
+
+* Prior weights that are all 1 no longer trigger the warning about ignored prior weights, e.g. for `gamm4()$mer` models fitted without weights (#626).
+
+* `getData()` for `spaMM` models returns the data stored in the model object (without rows with NAs); previously it failed for models fitted inside a function or could return another object with the same name (#621, #626).
+
 ## Minor changes
 
 * `plotResiduals()` / `testCategorical()`: boxplots for categorical predictors show residuals as jittered points with outliers marked (unless `smoothScatter = TRUE`, default for > 10,000 observations; jitter set by the new argument `jitterPoints`, also for numeric predictors); further arguments such as `ylab` are passed to the boxplot (#562, #616).

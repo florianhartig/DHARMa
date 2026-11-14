@@ -274,7 +274,7 @@ checkBinomialMatrixWeights <- function(fittedModel){
 
 #' Check if a model has (problematic) prior weights
 #'
-#' For n/k models, weights can either represent the number of trials or actual prior weights on the likelihood. This function distinguishes the two cases and returns TRUE if the model has prior weights that are not the number of trials.
+#' For n/k models, weights can either represent the number of trials or actual prior weights on the likelihood. This function distinguishes the two cases and returns TRUE if the model has prior weights that are not the number of trials. Weights that are all 1 are not prior weights.
 #'
 #' @param fittedModel a fitted model
 #' @keywords internal
@@ -305,6 +305,6 @@ hasWeights <- function(fittedModel){
     return(FALSE)
   }
 
-  # for all other families, any "(weights)" is a true prior weight
-  return(TRUE)
+  # for all other families, weights other than 1 are prior weights (gamm4 passes weights of 1)
+  return(any(w != 1))
 }

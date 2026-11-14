@@ -262,7 +262,7 @@ getFamily <- function (object, ...) {
 #' @param object a fitted model.
 #' @param ... additional parameters to be passed on.
 #'
-#' @note  The data is retrieved from the environment where the model was fit, which is usually your current environment. If you delete the data from the environment or change it after fitting the model this function will probably not work or get the wrong dataset, respectively.
+#' @note  The data is retrieved from the environment where the model was fit, which is usually your current environment. If you delete the data from the environment or change it after fitting the model this function will probably not work or get the wrong dataset, respectively. For spaMM models, the data stored in the model object is returned (only the rows used in the fit, i.e. rows with NAs in model variables are removed).
 #'
 #' @seealso [getObservedResponse], [getSimulations], [getRefit], [getFixedEffects], [getFitted]
 #'
@@ -381,7 +381,7 @@ getFixedEffects.default <- function(object, ...){
 
   if(class(object)[1] %in% c("glm", "lm", "gam", "bam", "negbin") ){
     out  = coef(object)
-  } else if(class(object)[1] %in% c("glmerMod", "lmerMod", "HLfit", "lmerTest")){
+  } else if(inherits(object, c("merMod", "HLfit"))){ # merMod includes subclasses such as lmerModLmerTest
     out = fixef(object)
   } else if(class(object)[1] %in% c("glmmTMB")){
     out = glmmTMB::fixef(object)
@@ -881,7 +881,16 @@ getSimulations.HLfit <- function(object, nsim = 1, simulateREs = c("conditional"
 #' @rdname getRefit
 #' @export
 getRefit.HLfit <- function(object, newresp, ...) {
-  spaMM::update_resp(object, newresp, evaluate = TRUE, ...)
+  # fitmv (list of formulas), plain and cbind() responses: update_resp(); it fails for transformed responses such as log(y + 1), refitted as for lm
+  if(inherits(object, "fitmv") || is.name(formula(object)[[2]]) || identical(formula(object)[[2]][[1]], quote(cbind))) {
+    spaMM::update_resp(object, newresp, evaluate = TRUE, ...)
+  } else getRefit.lm(object, newresp, ...)
+}
+
+#' @rdname getData
+#' @export
+getData.HLfit <- function (object, ...){
+  object$data # stored data (rows with NAs removed); evaluating the data argument again fails for models fitted inside a function (#621)
 }
 
 #' @rdname getFitted
