@@ -120,6 +120,10 @@ test_that("hasWeights", {
   m = glm(observedResponse ~ Environment1, family = poisson, data = dp, weights = w)
   expect_true(DHARMa:::hasWeights(m))
 
+  # weights that are all 1 are not prior weights (gamm4 passes them to glmer)
+  m = glm(observedResponse ~ Environment1, family = poisson, data = dp, weights = rep(1, 200))
+  expect_false(DHARMa:::hasWeights(m))
+
 })
 
 test_that("runBenchmarks", {
