@@ -21,8 +21,8 @@ Checked on 2026-11-09 with DHARMa 0.5.2 (master), phylolm 2.6.5 and R 4.6.2. Evi
 
 ## Known problems
 
-- Residuals are in the order of the tree tips (#609). Order predictors as `tree$tip.label` before passing them to `plotResiduals()`, `testCategorical()` etc.
-- `phyloglm`: functions with formula predictors (`plotResiduals(form = )`, `recalculateResiduals(group = ~)`, `testQuantiles(predictor = ~)`, ...) stop, because phyloglm objects have no model frame (#609).
+- Residuals are in the order of the tree tips (#609). Predictors given as formula are taken in this order automatically (since 0.5.2; package test testTests.R); order vector predictors as `tree$tip.label`.
+- `phyloglm`: `plotResiduals(form = ~.)` stops, because phyloglm objects have no model frame.
 - `poisson_GEE`, and models fitted inside a function: simulations and refit use `update()`, which fails if the objects named in the model call are not found outside the function (#478).
 
 ## Not checked

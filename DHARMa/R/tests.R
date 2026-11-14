@@ -86,7 +86,7 @@ testBivariateUniformity <- function(simulationOutput, alternative = c("two.sided
 #'
 #' The p-values of the intercept and splines are combined into a total p-value via Benjamini & Hochberg adjustment to control the FDR.
 #'
-#' Predictor can be a formula (e.g. predictor = ~predictor), in which case NAs are handled automatically (recommended). Predictor can also be a variable in your environment (e.g. predictor = data$predictor), but then you need to remove rows that were excluded by the model due to NAs by hand. A formula must contain exactly one variable of the data used to fit the model, e.g. ~x or ~log(x); transformations such as log() are applied, and other objects in the formula (e.g. ~log(x + k)) are taken from the environment of the formula ([plotResiduals] currently ignores transformations and uses the untransformed variable). To plot residuals against several predictors or by group, see the argument `form` in [plotResiduals]. Predictor must be numeric or an ordered factor (used in the order of its levels); for categorical predictors, use [testCategorical].
+#' Predictor can be a formula (e.g. predictor = ~predictor), in which case NAs are handled automatically (recommended). Predictor can also be a variable in your environment (e.g. predictor = data$predictor), but then you need to remove rows that were excluded by the model due to NAs by hand. A formula must contain exactly one variable or expression, e.g. ~x or ~log(x); transformations such as log() are applied, and objects that are not in the data used to fit the model (e.g. k in ~log(x + k)) are taken from the environment of the formula. To plot residuals against several predictors or by group, see the argument `form` in [plotResiduals]. Predictor must be numeric or an ordered factor (used in the order of its levels); for categorical predictors, use [testCategorical].
 #'
 #' When plotting (plot = TRUE), the shaded gray areas indicate 95% confidence intervals of the quantile estimates (1.96 * standard error).
 #'
@@ -99,13 +99,7 @@ testQuantiles <- function(simulationOutput, predictor = NULL, rank = TRUE,
 
   predictorName = gsub(".*[$]|^~", "", paste(deparse(substitute(predictor)), collapse = ""))
 
-  # fixes #576 (one-variable formulas)
-  if(inherits(predictor, "formula")){
-    # variables of the model data; other objects are taken from the environment of the formula
-    predictors = getFormulaPredictors(ensureDHARMa(simulationOutput, convert = T), predictor)
-    if(length(predictors) != 1) stop("DHARMa::testQuantiles: a formula predictor must contain exactly one variable of the data used to fit the model, e.g. ~x. To plot residuals against several predictors or groups, use plotResiduals().")
-    predictor = eval(predictor[[2]], envir = predictors, enclos = environment(predictor))
-  }
+  if(inherits(predictor, "formula")) predictor = getPredictor(ensureDHARMa(simulationOutput, convert = T), predictor)
 
   if(is.ordered(predictor)) predictor = as.numeric(predictor)
   else if(is.factor(predictor) || is.character(predictor) || is.logical(predictor)) stop("DHARMa::testQuantiles: quantile regressions require a numeric predictor or an ordered factor. For categorical predictors, use testCategorical().")
@@ -361,7 +355,7 @@ testOutliers <- function(simulationOutput, alternative = c("two.sided", "greater
 #' This function tests if there are problems in a res ~ group structure. It performs two tests: test for within-group uniformity, and test for between-group homogeneity of variances.
 #'
 #' @param simulationOutput an object of class DHARMa, either created via [simulateResiduals] for supported models or by [createDHARMa] for simulations created outside DHARMa, or a supported model. Providing a supported model directly is discouraged, because simulation settings cannot be changed in this case.
-#' @param catPred a categorical predictor with the same dimensions as the residuals in simulationOutput. If specified as formula, e.g. catPred = ~group, NAs are handled automatically (recommended).
+#' @param catPred a categorical predictor, one value per residual (after recalculateResiduals, values per observation are aggregated per group; values per group must be in the order of groupLevels). If specified as formula, e.g. catPred = ~group, NAs are handled automatically (recommended).
 #' @param quantiles whether to draw the quantile lines.
 #' @param plot if TRUE, the function will create an additional plot.
 #' @param smoothScatter if TRUE, individual residuals are not plotted, only the boxplot and the outliers. This makes sense when the number of residuals is very large. Default NULL chooses T for nObs > 10000, and F otherwise.
@@ -386,13 +380,7 @@ testCategorical <- function(simulationOutput, catPred,
   if(is.null(a$xlab)) a$xlab = paste(deparse(substitute(catPred)), "(catPred)")
   a$ylab = checkDots("ylab", "DHARMa residual", ...)
 
-  if(!inherits(catPred, "formula")) {
-    catPred = catPred # old default
-  } else {
-    catPred = getFormulaPredictors(simulationOutput, formula = catPred)[[1]] # formula syntax
-  }
-
-  catPred = droplevels(as.factor(catPred)) # unused levels have no residuals
+  catPred = droplevels(as.factor(getPredictor(simulationOutput, catPred))) # unused levels have no residuals
   res = simulationOutput$scaledResiduals
   out = list()
 
@@ -702,12 +690,12 @@ testGeneric <- function(simulationOutput, summary, alternative = c("two.sided", 
 #' This function performs a standard test for temporal autocorrelation on the simulated residuals.
 #'
 #' @param simulationOutput an object of class DHARMa, either created via [simulateResiduals] for supported models or by [createDHARMa] for simulations created outside DHARMa, or a supported model. Providing a supported model directly is discouraged, because simulation settings cannot be changed in this case.
-#' @param time time variable in the same order as the datapoints and with the same length as the residuals in simulationOutput. If specified as formula, e.g. time = ~time, NAs are handled automatically (recommended).
+#' @param time time variable, one value per residual, in the order of the residuals (after recalculateResiduals, values per observation are aggregated per group; values per group must be in the order of groupLevels). If specified as formula, e.g. time = ~time, NAs are handled automatically (recommended).
 #' @param alternative a character string specifying whether the test should test if observations are "greater", "less" or "two.sided" compared to the simulated null hypothesis.
 #' @param plot whether to plot output.
 #' @details The function performs a Durbin-Watson test on the uniformly scaled residuals, and plots the residuals against time. The DW test was originally designed for normal residuals. In simulations, I didn't see a problem with this setting though. The alternative is to transform the uniform residuals to normal residuals and perform the DW test on those.
 #'
-#' Testing for temporal autocorrelation requires unique time values - if you have several observations per time value, either use [recalculateResiduals] function to aggregate residuals per time step (note that the aggregated residuals are ordered by the sorted group levels, so time must be provided in the same order, e.g. sort(unique(time))), or extract the residuals from the fitted object, and plot / test each of them independently for temporally repeated subgroups (typical choices would be location / subject etc.). Note that the latter must be done by hand, outside testTemporalAutocorrelation.
+#' Testing for temporal autocorrelation requires unique time values - if you have several observations per time value, either use [recalculateResiduals] function to aggregate residuals per time step (time given as formula, e.g. time = ~time, or as vector with one value per observation is then aggregated automatically; a vector with one value per time step must be in the order of the grouped residuals, see groupLevels in the output of [recalculateResiduals]), or extract the residuals from the fitted object, and plot / test each of them independently for temporally repeated subgroups (typical choices would be location / subject etc.). Note that the latter must be done by hand, outside testTemporalAutocorrelation.
 #'
 #' @note Standard DHARMa simulations from models with (temporal / spatial / phylogenetic) conditional autoregressive terms will still have the respective temporal / spatial / phylogenetic correlation in the DHARMa residuals, unless the package you are using is modelling the autoregressive terms as explicit REs and is able to simulate conditional on the fitted REs. This has two consequences:
 #'
@@ -738,13 +726,7 @@ testTemporalAutocorrelation <- function(simulationOutput, time, alternative = c(
     message("DHARMa::testTemporalAutocorrelation - no time argument provided, using random times for each data point")
   }
 
-  if(!inherits(time, "formula")){
-    # old default
-    # To avoid Issue #190
-    if (length(time) != length(residuals(simulationOutput))) stop("Dimensions of time don't match the dimension of the residuals. Remove rows with NAs or use formula syntax for group to handle NAs automatically.")
-  } else {
-    time = getFormulaPredictors(simulationOutput, formula = time)[[1]] # formula syntax
-  }
+  time = getPredictor(simulationOutput, time)
 
   # actually not sure if this is neccessary for dwtest, but seems better to aggregate
   if(any(duplicated(time))) stop("testing for temporal autocorrelation requires unique time values - if you have several observations per time value, either use the recalculateResiduals function to aggregate residuals per time step, or extract the residuals from the fitted object, and plot / test each of them independently for temporally repeated subgroups (typical choices would be location / subject etc.). Note that the latter must be done by hand, outside testTemporalAutocorrelation.")
@@ -781,8 +763,8 @@ testTemporalAutocorrelation <- function(simulationOutput, time, alternative = c(
 #' This function performs a Moran's I test for distance-based spatial (or similar type) autocorrelation on the calculated quantile residuals.
 #'
 #' @param simulationOutput an object of class DHARMa, either created via [simulateResiduals] for supported models or via [createDHARMa] for simulations created outside DHARMa, or a supported model. Providing a supported model directly is discouraged, because simulation settings cannot be changed in this case.
-#' @param x the x coordinate, in the same order as the data points. Must be specified unless distMat is provided.
-#' @param y the y coordinate, in the same order as the data points. Must be specified unless distMat is provided.
+#' @param x the x coordinate, one value per residual, in the order of the residuals (after recalculateResiduals, values per observation are aggregated per group; values per group must be in the order of groupLevels). Must be specified unless distMat is provided. If specified as formula, e.g. x = ~x, NAs are handled automatically (recommended).
+#' @param y the y coordinate, one value per residual, in the order of the residuals (after recalculateResiduals, values per observation are aggregated per group; values per group must be in the order of groupLevels). Must be specified unless distMat is provided. If specified as formula, e.g. y = ~y, NAs are handled automatically (recommended).
 #' @param distMat optional distance matrix. Must be provided as class "matrix/array" (class "dist" is not supported). If distMat is not provided, euclidean distances based on x and y will be calculated. See details for explanation.
 #' @param alternative a character string specifying whether the test should test if observations are "greater", "less" or "two.sided" compared to the simulated null hypothesis.
 #' @param plot if T, and if x and y is provided, plot the output (see details).
@@ -791,7 +773,7 @@ testTemporalAutocorrelation <- function(simulationOutput, time, alternative = c(
 #'
 #' If plot = T, a plot will be produced showing each residual at its x,y position, colored according to the residual value. Residuals with 0.5 are colored white, everything below 0.5 is colored increasingly red, everything above 0.5 is colored increasingly blue.
 #'
-#' Testing for spatial autocorrelation requires unique x,y values - if you have several observations per location, either use the [recalculateResiduals] function to aggregate residuals per location, or extract the residuals from the fitted object, and plot / test each of them independently for spatially repeated subgroups (a typical scenario would be repeated spatial observation, in which case one could plot / test each time step separately for temporal autocorrelation). Note that the latter must be done by hand, outside [testSpatialAutocorrelation].
+#' Testing for spatial autocorrelation requires unique x,y values - if you have several observations per location, either use the [recalculateResiduals] function to aggregate residuals per location (x and y given as formula, e.g. x = ~x, or as vectors with one value per observation are then aggregated automatically), or extract the residuals from the fitted object, and plot / test each of them independently for spatially repeated subgroups (a typical scenario would be repeated spatial observation, in which case one could plot / test each time step separately for temporal autocorrelation). Note that the latter must be done by hand, outside [testSpatialAutocorrelation].
 #'
 #' @note Standard DHARMa simulations from models with (temporal / spatial / phylogenetic) conditional autoregressive terms will still have the respective temporal / spatial / phylogenetic correlation in the DHARMa residuals, unless the package you are using is modelling the autoregressive terms as explicit REs and is able to simulate conditional on the fitted REs. This has two consequences:
 #'
@@ -832,18 +814,8 @@ testSpatialAutocorrelation <- function(simulationOutput, x = NULL, y  = NULL, di
 
   if( (is.null(x) | is.null(y)) & is.null(distMat) ) stop("You need to provide either x,y coordinates or a distMatrix.")
 
-  # check if x,y are formulas
-  if(!inherits(x, "formula") | !inherits(y, "formula")) {
-    # old default
-    # To avoid Issue #190
-    if (is.null(distMat) & !is.null(x) & length(x) != length(residuals(simulationOutput)) | is.null(distMat) & !is.null(y) & length(y) != length(residuals(simulationOutput))) stop("Dimensions of x / y coordinates don't match the dimension of the residuals. Remove rows with NAs or specify x,y as formula to handle NAs automatically.")
-
-    if(inherits(x, "formula") != inherits(y, "formula")) stop("Please specify x and y the same way, either both as formula (e.g.x = ~x) or both as vector (e.g. x = data$x).")
-  } else {
-    # formula syntax
-    x = getFormulaPredictors(simulationOutput, formula = x)[[1]]
-    y = getFormulaPredictors(simulationOutput, formula = y)[[1]]
-  }
+  x = getPredictor(simulationOutput, x)
+  y = getPredictor(simulationOutput, y)
 
   # if not provided, create distance matrix based on x and y
   if(is.null(distMat)) distMat <- as.matrix(dist(cbind(x, y)))

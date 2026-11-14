@@ -225,7 +225,7 @@ checkSimulations <- function(simulatedResponse, nObs, nSim){
 #' @param seed the random seed to be used within DHARMa. The default setting, recommended for most users, is to keep the random seed on a fixed value of 123. This means that you will always get the same randomization and thus the same result when running the same code. NULL = no new seed is set, but previous random state will be restored after simulation. FALSE = no seed is set, and random state will not be restored. The latter two options are only recommended for simulation experiments. See vignette for details.
 #' @param method the quantile randomization method used. The two options implemented at the moment are probability integral transform (PIT-) residuals (current default), and the "traditional" randomization procedure, that was used in DHARMa until version 0.3.0. For residuals simulated with refit = TRUE, "traditional" is always used, as in [simulateResiduals]; rotation is then not available. For details, see [getQuantile].
 #' @param rotation optional rotation of the residual space to remove residual autocorrelation. See details in [simulateResiduals], section *residual auto-correlation* for an extended explanation, and [getQuantile] for syntax.
-#' @return an object of class DHARMa, similar to what is returned by [simulateResiduals], but with additional outputs for the new grouped calculations. Note that the relevant outputs are 2x in the object, the first is the grouped calculations (which is returned by $name access), and later another time, under identical name, the original output. Moreover, there is a function 'aggregateByGroup', which can be used to aggregate predictor variables in the same way as the variables calculated here.
+#' @return an object of class DHARMa, similar to what is returned by [simulateResiduals], but with additional outputs for the new grouped calculations. Note that the relevant outputs are 2x in the object, the first is the grouped calculations (which is returned by $name access), and later another time, under identical name, the original output. Moreover, there is a function 'aggregateByGroup', which aggregates a variable in the same way as the response (with aggregateBy), and 'groupLevels' gives the group of each grouped residual (residuals are in the order of levels(factor(group))). Predictors provided to plots and tests as formula or as vector with one value per observation are aggregated per group automatically (mean for numeric predictors that vary within groups); vectors with one value per group (also if there is only one observation per group) must be in the order of groupLevels.
 #'
 #' @details The function aggregates the observed and simulated data per group according to the function provided by the aggregateBy option. DHARMa residuals are then calculated exactly as for a single data point (see [getQuantile] for details). The function stops if fewer than 2 residuals remain after grouping and selection, and warns if fewer than 10 remain.
 #'
@@ -254,15 +254,7 @@ recalculateResiduals <- function(simulationOutput, group = NULL, aggregateBy = s
   if(is.null(group) & is.null(sel)) {return(simulationOutput)}
   else {
     if(is.null(group)) {group = 1:simulationOutput$nObs}
-    else {
-      if(!inherits(group, "formula")){
-        # old default
-        group = group
-        if(length(group) != length(simulationOutput$scaledResiduals)) stop("DHARMa: residuals and group do not have the same length. Remove rows with NAs or use formula syntax for group to handle NAs automatically.")
-      } else {
-        group = getFormulaPredictors(simulationOutput, formula = group)[[1]] # formula syntax
-      }
-    }
+    else group = getPredictor(simulationOutput, group)
     out$group = group
     group = as.factor(group)
 
@@ -270,16 +262,8 @@ recalculateResiduals <- function(simulationOutput, group = NULL, aggregateBy = s
     if(is.null(sel)) {
       sel = 1:simulationOutput$nObs
     } else {
-      # if sel is a formula (e.g. ~ Environment1<0.5)
-      if(inherits(sel, "formula")){
-        predictor = getFormulaPredictors(simulationOutput, formula = sel)
-        sel = eval(sel[[2]], envir = predictor, enclos = environment(sel))
-      }
-
-      # if sel is logical (e.g. testData$group == 1)
-      if(is.logical(sel)){
-        if(length(sel)!=length(simulationOutput$scaledResiduals)) stop("DHARMa: residuals and variable for sel do not have the same length. Remove rows with NAs or use formula syntax for sel to handle NAs automatically.")
-      }
+      # formula (e.g. ~ Environment1 < 0.5) or logical (e.g. testData$group == 1)
+      if(inherits(sel, "formula") || is.logical(sel)) sel = getPredictor(simulationOutput, sel)
 
       # if sel is numeric (e.g. 1:20)
       if(is.numeric(sel)){
@@ -326,6 +310,7 @@ recalculateResiduals <- function(simulationOutput, group = NULL, aggregateBy = s
     # question to myself - what's the use of that, why not erase the old outputs? they are anyway saved in the old object
 
     out$aggregateByGroup = aggregateByGroup
+    out$groupLevels = levels(droplevels(group[sel])) # fixes #359 (group of each grouped residual)
     out$nObs = out$nGroups = length(out$scaledResiduals) # fixes #603, #605 (nObs, nGroups after grouping and sel)
     out = c(out, simulationOutput)
     out$randomState = randomState

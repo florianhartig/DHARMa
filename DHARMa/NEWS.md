@@ -6,7 +6,21 @@ NOTE: for more news about the package, see https://github.com/florianhartig/DHAR
 
 * `testCategorical()` no longer fails for factors with unused levels (#348, #616).
 
+* `plotResiduals()` applies transformations in `form`, e.g. `~log(x)`; `~x + I(x^2)` gives two plots (#607).
+
+* After `recalculateResiduals()`, predictors given as formula or as vector with one value per observation are aggregated per group (#359, #298).
+
+* Predictors given as formula are in the order of the residuals for `GLMMadaptive` and `phylolm` models, and work for `phyloglm` models except `form = ~.` (#609).
+
+* `plotResiduals(form = ~.)` no longer fails for models fitted with the `offset` argument (e.g. `glm(..., offset = log(area))`) (#624).
+
 ## Minor changes
+
+* `recalculateResiduals()` returns `groupLevels`, the group of each grouped residual (#359).
+
+* Formula arguments of `testCategorical()`, the autocorrelation tests and `recalculateResiduals(group = )` (e.g. `catPred = ~year > 10`, `group = ~interaction(a, b)`) are evaluated as written; previously only their first variable was used (#624).
+
+* `testSpatialAutocorrelation()` accepts `x` and `y` as a mix of formula and vector (#612).
 
 * `plotResiduals()` / `testCategorical()`: boxplots for categorical predictors show residuals as jittered points with outliers marked (unless `smoothScatter = TRUE`, default for > 10,000 observations; jitter set by the new argument `jitterPoints`, also for numeric predictors); further arguments such as `ylab` are passed to the boxplot (#562, #616).
 

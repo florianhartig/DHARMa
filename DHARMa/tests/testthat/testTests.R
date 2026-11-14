@@ -202,12 +202,12 @@ test_that("correlation tests work", {
   expect_error(testSpatialAutocorrelation(simulationOutput, plot = FALSE,
                                              x =  testData$x[1:10],
                                           y = testData$y[1:9]),
-               "Dimensions of x / y coordinates don't match")
+               "do not have the same length")
   # x and y have equal length but unequal to simulationOutput
   expect_error(testSpatialAutocorrelation(simulationOutput, plot = FALSE,
                                           x =  testData$x[1:10],
                                           y = testData$y[1:10]),
-               "Dimensions of x / y coordinates don't match")
+               "do not have the same length")
   # see Issue #190  'https://github.com/florianhartig/DHARMa/issues/190'
 
   # testing distance matrix and an extra x or y argument
@@ -330,10 +330,89 @@ test_that("testQuantiles with categorical, formula and few-valued predictors (#5
   fittedModel = glm(observedResponse ~ Environment1, family = poisson, data = testData)
   simulationOutput = simulateResiduals(fittedModel, n = 50)
   expect_error(testQuantiles(simulationOutput, predictor = testData$group, plot = FALSE), "testCategorical")
-  expect_error(testQuantiles(simulationOutput, predictor = ~Environment1 | group), "exactly one variable")
+  expect_error(testQuantiles(simulationOutput, predictor = ~Environment1 + group), "exactly one variable")
   grDevices::pdf(NULL)
   on.exit(grDevices::dev.off())
   pred = round(testData$Environment1)
   expect_equal(testQuantiles(simulationOutput, predictor = pred, plot = FALSE)$p.value,
                testQuantiles(simulationOutput, predictor = pred, plot = TRUE)$p.value)
+})
+
+
+test_that("formula predictors: transformations, grouped residuals, model order (#607, #359, #609)", {
+  set.seed(123)
+  testData = createData(sampleSize = 100, family = poisson(), numGroups = 10, randomEffectVariance = 0)
+  testData$year = rep(1:20, each = 5)
+  testData$siteX = runif(10)[testData$group]
+  testData$siteY = runif(10)[testData$group]
+  testData$f = factor(as.integer(testData$group) > 5)
+  fittedModel = glm(observedResponse ~ Environment1, family = poisson, data = testData)
+  simulationOutput = simulateResiduals(fittedModel, n = 50)
+  grDevices::pdf(NULL)
+  on.exit(grDevices::dev.off())
+
+  # #607: transformations in plotResiduals()
+  expect_equal(plotResiduals(simulationOutput, form = ~abs(Environment1), rank = FALSE)$p.value,
+               testQuantiles(simulationOutput, predictor = abs(testData$Environment1), rank = FALSE, plot = FALSE)$p.value)
+
+  # matrix-valued terms, other objects from the environment of the formula
+  expect_equal(getPredictor(simulationOutput, ~scale(Environment1)), as.vector(scale(testData$Environment1)))
+  env1 = testData$Environment1
+  expect_equal(getPredictor(simulationOutput, ~poly(env1, 2)), testData$Environment1)
+
+  # formula operators: + inside transformations, | in sel, interactions in panels
+  expect_no_error(plotResiduals(simulationOutput, form = ~log(Environment1 + 3) | group == 1))
+  expect_equal(recalculateResiduals(simulationOutput, sel = ~Environment1 < -0.5 | Environment1 > 0.5)$nObs,
+               sum(abs(testData$Environment1) > 0.5))
+  expect_no_error(plotResiduals(simulationOutput, form = ~Environment1:f))
+  expect_error(plotResiduals(simulationOutput, form = ~Environment1 * f | group), "Detected both")
+  expect_error(testQuantiles(simulationOutput, predictor = ~Environment1 * f), "exactly one variable")
+
+  # #359: formula predictors are aggregated per group, in the order of the grouped residuals
+  resYear = recalculateResiduals(simulationOutput, group = ~year)
+  expect_equal(testTemporalAutocorrelation(resYear, time = ~year, plot = FALSE)$p.value,
+               testTemporalAutocorrelation(resYear, time = 1:20, plot = FALSE)$p.value)
+  resSite = recalculateResiduals(simulationOutput, group = factor(testData$group, levels = 10:1))
+  expect_equal(resSite$groupLevels, as.character(10:1))
+  site = testData[match(10:1, testData$group), ]
+  expect_equal(testSpatialAutocorrelation(resSite, x = ~siteX, y = ~siteY, plot = FALSE)$p.value,
+               testSpatialAutocorrelation(resSite, x = site$siteX, y = site$siteY, plot = FALSE)$p.value)
+  expect_equal(testSpatialAutocorrelation(resSite, x = testData$siteX, y = testData$siteY, plot = FALSE)$p.value,
+               testSpatialAutocorrelation(resSite, x = site$siteX, y = site$siteY, plot = FALSE)$p.value) # vectors per observation are aggregated too
+  expect_message(plotResiduals(resSite, form = ~Environment1), "averaged per group")
+  expect_message(plotResiduals(resSite, form = testData$Environment1), "averaged per group")
+  expect_error(testCategorical(resSite, catPred = ~factor(year), plot = FALSE), "not constant within the groups")
+  groupNA = testData$group
+  groupNA[1] = NA
+  resNA = recalculateResiduals(simulationOutput, group = groupNA)
+  expect_silent(getPredictor(resNA, ~siteX))
+  expect_equal(getPredictor(resNA, testData$siteX), getPredictor(resNA, ~siteX))
+  sel = testData$Environment1 > 0
+  expect_equal(getPredictor(recalculateResiduals(simulationOutput, sel = sel), testData$year), testData$year[sel])
+  # one observation per group: vectors with one value per grouped residual are kept
+  perm = sample(100)
+  resPerm = recalculateResiduals(simulationOutput, group = perm)
+  expect_equal(getPredictor(resPerm, ~Environment1), testData$Environment1[order(perm)])
+  expect_equal(getPredictor(resPerm, testData$Environment1[order(perm)]), testData$Environment1[order(perm)])
+
+  # #609: formula predictors in the order of the residuals
+  skip_if_not_installed("GLMMadaptive")
+  shuffledData = testData[sample(nrow(testData)), ]
+  fittedModel = GLMMadaptive::mixed_model(observedResponse ~ Environment1, random = ~ 1 | group,
+                                          family = poisson(), data = shuffledData)
+  simulationOutput = simulateResiduals(fittedModel, n = 50)
+  expect_equal(getPredictor(simulationOutput, ~observedResponse), simulationOutput$observedResponse,
+               ignore_attr = TRUE)
+
+  skip_if_not_installed("phylolm")
+  phyloTree <<- ape::rtree(40) # global, as update() in the simulations of phylolm models looks for it there
+  on.exit(rm(list = intersect(c("phyloTree", "phyloData"), ls(globalenv())), envir = globalenv()), add = TRUE)
+  phyloData <<- data.frame(x = runif(40), row.names = phyloTree$tip.label)
+  phyloData$y <<- rbinom(40, 1, plogis(phyloData$x))
+  phyloData <<- phyloData[sample(40), ]
+  fittedModel = phylolm::phylolm(y ~ x, data = phyloData, phy = phyloTree)
+  expect_equal(getPredictor(simulateResiduals(fittedModel, n = 50), ~x), fittedModel$X[, "x"], ignore_attr = TRUE)
+  fittedModel = phylolm::phyloglm(y ~ x, data = phyloData, phy = phyloTree, method = "logistic_MPLE")
+  simulationOutput = simulateResiduals(fittedModel, n = 50)
+  expect_equal(getPredictor(simulationOutput, ~y), simulationOutput$observedResponse, ignore_attr = TRUE)
 })
