@@ -228,8 +228,8 @@ plotResiduals <- function(simulationOutput, form = NULL, quantreg = NULL,
       if(form == "~.") {
         predictorNames = getPredictorNames(simulationOutput$fittedModel)
 
-        # issue #536: remove "(weights)" from predictorNames
-        if("(weights)" %in% predictorNames) {predictorNames = predictorNames[!predictorNames %in% "(weights)"]}
+        # drop model.frame() helper columns, e.g. "(weights)" (#536), "(offset)"
+        predictorNames = predictorNames[!grepl("^[(].*[)]$", predictorNames)]
         return(plotResidualsPanels(
           simulationOutput = simulationOutput,
           predictorNames = predictorNames,

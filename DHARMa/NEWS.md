@@ -12,6 +12,8 @@ NOTE: for more news about the package, see https://github.com/florianhartig/DHAR
 
 * Predictors given as formula are in the order of the residuals for `GLMMadaptive` and `phylolm` models, and work for `phyloglm` models except `form = ~.` (#609).
 
+* `plotResiduals(form = ~.)` no longer fails for models fitted with the `offset` argument (e.g. `glm(..., offset = log(area))`) (#624).
+
 ## Minor changes
 
 * `recalculateResiduals()` returns `groupLevels`, the group of each grouped residual (#359).
