@@ -6,6 +6,8 @@ NOTE: for more news about the package, see https://github.com/florianhartig/DHAR
 
 * `testCategorical()` no longer fails for factors with unused levels (#348, #616).
 
+* `getRefit()` / `simulateResiduals(refit = TRUE)` now stop with an error if rows or values used in the fit were changed in the data after fitting; since 0.5.1, refits silently used the changed data (#611).
+
 * `simulateResiduals(refit = TRUE)` no longer fails for `lmerTest` models and for `spaMM` models with a transformed response such as `log(y + 1)` (#626).
 
 * Prior weights that are all 1 no longer trigger the warning about ignored prior weights, e.g. for `gamm4()$mer` models fitted without weights (#626).
