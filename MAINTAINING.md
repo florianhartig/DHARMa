@@ -6,6 +6,7 @@ This page is for the DHARMa team (maintainers and collaborators with write acces
 
 - Set the target release as the milestone of the issue or pull request.
 - Team members may merge their own pull requests. If in doubt, request a review from another team member first.
+- Team members can mention `@claude` in a pull request comment or review to get a review or an answer from Claude Code (`.github/workflows/claude.yml`, secret `ANTHROPIC_API_KEY`). It can comment but not push; whoever asked checks its replies.
 - As an exception to the pull request workflow, trivial changes and small changes outside the package folder `DHARMa/` (e.g., in `Code/`, `Publications/`; in `DHARMa/` only `NEWS.md` and the version bump after a release) can be committed directly to `master`; larger ones (e.g., new folders, changes to many files or substantial new content) need a pull request. CRAN submissions are prepared on a branch, see the [CRAN submission checklist](Code/DHARMaCRAN/Checklist.md).
 
 ## Branches
