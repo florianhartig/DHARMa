@@ -33,12 +33,11 @@ stopifnot(interfaceOk(interface))
 
 # Transformed response ----
 
-# refit = TRUE fails if the response is transformed in the formula (spaMM::update_resp)
+# spaMM::update_resp() fails for transformed responses; DHARMa then refits via update()
 m = fitme(log(observedResponse + 1) ~ Environment1 + (1|group), data = dat)
 interface = checkInterface(m, nRefit = 5)
 print(interface)
-stopifnot(interface[names(interface) != "simulateResidualsRefit"] == "ok",
-          is_outcome(interface["simulateResidualsRefit"], "error", "is not a variable"))
+stopifnot(interface == "ok")
 
 # k/n binomial with weights ----
 

@@ -27,13 +27,7 @@ models = list(
 interface = sapply(models, checkInterface)
 print(t(interface))
 stopifnot(sapply(models, function(m) class(m)[1]) %in% DHARMa:::getPossibleModels())
-# known problem: refit = TRUE fails for lmerTest models (getFixedEffects() returns
-# the coefficients per group, because it checks for class "lmerTest" instead of
-# "lmerModLmerTest")
-isRefit = rownames(interface) == "simulateResidualsRefit"
-stopifnot(interface[!isRefit, ] == "ok", interface[isRefit, colnames(interface) != "lmerTest"] == "ok",
-          is_outcome(interface[isRefit, "lmerTest"], "error", "all refits failed"))
-stopifnot(is.list(getFixedEffects(models$lmerTest)))
+stopifnot(interface == "ok")
 
 # Logical response ----
 
@@ -48,10 +42,9 @@ m = gamm4::gamm4(observedResponse ~ s(Environment1), random = ~(1|group), family
 interface = checkInterface(m$mer, nRefit = 5)
 print(interface)
 stopifnot(inherits(m$mer, "glmerMod"), interface[c("observedResponse", "fitted", "fittedResponse")] == "ok")
-# known problem: gamm4 passes weights of 1 to glmer(), and DHARMa warns about prior
-# weights (hasWeights() treats any weights column as prior weights for non-binomial families)
+# gamm4 passes weights of 1 to glmer(); these are not treated as prior weights
 stopifnot(all(model.frame(m$mer)[["(weights)"]] == 1),
-          sapply(interface[c("simulations", "simulateResiduals", "simulateResidualsRefit")], is_outcome, "warning", "prior weights"))
+          !grepl("prior weights", interface))
 
 # Conditional and unconditional simulations ----
 
