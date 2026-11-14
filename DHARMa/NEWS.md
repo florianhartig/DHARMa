@@ -18,7 +18,7 @@ NOTE: for more news about the package, see https://github.com/florianhartig/DHAR
 
 * `recalculateResiduals()` returns `groupLevels`, the group of each grouped residual (#359).
 
-* Formula arguments of `testCategorical()`, the autocorrelation tests and `recalculateResiduals(group = )` (e.g. `catPred = ~year > 10`, `group = ~interaction(a, b)`) are evaluated as written; previously only their first variable was used.
+* Formula arguments of `testCategorical()`, the autocorrelation tests and `recalculateResiduals(group = )` (e.g. `catPred = ~year > 10`, `group = ~interaction(a, b)`) are evaluated as written; previously only their first variable was used (#624).
 
 * `testSpatialAutocorrelation()` accepts `x` and `y` as a mix of formula and vector (#612).
 

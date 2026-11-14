@@ -13,8 +13,8 @@ The vignette (section "Supported packages and frameworks") and the package tests
 | [glmmTMB](glmmTMB/README.md) | `glmmTMB` | full | no conditioning on selected REs; conditional simulations fall back to unconditional for `exp()` |
 | [mgcv](mgcv/README.md) | `gam`, `bam` | full (one linear predictor), partial (several, #600) | only conditional simulations; extended families need mgcViz; several linear predictors (#600); `multinom`, `gamm()$gam` and `gamm4()$gam` not supported (#418, #612) |
 | [spaMM](spaMM/README.md) | `HLfit` | full | refit fails for transformed responses; no k/n binomial via weights |
-| [GLMMadaptive](GLMMadaptive/README.md) | `MixMod` | partial | residuals sorted by group (#609); `cbind()` refit fails (#565); beta-binomial simulations wrong (GLMMadaptive, #565); no Pearson residuals |
-| [phylolm](phylolm/README.md) | `phylolm`, `phyloglm` | partial | residuals in tree tip order (#609); `poisson_GEE` and models fitted in functions fail (#478); phyloglm: `plotResiduals(form = ~.)` fails; no Pearson residuals |
+| [GLMMadaptive](GLMMadaptive/README.md) | `MixMod` | partial | residuals sorted by the grouping factor; vector predictors must be in this order (#609); `cbind()` refit fails (#565); beta-binomial simulations wrong (GLMMadaptive, #565); no Pearson residuals |
+| [phylolm](phylolm/README.md) | `phylolm`, `phyloglm` | partial | residuals in tree tip order; vector predictors must be in this order (#609); `poisson_GEE` and models fitted in functions fail (#478); phyloglm: `plotResiduals(form = ~.)` fails; no Pearson residuals |
 | [brms](brms/README.md) | `brmsfit` | partial (univariate models) | n ≤ posterior draws (#591); `weights()` ignored (#7); `getData()` fails for data expressions and wrappers (#611); unsupported model types with unclear errors (#612) |
 | [phyr](phyr/README.md) | | not checked | #235 |
 | [gamlss](gamlss/README.md), [VGAM](vgam/README.md) | | not supported | #319, #322 |
