@@ -147,6 +147,8 @@ getFixedEffects <- function(object, ...){
 #'
 #' @details The purpose of this wrapper is to standardize the refit of a model. The behavior of this function depends on the supplied model. When available, it uses the refit method, otherwise it will use update. For glmmTMB: since version 1.0, glmmTMB has a refit function, but this didn't work, so I switched back to this implementation, which is a hack based on the update function.
 #'
+#' Refits based on update use the data object of the model call, which must not be changed after fitting. If the refit detects that rows or values used in the fit were changed, it stops with an error.
+#'
 #' @example inst/examples/wrappersHelp.R
 #'
 #' @seealso [getObservedResponse], [getSimulations], [getFixedEffects]
@@ -497,8 +499,11 @@ getRefit.lm <- function(object, newresp, ...){
 #' @keywords internal
 getRefitData <- function(object, newresp, rows = rownames(model.frame(object))){
   if(is.null(getCall(object)$data)) newData = model.frame(object)
-  else newData = getData(object)
-  newData = as.data.frame(newData)[rows, , drop = FALSE]
+  else {
+    newData = as.data.frame(getData(object))
+    checkRefitData(object, newData, rows)
+  }
+  newData = newData[rows, , drop = FALSE]
   f = formula(object)
   # expand '.' while the original response is on the left-hand side, so that it is not included in '.'
   if("." %in% all.vars(f)) f = formula(terms(f, data = newData))
@@ -507,6 +512,25 @@ getRefitData <- function(object, newresp, rows = rownames(model.frame(object))){
   if(is.factor(newresp)) newresp = as.numeric(newresp) - 1
   newData$.DHARMa_response = newresp
   return(list(data = newData, formula = f))
+}
+
+# fixes #611 (data changed after fitting): stops if the data found by getData() lack rows or contain other values than the model frame.
+# Each column is evaluated on the full data and then restricted to the rows used in the fit, as in model.frame()
+checkRefitData <- function(object, data, rows){
+  msg = "DHARMa: the data found for the fitted model do not match the data used for fitting, probably because they were changed after fitting or the model was fitted inside a function. Refits need the original data: restore them or fit the model again."
+  i = match(rows, rownames(data))
+  if(anyNA(i)) stop(msg, " Rows used in the fit are missing.", call. = FALSE)
+  mf = tryCatch(model.frame(object), error = function(e) NULL)
+  # expressions of the model-frame columns, named as in model.frame.default()
+  vars = tryCatch(as.list(attr(terms(mf), "variables"))[-1], error = function(e) list())
+  names(vars) = vapply(vars, function(e) paste(deparse(e, width.cutoff = 500L, backtick = !is.symbol(e) && is.language(e)), collapse = " "), "")
+  for(v in names(mf)[-1]){ # the response is replaced in the refit
+    ex = if(startsWith(v, "(")) getCall(object)[[substr(v, 2, nchar(v) - 1)]] else vars[[v]]
+    x = tryCatch(eval(ex, data, environment(formula(object))), error = function(e) NULL)
+    if(is.null(x) || NROW(x) != nrow(data)) next # cannot be checked
+    x = if(is.matrix(x)) x[i, , drop = FALSE] else x[i]
+    if(!isTRUE(all.equal(as.vector(x), as.vector(mf[[v]])))) stop(msg, " Values differ for: ", v, call. = FALSE)
+  }
 }
 
 

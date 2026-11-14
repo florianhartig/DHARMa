@@ -6,6 +6,8 @@ NOTE: for more news about the package, see https://github.com/florianhartig/DHAR
 
 * `testCategorical()` no longer fails for factors with unused levels (#348, #616).
 
+* `getRefit()` / `simulateResiduals(refit = TRUE)` now stop with an error if rows or values used in the fit were changed in the data after fitting; since 0.5.1, refits silently used the changed data (#611).
+
 ## Minor changes
 
 * `plotResiduals()` / `testCategorical()`: boxplots for categorical predictors show residuals as jittered points with outliers marked (unless `smoothScatter = TRUE`, default for > 10,000 observations; jitter set by the new argument `jitterPoints`, also for numeric predictors); further arguments such as `ylab` are passed to the boxplot (#562, #616).
