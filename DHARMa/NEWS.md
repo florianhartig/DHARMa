@@ -6,13 +6,11 @@ NOTE: for more news about the package, see https://github.com/florianhartig/DHAR
 
 * `testCategorical()` no longer fails for factors with unused levels (#348, #616).
 
-* `simulateResiduals(refit = TRUE)` no longer fails for `lmerTest` models (class `lmerModLmerTest`) and other subclasses of lme4's `merMod` class.
+* `simulateResiduals(refit = TRUE)` no longer fails for `lmerTest` models and for `spaMM` models with a transformed response such as `log(y + 1)` (#626).
 
-* `simulateResiduals(refit = TRUE)` no longer fails for `spaMM` models with a transformed response such as `log(y + 1)`.
+* Prior weights that are all 1 no longer trigger the warning about ignored prior weights, e.g. for `gamm4()$mer` models fitted without weights (#626).
 
-* Prior weights that are all 1 no longer trigger the warning about ignored prior weights, e.g. for `gamm4()$mer` models fitted without weights.
-
-* `getData()` for `spaMM` models returns the data stored in the model object; previously it failed for models fitted inside a function or could return another object with the same name (#621).
+* `getData()` for `spaMM` models returns the data stored in the model object (without rows with NAs); previously it failed for models fitted inside a function or could return another object with the same name (#621, #626).
 
 ## Minor changes
 

@@ -154,7 +154,7 @@ test_that("getFittedResponse returns fitted values on the scale of the observed 
 })
 
 
-test_that("refitting to the observed response reproduces the fit (#571, #599)", {
+test_that("refitting to the observed response reproduces the fit (#571, #599, #621)", {
   set.seed(1)
   n = 60
   testData = data.frame(x = runif(n), N = sample(5:15, n, TRUE))
@@ -179,6 +179,10 @@ test_that("refitting to the observed response reproduces the fit (#571, #599)", 
   expect_equal(refitCoef(m), coef(m))
   # spaMM with a transformed response
   m = spaMM::fitme(log(y) ~ x, data = testData)
+  expect_equal(refitCoef(m, spaMM::fixef), spaMM::fixef(m), tolerance = 1e-6)
+  # spaMM model fitted inside a function: getData() returns the stored data (#621)
+  fitInFunction = function(dd) spaMM::fitme(log(y) ~ x, data = dd)
+  m = fitInFunction(testData[-1, ])
   expect_equal(refitCoef(m, spaMM::fixef), spaMM::fixef(m), tolerance = 1e-6)
 })
 

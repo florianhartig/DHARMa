@@ -23,7 +23,7 @@ The vignette (section "Supported packages and frameworks") and the package tests
 Problems that affect several packages:
 
 - `integerResponse` is `FALSE` for many integer-valued families (names per package in #620, e.g. glmmTMB `nbinom12`, mgcv `ziP`, spaMM `negbin2`, GLMMadaptive and brms negative binomial), so `testOutliers()` uses the binomial instead of the bootstrap test for models with up to 500 observations, and refits are not randomized for integers (#620).
-- Models fitted in a function with an argument named `data` or `df` (formula passed as an argument): `getData()` returns a function, so formula predictors and refits fail (#611).
+- Models fitted in a function with an argument named `data` or `df` (formula passed as an argument): `getData()` returns a function, so formula predictors and refits fail (not for spaMM, whose stored data are used; #621).
 - Refits fail if NA rows were removed and the offset, the weights or a predictor are vectors outside the data (#601).
 - Conditional simulations (the default) give underdispersed residuals for correct models if each value of a latent field is informed by about one observation, e.g. `ar1()` with one observation per time step or spatial fields with one observation per location (strongly for Gaussian, less for Poisson models); the same mechanism applies to observation-level REs (not checked) (#527).
 - `rotation = "estimated"` is strongly anti-conservative unless n is much larger than the number of observations (or groups, after `recalculateResiduals(group = )`); with 200 observations, the rejection rate of the uniformity test was 1.00 for the default `n = 250` and 0.02 for `n = 1000` (#489).

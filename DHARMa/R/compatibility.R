@@ -857,9 +857,8 @@ getSimulations.HLfit <- function(object, nsim = 1, simulateREs = c("conditional"
 #' @rdname getRefit
 #' @export
 getRefit.HLfit <- function(object, newresp, ...) {
-  # update_resp() fails for transformed responses such as log(y + 1); these are refitted as for lm
-  response = formula(object)[[2]]
-  if(inherits(object, "fitmv") || is.name(response) || identical(response[[1]], as.name("cbind"))) {
+  # fitmv (list of formulas), plain and cbind() responses: update_resp(); it fails for transformed responses such as log(y + 1), refitted as for lm
+  if(inherits(object, "fitmv") || is.name(formula(object)[[2]]) || identical(formula(object)[[2]][[1]], quote(cbind))) {
     spaMM::update_resp(object, newresp, evaluate = TRUE, ...)
   } else getRefit.lm(object, newresp, ...)
 }
@@ -867,7 +866,7 @@ getRefit.HLfit <- function(object, newresp, ...) {
 #' @rdname getData
 #' @export
 getData.HLfit <- function (object, ...){
-  object$data # spaMM stores the data (rows with NAs removed); its formula environment is not the one of the caller
+  object$data # stored data (rows with NAs removed); evaluating the data argument again fails for models fitted inside a function (#621)
 }
 
 #' @rdname getFitted
