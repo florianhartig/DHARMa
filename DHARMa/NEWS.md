@@ -12,13 +12,13 @@ NOTE: for more news about the package, see https://github.com/florianhartig/DHAR
 
 * Predictors given as formula are in the order of the residuals for `GLMMadaptive` and `phylolm` models, and work for `phyloglm` models, also with `plotResiduals(form = ~.)` (#609).
 
-* Formula arguments such as `plotResiduals(form = ~x)` or `recalculateResiduals(group = ~g)` and numeric `sel` in `recalculateResiduals()` work for models fitted without `data` argument; variables that are not in the model frame are taken from the environment of the formula (#622).
+* Formula arguments such as `plotResiduals(form = ~x)` or `recalculateResiduals(group = ~g)` and numeric `sel` in `recalculateResiduals()` work for models fitted without `data` argument; variables that are not in the model frame are taken from the environment of the formula (#622, #631).
 
 * `plotResiduals(form = ~.)` no longer fails for models fitted with the `offset` argument (e.g. `glm(..., offset = log(area))`) (#624).
 
-* `getRefit()` / `simulateResiduals(refit = TRUE)` and predictors given as formula (e.g. `plotResiduals(form = ~x)`) use the data stored in the fitted model if possible (e.g. `glm`, `GLMMadaptive`, `spaMM`, `brms`; for formula predictors also the model frame), otherwise the data in the environment, and stop with an error if rows used in the fit were removed or variables of the model were changed after fitting (changed values are not detected for `phyloglm`); previously, refits (since 0.5.1) and formula predictors silently used the changed data (#611, #625).
+* `getRefit()` / `simulateResiduals(refit = TRUE)` and predictors given as formula (e.g. `plotResiduals(form = ~x)`) use the data stored in the fitted model if possible (e.g. `glm`, `GLMMadaptive`, `spaMM`, `brms`; for formula predictors also the model frame), otherwise the data in the environment, and stop with an error if rows used in the fit were removed or variables of the model were changed after fitting (changed values are not detected for `phyloglm`); previously, refits (since 0.5.1) and formula predictors silently used the changed data (#611, #625, #631).
 
-* `getData()` stops with an error instead of returning a function such as `utils::data` for models fitted inside a function, and works for `brms` models with an expression as `data` (#621).
+* `getData()` stops with an error instead of returning a function such as `utils::data` for models fitted inside a function, and works for `brms` models with an expression as `data` (#621, #631).
 
 * `simulateResiduals(refit = TRUE)` no longer fails for `lmerTest` models and for `spaMM` models with a transformed response such as `log(y + 1)` (#626).
 
