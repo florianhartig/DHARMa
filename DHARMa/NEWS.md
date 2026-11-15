@@ -24,6 +24,10 @@ NOTE: for more news about the package, see https://github.com/florianhartig/DHAR
 
 * `getData()` for `spaMM` models returns the data stored in the model object (without rows with NAs); previously it failed for models fitted inside a function or could return another object with the same name (#621, #626).
 
+* `simulateResiduals()` for `brms` models no longer fails if `n` exceeds the number of posterior draws (e.g. the default `n = 250` for a model with 200 draws); draws are then reused, with a message (#591, #627).
+
+* `simulateResiduals()`: `integerResponse` is now detected from the simulated values instead of a list of family names, which missed many integer-valued families (e.g. `glmmTMB` `nbinom12`, `mgcv` `ziP`, `spaMM` `negbin2`); beta-binomial families of `spaMM` and `GLMMadaptive` are now treated as binomial (#620, #627).
+
 ## Minor changes
 
 * `recalculateResiduals()` returns `groupLevels`, the group of each grouped residual (#359).

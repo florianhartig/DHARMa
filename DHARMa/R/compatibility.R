@@ -305,7 +305,7 @@ getObservedResponse.default <- function (object, ...){
   if(is.factor(out)) out = as.numeric(out) - 1
 
   # check for weights in k/n case
-  if(family(object)$family %in% c("binomial", "betabinomial") & "(weights)" %in% colnames(model.frame(object))){
+  if(isBinomialFamily(object) & "(weights)" %in% colnames(model.frame(object))){
     x = model.frame(object)
     out = out * x$`(weights)`
   }
@@ -316,7 +316,7 @@ getObservedResponse.default <- function (object, ...){
       out = as.vector(out)
     } else if(ncol(out) == 2) {
       # case k/n binomial
-      if(!(family(object)$family %in% c("binomial", "betabinomial"))) securityAssertion("nKcase - wrong family")
+      if(!isBinomialFamily(object)) securityAssertion("nKcase - wrong family")
       out = out[,1]
     }
     else securityAssertion("Response in the model is a matrix with > 2 dim")
@@ -348,7 +348,7 @@ getSimulations.default <- function (object, nsim = 1, simulateREs = c("condition
   if(is.data.frame(out) && nrow(out) == 0 && length(out) > 0) attr(out, "row.names") = .set_row_names(NROW(out[[1]]))
 
   if (type == "normal"){
-    if(family(object)$family %in% c("binomial", "betabinomial")){
+    if(isBinomialFamily(object)){
 
       if(is.factor(out[[1]])){
         if(nlevels(out[[1]]) != 2){
@@ -407,10 +407,19 @@ getFittedResponse.default <- function (object, ...){
   getFitted(object, ...) * getTrials(object)
 }
 
+# binomial and beta-binomial families (names in glm/glmmTMB, spaMM and GLMMadaptive)
+isBinomialFamily <- function(object) getFamily(object)$family %in% c("binomial", "betabinomial", "betabin", "beta binomial")
+
+# fixes #620 (fixed lists of family names missed integer-valued families): TRUE if all simulations are whole numbers
+isIntegerValued <- function(simulations, trials = 1){
+  x = as.numeric(unlist(simulations)) * trials
+  all(abs(x - round(x)) < 1e-6, na.rm = TRUE)
+}
+
 # number of trials per observation for k/n binomial models, 1 otherwise
 getTrials <- function(object){
   out = 1
-  if(getFamily(object)$family %in% c("binomial", "betabinomial", "betabin", "beta binomial")){
+  if(isBinomialFamily(object)){
     x = model.frame(object)
     # number of trials given via cbind(successes, failures)
     if(is.matrix(x[[1]]) && ncol(x[[1]]) == 2) out = out * rowSums(x[[1]])
@@ -624,7 +633,7 @@ getSimulations.gam <- function(object, nsim = 1, simulateREs = c("conditional", 
     out = as.data.frame(out)
 
     if (type == "normal"){
-      if(family(object)$family %in% c("binomial", "betabinomial")){
+      if(isBinomialFamily(object)){
         if (is.matrix(model.frame(object)[[1]])){
           # k/n binomial case first (#568), rounded (#590)
           out = round(out * rowSums(model.frame(object)[[1]]))
@@ -635,7 +644,7 @@ getSimulations.gam <- function(object, nsim = 1, simulateREs = c("conditional", 
       }
       if(!is.matrix(out)) out = data.matrix(out)
     } else{
-      if(family(object)$family %in% c("binomial", "betabinomial")){
+      if(isBinomialFamily(object)){
         if (is.matrix(model.frame(object)[[1]])){
 
           # need to convert to k,n-k format for refit. Syntax here is from
@@ -786,7 +795,7 @@ getSimulations.glmmTMB <- function (object, nsim = 1, simulateREs = c("condition
   }else{
 
     # check for weights in k/n case
-    if(family(object)$family %in% c("binomial", "betabinomial")){
+    if(isBinomialFamily(object)){
       if("(weights)" %in% colnames(model.frame(object)) && !is.matrix(model.frame(object)[[1]])){
         w = model.frame(object)
         w = w$`(weights)`
@@ -835,7 +844,7 @@ getObservedResponse.HLfit <- function(object, ...){
 
   nKcase = is.matrix(out)
   if(nKcase){
-    if(! (family(object) %in% c("binomial", "betabinomial"))) securityAssertion("nKcase - wrong family")
+    if(!isBinomialFamily(object)) securityAssertion("nKcase - wrong family")
     if(! (ncol(out)==2)) securityAssertion("nKcase - wrong dimensions of response")
     out = out[,1]
   }
@@ -1123,14 +1132,19 @@ getSimulations.brmsfit <- function (object, nsim = 1, simulateREs = c("condition
 
   out = NULL
 
+  # fixes #591 (posterior_predict stops if nsim > ndraws): reuse draws
+  nDraws = brms::ndraws(object)
+  if(nsim > nDraws) message("DHARMa: n = ", nsim, " exceeds the number of posterior draws (", nDraws, "), draws are reused.")
+  draws = sample(nDraws, nsim, replace = nsim > nDraws)
+
   # user-specified (as before)
   if (simulateREs == "user-specified") {
-    out = t(brms::posterior_predict(object = object, ndraws = nsim, ...))
+    out = t(brms::posterior_predict(object = object, draw_ids = draws, ...))
   }
 
   # conditional
   if (simulateREs == "conditional") {
-    out = t(brms::posterior_predict(object = object, re_formula = NULL, ndraws = nsim, ...))
+    out = t(brms::posterior_predict(object = object, re_formula = NULL, draw_ids = draws, ...))
   }
 
   # unconditional
@@ -1154,7 +1168,7 @@ getSimulations.brmsfit <- function (object, nsim = 1, simulateREs = c("condition
       unclass(s)[!grepl("^J_[0-9]", names(s))]
     }
     if(!isTRUE(all.equal(standataNoJ(object$data), standataNoJ(newData), check.attributes = FALSE))) stop(msg)
-    out = t(brms::posterior_predict(object, newdata = newData, allow_new_levels = TRUE, sample_new_levels = "gaussian", ndraws = nsim, ...))
+    out = t(brms::posterior_predict(object, newdata = newData, allow_new_levels = TRUE, sample_new_levels = "gaussian", draw_ids = draws, ...))
   }
 
   if(type == "normal"){

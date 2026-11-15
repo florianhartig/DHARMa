@@ -179,11 +179,11 @@ stopifnot(is_outcome(outcome(getPearsonResiduals(models$poisson)), "error", "not
 
 # Number of simulations and posterior draws ----
 
-# known problem (#591): n larger than the number of posterior draws stops with a
-# brms error, also for the default n = 250 if the model has fewer draws
+# n larger than the number of posterior draws (also the default n = 250 if the
+# model has fewer draws): draws are reused, with a message (#591)
 m = brm(yPois ~ x, family = poisson(), data = d, chains = 1, iter = 200, refresh = 0, seed = 1)
 stopifnot(ndraws(m) == 100,
-          is_outcome(outcome(simRes(m)), "error", "maximum number of draws"),
+          is_outcome(outcome(simRes(m)), "message", "draws are reused"),
           okOrSimpleWarning(outcome(simulateResiduals(m, n = 100))))
 
 # Unsupported models ----

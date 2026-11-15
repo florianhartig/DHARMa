@@ -6,7 +6,7 @@
 #' @param n number of simulations. The smaller the number, the higher the stochastic error on the residuals. Also, for very small n, discretization artefacts can influence the tests. Default is 250, which is a relatively safe value. You can consider increasing to 1000 to stabilize the simulated values.
 #' @param simulateREs decides which REs / hierarchical levels should be re-simulated. If \code{conditional}, simulations are done conditional on all fitted random effects (default). If \code{unconditional}, all REs or hierarchical levels are re-simulated. Setting \code{user-specified} allows supplying package-specific arguments to decide which REs are to be re-simulated. If none are supplied, the defaults of the respective fitted model object is used. See details and further comments in [getSimulations].
 #' @param refit if FALSE, new data will be simulated and scaled residuals will be created by comparing observed data with new data. If TRUE, the model will be refitted on the simulated data (parametric bootstrap), and scaled residuals will be created by comparing observed with refitted residuals.
-#' @param integerResponse if TRUE, noise will be added to the residuals to maintain uniform expectations for integer responses (such as Poisson or Binomial). Usually, the model will automatically detect the appropriate setting, so there is no need to adjust this setting.
+#' @param integerResponse if TRUE, noise will be added to the residuals to maintain uniform expectations for integer responses (such as Poisson or Binomial). If NULL (default), it is TRUE if all simulated values are whole numbers (with refit = TRUE, after multiplying k/n binomial proportions by the number of trials).
 #' @param plot if TRUE, [plot.DHARMa] will be directly run after the residuals have been calculated.
 #' @param ... further parameters to pass on to the simulate and update function of the model object (via DHARMa::getSimulations and DHARMa::getRefit). If simulateREs = "user-specified", an important use of this is to specify whether simulations should be conditional on all, some or none of the current random effect estimates, e.g. via re.form. Note that not all models support syntax to specify conditional or unconditional simulations. See details and [getSimulations].
 #' @param seed the random seed to be used within DHARMa. The default setting, recommended for most users, is to keep the random seed on a fixed value of 123. This means that you will always get the same randomization and thus the same result when running the same code. If NULL, no new seed is set, but previous random state will be restored after simulation. If FALSE, no seed is set, and random state will not be restored. The latter two options are only recommended for simulation experiments. See vignette for details.
@@ -29,7 +29,7 @@
 #'
 #' \strong{Transformation to other distributions}: DHARMa calculates residuals for which the theoretical expectation (assuming a correctly specified model) is uniform. To transform these residuals to another distribution (e.g. so that a correctly specified model will have normal residuals) see [residuals.DHARMa].
 #'
-#' \strong{Integer responses}: this is only relevant if method = "traditional", in which case it activates the randomization of the residuals. Usually, this does not need to be changed, as DHARMa will try to automatically check if the fitted model has an integer or discrete distribution via the family argument. However, in some cases the family does not allow to uniquely identify the distribution type. For example, a tweedie distribution can be integer or continuous. Therefore, DHARMa will additionally check the simulation results for repeated values, and will change the distribution type if repeated values are found (a message is displayed in this case).
+#' \strong{Integer responses}: this is only relevant if method = "traditional", in which case it activates the randomization of the residuals. Usually, this does not need to be changed, as DHARMa sets integerResponse = TRUE if all simulated values are whole numbers. In addition, DHARMa checks the simulation results for repeated values, and will change the distribution type if repeated values are found (a message is displayed in this case).
 #'
 #' \strong{Residual autocorrelation}: a common problem is residual autocorrelation. Spatial, temporal and phylogenetic autocorrelation can be tested with [testSpatialAutocorrelation], [testTemporalAutocorrelation] and [testPhylogeneticAutocorrelation]. If simulations are unconditional, residual correlations will be maintained, even if the autocorrelation is addressed by an appropriate CAR structure. This may be a problem, because autocorrelation may create apparently systematic patterns in plots or tests such as [testUniformity]. To reduce this problem, either simulate conditional on fitted correlated REs, or rotate residuals via the rotation parameter (the latter will likely only work in approximately linear models). See [getQuantile] for details on the rotation.
 #'
@@ -60,7 +60,6 @@ simulateResiduals <- function(fittedModel, n = 250, simulateREs = c("conditional
 
   out = list()
 
-  family = getFamily(fittedModel)
   out$fittedModel = fittedModel
   out$modelClass = class(fittedModel)[1]
 
@@ -74,12 +73,6 @@ simulateResiduals <- function(fittedModel, n = 250, simulateREs = c("conditional
 
   # this is to check for problem #325
   if (out$nObs < length(out$observedResponse)) stop("DHARMA::simulateResiduals: nobs(model) < nrow(model.frame). A possible reason is that you have observations with zero prior weights (in binomial with n=0) in your data. Calculating residuals in this case wouldn't be sensible. Please remove zero-weight observations from your data and re-fit your model! If you believe that this is not the reason, please file an issue under https://github.com/florianhartig/DHARMa/issues")
-
-  if(is.null(integerResponse)){
-    if (family$family %in% c("integer-valued", "binomial", "poisson", "quasibinomial", "quasipoisson", "Negative Binom", "nbinom2", "nbinom1", "genpois", "compois", "truncated_poisson", "truncated_nbinom2", "truncated_nbinom1", "betabinomial", "Poisson", "Tpoisson", "COMPoisson", "negbin", "Tnegbin") | grepl("Negative Binomial",family$family) ) integerResponse = TRUE
-    else integerResponse = FALSE
-  }
-  out$integerResponse = integerResponse
 
   out$problems = list()
 
@@ -98,6 +91,7 @@ simulateResiduals <- function(fittedModel, n = 250, simulateREs = c("conditional
                                            type = "normal", ...)
 
     checkSimulations(out$simulatedResponse, out$nObs, out$nSim)
+    if(is.null(integerResponse)) integerResponse = isIntegerValued(out$simulatedResponse)
 
     out$scaledResiduals <- getQuantile(simulations = out$simulatedResponse ,
                                       observed = out$observedResponse ,
@@ -166,6 +160,7 @@ simulateResiduals <- function(fittedModel, n = 250, simulateREs = c("conditional
 
     # fixes #598 (k/n binomial: randomize residuals on the scale of the number of successes)
     trials = getTrials(fittedModel)
+    if(is.null(integerResponse)) integerResponse = isIntegerValued(out$simulatedResponse, trials)
     out$fittedResiduals = out$fittedResiduals * trials
     out$refittedResiduals = out$refittedResiduals * trials
 
@@ -178,6 +173,7 @@ simulateResiduals <- function(fittedModel, n = 250, simulateREs = c("conditional
 
   ########### Wrapup ############
 
+  out$integerResponse = integerResponse
   out$time = proc.time() - ptm
   out$randomState = randomState
 

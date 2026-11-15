@@ -15,14 +15,13 @@ The vignette (section "Supported packages and frameworks") and the package tests
 | [spaMM](spaMM/README.md) | `HLfit` | full | no k/n binomial via weights |
 | [GLMMadaptive](GLMMadaptive/README.md) | `MixMod` | partial | residuals sorted by the grouping factor; vector predictors must be in this order (#609); `cbind()` refit fails (#565); beta-binomial simulations wrong (GLMMadaptive, #565); no Pearson residuals |
 | [phylolm](phylolm/README.md) | `phylolm`, `phyloglm` | partial | residuals in tree tip order; vector predictors must be in this order (#609); `poisson_GEE` and models fitted in functions fail (#478); no Pearson residuals |
-| [brms](brms/README.md) | `brmsfit` | partial (univariate models) | n ≤ posterior draws (#591); `weights()` ignored (#7); `getData()` fails for data expressions and wrappers (#611); unsupported model types with unclear errors (#612) |
+| [brms](brms/README.md) | `brmsfit` | partial (univariate models) | `weights()` ignored (#7); `getData()` fails for data expressions and wrappers (#611); unsupported model types with unclear errors (#612) |
 | [phyr](phyr/README.md) | | not checked | #235 |
 | [gamlss](gamlss/README.md), [VGAM](vgam/README.md) | | not supported | #319, #322 |
 | [sjSDM](sjSDM/README.md) | | not supported | |
 
 Problems that affect several packages:
 
-- `integerResponse` is `FALSE` for many integer-valued families (names per package in #620, e.g. glmmTMB `nbinom12`, mgcv `ziP`, spaMM `negbin2`, GLMMadaptive and brms negative binomial), so `testOutliers()` uses the binomial instead of the bootstrap test for models with up to 500 observations, and refits are not randomized for integers (#620).
 - Models fitted in a function with an argument named `data` or `df` (formula passed as an argument): `getData()` returns a function, so formula predictors and refits fail (not for spaMM, whose stored data are used; #621).
 - Refits fail if NA rows were removed and the offset, the weights or a predictor are vectors outside the data (#601).
 - Conditional simulations (the default) give underdispersed residuals for correct models if each value of a latent field is informed by about one observation, e.g. `ar1()` with one observation per time step or spatial fields with one observation per location (strongly for Gaussian, less for Poisson models); the same mechanism applies to observation-level REs (not checked) (#527).
