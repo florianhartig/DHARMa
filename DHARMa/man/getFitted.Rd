@@ -38,6 +38,8 @@ Wrapper to get the fitted/predicted response of the model at the response scale.
 \details{
 The purpose of this wrapper is to extract the fitted values, which is implemented via predict(model, type = "response") for most model classes.
 
+For mgcv models with several linear predictors (e.g. gaulss), the first column of the predictions is returned. This is the mean for gaulss and gammals, but the location parameter for gevlss and shash.
+
 If you implement this function for a new model class, you should include an option to modify which random effects (REs) are included in the predictions. If this option is not available, it is essential that predictions are provided marginally/unconditionally, i.e. without the RE estimates (because of https://github.com/florianhartig/DHARMa/issues/43), which corresponds to re-form = ~0 in lme4.
 }
 \examples{

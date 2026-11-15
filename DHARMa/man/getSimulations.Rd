@@ -68,7 +68,7 @@ getSimulations(object, nsim = 1, simulateREs = c("conditional",
 
 \item{...}{additional parameters to be passed on, usually to the simulate function of the respective model class.}
 
-\item{mgcViz}{whether simulations should be created with mgcViz (if mgcViz is available)}
+\item{mgcViz}{whether simulations should be created with mgcViz (if mgcViz is available). Without mgcViz, only families that can be simulated by the stats package (e.g. gaussian, poisson, binomial, Gamma) are supported.}
 }
 \value{
 a matrix with simulations.
