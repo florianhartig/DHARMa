@@ -40,6 +40,8 @@ NOTE: for more news about the package, see https://github.com/florianhartig/DHAR
 
 * `runBenchmarks()` no longer fails if `calculateStatistics` returns a single value (#628).
 
+* `simulateResiduals(refit = TRUE)` stores `simulatedResponse` as a matrix on the scale of the observed response, as for `refit = FALSE`, and `recalculateResiduals()` aggregates it; previously, `testGeneric()` and `testZeroInflation()` gave wrong results for k/n binomial models and factor responses with `refit = TRUE`, and after grouping (#610, #632).
+
 ## Minor changes
 
 * `recalculateResiduals()` returns `groupLevels`, the group of each grouped residual (#359).

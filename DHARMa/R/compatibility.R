@@ -104,7 +104,7 @@ getObservedResponse <- function (object, ...) {
 #' @param type if simulations should be prepared for getQuantile or for refit.
 #' @param ... additional parameters to be passed on, usually to the simulate function of the respective model class.
 #'
-#' @return a matrix with simulations.
+#' @return a matrix with simulations (type = "normal"), or a data.frame with one simulation per column in the format of the response used to fit the model (type = "refit").
 #' @example inst/examples/wrappersHelp.R
 #'
 #' @seealso [getObservedResponse], [getRefit], [getFixedEffects], [getFitted]
@@ -303,13 +303,17 @@ getPredictorNames <- function (object, ...) {
 #' @rdname getObservedResponse
 #' @export
 getObservedResponse.default <- function (object, ...){
-  out = model.frame(object)[,1]
+  getResponseScale(model.frame(object)[,1], object)
+}
+
+# observed response or one refit-format simulation on the scale of observedResponse (#632)
+getResponseScale <- function(out, object){
 
   # observation is factor - unlike lme4 and older, glmmTMB simulates nevertheless as numeric
   if(is.factor(out)) out = as.numeric(out) - 1
 
   # check for weights in k/n case
-  if(isBinomialFamily(object) & "(weights)" %in% colnames(model.frame(object))){
+  if(isBinomialFamily(object) && "(weights)" %in% colnames(model.frame(object))){
     x = model.frame(object)
     out = out * x$`(weights)`
   }
@@ -410,8 +414,8 @@ getFittedResponse.default <- function (object, ...){
 isBinomialFamily <- function(object) getFamily(object)$family %in% c("binomial", "betabinomial", "betabin", "beta binomial")
 
 # fixes #620 (fixed lists of family names missed integer-valued families): TRUE if all simulations are whole numbers
-isIntegerValued <- function(simulations, trials = 1){
-  x = as.numeric(unlist(simulations)) * trials
+isIntegerValued <- function(simulations){
+  x = as.numeric(simulations)
   all(abs(x - round(x)) < 1e-6, na.rm = TRUE)
 }
 

@@ -18,7 +18,7 @@ simulateResiduals(fittedModel, n = 250, simulateREs = c("conditional",
 
 \item{refit}{if FALSE, new data will be simulated and scaled residuals will be created by comparing observed data with new data. If TRUE, the model will be refitted on the simulated data (parametric bootstrap), and scaled residuals will be created by comparing observed with refitted residuals.}
 
-\item{integerResponse}{if TRUE, noise will be added to the residuals to maintain uniform expectations for integer responses (such as Poisson or Binomial). If NULL (default), it is TRUE if all simulated values are whole numbers (with refit = TRUE, after multiplying k/n binomial proportions by the number of trials).}
+\item{integerResponse}{if TRUE, noise will be added to the residuals to maintain uniform expectations for integer responses (such as Poisson or Binomial). If NULL (default), it is TRUE if all simulated values are whole numbers.}
 
 \item{plot}{if TRUE, \link{plot.DHARMa} will be directly run after the residuals have been calculated.}
 
@@ -46,7 +46,7 @@ There are a number of important considerations when simulating from a more compl
 \strong{Refitting or not}: a third issue is how residuals are calculated. simulateResiduals has two options that are controlled by the refit parameter:
 \enumerate{
 \item if refit = FALSE (default), new data is simulated from the fitted model, and residuals are calculated by comparing the observed data to the new data.
-\item if refit = TRUE, a parametric bootstrap is performed, meaning that the model is refit on the new data, and residuals are created by comparing observed residuals against refitted residuals. I advise against using this method per default (see more comments in the vignette), unless you are really sure that you need it.
+\item if refit = TRUE, a parametric bootstrap is performed, meaning that the model is refit on the new data, and residuals are created by comparing observed residuals against refitted residuals. As for refit = FALSE, the simulated responses are stored on the scale of the observed response; the format used for the refits can be obtained with \link{getSimulations} (type = "refit"). I advise against using this method per default (see more comments in the vignette), unless you are really sure that you need it.
 }
 
 \strong{Residuals per group}: In many situations, it can be useful to look at residuals per group, e.g. to see how much the model over / underpredicts per plot, year or subject. To do this, use \link{recalculateResiduals}, together with a grouping variable (see also help).

@@ -85,6 +85,8 @@ runEverything = function(fittedModel, testData, DHARMaData = T, phy = NULL,
     simulationOutput2 <- simulateResiduals(fittedModel = fittedModel,
                                                           refit = T, n = 100)
     checkOutput(simulationOutput2)
+    # #632: simulatedResponse as with refit = FALSE (same seed)
+    expect_equal(simulationOutput2$simulatedResponse, simulateResiduals(fittedModel, n = 100)$simulatedResponse, ignore_attr = TRUE)
     if(doPlots) plot(simulationOutput2, quantreg = F)
 
     # note that the pearson test is biased, therefore have to test greater
@@ -158,6 +160,8 @@ runEverythingExcPearson = function(fittedModel, testData, DHARMaData = T, phy = 
     simulationOutput2 <- simulateResiduals(fittedModel = fittedModel,
                                            refit = T, n = 100)
     checkOutput(simulationOutput2)
+    # #632: simulatedResponse as with refit = FALSE (same seed)
+    expect_equal(simulationOutput2$simulatedResponse, simulateResiduals(fittedModel, n = 100)$simulatedResponse, ignore_attr = TRUE)
     if(doPlots) plot(simulationOutput2, quantreg = F)
 
     # note that the pearson test is biased, therefore have to test greater

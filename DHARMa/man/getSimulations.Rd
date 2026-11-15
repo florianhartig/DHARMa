@@ -71,7 +71,7 @@ getSimulations(object, nsim = 1, simulateREs = c("conditional",
 \item{mgcViz}{whether simulations should be created with mgcViz (if mgcViz is available). Without mgcViz, only families that can be simulated by the stats package (e.g. gaussian, poisson, binomial, Gamma) are supported.}
 }
 \value{
-a matrix with simulations.
+a matrix with simulations (type = "normal"), or a data.frame with one simulation per column in the format of the response used to fit the model (type = "refit").
 }
 \description{
 Wrapper to simulate from a fitted model.
