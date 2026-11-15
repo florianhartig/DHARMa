@@ -21,6 +21,12 @@ test_that("createDHARMa works", {
                               observedResponse = truth), "No fitted predicted")
   expect_match(class(sim2), "DHARMa")
 
+  # method is stored, as testOutliers(type = "bootstrap") uses it (#634)
+  expect_equal(sim$method, "PIT")
+  sim3 = createDHARMa(simulatedResponse = simulatedResponse, observedResponse = truth,
+                      fittedPredictedResponse = pred, integerResponse = T,
+                      method = "traditional")
+  expect_equal(sim3$method, "traditional")
 
 })
 

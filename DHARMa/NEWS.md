@@ -32,6 +32,12 @@ NOTE: for more news about the package, see https://github.com/florianhartig/DHAR
 
 * `simulateResiduals()`: `integerResponse` is now detected from the simulated values instead of a list of family names, which missed many integer-valued families (e.g. `glmmTMB` `nbinom12`, `mgcv` `ziP`, `spaMM` `negbin2`); beta-binomial families of `spaMM` and `GLMMadaptive` are now treated as binomial (#620, #627).
 
+* `testSpatialAutocorrelation()` and `testPhylogeneticAutocorrelation()` return and print the chosen `alternative` (#633).
+
+* `createDHARMa()` stores `method`, so `testOutliers(type = "bootstrap")` uses the same randomization method as the residuals; previously it always used PIT (#634).
+
+* `runBenchmarks()` no longer fails if `calculateStatistics` returns a single value (#628).
+
 ## Minor changes
 
 * `recalculateResiduals()` returns `groupLevels`, the group of each grouped residual (#359).

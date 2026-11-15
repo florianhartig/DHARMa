@@ -43,7 +43,7 @@ chk("createDHARMa, integer response", testUniformity(sob, plot = FALSE))
 chk("createDHARMa, plotResiduals with vector predictor", plotResiduals(sob, form = d$Environment1))
 chk("createDHARMa, grouped", testDispersion(recalculateResiduals(sob, group = d$group), plot = FALSE))
 chk("createDHARMa, transposed simulations", createDHARMa(t(sims), d$y2, integerResponse = TRUE), expect = "error")
-# known problem #628: ?runBenchmarks allows a function that returns one value, but this fails
+# a function that returns one value, as allowed by ?runBenchmarks (#628)
 chk("runBenchmarks, one statistic", runBenchmarks(function() testDispersion(sob, plot = FALSE)$p.value, nRep = 3))
 
 # model fitted inside a function with local data: refit and formula predictors should work
