@@ -429,4 +429,10 @@ test_that("formula predictors: transformations, grouped residuals, model order (
   simulationOutput = simulateResiduals(fittedModel, n = 50)
   expect_equal(getPredictor(simulationOutput, ~y), simulationOutput$observedResponse, ignore_attr = TRUE)
   expect_no_error(plotResiduals(simulationOutput, form = ~.))
+  dotModel = phylolm::phyloglm(y ~ ., data = phyloData, phy = phyloTree, method = "logistic_MPLE")
+  expect_equal(coef(getRefit(dotModel, dotModel$y)), coef(dotModel))
+  # phyloglm: data changed after fitting are detected via the design matrix (#625)
+  expect_equal(coef(getRefit(fittedModel, fittedModel$y)), coef(fittedModel))
+  phyloData$x <<- phyloData$x * 2
+  expect_error(getRefit(fittedModel, fittedModel$y), "Values differ for: x")
 })

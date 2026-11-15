@@ -518,12 +518,10 @@ getRefitData <- function(object, newresp){
 
 # fixes #611 (data changed after fitting): stops if the data lack rows or contain other values than the model frame.
 # Each column is evaluated on the full data and then restricted to the rows used in the fit, as in model.frame()
-checkRefitData <- function(object, data, rows){
+checkRefitData <- function(object, data, rows, mf){
   msg = "DHARMa: the data found for the fitted model do not match the data used for fitting, probably because they were changed after fitting or the model was fitted inside a function. Refits and formula predictors need the original data: restore them or fit the model again."
   i = match(rows, rownames(data))
   if(anyNA(i)) stop(msg, " Rows used in the fit are missing.", call. = FALSE)
-  # phyloglm has no model frame (model.frame() would evaluate the formula in the environment)
-  mf = if(!inherits(object, "phyloglm")) tryCatch(model.frame(object), error = function(e) NULL)
   # expressions of the model-frame columns, named as in model.frame.default()
   vars = tryCatch(as.list(attr(terms(mf), "variables"))[-1], error = function(e) list())
   names(vars) = vapply(vars, function(e) paste(deparse(e, width.cutoff = 500L, backtick = !is.symbol(e) && is.language(e)), collapse = " "), "")

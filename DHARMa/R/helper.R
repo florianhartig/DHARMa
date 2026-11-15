@@ -284,15 +284,20 @@ getPredictor <- function(simulationOutput, predictor, name = "predictor"){
 #' @param vars the names of the variables needed.
 #' @keywords internal
 getModelData <- function(fittedModel, vars = NULL){
-  mf = if(!inherits(fittedModel, "phyloglm")) model.frame(fittedModel) # phyloglm has no model frame
-  rows = if(is.null(mf)) rownames(fittedModel$X) else rownames(mf)
+  mf = if(!inherits(fittedModel, "phyloglm")) model.frame(fittedModel) else {
+    # phyloglm has no model frame: response and columns of the design matrix, with the terms of the formula
+    X = fittedModel$X[, colnames(fittedModel$X) != "(Intercept)", drop = FALSE]
+    X = setNames(data.frame(fittedModel$y, X, row.names = rownames(X), check.names = FALSE), c(deparse(formula(fittedModel)[[2]]), colnames(X)))
+    structure(X, terms = terms(formula(fittedModel), data = X)) # data: expands '.' in the formula
+  }
+  rows = rownames(mf)
   # fixes #625 (data of the fit first, data from the environment second)
   if(length(vars) && all(vars %in% names(mf))) return(mf)
   data = if(!isS4(fittedModel) && is.data.frame(fittedModel$data) && all(vars %in% names(fittedModel$data))) fittedModel$data
   else tryCatch(getData(fittedModel), error = function(e) if(is.null(getCall(fittedModel)$data) && !inherits(fittedModel, "brmsfit")) NULL else stop(e))
   if(is.null(data)) return(mf) # fixes #622 (models without data: other variables are taken from the environment of the formula)
   data = as.data.frame(data)
-  checkRefitData(fittedModel, data, rows)
+  checkRefitData(fittedModel, data, rows, mf)
   data[rows, , drop = FALSE]
 }
 
