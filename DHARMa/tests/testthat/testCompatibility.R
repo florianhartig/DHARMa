@@ -95,6 +95,53 @@ test_that("gam simulations without mgcViz work (#567)", {
 })
 
 
+test_that("gam simulations: same format with and without mgcViz (#580)", {
+  set.seed(1)
+  n = 200
+  d = data.frame(x = runif(n), N = sample(20:98, n, TRUE))
+  d$k = rbinom(n, d$N, plogis(d$x))
+
+  # k/n binomial (cbind and weights), factor response: integers, refit format
+  models = list(cbind = mgcv::gam(cbind(k, N - k) ~ s(x), family = binomial, data = d),
+                weights = mgcv::gam(k / N ~ s(x), weights = N, family = binomial, data = d),
+                factor = mgcv::gam(factor(k > 30) ~ s(x), family = binomial, data = d))
+  paths = if(requireNamespace("mgcViz", quietly = TRUE)) c(TRUE, FALSE) else FALSE
+  for(i in names(models)) for(v in paths){
+    sim = getSimulations(models[[i]], nsim = 10, mgcViz = v)
+    expect_equal(dim(sim), c(n, 10), info = i)
+    expect_true(all(sim %% 1 == 0), info = i)
+    refitSim = getSimulations(models[[i]], nsim = 2, type = "refit", mgcViz = v)
+    expect_equal(NROW(refitSim[[1]]), n, info = i)
+    expect_equal(is.matrix(refitSim[[1]]), i == "cbind", info = i)
+  }
+  # one-column matrix response is not a cbind() response
+  m = mgcv::gam(scale(k) ~ s(x), data = d)
+  for(v in paths) expect_no_error(simulateResiduals(m, n = 3, refit = TRUE, mgcViz = v))
+
+  # families not simulated by stats
+  expect_error(getSimulations(mgcv::gam(k ~ s(x), family = mgcv::nb(), data = d), mgcViz = FALSE), "require the package mgcViz")
+})
+
+
+test_that("gam with several linear predictors, unsupported families (#600)", {
+  skip_if_not_installed("mgcViz")
+  set.seed(1)
+  n = 200
+  d = data.frame(x = runif(n), x2 = runif(n), a = runif(n, 1, 3))
+  d$y = rnorm(n, 1 + 2 * d$x, exp(-1 + d$x2))
+  # several linear predictors: fitted values are the first column (mean for gaulss)
+  m = mgcv::gam(list(y ~ s(x), ~ s(x2)), family = mgcv::gaulss(), data = d)
+  expect_equal(getFitted(m), predict(m, type = "response")[, 1], ignore_attr = TRUE)
+  res = simulateResiduals(m, n = 50)
+  expect_no_error(testDispersion(res, plot = FALSE))
+  expect_error(simulateResiduals(m, refit = TRUE, n = 2), "several linear predictors")
+  expect_error(simulateResiduals(mgcv::gam(list(y ~ s(x), ~ 1), offset = log(a), family = mgcv::gaulss(), data = d)), "offset")
+  expect_no_error(simulateResiduals(mgcv::gam(list(y ~ s(x) + offset(log(a)), ~ 1), family = mgcv::gaulss(), data = d), n = 10))
+  d$y2 = rnorm(n, d$x, 0.5)
+  expect_error(simulateResiduals(mgcv::gam(list(y ~ s(x), y2 ~ s(x)), family = mgcv::mvn(d = 2), data = d)), "not supported")
+})
+
+
 test_that("binomial models with cbind() response: prior weights stop (#568), integer simulations (#590)", {
   set.seed(2)
   # N of 20 to 30: (k/N)*N is not always an exact integer
