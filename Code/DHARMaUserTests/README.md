@@ -10,14 +10,14 @@ From the repository root, one script at a time:
 source("Code/DHARMaUserTests/01_standardWorkflows.R")
 ```
 
-The scripts load the package source with `devtools::load_all("DHARMa")`. Plots (PNG) and a log (`*_log.csv`) are written to a temporary folder, or to the folder in the environment variable `DHARMA_USERTEST_OUT`. Each script takes less than a minute. They need devtools, lme4, glmmTMB and mgcv; the last part of `04_advanced.R` also needs GLMMadaptive.
+The scripts load the package source with `devtools::load_all("DHARMa")`. Plots (PNG) and a log (`*_log.csv`) are written to a temporary folder, or to the folder in the environment variable `DHARMA_USERTEST_OUT`. Each script takes less than a minute. They need devtools, lme4, glmmTMB and mgcv; parts of `04_advanced.R` also use GLMMadaptive, lmerTest, gamm4 and spaMM (skipped if not installed).
 
 | Script | User | Content |
 |---|---|---|
-| `01_standardWorkflows.R` | first-time user following the vignette | lm, glm (Poisson, Bernoulli, k/n binomial), glmer, glmmTMB, gam with the standard tests and plots; deliberately misspecified models |
+| `01_standardWorkflows.R` | first-time user following the vignette | lm, glm (Poisson, Bernoulli, k/n binomial), glmer, glmmTMB, gam with the standard tests and plots; detection of integer responses; deliberately misspecified models |
 | `02_groupingAutocorrelation.R` | field ecologist | repeated measures per site and year, `recalculateResiduals()`, temporal and spatial autocorrelation |
-| `03_userMistakes.R` | careless user | wrong-length or NA predictors, missing arguments, model instead of DHARMa object, very small data |
-| `04_advanced.R` | advanced user | `refit = TRUE` (incl. calibration for k/n binomial models), offsets, `simulateREs`, `createDHARMa()`, models fitted inside a function, data order of GLMMadaptive |
+| `03_userMistakes.R` | careless user | wrong-length or NA predictors, arguments of the wrong type or with NA, missing arguments, model instead of DHARMa object, very small data |
+| `04_advanced.R` | advanced user | `refit = TRUE` (incl. calibration for k/n binomial models), offsets, `simulateREs`, `createDHARMa()`, models fitted inside a function, data changed after fitting, refits of lmerTest, gamm4 and spaMM models, further glmmTMB families, `runBenchmarks()`, data order of GLMMadaptive |
 
 ## What to check
 

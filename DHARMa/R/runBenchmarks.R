@@ -60,6 +60,9 @@ runBenchmarks <- function(calculateStatistics, controlValues = NULL, nRep = 10, 
 
   # Calculations of summaries
 
+  # fixes #628 (one statistic gives a vector instead of a matrix)
+  simulations = lapply(simulations, function(s) if(is.null(dim(s))) matrix(s, nrow = 1) else s)
+
   if(is.null(controlValues)) controlValues = c("N")
 
   nOutputs = nrow(simulations[[1]])
@@ -142,7 +145,7 @@ plot.DHARMaBenchmark <- function(x, ...){
               col = "#00000020", border = FALSE)
       lines(res$controlValues, res[,i+1], col = i, lty = i, lwd = 2)
     }
-    legend("bottomright", colnames(res[,-1]), col = 1:x$nSummaries, lty = 1:x$nSummaries, lwd = 2)
+    legend("bottomright", colnames(res[,-1, drop = FALSE]), col = 1:x$nSummaries, lty = 1:x$nSummaries, lwd = 2)
 
   }
 }

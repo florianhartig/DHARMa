@@ -133,4 +133,12 @@ test_that("runBenchmarks", {
   withNA = function() {i <<- i + 1; c(runif(1), if (i == 1) NA else runif(1))}
   expect_warning(runBenchmarks(withNA, nRep = 3), "NA values")
 
+  # one statistic (#628)
+  out = runBenchmarks(function() runif(1), nRep = 3)
+  expect_equal(dim(out$simulations), c(3, 3))
+  expect_no_error(plot(out))
+  out = runBenchmarks(function(control) runif(1), controlValues = c(0, 1), nRep = 3)
+  expect_equal(dim(out$simulations), c(6, 3))
+  expect_no_error(plot(out))
+
 })
