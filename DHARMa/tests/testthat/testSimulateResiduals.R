@@ -34,6 +34,7 @@ test_that("Conditional, unconditional and user-specified simulations work for lm
 
 
 test_that("Conditional, unconditional and user-specified simulations work for spaMM", {
+  skip_if_not_installed("spaMM")
 
   testData = createData(family = gaussian())
   fittedModel <- spaMM::HLfit(observedResponse ~ Environment1 + (1|group), data = testData)
@@ -50,6 +51,7 @@ test_that("Conditional, unconditional and user-specified simulations work for sp
 
 
 test_that("Conditional, unconditional and user-specified simulations work for glmmTMB", {
+  skip_if_not_installed("glmmTMB")
 
   testData = createData(family = gaussian())
   fittedModel <- glmmTMB::glmmTMB(observedResponse ~ Environment1 + (1|group), data = testData)
@@ -65,6 +67,7 @@ test_that("Conditional, unconditional and user-specified simulations work for gl
 
 
 test_that("Conditional, unconditional and user-specified simulations work for GLMMadaptive", {
+  skip_if_not_installed("GLMMadaptive")
 
   testData = createData(family = binomial())
   fittedModel <- GLMMadaptive::mixed_model(fixed = observedResponse ~ Environment1, random = ~1|group, data = testData, family = binomial)
@@ -110,6 +113,8 @@ test_that("refit = TRUE: k/n binomial residuals are on the scale of the number o
 
 
 test_that("integerResponse is detected from the simulations; beta-binomial names count as binomial (#620)", {
+  skip_if_not_installed("glmmTMB")
+  skip_if_not_installed("GLMMadaptive")
 
   testData = createData(sampleSize = 100, family = poisson())
   fittedModel = glmmTMB::glmmTMB(observedResponse ~ Environment1, family = glmmTMB::nbinom12, data = testData)

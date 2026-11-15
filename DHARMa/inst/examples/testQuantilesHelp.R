@@ -6,7 +6,7 @@ simulationOutput <- simulateResiduals(fittedModel = fittedModel)
 x = testQuantiles(simulationOutput)
 x # the test shows a combined p-value, corrected for multiple testing
 
-\dontrun{
+\donttest{
 # accessing results of the test
 x$pvals # pvalues for the individual quantiles
 x$qgamFits # access the fitted quantile regression

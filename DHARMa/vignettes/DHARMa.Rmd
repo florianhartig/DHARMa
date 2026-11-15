@@ -31,6 +31,7 @@ editor_options:
 ```{r global_options, include=FALSE}
 knitr::opts_chunk$set(fig.width=6.5, fig.height=4.5, fig.align='center',
                       warning=FALSE, message=FALSE, cache = TRUE)
+hasGlmmTMB = requireNamespace("glmmTMB", quietly = TRUE) # chunks that need glmmTMB (#594)
 ```
 
 ```{r, echo = FALSE, message = FALSE}
@@ -501,7 +502,7 @@ plotResiduals(simulationOutput, form= ~Environment1, absoluteDeviation = T)
 ```
 
 To remove this pattern, you would need to apply a transformation to the data or make the dispersion parameter dependent on a predictor, which can be done in `glmmTMB` with the `dispformula`:
-```{r}
+```{r, eval = hasGlmmTMB}
 library(glmmTMB)
 fittedModel2 <- glmmTMB(observedResponse ~ Environment1, 
                         dispformula = ~Environment1,
@@ -573,7 +574,7 @@ Note that all these tests are most sensitive against homogeneous residual struct
 
 However, standard DHARMa simulations from models with temporal / spatial / phylogenetic conditional autoregressive terms will still have the respective correlation in the `DHARMa` residuals, unless the package you are using is modelling the autoregressive terms as explicit REs and is able to simulate conditional on the fitted REs. It means that the residuals will still show significant autocorrelation, even if the model fully accounts for this structure, and other tests, such as dispersion, uniformity, may have inflated type I error. See the example below with a `glmmTMB` model with a spatial autocorrelation structure:
 
-```{r, fig.width=4, fig.height=4}
+```{r, fig.width=4, fig.height=4, eval = hasGlmmTMB}
 library(glmmTMB)
 testData$pos <- numFactor(testData$x, testData$y)
 fittedModel2 <- glmmTMB(observedResponse ~ Environment1 + exp(pos + 0|group), 
@@ -589,7 +590,7 @@ Note that while glmmTMB supports conditional simulations in general, this is not
 
 One of the options to solve it and get correct tests and no residual pattern (if the model is correct) is to rotate the residual space according to the covariance structure of the fitted model, such that the rotated residuals are conditionally independent. The argument rotation in `simulateResiduals` does it (see also `?getQuantile` for details about the rotation options):
 
-```{r, fig.width=4, fig.height=4}
+```{r, fig.width=4, fig.height=4, eval = hasGlmmTMB}
 # rotation of the residuals 
 simulationOutput3 <- simulateResiduals(fittedModel = fittedModel2, 
                                        simulateREs = "unconditional",
@@ -658,7 +659,7 @@ We see various signals of overdispersion:
 
 OK, so let's add overdispersion through an beta-binomial distribution from `glmmTMB` package.
 
-```{r}
+```{r, eval = hasGlmmTMB}
 library(glmmTMB)
 mod2 <- glmmTMB(cbind(N_parasitized, N_adult) ~ logDensity + (1|ID), data = data,
               family=betabinomial)
@@ -668,7 +669,7 @@ plot(simulationOutput)
 
 The overdispersion looks better, but you can see that the residuals still look a bit irregular (although tests are n.s.). The raw data looks a bit hump-shaped, so we might be tempted to add a quadratic effect.
 
-```{r}
+```{r, eval = hasGlmmTMB}
 mod3 <- glmmTMB(cbind(N_parasitized, N_adult) ~ logDensity + I(logDensity^2) +
                 (1|ID), data = data, family=betabinomial)
 simulationOutput <- simulateResiduals(fittedModel = mod3)
@@ -677,13 +678,13 @@ plot(simulationOutput)
 
 The residuals look perfect now! That being said, we don't have a lot of data, and we have to be sure we're not overfitting. A likelihood ratio test tells us that the quadratic effect is not significantly supported.
 
-```{r}
+```{r, eval = hasGlmmTMB}
 anova(mod2, mod3)
 ```
 
 Also AIC differences are small, although slightly in favor of model 3:
 
-```{r}
+```{r, eval = hasGlmmTMB}
 AIC(mod2) 
 AIC(mod3)
 ```
@@ -694,7 +695,7 @@ I guess you could use either Model 2 or 3 - the broader point is: increasing mod
 
 The next example uses the fairly well known Owl dataset which is provided in `glmmTMB` (see `?Owls` for more info about the data). The following shows a sequence of models, all checked with DHARMa. The example is discussed in a talk at ISEC 2018, see slides [here](https://www.slideshare.net/slideshow/mon-c5hartig2493/103596145).
 
-```{r, error=TRUE}
+```{r, error=TRUE, eval = hasGlmmTMB}
 m1 <- glm(SiblingNegotiation ~ FoodTreatment*SexParent + offset(log(BroodSize)),
           data = Owls, family = poisson)
 res <- simulateResiduals(m1)
@@ -703,7 +704,7 @@ plot(res)
 
 OK, this is highly overdispersed. Let's add a RE on nest:
 
-```{r, error=TRUE}
+```{r, error=TRUE, eval = hasGlmmTMB}
 m2 <- glmmTMB(SiblingNegotiation ~ FoodTreatment*SexParent + 
                 offset(log(BroodSize)) + (1|Nest), data=Owls , family = poisson)
 res <- simulateResiduals(m2)
@@ -712,7 +713,7 @@ plot(res)
 
 Somewhat better, but not good. Move to neg binom, to adjust dispersion, and checking dispersion and residuals against FoodTreatment predictor:
 
-```{r, error=TRUE}
+```{r, error=TRUE, eval = hasGlmmTMB}
 m3 <- glmmTMB(SiblingNegotiation ~ FoodTreatment*SexParent + 
                 offset(log(BroodSize)) + (1|Nest), data=Owls , family = nbinom1)
 
@@ -724,13 +725,13 @@ plotResiduals(res, form = ~ FoodTreatment)
 
 We see underdispersion now. In a model with variable dispersion, this is often the signal that some other distributional assumptions are violated. Let's check for zero-inflation:
 
-```{r, fig.height=4, fig.width=4}
+```{r, fig.height=4, fig.width=4, eval = hasGlmmTMB}
 testZeroInflation(res)
 ```
 
 It looks as if there is some zero-inflation, although non-significant. Fitting a zero-inflated model:
 
-```{r, error=TRUE}
+```{r, error=TRUE, eval = hasGlmmTMB}
 m4 <- glmmTMB(SiblingNegotiation ~ FoodTreatment*SexParent + 
                 offset(log(BroodSize)) + (1|Nest), 
               ziformula = ~ FoodTreatment + SexParent,  data=Owls, 
@@ -739,7 +740,7 @@ m4 <- glmmTMB(SiblingNegotiation ~ FoodTreatment*SexParent +
 res <- simulateResiduals(m4, plot = TRUE)
 ```
 
-```{r, error=TRUE, fig.width=7}
+```{r, error=TRUE, fig.width=7, eval = hasGlmmTMB}
 par(mfrow = c(1,3))
 plotResiduals(res, form = ~ FoodTreatment)
 testDispersion(res)
@@ -748,7 +749,7 @@ testZeroInflation(res)
 
 This looks a lot better. Trying a slightly different model specification, adding a dispersion model as well:
 
-```{r, error=TRUE}
+```{r, error=TRUE, eval = hasGlmmTMB}
 m5 <- glmmTMB(SiblingNegotiation ~ FoodTreatment*SexParent + 
                 offset(log(BroodSize)) + (1|Nest), 
               dispformula = ~ FoodTreatment + SexParent , 
@@ -758,7 +759,7 @@ m5 <- glmmTMB(SiblingNegotiation ~ FoodTreatment*SexParent +
 res <- simulateResiduals(m5, plot = TRUE)
 ```
 
-```{r, error=TRUE, fig.width=7}
+```{r, error=TRUE, fig.width=7, eval = hasGlmmTMB}
 par(mfrow = c(1,3))
 plotResiduals(res, form = ~ FoodTreatment)
 testDispersion(res)

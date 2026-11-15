@@ -129,23 +129,6 @@ getQuantile <- function(simulations, observed, integerResponse,
   return(scaledResiduals)
 }
 
-#
-#
-# testData = createData(sampleSize = 200, family = gaussian(),
-#                       randomEffectVariance = 0, numGroups = 5)
-# fittedModel <- glmmTMB(observedResponse ~ Environment1,
-#                    data = testData)
-# simulationOutput <- simulateResiduals(fittedModel = fittedModel)
-#
-# sims = simulationOutput$simulatedResponse
-# sims[1, c(1,6,8)] = 0
-# any(apply(sims, 1, anyDuplicated))
-# getQuantile(simulations = sims, observed = testData$observedResponse, n = 200, integerResponse = F, nSim = 250)
-#
-#
-#
-
-
 
 #' Check dot operator
 #'

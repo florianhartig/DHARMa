@@ -126,22 +126,7 @@ test_that("tests work", {
   expectTest(out$outliers)
   expect_message(testSimulatedResiduals(simulationOutput))
 
-  ###### zero-inflation ##########
-
-  # testing zero inflation
-  expectTest(testZeroInflation(simulationOutput, plot = FALSE))
-  expectTest(testZeroInflation(simulationOutput, plot = FALSE,
-                                    alternative = "less"))
-
-  # testing generic summaries
-
-  # testing for number of 1s
-  countOnes <- function(x) sum(x == 1)
-  expectTest(testGeneric(simulationOutput, summary = countOnes,
-                              plot = FALSE)) # 1-inflation
-  expectTest(testGeneric(simulationOutput, summary = countOnes,
-                              plot = FALSE,
-                              alternative = "less")) # 1-deficit
+  # no zero-inflation or countOnes tests here: the grouped sums contain no 0 or 1 (#613)
 
   # testing if mean prediction fits
   means <- function(x) mean(x)
@@ -241,6 +226,7 @@ test_that("correlation tests work", {
 
 ### Test phylogenetic autocorrelation
 test_that("test phylogenetic autocorrelation", {
+  skip_if_not_installed("phylolm")
 
   set.seed(123)
   tre <<- ape::rcoal(60)

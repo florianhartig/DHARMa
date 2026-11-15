@@ -38,7 +38,9 @@ NOTE: for more news about the package, see https://github.com/florianhartig/DHAR
 
 * `createDHARMa()` stores `method`, so `testOutliers(type = "bootstrap")` uses the same randomization method as the residuals; previously it always used PIT (#634).
 
-* `runBenchmarks()` no longer fails if `calculateStatistics` returns a single value (#628).
+* `runBenchmarks()` no longer fails if `calculateStatistics` returns a single value, and keeps its name (#628).
+
+* A value of `options(DHARMaSignalColor = ...)` set before loading DHARMa is no longer overwritten when the package is loaded (#613).
 
 ## Minor changes
 
@@ -52,9 +54,11 @@ NOTE: for more news about the package, see https://github.com/florianhartig/DHAR
 
 * `plotResiduals()` / `testCategorical()`: boxplots for categorical predictors show residuals as jittered points with outliers marked (unless `smoothScatter = TRUE`, default for > 10,000 observations; jitter set by the new argument `jitterPoints`, also for numeric predictors); further arguments such as `ylab` are passed to the boxplot (#562, #616).
 
-* `testCategorical()`: significant boxes and titles use `DHARMaSignalColor` instead of red (#616).
-
 * GEE models (class `gee`, e.g. `geepack::geeglm`) now give a warning that they are not supported (#339).
+
+* `testCategorical()`, `testOutliers()`, `testDispersion()` (with `refit = TRUE`), `testTemporalAutocorrelation()` and `testSpatialAutocorrelation()` mark significant results in their plots with `DHARMaSignalColor` instead of red (#613, #616).
+
+* `sfsmisc`, used by `createData()` for temporal and spatial autocorrelation, is now in Imports instead of Suggests (#594).
 
 
 # DHARMa 0.5.1
