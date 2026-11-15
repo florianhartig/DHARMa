@@ -252,7 +252,7 @@ getPredictor <- function(simulationOutput, predictor, name = "predictor"){
     data = tryCatch(getModelData(original$fittedModel, all.vars(expr)), error = function(e) stop("DHARMa: unable to get the data used to fit the model (", conditionMessage(e), ").", advice, call. = FALSE))
     env = environment(predictor)
     predictor = tryCatch(eval(expr, data, env), error = function(e) stop("DHARMa: unable to evaluate the formula predictor (", conditionMessage(e), ").", advice, call. = FALSE))
-    if(is.null(getCall(original$fittedModel)$data) && NROW(predictor) > original$nObs) stop("DHARMa: the model has no stored data, so ", name, " given as formula is taken from the environment of the formula, and rows removed in the fit (e.g. because of NAs) cannot be dropped. Fit the model with the data argument, or provide ", name, " as a vector without these rows.", call. = FALSE)
+    if(is.null(getCall(original$fittedModel)$data) && !inherits(original$fittedModel, "brmsfit") && NROW(predictor) > original$nObs) stop("DHARMa: the model has no stored data, so ", name, " given as formula is taken from the environment of the formula, and rows removed in the fit (e.g. because of NAs) cannot be dropped. Fit the model with the data argument, or provide ", name, " as a vector without these rows.", call. = FALSE)
     # matrix-valued terms: one column (e.g. scale(x)) as vector, several columns (e.g. poly(x, 2)) as the untransformed variable
     if(is.matrix(predictor)) predictor = if(ncol(predictor) == 1) as.vector(predictor) else eval(as.name(all.vars(expr)[1]), data, env)
   }

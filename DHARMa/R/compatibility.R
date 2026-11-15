@@ -266,7 +266,7 @@ getFamily <- function (object, ...) {
 #' @param object a fitted model.
 #' @param ... additional parameters to be passed on.
 #'
-#' @note  The data is retrieved from the environment where the model was fit, which is usually your current environment. If you delete the data from the environment or change it after fitting the model this function will probably not work or get the wrong dataset, respectively. For spaMM models, the data stored in the model object is returned (only the rows used in the fit, i.e. rows with NAs in model variables are removed).
+#' @note  The data is retrieved from the environment where the model was fit, which is usually your current environment. If you delete the data from the environment or change it after fitting the model this function will probably not work or get the wrong dataset, respectively. For models fitted without data argument, it stops with an error. For spaMM models, the data stored in the model object is returned (only the rows used in the fit, i.e. rows with NAs in model variables are removed).
 #'
 #' @seealso [getObservedResponse], [getSimulations], [getRefit], [getFixedEffects], [getFitted]
 #'
@@ -476,7 +476,7 @@ getData.default <- function (object,...){
     out = tryCatch(eval(getCall(object)$data, envir = e), error = function(e) NULL)
     if (!is.null(out) && !is.function(out)) return(out) # fixes #621 (e.g. utils::data for models fitted inside a function)
   }
-  stop("DHARMa::getData: cannot locate the original data of the fitted model, probably because you are fitting your model inside a function.")
+  stop("DHARMa::getData: cannot locate the original data of the fitted model, probably because you are fitting your model inside a function or without a data argument.")
 }
 
 #' @rdname getPredictorNames

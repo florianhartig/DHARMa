@@ -263,7 +263,8 @@ recalculateResiduals <- function(simulationOutput, group = NULL, aggregateBy = s
 
       # if sel is numeric (e.g. 1:20)
       if(is.numeric(sel)){
-        if(isTRUE(tryCatch(nrow(getData(simulationOutput$fittedModel)) != length(simulationOutput$scaledResiduals), error = function(e) FALSE))) warning("DHARMa: data used to fit the model and DHARMa residuals don't have the same length, probably due to NAs in your data. sel will select rows based on the residuals and their order.")
+        # models without data: rows removed because of NAs (#622)
+        if(isTRUE(tryCatch(nrow(getData(simulationOutput$fittedModel)) != length(simulationOutput$scaledResiduals), error = function(e) tryCatch(length(attr(model.frame(simulationOutput$fittedModel), "na.action")) > 0, error = function(e) FALSE)))) warning("DHARMa: data used to fit the model and DHARMa residuals don't have the same length, probably due to NAs in your data. sel will select rows based on the residuals and their order.")
       }
     }
 

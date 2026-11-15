@@ -312,6 +312,10 @@ test_that("formula predictors and refits use the data of the fit (#621, #622, #6
   expect_equal(recalculateResiduals(res, sel = ~x > threshold)$sel, x > 0)
   res = simulateResiduals(lme4::glmer(y ~ x + (1|g), family = poisson))
   expect_s3_class(recalculateResiduals(res, sel = 1:50), "DHARMa")
+  xNA = x
+  xNA[1] = NA
+  res = simulateResiduals(glm(y ~ xNA, family = poisson))
+  expect_warning(recalculateResiduals(res, sel = 1:50), "don't have the same length")
 })
 
 test_that("getData works for brms models with a data expression (#621)", {

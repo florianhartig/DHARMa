@@ -16,9 +16,9 @@ NOTE: for more news about the package, see https://github.com/florianhartig/DHAR
 
 * `plotResiduals(form = ~.)` no longer fails for models fitted with the `offset` argument (e.g. `glm(..., offset = log(area))`) (#624).
 
-* `getRefit()` / `simulateResiduals(refit = TRUE)` and predictors given as formula (e.g. `plotResiduals(form = ~x)`) use the data stored in the fitted model if possible (e.g. `glm`, `GLMMadaptive`, `spaMM`, `brms`; for formula predictors also the model frame), otherwise the data in the environment, and stop with an error if rows used in the fit were removed or variables of the model were changed after fitting (changed values are not detected for `phyloglm`); previously, refits (since 0.5.1) and formula predictors silently used the changed data (#611, #625, #631).
+* `getRefit()` / `simulateResiduals(refit = TRUE)` and predictors given as formula (e.g. `plotResiduals(form = ~x)`) use the data stored in the fitted model if possible (e.g. `glm`, `GLMMadaptive`, `spaMM`; for formula predictors also `brms` and the model frame), otherwise the data in the environment, and stop with an error if rows used in the fit were removed or variables of the model were changed after fitting (changed values are not detected for `phyloglm`); previously, refits (since 0.5.1) and formula predictors silently used the changed data (#611, #625, #631).
 
-* `getData()` stops with an error instead of returning a function such as `utils::data` for models fitted inside a function, and works for `brms` models with an expression as `data` (#621, #631).
+* `getData()` stops with an error instead of returning a function such as `utils::data` (models fitted inside a function) or `NULL` (`lme4` models fitted without `data`), and works for `brms` models with an expression as `data` (#621, #631).
 
 * `simulateResiduals(refit = TRUE)` no longer fails for `lmerTest` models and for `spaMM` models with a transformed response such as `log(y + 1)` (#626).
 
