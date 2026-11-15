@@ -411,7 +411,9 @@ test_that("formula predictors: transformations, grouped residuals, model order (
   expect_equal(recalculateResiduals(resNoData, sel = ~x > 0)$nObs, sum(x > 0))
   expect_equal(getPredictor(resNoData, ~x), x)
   xNA = x; xNA[1] = NA
-  expect_error(getPredictor(simulateResiduals(lme4::glmer(y ~ xNA + (1|g), family = poisson), n = 50), ~xNA), "no stored data")
+  resNA = simulateResiduals(lme4::glmer(y ~ xNA + (1|g), family = poisson), n = 50)
+  expect_equal(getPredictor(resNA, ~xNA), xNA[-1])
+  expect_error(getPredictor(resNA, ~x), "no stored data")
 
   # #609: formula predictors in the order of the residuals
   skip_if_not_installed("GLMMadaptive")
@@ -434,4 +436,10 @@ test_that("formula predictors: transformations, grouped residuals, model order (
   simulationOutput = simulateResiduals(fittedModel, n = 50)
   expect_equal(getPredictor(simulationOutput, ~y), simulationOutput$observedResponse, ignore_attr = TRUE)
   expect_no_error(plotResiduals(simulationOutput, form = ~.))
+  dotModel = phylolm::phyloglm(y ~ ., data = phyloData, phy = phyloTree, method = "logistic_MPLE")
+  expect_equal(coef(getRefit(dotModel, dotModel$y)), coef(dotModel))
+  # phyloglm: data changed after fitting are detected via the design matrix (#625)
+  expect_equal(coef(getRefit(fittedModel, fittedModel$y)), coef(fittedModel))
+  phyloData$x <<- phyloData$x * 2
+  expect_error(getRefit(fittedModel, fittedModel$y), "Values differ for: x")
 })

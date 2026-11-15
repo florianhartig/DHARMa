@@ -3,7 +3,6 @@
 \name{getData}
 \alias{getData}
 \alias{getData.default}
-\alias{getData.merMod}
 \alias{getData.HLfit}
 \alias{getData.brmsfit}
 \title{Get model data}
@@ -11,8 +10,6 @@
 getData(object, ...)
 
 \method{getData}{default}(object, ...)
-
-\method{getData}{merMod}(object, ...)
 
 \method{getData}{HLfit}(object, ...)
 
@@ -27,7 +24,7 @@ getData(object, ...)
 Wrapper to get the data that was used to fit a model.
 }
 \note{
-The data is retrieved from the environment where the model was fit, which is usually your current environment. If you delete the data from the environment or change it after fitting the model this function will probably not work or get the wrong dataset, respectively. For spaMM models, the data stored in the model object is returned (only the rows used in the fit, i.e. rows with NAs in model variables are removed).
+The data is retrieved from the environment where the model was fit, which is usually your current environment. If you delete the data from the environment or change it after fitting the model this function will probably not work or get the wrong dataset, respectively. For models fitted without data argument, it stops with an error. For spaMM models, the data stored in the model object is returned (only the rows used in the fit, i.e. rows with NAs in model variables are removed).
 }
 \seealso{
 \link{getObservedResponse}, \link{getSimulations}, \link{getRefit}, \link{getFixedEffects}, \link{getFitted}
