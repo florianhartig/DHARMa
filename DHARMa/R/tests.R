@@ -380,7 +380,7 @@ testCategorical <- function(simulationOutput, catPred,
   if(is.null(a$xlab)) a$xlab = paste(deparse(substitute(catPred)), "(catPred)")
   a$ylab = checkDots("ylab", "DHARMa residual", ...)
 
-  catPred = droplevels(as.factor(getPredictor(simulationOutput, catPred))) # unused levels have no residuals
+  catPred = droplevels(as.factor(getPredictor(simulationOutput, catPred, "catPred"))) # unused levels have no residuals
   res = simulationOutput$scaledResiduals
   out = list()
 
@@ -726,7 +726,7 @@ testTemporalAutocorrelation <- function(simulationOutput, time, alternative = c(
     message("DHARMa::testTemporalAutocorrelation - no time argument provided, using random times for each data point")
   }
 
-  time = getPredictor(simulationOutput, time)
+  time = getPredictor(simulationOutput, time, "time")
 
   # actually not sure if this is neccessary for dwtest, but seems better to aggregate
   if(any(duplicated(time))) stop("testing for temporal autocorrelation requires unique time values - if you have several observations per time value, either use the recalculateResiduals function to aggregate residuals per time step, or extract the residuals from the fitted object, and plot / test each of them independently for temporally repeated subgroups (typical choices would be location / subject etc.). Note that the latter must be done by hand, outside testTemporalAutocorrelation.")
@@ -814,8 +814,8 @@ testSpatialAutocorrelation <- function(simulationOutput, x = NULL, y  = NULL, di
 
   if( (is.null(x) | is.null(y)) & is.null(distMat) ) stop("You need to provide either x,y coordinates or a distMatrix.")
 
-  x = getPredictor(simulationOutput, x)
-  y = getPredictor(simulationOutput, y)
+  x = getPredictor(simulationOutput, x, "x")
+  y = getPredictor(simulationOutput, y, "y")
 
   # if not provided, create distance matrix based on x and y
   if(is.null(distMat)) distMat <- as.matrix(dist(cbind(x, y)))

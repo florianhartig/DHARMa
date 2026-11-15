@@ -367,6 +367,8 @@ test_that("formula predictors: transformations, grouped residuals, model order (
   expect_no_error(plotResiduals(simulationOutput, form = ~Environment1:f))
   expect_error(plotResiduals(simulationOutput, form = ~Environment1 * f | group), "Detected both")
   expect_error(testQuantiles(simulationOutput, predictor = ~Environment1 * f), "exactly one variable")
+  expect_error(plotResiduals(simulationOutput, form = ~doesNotExist), "DHARMa: unable to evaluate")
+  expect_error(recalculateResiduals(simulationOutput, group = 1:10), "residuals and group do not have the same length")
 
   # #359: formula predictors are aggregated per group, in the order of the grouped residuals
   resYear = recalculateResiduals(simulationOutput, group = ~year)
@@ -395,6 +397,14 @@ test_that("formula predictors: transformations, grouped residuals, model order (
   expect_equal(testQuantiles(resPerm, ~Environment1, plot = FALSE)$p.value,
                testQuantiles(resPerm, testData$Environment1[order(perm)], plot = FALSE)$p.value)
   expect_equal(getPredictor(resPerm, testData$Environment1[order(perm)]), testData$Environment1[order(perm)])
+  expect_message(recalculateResiduals(simulationOutput, group = perm, sel = 1:50), "each group has one observation")
+  # model without data argument: formula evaluated in its environment (#622)
+  y = testData$observedResponse; x = testData$Environment1; g = testData$group
+  resNoData = simulateResiduals(lme4::glmer(y ~ x + (1|g), family = poisson), n = 50)
+  expect_equal(recalculateResiduals(resNoData, sel = ~x > 0)$nObs, sum(x > 0))
+  expect_equal(getPredictor(resNoData, ~x), x)
+  xNA = x; xNA[1] = NA
+  expect_error(getPredictor(simulateResiduals(lme4::glmer(y ~ xNA + (1|g), family = poisson), n = 50), ~xNA), "no stored data")
 
   # #609: formula predictors in the order of the residuals
   skip_if_not_installed("GLMMadaptive")

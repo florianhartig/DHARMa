@@ -230,15 +230,16 @@ ensurePredictor <- function(simulationOutput,
 #'
 #' Evaluates a predictor for plotResiduals, recalculateResiduals, testCategorical, testQuantiles, testTemporalAutocorrelation and testSpatialAutocorrelation, and checks that it matches the residuals.
 #'
-#' A formula (e.g. ~x or ~log(x)) is evaluated in the data used to fit the model; other objects in the formula are taken from the environment of the formula. The data rows are taken in the order of the residuals, and rows that the model removed because of NAs are dropped.
+#' A formula (e.g. ~x or ~log(x)) is evaluated in the data used to fit the model; other objects in the formula are taken from the environment of the formula. The data rows are taken in the order of the residuals, and rows that the model removed because of NAs are dropped. If the model has no stored data (e.g. lme4 models fitted without data argument), all variables are taken from the environment of the formula, and an error is given if the model removed rows because of NAs.
 #'
 #' For residuals grouped by [recalculateResiduals], a formula or a vector with one value per observation is aggregated per group, in the order of the grouped residuals. Values that are constant within groups are kept; numeric values that vary within groups are averaged (with a message); other values that vary within groups cause an error. Observations without group (NA) are dropped. A vector with one value per group is used as given, in the order of groupLevels, also if there is only one observation per group.
 #'
 #' @param simulationOutput a DHARMa object.
 #' @param predictor a vector, or a one-sided formula with one variable or expression.
+#' @param name the name of the argument, used in error messages.
 #' @return the predictor as a vector with one value per residual, or NULL if predictor is NULL.
 #' @keywords internal
-getPredictor <- function(simulationOutput, predictor){
+getPredictor <- function(simulationOutput, predictor, name = "predictor"){
 
   if(is.null(predictor)) return(NULL)
   original = if(is.null(simulationOutput$original)) simulationOutput else simulationOutput$original
@@ -247,16 +248,21 @@ getPredictor <- function(simulationOutput, predictor){
   if(isFormula){
     expr = predictor[[2]]
     if(is.call(expr) && deparse(expr[[1]]) %in% c("+", "*", ":")) stop("DHARMa: a formula predictor must contain exactly one variable or expression, e.g. ~x, ~log(x) or ~I(a + b). To plot residuals against several predictors, use plotResiduals().")
-    advice = " Please provide the predictor as a vector in the order of the residuals, e.g. data$x instead of ~x."
+    advice = paste0(" Please provide ", name, " as a vector in the order of the residuals, e.g. data$x instead of ~x.")
     data = tryCatch({
-      data = as.data.frame(getData(original$fittedModel))
-      # fixes #609 (data rows in the order of the residuals, e.g. GLMMadaptive, phylolm)
-      rows = match(getModelRows(original$fittedModel), rownames(data))
-      if(!anyNA(rows)) data[rows, , drop = FALSE] else if(nrow(data) == original$nObs) data
+      data = getData(original$fittedModel)
+      # partly fixes #622 (models without data argument, e.g. lme4: variables from the environment of the formula)
+      if(is.null(data)) list() else {
+        data = as.data.frame(data)
+        # fixes #609 (data rows in the order of the residuals, e.g. GLMMadaptive, phylolm)
+        rows = match(getModelRows(original$fittedModel), rownames(data))
+        if(!anyNA(rows)) data[rows, , drop = FALSE] else if(nrow(data) == original$nObs) data
+      }
     }, error = function(e) stop("DHARMa: unable to get the data used to fit the model (", conditionMessage(e), ").", advice, call. = FALSE))
     if(is.null(data)) stop("DHARMa: unable to match the data used to fit the model to the residuals.", advice)
     env = environment(predictor)
-    predictor = eval(expr, data, env)
+    predictor = tryCatch(eval(expr, data, env), error = function(e) stop("DHARMa: unable to evaluate the formula predictor (", conditionMessage(e), ").", advice, call. = FALSE))
+    if(identical(data, list()) && NROW(predictor) > original$nObs) stop("DHARMa: the model has no stored data, so ", name, " given as formula is taken from the environment of the formula, and rows removed because of NAs cannot be dropped. Fit the model with the data argument, or provide ", name, " as a vector without these rows.", call. = FALSE)
     # matrix-valued terms: one column (e.g. scale(x)) as vector, several columns (e.g. poly(x, 2)) as the untransformed variable
     if(is.matrix(predictor)) predictor = if(ncol(predictor) == 1) as.vector(predictor) else eval(as.name(all.vars(expr)[1]), data, env)
   }
@@ -276,7 +282,7 @@ getPredictor <- function(simulationOutput, predictor){
     } else predictor = predictor[first]
   }
 
-  if(length(predictor) != nRes) stop("DHARMa: residuals and predictor do not have the same length. The issue is possibly that you have NAs in your predictor that were removed during the model fit. Remove the NA values from your predictor, or use formula syntax (e.g. ~x) to handle NAs automatically. After recalculateResiduals(), vectors need one value per observation or per group (in the order of simulationOutput$groupLevels).")
+  if(length(predictor) != nRes) stop("DHARMa: residuals and ", name, " do not have the same length. The issue is possibly that you have NAs in your ", name, " that were removed during the model fit. Remove the NA values from your ", name, ", or use formula syntax (e.g. ~x) to handle NAs automatically. After recalculateResiduals(), vectors need one value per observation or per group (in the order of simulationOutput$groupLevels).")
   return(predictor)
 }
 

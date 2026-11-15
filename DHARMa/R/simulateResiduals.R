@@ -254,7 +254,7 @@ recalculateResiduals <- function(simulationOutput, group = NULL, aggregateBy = s
   if(is.null(group) & is.null(sel)) {return(simulationOutput)}
   else {
     if(is.null(group)) {group = 1:simulationOutput$nObs}
-    else group = getPredictor(simulationOutput, group)
+    else group = getPredictor(simulationOutput, group, "group")
     out$group = group
     group = as.factor(group)
 
@@ -263,7 +263,7 @@ recalculateResiduals <- function(simulationOutput, group = NULL, aggregateBy = s
       sel = 1:simulationOutput$nObs
     } else {
       # formula (e.g. ~ Environment1 < 0.5) or logical (e.g. testData$group == 1)
-      if(inherits(sel, "formula") || is.logical(sel)) sel = getPredictor(simulationOutput, sel)
+      if(inherits(sel, "formula") || is.logical(sel)) sel = getPredictor(simulationOutput, sel, "sel")
 
       # if sel is numeric (e.g. 1:20)
       if(is.numeric(sel)){
@@ -312,8 +312,8 @@ recalculateResiduals <- function(simulationOutput, group = NULL, aggregateBy = s
     out$aggregateByGroup = aggregateByGroup
     out$groupLevels = levels(droplevels(group[sel])) # fixes #359 (group of each grouped residual)
     # one observation per group: vectors are taken in the order of groupLevels (#624)
-    if(length(out$scaledResiduals) == simulationOutput$nObs && is.unsorted(match(out$groupLevels, as.character(group))))
-      message("DHARMa: each group has one observation, and the grouped residuals are in the order of simulationOutput$groupLevels, not of the observations. Predictors given as vectors must be in this order; formulas are reordered automatically.")
+    if(length(out$scaledResiduals) == sum(!is.na(group[sel])) && is.unsorted(match(out$groupLevels, as.character(group[sel]))))
+      message("DHARMa: each group has one observation, and the grouped residuals are in the order of simulationOutput$groupLevels, not of the observations. Vectors with one value per grouped residual are used as given and must be in this order; formulas are reordered automatically.")
     out$nObs = out$nGroups = length(out$scaledResiduals) # fixes #603, #605 (nObs, nGroups after grouping and sel)
     out = c(out, simulationOutput)
     out$randomState = randomState

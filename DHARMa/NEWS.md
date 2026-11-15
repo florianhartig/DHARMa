@@ -12,6 +12,8 @@ NOTE: for more news about the package, see https://github.com/florianhartig/DHAR
 
 * Predictors given as formula are in the order of the residuals for `GLMMadaptive` and `phylolm` models, and work for `phyloglm` models, also with `plotResiduals(form = ~.)` (#609).
 
+* Formula arguments such as `plotResiduals(form = ~x)` or `recalculateResiduals(group = ~g)` work for `lme4` models fitted without `data` argument; variables are taken from the environment of the formula (#622).
+
 * `plotResiduals(form = ~.)` no longer fails for models fitted with the `offset` argument (e.g. `glm(..., offset = log(area))`) (#624).
 
 * `getRefit()` / `simulateResiduals(refit = TRUE)` now stop with an error if rows or values used in the fit were changed in the data after fitting; since 0.5.1, refits silently used the changed data (#611).
