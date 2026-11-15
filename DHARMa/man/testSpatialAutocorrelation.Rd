@@ -11,9 +11,9 @@ testSpatialAutocorrelation(simulationOutput, x = NULL, y = NULL,
 \arguments{
 \item{simulationOutput}{an object of class DHARMa, either created via \link{simulateResiduals} for supported models or via \link{createDHARMa} for simulations created outside DHARMa, or a supported model. Providing a supported model directly is discouraged, because simulation settings cannot be changed in this case.}
 
-\item{x}{the x coordinate, in the same order as the data points. Must be specified unless distMat is provided.}
+\item{x}{the x coordinate, one value per residual, in the order of the residuals (after recalculateResiduals, values per observation are aggregated per group; values per group must be in the order of groupLevels). Must be specified unless distMat is provided. If specified as formula, e.g. x = ~x, NAs are handled automatically (recommended).}
 
-\item{y}{the y coordinate, in the same order as the data points. Must be specified unless distMat is provided.}
+\item{y}{the y coordinate, one value per residual, in the order of the residuals (after recalculateResiduals, values per observation are aggregated per group; values per group must be in the order of groupLevels). Must be specified unless distMat is provided. If specified as formula, e.g. y = ~y, NAs are handled automatically (recommended).}
 
 \item{distMat}{optional distance matrix. Must be provided as class "matrix/array" (class "dist" is not supported). If distMat is not provided, euclidean distances based on x and y will be calculated. See details for explanation.}
 
@@ -29,7 +29,7 @@ The function performs Moran.I test from the package ape on the DHARMa residuals.
 
 If plot = T, a plot will be produced showing each residual at its x,y position, colored according to the residual value. Residuals with 0.5 are colored white, everything below 0.5 is colored increasingly red, everything above 0.5 is colored increasingly blue.
 
-Testing for spatial autocorrelation requires unique x,y values - if you have several observations per location, either use the \link{recalculateResiduals} function to aggregate residuals per location, or extract the residuals from the fitted object, and plot / test each of them independently for spatially repeated subgroups (a typical scenario would be repeated spatial observation, in which case one could plot / test each time step separately for temporal autocorrelation). Note that the latter must be done by hand, outside \link{testSpatialAutocorrelation}.
+Testing for spatial autocorrelation requires unique x,y values - if you have several observations per location, either use the \link{recalculateResiduals} function to aggregate residuals per location (x and y given as formula, e.g. x = ~x, or as vectors with one value per observation are then aggregated automatically), or extract the residuals from the fitted object, and plot / test each of them independently for spatially repeated subgroups (a typical scenario would be repeated spatial observation, in which case one could plot / test each time step separately for temporal autocorrelation). Note that the latter must be done by hand, outside \link{testSpatialAutocorrelation}.
 }
 \note{
 Standard DHARMa simulations from models with (temporal / spatial / phylogenetic) conditional autoregressive terms will still have the respective temporal / spatial / phylogenetic correlation in the DHARMa residuals, unless the package you are using is modelling the autoregressive terms as explicit REs and is able to simulate conditional on the fitted REs. This has two consequences:
@@ -78,14 +78,11 @@ testSpatialAutocorrelation(res, distMat = dM)
 testData$x = as.numeric(testData$group)
 testData$y = as.numeric(testData$group)
 
-# calculating x, y positions per group
-groupLocations = aggregate(testData[, 6:7], list(testData$group), mean)
-
 # calculating residuals per group
 res2 = recalculateResiduals(res, group = ~group)
 
-# running the spatial test on grouped residuals
-testSpatialAutocorrelation(res2, groupLocations$x, groupLocations$y)
+# running the spatial test on grouped residuals; x, y per observation are aggregated per group
+testSpatialAutocorrelation(res2, x = testData$x, y = testData$y)
 
 # careful when using REs to account for spatially clustered (but not grouped)
 # data. this originates from https://github.com/florianhartig/DHARMa/issues/81
@@ -118,9 +115,7 @@ testSpatialAutocorrelation(res, x = ~x, y = ~y)
 # Because at least how the data are simulated, cluster are spatially independent
 
 res2 = recalculateResiduals(res, group = ~group)
-testSpatialAutocorrelation(res2,
-                           x =  aggregate(testData$x, list(testData$group), mean)$x,
-                           y = aggregate(testData$y, list(testData$group), mean)$x)
+testSpatialAutocorrelation(res2, x = ~x, y = ~y) # x, y are averaged per group
 
 # For lme4 models, it's also possible to simulate residuals conditional on fitted
 # REs (DHARMa default). Conditional on the fitted REs (i.e. accounting for the clusters)

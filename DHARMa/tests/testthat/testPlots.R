@@ -85,6 +85,8 @@ test_that("different form arguments in plotResiduals work",
             expect_no_error(plotResiduals(simulationOutput, form = ~Environment1|group=="1"))
             expect_no_error(plotResiduals(simulationOutput, form = ~x))
             expect_no_error(plotResiduals(simulationOutput, form = ~.))
+            offsetModel = glm(observedResponse ~ Environment1, family = "poisson", data = testData, offset = log(abs(Environment1) + 1))
+            expect_no_error(plotResiduals(simulateResiduals(offsetModel), form = ~.)) # "(offset)" column
             expect_error(plotResiduals(simulationOutput, form = testData$Environment1))
 
             # one panel per group level (issue #573)

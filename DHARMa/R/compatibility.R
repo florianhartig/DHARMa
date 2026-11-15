@@ -1072,6 +1072,13 @@ getFitted.phyloglm  <- function (object,...){
 
 
 
+#' @rdname getPredictorNames
+#' @export
+getPredictorNames.phyloglm <- function (object,...){
+  all.vars(delete.response(terms(formula(object), data = getData(object)))) # data needed to expand y ~ .
+}
+
+
 #' @rdname getFamily
 #' @export
 getFamily.phyloglm <- function (object,...){

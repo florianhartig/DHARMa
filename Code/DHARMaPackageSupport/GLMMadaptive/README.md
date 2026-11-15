@@ -26,8 +26,8 @@ Checked on 2026-11-09 with DHARMa 0.5.2 (master), GLMMadaptive 0.9-7 and R 4.6.2
 
 ## Known problems
 
-- Residuals are in the order of the data sorted by the grouping factor (#609). Sort the data by the grouping factor before fitting if you pass predictors to `plotResiduals()`, `testCategorical()`, `testQuantiles()` or a group to `recalculateResiduals()` (as in the vignette).
-- `cbind()` response: refit simulations contain only the successes, so refits fail ("y values must be 0 <= y <= 1"; #565, #609).
+- Residuals are in the order of the data sorted by the grouping factor (#609). Predictors given as formula are taken in this order automatically (since 0.5.2; package test testTests.R); sort the data by the grouping factor before fitting if you pass predictors as vectors.
+- `cbind()` response: refit simulations contain only the successes, so refits fail ("y values must be 0 <= y <= 1"; #565).
 - The vignette table of `simulateREs = "user-specified"` syntax gives `type = "subject_specific"` for GLMMadaptive; this argument cannot be passed through `simulateResiduals()` ("formal argument "type" matched by multiple actual arguments"; no issue yet). `new_RE = TRUE` alone works; `"subject_specific"` is already the default of `simulate.MixMod()`.
 - Beta-binomial with more than one trial: `GLMMadaptive::beta.binomial()$simulate` draws 0/1 values instead of counts (a GLMMadaptive problem), so the residuals are wrong (#565). In addition, DHARMa does not recognise the family name "beta binomial" and warns "nKcase - wrong family" (#620).
 

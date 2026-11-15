@@ -169,7 +169,7 @@ plotQQunif <- function(simulationOutput, testUniformity = TRUE, testOutliers = T
 #'
 #' The quantile regression can take some time to calculate, especially for larger datasets. For this reason, quantreg = F can be set to generate a smooth spline instead. This is the default for n > 10000.
 #'
-#' If form is specified as a formula, e.g. \code{form = ~ your_predictor}, NAs will be handled automatically (recommended). If \code{form = ~.}, separate plots for all predictors in the model are produced. If \code{form = ~ predictor1 + predictor2}, a separate plot for each specified predictor is produced. If an additional grouping variable is specified, e.g. \code{form = ~ predictor|group}, a separate plot for the predictor within each grouping level is produced. Be careful with this command: if you have many levels, the plot may not display nicely. If you are interested in a specific group, you can use \code{form = ~ predictor|group == "group_level"}, and for several groups \code{form = ~ predictor|group \%in\% c("level1", "level2")}, which produces a separate plot for each of these levels. If form is **not** a formula, e.g. \code{form = data$predictor}, NAs are **not** handled automatically. For phyr and gamm4$mer models, you need to specify form in this way.
+#' If form is specified as a formula, e.g. \code{form = ~ your_predictor}, NAs will be handled automatically (recommended). Transformations in the formula, e.g. \code{form = ~ log(your_predictor)}, are applied; terms with several columns, e.g. \code{poly(x, 2)}, are plotted against the untransformed variable. If \code{form = ~.}, separate plots for all predictors in the model are produced, using the untransformed variables. If \code{form = ~ predictor1 + predictor2}, a separate plot for each specified predictor is produced (e.g. two plots for \code{~ x + I(x^2)}; one plot per variable for interactions such as \code{x*f} or \code{x:f}). If an additional grouping variable is specified, e.g. \code{form = ~ predictor|group}, a separate plot for the predictor within each grouping level is produced. Be careful with this command: if you have many levels, the plot may not display nicely. If you are interested in a specific group, you can use \code{form = ~ predictor|group == "group_level"}, and for several groups \code{form = ~ predictor|group \%in\% c("level1", "level2")}, which produces a separate plot for each of these levels. If form is **not** a formula, e.g. \code{form = data$predictor}, NAs are **not** handled automatically. For phyr and gamm4$mer models, you need to specify form in this way.
 #'
 #' If the predictor is a factor, a boxplot will be plotted instead of a scatter plot. Individual residuals are added as jittered points (unless smoothScatter = TRUE). The distribution for each factor level should be uniformly distributed, so the box should go from 0.25 to 0.75, with the median line at 0.5 (within-group). To test if deviations from those expectations are significant, KS-tests per group and a Levene test for homogeneity of variances are performed. See [testCategorical] for details.
 #'
@@ -193,9 +193,13 @@ plotResiduals <- function(simulationOutput, form = NULL, quantreg = NULL,
   a <- list(...)
   yAxis = ifelse(absoluteDeviation == TRUE, "Residual spread [2*abs(res - 0.5)]", "DHARMa residual")
   a$ylab = checkDots("ylab", yAxis , ...)
-  # all.vars only for formulas, as it returns character(0) for vectors
+  # for formulas, the predictor expression (without the group after |)
+  if(inherits(form, "formula")) {
+    predExpr = form[[2]]
+    if(is.call(predExpr) && identical(predExpr[[1]], as.name("|"))) predExpr = predExpr[[2]]
+  }
   a$xlab = checkDots("xlab", if(is.null(form)) "Model predictions"
-                     else if(inherits(form, "formula")) paste(unique(all.vars(form)), collapse = ", ")
+                     else if(inherits(form, "formula")) paste(deparse(predExpr), collapse = "")
                      else gsub(".*[$]|^~","", paste(deparse(substitute(form)), collapse = "")), ...)
   a$main = checkDots("main", NULL, ...)
 
@@ -224,8 +228,8 @@ plotResiduals <- function(simulationOutput, form = NULL, quantreg = NULL,
       if(form == "~.") {
         predictorNames = getPredictorNames(simulationOutput$fittedModel)
 
-        # issue #536: remove "(weights)" from predictorNames
-        if("(weights)" %in% predictorNames) {predictorNames = predictorNames[!predictorNames %in% "(weights)"]}
+        # drop model.frame() helper columns, e.g. "(weights)" (#536), "(offset)"
+        predictorNames = predictorNames[!grepl("^[(].*[)]$", predictorNames)]
         return(plotResidualsPanels(
           simulationOutput = simulationOutput,
           predictorNames = predictorNames,
@@ -241,49 +245,37 @@ plotResiduals <- function(simulationOutput, form = NULL, quantreg = NULL,
           ...
         ))}
 
-      # if there is more than 1 predictor, check if form is specified either
-      # with "|" (plot residuals within a certain group)
-      # or "+" (plot residuals for multiple predictors in separate panels via plotResidualsPanels)
+      # form is specified either with "+" (plot residuals for multiple predictors in separate panels via plotResidualsPanels)
+      # or with "|" (plot residuals within a certain group)
+      if(!identical(predExpr, form[[2]]) && is.call(predExpr) && deparse(predExpr[[1]]) %in% c("+", "*", ":")) stop("DHARMa: Detected both + and | as operators. Please choose one or the other. See ?plotResiduals.")
 
-      predictors = getFormulaPredictors(simulationOutput = simulationOutput, formula = form)
-
-      if(length(predictors) > 1) {
-        operators = all.names(form[[2]])
-
-        if("|" %in% operators && "+" %in% operators) stop("DHARMa: Detected both + and | as operators. Please choose one or the other. See ?plotResiduals.")
-
-        # for formulas with +, create a separate residual plot for each predictor
-        if("+" %in% operators) {
-          predictorNames = names(predictors)
-
-          return(plotResidualsPanels(
-            simulationOutput = simulationOutput,
-            predictorNames = predictorNames,
-            predictorType = "predictor",
-            form = form,
-            quantreg = quantreg,
-            rank = rank,
-            asFactor = asFactor,
-            smoothScatter = smoothScatter,
-            jitterPoints = jitterPoints,
-            quantiles = quantiles,
-            absoluteDeviation = absoluteDeviation,
-            ...
-          ))
-
-        }
-
-        # for formulas with |, get predictor and group variables
-        predictor = if (length(predictors) >= 1) predictors[[1]] else NULL
-        group = if (length(predictors) >= 2) predictors[[2]] else NULL
-
-        # if form has just one predictor, make the standard plot for that predictor
-      } else {
-        predictor = if (length(predictors) >= 1) predictors[[1]] else NULL
-        group = NULL
+      # for formulas with +, create a separate residual plot for each predictor (with transformations, #607)
+      if(is.call(form[[2]]) && deparse(form[[2]][[1]]) %in% c("+", "*", ":")) {
+        return(plotResidualsPanels(
+          simulationOutput = simulationOutput,
+          predictorNames = rownames(attr(terms(form), "factors")), # variables of all terms, e.g. x and f for ~x + x:f
+          predictorType = "predictor",
+          form = form,
+          quantreg = quantreg,
+          rank = rank,
+          asFactor = asFactor,
+          smoothScatter = smoothScatter,
+          jitterPoints = jitterPoints,
+          quantiles = quantiles,
+          absoluteDeviation = absoluteDeviation,
+          ...
+        ))
       }
 
-      if(is.null(predictor)) stop("DHARMA: unable to extract specified predictor variable from the data frame that was used to fit the model. Further note: if you are using a gamm4 model, please use form = your_data$your_predictor instead of form = ~ your_predictor.")
+      # predictor and (for formulas with |) group as one-sided formulas, evaluated by ensurePredictor()
+      predictor = form
+      predictor[[2]] = predExpr
+      group = NULL
+      if(!identical(predExpr, form[[2]])) {
+        group = form
+        group[[2]] = form[[2]][[3]]
+        if(is.call(group[[2]]) && deparse(group[[2]][[1]]) %in% c("==", "%in%")) group[[2]] = group[[2]][[2]]
+      }
     }
   } else {
     predictor = NULL
@@ -519,8 +511,9 @@ plotResidualsPanels <- function(simulationOutput, predictorNames, predictorType 
   # remove duplicate predictors, e.g. due to quadratic effects (fixes issue #536)
   # only for predictors, group levels are not variable names (issue #573)
   if(predictorType == "predictor"){
-    Vars = unname(sapply(predictorNames, function(x) all.vars(formula(paste("~", x)))[1]))
-    predictorNames = predictorNames[!duplicated(Vars)]
+    # ~. plots the untransformed variables, e.g. x for poly(x, 2) (#536); ~a + log(b) keeps transformations (#607)
+    if(isTRUE(form == "~.")) predictorNames = unname(sapply(predictorNames, function(x) all.vars(formula(paste("~", x)))[1]))
+    predictorNames = unique(predictorNames)
   }
 
   # get number of panels needed (copied from BayesianTools)
@@ -542,18 +535,15 @@ plotResidualsPanels <- function(simulationOutput, predictorNames, predictorType 
   if(predictorType == "predictor"){
     # create residual plot for multiple predictors (additional arguments in ... are ignored here)
     for(i in 1:length(predictorNames)){
-      form = eval(formula(paste("~", predictorNames[i])))
       plotResiduals(simulationOutput,
-                    form = form,
+                    form = formula(paste("~", predictorNames[i]), env = environment(form)),
                     quantreg = quantreg,
                     rank = rank,
                     asFactor = asFactor,
                     smoothScatter = smoothScatter,
                     jitterPoints = jitterPoints,
                     quantiles = quantiles,
-                    absoluteDeviation = absoluteDeviation,
-                    # create the correct xlab for poly()-syntax (related to issue #536)
-                    xlab = paste(unique(all.vars(form)), collapse = ", "))
+                    absoluteDeviation = absoluteDeviation)
     }
   }
 
@@ -563,7 +553,7 @@ plotResidualsPanels <- function(simulationOutput, predictorNames, predictorType 
       newForm = paste("~", form, "==", deparse(predictorNames[i]))[[2]]
 
       plotResiduals(simulationOutput,
-                    form = formula(newForm),
+                    form = formula(newForm, env = environment(form)),
                     quantreg = quantreg,
                     rank = rank,
                     asFactor = asFactor,

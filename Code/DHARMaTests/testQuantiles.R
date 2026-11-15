@@ -21,5 +21,5 @@ test_that("testQuantiles with categorical, ordered and formula predictors (#576)
   k = 3
   expect_equal(testQuantiles(simulationOutput, predictor = ~log(Environment1 + k), rank = FALSE, plot = FALSE)$p.value,
                testQuantiles(simulationOutput, predictor = log(testData$Environment1 + 3), rank = FALSE, plot = FALSE)$p.value)
-  expect_error(testQuantiles(simulationOutput, predictor = ~unknownVariable), "exactly one variable")
+  expect_error(testQuantiles(simulationOutput, predictor = ~unknownVariable), "not found")
 })
