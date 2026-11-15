@@ -100,11 +100,12 @@ createDHARMa <- function(simulatedResponse , observedResponse , fittedPredictedR
 
   randomState <-getRandomState(seed)
   on.exit({randomState$restoreCurrent()})
-  match.arg(method)
+  method = match.arg(method)
 
   out = list()
   out$simulatedResponse = simulatedResponse
   out$refit = F
+  out$method = method
   out$integerResponse = integerResponse
   out$observedResponse = observedResponse
 

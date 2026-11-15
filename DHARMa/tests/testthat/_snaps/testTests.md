@@ -171,7 +171,7 @@
       data:  simulationOutput
       observed = -0.0166319, expected = -0.0050251, sd = 0.0112750, p-value =
       0.3033
-      alternative hypothesis: Distance-based autocorrelation
+      alternative hypothesis: two.sided
       
 
 ---
@@ -218,7 +218,7 @@
       data:  res2
       observed = 0.047474, expected = -0.016949, sd = 0.088260, p-value =
       0.4654
-      alternative hypothesis: Phylogenetic autocorrelation
+      alternative hypothesis: two.sided
       
 
 # testOutliers

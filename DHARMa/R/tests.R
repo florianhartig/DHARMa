@@ -833,7 +833,7 @@ testSpatialAutocorrelation <- function(simulationOutput, x = NULL, y  = NULL, di
   out = list()
   out$statistic = c(observed = MI$observed, expected = MI$expected, sd = MI$sd)
   out$method = "DHARMa Moran's I test for distance-based autocorrelation"
-  out$alternative = "Distance-based autocorrelation"
+  out$alternative = alternative
   out$p.value = MI$p.value
   out$data.name = data.name
 
@@ -925,7 +925,7 @@ testPhylogeneticAutocorrelation <- function(simulationOutput,
   out = list()
   out$statistic = c(observed = MI$observed, expected = MI$expected, sd = MI$sd)
   out$method = "DHARMa Moran's I test for phylogenetic autocorrelation"
-  out$alternative = "Phylogenetic autocorrelation"
+  out$alternative = alternative
   out$p.value = MI$p.value
   out$data.name = data.name
 

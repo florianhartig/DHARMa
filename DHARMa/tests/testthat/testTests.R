@@ -185,6 +185,10 @@ test_that("correlation tests work", {
   expectTest(testSpatialAutocorrelation(simulationOutput, x =  testData$x,
                                              y = testData$y, plot = FALSE,
                              alternative = "two.sided"))
+  # chosen alternative is returned (#633)
+  expect_equal(testSpatialAutocorrelation(simulationOutput, x = testData$x, y = testData$y,
+                                          plot = FALSE, alternative = "greater")$alternative,
+               "greater")
 
   # If x and y is not provided, random values will be created
   expect_error(testSpatialAutocorrelation(simulationOutput))
@@ -253,6 +257,9 @@ test_that("test phylogenetic autocorrelation", {
   restest <- testPhylogeneticAutocorrelation(res, tree = tre)
 
   expect_true(restest$p.value <= 0.05)
+  # chosen alternative is returned (#633)
+  expect_equal(testPhylogeneticAutocorrelation(res, tree = tre, alternative = "less")$alternative,
+               "less")
 
   fit2 = phylolm::phylolm(trait ~ pred, data = dat, phy = tre, model = "BM")
   res2 = simulateResiduals(fit2, plot = F, rotation = "estimated")
