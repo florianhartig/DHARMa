@@ -24,7 +24,7 @@ All statements are backed by sections of [checks.R](checks.R) (run from the repo
 | Order of residuals | data order | checks.R, *Order of residuals* |
 | Predictors in `plotResiduals(form = )` | from the data object named in the call; fails for some calls (see Known problems) | checks.R, *Predictors for plotResiduals(form = )*; testGetPredictorNames.R |
 | Pearson residuals, `testDispersion(type = "PearsonChisq")` | not supported, DHARMa stops with a message; the default dispersion test works | checks.R, *Pearson residuals and dispersion tests* |
-| Number of simulations `n` | at most the number of posterior draws (see Known problems) | checks.R, *Number of simulations and posterior draws* |
+| Number of simulations `n` | larger than the number of posterior draws: draws are reused, with a message (#591) | checks.R, *Number of simulations and posterior draws* |
 | Ordinal (`cumulative`), `categorical`, multivariate models | not supported; DHARMa stops, but with unclear messages (see Known problems) | checks.R, *Unsupported models* |
 | Own simulations via `posterior_predict()` + `createDHARMa()` | works | checks.R, *Posterior predictive simulations with createDHARMa()* |
 
@@ -42,7 +42,6 @@ Poisson GLMM with 10 groups, 40 data sets per row, `n = 250` simulations; share 
 
 ## Known problems
 
-- `n` larger than the number of posterior draws stops with the brms error "Argument 'ndraws' should be between 1 and the maximum number of draws", also with the default `n = 250` for models with fewer draws (#591). Workaround: `n <= ndraws(model)`.
 - Prior weights: `posterior_predict()` ignores `weights()`, so DHARMa simulates weighted models with the same variance for all weights, and does not warn (#7).
 - Ordinal, categorical and multivariate models stop with "argument is not a matrix" or "argument is of length zero" instead of a message that the model type is not supported; ordinal models are not mentioned as unsupported in the documentation (#612).
 - Unconditional simulations: for n = 400, the uniformity test gave p < 0.05 for 25% of the correct models (glmmTMB: 8%); see the calibration table.

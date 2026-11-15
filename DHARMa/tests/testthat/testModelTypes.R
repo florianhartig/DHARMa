@@ -604,6 +604,10 @@ test_that("brms works",
             corr = cor(t(getSimulations(fittedModel, nsim = 50, simulateREs = "unconditional")))
             sameGroup = outer(testData$lmm$group, testData$lmm$group, "==")
             expect_gt(mean(corr[sameGroup & upper.tri(corr)], na.rm = TRUE), mean(corr[!sameGroup], na.rm = TRUE) + 0.1)
+            # n larger than the number of posterior draws (#591)
+            fewDraws = update(fittedModel, chains = 1, iter = 200, refresh = 0)
+            expect_message(res <- simulateResiduals(fewDraws), "draws are reused")
+            expect_equal(dim(res$simulatedResponse), c(nrow(testData$lmm), 250))
 
             fittedModel <-  brms::brm(observedResponse|trials(1) ~ Environment1 +
                                         (1|group), family = "binomial",

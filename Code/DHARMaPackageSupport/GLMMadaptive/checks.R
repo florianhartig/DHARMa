@@ -31,14 +31,14 @@ mCbind = mixed_model(cbind(observedResponse1, observedResponse0) ~ Environment1,
 interface = checkInterface(mCbind, nRefit = 5)
 stopifnot(interface[names(interface) != "simulateResidualsRefit"] == "ok",
           is_outcome(interface["simulateResidualsRefit"], "error", "0 <= y <= 1"))
-# beta-binomial: getObservedResponse() does not recognise the family name
-# "beta binomial" (#565)
+# beta-binomial: no DHARMa warning since #620, but the simulations of
+# GLMMadaptive are wrong (#565)
 set.seed(1)
 datBB = createData(sampleSize = 200, randomEffectVariance = 0.5, overdispersion = 0.5, family = binomial(), binomialTrials = 10)
 mBB = mixed_model(cbind(observedResponse1, observedResponse0) ~ Environment1, random = ~ 1 | group, family = beta.binomial(), data = datBB)
 o = outcome(simulateResiduals(mBB))
 print(o)
-stopifnot(is_outcome(o, "warning", "nKcase - wrong family"))
+stopifnot(o == "ok")
 
 # Gaussian ----
 
