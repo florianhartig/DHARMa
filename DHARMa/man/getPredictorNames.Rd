@@ -4,6 +4,7 @@
 \alias{getPredictorNames}
 \alias{getPredictorNames.default}
 \alias{getPredictorNames.MixMod}
+\alias{getPredictorNames.phyloglm}
 \alias{getPredictorNames.brmsfit}
 \title{Get predictor names}
 \usage{
@@ -12,6 +13,8 @@ getPredictorNames(object, ...)
 \method{getPredictorNames}{default}(object, ...)
 
 \method{getPredictorNames}{MixMod}(object, ...)
+
+\method{getPredictorNames}{phyloglm}(object, ...)
 
 \method{getPredictorNames}{brmsfit}(object, ...)
 }

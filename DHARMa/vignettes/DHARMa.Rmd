@@ -301,7 +301,7 @@ In many situations, it can be useful to look at residuals per group, e.g. to see
 simulationOutput = recalculateResiduals(simulationOutput, group = ~group)
 ```
 
-Note, however, that you will have to change the selection of variables that you provide to plots and tests (e.g. in `plotResiduals` or `testSpatialAutocorrelation`) accordingly when you group or subset residuals.
+Predictors given as formula (e.g. `form = ~x` in `plotResiduals()` or `x = ~x, y = ~y` in `testSpatialAutocorrelation()`) or as vectors with one value per observation are grouped and subset in the same way automatically; numeric predictors that vary within groups are averaged. Vectors with one value per grouped residual (also if there is only one observation per group) must be in the order of `simulationOutput$groupLevels`.
 
 ### Reproducibility notes, random seed and random state
 
@@ -963,11 +963,13 @@ Possible to condition on specific REs via re.form, see help of simulate.HLfit an
 
 GLMMadaptive is supported by DHARMa since 0.3.4.
 
-Note that `mixed_model()` sorts the data by the grouping factor, and DHARMa residuals of GLMMadaptive models are returned in this sorted order. If you supply predictors to `plotResiduals()`, `testCategorical()`, `testQuantiles()` or a `group` to `recalculateResiduals()`, sort your data by the grouping factor before fitting the model; otherwise, residuals and predictors are silently misaligned.
+Note that `mixed_model()` sorts the data by the grouping factor, and DHARMa residuals of GLMMadaptive models are returned in this sorted order. Predictors given as formula (e.g. `form = ~x` in `plotResiduals()` or `group = ~g` in `recalculateResiduals()`) are taken in this order automatically (since DHARMa 0.5.2). If you supply predictors as vectors (e.g. `data$x`), sort your data by the grouping factor before fitting the model; otherwise, residuals and predictors are silently misaligned.
 
 ## phylolm
 
 phylolm (version \>= 2.6.5) is supported by DHARMa since 0.4.7 for both model classes phylolm and phyloglm.
+
+Note that phylolm orders the observations by the tip labels of the tree, and DHARMa residuals are returned in this order. As for GLMMadaptive, predictors given as formula are taken in this order automatically (since DHARMa 0.5.2); predictors given as vectors must be in the order of the tip labels.
 
 ## phyr
 

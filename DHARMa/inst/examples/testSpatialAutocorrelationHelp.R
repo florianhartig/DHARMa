@@ -30,14 +30,11 @@ testSpatialAutocorrelation(res, distMat = dM)
 testData$x = as.numeric(testData$group)
 testData$y = as.numeric(testData$group)
 
-# calculating x, y positions per group
-groupLocations = aggregate(testData[, 6:7], list(testData$group), mean)
-
 # calculating residuals per group
 res2 = recalculateResiduals(res, group = ~group)
 
-# running the spatial test on grouped residuals
-testSpatialAutocorrelation(res2, groupLocations$x, groupLocations$y)
+# running the spatial test on grouped residuals; x, y per observation are aggregated per group
+testSpatialAutocorrelation(res2, x = testData$x, y = testData$y)
 
 # careful when using REs to account for spatially clustered (but not grouped)
 # data. this originates from https://github.com/florianhartig/DHARMa/issues/81
@@ -70,9 +67,7 @@ testSpatialAutocorrelation(res, x = ~x, y = ~y)
 # Because at least how the data are simulated, cluster are spatially independent
 
 res2 = recalculateResiduals(res, group = ~group)
-testSpatialAutocorrelation(res2,
-                           x =  aggregate(testData$x, list(testData$group), mean)$x,
-                           y = aggregate(testData$y, list(testData$group), mean)$x)
+testSpatialAutocorrelation(res2, x = ~x, y = ~y) # x, y are averaged per group
 
 # For lme4 models, it's also possible to simulate residuals conditional on fitted
 # REs (DHARMa default). Conditional on the fitted REs (i.e. accounting for the clusters)
