@@ -44,6 +44,8 @@ checkModel <- function(fittedModel, stop = F){
 
   if(class(fittedModel)[1] == "brmsfit") warning("DHARMa: only simple brms models are supported as of DHARMa version 0.5.0. This includes all models you could also fit with glmmTMB. Multivariate models (multi-response, structural equation models, multinomial) are not supported. DHARMa doesn't check if your model can reliably be checked or not. ")
 
+  if(inherits(fittedModel, "gam") && inherits(fittedModel$family, "family") && fittedModel$family$family %in% c("Multivariate normal", "multinom", "Cox PH")) stop("DHARMa: gam models with the families mvn(), multinom() and cox.ph() are not supported.")
+
   # see #339 (GEE objects inherit glm methods, but simulations ignore the GEE structure)
   if(inherits(fittedModel, "gee")) warning("DHARMa: GEE models are not supported. Simulations (if they run at all) are drawn from the marginal GLM and ignore the working correlation and the scale parameter. Plots of residuals against fitted values and predictors can show problems in the mean structure, but the tests assume independent data with the GLM dispersion and will therefore flag overdispersion and within-cluster correlation that the GEE accounts for. See https://github.com/florianhartig/DHARMa/issues/339")
 
@@ -163,6 +165,8 @@ getRefit <- function (object, newresp, ...) {
 #' Wrapper to get the fitted/predicted response of the model at the response scale.
 #'
 #' The purpose of this wrapper is to extract the fitted values, which is implemented via predict(model, type = "response") for most model classes.
+#'
+#' For mgcv models with several linear predictors (e.g. gaulss), the first column of the predictions is returned. This is the mean for gaulss and gammals, but the location parameter for gevlss and shash.
 #'
 #' If you implement this function for a new model class, you should include an option to modify which random effects (REs) are included in the predictions. If this option is not available, it is essential that predictions are provided marginally/unconditionally, i.e. without the RE estimates (because of https://github.com/florianhartig/DHARMa/issues/43), which corresponds to re-form = ~0 in lme4.
 #'
@@ -340,12 +344,7 @@ getSimulations.default <- function (object, nsim = 1, simulateREs = c("condition
 
   checkBinomialMatrixWeights(object)
 
-  # fixes #567 (mgcViz's simulate.gam would be dispatched)
-  if(inherits(object, "gam")) out = getS3method("simulate", "lm")(object, nsim = nsim, ...)
-  else out = simulate(object, nsim = nsim, ...)
-
-  # fixes #567 (simulate.lm returns 0 rows for unnamed fitted())
-  if(is.data.frame(out) && nrow(out) == 0 && length(out) > 0) attr(out, "row.names") = .set_row_names(NROW(out[[1]]))
+  out = simulate(object, nsim = nsim, ...)
 
   if (type == "normal"){
     if(isBinomialFamily(object)){
@@ -559,8 +558,9 @@ getSimulations.negbin<- function (object, nsim = 1, simulateREs = c("conditional
 
 ######## MGCV ############
 
-# fixes #572 (non-discrete bam drops offset = from fitted values)
-checkBamOffset <- function(object){
+checkGamOffset <- function(object){
+  if(is.list(formula(object)) && "(offset)" %in% names(model.frame(object))) stop("DHARMa: for gam models with several linear predictors (a list of formulae), mgcv ignores offsets supplied via the offset argument. Please specify the offset in the formula instead, e.g. list(y ~ s(x) + offset(log(a)), ~ 1).")
+  # fixes #572 (non-discrete bam drops offset = from fitted values)
   if(inherits(object, "bam") && !is.null(off <- model.frame(object)[["(offset)"]]) && any(off != 0)){
     eta = predict(object, type = "link")
     if(!isTRUE(all.equal(unname(object$linear.predictors - eta[!is.na(eta)]), unname(off)))) stop("DHARMa: the fitted values of this bam model do not include the offset supplied via the offset argument (a problem in mgcv). Please specify the offset in the formula instead, e.g. y ~ s(x) + offset(log(a)).")
@@ -570,13 +570,15 @@ checkBamOffset <- function(object){
 #' @rdname getFitted
 #' @export
 getFitted.gam <- function(object, ...){
-  checkBamOffset(object)
+  checkGamOffset(object)
   # unconditional predictions, excluding random effects and factor smooth interactions (fixes issue #544)
   isRE = sapply(object$smooth, function(x) any(class(x) %in% c("random.effect", "fs.interaction")))
   if(any(isRE)) excludeREs = sapply(object$smooth[isRE], `[[`, "label") else excludeREs =  NULL
   fam = object$family # also for gamm()$gam, which has no family() method
   if(is.matrix(object$linear.predictors)){
     out = predict(object, type = "response", exclude = excludeREs, ...)
+    # fixes #600 (one column per linear predictor, e.g. gaulss)
+    if(is.matrix(out)) out = out[, 1]
   } else {
     # fixes #572 (keep offsets passed via offset =)
     eta = napredict(object$na.action, object$linear.predictors)
@@ -612,7 +614,7 @@ getPearsonResiduals.gam <- function(object, ...) {
 # Get Simulations of gam object
 
 #' @rdname getSimulations
-#' @param mgcViz whether simulations should be created with mgcViz (if mgcViz is available)
+#' @param mgcViz whether simulations should be created with mgcViz (if mgcViz is available). Without mgcViz, only families that can be simulated by the stats package (e.g. gaussian, poisson, binomial, Gamma) are supported.
 #' @export
 getSimulations.gam <- function(object, nsim = 1, simulateREs = c("conditional", "unconditional", "user-specified"), type = c("normal", "refit"), mgcViz = TRUE, ...){
 
@@ -624,52 +626,45 @@ getSimulations.gam <- function(object, nsim = 1, simulateREs = c("conditional", 
   checkBinomialMatrixWeights(object)
   if(hasWeights(object)) warning(weightsWarning)
 
-  checkBamOffset(object)
+  checkGamOffset(object)
+  # fixes #600 (getRefitData() would replace the second formula instead of the response)
+  if(type == "refit" && is.list(formula(object))) stop("DHARMa: refit = TRUE is not supported for gam models with several linear predictors (a list of formulae).")
 
+  # raw simulations: n x nsim matrix, binomial responses as proportions (#580)
   if(isTRUE(mgcViz) && requireNamespace("mgcViz", quietly = TRUE)){
-
-    # use mgcViz if available
-    out = mgcViz::simulate.gam(object, nsim = nsim , ...)
-    out = as.data.frame(out)
-
-    if (type == "normal"){
-      if(isBinomialFamily(object)){
-        if (is.matrix(model.frame(object)[[1]])){
-          # k/n binomial case first (#568), rounded (#590)
-          out = round(out * rowSums(model.frame(object)[[1]]))
-        } else if("(weights)" %in% colnames(model.frame(object))){
-          x = model.frame(object)
-          out = out * x$`(weights)`
-        }
-      }
-      if(!is.matrix(out)) out = data.matrix(out)
-    } else{
-      if(isBinomialFamily(object)){
-        if (is.matrix(model.frame(object)[[1]])){
-
-          # need to convert to k,n-k format for refit. Syntax here is from
-          # https://stackoverflow.com/questions/6143697/data-frame-with-a-column-containing-a-matrix-in-r
-
-          trials = rowSums(model.frame(object)[[1]])
-          oldnames = names(out)
-          oldrownames = row.names(out)
-          out = round(out * trials) # (k/n)*n is not always exactly k (#590)
-          out = as.list(out)
-          for(i in 1:length(out)){
-            out[[i]] = cbind(out[[i]], trials - out[[i]])
-            colnames(out[[i]]) = colnames(model.frame(object)[[1]])
-          }
-          class(out) = "data.frame"
-          names(out) = oldnames
-          row.names(out) = oldrownames
-        }
-      }
-    }
+    out = as.matrix(mgcViz::simulate.gam(object, nsim = nsim , ...))
   } else {
     if(isTRUE(mgcViz)) message("It seems you don't have mgcViz installed on this computer. When using DHARMa with mgcv objects, it is highly recommended to also install mgcViz, which will extend the ability of DHARMa to simulate from various gam objects. Without mgcViz, simulations will fail in various situations. See vignette for details!")
-    out = getSimulations.default(object = object, nsim = nsim, type = type, ...)
+    out = simulateGamStats(object, nsim = nsim, ...)
+  }
+
+  trials = getTrials(object)
+  if (type == "normal"){
+    # k/n binomial: number of successes, rounded because (k/n)*n is not always exactly k (#590)
+    out = out * trials
+    if(!identical(trials, 1) && all(trials %% 1 == 0)) out = round(out)
+  } else {
+    out = as.data.frame(out)
+    # cbind(successes, failures) format for refit
+    resp = model.frame(object)[[1]]
+    if(is.matrix(resp) && ncol(resp) == 2) for(i in seq_along(out)){
+      k = round(out[[i]] * trials)
+      out[[i]] = cbind(k, trials - k)
+      colnames(out[[i]]) = colnames(resp)
+    }
   }
   return(out)
+}
+
+# simulations of gam models with stats:::simulate.lm, on the scale of mgcViz::simulate.gam
+simulateGamStats <- function(object, nsim, ...){
+  fam = object$family
+  # simulate.lm needs a glm object, and simulates only from families with a simulate function or gaussian
+  if(!inherits(object, "glm") || (fam$family != "gaussian" && is.null(fam$simulate))) stop("DHARMa: simulations for gam models with family ", fam$family, " require the package mgcViz. Please install mgcViz and do not set mgcViz = FALSE.")
+  # fixes #567 (mgcViz's simulate.gam would be dispatched)
+  out = getS3method("simulate", "lm")(object, nsim = nsim, ...)
+  # factor responses as 0/1, cbind() responses as proportions; vapply over columns, as the data frame can have 0 rows (#567)
+  vapply(out, function(x) if(is.factor(x)) as.numeric(x) - 1 else if(is.matrix(x)) x[, 1] / rowSums(x) else as.numeric(x), numeric(NROW(out[[1]])))
 }
 
 

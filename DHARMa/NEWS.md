@@ -22,6 +22,10 @@ NOTE: for more news about the package, see https://github.com/florianhartig/DHAR
 
 * Prior weights that are all 1 no longer trigger the warning about ignored prior weights, e.g. for `gamm4()$mer` models fitted without weights (#626).
 
+* `gam` models with several linear predictors (e.g. `gaulss()`): `testDispersion()` and residual plots no longer fail; `refit = TRUE`, offsets via the `offset` argument (ignored by mgcv) and the families `mvn()`, `multinom()` and `cox.ph()` stop with an informative error (#600, #629).
+
+* `gam` simulations of binomial models with the number of trials given via weights are integers; without mgcViz, families that the stats package cannot simulate (e.g. `nb()`) stop with an error recommending mgcViz (#580, #629).
+
 * `getData()` for `spaMM` models returns the data stored in the model object (without rows with NAs); previously it failed for models fitted inside a function or could return another object with the same name (#621, #626).
 
 * `simulateResiduals()` for `brms` models no longer fails if `n` exceeds the number of posterior draws (e.g. the default `n = 250` for a model with 200 draws); draws are then reused, with a message (#591, #627).
