@@ -24,6 +24,18 @@ chk("testTemporalAutocorrelation without time", testTemporalAutocorrelation(so),
 chk("testSpatialAutocorrelation without coordinates", testSpatialAutocorrelation(so), expect = "error")
 chk("testCategorical without catPred", testCategorical(so), expect = "error")
 
+# arguments of the wrong type or with NA: known problems listed in #612 (they run silently or give unclear errors)
+m1 = glm(observedResponse ~ Environment1, family = poisson, data = d); so1 = simulateResiduals(m1)  # 100 residuals, no NA rows
+chk("time as character (sorted alphabetically)", testTemporalAutocorrelation(so1, time = as.character(1:100), plot = FALSE), expect = "error")
+chk("time with NA", testTemporalAutocorrelation(so1, time = replace(1:100, 50, NA), plot = FALSE), expect = "error")
+chk("coordinate with NA", testSpatialAutocorrelation(so1, x = replace(d$x, 50, NA), y = d$y, plot = FALSE), expect = "error")
+chk("quantiles outside 0-1", testQuantiles(so1, quantiles = c(0.5, 1.2), plot = FALSE), expect = "error")
+chk("form as character string", plotResiduals(so1, form = "Environment1"), expect = "error")
+chk("sel removes all residuals", recalculateResiduals(so1, sel = rep(FALSE, 100)), expect = "error")
+sims = replicate(100, rpois(100, 3)); obs = rpois(100, 3)
+chk("createDHARMa with a data.frame of simulations", createDHARMa(as.data.frame(sims), obs, integerResponse = TRUE), expect = "error")
+chk("createDHARMa, formula predictor (no model data)", plotResiduals(createDHARMa(sims, obs, integerResponse = TRUE), form = ~x), expect = "error")
+
 # model instead of DHARMa object
 chk("testDispersion(model) converts the model", testDispersion(m, plot = FALSE))
 chk("recalculateResiduals(model)", recalculateResiduals(m, group = ~group), expect = "error")
@@ -37,5 +49,6 @@ for(n in c(3, 10)){
   if(!is.null(s)) chk(paste0("n = ", n, " plot"), plot(s), png = paste0("small_n", n))
 }
 chk("n = 1 simulation", simulateResiduals(m, n = 1), expect = "error")
+chk("non-integer number of simulations", simulateResiduals(m1, n = 10.5), expect = "error")
 
 saveLog("03_userMistakes")

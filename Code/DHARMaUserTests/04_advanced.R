@@ -1,6 +1,7 @@
 # User-perspective test 4: advanced use - refit = TRUE (incl. k/n binomial calibration),
-# offsets, simulateREs options, createDHARMa(), models fitted inside a function,
-# data order of GLMMadaptive. No brms (compiles Stan).
+# offsets, simulateREs options, createDHARMa(), runBenchmarks(), models fitted inside a function,
+# data changed after fitting, further model types and families, data order of GLMMadaptive.
+# No brms (compiles Stan).
 source("Code/DHARMaUserTests/helper.R")
 library(lme4); library(glmmTMB)
 set.seed(5)
@@ -37,7 +38,13 @@ chk("glmer refit = TRUE, grouped dispersion", testDispersion(recalculateResidual
 
 # createDHARMa() with own simulations
 sims = replicate(250, rpois(200, exp(log(d$area) + 0.5 * d$Environment1)))
-chk("createDHARMa, integer response", testUniformity(createDHARMa(sims, d$y2, integerResponse = TRUE), plot = FALSE))
+sob = createDHARMa(sims, d$y2, integerResponse = TRUE)
+chk("createDHARMa, integer response", testUniformity(sob, plot = FALSE))
+chk("createDHARMa, plotResiduals with vector predictor", plotResiduals(sob, form = d$Environment1))
+chk("createDHARMa, grouped", testDispersion(recalculateResiduals(sob, group = d$group), plot = FALSE))
+chk("createDHARMa, transposed simulations", createDHARMa(t(sims), d$y2, integerResponse = TRUE), expect = "error")
+# known problem #628: ?runBenchmarks allows a function that returns one value, but this fails
+chk("runBenchmarks, one statistic", runBenchmarks(function() testDispersion(sob, plot = FALSE)$p.value, nRep = 3))
 
 # model fitted inside a function with local data: refit and formula predictors should work
 f = function(){
@@ -47,6 +54,32 @@ f = function(){
   plotResiduals(sl, form = ~Environment1)
 }
 chk("model fitted inside a function", f())
+
+# data changed after fitting (#611): refits stop if used rows or values changed, other changes are harmless
+dr = d; mr = glm(y2 ~ Environment1 + offset(log(area)), family = poisson, data = dr)
+dr = d[order(d$Environment1), ]; dr$newColumn = 1
+chk("rows sorted and column added after fit, refit", simulateResiduals(mr, refit = TRUE, n = 10))
+dr$Environment1[1] = 99
+chk("value changed after fit, refit", simulateResiduals(mr, refit = TRUE, n = 10), expect = "error")
+ms = glm(y2 ~ scale(Environment1), family = poisson, data = d, subset = Environment1 > 0)
+chk("scale() with subset, refit (no false stop)", simulateResiduals(ms, refit = TRUE, n = 10))
+
+# refit and prior weights fixes (#626)
+if(requireNamespace("lmerTest", quietly = TRUE)) chk("lmerTest refit", testUniformity(simulateResiduals(lmerTest::lmer(Environment1 ~ area + (1|group), data = d), refit = TRUE, n = 20), plot = FALSE))
+if(requireNamespace("gamm4", quietly = TRUE)) chk("gamm4 $mer without prior-weights warning", testUniformity(simulateResiduals(gamm4::gamm4(y2 ~ s(Environment1), random = ~(1|group), family = poisson, data = d)$mer), plot = FALSE))
+if(requireNamespace("spaMM", quietly = TRUE)) chk("spaMM log(y + 1) response, refit", testUniformity(simulateResiduals(spaMM::fitme(log(y2 + 1) ~ Environment1, data = d), refit = TRUE, n = 20), plot = FALSE))
+
+# further glmmTMB families for zero-inflated and overdispersed data: zero-inflated, hurdle and betabinomial models
+# should pass, the Poisson and binomial models should be detected
+dz = data.frame(x = runif(300, -1, 1), g = factor(sample(1:15, 300, TRUE)), size = sample(5:20, 300, TRUE))
+mu = exp(0.5 + dz$x + rnorm(15, 0, 0.5)[dz$g])
+dz$y = ifelse(runif(300) < 0.3, 0, rnbinom(300, mu = mu, size = 2))
+dz$k = rbinom(300, dz$size, rbeta(300, 4 * plogis(dz$x), 4 * (1 - plogis(dz$x))))
+chk("glmmTMB zero-inflated nbinom2", testZeroInflation(simulateResiduals(glmmTMB(y ~ x + (1|g), ziformula = ~1, family = nbinom2, data = dz)), plot = FALSE))
+chk("glmmTMB hurdle (truncated_nbinom2)", testUniformity(simulateResiduals(glmmTMB(y ~ x + (1|g), ziformula = ~1, family = truncated_nbinom2, data = dz)), plot = FALSE))
+chk("glmmTMB Poisson for zero-inflated data", testZeroInflation(simulateResiduals(glmmTMB(y ~ x + (1|g), family = poisson, data = dz)), plot = FALSE), expect = "detect")
+chk("glmmTMB betabinomial", testDispersion(simulateResiduals(glmmTMB(cbind(k, size - k) ~ x, family = betabinomial, data = dz)), plot = FALSE))
+chk("glmmTMB binomial for betabinomial data", testDispersion(simulateResiduals(glmmTMB(cbind(k, size - k) ~ x, family = binomial, data = dz)), plot = FALSE), expect = "detect")
 
 # GLMMadaptive sorts the data by group: predictors must be in that order (see vignette)
 if(requireNamespace("GLMMadaptive", quietly = TRUE)){

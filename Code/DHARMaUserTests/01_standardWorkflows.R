@@ -29,6 +29,9 @@ battery("glmmTMB", simulateResiduals(glmmTMB(observedResponse ~ Environment1 + (
 dg = data.frame(x = runif(300, -2, 2)); dg$y = rpois(300, exp(1 + sin(2 * dg$x)))
 battery("gam", simulateResiduals(gam(y ~ s(x), family = poisson, data = dg)), form = c(~x))
 
+# integer-valued families should be detected as integer responses (#620)
+chk("gam ziP detected as integer response", stopifnot(simulateResiduals(gam(y ~ s(x), family = ziP, data = dg))$integerResponse))
+
 # deliberate misspecifications: the respective test should detect them (p < 0.05)
 d = createData(sampleSize = 200, family = poisson(), overdispersion = 1, numGroups = 5, randomEffectVariance = 0)
 chk("overdispersion, Poisson glm", testDispersion(simulateResiduals(glm(observedResponse ~ Environment1, family = poisson, data = d)), plot = FALSE), expect = "detect")
