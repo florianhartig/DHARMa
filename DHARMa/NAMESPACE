@@ -3,7 +3,6 @@
 S3method(getData,HLfit)
 S3method(getData,brmsfit)
 S3method(getData,default)
-S3method(getData,merMod)
 S3method(getFamily,default)
 S3method(getFamily,phyloglm)
 S3method(getFamily,phylolm)

@@ -194,12 +194,27 @@ test_that("getFixedEffects works for subclasses of merMod (e.g. lmerModLmerTest)
   expect_equal(getFixedEffects(m), lme4::fixef(m))
 })
 
-test_that("refits stop if the data were changed after fitting (#611)", {
+test_that("refits use the data stored in the model, or stop if the data were changed after fitting (#611, #625)", {
   set.seed(1)
   testData = data.frame(x = runif(60), area = runif(60, 1, 2), f = factor(sample(letters[1:3], 60, TRUE)))
   testData$y = rpois(60, exp(1 + testData$x))
   testData$x[3] = NA
   m = glm(y ~ x + log(area) + f, offset = log(area), family = poisson, data = testData)
+  newresp = model.response(model.frame(m))
+  orig = testData
+  # glm stores the data, which are used also if the data were changed after fitting
+  testData = orig[1:50, ]
+  testData$x = testData$x * 10
+  expect_equal(coef(getRefit(m, newresp)), coef(m))
+  # variables from the environment are checked also if the data are stored
+  testData = orig
+  ww = runif(60)
+  m = glm(y ~ x, family = poisson, data = testData, weights = ww)
+  ww = rev(ww)
+  expect_error(getRefit(m, model.response(model.frame(m))), "Values differ for: \\(weights\\)")
+  # lm stores no data: the data from the environment are checked
+  testData = orig
+  m = lm(y ~ x + log(area) + f, offset = log(area), data = testData)
   newresp = model.response(model.frame(m))
   # unchanged data, also after converting the factor to character or changing the response
   expect_equal(coef(getRefit(m, newresp)), coef(m))
@@ -215,8 +230,54 @@ test_that("refits stop if the data were changed after fitting (#611)", {
   expect_error(getRefit(m, newresp), "Values differ for: log\\(area\\)")
   # `a-b` is a name, log(area) a call, also if columns a, b and `log(area)` exist
   testData = orig; testData$`a-b` = testData$area; testData$a = 1; testData$b = 2; testData$`log(area)` = 0
-  m = glm(y ~ `a-b` + log(area), family = poisson, data = testData)
+  m = lm(y ~ `a-b` + log(area), data = testData)
   expect_equal(coef(getRefit(m, model.response(model.frame(m)))), coef(m))
+})
+
+test_that("formula predictors and refits use the data of the fit (#621, #622, #625)", {
+  set.seed(1)
+  testData = createData(sampleSize = 100, family = poisson())
+  testData$f = factor(rep(c("a", "b"), 50))
+  # f is not in the model, glm stores the data
+  res = simulateResiduals(glm(observedResponse ~ Environment1, family = poisson, data = testData))
+  f = testData$f
+  testData$f = sample(testData$f)
+  expect_equal(getPredictor(res, ~f), f)
+  # models fitted inside a function with an argument named like a function (#621)
+  fitGlm = function(formula, data) glm(formula, family = poisson, data = data)
+  m = fitGlm(observedResponse ~ Environment1, testData)
+  expect_error(getData(m), "cannot locate the original data")
+  res = simulateResiduals(m)
+  expect_equal(getPredictor(res, ~Environment1), testData$Environment1)
+  expect_s3_class(recalculateResiduals(res, sel = 1:50), "DHARMa")
+  expect_equal(coef(getRefit(m, testData$observedResponse)), coef(m))
+  fitGlmer = function(formula, df) lme4::glmer(formula, family = poisson, data = df)
+  m = fitGlmer(observedResponse ~ Environment1 + (1|group), testData)
+  expect_error(getData(m), "cannot locate the original data")
+  expect_equal(getPredictor(simulateResiduals(m), ~Environment1), testData$Environment1)
+  # models fitted without data (#622)
+  y = testData$observedResponse
+  x = testData$Environment1
+  g = testData$group
+  threshold = 0
+  res = simulateResiduals(glm(y ~ x, family = poisson))
+  expect_s3_class(recalculateResiduals(res, sel = 1:50), "DHARMa")
+  expect_equal(recalculateResiduals(res, sel = ~x > threshold)$sel, x > 0)
+  res = simulateResiduals(lme4::glmer(y ~ x + (1|g), family = poisson))
+  expect_s3_class(recalculateResiduals(res, sel = 1:50), "DHARMa")
+})
+
+test_that("getData works for brms models with a data expression (#621)", {
+  skip_on_cran()
+  skip_if_not_installed("brms")
+  testData = createData(sampleSize = 100, family = poisson())
+  m = brms::brm(observedResponse ~ Environment1, data = testData[testData$Environment1 > 0, ], family = poisson, empty = TRUE)
+  expect_equal(getData(m), testData[testData$Environment1 > 0, ])
+  fitBrms = function(formula, data) brms::brm(formula, data = data, family = poisson, empty = TRUE)
+  m = fitBrms(observedResponse ~ Environment1, testData)
+  expect_error(getData(m), "cannot locate the original data")
+  expect_equal(getModelData(m, "Environment1")$Environment1, testData$Environment1)
+  expect_error(getModelData(m, "Environment2"), "cannot locate the original data")
 })
 
 

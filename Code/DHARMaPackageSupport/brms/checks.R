@@ -158,15 +158,12 @@ stopifnot(inDataOrder(models$poisson, d$yPois))
 
 # Predictors for plotResiduals(form = ) ----
 
-# known problem (no issue yet): getData() evaluates the name of the data argument
-# in the environment of the formula. It fails if the data argument was an
-# expression, and finds another object if the model was fitted by a function with
-# an argument named data (here utils::data; this also happens for glm());
-# plotResiduals(form = ) then stops.
+# getData() works for a data expression and stops for a model fitted by a function
+# with an argument named data (#621); formula predictors use the data stored in the model
 dataSubset = suppressMessages(brm(yGauss ~ x, data = d[d$x > 0, ], empty = TRUE))
-stopifnot(is_outcome(outcome(getData(dataSubset)), "error", "not found"))
+stopifnot(nrow(getData(dataSubset)) == sum(d$x > 0))
 fitModel = function(formula, data) brm(formula, data = data, empty = TRUE)
-stopifnot(is.function(getData(suppressMessages(fitModel(yGauss ~ x, d)))))
+stopifnot(is_outcome(outcome(getData(suppressMessages(fitModel(yGauss ~ x, d)))), "error", "cannot locate"))
 
 # Pearson residuals and dispersion tests ----
 

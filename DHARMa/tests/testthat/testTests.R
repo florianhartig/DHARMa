@@ -404,7 +404,9 @@ test_that("formula predictors: transformations, grouped residuals, model order (
   expect_equal(recalculateResiduals(resNoData, sel = ~x > 0)$nObs, sum(x > 0))
   expect_equal(getPredictor(resNoData, ~x), x)
   xNA = x; xNA[1] = NA
-  expect_error(getPredictor(simulateResiduals(lme4::glmer(y ~ xNA + (1|g), family = poisson), n = 50), ~xNA), "no stored data")
+  resNA = simulateResiduals(lme4::glmer(y ~ xNA + (1|g), family = poisson), n = 50)
+  expect_equal(getPredictor(resNA, ~xNA), xNA[-1])
+  expect_error(getPredictor(resNA, ~x), "no stored data")
 
   # #609: formula predictors in the order of the residuals
   skip_if_not_installed("GLMMadaptive")

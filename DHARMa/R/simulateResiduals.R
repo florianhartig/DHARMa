@@ -267,7 +267,7 @@ recalculateResiduals <- function(simulationOutput, group = NULL, aggregateBy = s
 
       # if sel is numeric (e.g. 1:20)
       if(is.numeric(sel)){
-        if(nrow(getData(simulationOutput$fittedModel)) != length(simulationOutput$scaledResiduals)) warning("DHARMa: data used to fit the model and DHARMa residuals don't have the same length, probably due to NAs in your data. sel will select rows based on the residuals and their order.")
+        if(isTRUE(tryCatch(nrow(getData(simulationOutput$fittedModel)) != length(simulationOutput$scaledResiduals), error = function(e) FALSE))) warning("DHARMa: data used to fit the model and DHARMa residuals don't have the same length, probably due to NAs in your data. sel will select rows based on the residuals and their order.")
       }
     }
 

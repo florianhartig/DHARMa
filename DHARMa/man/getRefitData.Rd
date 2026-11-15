@@ -4,16 +4,14 @@
 \alias{getRefitData}
 \title{Data and formula for refitting a model to a new response}
 \usage{
-getRefitData(object, newresp, rows = rownames(model.frame(object)))
+getRefitData(object, newresp)
 }
 \arguments{
 \item{object}{a fitted model.}
 
 \item{newresp}{the new response.}
-
-\item{rows}{the rows used in the fit.}
 }
 \description{
-Internal helper for \link{getRefit}. Returns a list with the model data (the model frame for models fitted without data), restricted to the rows used in the fit, with the new response in column \code{.DHARMa_response}, and the formula with this column as response.
+Internal helper for \link{getRefit}. Returns a list with the model data (see \link{getModelData}), restricted to the rows used in the fit, with the new response in column \code{.DHARMa_response}, and the formula with this column as response.
 }
 \keyword{internal}

@@ -230,7 +230,7 @@ ensurePredictor <- function(simulationOutput,
 #'
 #' Evaluates a predictor for plotResiduals, recalculateResiduals, testCategorical, testQuantiles, testTemporalAutocorrelation and testSpatialAutocorrelation, and checks that it matches the residuals.
 #'
-#' A formula (e.g. ~x or ~log(x)) is evaluated in the data used to fit the model; other objects in the formula are taken from the environment of the formula. The data rows are taken in the order of the residuals, and rows that the model removed because of NAs are dropped. If the model has no stored data (e.g. lme4 models fitted without data argument), all variables are taken from the environment of the formula, and an error is given if the model removed rows because of NAs.
+#' A formula (e.g. ~x or ~log(x)) is evaluated in the data used to fit the model; other objects in the formula are taken from the environment of the formula. The data rows are taken in the order of the residuals, and rows that the model removed because of NAs are dropped. For models fitted without data argument, variables that are not in the model frame are taken from the environment of the formula, and an error is given if the model removed rows because of NAs.
 #'
 #' For residuals grouped by [recalculateResiduals], a formula or a vector with one value per observation is aggregated per group, in the order of the grouped residuals. Values that are constant within groups are kept; numeric values that vary within groups are averaged (with a message); other values that vary within groups cause an error. Observations without group (NA) are dropped. A vector with one value per group is used as given, in the order of groupLevels, also if there is only one observation per group.
 #'
@@ -249,20 +249,10 @@ getPredictor <- function(simulationOutput, predictor, name = "predictor"){
     expr = predictor[[2]]
     if(is.call(expr) && deparse(expr[[1]]) %in% c("+", "*", ":")) stop("DHARMa: a formula predictor must contain exactly one variable or expression, e.g. ~x, ~log(x) or ~I(a + b). To plot residuals against several predictors, use plotResiduals().")
     advice = paste0(" Please provide ", name, " as a vector in the order of the residuals, e.g. data$x instead of ~x.")
-    data = tryCatch({
-      data = getData(original$fittedModel)
-      # partly fixes #622 (models without data argument, e.g. lme4: variables from the environment of the formula)
-      if(is.null(data)) list() else {
-        data = as.data.frame(data)
-        # fixes #609 (data rows in the order of the residuals, e.g. GLMMadaptive, phylolm)
-        rows = match(getModelRows(original$fittedModel), rownames(data))
-        if(!anyNA(rows)) data[rows, , drop = FALSE] else if(nrow(data) == original$nObs) data
-      }
-    }, error = function(e) stop("DHARMa: unable to get the data used to fit the model (", conditionMessage(e), ").", advice, call. = FALSE))
-    if(is.null(data)) stop("DHARMa: unable to match the data used to fit the model to the residuals.", advice)
+    data = tryCatch(getModelData(original$fittedModel, all.vars(expr)), error = function(e) stop("DHARMa: unable to get the data used to fit the model (", conditionMessage(e), ").", advice, call. = FALSE))
     env = environment(predictor)
     predictor = tryCatch(eval(expr, data, env), error = function(e) stop("DHARMa: unable to evaluate the formula predictor (", conditionMessage(e), ").", advice, call. = FALSE))
-    if(identical(data, list()) && NROW(predictor) > original$nObs) stop("DHARMa: the model has no stored data, so ", name, " given as formula is taken from the environment of the formula, and rows removed because of NAs cannot be dropped. Fit the model with the data argument, or provide ", name, " as a vector without these rows.", call. = FALSE)
+    if(is.null(getCall(original$fittedModel)$data) && NROW(predictor) > original$nObs) stop("DHARMa: the model has no stored data, so ", name, " given as formula is taken from the environment of the formula, and rows removed in the fit (e.g. because of NAs) cannot be dropped. Fit the model with the data argument, or provide ", name, " as a vector without these rows.", call. = FALSE)
     # matrix-valued terms: one column (e.g. scale(x)) as vector, several columns (e.g. poly(x, 2)) as the untransformed variable
     if(is.matrix(predictor)) predictor = if(ncol(predictor) == 1) as.vector(predictor) else eval(as.name(all.vars(expr)[1]), data, env)
   }
@@ -286,14 +276,24 @@ getPredictor <- function(simulationOutput, predictor, name = "predictor"){
   return(predictor)
 }
 
-#' Get the rows of the data used in the model fit, in the order of the residuals
+#' Get the data used in the model fit, in the order of the residuals
+#'
+#' Takes the model frame if `vars` are given and all of them are in the model frame. Otherwise, takes the copy of the data stored in the model (e.g. glm, GLMMadaptive, spaMM, brms) if it contains all variables in `vars`, or else the data from the environment ([getData]), and checks them against the model frame. For models fitted without data, the model frame is used.
 #'
 #' @param fittedModel a fitted model
+#' @param vars the names of the variables needed.
 #' @keywords internal
-getModelRows <- function(fittedModel){
-  # phyloglm has no model frame
-  if(inherits(fittedModel, "phyloglm")) rownames(fittedModel$X)
-  else rownames(model.frame(fittedModel))
+getModelData <- function(fittedModel, vars = NULL){
+  mf = if(!inherits(fittedModel, "phyloglm")) model.frame(fittedModel) # phyloglm has no model frame
+  rows = if(is.null(mf)) rownames(fittedModel$X) else rownames(mf)
+  # fixes #625 (data of the fit first, data from the environment second)
+  if(length(vars) && all(vars %in% names(mf))) return(mf)
+  data = if(!isS4(fittedModel) && is.data.frame(fittedModel$data) && all(vars %in% names(fittedModel$data))) fittedModel$data
+  else tryCatch(getData(fittedModel), error = function(e) if(is.null(getCall(fittedModel)$data) && !inherits(fittedModel, "brmsfit")) NULL else stop(e))
+  if(is.null(data)) return(mf) # fixes #622 (models without data: other variables are taken from the environment of the formula)
+  data = as.data.frame(data)
+  checkRefitData(fittedModel, data, rows)
+  data[rows, , drop = FALSE]
 }
 
 

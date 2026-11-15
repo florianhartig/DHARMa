@@ -147,7 +147,7 @@ getFixedEffects <- function(object, ...){
 #'
 #' @details The purpose of this wrapper is to standardize the refit of a model. The behavior of this function depends on the supplied model. When available, it uses the refit method, otherwise it will use update. For glmmTMB: since version 1.0, glmmTMB has a refit function, but this didn't work, so I switched back to this implementation, which is a hack based on the update function.
 #'
-#' Refits based on update use the data object of the model call, which must not be changed after fitting. If the refit detects that rows or values used in the fit were changed, it stops with an error.
+#' Refits based on update use the data stored in the model if available (e.g. glm, GLMMadaptive), otherwise the data object of the model call, which must not be changed after fitting. If the refit detects that rows or values used in the fit were changed, it stops with an error.
 #'
 #' @example inst/examples/wrappersHelp.R
 #'
@@ -465,8 +465,8 @@ getFamily.default <- function (object,...){
 #' @export
 getData.default <- function (object,...){
   for (e in c(list(environment(formula(object))), rev(sys.frames()))) {
-    out = tryCatch(eval(object$call$data, envir = e), error = function(e) NULL)
-    if (!is.null(out)) return(out)
+    out = tryCatch(eval(getCall(object)$data, envir = e), error = function(e) NULL)
+    if (!is.null(out) && !is.function(out)) return(out) # fixes #621 (e.g. utils::data for models fitted inside a function)
   }
   stop("DHARMa::getData: cannot locate the original data of the fitted model, probably because you are fitting your model inside a function.")
 }
@@ -491,19 +491,13 @@ getRefit.lm <- function(object, newresp, ...){
 # fixes #351 (variables in offsets) and #571 (transformed and cbind() responses, models without data)
 #' Data and formula for refitting a model to a new response
 #'
-#' Internal helper for [getRefit]. Returns a list with the model data (the model frame for models fitted without data), restricted to the rows used in the fit, with the new response in column `.DHARMa_response`, and the formula with this column as response.
+#' Internal helper for [getRefit]. Returns a list with the model data (see [getModelData]), restricted to the rows used in the fit, with the new response in column `.DHARMa_response`, and the formula with this column as response.
 #'
 #' @param object a fitted model.
 #' @param newresp the new response.
-#' @param rows the rows used in the fit.
 #' @keywords internal
-getRefitData <- function(object, newresp, rows = rownames(model.frame(object))){
-  if(is.null(getCall(object)$data)) newData = model.frame(object)
-  else {
-    newData = as.data.frame(getData(object))
-    checkRefitData(object, newData, rows)
-  }
-  newData = newData[rows, , drop = FALSE]
+getRefitData <- function(object, newresp){
+  newData = getModelData(object)
   f = formula(object)
   # expand '.' while the original response is on the left-hand side, so that it is not included in '.'
   if("." %in% all.vars(f)) f = formula(terms(f, data = newData))
@@ -514,13 +508,14 @@ getRefitData <- function(object, newresp, rows = rownames(model.frame(object))){
   return(list(data = newData, formula = f))
 }
 
-# fixes #611 (data changed after fitting): stops if the data found by getData() lack rows or contain other values than the model frame.
+# fixes #611 (data changed after fitting): stops if the data lack rows or contain other values than the model frame.
 # Each column is evaluated on the full data and then restricted to the rows used in the fit, as in model.frame()
 checkRefitData <- function(object, data, rows){
-  msg = "DHARMa: the data found for the fitted model do not match the data used for fitting, probably because they were changed after fitting or the model was fitted inside a function. Refits need the original data: restore them or fit the model again."
+  msg = "DHARMa: the data found for the fitted model do not match the data used for fitting, probably because they were changed after fitting or the model was fitted inside a function. Refits and formula predictors need the original data: restore them or fit the model again."
   i = match(rows, rownames(data))
   if(anyNA(i)) stop(msg, " Rows used in the fit are missing.", call. = FALSE)
-  mf = tryCatch(model.frame(object), error = function(e) NULL)
+  # phyloglm has no model frame (model.frame() would evaluate the formula in the environment)
+  mf = if(!inherits(object, "phyloglm")) tryCatch(model.frame(object), error = function(e) NULL)
   # expressions of the model-frame columns, named as in model.frame.default()
   vars = tryCatch(as.list(attr(terms(mf), "variables"))[-1], error = function(e) list())
   names(vars) = vapply(vars, function(e) paste(deparse(e, width.cutoff = 500L, backtick = !is.symbol(e) && is.language(e)), collapse = " "), "")
@@ -706,13 +701,6 @@ getSimulations.merMod <- function (object, nsim = 1, simulateREs = c("conditiona
   }
 
   return(out)
-}
-
-
-#' @rdname getData
-#' @export
-getData.merMod <- function (object, ...){
-  eval(object@call$data, envir = environment(formula(object)))
 }
 
 
@@ -1058,8 +1046,7 @@ getSimulations.phyloglm <- function(object, nsim = 1,
 #' @rdname getRefit
 #' @export
 getRefit.phyloglm <- function(object, newresp, ...){
-  #object phyloglm doesn't have a model.frame object
-  refitData = getRefitData(object, newresp, rows = rownames(object$X))
+  refitData = getRefitData(object, newresp)
   update(object, formula. = refitData$formula, data = refitData$data, ...)
 }
 
@@ -1206,8 +1193,9 @@ getPearsonResiduals.brmsfit <- function (object, ...){
 #' @rdname getData
 #' @export
 getData.brmsfit <- function (object, ...){
-  eval(as.name(attr(object$data, "data_name", TRUE)), envir = environment(formula(object$formula)))
-  #could also use as.name(brms:::get_data_name(fit1$data)) #returns NULL if is NULL
+  out = eval(str2lang(attr(object$data, "data_name", TRUE)), envir = environment(formula(object$formula)))
+  if(is.function(out)) stop("DHARMa::getData: cannot locate the original data of the fitted model, probably because you are fitting your model inside a function.") # fixes #621 (e.g. utils::data)
+  out
 }
 
 #' @rdname getPredictorNames

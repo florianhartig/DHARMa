@@ -15,7 +15,7 @@ The vignette (section "Supported packages and frameworks") and the package tests
 | [spaMM](spaMM/README.md) | `HLfit` | full | no k/n binomial via weights |
 | [GLMMadaptive](GLMMadaptive/README.md) | `MixMod` | partial | residuals sorted by the grouping factor; vector predictors must be in this order (#609); `cbind()` refit fails (#565); beta-binomial simulations wrong (GLMMadaptive, #565); no Pearson residuals |
 | [phylolm](phylolm/README.md) | `phylolm`, `phyloglm` | partial | residuals in tree tip order; vector predictors must be in this order (#609); `poisson_GEE` and models fitted in functions fail (#478); no Pearson residuals |
-| [brms](brms/README.md) | `brmsfit` | partial (univariate models) | n ≤ posterior draws (#591); `weights()` ignored (#7); `getData()` fails for data expressions and wrappers (#611); unsupported model types with unclear errors (#612) |
+| [brms](brms/README.md) | `brmsfit` | partial (univariate models) | n ≤ posterior draws (#591); `weights()` ignored (#7); unsupported model types with unclear errors (#612) |
 | [phyr](phyr/README.md) | | not checked | #235 |
 | [gamlss](gamlss/README.md), [VGAM](vgam/README.md) | | not supported | #319, #322 |
 | [sjSDM](sjSDM/README.md) | | not supported | |
@@ -23,7 +23,7 @@ The vignette (section "Supported packages and frameworks") and the package tests
 Problems that affect several packages:
 
 - `integerResponse` is `FALSE` for many integer-valued families (names per package in #620, e.g. glmmTMB `nbinom12`, mgcv `ziP`, spaMM `negbin2`, GLMMadaptive and brms negative binomial), so `testOutliers()` uses the binomial instead of the bootstrap test for models with up to 500 observations, and refits are not randomized for integers (#620).
-- Models fitted in a function with an argument named `data` or `df` (formula passed as an argument): `getData()` returns a function, so formula predictors and refits fail (not for spaMM, whose stored data are used; #621).
+- Models fitted in a function (formula passed as an argument): formula predictors work if the variables are in the model frame or the model stores the data (glm, GLMMadaptive, spaMM, brms), refits only in the latter case; otherwise they stop (#621, #625).
 - Refits fail if NA rows were removed and the offset, the weights or a predictor are vectors outside the data (#601).
 - Conditional simulations (the default) give underdispersed residuals for correct models if each value of a latent field is informed by about one observation, e.g. `ar1()` with one observation per time step or spatial fields with one observation per location (strongly for Gaussian, less for Poisson models); the same mechanism applies to observation-level REs (not checked) (#527).
 - `rotation = "estimated"` is strongly anti-conservative unless n is much larger than the number of observations (or groups, after `recalculateResiduals(group = )`); with 200 observations, the rejection rate of the uniformity test was 1.00 for the default `n = 250` and 0.02 for `n = 1000` (#489).

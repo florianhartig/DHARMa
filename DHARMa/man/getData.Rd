@@ -3,7 +3,6 @@
 \name{getData}
 \alias{getData}
 \alias{getData.default}
-\alias{getData.merMod}
 \alias{getData.HLfit}
 \alias{getData.brmsfit}
 \title{Get model data}
@@ -11,8 +10,6 @@
 getData(object, ...)
 
 \method{getData}{default}(object, ...)
-
-\method{getData}{merMod}(object, ...)
 
 \method{getData}{HLfit}(object, ...)
 
