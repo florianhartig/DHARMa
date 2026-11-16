@@ -48,14 +48,6 @@ checkModel <- function(fittedModel, stop = F){
 
   # see #339 (GEE objects inherit glm methods, but simulations ignore the GEE structure)
   if(inherits(fittedModel, "gee")) warning("DHARMa: GEE models are not supported. Simulations (if they run at all) are drawn from the marginal GLM and ignore the working correlation and the scale parameter. Plots of residuals against fitted values and predictors can show problems in the mean structure, but the tests assume independent data with the GLM dispersion and will therefore flag overdispersion and within-cluster correlation that the GEE accounts for. See https://github.com/florianhartig/DHARMa/issues/339")
-
-  # #' @example inst/examples/checkModelHelp.R
-
-  #  NA values in the data: checkModel will detect if there were NA values in the data frame. For NA values, most regression models will remove the entire observation from the data. This is not a problem for DHARMa - residuals are then only calculated for non-NA rows in the data. However, if you provide additional predictors to DHARMa, for example to plot residuals against a predictor, you will have to remove all NA rows that were also removed in the model. For most models, you can get the rows of the data that were actually used in the fit via rownames(model.frame(fittedModel))
-
-
-  #if (class(fittedModel)[1] == "gam" ) if (class(fittedModel$family)[1] == "extended.family") stop("It seems you are trying to fit a model from mgcv that was fit with an extended.family. Simulation functions for these families are not yet implemented in DHARMa. See issue https://github.com/florianhartig/DHARMa/issues/11 for updates about this")
-
 }
 
 #' get possible models

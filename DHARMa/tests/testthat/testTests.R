@@ -126,8 +126,6 @@ test_that("tests work", {
   expectTest(out$outliers)
   expect_message(testSimulatedResiduals(simulationOutput))
 
-  # no zero-inflation or countOnes tests here: the grouped sums contain no 0 or 1 (#613)
-
   # testing if mean prediction fits
   means <- function(x) mean(x)
   expectTest(testGeneric(simulationOutput, summary = means, plot = FALSE))
