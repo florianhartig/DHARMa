@@ -970,7 +970,7 @@ Note that `mixed_model()` sorts the data by the grouping factor, and DHARMa resi
 
 ## phylolm
 
-phylolm (version \>= 2.6.5) is supported by DHARMa since 0.4.7 for both model classes phylolm and phyloglm.
+phylolm (version \>= 2.6.5) is supported by DHARMa since 0.4.7 for both model classes phylolm and phyloglm. phyloglm models with `method = "poisson_GEE"` are not supported, because phyloglm does not return simulations for this method. See also <https://github.com/florianhartig/DHARMa/issues/478>
 
 Note that phylolm orders the observations by the tip labels of the tree, and DHARMa residuals are returned in this order. As for GLMMadaptive, predictors given as formula are taken in this order automatically (since DHARMa 0.5.2); predictors given as vectors must be in the order of the tip labels.
 
