@@ -104,7 +104,7 @@ getObservedResponse <- function (object, ...) {
 #' @param type if simulations should be prepared for getQuantile or for refit.
 #' @param ... additional parameters to be passed on, usually to the simulate function of the respective model class.
 #'
-#' @return a matrix with simulations (type = "normal"), or a data.frame with one simulation per column in the format of the response used to fit the model (type = "refit").
+#' @return a matrix with simulations (type = "normal"), or a data.frame with one simulation per column in the format needed to refit the model (type = "refit").
 #' @example inst/examples/wrappersHelp.R
 #'
 #' @seealso [getObservedResponse], [getRefit], [getFixedEffects], [getFitted]
