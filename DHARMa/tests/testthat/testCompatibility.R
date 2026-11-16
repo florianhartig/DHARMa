@@ -176,9 +176,14 @@ test_that("getFittedResponse returns fitted values on the scale of the observed 
     glmmTMB_betabinomial = glmmTMB::glmmTMB(cbind(observedResponse1, observedResponse0) ~ Environment1, data = testData, family = glmmTMB::betabinomial()),
     spaMM_cbind = spaMM::HLfit(cbind(observedResponse1, observedResponse0) ~ Environment1 + (1|group), data = testData, family = binomial()),
     spaMM_betabin = spaMM::fitme(cbind(observedResponse1, observedResponse0) ~ Environment1 + (1|group), data = testData, family = spaMM::betabin()),
-    GLMMadaptive_cbind = GLMMadaptive::mixed_model(cbind(observedResponse1, observedResponse0) ~ Environment1, random = ~ 1 |group, data = testData, family = binomial()) #,
-    # GLMMadaptive_betabinomial = mixed_model(fixed = cbind(observedResponse1, observedResponse0) ~ Environment1, random = ~ 1 |group, data = testData, family = beta.binomial())
+    GLMMadaptive_cbind = GLMMadaptive::mixed_model(cbind(observedResponse1, observedResponse0) ~ Environment1, random = ~ 1 |group, data = testData, family = binomial())
   )
+
+  if(utils::packageVersion("GLMMadaptive") >= "0.9-9"){
+    # Overdispersion keeps the beta-binomial fit away from the binomial boundary.
+    betaData = createData(200, randomEffectVariance = 0.5, family = binomial(), binomialTrials = nTrials, overdispersion = 0.5)
+    models$GLMMadaptive_betabinomial = GLMMadaptive::mixed_model(cbind(observedResponse1, observedResponse0) ~ Environment1, random = ~ 1 |group, data = betaData, family = GLMMadaptive::beta.binomial())
+  }
 
   for(i in names(models)){
     fittedResponse = getFittedResponse(models[[i]])

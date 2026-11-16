@@ -118,9 +118,52 @@ test_that("integerResponse is detected from the simulations; beta-binomial names
   fittedModel = glm(observedResponse ~ Environment1, family = Gamma(link = "log"), data = testData[testData$observedResponse > 0, ])
   expect_false(simulateResiduals(fittedModel, n = 10)$integerResponse)
 
-  testData = createData(sampleSize = 100, family = binomial(), binomialTrials = 10)
+  testData = createData(sampleSize = 100, family = binomial(), binomialTrials = 10, overdispersion = 0.5)
   fittedModel = GLMMadaptive::mixed_model(cbind(observedResponse1, observedResponse0) ~ Environment1, random = ~ 1 | group, data = testData, family = GLMMadaptive::beta.binomial())
-  expect_no_warning(simulateResiduals(fittedModel, n = 10))
+  if(utils::packageVersion("GLMMadaptive") < "0.9-9"){
+    expect_error(simulateResiduals(fittedModel, n = 10), "GLMMadaptive.*0.9-9")
+  } else {
+    expect_no_warning(simulateResiduals(fittedModel, n = 10))
+  }
+})
+
+
+test_that("GLMMadaptive beta-binomial simulations respect trial totals and the version requirement (#565)", {
+  skip_if_not_installed("GLMMadaptive")
+  set.seed(123)
+  testData = data.frame(x = rnorm(200), group = factor(rep(1:20, each = 10)))
+  mu = plogis(0.3 + 0.5 * testData$x + rnorm(20, sd = 0.5)[testData$group])
+  prob = rbeta(200, mu * 10, (1 - mu) * 10)
+
+  for(trials in list(rep(20, 200), rep(1:20, 10))){
+    testData$k = rbinom(200, trials, prob)
+    testData$N = trials
+    fittedModel = GLMMadaptive::mixed_model(cbind(k, N - k) ~ x, random = ~ 1 | group,
+                                          data = testData, family = GLMMadaptive::beta.binomial())
+    expect_true(fittedModel$converged)
+    if(utils::packageVersion("GLMMadaptive") < "0.9-9"){
+      expect_error(simulateResiduals(fittedModel, n = 20), "GLMMadaptive.*0.9-9")
+      expect_error(simulateLRT(fittedModel, fittedModel, n = 2, plot = FALSE), "GLMMadaptive.*0.9-9")
+    } else {
+      expect_no_warning(res <- simulateResiduals(fittedModel, n = 20))
+      expect_equal(dim(res$simulatedResponse), c(200, 20))
+      expect_equal(res$observedResponse, testData$k, ignore_attr = TRUE)
+      expect_true(all(res$simulatedResponse >= 0 & res$simulatedResponse <= trials))
+      expect_true(all(res$simulatedResponse %% 1 == 0))
+      expect_true(any(res$simulatedResponse > 1))
+    }
+  }
+
+  # One trial does not identify beta-binomial dispersion: exercise only the guard.
+  singleTrialModel = fittedModel
+  singleTrialModel$model_frames$mfX[[1]] = cbind(testData$k %% 2, 1 - testData$k %% 2)
+  expect_no_error(checkModel(singleTrialModel))
+  singleTrialModel$model_frames$mfX[[1]] = testData$k %% 2
+  expect_no_error(checkModel(singleTrialModel))
+
+  binomialModel = GLMMadaptive::mixed_model(cbind(k, N - k) ~ x, random = ~ 1 | group,
+                                           data = testData, family = binomial())
+  expect_no_warning(simulateResiduals(binomialModel, n = 10))
 })
 
 

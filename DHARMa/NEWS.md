@@ -4,6 +4,8 @@ NOTE: for more news about the package, see https://github.com/florianhartig/DHAR
 
 ## Bugfixes
 
+* GLMMadaptive beta-binomial models with more than one trial stop with an update message for GLMMadaptive < 0.9-9, whose simulations ignore the trial totals (@algoria-contributions, #565).
+
 * `testCategorical()` no longer fails for factors with unused levels (#348, #616).
 
 * `plotResiduals()` applies transformations in `form`, e.g. `~log(x)`; `~x + I(x^2)` gives two plots (#607).

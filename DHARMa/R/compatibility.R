@@ -30,6 +30,8 @@
 #'
 #' @details The main purpose of this function is to check if the fitted model class is supported by DHARMa. The function additionally checks for properties of the fitted model that could create problems for calculating residuals or working with the results in DHARMa.
 #'
+#' GLMMadaptive beta-binomial models with more than one trial per observation require GLMMadaptive >= 0.9-9; earlier versions simulate a single trial regardless of the response.
+#'
 #'
 #' @keywords internal
 checkModel <- function(fittedModel, stop = F){
@@ -45,6 +47,12 @@ checkModel <- function(fittedModel, stop = F){
   if(class(fittedModel)[1] == "brmsfit") warning("DHARMa: only simple brms models are supported as of DHARMa version 0.5.0. This includes all models you could also fit with glmmTMB. Multivariate models (multi-response, structural equation models, multinomial) are not supported. DHARMa doesn't check if your model can reliably be checked or not. ")
 
   if(inherits(fittedModel, "gam") && inherits(fittedModel$family, "family") && fittedModel$family$family %in% c("Multivariate normal", "multinom", "Cox PH")) stop("DHARMa: gam models with the families mvn(), multinom() and cox.ph() are not supported.")
+
+  # #565: earlier GLMMadaptive versions simulate one trial for grouped beta-binomial responses.
+  if(inherits(fittedModel, "MixMod") && getFamily(fittedModel)$family == "beta binomial" &&
+     utils::packageVersion("GLMMadaptive") < "0.9-9" && any(getTrials(fittedModel) > 1)){
+    stop("DHARMa: simulations of GLMMadaptive beta.binomial() models with more than one trial are wrong in GLMMadaptive < 0.9-9; please update to GLMMadaptive >= 0.9-9 (https://github.com/drizopoulos/GLMMadaptive).")
+  }
 
   # see #339 (GEE objects inherit glm methods, but simulations ignore the GEE structure)
   if(inherits(fittedModel, "gee")) warning("DHARMa: GEE models are not supported. Simulations (if they run at all) are drawn from the marginal GLM and ignore the working correlation and the scale parameter. Plots of residuals against fitted values and predictors can show problems in the mean structure, but the tests assume independent data with the GLM dispersion and will therefore flag overdispersion and within-cluster correlation that the GEE accounts for. See https://github.com/florianhartig/DHARMa/issues/339")

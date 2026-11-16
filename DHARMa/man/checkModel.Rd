@@ -16,5 +16,7 @@ The function checks if the fitted model is supported by DHARMa, and if there are
 }
 \details{
 The main purpose of this function is to check if the fitted model class is supported by DHARMa. The function additionally checks for properties of the fitted model that could create problems for calculating residuals or working with the results in DHARMa.
+
+GLMMadaptive beta-binomial models with more than one trial per observation require GLMMadaptive >= 0.9-9; earlier versions simulate a single trial regardless of the response.
 }
 \keyword{internal}
