@@ -130,4 +130,21 @@ test_that("different form arguments in plotResiduals work",
           }
 )
 
+test_that("plotQQunif names over- and underdispersion (#563)",
+          {
+            simulationOutput = simulateResiduals(glm(observedResponse ~ Environment1, family = "poisson", data = createData(50)))
+            legendText = function(statistic, p.value){
+              out = NULL
+              local_mocked_bindings(testDispersion = function(...) list(statistic = c(dispersion = statistic), p.value = p.value),
+                                    legend = function(x, legend, text.col, ...) out <<- c(legend, text.col))
+              plotQQunif(simulationOutput, testUniformity = FALSE, testOutliers = FALSE)
+              out
+            }
+            expect_equal(legendText(1.5, 0.001), c("Overdispersion: p= 0.001", getOption("DHARMaSignalColor")))
+            expect_equal(legendText(0.5, 0.001), c("Underdispersion: p= 0.001", getOption("DHARMaSignalColor")))
+            expect_equal(legendText(1.5, 0.3), c("Dispersion test: p= 0.3", "Deviation  n.s.", "black"))
+            expect_equal(legendText(NA, NA), c("Dispersion test: p= NA", "Deviation  not available", "black"))
+          }
+)
+
 

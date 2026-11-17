@@ -56,6 +56,8 @@ NOTE: for more news about the package, see https://github.com/florianhartig/DHAR
 
 * GEE models (class `gee`, e.g. `geepack::geeglm`) now give a warning that they are not supported (#339).
 
+* `plotQQunif()` / `plot.DHARMa()`: a significant dispersion test is labelled "Overdispersion: p= ..." or "Underdispersion: p= ..." instead of "Dispersion test: p= ..." and "Deviation significant" (#563).
+
 
 # DHARMa 0.5.1
 
