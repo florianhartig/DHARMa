@@ -21,7 +21,7 @@ Please write issues so that they are understandable without earlier discussions.
 
 ### Submitting pull requests
 
-Please open or comment on an issue before you start working on a pull request, so that the approach can be discussed before you invest time in an implementation. This avoids situations where a pull request cannot be merged because of design conflicts that could have been resolved earlier. Only trivial fixes (e.g., typos or a factual error in the documentation) can go directly to a pull request. See [Pull request workflow](#pull-request-workflow) below.
+Please open or comment on an issue before you start working on a pull request, so that the approach can be discussed before you invest time in an implementation. This avoids situations where a pull request cannot be merged because of design conflicts that could have been resolved earlier. Only trivial fixes (e.g., typos or a factual error in the documentation) can go directly to a pull request. Other pull requests from contributors outside the DHARMa team may be closed without detailed review if they were not discussed in an issue first, or if reviewing them would take more effort than they are likely to add, whether or not AI was used. See [Pull request workflow](#pull-request-workflow) below.
 
 When working on changes, note that there is extensive code for tests and development purposes outside the package in the folder `Code/` of this repository (see the [README](Code/README.md) there for its structure). You may find useful context there. Changes to `Code/` follow the same workflow.
 
@@ -41,7 +41,7 @@ Using AI tools as a personal aid during development is a matter of individual ch
 
 If you are unsure whether your contribution complies with this policy, ask yourself: can you explain every line of your proposed change and its consequences for the rest of the codebase? If not, please do not submit it as a pull request — an issue describing the problem or idea is a better starting point.
 
-For everyone, including the DHARMa team: if AI tools wrote substantial parts of your code or text, please mention this briefly in your issue, pull request, comment or commit (one sentence is enough, e.g., "Code drafted with an AI assistant, checked and tested by me."; in commits, use a trailer such as `Assisted-by: <tool> (<model>)`). Instructions for AI coding agents, including those used by the DHARMa team, are in [AGENTS.md](AGENTS.md).
+For everyone, including the DHARMa team: if AI tools wrote substantial parts of your code or text, you must say so briefly in your issue, pull request, comment or commit (one sentence is enough, e.g., "Code drafted with an AI assistant, checked and tested by me."; in commits, use a trailer such as `Assisted-by: <tool> (<model>)`). Instructions for AI coding agents, including those used by the DHARMa team, are in [AGENTS.md](AGENTS.md).
 
 ## Pull request workflow
 

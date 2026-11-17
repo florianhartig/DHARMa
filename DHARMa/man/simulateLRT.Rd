@@ -60,7 +60,7 @@ dat <- createData(sampleSize = 200, randomEffectVariance = 1)
 m1 = glmer(observedResponse ~ Environment1 + (1|group), data = dat, family = "poisson")
 m0 = glm(observedResponse ~ Environment1 , data = dat, family = "poisson")
 
-\dontrun{
+\donttest{
 # run LRT - n should be increased to at least 250 for a real study
 out = simulateLRT(m0, m1, n = 10)
 

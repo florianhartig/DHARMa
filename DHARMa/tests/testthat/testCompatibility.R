@@ -1,4 +1,7 @@
 test_that("Conditional simulations have a smaller spread than unconditional simulations", {
+  skip_if_not_installed("glmmTMB")
+  skip_if_not_installed("spaMM")
+  skip_if_not_installed("GLMMadaptive")
 
   # create data
   # poisson, because required for GLMMadaptive; increased RE variance
@@ -37,6 +40,9 @@ test_that("Conditional simulations have a smaller spread than unconditional simu
 
 
 test_that("Unconditional predictions are the default in DHARMa", {
+  skip_if_not_installed("glmmTMB")
+  skip_if_not_installed("spaMM")
+  skip_if_not_installed("GLMMadaptive")
 
   # create data
   # poisson, because required for GLMMadaptive; increased RE variance
@@ -156,6 +162,9 @@ test_that("binomial models with cbind() response: prior weights stop (#568), int
 
 
 test_that("getFittedResponse returns fitted values on the scale of the observed response", {
+  skip_if_not_installed("glmmTMB")
+  skip_if_not_installed("spaMM")
+  skip_if_not_installed("GLMMadaptive")
 
   set.seed(123)
   nTrials = 20
@@ -202,6 +211,8 @@ test_that("getFittedResponse returns fitted values on the scale of the observed 
 
 
 test_that("refitting to the observed response reproduces the fit (#571, #599, #621)", {
+  skip_if_not_installed("glmmTMB")
+  skip_if_not_installed("spaMM")
   set.seed(1)
   n = 60
   testData = data.frame(x = runif(n), N = sample(5:15, n, TRUE))

@@ -61,7 +61,7 @@ runBenchmarks <- function(calculateStatistics, controlValues = NULL, nRep = 10, 
   # Calculations of summaries
 
   # fixes #628 (one statistic gives a vector instead of a matrix)
-  simulations = lapply(simulations, function(s) if(is.null(dim(s))) matrix(s, nrow = 1) else s)
+  simulations = lapply(simulations, function(s) if(is.null(dim(s))) matrix(s, nrow = 1, dimnames = list(names(s)[1], NULL)) else s)
 
   if(is.null(controlValues)) controlValues = c("N")
 
@@ -78,7 +78,7 @@ runBenchmarks <- function(calculateStatistics, controlValues = NULL, nRep = 10, 
 
   # function for aggregation
   aggreg <- function(f,...) {
-    ret <- aggregate(x[,- c(ncol(x) - 1, ncol(x))], by = list(x$controlValues), f)
+    ret <- aggregate(x[,- c(ncol(x) - 1, ncol(x)), drop = FALSE], by = list(x$controlValues), f)
     colnames(ret)[1] = "controlValues"
     return(ret)
   }
@@ -189,14 +189,6 @@ testPDistribution <- function(x, plot = TRUE, main = "p distribution \n expected
   abline(h=1, col = "red")
   return(out)
 }
-
-
-# if(plot == TRUE){
-#   oldpar <- par(mfrow = c(4,4))
-#   hist(out, breaks = 50, col = "red", main = paste("mean of", nSim, "simulations"))
-#   for (i in 1:min(nSim, 15)) hist(out[i,], breaks = 50, freq = FALSE, main = i)
-#   par(oldpar)
-# }
 
 
 
