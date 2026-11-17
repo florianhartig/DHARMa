@@ -4,7 +4,7 @@ Steps marked [maintainer] need e-mails sent to the maintainer; all other steps c
 
 ## Prepare release
 
-* Run the GitHub Actions workflow "Reverse dependency check" early (Actions tab, "Run workflow")
+* Run the GitHub Actions workflow "Reverse dependency check" (`.github/workflows/recheck.yml`) early (Actions tab, "Run workflow"; input `which`: `most` also checks packages that have DHARMa in Suggests, `strong` only Depends/Imports/LinkingTo)
   * If an intended change breaks packages: inform their maintainers with suggested changes at least 2 weeks before submitting
 * Check current CRAN issues at <https://cran.r-project.org/web/checks/check_results_DHARMa.html>
 * All GitHub issues and pull requests in the release milestone resolved, or postponed to the next release?

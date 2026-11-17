@@ -64,7 +64,7 @@ simulateLRT<-function(m0, m1, n = 250, seed = 123, plot = TRUE, suppressWarnings
 
   out$simulatedLR = rep(NA, n)
 
-  if(saveModels == TRUE) out$saveModels == list()
+  if(saveModels == TRUE) out$saveModels = list()
 
   for (i in 1:n){
 

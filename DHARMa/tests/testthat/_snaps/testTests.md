@@ -133,22 +133,6 @@
 
 ---
 
-    list(statistic = NaN, p.value = 1)
-
----
-
-    list(statistic = NaN, p.value = 1)
-
----
-
-    list(statistic = NaN, p.value = 1)
-
----
-
-    list(statistic = NaN, p.value = 1)
-
----
-
     list(statistic = 1.0070968858676, p.value = 0.952)
 
 ---

@@ -34,6 +34,7 @@ test_that("Conditional, unconditional and user-specified simulations work for lm
 
 
 test_that("Conditional, unconditional and user-specified simulations work for spaMM", {
+  skip_if_not_installed("spaMM")
 
   testData = createData(family = gaussian())
   fittedModel <- spaMM::HLfit(observedResponse ~ Environment1 + (1|group), data = testData)
@@ -50,6 +51,7 @@ test_that("Conditional, unconditional and user-specified simulations work for sp
 
 
 test_that("Conditional, unconditional and user-specified simulations work for glmmTMB", {
+  skip_if_not_installed("glmmTMB")
 
   testData = createData(family = gaussian())
   fittedModel <- glmmTMB::glmmTMB(observedResponse ~ Environment1 + (1|group), data = testData)
@@ -65,6 +67,7 @@ test_that("Conditional, unconditional and user-specified simulations work for gl
 
 
 test_that("Conditional, unconditional and user-specified simulations work for GLMMadaptive", {
+  skip_if_not_installed("GLMMadaptive")
 
   testData = createData(family = binomial())
   fittedModel <- GLMMadaptive::mixed_model(fixed = observedResponse ~ Environment1, random = ~1|group, data = testData, family = binomial)
@@ -110,6 +113,8 @@ test_that("refit = TRUE: k/n binomial residuals are on the scale of the number o
 
 
 test_that("integerResponse is detected from the simulations; beta-binomial names count as binomial (#620)", {
+  skip_if_not_installed("glmmTMB")
+  skip_if_not_installed("GLMMadaptive")
 
   testData = createData(sampleSize = 100, family = poisson())
   fittedModel = glmmTMB::glmmTMB(observedResponse ~ Environment1, family = glmmTMB::nbinom12, data = testData)
@@ -136,6 +141,25 @@ test_that("simulateResiduals and recalculateResiduals: matched method, refit = T
   expect_equal(grouped$method, "traditional")
   expect_equal(grouped$scaledResiduals, recalculateResiduals(simulationOutput, group = testData$group, method = "traditional")$scaledResiduals)
   expect_error(recalculateResiduals(simulationOutput, group = testData$group, rotation = "estimated"), "rotation")
+})
+
+
+test_that("refit = TRUE: simulatedResponse on the scale of observedResponse, also after grouping (#632, #610)", {
+
+  set.seed(1)
+  testData = data.frame(x = runif(200), group = factor(rep(1:20, 10)))
+  testData$k = rbinom(200, 10, plogis(2 + testData$x))
+  testData$p = testData$k / 10
+  fittedModels = list(glm(cbind(k, 10 - k) ~ x, family = binomial, data = testData),
+                      glm(p ~ x, family = binomial, weights = rep(10, 200), data = testData))
+  for(fittedModel in fittedModels){
+    res = simulateResiduals(fittedModel, n = 50, refit = TRUE)
+    expect_equal(res$simulatedResponse, simulateResiduals(fittedModel, n = 50)$simulatedResponse, ignore_attr = TRUE)
+    expect_lt(abs(testGeneric(res, summary = mean, plot = FALSE)$statistic - 1), 0.01)
+    grouped = recalculateResiduals(res, group = testData$group)
+    expect_equal(dim(grouped$simulatedResponse), c(20, 50))
+    expect_gt(testGeneric(grouped, summary = mean, plot = FALSE)$p.value, 0.05)
+  }
 })
 
 test_that("seed: same residuals in fresh sessions and with extra random draws (#630, #496)", {
