@@ -150,7 +150,7 @@ plotQQunif <- function(simulationOutput, testUniformity = TRUE, testOutliers = T
 #' The function creates a generic residual plot with either spline or quantile regression to highlight patterns in the residuals. Outliers are marked in star/asterisk form and highlighted in red if the outlier test is significant.
 #'
 #' @param simulationOutput an object, usually a DHARMa object, from which residual values can be extracted. Alternatively, a vector with residuals or a fitted model can be provided, which will then be transformed into a DHARMa object.
-#' @param form optional predictor(s) against which the residuals should be plotted. Default is to use the predicted(simulationOutput). Recommended to specify as formula. Use \code{form = ~.} to plot against all predictors. See details.
+#' @param form optional predictor(s) against which the residuals should be plotted. Default is the fitted predicted response (fittedPredictedResponse; for binomial models with more than one trial, the expected number of successes). Recommended to specify as formula. Use \code{form = ~.} to plot against all predictors. See details.
 #' @param quantreg whether to perform a quantile regression based on [testQuantiles] or a smooth spline around the mean. Default NULL chooses T for nObs < 10000, and F otherwise.
 #' @param rank if T, the values provided in form will be rank transformed. This will usually make patterns easier to spot visually, especially if the distribution of the predictor is skewed. If form is a factor, this has no effect.
 #' @param asFactor should a numeric predictor provided in form be treated as a factor. Default is to choose this for < 10 unique values, as long as enough predictions are available to draw a boxplot.

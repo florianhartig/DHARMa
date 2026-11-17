@@ -23,7 +23,7 @@ Wrapper to get the fitted/predicted values of the model on the same scale as the
 \details{
 For most models, this is identical to \link{getFitted}. The exception are binomial and beta-binomial models with more than one trial per observation (k/n models), specified either as cbind(successes, failures) or as proportions with the number of trials provided via weights. For these models, \link{getObservedResponse} and \link{getSimulations} return the number of successes, whereas \link{getFitted} returns the predicted proportions. getFittedResponse returns the predicted proportions multiplied by the number of trials, i.e. the expected number of successes.
 
-The fitted response is used by \link{testDispersion} (refit = FALSE) to calculate the raw residuals (observed or simulated response minus fitted response).
+\link{simulateResiduals} stores the fitted response as fittedPredictedResponse, which is used e.g. by \link{testDispersion} (refit = FALSE) to calculate the raw residuals (observed or simulated response minus fitted response), and as default predictor in \link{plotResiduals} and \link{testQuantiles}.
 }
 \examples{
 testData = createData(sampleSize = 400, family = gaussian())

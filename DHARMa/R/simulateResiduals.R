@@ -76,7 +76,7 @@ simulateResiduals <- function(fittedModel, n = 250, simulateREs = c("conditional
 
   out$problems = list()
 
-  out$fittedPredictedResponse = getFitted(fittedModel)
+  out$fittedPredictedResponse = getFittedResponse(fittedModel) # fixes #502 (k/n binomial: expected number of successes, as observedResponse)
   out$fittedFixedEffects = getFixedEffects(fittedModel)
   out$fittedResiduals = getResiduals(fittedModel)
 
@@ -129,7 +129,7 @@ simulateResiduals <- function(fittedModel, n = 250, simulateREs = c("conditional
 
         refittedModel <- getRefit(fittedModel, simObserved, ...)
 
-        out$refittedPredictedResponse[,i] <- getFitted(refittedModel)
+        out$refittedPredictedResponse[,i] <- getFittedResponse(refittedModel)
         out$refittedFixedEffects[,i] <- getFixedEffects(refittedModel)
         out$refittedResiduals[,i] <- getResiduals(refittedModel)
         out$refittedPearsonResiduals[,i] <- getPearsonResiduals(refittedModel)
