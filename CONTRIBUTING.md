@@ -38,8 +38,8 @@ The maintainer must be able to understand, evaluate, and take long-term responsi
 This policy covers issues, pull requests and comments submitted autonomously by AI agents, as well as contributions where the submitter does not have a full, independent understanding of the proposed changes. Having a tool post a contribution at your explicit request, after you have checked its content, does not count as autonomous.
 
 Using AI tools as a personal aid during development is a matter of individual choice. However, any contribution must be authored and understood by a human who can explain, defend, and iterate on the proposed changes.
-If you are unsure whether your contribution complies with this policy, ask yourself: can you explain every line of your proposed change and its consequences for the rest of the codebase? If not, please do not submit it as a pull request — an issue describing the problem or idea is a better starting point.
 
+If you are unsure whether your contribution complies with this policy, ask yourself: can you explain every line of your proposed change and its consequences for the rest of the codebase? If not, please do not submit it as a pull request — an issue describing the problem or idea is a better starting point.
 
 For everyone, including the DHARMa team: if AI tools wrote substantial parts of your code or text, you must say so briefly in your issue, pull request, comment or commit (one sentence is enough, e.g., "Code drafted with an AI assistant, checked and tested by me."; in commits, use a trailer such as `Assisted-by: <tool> (<model>)`). Instructions for AI coding agents, including those used by the DHARMa team, are in [AGENTS.md](AGENTS.md).
 
