@@ -2,7 +2,7 @@
 skip_on_cran()
 #skip_on_ci()
 
-set.seed(1234)
+set.seed(2)
 
 doPlots = F
 

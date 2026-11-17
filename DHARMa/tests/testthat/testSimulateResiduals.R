@@ -137,3 +137,23 @@ test_that("simulateResiduals and recalculateResiduals: matched method, refit = T
   expect_equal(grouped$scaledResiduals, recalculateResiduals(simulationOutput, group = testData$group, method = "traditional")$scaledResiduals)
   expect_error(recalculateResiduals(simulationOutput, group = testData$group, rotation = "estimated"), "rotation")
 })
+
+test_that("seed: same residuals in fresh sessions and with extra random draws (#630, #496)", {
+  fittedModel = glm(carb ~ wt, family = poisson, data = mtcars)
+
+  # no random state, as in a fresh R session (#630)
+  if(exists(".Random.seed", envir = globalenv())) rm(".Random.seed", envir = globalenv())
+  res = residuals(simulateResiduals(fittedModel, n = 50))
+  expect_false(exists(".Random.seed", envir = globalenv()))
+  runif(1)
+  expect_equal(residuals(simulateResiduals(fittedModel, n = 50)), res)
+
+  # extra random draws after the simulations and refits do not change the residuals (#496)
+  resRefit = residuals(simulateResiduals(fittedModel, n = 10, refit = TRUE))
+  getSimulationsOrig = getSimulations
+  getRefitOrig = getRefit
+  local_mocked_bindings(getSimulations = function(...) {x = getSimulationsOrig(...); runif(100); x},
+                        getRefit = function(...) {x = getRefitOrig(...); runif(3); x})
+  expect_equal(residuals(simulateResiduals(fittedModel, n = 50)), res)
+  expect_equal(residuals(simulateResiduals(fittedModel, n = 10, refit = TRUE)), resRefit)
+})

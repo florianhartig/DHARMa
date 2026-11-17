@@ -4,6 +4,8 @@ NOTE: for more news about the package, see https://github.com/florianhartig/DHAR
 
 ## Bugfixes
 
+* With the same `seed`, results are identical in a fresh R session and in a session with an existing random state, and the randomization of residuals in `simulateResiduals()` no longer depends on the random numbers used by simulations and refits; simulations and residuals therefore differ from earlier versions (#630, #496).
+
 * `testCategorical()` no longer fails for factors with unused levels (#348, #616).
 
 * `plotResiduals()` applies transformations in `form`, e.g. `~log(x)`; `~x + I(x^2)` gives two plots (#607).
