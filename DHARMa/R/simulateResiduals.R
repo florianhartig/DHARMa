@@ -6,7 +6,7 @@
 #' @param n number of simulations. The smaller the number, the higher the stochastic error on the residuals. Also, for very small n, discretization artefacts can influence the tests. Default is 250, which is a relatively safe value. You can consider increasing to 1000 to stabilize the simulated values.
 #' @param simulateREs decides which REs / hierarchical levels should be re-simulated. If \code{conditional}, simulations are done conditional on all fitted random effects (default). If \code{unconditional}, all REs or hierarchical levels are re-simulated. Setting \code{user-specified} allows supplying package-specific arguments to decide which REs are to be re-simulated. If none are supplied, the defaults of the respective fitted model object is used. See details and further comments in [getSimulations].
 #' @param refit if FALSE, new data will be simulated and scaled residuals will be created by comparing observed data with new data. If TRUE, the model will be refitted on the simulated data (parametric bootstrap), and scaled residuals will be created by comparing observed with refitted residuals.
-#' @param integerResponse if TRUE, noise will be added to the residuals to maintain uniform expectations for integer responses (such as Poisson or Binomial). If NULL (default), it is TRUE if all simulated values are whole numbers (with refit = TRUE, after multiplying k/n binomial proportions by the number of trials).
+#' @param integerResponse if TRUE, noise will be added to the residuals to maintain uniform expectations for integer responses (such as Poisson or Binomial). If NULL (default), it is TRUE if all simulated values are whole numbers.
 #' @param plot if TRUE, [plot.DHARMa] will be directly run after the residuals have been calculated.
 #' @param ... further parameters to pass on to the simulate and update function of the model object (via DHARMa::getSimulations and DHARMa::getRefit). If simulateREs = "user-specified", an important use of this is to specify whether simulations should be conditional on all, some or none of the current random effect estimates, e.g. via re.form. Note that not all models support syntax to specify conditional or unconditional simulations. See details and [getSimulations].
 #' @param seed the random seed to be used within DHARMa. The default setting, recommended for most users, is to keep the random seed on a fixed value of 123. This means that you will always get the same randomization and thus the same result when running the same code. If NULL, no new seed is set, but previous random state will be restored after simulation. If FALSE, no seed is set, and random state will not be restored. The latter two options are only recommended for simulation experiments. See vignette for details.
@@ -23,7 +23,7 @@
 #'
 #' 1. if refit = FALSE (default), new data is simulated from the fitted model, and residuals are calculated by comparing the observed data to the new data.
 #'
-#' 2. if refit = TRUE, a parametric bootstrap is performed, meaning that the model is refit on the new data, and residuals are created by comparing observed residuals against refitted residuals. I advise against using this method per default (see more comments in the vignette), unless you are really sure that you need it.
+#' 2. if refit = TRUE, a parametric bootstrap is performed, meaning that the model is refit on the new data, and residuals are created by comparing observed residuals against refitted residuals. As for refit = FALSE, the simulated responses are stored on the scale of the observed response; the simulations in the format used for the refits are returned by [getSimulations] (type = "refit"). I advise against using this method per default (see more comments in the vignette), unless you are really sure that you need it.
 #'
 #' \strong{Residuals per group}: In many situations, it can be useful to look at residuals per group, e.g. to see how much the model over / underpredicts per plot, year or subject. To do this, use [recalculateResiduals], together with a grouping variable (see also help).
 #'
@@ -112,13 +112,14 @@ simulateResiduals <- function(fittedModel, n = 250, simulateREs = c("conditional
     out$refittedResiduals <- matrix(nrow = out$nObs, ncol = n)
     out$refittedPearsonResiduals <- matrix(nrow = out$nObs, ncol = n)
 
-    out$simulatedResponse <- getSimulations(fittedModel, nsim = n,
-                                            simulateREs = simulateREs,
-                                           type = "refit", ...)
+    refitResponse <- getSimulations(fittedModel, nsim = n,
+                                    simulateREs = simulateREs,
+                                    type = "refit", ...)
+    out$simulatedResponse <- do.call(cbind, lapply(refitResponse, getResponseScale, object = fittedModel))
 
     for (i in 1:n){
 
-      simObserved <- out$simulatedResponse[[i]]
+      simObserved <- refitResponse[[i]]
 
       refitTry = try({
 
@@ -160,7 +161,7 @@ simulateResiduals <- function(fittedModel, n = 250, simulateREs = c("conditional
 
     # fixes #598 (k/n binomial: randomize residuals on the scale of the number of successes)
     trials = getTrials(fittedModel)
-    if(is.null(integerResponse)) integerResponse = isIntegerValued(out$simulatedResponse, trials)
+    if(is.null(integerResponse)) integerResponse = isIntegerValued(out$simulatedResponse)
     out$fittedResiduals = out$fittedResiduals * trials
     out$refittedResiduals = out$refittedResiduals * trials
 
@@ -277,11 +278,11 @@ recalculateResiduals <- function(simulationOutput, group = NULL, aggregateBy = s
     if (length(out$observedResponse) < 2) stop("Calculations stopped - number of residuals < 2")
     if (length(out$observedResponse) < 10) warning("Residual calculations resulted in less than 10 residuals. Tests on such a low number of residuals rarely make sense.")
     out$fittedPredictedResponse = aggregateByGroup(simulationOutput$fittedPredictedResponse)
+    out$simulatedResponse = apply(simulationOutput$simulatedResponse, 2,
+                                  aggregateByGroup) # fixes #610 (also for refit = TRUE)
 
     if (simulationOutput$refit == FALSE){
 
-      out$simulatedResponse = apply(simulationOutput$simulatedResponse, 2,
-                                    aggregateByGroup)
       out$scaledResiduals = getQuantile(simulations = out$simulatedResponse ,
                                         observed = out$observedResponse,
                                         integerResponse = simulationOutput$integerResponse,

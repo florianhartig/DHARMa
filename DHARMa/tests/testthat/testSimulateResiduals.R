@@ -142,3 +142,22 @@ test_that("simulateResiduals and recalculateResiduals: matched method, refit = T
   expect_equal(grouped$scaledResiduals, recalculateResiduals(simulationOutput, group = testData$group, method = "traditional")$scaledResiduals)
   expect_error(recalculateResiduals(simulationOutput, group = testData$group, rotation = "estimated"), "rotation")
 })
+
+
+test_that("refit = TRUE: simulatedResponse on the scale of observedResponse, also after grouping (#632, #610)", {
+
+  set.seed(1)
+  testData = data.frame(x = runif(200), group = factor(rep(1:20, 10)))
+  testData$k = rbinom(200, 10, plogis(2 + testData$x))
+  testData$p = testData$k / 10
+  fittedModels = list(glm(cbind(k, 10 - k) ~ x, family = binomial, data = testData),
+                      glm(p ~ x, family = binomial, weights = rep(10, 200), data = testData))
+  for(fittedModel in fittedModels){
+    res = simulateResiduals(fittedModel, n = 50, refit = TRUE)
+    expect_equal(res$simulatedResponse, simulateResiduals(fittedModel, n = 50)$simulatedResponse, ignore_attr = TRUE)
+    expect_lt(abs(testGeneric(res, summary = mean, plot = FALSE)$statistic - 1), 0.01)
+    grouped = recalculateResiduals(res, group = testData$group)
+    expect_equal(dim(grouped$simulatedResponse), c(20, 50))
+    expect_gt(testGeneric(grouped, summary = mean, plot = FALSE)$p.value, 0.05)
+  }
+})
