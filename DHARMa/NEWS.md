@@ -40,6 +40,8 @@ NOTE: for more news about the package, see https://github.com/florianhartig/DHAR
 
 * `runBenchmarks()` no longer fails if `calculateStatistics` returns a single value (#628).
 
+* A value of `options(DHARMaSignalColor = ...)` set before loading DHARMa is no longer overwritten when the package is loaded (#613).
+
 * `simulateResiduals(refit = TRUE)` stores `simulatedResponse` as a matrix on the scale of the observed response, as for `refit = FALSE`, and `recalculateResiduals()` aggregates it; previously, `testGeneric()` gave wrong results with `refit = TRUE` for k/n binomial models and for factor responses of glm and lme4 models, `testZeroInflation()` for `cbind()` responses, and both after grouping (#610, #632, #637).
 
 ## Minor changes
@@ -54,9 +56,11 @@ NOTE: for more news about the package, see https://github.com/florianhartig/DHAR
 
 * `plotResiduals()` / `testCategorical()`: boxplots for categorical predictors show residuals as jittered points with outliers marked (unless `smoothScatter = TRUE`, default for > 10,000 observations; jitter set by the new argument `jitterPoints`, also for numeric predictors); further arguments such as `ylab` are passed to the boxplot (#562, #616).
 
-* `testCategorical()`: significant boxes and titles use `DHARMaSignalColor` instead of red (#616).
+* `testCategorical()`, `testOutliers()`, `testDispersion()` (with `refit = TRUE`), `testTemporalAutocorrelation()` and `testSpatialAutocorrelation()` mark significant results in their plots with `DHARMaSignalColor` instead of red (#613, #616).
 
 * GEE models (class `gee`, e.g. `geepack::geeglm`) now give a warning that they are not supported (#339).
+
+* `sfsmisc`, used by `createData()` for temporal and spatial autocorrelation, is now in Imports instead of Suggests (#594).
 
 
 # DHARMa 0.5.1

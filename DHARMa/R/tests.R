@@ -58,18 +58,6 @@ testUniformity <- function(simulationOutput, alternative = c("two.sided", "less"
 }
 
 
-# Experimental
-testBivariateUniformity <- function(simulationOutput, alternative = c("two.sided", "less", "greater"), plot = TRUE){
-
-  simulationOutput = ensureDHARMa(simulationOutput, convert = T)
-
-  #out <- suppressWarnings(ks.test(simulationOutput$scaledResiduals, 'punif', alternative = alternative))
-  #if(plot == T) plotQQunif(simulationOutput = simulationOutput)
-  out = NULL
-  return(out)
-}
-
-
 
 #' Test for quantiles
 #'
@@ -257,7 +245,7 @@ testOutliers <- function(simulationOutput, alternative = c("two.sided", "greater
                     "Outlier test n.s.")
 
       title(main = main, cex.main = 1,
-            col.main = ifelse(out$p.value <= 0.05, "red", "black"))
+            col.main = ifelse(out$p.value <= 0.05, .Options$DHARMaSignalColor, "black"))
 
     }
 
@@ -328,8 +316,6 @@ testOutliers <- function(simulationOutput, alternative = c("two.sided", "greater
       hist(frequBoot, xlim = range(frequBoot, outliers), col = "lightgrey", main = "Bootstrapped outlier frequency \n grey = simulated, red = observed, black = simulation mean", cex.main = 0.8)
       abline(v = mean(frequBoot), col = 1, lwd = 2)
       abline(v = outliers, col = "red", lwd = 2)
-
-      # legend("center", c(paste("p=", round(out$p.value, digits = 5)), paste("Deviation ", ifelse(out$p.value < 0.05, "significant", "n.s."))), text.col = ifelse(out$p.value < 0.05, "red", "black" ))
     }
 
     if(plot == T) {
@@ -341,7 +327,7 @@ testOutliers <- function(simulationOutput, alternative = c("two.sided", "greater
                     "Outlier test n.s.")
 
       title(main = main, cex.main = 1,
-            col.main = ifelse(out$p.value <= 0.05, "red", "black"))
+            col.main = ifelse(out$p.value <= 0.05, .Options$DHARMaSignalColor, "black"))
 
     }
   }
@@ -542,7 +528,7 @@ testDispersion <- function(simulationOutput, alternative = c("two.sided", "great
                       "Dispersion test n.s.")
 
         title(main = main, cex.main = 1,
-              col.main = ifelse(isTRUE(out$p.value <= 0.05), "red", "black"))
+              col.main = ifelse(isTRUE(out$p.value <= 0.05), .Options$DHARMaSignalColor, "black"))
       }
     }
 
@@ -750,7 +736,7 @@ testTemporalAutocorrelation <- function(simulationOutput, time, alternative = c(
     legend("topright",
            c(paste(out$method, " p=", round(out$p.value, digits = 5)),
              paste("Deviation ", ifelse(out$p.value < 0.05, "significant", "n.s."))),
-           text.col = ifelse(out$p.value < 0.05, "red", "black" ), bty="n")
+           text.col = ifelse(out$p.value < 0.05, .Options$DHARMaSignalColor, "black" ), bty="n")
 
   }
 
@@ -855,7 +841,7 @@ testSpatialAutocorrelation <- function(simulationOutput, x = NULL, y  = NULL, di
 
     mtext(paste0(out$method, "\n",
                   " p = ", round(out$p.value, digits = 5), ", Deviation ", ifelse(out$p.value < 0.05, "significant", "n.s.")),
-          col = ifelse(out$p.value < 0.05, "red", "black"),
+          col = ifelse(out$p.value < 0.05, .Options$DHARMaSignalColor, "black"),
           cex = 0.8,
           side = 3, line = 0)
 

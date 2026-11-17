@@ -14,7 +14,7 @@
 
 <!-- One short bullet per check: tests added and run (do they fail without the change?), manual checks or reproducible examples, and what you did not check. No CI status (it is shown on the pull request). -->
 
-<!-- If AI tools wrote substantial parts of the code or text, please say so in one sentence at the end. -->
+<!-- If AI tools wrote substantial parts of the code or text, you must say so in one sentence at the end. -->
 
 <!--
 Before submitting, please check:
