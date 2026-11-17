@@ -78,7 +78,7 @@ runBenchmarks <- function(calculateStatistics, controlValues = NULL, nRep = 10, 
 
   # function for aggregation
   aggreg <- function(f,...) {
-    ret <- aggregate(x[,- c(ncol(x) - 1, ncol(x))], by = list(x$controlValues), f)
+    ret <- aggregate(x[,- c(ncol(x) - 1, ncol(x)), drop = FALSE], by = list(x$controlValues), f)
     colnames(ret)[1] = "controlValues"
     return(ret)
   }
