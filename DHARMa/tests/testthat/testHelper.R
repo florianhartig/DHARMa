@@ -140,5 +140,6 @@ test_that("runBenchmarks", {
   out = runBenchmarks(function(control) runif(1), controlValues = c(0, 1), nRep = 3)
   expect_equal(dim(out$simulations), c(6, 3))
   expect_no_error(plot(out))
+  expect_equal(colnames(runBenchmarks(function() c(p = runif(1)), nRep = 3)$simulations)[1], "p")
 
 })

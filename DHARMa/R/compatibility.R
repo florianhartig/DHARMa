@@ -48,17 +48,6 @@ checkModel <- function(fittedModel, stop = F){
 
   # see #339 (GEE objects inherit glm methods, but simulations ignore the GEE structure)
   if(inherits(fittedModel, "gee")) warning("DHARMa: GEE models are not supported. Simulations (if they run at all) are drawn from the marginal GLM and ignore the working correlation and the scale parameter. Plots of residuals against fitted values and predictors can show problems in the mean structure, but the tests assume independent data with the GLM dispersion and will therefore flag overdispersion and within-cluster correlation that the GEE accounts for. See https://github.com/florianhartig/DHARMa/issues/339")
-
-  # if(hasNA(fittedModel)) message("It seems there were NA values in the data used for fitting the model. This can create problems if you supply additional data to DHARMa functions. See ?checkModel for details")
-
-  # TODO: check as implemented does not work reliably, check if there is any other option to check for NA
-  # #' @example inst/examples/checkModelHelp.R
-
-  #  NA values in the data: checkModel will detect if there were NA values in the data frame. For NA values, most regression models will remove the entire observation from the data. This is not a problem for DHARMa - residuals are then only calculated for non-NA rows in the data. However, if you provide additional predictors to DHARMa, for example to plot residuals against a predictor, you will have to remove all NA rows that were also removed in the model. For most models, you can get the rows of the data that were actually used in the fit via rownames(model.frame(fittedModel))
-
-
-  #if (class(fittedModel)[1] == "gam" ) if (class(fittedModel$family)[1] == "extended.family") stop("It seems you are trying to fit a model from mgcv that was fit with an extended.family. Simulation functions for these families are not yet implemented in DHARMa. See issue https://github.com/florianhartig/DHARMa/issues/11 for updates about this")
-
 }
 
 #' get possible models
@@ -445,23 +434,6 @@ getPearsonResiduals.default <- function(object, ...) {
   )
 }
 
-# #' has NA
-# #'
-# #' checks if the fitted model excluded NA values.
-# #'
-# #' @param object a fitted model.
-# #'
-# #' @details Checks if the fitted model excluded NA values.
-# #'
-# #' @export
-
-# hasNA <- function(object){
-#   x = rownames(model.frame(object))
-#   if(length(x) < as.numeric(x[length(x) ])) return(TRUE)
-#   else return(FALSE)
-# }
-#
-
 
 #' @rdname getFamily
 #' @export
@@ -787,31 +759,7 @@ getSimulations.glmmTMB <- function (object, nsim = 1, simulateREs = c("condition
         out = as.data.frame(as.matrix(out)[,seq(1, (2*nsim), by = 2)])
       }
     }
-
-
-
-
-
-
-    # matrixResp =
-    #
-    # if(matrixResp & !is.null(ncol(newresp))){
-    #   # Hack to make the factor binomial case work
-    #   tmp = colnames(newData[[1]])
-    #   newData[[1]] = NULL
-    #   newData = cbind(newresp, newData)
-    #   colnames(newData)[1:2] = tmp
-    # } else if(!is.null(ncol(newresp))){
-    #   newData[[1]] = newresp[,1]
-    # } else {
-    #   newData[[1]] = newresp
-    # }
-
-
-    # if (out$modelClass == "glmmTMB" & ncol(simulations) == 2*n) simObserved = simulations[,(1+(2*(i-1))):(2+(2*(i-1)))]
   }
-
-  # else securityAssertion("Simulation results produced unsupported data structure", stop = TRUE)
 
   return(out)
 }
