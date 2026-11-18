@@ -130,20 +130,26 @@ test_that("different form arguments in plotResiduals work",
           }
 )
 
-test_that("plotQQunif names over- and underdispersion (#563)",
+test_that("plotQQunif legends show test results and their interpretation (#563)",
           {
             simulationOutput = simulateResiduals(glm(observedResponse ~ Environment1, family = "poisson", data = createData(50)))
-            legendText = function(statistic, p.value){
+            legendText = function(statistic, p.value, testUniformity = FALSE){
               out = NULL
+              # text of each legend line; for the arrow lines (plotmath calls), the text after the arrow
               local_mocked_bindings(testDispersion = function(...) list(statistic = c(dispersion = statistic), p.value = p.value),
-                                    legend = function(x, legend, text.col, ...) out <<- c(legend, text.col))
-              plotQQunif(simulationOutput, testUniformity = FALSE, testOutliers = FALSE)
+                                    testUniformity = function(...) list(p.value = 0.5),
+                                    legend = function(x, legend, text.col, ...) out <<- c(out, sapply(legend, function(l) if(is.call(l)) l[[length(l)]] else l), text.col))
+              plotQQunif(simulationOutput, testUniformity = testUniformity, testOutliers = FALSE)
               out
             }
-            expect_equal(legendText(1.5, 0.001), c("Dispersion ratio: 1.5", "p= 0.001 (Overdispersion)", getOption("DHARMaSignalColor")))
-            expect_equal(legendText(0.5, 0.001), c("Dispersion ratio: 0.5", "p= 0.001 (Underdispersion)", getOption("DHARMaSignalColor")))
-            expect_equal(legendText(1.5, 0.3), c("Dispersion ratio: 1.5", "p= 0.3 (n.s.)", "black"))
-            expect_equal(legendText(NA, NA), c("Dispersion ratio: NA", "p= NA (not available)", "black"))
+            expect_equal(legendText(1.5, 0.001), c("Dispersion 1.5, p=0.001", "Overdispersion", getOption("DHARMaSignalColor")))
+            expect_equal(legendText(0.5, 0.001), c("Dispersion 0.5, p=0.001", "Underdispersion", getOption("DHARMaSignalColor")))
+            expect_equal(legendText(1.5, 0.3), c("Dispersion 1.5, p=0.3", "No dispersion problem", "black"))
+            expect_equal(legendText(NA, NA), c("Dispersion NA, p=NA", "Test not available", "black"))
+            # dispersion legend below the KS test legend
+            expect_equal(legendText(1.5, 0.3, testUniformity = TRUE),
+                         c("KS test: p=0.5", "No distribution problem", "black",
+                           "", "", "", "Dispersion 1.5, p=0.3", "No dispersion problem", "black"))
           }
 )
 

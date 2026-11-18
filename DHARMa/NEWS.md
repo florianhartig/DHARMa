@@ -62,7 +62,7 @@ NOTE: for more news about the package, see https://github.com/florianhartig/DHAR
 
 * `sfsmisc`, used by `createData()` for temporal and spatial autocorrelation, is now in Imports instead of Suggests (#594).
 
-* `plotQQunif()` / `plot.DHARMa()`: the dispersion legend shows the dispersion ratio and the p-value, labelled "(Overdispersion)" or "(Underdispersion)" if significant and "(n.s.)" otherwise (#563).
+* `plotQQunif()` / `plot.DHARMa()`: the test legends interpret the result after an arrow (e.g. "Overdispersion", "No outlier problem") instead of "Deviation significant" / "n.s."; the dispersion legend shows the dispersion ratio and sits below the KS legend (#563).
 
 
 # DHARMa 0.5.1

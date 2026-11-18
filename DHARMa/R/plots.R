@@ -115,33 +115,31 @@ plotQQunif <- function(simulationOutput, testUniformity = TRUE, testOutliers = T
 
   do.call(gap::qqunif, append(list(simulationOutput$scaledResiduals), a))
 
+  # p-value and interpretation after an arrow (#563); plotmath arrow, as Unicode arrows fail in pdf()
+  testLegend = function(position, label, p, problem, noProblem, pad = NULL){
+    significant = isTRUE(p < 0.05)
+    interpretation = if(is.na(p)) "Test not available" else if(significant) problem else noProblem
+    legend(position,
+           as.expression(c(pad, paste0(label, "p=", round(p, digits = 5)),
+                           bquote(symbol("\256") ~ "" ~ .(interpretation)))), # ~ "" ~ keeps a space on cairo devices
+           text.col = if(significant) .Options$DHARMaSignalColor else "black", bty = "n")
+  }
+
   if(testUniformity == TRUE){
     temp = testUniformity(simulationOutput, plot = FALSE)
-    legend("topleft",
-           c(paste("KS test: p=", round(temp$p.value, digits = 5)),
-             paste("Deviation ", ifelse(temp$p.value < 0.05, "significant", "n.s."))),
-           text.col = ifelse(temp$p.value < 0.05, .Options$DHARMaSignalColor, "black" ), bty="n")
-
+    testLegend("topleft", "KS test: ", temp$p.value, "Distribution problem", "No distribution problem")
   }
 
   if(testOutliers == TRUE){
     temp = testOutliers(simulationOutput, plot = FALSE)
-    legend("bottomright",
-           c(paste("Outlier test: p=", round(temp$p.value, digits = 5)),
-             paste("Deviation ", ifelse(temp$p.value < 0.05, "significant", "n.s."))),
-           text.col = ifelse(temp$p.value < 0.05, .Options$DHARMaSignalColor, "black" ), bty="n")
-
+    testLegend("bottomright", "Outlier test: ", temp$p.value, "Outlier problem", "No outlier problem")
   }
 
   if(testDispersion == TRUE){
     temp = testDispersion(simulationOutput, plot = FALSE)
-    significant = isTRUE(temp$p.value < 0.05)
-    legend("center",
-           c(paste("Dispersion ratio:", round(temp$statistic, digits = 2)),
-             paste0("p= ", round(temp$p.value, digits = 5),
-                    if(significant) (if(temp$statistic > 1) " (Overdispersion)" else " (Underdispersion)")
-                    else if(is.na(temp$p.value)) " (not available)" else " (n.s.)")),
-           text.col = ifelse(significant, .Options$DHARMaSignalColor, "black" ), bty="n")
+    testLegend("topleft", paste0("Dispersion ", round(temp$statistic, digits = 2), ", "), temp$p.value,
+               if(isTRUE(temp$statistic > 1)) "Overdispersion" else "Underdispersion", "No dispersion problem",
+               pad = if(testUniformity == TRUE) rep("", 3)) # below the KS test legend
   }
 
 }
