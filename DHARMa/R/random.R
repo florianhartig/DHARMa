@@ -33,7 +33,7 @@ getRandomState <- function(seed = NULL){
   # setting seed
   if(is.numeric(seed)) set.seed(seed)
 
-  # ensuring that RNG has been initialized; fixes #630 (no runif() after set.seed(), shifted the stream in fresh sessions)
+  # ensuring that RNG has been initialized; fixes #630 (runif() after set.seed() shifted the stream in fresh sessions)
   if (is.null(current) && !is.numeric(seed)) runif(1)
 
   randomState = list(seed, state = get(".Random.seed", globalenv()), kind = RNGkind(), restoreCurrent = restoreCurrent)

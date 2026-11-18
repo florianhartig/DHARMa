@@ -2,7 +2,7 @@
 skip_on_cran()
 #skip_on_ci()
 
-set.seed(2)
+set.seed(2) # seed 1234 gave k/n binomial data with a chance spatial pattern (#630, #496)
 
 doPlots = F
 
