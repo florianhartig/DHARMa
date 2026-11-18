@@ -54,6 +54,8 @@ simulateResiduals <- function(fittedModel, n = 250, simulateREs = c("conditional
   method = match.arg(method)
   randomState <- getRandomState(seed)
   on.exit({randomState$restoreCurrent()})
+  # fixes #496 (own seed for the randomization, independent of the draws used by simulations and refits)
+  randomizationSeed = sample.int(.Machine$integer.max, 1)
   ptm <- proc.time()
 
   ####### extract model info ############
@@ -93,6 +95,8 @@ simulateResiduals <- function(fittedModel, n = 250, simulateREs = c("conditional
     checkSimulations(out$simulatedResponse, out$nObs, out$nSim)
     if(is.null(integerResponse)) integerResponse = isIntegerValued(out$simulatedResponse)
 
+    quantileState = getRandomState(randomizationSeed)
+    on.exit(quantileState$restoreCurrent(), add = TRUE, after = FALSE)
     out$scaledResiduals <- getQuantile(simulations = out$simulatedResponse ,
                                       observed = out$observedResponse ,
                                       integerResponse = integerResponse,
@@ -165,6 +169,8 @@ simulateResiduals <- function(fittedModel, n = 250, simulateREs = c("conditional
     out$fittedResiduals = out$fittedResiduals * trials
     out$refittedResiduals = out$refittedResiduals * trials
 
+    quantileState = getRandomState(randomizationSeed)
+    on.exit(quantileState$restoreCurrent(), add = TRUE, after = FALSE)
     out$scaledResiduals = getQuantile(simulations = out$refittedResiduals,
                                       observed = out$fittedResiduals,
                                       integerResponse = integerResponse,

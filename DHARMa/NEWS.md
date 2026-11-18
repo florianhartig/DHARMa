@@ -46,6 +46,8 @@ NOTE: for more news about the package, see https://github.com/florianhartig/DHAR
 
 * `simulateResiduals()` stores `fittedPredictedResponse` and `refittedPredictedResponse` on the scale of the observed response, i.e. the expected number of successes for k/n binomial models, as documented in `createDHARMa()`; previously these were predicted proportions. For these models, the default x-axis of `plotResiduals()` and the default predictor of `testQuantiles()` change accordingly; use `form = getFitted(model)` or `predictor = getFitted(model)` for predicted proportions (#502).
 
+* With the same `seed`, results are identical in a fresh R session and in a session with an existing random state, and the randomization of residuals in `simulateResiduals()` no longer depends on the random numbers used by simulations and refits; simulations and residuals therefore differ from earlier versions (#630, #496).
+
 ## Minor changes
 
 * `recalculateResiduals()` returns `groupLevels`, the group of each grouped residual (#359).
