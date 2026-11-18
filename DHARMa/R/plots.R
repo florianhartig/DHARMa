@@ -137,9 +137,10 @@ plotQQunif <- function(simulationOutput, testUniformity = TRUE, testOutliers = T
     temp = testDispersion(simulationOutput, plot = FALSE)
     significant = isTRUE(temp$p.value < 0.05)
     legend("center",
-           if(significant) paste(if(temp$statistic > 1) "Overdispersion:" else "Underdispersion:", "p=", round(temp$p.value, digits = 5))
-           else c(paste("Dispersion test: p=", round(temp$p.value, digits = 5)),
-                  paste("Deviation ", if(is.na(temp$p.value)) "not available" else "n.s.")),
+           c(paste("Dispersion ratio:", round(temp$statistic, digits = 2)),
+             paste0("p= ", round(temp$p.value, digits = 5),
+                    if(significant) (if(temp$statistic > 1) " (Overdispersion)" else " (Underdispersion)")
+                    else if(is.na(temp$p.value)) " (not available)" else " (n.s.)")),
            text.col = ifelse(significant, .Options$DHARMaSignalColor, "black" ), bty="n")
   }
 

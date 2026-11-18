@@ -140,10 +140,10 @@ test_that("plotQQunif names over- and underdispersion (#563)",
               plotQQunif(simulationOutput, testUniformity = FALSE, testOutliers = FALSE)
               out
             }
-            expect_equal(legendText(1.5, 0.001), c("Overdispersion: p= 0.001", getOption("DHARMaSignalColor")))
-            expect_equal(legendText(0.5, 0.001), c("Underdispersion: p= 0.001", getOption("DHARMaSignalColor")))
-            expect_equal(legendText(1.5, 0.3), c("Dispersion test: p= 0.3", "Deviation  n.s.", "black"))
-            expect_equal(legendText(NA, NA), c("Dispersion test: p= NA", "Deviation  not available", "black"))
+            expect_equal(legendText(1.5, 0.001), c("Dispersion ratio: 1.5", "p= 0.001 (Overdispersion)", getOption("DHARMaSignalColor")))
+            expect_equal(legendText(0.5, 0.001), c("Dispersion ratio: 0.5", "p= 0.001 (Underdispersion)", getOption("DHARMaSignalColor")))
+            expect_equal(legendText(1.5, 0.3), c("Dispersion ratio: 1.5", "p= 0.3 (n.s.)", "black"))
+            expect_equal(legendText(NA, NA), c("Dispersion ratio: NA", "p= NA (not available)", "black"))
           }
 )
 
