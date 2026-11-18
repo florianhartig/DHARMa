@@ -12,7 +12,7 @@ plotResiduals(simulationOutput, form = NULL, quantreg = NULL,
 \arguments{
 \item{simulationOutput}{an object, usually a DHARMa object, from which residual values can be extracted. Alternatively, a vector with residuals or a fitted model can be provided, which will then be transformed into a DHARMa object.}
 
-\item{form}{optional predictor(s) against which the residuals should be plotted. Default is to use the predicted(simulationOutput). Recommended to specify as formula. Use \code{form = ~.} to plot against all predictors. See details.}
+\item{form}{optional predictor(s) against which the residuals should be plotted. Default is the fitted predicted response (fittedPredictedResponse; for binomial models with more than one trial, the expected number of successes). Recommended to specify as formula. Use \code{form = ~.} to plot against all predictors. See details.}
 
 \item{quantreg}{whether to perform a quantile regression based on \link{testQuantiles} or a smooth spline around the mean. Default NULL chooses T for nObs < 10000, and F otherwise.}
 

@@ -388,12 +388,13 @@ test_that("glmmTMB works",
                                             data = testData$binomial_nk_matrix)
             runEverything(fittedModel, testData$binomial_nk_matrix)
 
+            # overdispersed data: otherwise the betabinomial dispersion runs to the boundary and simulations break
             fittedModel <- glmmTMB::glmmTMB(cbind(observedResponse1,
                                                   observedResponse0) ~
                                               Environment1 + (1|group),
                                             family = glmmTMB::betabinomial(),
-                                            data = testData$binomial_nk_matrix)
-            runEverything(fittedModel, testData$binomial_nk_matrix)
+                                            data = testData$binomial_nk_weights2)
+            runEverything(fittedModel, testData$binomial_nk_weights2)
 
             fittedModel <- glmmTMB::glmmTMB(prop ~ Environment1 + (1|group),
                                             family = "binomial",

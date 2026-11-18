@@ -178,7 +178,7 @@ getFitted <- function (object, ...) {
 #'
 #' For most models, this is identical to [getFitted]. The exception are binomial and beta-binomial models with more than one trial per observation (k/n models), specified either as cbind(successes, failures) or as proportions with the number of trials provided via weights. For these models, [getObservedResponse] and [getSimulations] return the number of successes, whereas [getFitted] returns the predicted proportions. getFittedResponse returns the predicted proportions multiplied by the number of trials, i.e. the expected number of successes.
 #'
-#' The fitted response is used by [testDispersion] (refit = FALSE) to calculate the raw residuals (observed or simulated response minus fitted response).
+#' [simulateResiduals] stores the fitted response as fittedPredictedResponse, which is used e.g. by [testDispersion] (refit = FALSE) to calculate the raw residuals (observed or simulated response minus fitted response), and as default predictor in [plotResiduals] and [testQuantiles].
 #'
 #' @param object a fitted model.
 #' @param ... additional parameters to be passed on, usually to [getFitted].

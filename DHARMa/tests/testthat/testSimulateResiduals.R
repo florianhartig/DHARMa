@@ -162,6 +162,27 @@ test_that("refit = TRUE: simulatedResponse on the scale of observedResponse, als
   }
 })
 
+
+test_that("k/n binomial: fittedPredictedResponse is the expected number of successes (#502)", {
+
+  set.seed(1)
+  testData = data.frame(x = runif(200), N = sample(c(2, 5, 50), 200, replace = TRUE), group = factor(rep(1:20, 10)))
+  testData$k = rbinom(200, testData$N, plogis(testData$x + rnorm(200))) # overdispersed
+  fittedModels = list(glm(cbind(k, N - k) ~ x, family = binomial, data = testData),
+                      glm(k / N ~ x, family = binomial, weights = N, data = testData))
+  for(fittedModel in fittedModels){
+    expected = fitted(fittedModel) * testData$N
+    res = simulateResiduals(fittedModel, n = 10)
+    expect_equal(res$fittedPredictedResponse, expected, ignore_attr = TRUE)
+    expect_gt(testDispersion(res, plot = FALSE)$statistic, 2)
+    grouped = recalculateResiduals(res, group = testData$group)
+    expect_equal(grouped$fittedPredictedResponse, as.vector(tapply(expected, testData$group, sum)))
+    expect_gt(testDispersion(grouped, plot = FALSE)$statistic, 2)
+    res = simulateResiduals(fittedModel, n = 3, refit = TRUE)
+    expect_equal(rowMeans(res$refittedPredictedResponse), expected, tolerance = 0.2, ignore_attr = TRUE)
+  }
+})
+
 test_that("seed: same residuals in fresh sessions and with extra random draws (#630, #496)", {
   fittedModel = glm(carb ~ wt, family = poisson, data = mtcars)
 
