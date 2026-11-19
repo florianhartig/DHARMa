@@ -132,7 +132,9 @@ plotQQunif <- function(simulationOutput, testUniformity = TRUE, testOutliers = T
 
   if(testOutliers == TRUE){
     temp = testOutliers(simulationOutput, plot = FALSE)
-    testLegend("bottomright", "Outlier test: ", temp$p.value, "Outlier problem", "No outlier problem")
+    expected = if(is.null(temp$null.value)) mean(temp$conf.int) else temp$null.value # bootstrap: centre of the 95% bootstrap interval
+    testLegend("bottomright", "Outlier test: ", temp$p.value,
+               if(isTRUE(temp$estimate > expected)) "Too many outliers" else "Too few outliers", "No outlier problem")
   }
 
   if(testDispersion == TRUE){

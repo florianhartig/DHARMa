@@ -133,15 +133,24 @@ test_that("different form arguments in plotResiduals work",
 test_that("plotQQunif legends show test results and their interpretation (#563)",
           {
             simulationOutput = simulateResiduals(glm(observedResponse ~ Environment1, family = "poisson", data = createData(50)))
-            legendText = function(statistic, p.value, testUniformity = FALSE){
+            legendText = function(statistic, p.value, testUniformity = FALSE, outliers = NULL){
               out = NULL
               # text of each legend line; for the arrow lines (plotmath calls), the text after the arrow
               local_mocked_bindings(testDispersion = function(...) list(statistic = c(dispersion = statistic), p.value = p.value),
                                     testUniformity = function(...) list(p.value = 0.5),
+                                    testOutliers = function(...) outliers,
                                     legend = function(x, legend, text.col, ...) out <<- c(out, sapply(legend, function(l) if(is.call(l)) l[[length(l)]] else l), text.col))
-              plotQQunif(simulationOutput, testUniformity = testUniformity, testOutliers = FALSE)
+              plotQQunif(simulationOutput, testUniformity = testUniformity, testOutliers = !is.null(outliers))
               out
             }
+            # outlier legend (shown before the dispersion legend): direction from binomial (null.value) or bootstrap (conf.int) output
+            signal = getOption("DHARMaSignalColor")
+            expect_equal(legendText(1.5, 0.3, outliers = list(p.value = 0.001, estimate = 0, null.value = 0.008))[1:3],
+                         c("Outlier test: p=0.001", "Too few outliers", signal))
+            expect_equal(legendText(1.5, 0.3, outliers = list(p.value = 0.001, estimate = 0.05, conf.int = c(0, 0.02)))[1:3],
+                         c("Outlier test: p=0.001", "Too many outliers", signal))
+            expect_equal(legendText(1.5, 0.3, outliers = list(p.value = 0.3, estimate = 0.01, null.value = 0.008))[1:3],
+                         c("Outlier test: p=0.3", "No outlier problem", "black"))
             expect_equal(legendText(1.5, 0.001), c("Dispersion 1.5, p=0.001", "Overdispersion", getOption("DHARMaSignalColor")))
             expect_equal(legendText(0.5, 0.001), c("Dispersion 0.5, p=0.001", "Underdispersion", getOption("DHARMaSignalColor")))
             expect_equal(legendText(1.5, 0.3), c("Dispersion 1.5, p=0.3", "No dispersion problem", "black"))
