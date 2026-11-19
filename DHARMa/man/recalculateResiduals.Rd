@@ -57,6 +57,11 @@ plot(simulationOutput3, quantreg = FALSE)
 # one of the possible test, for other options see ?testResiduals / vignette
 testDispersion(simulationOutput1)
 
+# check several models with lapply(), e.g. the GLMM and a GLM without random effect
+fittedModel2 <- glm(observedResponse ~ Environment1, family = "poisson", data = testData)
+res <- lapply(list(glmm = fittedModel, glm = fittedModel2), simulateResiduals)
+sapply(res, function(r) testDispersion(r, plot = FALSE)$p.value)
+
 # the calculated residuals can be accessed via
 residuals(simulationOutput1)
 

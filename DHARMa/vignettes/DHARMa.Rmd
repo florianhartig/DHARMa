@@ -222,15 +222,6 @@ To support the visual inspection of the residuals, the `DHARMa` package provides
 
 See the help of the functions and further comments below for a more detailed description.
 
-To check several models, e.g. two models m1 and m2 with alternative distributions for the same data, apply the functions to each model, for example with `lapply()`:
-
-```{r, eval = FALSE}
-models = list(poisson = m1, negbin = m2)
-res = lapply(models, simulateResiduals)
-invisible(lapply(res, plot))
-sapply(res, function(r) testDispersion(r, plot = FALSE)$p.value)
-```
-
 ## Simulation options
 
 There are a few important technical details regarding how the simulations are performed, in particular regarding the treatments of random effects and integer responses. It is strongly recommended to read the help of

@@ -66,7 +66,7 @@ NOTE: for more news about the package, see https://github.com/florianhartig/DHAR
 
 * `sfsmisc`, used by `createData()` for temporal and spatial autocorrelation, is now in Imports instead of Suggests (#594).
 
-* Documentation: the vignette shows how to check several models with `lapply()` (#204).
+* Documentation: the examples of `simulateResiduals()` show how to check several models with `lapply()` (#204).
 
 
 # DHARMa 0.5.1
