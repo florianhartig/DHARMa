@@ -19,6 +19,8 @@ The vignette (section "Supported packages and frameworks") and the package tests
 | [phyr](phyr/README.md) | | not checked | #235 |
 | [gamlss](gamlss/README.md), [VGAM](vgam/README.md) | | not supported | #319, #322 |
 | [sjSDM](sjSDM/README.md) | | not supported | |
+| INLA | | not supported | no `simulate()` method; workaround: posterior samples with `inla.posterior.sample()`, response simulated by hand, read in with `createDHARMa()` (#341, not checked) |
+| censReg, VAST, gjam, rstanarm | | not checked | #223, #170, #164, #58 |
 
 Problems that affect several packages:
 
