@@ -32,6 +32,8 @@ testData = createData(sampleSize = 100, overdispersion = 0.5, family = poisson()
 fittedModel <- glmer(observedResponse ~ Environment1 + (1|group),
                      family = "poisson", data = testData)
 
+# simulateResiduals() takes one model; to check several models, use lapply() or a for loop
+
 # simulate residuals (default behavior, conditional on the fitted random effects)
 simulationOutput1 <- simulateResiduals(fittedModel = fittedModel)
 plot(simulationOutput1, quantreg = FALSE)
@@ -49,11 +51,6 @@ plot(simulationOutput3, quantreg = FALSE)
 
 # one of the possible test, for other options see ?testResiduals / vignette
 testDispersion(simulationOutput1)
-
-# check several models with lapply(), e.g. the GLMM and a GLM without random effect
-fittedModel2 <- glm(observedResponse ~ Environment1, family = "poisson", data = testData)
-res <- lapply(list(glmm = fittedModel, glm = fittedModel2), simulateResiduals)
-sapply(res, function(r) testDispersion(r, plot = FALSE)$p.value)
 
 # the calculated residuals can be accessed via
 residuals(simulationOutput1)
