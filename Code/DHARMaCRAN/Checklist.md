@@ -7,6 +7,8 @@ Steps marked [maintainer] need e-mails sent to the maintainer; all other steps c
 * Run the GitHub Actions workflow "Reverse dependency check" (`.github/workflows/recheck.yml`) early (Actions tab, "Run workflow"; input `which`: `most` also checks packages that have DHARMa in Suggests, `strong` only Depends/Imports/LinkingTo)
   * If an intended change breaks packages: inform their maintainers with suggested changes at least 2 weeks before submitting
 * Check current CRAN issues at <https://cran.r-project.org/web/checks/check_results_DHARMa.html>
+* Run `Code/DHARMaCRAN/dependencies.R`: for each package in Imports it lists the packages installed only because of it. Check whether an Import pulls in many packages
+* Before a minor release (x.y.0), if not done in the last year: run [pkgcheck](https://docs.ropensci.org/pkgcheck/) and the review skills of [ropensci-skills](https://github.com/ropensci-review-tools/ropensci-skills) (results and false positives in #566); take useful ideas into our own tests and checklists
 * All GitHub issues and pull requests in the release milestone resolved, or postponed to the next release?
   * All new features / changes have help files, examples and appropriate unit tests? 
   * Is the NEWS.md file updated?

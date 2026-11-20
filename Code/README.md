@@ -4,7 +4,7 @@ Scripts and material that are not part of the package. Except for `DHARMaTests/`
 
 | Folder | Content |
 |---|---|
-| `DHARMaCRAN/` | CRAN submission checklist |
+| `DHARMaCRAN/` | CRAN submission checklist and dependency check (`dependencies.R`) |
 | `DHARMaData/` | creation of the package dataset `hurricanes`, with raw data |
 | `DHARMaDevelopment/` | prototypes and notes for new or changed functionality |
 | `DHARMaExamples/` | worked examples of specific modelling problems |
