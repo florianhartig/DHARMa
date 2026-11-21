@@ -66,7 +66,7 @@ NOTE: for more news about the package, see https://github.com/florianhartig/DHAR
 
 * `sfsmisc`, used by `createData()` for temporal and spatial autocorrelation, is now in Imports instead of Suggests (#594).
 
-* `plotQQunif()` / `plot.DHARMa()`: the test legends interpret the result after an arrow (e.g. "Overdispersion", "Too few outliers", "No outlier problem") instead of "Deviation significant" / "n.s."; the dispersion legend shows the dispersion ratio and sits below the KS legend (#563).
+* Plots interpret test results (e.g. "Overdispersion", "Too few outliers", "Positive autocorrelation", "No quantile problem") instead of "significant" / "n.s.", with the same threshold p < 0.05 in all plots (previously p <= 0.05 in some): legends of `plotQQunif()` / `plot.DHARMa()` (after an arrow; the dispersion legend shows the dispersion ratio and sits below the KS legend), titles of `plotResiduals()` (combined quantile test), `testOutliers()`, `testDispersion()`, `testZeroInflation()`, `testGeneric()` (new argument `interpretation`), `testCategorical()` and the autocorrelation tests. The x-axis label of `hist.DHARMa()` no longer says "red" (#563, #650).
 
 
 # DHARMa 0.5.1
