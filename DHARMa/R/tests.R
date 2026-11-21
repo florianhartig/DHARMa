@@ -61,22 +61,22 @@ testUniformity <- function(simulationOutput, alternative = c("two.sided", "less"
 
 #' Test for quantiles
 #'
-#' This function fits quantile regressions on the residuals, and compares their location to the expected location.
+#' This function tests whether the quantiles of the residuals deviate from their expected location, overall or along a predictor, and fits quantile regressions on the residuals for plotting.
 #'
 #' @param simulationOutput an object of class DHARMa, either created via [simulateResiduals] for supported models or by [createDHARMa] for simulations created outside DHARMa, or a supported model. Providing a supported model directly is discouraged, because simulation settings cannot be changed in this case.
 #' @param predictor an optional predictor variable to be used, instead of the predicted response (default). See details.
 #' @param rank if TRUE, the values provided in predictor will be rank transformed. This will usually make patterns easier to spot visually, especially if the distribution of the predictor is skewed.
 #' @param quantiles the quantiles to be tested.
 #' @param plot if TRUE, the function will create an additional plot.
-#' @details The function fits quantile regressions (via package qgam) on the residuals, and compares their location to the expected location (because of the uniform distribution, the expected location is 0.5 for the 0.5 quantile).
+#' @details The function tests whether the quantiles of the residuals deviate from their expected location (because of the uniform distribution, the expected location is 0.5 for the 0.5 quantile), either overall or as a function of the predictor.
 #'
-#' A significant p-value for the splines means the fitted spline deviates from a flat line at the expected location.
+#' Under H0, the indicators residual <= q are Bernoulli(q) distributed and independent of the predictor. The test projects their deviations from q on orthogonal polynomials of the predictor (up to degree 10), and uses the smallest chi-squared p-value over the polynomial degrees as test statistic. Its distribution under H0 is simulated (1000 simulations with a fixed random seed; the smallest possible p-value is thus 1/1001) from uniform residuals or, for more than 10000 residuals, from the asymptotic normal distribution of the scores, so the p-values are calibrated also for small data sets. The p-value of each quantile (`pvals`) is calculated in the same way for this quantile alone; the overall p-value (`p.value`) tests all quantiles jointly. Before DHARMa 0.5.2, the p-values were taken from the qgam quantile regressions; these rejected correctly specified models too often, in particular for small data sets (see <https://github.com/florianhartig/DHARMa/issues/185>).
 #'
-#' The p-values of the intercept and splines are combined into a total p-value via Benjamini & Hochberg adjustment to control the FDR.
+#' The quantile regressions (via package qgam) are only used for the plot and for the returned `predictions`.
 #'
 #' Predictor can be a formula (e.g. predictor = ~predictor), in which case NAs are handled automatically (recommended). Predictor can also be a variable in your environment (e.g. predictor = data$predictor), but then you need to remove rows that were excluded by the model due to NAs by hand. A formula must contain exactly one variable or expression, e.g. ~x or ~log(x); transformations such as log() are applied, and objects that are not in the data used to fit the model (e.g. k in ~log(x + k)) are taken from the environment of the formula. To plot residuals against several predictors or by group, see the argument `form` in [plotResiduals]. Predictor must be numeric or an ordered factor (used in the order of its levels); for categorical predictors, use [testCategorical].
 #'
-#' When plotting (plot = TRUE), the shaded gray areas indicate 95% confidence intervals of the quantile estimates (1.96 * standard error).
+#' When plotting (plot = TRUE), the quantile regression lines are colored red if the test for this quantile is significant. The shaded gray areas indicate 95% confidence intervals of the quantile estimates (1.96 * standard error) of qgam; they are approximate and need not agree with the test.
 #'
 #' @author Florian Hartig
 #' @example inst/examples/testQuantilesHelp.R
@@ -86,6 +86,7 @@ testQuantiles <- function(simulationOutput, predictor = NULL, rank = TRUE,
                           quantiles = c(0.25,0.5,0.75), plot = TRUE){
 
   predictorName = gsub(".*[$]|^~", "", paste(deparse(substitute(predictor)), collapse = ""))
+  if(!is.numeric(quantiles) || anyNA(quantiles) || any(quantiles <= 0 | quantiles >= 1) || anyDuplicated(quantiles)) stop("DHARMa::testQuantiles: quantiles must be distinct values between 0 and 1.")
 
   if(inherits(predictor, "formula")) predictor = getPredictor(ensureDHARMa(simulationOutput, convert = T), predictor)
 
@@ -105,8 +106,10 @@ testQuantiles <- function(simulationOutput, predictor = NULL, rank = TRUE,
 
     dat = data.frame(res = simulationOutput$scaledResiduals, pred = pred)
 
+    # p-values from a calibrated test instead of the qgam summaries, fixes #185 (too many rejections under H0)
+    pval = quantileScoreTest(dat$res, dat$pred, quantiles)
+
     quantileFits <- list()
-    pval = rep(NA, length(quantiles))
     predictions = data.frame(pred = sort(dat$pred))
     predictions = cbind(predictions, matrix(ncol = 2 * length(quantiles),
                                             nrow = nrow(dat)))
@@ -117,26 +120,24 @@ testQuantiles <- function(simulationOutput, predictor = NULL, rank = TRUE,
       # settings for k = the dimension of the basis used to represent the smooth term.
       # see https://github.com/mfasiolo/qgam/issues/37
       dimSmooth =  min(length(unique(datTemp$pred)), 10)
-      quantResult = try(capture.output(quantileFits[[i]] <-
+      quantResult = try(capture.output(quantileFits[[i]] <- suppressWarnings(suppressMessages(
                                          qgam::qgam(res ~ s(pred, k = dimSmooth),
                                                     data = datTemp,
-                                                    qu = quantiles[i])), silent = T)
+                                                    qu = quantiles[i])))), silent = T)
       if(inherits(quantResult, "try-error")){
         message("\n DHARMa: qgam was unable to calculate quantile regression for quantile ",
-                quantiles[i], ". Possibly too few (unique) data points / predictions. The quantile will be ommited in plots and significance calculations. \n")
+                quantiles[i], ". Possibly too few (unique) data points / predictions. The quantile will be omitted in plots. \n")
       } else {
-        x = summary(quantileFits[[i]])
-        pval[i] = min(p.adjust(c(x$p.table[1,4], x$s.table[1,4]), method = "BH")) # correction for test on slope and intercept
         quantPre = predict(quantileFits[[i]], newdata = predictions, se = T)
         predictions[, 2*i] = quantPre$fit + quantiles[i]
         predictions[, 2*i + 1] = 1.96*quantPre$se.fit
       }
     }
 
-    out$method = "Test for location of quantiles via qgam"
+    out$method = "Score test for the location of quantiles"
     out$alternative = "both"
-    out$pvals = pval
-    out$p.value = min(p.adjust(pval, method = "BH")) # correction for multiple quantile tests
+    out$pvals = pval[-1]
+    out$p.value = pval[1]
     out$predictions = predictions
     out$qgamFits = quantileFits
 
@@ -153,6 +154,50 @@ testQuantiles <- function(simulationOutput, predictor = NULL, rank = TRUE,
 
   }
   return(out)
+}
+
+#' Score test for the location of quantiles of the residuals
+#'
+#' Under H0, the indicators 1(res <= q) are Bernoulli(q) and independent of the predictor. Their deviations from q are projected on orthonormal polynomials of the predictor up to degree maxDegree; the test statistic is the smallest chi-squared p-value over the polynomial degrees, and its null distribution is simulated from uniform residuals.
+#'
+#' @param res scaled residuals
+#' @param pred predictor
+#' @param quantiles quantiles to test
+#' @param maxDegree maximum degree of the polynomials
+#' @param nRep number of simulations of the null distribution
+#' @return p-values of the joint test for all quantiles, followed by one p-value per quantile
+#' @keywords internal
+quantileScoreTest <- function(res, pred, quantiles, maxDegree = 10, nRep = 1000){
+
+  force(res); force(pred) # evaluate before the seed is set
+  randomState <- getRandomState(123)
+  on.exit({randomState$restoreCurrent()})
+
+  n = length(res)
+  m = length(quantiles)
+  degree = max(0, min(maxDegree, length(unique(pred)) - 1, n - 2))
+  basis = qr.Q(qr(cbind(rep(1, n), if(degree > 0) stats::poly(pred, degree))))
+  k = ncol(basis)
+  covariance = outer(quantiles, quantiles, pmin) - outer(quantiles, quantiles)
+  covInverse = solve(covariance)
+
+  scores = function(u) crossprod(basis, outer(u, quantiles, "<=") - rep(quantiles, each = n))
+  minP = function(S){
+    joint = cumsum(rowSums((S %*% covInverse) * S))
+    single = matrix(apply(S^2, 2, cumsum), nrow = k) / rep(diag(covariance), each = k)
+    c(min(stats::pchisq(joint, (1:k) * m, lower.tail = FALSE)),
+      apply(matrix(stats::pchisq(single, 1:k, lower.tail = FALSE), nrow = k), 2, min))
+  }
+
+  observed = minP(scores(res))
+  # exact null distribution; for large n, the asymptotic normal distribution of the scores
+  if(n <= 10000) simulated = replicate(nRep, minP(scores(stats::runif(n))))
+  else {
+    rootCovariance = chol(covariance)
+    simulated = replicate(nRep, minP(matrix(stats::rnorm(k * m), nrow = k) %*% rootCovariance))
+  }
+  simulated = matrix(simulated, nrow = m + 1)
+  return((rowSums(simulated <= observed) + 1) / (nRep + 1))
 }
 
 

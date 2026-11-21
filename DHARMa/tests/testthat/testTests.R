@@ -427,3 +427,26 @@ test_that("formula predictors: transformations, grouped residuals, model order (
   phyloData$x <<- phyloData$x * 2
   expect_error(getRefit(fittedModel, fittedModel$y), "Values differ for: x")
 })
+
+
+test_that("testQuantiles: calibrated p-values, also for small data (#185)", {
+  set.seed(123)
+  # quantileScoreTest under H0 (uniform residuals) and with a pattern; fixed seed without changing the random state
+  p = replicate(200, {res = runif(20); pred = runif(20); quantileScoreTest(res, pred, c(0.25, 0.5, 0.75), nRep = 200)})
+  expect_true(all(rowMeans(p < 0.05) < 0.1))
+  pred = runif(200)
+  res = ifelse(pred > 0.5, runif(200)^2, runif(200))
+  state = .Random.seed
+  expect_lt(quantileScoreTest(res, pred, c(0.25, 0.5, 0.75))[1], 0.05)
+  expect_identical(.Random.seed, state)
+  # no NA p-value for tiny data, same p-value in repeated calls
+  testData = createData(sampleSize = 5, family = poisson(), numGroups = 1, randomEffectVariance = 0)
+  simulationOutput = simulateResiduals(glm(observedResponse ~ Environment1, family = poisson, data = testData))
+  out = suppressMessages(testQuantiles(simulationOutput, plot = FALSE))
+  expect_false(anyNA(c(out$p.value, out$pvals)))
+  expect_equal(suppressMessages(testQuantiles(simulationOutput, plot = FALSE))$p.value, out$p.value)
+  expect_error(testQuantiles(simulationOutput, quantiles = c(0.5, 1.2)), "between 0 and 1")
+  # intercept-only model: constant predictor
+  simulationOutput = simulateResiduals(glm(observedResponse ~ 1, family = poisson, data = testData))
+  expect_false(is.na(suppressMessages(testQuantiles(simulationOutput, plot = FALSE))$p.value))
+})

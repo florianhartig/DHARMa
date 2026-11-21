@@ -50,6 +50,8 @@ NOTE: for more news about the package, see https://github.com/florianhartig/DHAR
 
 * With the same `seed`, results are identical in a fresh R session and in a session with an existing random state, and the randomization of residuals in `simulateResiduals()` no longer depends on the random numbers used by simulations and refits; simulations and residuals therefore differ from earlier versions (#630, #496).
 
+* `testQuantiles()` and the quantile lines in `plotResiduals()` calculate p-values with a calibrated score test instead of the qgam summaries, which rejected correctly specified models too often, especially for small data; the p-values change for all models, p-values are no longer `NA` or negative, and `quantiles` that are not distinct values between 0 and 1 give an error (#185, #612).
+
 ## Minor changes
 
 * `recalculateResiduals()` returns `groupLevels`, the group of each grouped residual (#359).

@@ -19,18 +19,18 @@ testQuantiles(simulationOutput, predictor = NULL, rank = TRUE,
 \item{plot}{if TRUE, the function will create an additional plot.}
 }
 \description{
-This function fits quantile regressions on the residuals, and compares their location to the expected location.
+This function tests whether the quantiles of the residuals deviate from their expected location, overall or along a predictor, and fits quantile regressions on the residuals for plotting.
 }
 \details{
-The function fits quantile regressions (via package qgam) on the residuals, and compares their location to the expected location (because of the uniform distribution, the expected location is 0.5 for the 0.5 quantile).
+The function tests whether the quantiles of the residuals deviate from their expected location (because of the uniform distribution, the expected location is 0.5 for the 0.5 quantile), either overall or as a function of the predictor.
 
-A significant p-value for the splines means the fitted spline deviates from a flat line at the expected location.
+Under H0, the indicators residual <= q are Bernoulli(q) distributed and independent of the predictor. The test projects their deviations from q on orthogonal polynomials of the predictor (up to degree 10), and uses the smallest chi-squared p-value over the polynomial degrees as test statistic. Its distribution under H0 is simulated (1000 simulations with a fixed random seed; the smallest possible p-value is thus 1/1001) from uniform residuals or, for more than 10000 residuals, from the asymptotic normal distribution of the scores, so the p-values are calibrated also for small data sets. The p-value of each quantile (\code{pvals}) is calculated in the same way for this quantile alone; the overall p-value (\code{p.value}) tests all quantiles jointly. Before DHARMa 0.5.2, the p-values were taken from the qgam quantile regressions; these rejected correctly specified models too often, in particular for small data sets (see \url{https://github.com/florianhartig/DHARMa/issues/185}).
 
-The p-values of the intercept and splines are combined into a total p-value via Benjamini & Hochberg adjustment to control the FDR.
+The quantile regressions (via package qgam) are only used for the plot and for the returned \code{predictions}.
 
 Predictor can be a formula (e.g. predictor = ~predictor), in which case NAs are handled automatically (recommended). Predictor can also be a variable in your environment (e.g. predictor = data$predictor), but then you need to remove rows that were excluded by the model due to NAs by hand. A formula must contain exactly one variable or expression, e.g. ~x or ~log(x); transformations such as log() are applied, and objects that are not in the data used to fit the model (e.g. k in ~log(x + k)) are taken from the environment of the formula. To plot residuals against several predictors or by group, see the argument \code{form} in \link{plotResiduals}. Predictor must be numeric or an ordered factor (used in the order of its levels); for categorical predictors, use \link{testCategorical}.
 
-When plotting (plot = TRUE), the shaded gray areas indicate 95\% confidence intervals of the quantile estimates (1.96 * standard error).
+When plotting (plot = TRUE), the quantile regression lines are colored red if the test for this quantile is significant. The shaded gray areas indicate 95\% confidence intervals of the quantile estimates (1.96 * standard error) of qgam; they are approximate and need not agree with the test.
 }
 \examples{
 testData = createData(sampleSize = 200, overdispersion = 0.0, randomEffectVariance = 0)
@@ -39,13 +39,13 @@ simulationOutput <- simulateResiduals(fittedModel = fittedModel)
 
 # run the quantile test
 x = testQuantiles(simulationOutput)
-x # the test shows a combined p-value, corrected for multiple testing
+x # the test shows a joint p-value for all quantiles
 
 \donttest{
 # accessing results of the test
 x$pvals # pvalues for the individual quantiles
 x$qgamFits # access the fitted quantile regression
-summary(x$qgamFits[[1]]) # summary of the first fitted quantile
+summary(x$qgamFits[[1]]) # summary of the first fitted quantile (its p-values are not those of the test)
 
 # possible to test user-defined quantiles
 testQuantiles(simulationOutput, quantiles = c(0.7))
