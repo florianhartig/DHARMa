@@ -76,6 +76,6 @@ For everyone, including the DHARMa team: if AI tools wrote substantial parts of 
 
 ## Attribution and authorship
 
-Contributors who make substantial contributions to DHARMa will be acknowledged by name in the README and/or the NEWS.md file. Substantial contributions include, but are not limited to: implementing support for a new model class, adding a meaningful new function or test, identifying and fixing a non-trivial bug, or making significant improvements to the documentation or vignette.
+Substantial contributions from outside the DHARMa team are credited in `DHARMa/NEWS.md` with the contributor's GitHub username (see [Code and documentation standards](#code-and-documentation-standards)). Substantial contributions include, but are not limited to: implementing support for a new model class, adding a meaningful new function or test, identifying and fixing a non-trivial bug, or making significant improvements to the documentation or vignette. A listing as contributor (`ctb`) in the DESCRIPTION file or a mention in the README acknowledgements is decided by the maintainer, typically for substantial or ongoing contributions.
 
 Minor corrections such as fixing typos, correcting punctuation, or making small formatting adjustments do not typically result in named acknowledgement, as is standard in open-source scientific software. If you are uncertain whether a planned contribution would qualify, you are welcome to ask in the relevant issue.
