@@ -1,8 +1,11 @@
 # Calibration of testQuantiles() under H0 (see issue #185)
 #
-# testQuantiles() fits qgam quantile regressions of the scaled residuals on the
-# (rank-transformed) predicted values and combines the p-values of the intercept
-# and the spline of each quantile with Benjamini & Hochberg. This script
+# Up to DHARMa 0.5.1, testQuantiles() fitted qgam quantile regressions of the
+# scaled residuals on the (rank-transformed) predicted values and combined the
+# p-values of the intercept and the spline of each quantile with Benjamini &
+# Hochberg; since 0.5.2, p is from a calibrated score test, while the columns
+# int* and spl* still record the qgam p-values (qgam warnings are no longer
+# counted, because testQuantiles() suppresses them). This script
 # simulates data from correctly specified models and records how often the test
 # rejects at alpha = 0.05, depending on the sample size, which component
 # (intercept or spline) rejects, and how often qgam reports convergence problems.

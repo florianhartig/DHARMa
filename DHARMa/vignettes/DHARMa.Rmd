@@ -212,7 +212,7 @@ To support the visual inspection of the residuals, the `DHARMa` package provides
 -   `testUniformity()` - tests if the overall distribution conforms to expectations.
 -   `testOutliers()` - tests if there are more or fewer simulation outliers than expected.
 -   `testDispersion()` - tests if the simulated dispersion is equal to the observed dispersion.
--   `testQuantiles()` - fits a quantile regression of residuals against a predictor (default predicted value), and tests if this conforms to the expected quantile.
+-   `testQuantiles()` - tests if the quantiles of the residuals deviate from their expected location along a predictor (default predicted value), and fits quantile regressions for the plot.
 -   `testCategorical(simulationOutput, catPred = testData\$group)` tests residuals against a categorical predictor.
 -   `testZeroInflation()` - tests if there are more (or fewer) zeros in the data than expected from the simulations.
 -   `testGeneric()` - test if a generic summary statistic (user-defined) deviates from model expectations.
