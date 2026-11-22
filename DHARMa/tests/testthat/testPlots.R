@@ -179,6 +179,7 @@ test_that("test plots interpret results with the threshold p < 0.05 (#650)",
             simulationOutput = simulateResiduals(glm(observedResponse ~ Environment1, family = "poisson", data = testData))
             titles = function(f){
               out = NULL
+              plot.new() # abline() etc. need an open plot, as hist() is mocked
               local_mocked_bindings(title = function(main = NULL, ...) out <<- c(out, main),
                                     hist = function(x, main = NULL, ...) out <<- c(out, main))
               f
