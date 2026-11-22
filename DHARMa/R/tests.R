@@ -240,12 +240,8 @@ testOutliers <- function(simulationOutput, alternative = c("two.sided", "greater
 
       hist(simulationOutput, main = "")
 
-      main = ifelse(out$p.value <= 0.05,
-                    "Outlier test significant",
-                    "Outlier test n.s.")
-
-      title(main = main, cex.main = 1,
-            col.main = ifelse(out$p.value <= 0.05, .Options$DHARMaSignalColor, "black"))
+      testResult = interpretTest(out$p.value, testTexts$outliers, moreOutliers(out))
+      title(main = paste("Outlier test:", testResult$text), cex.main = 1, col.main = testResult$col)
 
     }
 
@@ -322,12 +318,8 @@ testOutliers <- function(simulationOutput, alternative = c("two.sided", "greater
 
       hist(simulationOutput, main = "")
 
-      main = ifelse(out$p.value <= 0.05,
-                    "Outlier test significant",
-                    "Outlier test n.s.")
-
-      title(main = main, cex.main = 1,
-            col.main = ifelse(out$p.value <= 0.05, .Options$DHARMaSignalColor, "black"))
+      testResult = interpretTest(out$p.value, testTexts$outliers, moreOutliers(out))
+      title(main = paste("Outlier test:", testResult$text), cex.main = 1, col.main = testResult$col)
 
     }
   }
@@ -412,13 +404,13 @@ testCategorical <- function(simulationOutput, catPred,
     axis(2, at=c(0, quantiles, 1))
     abline(h = quantiles, lty = 2)
 
-    title(ifelse(any(out$uniformity$p.value.cor < 0.05), "Within-group deviations from uniformity significant", "Within-group deviation from uniformity n.s."),
-          col.main = ifelse(any(out$uniformity$p.value.cor < 0.05), .Options$DHARMaSignalColor, "black"),
-          line = 1, cex.main = 0.8)
+    p = out$uniformity$p.value.cor
+    testResult = interpretTest(if(all(is.na(p))) NA else min(p, na.rm = TRUE), testTexts$categorical)
+    title(paste("KS tests per group:", testResult$text), col.main = testResult$col, line = 1, cex.main = 0.8)
 
     if(length(out) > 1) {
-      title(ifelse(out$homogeneity$`Pr(>F)`[1] < 0.05, "Levene Test for homogeneity of variance significant", "Levene Test for homogeneity of variance n.s."),
-            col.main = ifelse(out$homogeneity$`Pr(>F)`[1] < 0.05, .Options$DHARMaSignalColor, "black"), cex.main = 0.8)
+      testResult = interpretTest(out$homogeneity$`Pr(>F)`[1], testTexts$levene)
+      title(paste("Levene test:", testResult$text), col.main = testResult$col, cex.main = 0.8)
     }
   }
 
@@ -482,7 +474,7 @@ testDispersion <- function(simulationOutput, alternative = c("two.sided", "great
 
       expectedVar = sd(simulationOutput$simulatedResponse)^2
       spread <- function(x) var(x - fitted) / expectedVar
-      out = testGeneric(simulationOutput, summary = spread, alternative = alternative, methodName = "DHARMa nonparametric dispersion test via sd of residuals fitted vs. simulated", plot = plot, ...)
+      out = testGeneric(simulationOutput, summary = spread, alternative = alternative, methodName = "DHARMa nonparametric dispersion test via sd of residuals fitted vs. simulated", interpretation = testTexts$dispersion, plot = plot, ...)
       names(out$statistic) = "dispersion"
     } else {
 
@@ -515,12 +507,8 @@ testDispersion <- function(simulationOutput, alternative = c("two.sided", "great
         hist(expected, xlim = range(expected, observed, na.rm=T ), col = "lightgrey", main = "", xlab = xLabel, breaks = 20, cex.main = 1)
         abline(v = observed, lwd= 2, col = "red")
 
-        main = if(is.na(out$p.value)) "Dispersion test not available" else ifelse(out$p.value <= 0.05,
-                      "Dispersion test significant",
-                      "Dispersion test n.s.")
-
-        title(main = main, cex.main = 1,
-              col.main = ifelse(isTRUE(out$p.value <= 0.05), .Options$DHARMaSignalColor, "black"))
+        testResult = interpretTest(out$p.value, testTexts$dispersion, out$statistic > 1)
+        title(main = paste("Dispersion test:", testResult$text), cex.main = 1, col.main = testResult$col)
       }
     }
 
@@ -604,7 +592,7 @@ testOverdispersionParametric <- function(...){
 #' @export
 testZeroInflation <- function(simulationOutput, ...){
   countZeros <- function(x) sum( x == 0)
-  testGeneric(simulationOutput = simulationOutput, summary = countZeros, methodName = "DHARMa zero-inflation test via comparison to expected zeros with simulation under H0 = fitted model", ... )
+  testGeneric(simulationOutput = simulationOutput, summary = countZeros, methodName = "DHARMa zero-inflation test via comparison to expected zeros with simulation under H0 = fitted model", interpretation = testTexts$zeroInflation, ... )
 }
 
 
@@ -617,6 +605,7 @@ testZeroInflation <- function(simulationOutput, ...){
 #' @param alternative a character string specifying whether the test should test if observations are "greater", "less" or "two.sided" compared to the simulated null hypothesis.
 #' @param plot whether to plot the simulated summary.
 #' @param methodName name of the test (will be used in plot).
+#' @param interpretation optional character vector shown in the plot title: interpretation of a significant result (p < 0.05) with the observed summary larger / smaller than the simulated mean, and of a non-significant result (length 3), or of a significant and a non-significant result (length 2). Default: "Observed larger than simulated", "Observed smaller than simulated", "No deviation from simulations".
 #'
 #' @details This function applies a user-defined summary to the simulated / observed data of a DHARMa object and then performs a hypothesis test using the ratio Obs / Sim as the test statistic.
 #'
@@ -630,7 +619,7 @@ testZeroInflation <- function(simulationOutput, ...){
 #' @author Florian Hartig
 #' @example inst/examples/testsHelp.R
 #' @seealso [testResiduals], [testUniformity], [testOutliers], [testDispersion], [testZeroInflation], [testGeneric], [testTemporalAutocorrelation], [testSpatialAutocorrelation], [testQuantiles], [testCategorical]
-testGeneric <- function(simulationOutput, summary, alternative = c("two.sided", "greater", "less"), plot = T, methodName = "DHARMa generic simulation test"){
+testGeneric <- function(simulationOutput, summary, alternative = c("two.sided", "greater", "less"), plot = T, methodName = "DHARMa generic simulation test", interpretation = NULL){
 
   out = list()
   out$data.name = deparse(substitute(simulationOutput))
@@ -656,7 +645,9 @@ testGeneric <- function(simulationOutput, summary, alternative = c("two.sided", 
   if(plot == T) {
     plotTitle = gsub('(.{1,50})(\\s|$)', '\\1\n', methodName)
     xLabel = paste("Simulated values, red line = fitted model. p-value (",out$alternative, ") = ", out$p.value, sep ="")
-   hist(simulated, xlim = range(simulated, observed, na.rm=T ), col = "lightgrey", main = plotTitle, xlab = xLabel, breaks = max(round(simulationOutput$nSim / 5), 20), cex.main = 0.8)
+   if(!is.null(interpretation) && !length(interpretation) %in% 2:3) stop("DHARMa::testGeneric: interpretation must be a character vector of length 2 or 3.")
+   testResult = interpretTest(p, if(is.null(interpretation)) testTexts$generic else interpretation, observed > mean(simulated))
+   hist(simulated, xlim = range(simulated, observed, na.rm=T ), col = "lightgrey", main = paste0(plotTitle, testResult$text), xlab = xLabel, breaks = max(round(simulationOutput$nSim / 5), 20), cex.main = 0.8, col.main = testResult$col)
    abline(v = observed, lwd= 2, col = "red")
   }
   return(out)
@@ -725,10 +716,9 @@ testTemporalAutocorrelation <- function(simulationOutput, time, alternative = c(
     abline(h=c(0,0.25,0.75,1), lty = 2 )
 
     acf(simulationOutput$scaledResiduals[order(time)], main = "Autocorrelation", ylim = c(-1,1))
-    legend("topright",
-           c(paste(out$method, " p=", round(out$p.value, digits = 5)),
-             paste("Deviation ", ifelse(out$p.value < 0.05, "significant", "n.s."))),
-           text.col = ifelse(out$p.value < 0.05, .Options$DHARMaSignalColor, "black" ), bty="n")
+    testResult = interpretTest(out$p.value, testTexts$autocorrelation, out$statistic < 2) # Durbin-Watson < 2: positive autocorrelation
+    legend("topright", c(paste(out$method, " p=", round(out$p.value, digits = 5)), testResult$text),
+           text.col = testResult$col, bty="n")
 
   }
 
@@ -831,9 +821,9 @@ testSpatialAutocorrelation <- function(simulationOutput, x = NULL, y  = NULL, di
          main = "Standardized residuals in space",
          cex.main = 0.8)
 
-    mtext(paste0(out$method, "\n",
-                  " p = ", round(out$p.value, digits = 5), ", Deviation ", ifelse(out$p.value < 0.05, "significant", "n.s.")),
-          col = ifelse(out$p.value < 0.05, .Options$DHARMaSignalColor, "black"),
+    testResult = interpretTest(out$p.value, testTexts$autocorrelation, MI$observed > MI$expected)
+    mtext(paste0(out$method, "\n", " p = ", round(out$p.value, digits = 5), ", ", testResult$text),
+          col = testResult$col,
           cex = 0.8,
           side = 3, line = 0)
 

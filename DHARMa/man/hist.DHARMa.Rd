@@ -7,7 +7,7 @@
 \method{hist}{DHARMa}(x, breaks = seq(-0.02, 1.02, len = 53),
   col = c(.Options$DHARMaSignalColor, rep("lightgrey", 50),
   .Options$DHARMaSignalColor), main = "Hist of DHARMa residuals",
-  xlab = "Residuals (outliers are marked red)", cex.main = 1, ...)
+  xlab = "Residuals (outliers are highlighted)", cex.main = 1, ...)
 }
 \arguments{
 \item{x}{a DHARMa simulation output (class DHARMa).}

@@ -6,7 +6,7 @@
 \usage{
 testGeneric(simulationOutput, summary, alternative = c("two.sided",
   "greater", "less"), plot = T,
-  methodName = "DHARMa generic simulation test")
+  methodName = "DHARMa generic simulation test", interpretation = NULL)
 }
 \arguments{
 \item{simulationOutput}{an object of class DHARMa, either created via \link{simulateResiduals} for supported models or by \link{createDHARMa} for simulations created outside DHARMa, or a supported model. Providing a supported model directly is discouraged, because simulation settings cannot be changed in this case.}
@@ -18,6 +18,8 @@ testGeneric(simulationOutput, summary, alternative = c("two.sided",
 \item{plot}{whether to plot the simulated summary.}
 
 \item{methodName}{name of the test (will be used in plot).}
+
+\item{interpretation}{optional character vector shown in the plot title: interpretation of a significant result (p < 0.05) with the observed summary larger / smaller than the simulated mean, and of a non-significant result (length 3), or of a significant and a non-significant result (length 2). Default: "Observed larger than simulated", "Observed smaller than simulated", "No deviation from simulations".}
 }
 \description{
 This function tests if a user-defined summary differs when applied to simulated / observed data.

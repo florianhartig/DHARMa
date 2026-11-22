@@ -163,3 +163,35 @@ test_that("plotQQunif legends show test results and their interpretation (#563)"
 )
 
 
+
+test_that("test plots interpret results with the threshold p < 0.05 (#650)",
+          {
+            signal = getOption("DHARMaSignalColor")
+            expect_equal(interpretTest(0.05, testTexts$dispersion, TRUE), list(text = "No dispersion problem", col = "black"))
+            expect_equal(interpretTest(0.049, testTexts$dispersion, TRUE), list(text = "Overdispersion", col = signal))
+            expect_equal(interpretTest(0.049, testTexts$dispersion, FALSE)$text, "Underdispersion")
+            expect_equal(interpretTest(NA, testTexts$dispersion, NA), list(text = "Test not available", col = "black"))
+            expect_equal(interpretTest(0.01, testTexts$levene, FALSE)$text, "Unequal variances between groups") # no direction
+            expect_equal(interpretTest(0.5, testTexts$levene)$text, "No variance problem")
+
+            set.seed(123)
+            testData = createData(sampleSize = 200, overdispersion = 2, family = poisson())
+            simulationOutput = simulateResiduals(glm(observedResponse ~ Environment1, family = "poisson", data = testData))
+            titles = function(f){
+              out = NULL
+              plot.new() # abline() etc. need an open plot, as hist() is mocked
+              local_mocked_bindings(title = function(main = NULL, ...) out <<- c(out, main),
+                                    hist = function(x, main = NULL, ...) out <<- c(out, main))
+              f
+              out[out != ""]
+            }
+            expect_equal(titles(testOutliers(simulationOutput, type = "binomial")), "Outlier test: Too many outliers")
+            expect_match(titles(testDispersion(simulationOutput)), "\nOverdispersion$")
+            expect_match(titles(testCategorical(simulationOutput, catPred = testData$group)),
+                         "^(KS tests per group|Levene test): ", all = TRUE)
+            # direction from observed vs. simulated summary, also for negative summaries; texts of length 2
+            expect_match(titles(testGeneric(simulationOutput, summary = function(x) -var(x))), "\nObserved smaller than simulated$")
+            expect_match(titles(testGeneric(simulationOutput, summary = var, interpretation = c("Problem", "OK"))), "\nProblem$")
+            expect_error(testGeneric(simulationOutput, summary = var, interpretation = "Problem"), "length 2 or 3")
+          }
+)
