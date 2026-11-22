@@ -88,6 +88,16 @@ These steps are visualized in the following figure
 
 The key advantage of this definition is that the so-defined residuals always have the same, known distribution, independent of the model that is fit, if the model is correctly specified. To see this, note that, if the observed data was created from the same data-generating process that we simulate from, all values of the cumulative distribution should appear with equal probability. That means we expect the distribution of the residuals to be flat, regardless of the model structure (Poisson, binomial, random effects and so on).
 
+Precisely, if k of the nSim simulations are smaller than the observed value and t are equal to it, DHARMa calculates the residual as (k + U (t + 1)) / (nSim + 1), with U drawn from a uniform distribution between 0 and 1. If the model is correct, the observation is one more draw from the same distribution, so its rank among the nSim + 1 values, with ties broken at random, is uniform on 0, ..., nSim (shown for continuous values by Talts et al., 2018). Spreading each rank uniformly over its cell of width 1/(nSim + 1), as in randomized PIT residuals (Smith, 1985; Dunn & Smyth, 1996) and randomized rank histograms (Heinrich, 2021), makes the residuals exactly uniform for continuous and discrete responses and any number of simulations. Before DHARMa 0.5.2, residuals were calculated as k / nSim (with a randomization between k / nSim and (k + t) / nSim for ties), which lies on a grid and is not exactly uniform; for large data sets and few simulations, this can be detected by tests ([issue #653](https://github.com/florianhartig/DHARMa/issues/653)).
+
+References for this paragraph:
+
+-   Smith, J. Q. (1985). Diagnostic checks of non-standard time series models. Journal of Forecasting 4, 283-291.
+
+-   Talts, S., Betancourt, M., Simpson, D., Vehtari, A., & Gelman, A. (2018). Validating Bayesian inference algorithms with simulation-based calibration. arXiv:1804.06788.
+
+-   Heinrich, C. (2021). On the number of bins in a rank histogram. Quarterly Journal of the Royal Meteorological Society 147, 544-556. doi:10.1002/qj.3932
+
 I currently prepare a more exact statistical justification for the approach in an accompanying paper, but if you must provide a reference in the meantime, I would suggest citing
 
 -   Dunn, P. K., and Smyth, G. K. (1996). Randomized quantile residuals. Journal of Computational and Graphical Statistics 5, 236-244.
