@@ -50,6 +50,8 @@ NOTE: for more news about the package, see https://github.com/florianhartig/DHAR
 
 * With the same `seed`, results are identical in a fresh R session and in a session with an existing random state, and the randomization of residuals in `simulateResiduals()` no longer depends on the random numbers used by simulations and refits; simulations and residuals therefore differ from earlier versions (#630, #496).
 
+* `simulateResiduals(refit = TRUE)` works for `GLMMadaptive` models with a `cbind()` response (binomial and beta-binomial); `getResiduals()` returns residuals on the proportion scale (observed minus fitted proportion) for these models instead of an n x 2 matrix (#655).
+
 ## Minor changes
 
 * `recalculateResiduals()` returns `groupLevels`, the group of each grouped residual (#359).
