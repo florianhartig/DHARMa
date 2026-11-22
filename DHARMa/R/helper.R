@@ -30,7 +30,7 @@ DHARMa.ecdf <- function (x)
 #' @param method the quantile randomization method used. See details.
 #' @param rotation optional rotation of the residuals. You can either provide as a known or estimated covariance matrix (e.g. when fitting an AR1 model), or use the argument "estimated", in which case the residual covariance will be approximated by simulations. See comments in details.
 #'
-#' @details The function calculates residual quantiles from the simulated data. For continuous distributions, this will simply be the value of the ecdf.
+#' @details The function calculates residual quantiles from the simulated data. For continuous distributions and method = "traditional", this will simply be the value of the ecdf.
 #'
 #' **Randomization procedure for discrete data**
 #'

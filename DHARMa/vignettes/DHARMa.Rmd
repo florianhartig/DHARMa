@@ -80,7 +80,7 @@ DHARMa aims at solving these problems by creating readily interpretable residual
 
 2.  For each observation, calculate the empirical cumulative density function for the simulated observations, which describes the possible values (and their probability) at the predictor combination of the observed value, assuming the fitted model is correct.
 
-3.  The residual is then defined as the value of the empirical density function at the value of the observed data, so a residual of 0 means that all simulated values are larger than the observed value, and a residual of 0.5 means half of the simulated values are larger than the observed value.
+3.  The residual is then defined as the value of the empirical density function at the value of the observed data, so a residual close to 0 means that all simulated values are larger than the observed value, and a residual of 0.5 means half of the simulated values are larger than the observed value.
 
 These steps are visualized in the following figure
 

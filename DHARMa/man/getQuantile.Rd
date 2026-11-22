@@ -22,7 +22,7 @@ getQuantile(simulations, observed, integerResponse, method = c("PIT",
 Calculates residual quantiles from a given simulation.
 }
 \details{
-The function calculates residual quantiles from the simulated data. For continuous distributions, this will simply be the value of the ecdf.
+The function calculates residual quantiles from the simulated data. For continuous distributions and method = "traditional", this will simply be the value of the ecdf.
 
 \strong{Randomization procedure for discrete data}
 
