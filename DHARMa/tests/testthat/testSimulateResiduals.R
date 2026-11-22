@@ -125,15 +125,11 @@ test_that("integerResponse is detected from the simulations; beta-binomial names
 
   testData = createData(sampleSize = 100, family = binomial(), binomialTrials = 10, overdispersion = 0.5)
   fittedModel = GLMMadaptive::mixed_model(cbind(observedResponse1, observedResponse0) ~ Environment1, random = ~ 1 | group, data = testData, family = GLMMadaptive::beta.binomial())
-  if(utils::packageVersion("GLMMadaptive") < "0.9-9"){
-    expect_error(simulateResiduals(fittedModel, n = 10), "GLMMadaptive.*0.9-9")
-  } else {
-    expect_no_warning(simulateResiduals(fittedModel, n = 10))
-  }
+  expect_no_warning(simulateResiduals(fittedModel, n = 10))
 })
 
 
-test_that("GLMMadaptive beta-binomial simulations respect trial totals and the version requirement (#565)", {
+test_that("GLMMadaptive beta-binomial simulations respect trial totals (#565)", {
   skip_if_not_installed("GLMMadaptive")
   set.seed(123)
   testData = data.frame(x = rnorm(200), group = factor(rep(1:20, each = 10)))
@@ -146,29 +142,37 @@ test_that("GLMMadaptive beta-binomial simulations respect trial totals and the v
     fittedModel = GLMMadaptive::mixed_model(cbind(k, N - k) ~ x, random = ~ 1 | group,
                                           data = testData, family = GLMMadaptive::beta.binomial())
     expect_true(fittedModel$converged)
-    if(utils::packageVersion("GLMMadaptive") < "0.9-9"){
-      expect_error(simulateResiduals(fittedModel, n = 20), "GLMMadaptive.*0.9-9")
-      expect_error(simulateLRT(fittedModel, fittedModel, n = 2, plot = FALSE), "GLMMadaptive.*0.9-9")
-    } else {
-      expect_no_warning(res <- simulateResiduals(fittedModel, n = 20))
-      expect_equal(dim(res$simulatedResponse), c(200, 20))
-      expect_equal(res$observedResponse, testData$k, ignore_attr = TRUE)
-      expect_true(all(res$simulatedResponse >= 0 & res$simulatedResponse <= trials))
-      expect_true(all(res$simulatedResponse %% 1 == 0))
-      expect_true(any(res$simulatedResponse > 1))
-    }
+    expect_no_warning(res <- simulateResiduals(fittedModel, n = 20))
+    expect_equal(dim(res$simulatedResponse), c(200, 20))
+    expect_equal(res$observedResponse, testData$k, ignore_attr = TRUE)
+    expect_true(all(res$simulatedResponse >= 0 & res$simulatedResponse <= trials))
+    expect_true(all(res$simulatedResponse %% 1 == 0))
+    expect_true(any(res$simulatedResponse > 1))
   }
-
-  # One trial does not identify beta-binomial dispersion: exercise only the guard.
-  singleTrialModel = fittedModel
-  singleTrialModel$model_frames$mfX[[1]] = cbind(testData$k %% 2, 1 - testData$k %% 2)
-  expect_no_error(checkModel(singleTrialModel))
-  singleTrialModel$model_frames$mfX[[1]] = testData$k %% 2
-  expect_no_error(checkModel(singleTrialModel))
 
   binomialModel = GLMMadaptive::mixed_model(cbind(k, N - k) ~ x, random = ~ 1 | group,
                                            data = testData, family = binomial())
   expect_no_warning(simulateResiduals(binomialModel, n = 10))
+})
+
+
+test_that("refit = TRUE works for GLMMadaptive models with a cbind() response (#655)", {
+  skip_if_not_installed("GLMMadaptive")
+  set.seed(123)
+  testData = createData(sampleSize = 100, family = binomial(), binomialTrials = 10, overdispersion = 0.5)
+  models = list(
+    binomial = GLMMadaptive::mixed_model(cbind(observedResponse1, observedResponse0) ~ Environment1, random = ~ 1 | group,
+                                         data = testData, family = binomial()),
+    betabinomial = GLMMadaptive::mixed_model(cbind(observedResponse1, observedResponse0) ~ Environment1, random = ~ 1 | group,
+                                             data = testData, family = GLMMadaptive::beta.binomial())
+  )
+  for(i in names(models)){
+    expect_equal(getResiduals(models[[i]]), testData$observedResponse1 / 10 - fitted(models[[i]], type = "subject_specific"), info = i)
+    expect_no_warning(res <- simulateResiduals(models[[i]], n = 5, refit = TRUE))
+    expect_false(anyNA(res$refittedResiduals), info = i)
+    expect_true(all(res$simulatedResponse >= 0 & res$simulatedResponse <= 10 & res$simulatedResponse %% 1 == 0), info = i)
+    expect_true(any(res$simulatedResponse > 1), info = i)
+  }
 })
 
 

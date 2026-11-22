@@ -26,20 +26,18 @@ stopifnot(interfaceOk(interface))
 
 # k/n binomial ----
 
-# cbind() response: simulations and residuals work; refit fails
+# cbind() response: simulations, residuals and refit work (#655)
 mCbind = mixed_model(cbind(observedResponse1, observedResponse0) ~ Environment1, random = ~ 1 | group, family = binomial(), data = datBin)
 interface = checkInterface(mCbind, nRefit = 5)
-stopifnot(interface[names(interface) != "simulateResidualsRefit"] == "ok",
-          is_outcome(interface["simulateResidualsRefit"], "error", "0 <= y <= 1"))
-# beta-binomial with multiple trials: DHARMa stops for GLMMadaptive < 0.9-9;
-# simulations work with corrected versions (#565)
+print(interface)
+stopifnot(interfaceOk(interface))
+# beta-binomial with multiple trials (needs GLMMadaptive >= 0.9-9, #565), also with refit (#655)
 set.seed(1)
 datBB = createData(sampleSize = 200, randomEffectVariance = 0.5, overdispersion = 0.5, family = binomial(), binomialTrials = 10)
 mBB = mixed_model(cbind(observedResponse1, observedResponse0) ~ Environment1, random = ~ 1 | group, family = beta.binomial(), data = datBB)
-o = outcome(simulateResiduals(mBB))
+o = c(outcome(simulateResiduals(mBB)), outcome(simulateResiduals(mBB, n = 5, refit = TRUE)))
 print(o)
-stopifnot(if (utils::packageVersion("GLMMadaptive") < "0.9-9")
-  is_outcome(o, "error", "please update to GLMMadaptive >= 0.9-9") else o == "ok")
+stopifnot(o == "ok")
 
 # Gaussian ----
 

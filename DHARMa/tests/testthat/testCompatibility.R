@@ -188,11 +188,9 @@ test_that("getFittedResponse returns fitted values on the scale of the observed 
     GLMMadaptive_cbind = GLMMadaptive::mixed_model(cbind(observedResponse1, observedResponse0) ~ Environment1, random = ~ 1 |group, data = testData, family = binomial())
   )
 
-  if(utils::packageVersion("GLMMadaptive") >= "0.9-9"){
-    # Overdispersion keeps the beta-binomial fit away from the binomial boundary.
-    betaData = createData(200, randomEffectVariance = 0.5, family = binomial(), binomialTrials = nTrials, overdispersion = 0.5)
-    models$GLMMadaptive_betabinomial = GLMMadaptive::mixed_model(cbind(observedResponse1, observedResponse0) ~ Environment1, random = ~ 1 |group, data = betaData, family = GLMMadaptive::beta.binomial())
-  }
+  # Overdispersion keeps the beta-binomial fit away from the binomial boundary.
+  betaData = createData(200, randomEffectVariance = 0.5, family = binomial(), binomialTrials = nTrials, overdispersion = 0.5)
+  models$GLMMadaptive_betabinomial = GLMMadaptive::mixed_model(cbind(observedResponse1, observedResponse0) ~ Environment1, random = ~ 1 |group, data = betaData, family = GLMMadaptive::beta.binomial())
 
   for(i in names(models)){
     fittedResponse = getFittedResponse(models[[i]])

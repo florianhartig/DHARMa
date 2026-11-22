@@ -344,3 +344,25 @@ hasWeights <- function(fittedModel){
   # for all other families, weights other than 1 are prior weights (gamm4 passes weights of 1)
   return(any(w != 1))
 }
+
+# texts of test results in plots: significant (with statistic above / below its expectation, if direction matters), not significant
+testTexts = list(
+  uniformity = c("Distribution problem", "No distribution problem"),
+  dispersion = c("Overdispersion", "Underdispersion", "No dispersion problem"),
+  outliers = c("Too many outliers", "Too few outliers", "No outlier problem"),
+  zeroInflation = c("More zeros than expected", "Fewer zeros than expected", "No zero-inflation problem"),
+  generic = c("Observed larger than simulated", "Observed smaller than simulated", "No deviation from simulations"),
+  autocorrelation = c("Positive autocorrelation", "Negative autocorrelation", "No autocorrelation problem"),
+  categorical = c("Distribution problem in at least one group", "No within-group distribution problem"),
+  levene = c("Unequal variances between groups", "No variance problem"),
+  quantiles = c("Quantile deviations", "No quantile problem"))
+
+# interpretation and colour of a test result in all plots, one threshold p < 0.05 (#650)
+interpretTest = function(p, texts, above = TRUE){
+  significant = isTRUE(p < 0.05)
+  list(text = if(is.na(p)) "Test not available" else texts[if(!significant) length(texts) else if(isTRUE(above) || length(texts) == 2) 1 else 2],
+       col = if(significant) .Options$DHARMaSignalColor else "black")
+}
+
+# whether an outlier test found more outliers than expected (binomial: null.value, bootstrap: centre of the 95% bootstrap interval)
+moreOutliers = function(test) isTRUE(test$estimate > if(is.null(test$null.value)) mean(test$conf.int) else test$null.value)
