@@ -9,7 +9,7 @@ test_that("ensureDHARMa", {
 
   fittedModel <- glm(observedResponse ~ Environment1 , family = "poisson", data = testData)
 
-  expect_error(getSimulations(fittedModel, 1, type = "refdt"))
+  expect_error(getSimulations(fittedModel, 1, type = "refdt"), "should be one of")
 
   simulationOutput <- simulateResiduals(fittedModel = fittedModel)
 

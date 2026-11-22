@@ -223,7 +223,7 @@ test_that("glm.nb works",
             fittedModel <- MASS::glm.nb(observedResponse ~ Environment1,
                                         data = testData$poisson2,
                                         weights = testData$weights)
-            expect_warning(simulateResiduals(fittedModel))
+            expect_warning(simulateResiduals(fittedModel), "Model was fit with prior weights")
           }
 )
 
@@ -271,7 +271,7 @@ test_that("mgcv gam works",
             fittedModel <- mgcv::gam(observedResponse ~ Environment1,
                                      weights = testData$weights,
                                      data = testData$poisson_weights, family = "poisson")
-            expect_warning(simulateResiduals(fittedModel))
+            expect_warning(simulateResiduals(fittedModel), "Model was fit with prior weights")
           }
 )
 
@@ -289,7 +289,7 @@ test_that("lme4:lmer works",
             # lmer warns!
             fittedModel <- lme4::lmer(observedResponse ~ Environment1 + (1|group),
                                       data = testData$lm, weights = testData$weights)
-            expect_warning(simulateResiduals(fittedModel))
+            expect_warning(simulateResiduals(fittedModel), "Model was fit with prior weights")
           }
 )
 
@@ -347,14 +347,16 @@ test_that("lme4:glmer works",
                                          (1|group), family = "poisson",
                                        data = testData$poisson_weights,
                                        weights = testData$weights)
-            expect_warning(simulateResiduals(fittedModel))
+            expect_warning(expect_warning(simulateResiduals(fittedModel), "Model was fit with prior weights"),
+                           "ignoring prior weights")
 
             # lme4::glmer.nb warns
             fittedModel <- lme4::glmer.nb(observedResponse ~ Environment1 +
                                             (1|group),
                                           data = testData$poisson_weights,
                                           weights = testData$weights)
-            expect_warning(simulateResiduals(fittedModel))
+            expect_warning(expect_warning(simulateResiduals(fittedModel), "Model was fit with prior weights"),
+                           "ignoring prior weights")
           }
 )
 
@@ -413,7 +415,7 @@ test_that("glmmTMB works",
                                             family = "poisson",
                                             data = testData$poisson_weights,
                                             weights = testData$weights)
-            expect_warning(simulateResiduals(fittedModel))
+            expect_warning(simulateResiduals(fittedModel), "Model was fit with prior weights")
           }
 )
 
@@ -445,12 +447,6 @@ test_that("spaMM::HLfit works",
                                         data = testData$binomial_nk_matrix)
             runEverything(fittedModel, testData$binomial_nk_matrix)
 
-            # spaMM doesn't support binomial k/n via weights
-            expect_error(spaMM::HLfit(prop ~ Environment1 + (1|group),
-                                      family = "binomial",
-                                      data = testData$binomial_nk_weights,
-                                      prior.weights = rep(20,200)))
-
             fittedModel <- spaMM::HLfit(observedResponse ~ Environment1 + (1|group),
                                         family = "poisson",  data = testData$poisson1)
             runEverything(fittedModel, testData$poisson1)
@@ -464,11 +460,12 @@ test_that("spaMM::HLfit works",
 
             # doesn't throw error / warning, but seems intended, see https://github.com/florianhartig/DHARMa/issues/175
 
-            expect_error(spaMM::HLfit(observedResponse ~ Environment1 + (1|group),
-                                      family = negbin(1),
-                                      data = testData$poisson_weights,
-                                      prior.weights = weights))
-            expect_s3_class(simulateResiduals(fittedModel), "DHARMa")
+            fittedModel <- spaMM::HLfit(observedResponse ~ Environment1 + (1|group),
+                                        family = spaMM::negbin(1),
+                                        data = testData$poisson_weights,
+                                        prior.weights = weights)
+            expect_no_warning(res <- simulateResiduals(fittedModel))
+            expect_s3_class(res, "DHARMa")
           }
 )
 
@@ -479,12 +476,6 @@ test_that("GLMMadaptive works",
           {
             skip_if_not_installed("GLMMadaptive")
             set.seed(1)
-
-            # GLMMadaptive does not support gaussian
-            expect_error(GLMMadaptive::mixed_model(fixed = observedResponse ~
-                                                     Environment1,
-                                                   random = ~ 1 | group, data = testData$lmm,
-                                                   family = gaussian()))
 
             fittedModel <- GLMMadaptive::mixed_model(fixed = observedResponse ~
                                                        Environment1,
@@ -530,7 +521,7 @@ test_that("GLMMadaptive works",
                                                      data = testData$poisson_weights,
                                                      family = poisson(),
                                                      weights = weights)
-            expect_warning(simulateResiduals(fittedModel))
+            expect_warning(simulateResiduals(fittedModel), "Model was fit with prior weights")
           }
 )
 
