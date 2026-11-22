@@ -4,7 +4,7 @@ NOTE: for more news about the package, see https://github.com/florianhartig/DHAR
 
 ## Major changes
 
-* PIT residuals (default `method = "PIT"`) are exactly uniform under H0, so all PIT residuals and the results based on them change once; they are never exactly 0 or 1, and outliers in `testOutliers()`, `outliers()` (`lowerQuantile` and `upperQuantile` now default to `NULL`) and the plots are residuals < 1/(nSim + 1) or > nSim/(nSim + 1), see `?getQuantile` (#653).
+* PIT residuals (default `method = "PIT"`) are exactly uniform under H0, so all PIT residuals and the results based on them change once; they are never exactly 0 or 1, and outliers in `testOutliers()`, `outliers()` (`lowerQuantile` and `upperQuantile` now default to `NULL`) and the plots are residuals < 1/(nSim + 1) or > nSim/(nSim + 1), see `?getQuantile` (#653). With PIT residuals, code that compares residuals with 0 or 1, e.g. `outliers(x, lowerQuantile = 0, upperQuantile = 1)`, no longer finds outliers; use the defaults instead.
 
 ## Bugfixes
 
