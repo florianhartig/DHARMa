@@ -2,6 +2,10 @@ NOTE: for more news about the package, see https://github.com/florianhartig/DHAR
 
 # DHARMa 0.5.2
 
+## Major changes
+
+* PIT residuals (default `method = "PIT"`) are exactly uniform under H0 (previously on the grid k / nSim, detected by tests for large data and small `n`), so all PIT residuals and the results based on them change once; they are never exactly 0 or 1, and outliers in `testOutliers()`, `outliers()` and the plots are residuals < 1/(nSim + 1) or > nSim/(nSim + 1), see `?getQuantile` (#653).
+
 ## Bugfixes
 
 * GLMMadaptive beta-binomial models with more than one trial stop with an update message for GLMMadaptive < 0.9-9, whose simulations ignore the trial totals (@algoria-contributions, #565).

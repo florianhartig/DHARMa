@@ -61,8 +61,8 @@ hist.DHARMa <- function(x,
   x = ensureDHARMa(x, convert = TRUE)
 
   val = x$scaledResiduals
-  val[val == 0] = -0.01
-  val[val == 1] = 1.01
+  val[isOutlier(val, x$nSim, "lower")] = -0.01
+  val[isOutlier(val, x$nSim, "upper")] = 1.01
 
   hist(val, breaks = breaks, col = col, main = main, xlab = xlab, cex.main = cex.main, ...)
 }
@@ -209,6 +209,7 @@ plotResiduals <- function(simulationOutput, form = NULL, quantreg = NULL,
   simOut <- simulationOutput
   simulationOutput = ensureDHARMa(simulationOutput, convert = TRUE)
   res = simulationOutput$scaledResiduals
+  outlier = isOutlier(res, simulationOutput$nSim) # before the transformation to absolute deviations
 
   if(absoluteDeviation == TRUE){
     res = 2 * abs(res - 0.5)
@@ -320,6 +321,7 @@ plotResiduals <- function(simulationOutput, form = NULL, quantreg = NULL,
 
     pred = pred[group == groupLevel]
     res = res[group == groupLevel]
+    outlier = outlier[group == groupLevel]
   }
 
 
@@ -361,6 +363,7 @@ plotResiduals <- function(simulationOutput, form = NULL, quantreg = NULL,
   # categorical plot
   if(is.factor(pred)){
     a$p.outliers = if(is.vector(simOut)) NA else testOutliers(simOut, plot = FALSE)$p.value
+    a$outlier = outlier
     simulationOutput$scaledResiduals = res
     do.call(testCategorical,
             append(list(simulationOutput = simulationOutput, catPred = pred,
@@ -370,7 +373,6 @@ plotResiduals <- function(simulationOutput, form = NULL, quantreg = NULL,
   } else{
 
     # color/shape outliers according to significance of outlier test, related to issue #453
-    outlier <- res == 0 | res == 1
     if(is.vector(simOut)) {
       message("Outliers will not be displayed in the plot when simulationOutput is not a DHARMa object.")
       defaultCol = blackcol

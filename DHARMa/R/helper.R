@@ -36,7 +36,7 @@ DHARMa.ecdf <- function (x)
 #'
 #' For discrete data, there are two options implemented.
 #'
-#' The current default (available since DHARMa 0.3.1) are probability integral transform (PIT-) residuals (Smith, 1985; Dunn & Smyth, 1996; see also Warton, et al., 2017).
+#' The current default (available since DHARMa 0.3.1) are probability integral transform (PIT-) residuals (Smith, 1985; Dunn & Smyth, 1996; see also Warton, et al., 2017). With k the number of simulations smaller than the observed value and t the number of simulations equal to it, the residual is (k + U (t + 1)) / (nSim + 1), with U ~ U(0,1), i.e. the rank of the observation among the nSim + 1 values, with ties broken at random, spread uniformly within its cell. Under H0, these residuals are exactly uniform for continuous, discrete and mixed distributions, also for small nSim. They are never exactly 0 or 1; observations outside the simulation envelope have residuals < 1/(nSim + 1) or > nSim/(nSim + 1) (see [testOutliers]). Before DHARMa 0.5.2, PIT residuals were calculated as k / nSim, with a randomization between k / nSim and (k + t) / nSim for ties, which is not exactly uniform under H0 (see [issue #653](https://github.com/florianhartig/DHARMa/issues/653)).
 #'
 #' Before DHARMa 0.3.1, a different randomization procedure was used, in which a U(-0.5, 0.5) distribution was added on observations and simulations for discrete distributions. For a completely discrete distribution, the two procedures should deliver equivalent results, but the second method has the disadvantage that (a) one has to know if the distribution is discrete (DHARMa tries to recognize this automatically), and (b) that it leads to inefficiencies for some distributions such as the Tweedie, which are partly continuous, partly discrete
 #' (see e.g. [issue #168](https://github.com/florianhartig/DHARMa/issues/168) on DHARMa GitHub page).
@@ -113,20 +113,30 @@ getQuantile <- function(simulations, observed, integerResponse,
       simulations = forwardsolve(L, simulations)
     }
 
-    # calculation of PIT residual - idea is that we check the lower quantile as
-    # well as lower or equal - if they are not identical we need to randomize then
-
-    lower <- unname(rowMeans(simulations < observed))
-    lowerOrEqual <- unname(rowMeans(simulations <= observed))
-    needsRandomization <- lower != lowerOrEqual
-
-    if(any(needsRandomization)) {
-      scaledResiduals <- ifelse(needsRandomization,
-                                runif(length(lower), lower, lowerOrEqual),
-                                lower)
-    } else scaledResiduals = lower
+    # randomized PIT: rank of the observation among the nSim + 1 values, with ties
+    # broken at random and a U(0,1) spread within the rank cell, exactly uniform under H0
+    # fixes #653 (k / nSim lies on a grid and is not uniform)
+    lower <- unname(rowSums(simulations < observed))
+    ties <- unname(rowSums(simulations == observed))
+    scaledResiduals <- (lower + runif(n) * (ties + 1)) / (nSim + 1)
   }
   return(scaledResiduals)
+}
+
+#' Simulation outliers
+#'
+#' @param res scaled residuals.
+#' @param nSim number of simulations; if NULL (residuals given as a vector), only residuals equal to 0 or 1 are outliers.
+#' @param margin lower, upper or both margins.
+#'
+#' @details Residuals below 1/(nSim + 1) or above nSim/(nSim + 1), i.e. in the outer cells of the randomized PIT (see [getQuantile]). For continuous responses and for method = "traditional", these are the observations outside the simulation envelope.
+#'
+#' @keywords internal
+isOutlier <- function(res, nSim, margin = c("both", "upper", "lower")){
+  margin = match.arg(margin)
+  lower = if(is.null(nSim)) res <= 0 else res < 1/(nSim + 1)
+  upper = if(is.null(nSim)) res >= 1 else res > nSim/(nSim + 1)
+  switch(margin, both = lower | upper, upper = upper, lower = lower)
 }
 
 

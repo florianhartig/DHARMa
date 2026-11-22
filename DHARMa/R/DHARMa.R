@@ -28,7 +28,7 @@ print.DHARMa <- function(x, ...){
 #'
 #' @param object an object with simulated residuals created by [simulateResiduals].
 #' @param quantileFunction optional - a quantile function to transform the uniform 0/1 scaling of DHARMa to another distribution.
-#' @param outlierValues if a quantile function with infinite support (such as qnorm) is used, residuals that are 0/1 are mapped to -Inf / Inf. outlierValues allows to convert -Inf / Inf values to an optional min / max value.
+#' @param outlierValues if a quantile function with infinite support (such as qnorm) is used, residuals that are 0/1 (only possible for method = "traditional" or refit = TRUE, see [getQuantile]) are mapped to -Inf / Inf. outlierValues allows to convert -Inf / Inf values to an optional min / max value.
 #' @param ... optional arguments for compatibility with the generic function, no function implemented.
 #' @details The function accesses the slot $scaledResiduals in a fitted DHARMa object, and optionally transforms the standard DHARMa quantile residuals (which have a uniform distribution) to a particular pdf.
 #'
@@ -58,11 +58,11 @@ residuals.DHARMa <- function(object, quantileFunction = NULL, outlierValues = NU
 #' Returns the outliers of a DHARMa object.
 #'
 #' @param object an object with simulated residuals created by [simulateResiduals].
-#' @param lowerQuantile lower threshold for outliers. Default is zero = outside simulation envelope.
-#' @param upperQuantile upper threshold for outliers. Default is 1 = outside simulation envelope.
+#' @param lowerQuantile lower threshold for outliers (residuals <= lowerQuantile). Default NULL = residuals < 1/(nSim + 1), as in [testOutliers]. Note that PIT residuals are never exactly 0 or 1, so lowerQuantile = 0 (the default before DHARMa 0.5.2) returns no outliers.
+#' @param upperQuantile upper threshold for outliers (residuals >= upperQuantile). Default NULL = residuals > nSim/(nSim + 1), as in [testOutliers].
 #' @param return whether to return indices of outliers or a logical vector.
 #'
-#' @details First of all, note that the standard definition of outlier in the DHARMa plots and outlier tests is an observation that is outside the simulation envelope. How far outside that is depends a lot on how many simulations you do. If you have 100 data points and do 100 simulations, you would expect to have about two "outliers" on average (one at each margin), even with a perfectly fitting model. This is in fact what the outlier test tests.
+#' @details First of all, note that the standard definition of outlier in the DHARMa plots and outlier tests is an observation that is outside the simulation envelope (for discrete responses, also a random share of the observations tied with the most extreme simulations, see [testOutliers]). How far outside that is depends a lot on how many simulations you do. If you have 100 data points and do 100 simulations, you would expect to have about two "outliers" on average (one at each margin), even with a perfectly fitting model. This is in fact what the outlier test tests.
 #'
 #' Thus, keep in mind that for a small number of simulations, outliers are mostly a technical term: these are points that are outside our simulations, but we don't know how far away they are.
 #'
@@ -72,11 +72,13 @@ residuals.DHARMa <- function(object, quantileFunction = NULL, outlierValues = NU
 #'
 #' @export
 #'
-outliers <- function(object, lowerQuantile = 0, upperQuantile = 1, return = c("index", "logical")){
+outliers <- function(object, lowerQuantile = NULL, upperQuantile = NULL, return = c("index", "logical")){
 
   return = match.arg(return)
 
-  out = residuals(object) >= upperQuantile | residuals(object) <= lowerQuantile
+  res = residuals(object)
+  out = (if(is.null(lowerQuantile)) isOutlier(res, object$nSim, "lower") else res <= lowerQuantile) |
+    (if(is.null(upperQuantile)) isOutlier(res, object$nSim, "upper") else res >= upperQuantile)
 
   if(return == "logical") return(out)
   else(return(which(out)))

@@ -159,7 +159,7 @@ Note: the uniform distribution is the only difference to "conventional" residual
 residuals(simulationOutput, quantileFunction = qnorm, outlierValues = c(-7,7))
 ```
 
-These normal residuals will behave exactly like the residuals of a linear regression. However, for reasons of a) numeric stability with low number of simulations, which makes it necessary to decide on which value outliers are to be transformed and b) my conviction that it is much easier to visually detect deviations from uniformity than normality, `DHARMa` checks all residuals in the uniform space, and I would personally advise against using the transformation.
+These normal residuals will behave exactly like the residuals of a linear regression. However, for reasons of a) numeric stability with low number of simulations (residuals calculated with method = "traditional" or refit = TRUE can be 0 or 1), which makes it necessary to decide on which value outliers are to be transformed and b) my conviction that it is much easier to visually detect deviations from uniformity than normality, `DHARMa` checks all residuals in the uniform space, and I would personally advise against using the transformation.
 
 ## Plotting the scaled residuals
 
