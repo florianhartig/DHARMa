@@ -44,11 +44,13 @@ jobs:
 
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
+          # rjags=?ignore: rjags >= 5 needs JAGS 5, not available on the Ubuntu runners (rjags is in Enhances, used only in eval = F vignette code)
           extra-packages: |
             any::rcmdcheck
             any::BH
             StanHeaders@2.32.10
             any::RcppEigen
+            rjags=?ignore
           needs: check
           working-directory: DHARMa
 
