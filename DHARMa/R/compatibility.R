@@ -51,7 +51,7 @@ checkModel <- function(fittedModel, stop = F){
   # #565: earlier GLMMadaptive versions simulate one trial for grouped beta-binomial responses.
   if(inherits(fittedModel, "MixMod") && getFamily(fittedModel)$family == "beta binomial" &&
      utils::packageVersion("GLMMadaptive") < "0.9-9" && any(getTrials(fittedModel) > 1)){
-    stop("DHARMa: simulations of GLMMadaptive beta.binomial() models with more than one trial are wrong in GLMMadaptive < 0.9-9; please update to GLMMadaptive >= 0.9-9 (https://github.com/drizopoulos/GLMMadaptive).")
+    stop("DHARMa: simulations of GLMMadaptive beta.binomial() models with more than one trial are wrong in GLMMadaptive < 0.9-9; please update GLMMadaptive.")
   }
 
   # see #339 (GEE objects inherit glm methods, but simulations ignore the GEE structure)
@@ -327,6 +327,15 @@ getResponseScale <- function(out, object){
     else securityAssertion("Response in the model is a matrix with > 2 dim")
   }
   return(out)
+}
+
+# refit simulations (data.frame with simulated numbers of successes) in the cbind(successes, failures) format of the response resp
+cbindRefitResponse <- function(k, resp){
+  for(i in seq_along(k)){
+    k[[i]] = cbind(k[[i]], rowSums(resp) - k[[i]])
+    colnames(k[[i]]) = colnames(resp)
+  }
+  k
 }
 
 #' @rdname getRefit
@@ -624,11 +633,7 @@ getSimulations.gam <- function(object, nsim = 1, simulateREs = c("conditional", 
     out = as.data.frame(out)
     # cbind(successes, failures) format for refit
     resp = model.frame(object)[[1]]
-    if(is.matrix(resp) && ncol(resp) == 2) for(i in seq_along(out)){
-      k = round(out[[i]] * trials)
-      out[[i]] = cbind(k, trials - k)
-      colnames(out[[i]]) = colnames(resp)
-    }
+    if(is.matrix(resp) && ncol(resp) == 2) out = cbindRefitResponse(round(out * trials), resp)
   }
   return(out)
 }
@@ -886,6 +891,8 @@ getSimulations.MixMod <- function(object, nsim = 1, simulateREs = c("conditional
     if(!is.matrix(out)) out = data.matrix(out)
   }else{
     out = as.data.frame(out)
+    resp = model.frame(object)[[1]]
+    if(is.matrix(resp) && ncol(resp) == 2) out = cbindRefitResponse(out, resp) # fixes #655
   }
   return(out)
 }
@@ -913,6 +920,9 @@ getFitted.MixMod <- function (object,...){
 #' @rdname getResiduals
 #' @export
 getResiduals.MixMod <- function (object,...){
+  # fixes #655 (cbind(successes, failures) response: GLMMadaptive returns an n x 2 matrix; DHARMa uses proportions)
+  y = model.frame(object)[[1]]
+  if(is.matrix(y) && ncol(y) == 2) return(y[, 1] / rowSums(y) - fitted(object, type = "subject_specific"))
   residuals(object, type = "subject_specific")
 }
 

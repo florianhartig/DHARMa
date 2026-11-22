@@ -13,7 +13,7 @@ The vignette (section "Supported packages and frameworks") and the package tests
 | [glmmTMB](glmmTMB/README.md) | `glmmTMB` | full | no conditioning on selected REs; conditional simulations fall back to unconditional for `exp()` |
 | [mgcv](mgcv/README.md) | `gam`, `bam` | full (one linear predictor), partial (several, #600) | only conditional simulations; extended families need mgcViz; several linear predictors (#600); `multinom`, `gamm()$gam` and `gamm4()$gam` not supported (#418, #612) |
 | [spaMM](spaMM/README.md) | `HLfit` | full | no k/n binomial via weights |
-| [GLMMadaptive](GLMMadaptive/README.md) | `MixMod` | partial | residuals sorted by the grouping factor; vector predictors must be in this order (#609); `cbind()` refit fails (#565); beta-binomial with more than one trial requires GLMMadaptive >= 0.9-9; earlier versions are blocked (#565); no Pearson residuals |
+| [GLMMadaptive](GLMMadaptive/README.md) | `MixMod` | partial | residuals sorted by the grouping factor; vector predictors must be in this order (#609); beta-binomial with more than one trial requires GLMMadaptive >= 0.9-9 (#565); no Pearson residuals |
 | [phylolm](phylolm/README.md) | `phylolm`, `phyloglm` | partial | residuals in tree tip order; vector predictors must be in this order (#609); `poisson_GEE` and models fitted in functions fail (#478); no Pearson residuals |
 | [brms](brms/README.md) | `brmsfit` | partial (univariate models) | `weights()` ignored (#7); unsupported model types with unclear errors (#612) |
 | [phyr](phyr/README.md) | | not checked | #235 |
