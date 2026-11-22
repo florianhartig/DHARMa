@@ -329,13 +329,15 @@ getResponseScale <- function(out, object){
   return(out)
 }
 
-# refit simulations (data.frame with simulated numbers of successes) in the cbind(successes, failures) format of the response resp
-cbindRefitResponse <- function(k, resp){
-  for(i in seq_along(k)){
-    k[[i]] = cbind(k[[i]], rowSums(resp) - k[[i]])
-    colnames(k[[i]]) = colnames(resp)
+# refit simulations (data.frame): for cbind(successes, failures) responses, convert numbers of successes (simulations * scale) to that format; otherwise unchanged
+cbindRefitResponse <- function(out, object, scale = 1){
+  resp = model.frame(object)[[1]]
+  if(isBinomialFamily(object) && is.matrix(resp) && ncol(resp) == 2) for(i in seq_along(out)){
+    k = round(out[[i]] * scale)
+    out[[i]] = cbind(k, rowSums(resp) - k)
+    colnames(out[[i]]) = colnames(resp)
   }
-  k
+  out
 }
 
 #' @rdname getRefit
@@ -630,10 +632,7 @@ getSimulations.gam <- function(object, nsim = 1, simulateREs = c("conditional", 
     out = out * trials
     if(!identical(trials, 1) && all(trials %% 1 == 0)) out = round(out)
   } else {
-    out = as.data.frame(out)
-    # cbind(successes, failures) format for refit
-    resp = model.frame(object)[[1]]
-    if(is.matrix(resp) && ncol(resp) == 2) out = cbindRefitResponse(round(out * trials), resp)
+    out = cbindRefitResponse(as.data.frame(out), object, trials)
   }
   return(out)
 }
@@ -890,9 +889,7 @@ getSimulations.MixMod <- function(object, nsim = 1, simulateREs = c("conditional
   if(type == "normal"){
     if(!is.matrix(out)) out = data.matrix(out)
   }else{
-    out = as.data.frame(out)
-    resp = model.frame(object)[[1]]
-    if(is.matrix(resp) && ncol(resp) == 2) out = cbindRefitResponse(out, resp) # fixes #655
+    out = cbindRefitResponse(as.data.frame(out), object)
   }
   return(out)
 }
@@ -920,9 +917,9 @@ getFitted.MixMod <- function (object,...){
 #' @rdname getResiduals
 #' @export
 getResiduals.MixMod <- function (object,...){
-  # fixes #655 (cbind(successes, failures) response: GLMMadaptive returns an n x 2 matrix; DHARMa uses proportions)
-  y = model.frame(object)[[1]]
-  if(is.matrix(y) && ncol(y) == 2) return(y[, 1] / rowSums(y) - fitted(object, type = "subject_specific"))
+  # fixes #655 (k/n models: residuals() returns an n x 2 matrix for cbind() responses; DHARMa needs proportions)
+  trials = getTrials(object)
+  if(!identical(trials, 1)) return(getObservedResponse(object) / trials - fitted(object, type = "subject_specific"))
   residuals(object, type = "subject_specific")
 }
 
