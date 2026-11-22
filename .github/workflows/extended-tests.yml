@@ -23,11 +23,13 @@ jobs:
 
       - uses: r-lib/actions/setup-r-dependencies@v2
         with:
+          # rjags=?ignore: see R-CMD-check.yaml
           extra-packages: |
             any::BH
             StanHeaders@2.32.10
             any::RcppEigen
             local::.
+            rjags=?ignore
           working-directory: DHARMa
 
       - name: Run extended tests

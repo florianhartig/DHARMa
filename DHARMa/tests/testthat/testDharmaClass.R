@@ -94,7 +94,7 @@ test_that("recalcuateResiduals works", {
 
   # selecting = negative Values
   expect_error(length(residuals(recalculateResiduals(
-    simulationOutput, sel = -10 : 5))))
+    simulationOutput, sel = -10 : 5))), "only 0's may be mixed with negative subscripts")
   expect_true(length(residuals(recalculateResiduals(simulationOutput,
                                                     sel = -10:-5))) == 194)
 
