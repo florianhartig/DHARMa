@@ -282,6 +282,31 @@ test_that("testOutliers", {
   expect_message(testOutliers(simulationOutput, plot = F, type = "binomial",
                               plotBootstrap = T), "ignored")
 
+  # type = "default": bootstrap only for traditional residuals with duplicated non-integer simulations (#653)
+  sims = matrix(rpois(200 * 50, 3), 200)
+  obs = rpois(200, 3)
+  pit = createDHARMa(sims, obs, fittedPredictedResponse = rep(3, 200), integerResponse = TRUE)
+  trad = createDHARMa(sims, obs, fittedPredictedResponse = rep(3, 200), integerResponse = TRUE, method = "traditional")
+  tradCont = createDHARMa(sims + rnorm(200 * 50), obs + rnorm(200), fittedPredictedResponse = rep(3, 200), method = "traditional")
+  expect_equal(testOutliers(pit, plot = F)$method, "DHARMa outlier test based on exact binomial test")
+  expect_equal(testOutliers(trad, plot = F)$method, "DHARMa outlier test based on exact binomial test")
+  expect_equal(testOutliers(tradCont, plot = F)$method, "DHARMa outlier test based on exact binomial test")
+  tradTies = suppressMessages(createDHARMa(sims / 2, obs / 2, fittedPredictedResponse = rep(1.5, 200), method = "traditional"))
+  expect_equal(testOutliers(tradTies, plot = F, nBoot = 10)$method, "DHARMa bootstrapped outlier test")
+  expect_match(testOutliers(tradTies, plot = F, type = "binomial")$method, "approximate expectations")
+  expect_silent(testOutliers(tradTies, plot = F, nBoot = 10))
+  # simulations with NA values (e.g. failed refits) are left out of the bootstrap
+  simsNA = sims / 2; simsNA[, 3] = NA
+  tiesNA = suppressMessages(createDHARMa(simsNA, obs / 2, fittedPredictedResponse = rep(1.5, 200), method = "traditional"))
+  expect_false(is.na(testOutliers(tiesNA, plot = F, nBoot = 10)$p.value))
+
+  # bootstrap expectation without resampling bias: for continuous responses and
+  # nBoot = nSim, each row has exactly 2 outliers among the nSim simulations; rescaled
+  # to nSim + 1 values, the expectation is exactly 2 / (nSim + 1) (#653)
+  cont = createDHARMa(matrix(rnorm(200 * 50), 200), rnorm(200), fittedPredictedResponse = rep(0, 200))
+  x = testOutliers(cont, type = "bootstrap", nBoot = 50, plot = F)
+  expect_equal(as.numeric(sub(".*expected: ([^ ]+) .*", "\\1", names(x$estimate))), 2 / 51)
+
 })
 
 

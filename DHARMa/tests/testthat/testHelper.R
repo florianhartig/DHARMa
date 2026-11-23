@@ -145,3 +145,34 @@ test_that("runBenchmarks", {
   expect_equal(colnames(out$summaries$propSignificant), c("controlValues", "p"))
 
 })
+
+test_that("PIT residuals are exactly uniform, outliers are the outer cells (#653)", {
+
+  set.seed(123)
+  n = 20000; nSim = 20
+
+  # continuous: previously on the grid k/nSim
+  sims = matrix(rnorm(n * nSim), n)
+  obs = rnorm(n)
+  res = getQuantile(sims, obs, integerResponse = FALSE)
+  expect_false(any(res == 0 | res == 1))
+  expect_gt(ks.test(res, punif)$p.value, 0.01)
+  k = rowSums(sims < obs)
+  expect_identical(isOutlier(res, nSim), k == 0 | k == nSim) # outside the envelope
+  expect_identical(isOutlier(c(0, 0.01, 0.99, 1), NULL), c(TRUE, FALSE, FALSE, TRUE)) # vector without nSim
+
+  # traditional residuals: outliers are exactly 0 / 1
+  resTrad = getQuantile(sims, obs, integerResponse = FALSE, method = "traditional")
+  expect_identical(isOutlier(resTrad, nSim), resTrad == 0 | resTrad == 1)
+
+  # discrete: ties randomized within the cell
+  resPois = getQuantile(matrix(rpois(n * nSim, 3), n), rpois(n, 3), integerResponse = TRUE)
+  expect_gt(ks.test(resPois, punif)$p.value, 0.01)
+  expect_gt(binom.test(sum(isOutlier(resPois, nSim)), n, 2/(nSim + 1))$p.value, 0.01)
+
+  # outliers(), testOutliers() and hist use the same definition
+  simulationOutput = createDHARMa(sims[1:500, ], obs[1:500], fittedPredictedResponse = rep(0, 500))
+  expect_equal(length(outliers(simulationOutput)),
+               unname(testOutliers(simulationOutput, type = "binomial", plot = FALSE)$statistic))
+  expect_equal(length(outliers(simulationOutput)), sum(k[1:500] == 0 | k[1:500] == nSim))
+})

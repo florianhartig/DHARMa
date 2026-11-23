@@ -12,7 +12,7 @@ simulateResiduals(fittedModel, n = 250, simulateREs = c("conditional",
 \arguments{
 \item{fittedModel}{a fitted model of a class supported by DHARMa.}
 
-\item{n}{number of simulations. The smaller the number, the higher the stochastic error on the residuals. Also, for very small n, discretization artefacts can influence the tests. Default is 250, which is a relatively safe value. You can consider increasing to 1000 to stabilize the simulated values.}
+\item{n}{number of simulations. The smaller the number, the higher the stochastic error on the residuals. Also, for very small n, discretization artefacts can influence the tests (for method = "traditional" or refit = TRUE, see \link{getQuantile}). Default is 250, which is a relatively safe value. You can consider increasing to 1000 to stabilize the simulated values.}
 
 \item{simulateREs}{decides which REs / hierarchical levels should be re-simulated. If \code{conditional}, simulations are done conditional on all fitted random effects (default). If \code{unconditional}, all REs or hierarchical levels are re-simulated. Setting \code{user-specified} allows supplying package-specific arguments to decide which REs are to be re-simulated. If none are supplied, the defaults of the respective fitted model object is used. See details and further comments in \link{getSimulations}.}
 

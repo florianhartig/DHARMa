@@ -4,15 +4,15 @@
 \alias{outliers}
 \title{Return outliers}
 \usage{
-outliers(object, lowerQuantile = 0, upperQuantile = 1,
+outliers(object, lowerQuantile = NULL, upperQuantile = NULL,
   return = c("index", "logical"))
 }
 \arguments{
 \item{object}{an object with simulated residuals created by \link{simulateResiduals}.}
 
-\item{lowerQuantile}{lower threshold for outliers. Default is zero = outside simulation envelope.}
+\item{lowerQuantile}{lower threshold for outliers (residuals <= lowerQuantile). Default NULL = residuals < 1/(nSim + 1), as in \link{testOutliers}. Note that PIT residuals are never exactly 0 or 1, so lowerQuantile = 0 (the default before DHARMa 0.5.2) returns no outliers.}
 
-\item{upperQuantile}{upper threshold for outliers. Default is 1 = outside simulation envelope.}
+\item{upperQuantile}{upper threshold for outliers (residuals >= upperQuantile). Default NULL = residuals > nSim/(nSim + 1), as in \link{testOutliers}.}
 
 \item{return}{whether to return indices of outliers or a logical vector.}
 }
@@ -20,7 +20,7 @@ outliers(object, lowerQuantile = 0, upperQuantile = 1,
 Returns the outliers of a DHARMa object.
 }
 \details{
-First of all, note that the standard definition of outlier in the DHARMa plots and outlier tests is an observation that is outside the simulation envelope. How far outside that is depends a lot on how many simulations you do. If you have 100 data points and do 100 simulations, you would expect to have about two "outliers" on average (one at each margin), even with a perfectly fitting model. This is in fact what the outlier test tests.
+First of all, note that the standard definition of outlier in the DHARMa plots and outlier tests is an observation that is outside the simulation envelope (for discrete responses, also a random share of the observations tied with the most extreme simulations, see \link{testOutliers}). How far outside that is depends a lot on how many simulations you do. If you have 100 data points and do 100 simulations, you would expect to have about two "outliers" on average (one at each margin), even with a perfectly fitting model. This is in fact what the outlier test tests.
 
 Thus, keep in mind that for a small number of simulations, outliers are mostly a technical term: these are points that are outside our simulations, but we don't know how far away they are.
 

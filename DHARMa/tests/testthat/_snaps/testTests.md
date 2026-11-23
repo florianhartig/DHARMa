@@ -1,14 +1,14 @@
 # tests work
 
-    list(statistic = 0.0479322043191642, p.value = 0.747699126906491)
+    list(statistic = 0.046404995137744, p.value = 0.782244345306786)
 
 ---
 
-    list(statistic = 0.0260323977395892, p.value = 0.762559841572756)
+    list(statistic = 0.0303172078924587, p.value = 0.692357223410798)
 
 ---
 
-    list(statistic = 0.0479322043191642, p.value = 0.398918364068668)
+    list(statistic = 0.046404995137744, p.value = 0.422582988286365)
 
 ---
 
@@ -38,7 +38,7 @@
 
 ---
 
-    list(statistic = 0.0479322043191642, p.value = 0.747699126906491)
+    list(statistic = 0.046404995137744, p.value = 0.782244345306786)
 
 ---
 
@@ -46,7 +46,7 @@
 
 ---
 
-    list(statistic = 1, p.value = 0.98)
+    list(statistic = 2, p.value = 0.675671011831035)
 
 ---
 
@@ -93,15 +93,15 @@
 
 ---
 
-    list(statistic = 0.240719932043925, p.value = 0.531731559712716)
+    list(statistic = 0.24236823311391, p.value = 0.523144542137211)
 
 ---
 
-    list(statistic = 0.132449687808752, p.value = 0.649774619838071)
+    list(statistic = 0.130838754741972, p.value = 0.65576829763515)
 
 ---
 
-    list(statistic = 0.240719932043925, p.value = 0.270264374492062)
+    list(statistic = 0.24236823311391, p.value = 0.265653558162143)
 
 ---
 
@@ -121,7 +121,7 @@
 
 ---
 
-    list(statistic = 0.240719932043925, p.value = 0.531731559712716)
+    list(statistic = 0.24236823311391, p.value = 0.523144542137211)
 
 ---
 
@@ -129,7 +129,7 @@
 
 ---
 
-    list(statistic = 1, p.value = 0.16)
+    list(statistic = 1, p.value = 0.0768840474800358)
 
 ---
 
@@ -153,43 +153,43 @@
       	DHARMa Moran's I test for distance-based autocorrelation
       
       data:  simulationOutput
-      observed = -0.0193785, expected = -0.0050251, sd = 0.0112743, p-value =
-      0.203
+      observed = -0.0185821, expected = -0.0050251, sd = 0.0112745, p-value =
+      0.2292
       alternative hypothesis: two.sided
       
 
 ---
 
-    list(statistic = c(-0.0193785030017313, -0.0050251256281407, 
-    0.0112742680577377), p.value = 0.202979200795442)
+    list(statistic = c(-0.0185820861732069, -0.0050251256281407, 
+    0.0112744972438508), p.value = 0.229191242002184)
 
 ---
 
-    list(statistic = c(-0.0193785030017313, -0.0050251256281407, 
-    0.0112742680577377), p.value = 0.202979200795442)
+    list(statistic = c(-0.0185820861732069, -0.0050251256281407, 
+    0.0112744972438508), p.value = 0.229191242002184)
 
 ---
 
-    list(statistic = c(-0.0193785030017313, -0.0050251256281407, 
-    0.0112742680577377), p.value = 0.202979200795442)
+    list(statistic = c(-0.0185820861732069, -0.0050251256281407, 
+    0.0112744972438508), p.value = 0.229191242002184)
 
 ---
 
-    list(statistic = c(-0.0193785030017313, -0.0050251256281407, 
-    0.0112742680577377), p.value = 0.202979200795442)
+    list(statistic = c(-0.0185820861732069, -0.0050251256281407, 
+    0.0112744972438508), p.value = 0.229191242002184)
 
 ---
 
-    list(statistic = c(-0.0193785030017313, -0.0050251256281407, 
-    0.0112742680577377), p.value = 0.202979200795442)
+    list(statistic = c(-0.0185820861732069, -0.0050251256281407, 
+    0.0112744972438508), p.value = 0.229191242002184)
 
 ---
 
-    list(statistic = 2.02715548206735, p.value = 0.846972128892957)
+    list(statistic = 2.03762175906022, p.value = 0.789189794363778)
 
 ---
 
-    list(statistic = 2.02715548206735, p.value = 0.576513935553522)
+    list(statistic = 2.03762175906022, p.value = 0.605405102818111)
 
 # test phylogenetic autocorrelation
 
@@ -200,8 +200,8 @@
       	DHARMa Moran's I test for phylogenetic autocorrelation
       
       data:  res2
-      observed = -0.0080149, expected = -0.0169492, sd = 0.0883345, p-value =
-      0.9194
+      observed = -0.0077989, expected = -0.0169492, sd = 0.0883326, p-value =
+      0.9175
       alternative hypothesis: two.sided
       
 
@@ -211,24 +211,23 @@
       testOutliers(simulationOutput, plot = F, margin = "lower")
     Output
       
-      	DHARMa outlier test based on exact binomial test with approximate
-      	expectations
+      	DHARMa outlier test based on exact binomial test
       
       data:  simulationOutput
-      outliers at lower margin(s) = 4, observations = 1000, p-value = 0.8037
+      outliers at lower margin(s) = 3, observations = 1000, p-value = 1
       alternative hypothesis: true probability of success is not equal to 0.003984064
       95 percent confidence interval:
-       0.001090908 0.010209665
+       0.0006190999 0.0087420232
       sample estimates:
       frequency of outliers (expected: 0.00398406374501992 ) 
-                                                       0.004 
+                                                       0.003 
       
+
+---
+
+    list(statistic = 3, p.value = 1)
 
 ---
 
     list(statistic = 4, p.value = 0.803658572542606)
-
----
-
-    list(statistic = 5, p.value = 0.607906169367581)
 

@@ -22,16 +22,24 @@ getQuantile(simulations, observed, integerResponse, method = c("PIT",
 Calculates residual quantiles from a given simulation.
 }
 \details{
-The function calculates residual quantiles from the simulated data. For continuous distributions, this will simply be the value of the ecdf.
+The function calculates residual quantiles from the simulated data. For continuous distributions and method = "traditional", this will simply be the value of the ecdf.
 
 \strong{Randomization procedure for discrete data}
 
 For discrete data, there are two options implemented.
 
-The current default (available since DHARMa 0.3.1) are probability integral transform (PIT-) residuals (Smith, 1985; Dunn & Smyth, 1996; see also Warton, et al., 2017).
+The current default (available since DHARMa 0.3.1, in its current form since DHARMa 0.5.2) are probability integral transform (PIT-) residuals (Smith, 1985; Dunn & Smyth, 1996; see also Warton, et al., 2017). With k the number of simulations smaller than the observed value and t the number of simulations equal to it, the residual is (k + U (t + 1)) / (nSim + 1), with U ~ U(0,1), i.e. the rank of the observation among the nSim + 1 values, with ties broken at random, spread uniformly within its cell. Under H0, this rank is uniform on 0, ..., nSim (shown for continuous values by Talts et al., 2018), and spreading it within its cell, as in randomized rank histograms (Heinrich, 2021), makes the residual exactly uniform on (0, 1) for continuous, discrete and mixed distributions, also for small nSim. They are never exactly 0 or 1; observations outside the simulation envelope have residuals < 1/(nSim + 1) or > nSim/(nSim + 1) (see \link{testOutliers}).
 
 Before DHARMa 0.3.1, a different randomization procedure was used, in which a U(-0.5, 0.5) distribution was added on observations and simulations for discrete distributions. For a completely discrete distribution, the two procedures should deliver equivalent results, but the second method has the disadvantage that (a) one has to know if the distribution is discrete (DHARMa tries to recognize this automatically), and (b) that it leads to inefficiencies for some distributions such as the Tweedie, which are partly continuous, partly discrete
 (see e.g. \href{https://github.com/florianhartig/DHARMa/issues/168}{issue #168} on DHARMa GitHub page).
+
+\strong{History of the residual calculation}
+\itemize{
+\item Up to DHARMa 0.3.0, residuals were calculated with the procedure that is now available as method = "traditional" (see above), with an empirical cumulative distribution function of the simulations that is 0 below and 1 above all simulations and interpolates linearly in between (since DHARMa 0.2.1).
+\item DHARMa 0.3.1 introduced PIT residuals as default (\href{https://github.com/florianhartig/DHARMa/issues/168}{issue #168}), with ties randomized between k / nSim and (k + t) / nSim and, without ties, the interpolated empirical cumulative distribution function of the traditional method. Because this failed for constant simulations (\href{https://github.com/florianhartig/DHARMa/issues/195}{issue #195}), the interpolation was removed in DHARMa 0.3.3; from 0.3.3 to 0.5.1, residuals without ties were k / nSim, i.e. not randomized within the cells.
+\item These k / nSim residuals lie on a grid of nSim + 1 values. Under H0, P(residual <= q) = (floor(q nSim) + 1) / (nSim + 1) instead of q (e.g. 0.51 instead of 0.5 for nSim = 50), so they are not uniform even for continuous responses. For 8000 observations simulated from the true model, \link{testUniformity} rejected in all simulated cases for nSim = 50 and in about 10\% for nSim = 250 (alpha = 0.05). Since DHARMa 0.5.2, PIT residuals are randomized within the cells as described above, which removes this bias (\href{https://github.com/florianhartig/DHARMa/issues/653}{issue #653}).
+\item Since DHARMa 0.4.1, simulateResiduals(refit = TRUE) calculates residuals with method = "traditional" (since DHARMa 0.5.1, recalculateResiduals() does the same, \href{https://github.com/florianhartig/DHARMa/issues/589}{issue #589}), because the residuals simulated with refits are continuous also for discrete responses, so that PIT does not randomize discrete observations (\href{https://github.com/florianhartig/DHARMa/issues/272}{issue #272}). These residuals are not exactly uniform either: observations outside the simulation envelope get exactly 0 or 1 (with probability 1/(nSim + 1) each under H0). For 8000 observations and nSim = 50, \link{testUniformity} rejected in all simulated cases; for nSim = 250, in less than 5\%.
+}
 
 \strong{Rotation (optional)}
 
@@ -49,4 +57,8 @@ Smith, J. Q. "Diagnostic checks of non-standard time series models." Journal of 
 Dunn, P.K., & Smyth, G.K. (1996). Randomized quantile residuals. Journal of Computational and Graphical Statistics 5, 236-244.
 
 Warton, David I., Loïc Thibaut, and Yi Alice Wang. "The PIT-trap—A “model-free” bootstrap procedure for inference about regression models with discrete, multivariate responses." PloS one 12.7 (2017).
+
+Talts, S., Betancourt, M., Simpson, D., Vehtari, A., & Gelman, A. (2018). Validating Bayesian inference algorithms with simulation-based calibration. arXiv:1804.06788.
+
+Heinrich, C. (2021). On the number of bins in a rank histogram. Quarterly Journal of the Royal Meteorological Society 147, 544-556. doi:10.1002/qj.3932
 }
