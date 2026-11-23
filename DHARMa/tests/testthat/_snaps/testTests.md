@@ -46,7 +46,7 @@
 
 ---
 
-    list(statistic = 2, p.value = 1)
+    list(statistic = 2, p.value = 0.675671011831035)
 
 ---
 
@@ -129,7 +129,7 @@
 
 ---
 
-    list(statistic = 1, p.value = 0.26)
+    list(statistic = 1, p.value = 0.0768840474800358)
 
 ---
 
@@ -211,8 +211,7 @@
       testOutliers(simulationOutput, plot = F, margin = "lower")
     Output
       
-      	DHARMa outlier test based on exact binomial test with approximate
-      	expectations
+      	DHARMa outlier test based on exact binomial test
       
       data:  simulationOutput
       outliers at lower margin(s) = 3, observations = 1000, p-value = 1

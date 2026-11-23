@@ -174,11 +174,11 @@ testQuantiles <- function(simulationOutput, predictor = NULL, rank = TRUE,
 #'
 #' Because no data was simulated in the range of the observed values, we don't know "how strongly" these values deviate from the model expectation, so the term "outlier" should be used with a grain of salt. It is not a judgment about the magnitude of the residual deviation, but simply a dichotomous sign that we are outside the simulated range. Moreover, the number of outliers will decrease as we increase the number of simulations.
 #'
-#' To test if the outliers are a concern, testOutliers implements 2 options (bootstrap, binomial), which can be chosen via the parameter "type". The third option (default) chooses bootstrap for integer-valued distributions with nObs <= 500, and else binomial. For residuals recalculated with [recalculateResiduals], nObs is the number of recalculated residuals.
+#' To test if the outliers are a concern, testOutliers implements 2 options (bootstrap, binomial), which can be chosen via the parameter "type". The third option (default) chooses bootstrap for residuals with method = "traditional" (incl. refit = TRUE) with duplicated non-integer simulated values and nObs <= 500, and else binomial. For residuals recalculated with [recalculateResiduals], nObs is the number of recalculated residuals.
 #'
-#' The binomial test considers that under the null hypothesis that the model is correct, and for continuous distributions (i.e. data and the model distribution are identical and continuous), the probability that a given observation is higher than all simulations is 1/(nSim +1), and binomial distributed. The testOutlier function can test this null hypothesis via type = "binomial". With the default method = "PIT", this expectation is exact also for integer-valued distributions, because the randomized PIT residuals are exactly uniform under H0 (see [getQuantile]). For method = "traditional" (and refit = TRUE), the rate of outliers of integer-valued distributions is in general not 1/(nSim +1), and may be particularly off for non-bounded integer-valued distributions (such as Poisson or Negative Binomial).
+#' The binomial test considers that under the null hypothesis that the model is correct (i.e. observations and simulations come from the same distribution), the probability that a given observation is higher (lower) than all simulations is 1/(nSim + 1), so that the number of outliers is binomially distributed. This expectation is exact for continuous responses, for PIT residuals (also of discrete responses, because ties are broken at random, see [getQuantile]), and for integer-valued responses with method = "traditional" (because of the randomization of integer values). It does not hold for method = "traditional" with discrete non-integer responses (duplicate non-integer values in the simulations), because observations tied with the smallest or largest simulations are not counted as outliers, so that the binomial test finds too few outliers. For fitted models (and refit = TRUE), the expectation is approximate, and the test is usually slightly conservative.
 #'
-#' For this reason, the testOutlier function implements an alternative procedure that uses the bootstrap to generate a simulation-based expectation for the outliers. It is recommended to use the bootstrap for integer-valued distributions with method = "traditional" (and integer-valued only, because it has no advantage for continuous distributions, ideally with reasonably high values of nSim and nBoot (I recommend at least 1000 for both)). Because of the high runtime, however, this option is switched off for type = default when nObs > 500.
+#' For this reason, the testOutlier function implements an alternative procedure that uses the bootstrap to generate a simulation-based expectation for the outliers: each of nBoot simulations is treated as observed data and compared with the remaining nSim - 1 simulations. Because the null distribution is estimated from the simulations, the bootstrap test rejects slightly too often for small nSim (e.g. in up to 10% instead of 5% of the cases under H0 with nSim = 50 and nBoot = 50), so it should be used with reasonably high values of nSim and nBoot (I recommend at least 1000 for both). Because of the high runtime, type = "default" does not use it when nObs > 500.
 #'
 #' Both binomial and bootstrap generate a null expectation, and then test for an excess or lack of outliers. Per default, testOutliers() looks for both, so if you get a significant p-value, you have to check if you have too many or too few outliers. An excess of outliers is to be interpreted as too many values outside the simulation envelope. This could be caused by overdispersion, or by what we classically call outliers. A lack of outliers would be caused, for example, by underdispersion.
 #'
@@ -202,15 +202,18 @@ testOutliers <- function(simulationOutput, alternative = c("two.sided", "greater
   data.name = deparse(substitute(simulationOutput)) # remember: needs to be called before ensureDHARMa
   simulationOutput = ensureDHARMa(simulationOutput, convert = "Model")
 
+  simResp = if(isTRUE(simulationOutput$refit)) simulationOutput$refittedResiduals else simulationOutput$simulatedResponse
+
+  # the binomial expectation is exact except for traditional residuals with duplicated
+  # non-integer simulated values, which getQuantile() does not randomize (#653)
+  binomialExact = identical(simulationOutput$method, "PIT") || isTRUE(simulationOutput$integerResponse) || {
+    v = as.vector(simResp)
+    !any(v[duplicated(v)] %% 1 != 0, na.rm = TRUE)
+  }
   if(type == "default"){
-    if(simulationOutput$integerResponse == FALSE) type = "binomial"
-    else{
-      if(simulationOutput$nObs > 500) type = "binomial"
-      else type = "bootstrap"
-    }
+    type = if(!binomialExact && simulationOutput$nObs <= 500) "bootstrap" else "binomial"
   }
 
-  # using the binomial test, not exact
   if(type == "binomial"){
 
     # calculation of outliers
@@ -223,16 +226,14 @@ testOutliers <- function(simulationOutput, alternative = c("two.sided", "greater
     out = binom.test(outliers, trials, p = outFreqH0, alternative = alternative)
 
     # overwrite information in binom.test
-    out$method = "DHARMa outlier test based on exact binomial test with approximate expectations"
+    out$method = paste0("DHARMa outlier test based on exact binomial test", if(!binomialExact) " with approximate expectations")
     out$data.name = data.name
     out$margin = margin
     names(out$statistic) = paste("outliers at", margin, "margin(s)")
     names(out$parameter) = "observations"
     names(out$estimate) = paste("frequency of outliers (expected:", out$null.value,")")
 
-    if (simulationOutput$integerResponse == T && !identical(simulationOutput$method, "PIT") && out$p.value < 0.05) message("DHARMa::testOutliers: type = 'binomial' may have inflated Type I error rates for integer-valued distributions. To get a more exact result, it is recommended to re-run testOutliers with type = 'bootstrap'. See ?testOutliers for details")
-
-    if (plotBootstrap == T) message("DHARMa::testOutliers: plotBootstrap = TRUE is ignored because the binomial test is used (type = 'binomial', or type = 'default' with non-integer response or nObs > 500). Use type = 'bootstrap' to get the bootstrap plot.")
+    if (plotBootstrap == T) message("DHARMa::testOutliers: plotBootstrap = TRUE is ignored because the binomial test is used (type = 'binomial', or type = 'default', see ?testOutliers). Use type = 'bootstrap' to get the bootstrap plot.")
 
     if(plot == T) {
 
@@ -250,13 +251,7 @@ testOutliers <- function(simulationOutput, alternative = c("two.sided", "greater
 
     # Bootstrapping to compare to expected
 
-    simIndices = 1:simulationOutput$nSim
     nSim = simulationOutput$nSim
-    if(simulationOutput$refit == T){
-      simResp = simulationOutput$refittedResiduals
-    } else {
-      simResp = simulationOutput$simulatedResponse
-    }
     resMethod = simulationOutput$method
     resInteger = simulationOutput$integerResponse
 
@@ -270,16 +265,19 @@ testOutliers <- function(simulationOutput, alternative = c("two.sided", "greater
 
     for (i in 1:nBoot){
 
-      #sel = -i
-      sel = sample(simIndices[-i], size = nSim, replace = T)
+      # simulation i against the other nSim - 1 simulations; resampling nSim of them
+      # with replacement overestimated the outlier frequency under H0 (#653)
+      # messages about duplicated values were already shown when the residuals were created
+      residuals <- suppressMessages(getQuantile(simulations = simResp[, -i, drop = FALSE],
+                                                observed = simResp[,i],
+                                                integerResponse = resInteger,
+                                                method = resMethod))
 
-      residuals <- getQuantile(simulations = simResp[,sel],
-                               observed = simResp[,i],
-                               integerResponse = resInteger,
-                               method = resMethod)
-
-      frequBoot[i] = mean(isOutlier(residuals, nSim, margin))
+      # rescaled from the expectation with nSim - 1 simulations to nSim simulations (#653)
+      frequBoot[i] = mean(isOutlier(residuals, nSim - 1, margin)) * nSim / (nSim + 1)
     }
+    # simulations with NA values (e.g. failed refits) give no bootstrap value
+    frequBoot = frequBoot[!is.na(frequBoot)]
 
     out = list()
     class(out) = "htest"

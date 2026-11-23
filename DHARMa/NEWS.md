@@ -6,6 +6,8 @@ NOTE: for more news about the package, see https://github.com/florianhartig/DHAR
 
 * PIT residuals (default `method = "PIT"`) are exactly uniform under H0, so all PIT residuals and the results based on them change once; they are never exactly 0 or 1, and outliers in `testOutliers()`, `outliers()` (`lowerQuantile` and `upperQuantile` now default to `NULL`) and the plots are residuals < 1/(nSim + 1) or > nSim/(nSim + 1), see `?getQuantile` (#653). With PIT residuals, code that compares residuals with 0 or 1, e.g. `outliers(x, lowerQuantile = 0, upperQuantile = 1)`, no longer finds outliers; use the defaults instead.
 
+* `testOutliers()` uses the binomial test by default, also for integer responses, where its expectation is exact under H0 (approximate for fitted models), so the message about inflated type I error rates is removed; only traditional residuals (incl. `refit = TRUE`) with duplicated non-integer simulated values and nObs <= 500 use the bootstrap. The bootstrap compares each simulation with the other nSim - 1 simulations instead of resampling with replacement, which overestimated the expected outlier frequency and often reported too few outliers under H0 (#653).
+
 ## Bugfixes
 
 * GLMMadaptive beta-binomial models with more than one trial stop with an update message for GLMMadaptive < 0.9-9, whose simulations ignore the trial totals (@algoria-contributions, #565).

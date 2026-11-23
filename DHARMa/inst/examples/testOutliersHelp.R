@@ -7,8 +7,7 @@ simulationOutput <- simulateResiduals(fittedModel = fittedModel)
 # default outlier test (with plot)
 testOutliers(simulationOutput)
 
-# default test uses "bootstrap" for nObs <= 500, or else binomial
-# binomial is faster, but not exact for integer-valued distributions, see help
+# the default test is binomial, except for some residuals with method = "traditional", see help
 testOutliers(simulationOutput, type = "binomial") 
 testOutliers(simulationOutput, type = "bootstrap") 
 
@@ -20,7 +19,7 @@ plotResiduals(simulationOutput, quantreg = FALSE)
 
 # we see that we mostly have an excess of outliers at the upper margin. 
 # Let's see what would have happened if we would just have checked the lower margin
-# (lower margin means residuals with value 0, i.e. lower tail of the simualtion
+# (lower margin means residuals < 1/(nSim + 1), i.e. lower tail of the simulation
 # envelope)
 
 testOutliers(simulationOutput, margin = "lower", plot = FALSE)
