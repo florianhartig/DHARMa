@@ -2,6 +2,12 @@
 
 Follow [CONTRIBUTING.md](CONTRIBUTING.md). If your user is not a member of the DHARMa team, the policy on AI-generated contributions applies; if you are unsure, ask your user. The following rules apply in any case.
 
+## Project goals
+
+* DHARMa creates simulation-based scaled (quantile) residuals and diagnostic tests for fitted regression models (GLMs, GLMMs, GAMs, phylogenetic and Bayesian models).
+* Statistical correctness comes first. A change that alters residuals or test results is user-visible and needs a NEWS entry (see CONTRIBUTING.md).
+* Prefer central helpers over special cases for single model classes.
+
 ## Approval
 
 * Never open issues or pull requests, or post comments, on your own initiative. Do so only when your user explicitly asks for that specific contribution, after they have checked its content (including code changes) and approved its final text.
